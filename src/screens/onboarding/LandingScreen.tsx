@@ -1,6 +1,6 @@
 import { FeaturePill, RoleCard } from "@/src/components/onboarding";
 import { features, roles } from "@/src/constants/onboarding";
-import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
+import { FontAwesome5 } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React from "react";
 import { Linking, Pressable, ScrollView, Text, View } from "react-native";
@@ -8,27 +8,21 @@ import { Linking, Pressable, ScrollView, Text, View } from "react-native";
 export default function LandingScreen() {
   const router = useRouter();
 
-  // const handleRoleSelect = (role: RoleType) => {
-  //   switch (role) {
-  //     case "user":
-  //       router.push(NAVIGATION_ROUTES.AUTH.USER_LOGIN);
-  //       break;
-  //     case "vendor":
-  //       router.push(NAVIGATION_ROUTES.AUTH.VENDOR_LOGIN);
-  //       break;
-  //     case "guest":
-  //       router.push(NAVIGATION_ROUTES.AUTH.GUEST_LOGIN);
-  //       break;
-  //   }
-  // };
+  const handleRoleSelect = (roleTitle: string) => {
+    const role = roleTitle.toLowerCase();
+    if (role === "user" || role === "vendor") {
+      // Both user and vendor go to the same login page
+      router.push("/(auth)/login" as any);
+    } else if (role === "guest") {
+      // Navigate directly to home for guest exploration
+      router.replace("/" as any);
+    }
+  };
 
-  // const handleSignup = () => {
-  //   router.push(NAVIGATION_ROUTES.AUTH.USER_SIGNUP);
-  // };
-
-  // const handleVendorSignup = () => {
-  //   router.push(NAVIGATION_ROUTES.AUTH.VENDOR_SIGNUP);
-  // };
+  const handleExplore = () => {
+    // Allow users to explore without signing up
+    router.replace("/" as any);
+  };
 
   return (
     <ScrollView
@@ -91,7 +85,7 @@ export default function LandingScreen() {
             subtitle={role.subtitle}
             bgColor={role.bgColor}
             iconBg={role.iconBg}
-            // onPress={() => handleRoleSelect(role.title.toLowerCase())}
+            onPress={() => handleRoleSelect(role.title)}
           />
         ))}
       </View>
@@ -110,53 +104,37 @@ export default function LandingScreen() {
         </View>
       </View>
 
-      {/* Sign Up Section */}
+      {/* Explore as Guest */}
       <View className="px-5 mb-4">
-        <View
-          className="bg-white rounded-2xl p-6"
-          style={{
-            borderWidth: 1,
-            borderColor: "#E5E7EB",
-            shadowColor: "#000",
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.08,
-            shadowRadius: 8,
-            elevation: 3,
-          }}
-        >
-          <Text className="text-center text-sm mb-4 text-gray-600">
-            New to Khumya?
-          </Text>
-          <Pressable
-            // onPress={handleSignup}
-            className="bg-primary-500 rounded-xl py-4 active:opacity-90"
-          >
-            <Text className="text-white text-center font-bold text-base">
-              Create Your Account
-            </Text>
-          </Pressable>
-        </View>
-      </View>
-
-      {/* Vendor CTA */}
-      <View className="px-5 mb-10">
         <Pressable
-          // onPress={handleVendorSignup}
-          className="bg-accent-50 rounded-2xl p-5 border border-accent-200"
-          style={({ pressed }) => ({
-            opacity: pressed ? 0.8 : 1,
-          })}
+          onPress={handleExplore}
+          className="bg-teal-50 rounded-2xl p-6 border border-teal-200 active:opacity-80"
         >
-          <View className="flex-row items-center justify-center">
-            <MaterialIcons name="business" size={20} color="#F43F5E" />
-            <Text className="ml-2 text-sm text-gray-600">
-              Are you a business?{" "}
-              <Text className="font-bold text-accent-600">
-                Become a Vendor →
-              </Text>
+          <View className="flex-row items-center justify-center mb-2">
+            <FontAwesome5 name="eye" size={20} color="#14B8A6" />
+            <Text className="ml-2 text-lg font-bold text-gray-900">
+              Explore Without Login
             </Text>
           </View>
+          <Text className="text-center text-sm text-gray-600">
+            Browse events and vendors as a guest
+          </Text>
         </Pressable>
+      </View>
+
+      {/* Sign In Reminder */}
+      <View className="px-5 mb-10">
+        <View className="bg-gray-50 rounded-2xl p-5 border border-gray-200">
+          <Text className="text-center text-sm text-gray-600">
+            Already have an account?{" "}
+            <Text
+              className="font-bold text-purple-600"
+              onPress={() => router.push("/(auth)/login" as any)}
+            >
+              Sign In →
+            </Text>
+          </Text>
+        </View>
       </View>
 
       {/* Footer */}

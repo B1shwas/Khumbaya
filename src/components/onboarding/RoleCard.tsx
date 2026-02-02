@@ -8,7 +8,7 @@ interface RoleCardProps {
   subtitle: string;
   bgColor: string;
   iconBg: string;
-  // onPress: () => void;
+  onPress?: () => void;
 }
 
 export const RoleCard: React.FC<RoleCardProps> = ({
@@ -17,14 +17,11 @@ export const RoleCard: React.FC<RoleCardProps> = ({
   subtitle,
   bgColor,
   iconBg,
-  // onPress,
+  onPress,
 }) => {
   return (
     <View className="mb-4">
-      <Pressable
-        // onPress={onPress}
-        onPress={() => {}}
-      >
+      <Pressable onPress={onPress}>
         <View
           className="rounded-2xl p-5"
           style={{
