@@ -11,8 +11,14 @@ SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
-    // You can add custom fonts here
-    // Example: 'CustomFont-Regular': require('../assets/fonts/CustomFont-Regular.ttf'),
+    "PlusJakartaSans-Regular": require("../assets/fonts/PlusJakartaSans-Regular.ttf"),
+    "PlusJakartaSans-Medium": require("../assets/fonts/PlusJakartaSans-Medium.ttf"),
+    "PlusJakartaSans-SemiBold": require("../assets/fonts/PlusJakartaSans-SemiBold.ttf"),
+    "PlusJakartaSans-Bold": require("../assets/fonts/PlusJakartaSans-Bold.ttf"),
+    PlusJakartaSans_400Regular: require("../assets/fonts/PlusJakartaSans-Regular.ttf"),
+    PlusJakartaSans_500Medium: require("../assets/fonts/PlusJakartaSans-Medium.ttf"),
+    PlusJakartaSans_600SemiBold: require("../assets/fonts/PlusJakartaSans-SemiBold.ttf"),
+    PlusJakartaSans_700Bold: require("../assets/fonts/PlusJakartaSans-Bold.ttf"),
   });
 
   useEffect(() => {
