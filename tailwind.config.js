@@ -122,12 +122,28 @@ module.exports = {
         },
       },
       fontFamily: {
-        // Modern, clean sans-serif stack
-        sans: ["SF Pro Display", "Inter", "system-ui", "sans-serif"],
-        // Display font for headlines
-        display: ["SF Pro Display", "Inter", "system-ui", "sans-serif"],
+        // Default sans-serif stack (system fonts)
+        sans: [
+          "system-ui",
+          "-apple-system",
+          "BlinkMacSystemFont",
+          "Segoe UI",
+          "Roboto",
+          "sans-serif",
+        ],
+        // Display font for headlines and emphasis
+        display: [
+          "system-ui",
+          "-apple-system",
+          "BlinkMacSystemFont",
+          "Segoe UI",
+          "Roboto",
+          "sans-serif",
+        ],
         // Monospace for code/data
-        mono: ["SF Mono", "Monaco", "Consolas", "monospace"],
+        mono: ["SF Mono", "Monaco", "Consolas", "Courier New", "monospace"],
+        // Add custom fonts here after loading them in _layout.tsx
+        // Example: 'custom': ['CustomFont', 'system-ui', 'sans-serif'],
       },
       fontSize: {
         xs: ["12px", { lineHeight: "16px" }],
