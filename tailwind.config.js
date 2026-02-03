@@ -34,8 +34,11 @@ module.exports = {
         },
       },
       fontFamily: {
-        sans: ["PlusJakartaSans"],
         jakarta: ["PlusJakartaSans"],
+        "jakarta-medium": ["PlusJakartaSans-Medium"],
+        "jakarta-semibold": ["PlusJakartaSans-SemiBold"],
+        "jakarta-bold": ["PlusJakartaSans-Bold"],
+        monserrat: ["Montserrat"],
       },
       fontWeight: {
         normal: "400",
