@@ -1,255 +1,239 @@
-import { MaterialIcons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
-import React, { useState } from 'react';
+import { MaterialIcons } from "@expo/vector-icons";
+import { useState } from "react";
 import {
 	Image,
-	ImageBackground,
 	Pressable,
 	ScrollView,
-	StatusBar,
 	Text,
 	TextInput,
 	View,
-} from 'react-native';
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-// Vendor data type
-interface Vendor {
-  id: number;
-  category: string;
-  name: string;
-  tagline: string;
-  rating: number;
-  reviews: number;
-  location: string;
-  image: string;
-  isFavorite: boolean;
-}
+// TODO: Update these colors to match your app's theme (currently using HTML's pink #ee2b8c)
+const PINK_PRIMARY = "#ee2b8c";
 
-// Sample vendor data
-const vendorsData: Vendor[] = [
+// Mock data - replace with actual data fetching
+const CATEGORIES = ["All", "Venues", "Catering", "Decoration", "Photography", "Planners"];
+
+const VENDORS = [
   {
-    id: 1,
-    category: 'Planner',
-    name: 'Luxe Event Planning',
-    tagline: 'Turning dreams into reality, one detail at a time.',
+    id: "1",
+    name: "Royal Palace Weddings",
+    category: "Venue",
     rating: 4.9,
     reviews: 120,
-    location: 'Hotel Muktinath , Chitwan',
-    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCN1fxAg3zXm-Z_BV-AkWIgvNiPROQ24erQPRgQH9zfvsYJ0IhXUfJc4WlZae5RGHPsfNv9uC-mxSHdofNa-WWoZ5BbdE3ukPK6dKkcSWaWAxnuSSjEatPZIAc3-CQt2jN0VTsa3A0ma5iw2tT3iVfm2DlwIz6hGPGQzHADzUU2CpOJVEHpH4qMYjgAXVDI5AWgYjvs45UfT6Q0qBCeuCvOnHBH0G7LlOCdlmgmhYo5YdKDqGWQTgByotf4QuU01zKEJYriintCQQ',
-    isFavorite: true,
+    priceLevel: "$$$$",
+    location: "Manhattan, NY",
+    image: "https://lh3.googleusercontent.com/aida-public/AB6AXuAYtTzLRQz7BrZfq0tS2qrOfefnfcwCrHTEifBG4xNigaYOav65joOcdh27d3-JCVydPTEImmycDRAhop49JtNIRP3J0Wug1dEBdbcPR5InAwdT8bjFmGJbmiE6rz2IE1pwNuRYsu9VJC-gRS4yYZ2QcKqjf21WraWaNEPAA-VgY2-m6niNNf9Qh2jI48G9XtOwTnulf2if0os5TopuuLJq5UmwIebQoF5UXPNFuUfVktzG6AmLIwXS-DWBS1Sylpu926qox0_vicE",
   },
   {
-    id: 2,
-    category: 'Catering',
-    name: 'Elegant Eats Catering',
-    tagline: 'Gourmet experiences for your special day.',
-    rating: 4.8,
+    id: "2",
+    name: "Aperture Photography",
+    category: "Photography",
+    rating: 4.7,
     reviews: 85,
-    location: 'Malla Hotel, Thamel',
-    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDTv1T_gKqv5DF2AzbUEJKHXFRvFFwcBHpNrlHm_Yj0UJc77X7SQDCpgLphLBP1badFSYyOVypFwPGdLdwpt_Wpy-H3pjcNoJaZ_A7qkEtasDwXP-TDJbnqbptMSTTPXMeCl1f-hzyLFK-G6X7rkSnU3IUChFz4bKVL6a2JL1qIlv-SKi_nCBSk-5evm1x7edcHlhkEvFJSujVGpwPCuio-qINTJocgfdh0w1GZ4gMWovxqlqhZYrLYkPq0LMyUV7MwyuYfEsaluQ',
-    isFavorite: false,
+    priceLevel: "$$",
+    location: "Brooklyn, NY",
+    image: "https://lh3.googleusercontent.com/aida-public/AB6AXuBFkFs3gMkYt9YZPAxte3M9V8lfrQHKSHytk5Uum7-Xh1k-fgp_z7QVUApiiZI8o2hOqZKZYYib8kCKmVtZSuQPTzMRHUSXBwe781PrBY9A22B7YliBuCrsTbO1L0-fOMP6DjilY6yrDaHPwgjMIYOlrSXgxpFRyN389s0uvcLzbGmR-jpOrzj_XGiW4hZopaaD_8PCLUMA1777j2x2K7_WrZsvZlxyb559Jtcfgt9JsWhblfdrfGFSEtyAW6OA9tVMscn173mciWA",
   },
   {
-    id: 3,
-    category: 'Decorator',
-    name: 'Blooming Tales',
-    tagline: 'Floral designs that speak the language of love.',
-    rating: 5.0,
-    reviews: 42,
-    location: 'Khumbaya, kathmandu',
-    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDTYEG96FXzSdLvRDGXrS38k0sj-vZYUAGvjuE5Llmyh0wZjvVr1tOzKPFGugJJ7RYbWlU6s3qpvHLgGb6MdnTnvHRaqtQndAE33eNAJt42nf8vf_QU-s0BLSmNaev_q4HmYGQphEPCsX8yVv2d5QopTsMvkifx-feSjpdx8w6cTJSH76Fv_rmoyOcBfRik0wvdJS3YmoZ1Bxtvlku0z033_nvFEEjpHS-fwbsL0IPExYuqmfXqlkycSRVGXt928zn6HKGRooMe8Q',
-    isFavorite: false,
+    id: "3",
+    name: "Elegant Eats Catering",
+    category: "Catering",
+    rating: 4.8,
+    reviews: 200,
+    priceLevel: "$$$",
+    location: "Queens, NY",
+    image: "https://lh3.googleusercontent.com/aida-public/AB6AXuAvVZMXfDTrga8zlthrkGcE34uboSRvgDDcGLV4Zv05QfinRcbOcUhO7YxzJDSKoasGHbtFJH0UmnkG8X8UON89yrr6V4bGUfBVQlAUS3Yvl2ry003gX7zVTFcr8MpyGdQXOYELOepoGOdh8Co7cqFq4Pp9hITgiHCiyZ6sxn0oZ__JPXGJPDdNxtso9fIuDKFION8HWjPQK1EfcvmqcaD60ubDeRI4zSm4eUtGseLOtbvMSimHsbEAShXSiIUlQJY1YnUx6R2XOtY",
+  },
+  {
+    id: "4",
+    name: "Bloom & Wild Decor",
+    category: "Decoration",
+    rating: 4.9,
+    reviews: 45,
+    priceLevel: "$$$",
+    location: "Staten Island, NY",
+    image: "https://lh3.googleusercontent.com/aida-public/AB6AXuBC9La7FaYaWmrN3p7F2OnkUEEwBPZHRiGNa7O46CpMyG62MzfxvYlSK5kE_VKyRKEqJhBDU1Wy6bNK6rno2gVVpRDIxz0TfrfW1A8hJXZR7FVCjXQnJfqlt0bj7UhUByiHYI7Z90787lDMRIONhA-L1L5szOoK0YeoJSsHXzQX39EOUB-MXXPmSA8fxVyYQOeGZovNXJOCypE58rcE7nlTZlzbu3b_PM7LujfCuclSYkKNLqsHyo3wstxyWxmKbYqVyBwffkx2uF0",
   },
 ];
 
-const categories = ['All', 'Planner', 'Decorator', 'Catering', 'Venue', 'Music'];
+interface Vendor {
+  id: string;
+  name: string;
+  category: string;
+  rating: number;
+  reviews: number;
+  priceLevel: string;
+  location: string;
+  image: string;
+}
 
-export default function ExploreVendors() {
-	//TODO: Use the zustand to do the state management in 
-  const [selectedCategory, setSelectedCategory] = useState('All');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [vendors, setVendors] = useState(vendorsData);
+// Category Chip Component
+function CategoryChip({
+  label,
+  isActive,
+  onPress,
+}: {
+  label: string;
+  isActive: boolean;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable
+      onPress={onPress}
+      className={`h-9 px-5 rounded-full items-center justify-center ${
+        isActive ? "bg-primary" : "bg-white border border-gray-100"
+      }`}
+    >
+      <Text
+        className={`text-sm font-medium ${
+          isActive ? "text-white" : "text-gray-700"
+        }`}
+      >
+        {label}
+      </Text>
+    </Pressable>
+  );
+}
 
-  const toggleFavorite = (id: number) => {
-    setVendors(vendors.map(v => v.id === id ? { ...v, isFavorite: !v.isFavorite } : v));
-  };
+// Vendor Card Component
+function VendorCard({ vendor }: { vendor: Vendor }) {
+  const [isFavorite, setIsFavorite] = useState(false);
 
   return (
-    <View className="flex-1 bg-[#22101f]">
-      <StatusBar barStyle="light-content" />
-      
-      {/* Header Section */}
-      <View className="bg-[#22101f] pb-2">
-        {/* Top App Bar */}
-        <View className="flex-row items-center justify-between px-4 pt-12 pb-2">
-          <View className="flex-row items-center gap-3">
-            <Pressable className="w-10 h-10 rounded-full overflow-hidden border border-white/10">
-              <Image
-                source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCE82wNXBs5awsz20ni9eoHCivpeKSKpfenRNxJmFZhNGTeSiJ9iZNWisGZ7eWPvH52mfWLZDItrabtDjEXxemhQoLInjpDVmg9FPM1QOY86lMGwtZPKg9Uxix_O2LnaMErRU-WYDesTe6CUwjHB1Hn1wy4BYl9ufRlGhHERaTVu_ayoQF_yQ30RXbbmj-p1tqqqwflt-o3YiPYXRy1eVb37LLkjt6qH0yB-49SjH5NNOKlgYy7X36SG91IA7THB5aSqGzqb389ig' }}
-                className="w-full h-full"
-                resizeMode="cover"
-              />
-            </Pressable>
-            <View>
-              <Text className="text-xs text-white/60 font-medium">Welcome back,</Text>
-              <Text className="text-white text-lg font-bold tracking-tight">Find Your Vendor</Text>
-            </View>
+    <Pressable className="bg-white rounded-xl overflow-hidden shadow-sm">
+      {/* Image Container */}
+      <View className="relative w-full aspect-[4/3] bg-gray-200">
+        <Image
+          source={{ uri: vendor.image }}
+          className="w-full h-full"
+          resizeMode="cover"
+        />
+        
+        {/* Favorite Button */}
+        <Pressable
+          onPress={() => setIsFavorite(!isFavorite)}
+          className="absolute top-3 right-3 bg-white/20 rounded-full p-2"
+        >
+          <MaterialIcons
+            name={isFavorite ? "favorite" : "favorite-border"} // Asynchrounous api call in this 
+            size={20}
+            color="white"
+          />
+        </Pressable>
+
+        {/* Rating Badge */}
+        <View className="absolute bottom-3 left-3 bg-white/90 rounded-lg px-2 py-1 flex-row items-center gap-1">
+          <MaterialIcons name="star" size={16} color="#EAB308" />
+          <Text className="text-xs font-bold text-gray-900">{vendor.rating}</Text>
+          <Text className="text-xs text-gray-500">({vendor.reviews})</Text>
+        </View>
+      </View>
+
+      {/* Card Content */}
+      <View className="p-4 gap-2">
+        <View className="flex-row justify-between items-start">
+          <View className="flex-1">
+            <Text className="text-lg font-bold text-gray-900">{vendor.name}</Text>
+            <Text className="text-primary/90 text-sm font-medium mt-1 shadow-[0_0_15px_5px_primary]">
+              {vendor.category}
+            </Text>
           </View>
-          <Pressable className="p-2 rounded-full active:bg-white/5">
-            <MaterialIcons name="settings" size={24} color="rgba(255,255,255,0.8)" />
-          </Pressable>
+          <View className="bg-success-50 px-2 py-1 rounded">
+            <Text className="text-success-700 text-xs font-semibold ">
+              {vendor.priceLevel}
+            </Text>
+          </View>
         </View>
 
-        {/* Search Bar */}
-        <View className="px-4 py-2">
-          <View className="flex-row items-center rounded-full bg-[#33192f]/80 h-12 border border-white/10 px-4">
-            <MaterialIcons name="search" size={24} color="#ee2bcd70" />
-            <TextInput
-              className="flex-1 text-base ml-2"
-              style={{ color: '#ffffff' }}
-              placeholder="Search for photographers, florists..."
-              placeholderTextColor="rgba(255,255,255,0.4)"
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-              selectionColor="#ee2bcd"
-            />
-          </View>
+        <View className="flex-row items-center gap-1 mt-1">
+          <MaterialIcons name="location-on" size={18} color="#6B7280" />
+          <Text className="text-sm text-gray-500">{vendor.location}</Text>
         </View>
+      </View>
+    </Pressable>
+  );
+}
 
-        {/* Category Chips */}
+// Main Component
+export default function ExploreVendors() {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [activeCategory, setActiveCategory] = useState("All");
+
+  return (
+    <SafeAreaView className="flex-1 bg-gray-50">
+      {/* Header & Search - TODO: Make this sticky if needed */}
+      <View className="px-4 pt-6 pb-2 bg-gray-50 ">
+        <Text className="text-2xl font-bold mb-4 px-1 text-gray-900">
+          Find your dream team
+        </Text>
+        
+        {/* Search Input */}
+        <View className="flex-row items-center h-12 bg-white rounded-xl px-4">
+          {/* TODO: Change color to match your primary/pink */}
+          <MaterialIcons name="search" size={24} color={PINK_PRIMARY} />
+          <TextInput
+            className="flex-1 h-full px-3 text-base text-gray-900"
+            placeholder="Search for photographers, venues..."
+            placeholderTextColor="#9CA3AF"
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+          />
+        </View>
+      </View>
+
+      {/* Category Chips */}
+      <View className="pt-3 pb-4 bg-gray-50">
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          className="px-4 py-2"
-          contentContainerStyle={{ gap: 12 }}
+          contentContainerClassName="px-4 gap-3 pb-2"
+	style={{ overflow: 'visible' }}// To show shadow
         >
-          {categories.map((category) => (
-            <Pressable
+          {CATEGORIES.map((category) => (
+            <CategoryChip
               key={category}
-              onPress={() => setSelectedCategory(category)}
-              className={`h-9 px-5 rounded-full items-center justify-center ${
-                selectedCategory === category
-                  ? 'bg-[#ee2bcd]'
-                  : 'bg-[#33192f] border border-white/10'
-              }`}
-              style={selectedCategory === category ? { 
-                shadowColor: '#ee2bcd',
-                shadowOffset: { width: 0, height: 0 },
-                shadowOpacity: 0.4,
-                shadowRadius: 10,
-              } : {}}
-            >
-              <Text className={`text-sm ${
-                selectedCategory === category ? 'font-semibold text-white' : 'font-medium text-white/80'
-              }`}>
-                {category}
-              </Text>
-            </Pressable>
+              label={category}
+              isActive={activeCategory === category}
+              onPress={() => setActiveCategory(category)}
+            />
           ))}
         </ScrollView>
       </View>
 
-      {/* Scrollable Content */}
-      <ScrollView className="flex-1 px-4 pt-2" contentContainerStyle={{ paddingBottom: 120 }}>
-        {/* Section Title */}
-        <View className="flex-row justify-between items-end pt-2 mb-5">
-          <Text className="text-white font-bold text-lg">Featured Vendors</Text>
-          <Pressable>
-            <Text className="text-[#ee2bcd] text-sm font-medium">See All</Text>
-          </Pressable>
-        </View>
-
-        {/* Vendor Cards */}
-        {vendors.map((vendor) => (
-          <View key={vendor.id} className="mb-5">
-            <View className="rounded-xl bg-[#33192f] overflow-hidden border border-white/5">
-              {/* Image Section */}
-              <View className="relative h-48">
-                <ImageBackground
-                  source={{ uri: vendor.image }}
-                  className="w-full h-full"
-                  resizeMode="cover"
-                >
-                  {/* Gradient Overlay */}
-                  <LinearGradient
-                    colors={['transparent', '#33192f99']}
-                    className="absolute inset-0"
-                  />
-                  
-                  {/* Favorite Button */}
-                  <Pressable
-                    onPress={() => toggleFavorite(vendor.id)}
-                    className="absolute top-3 right-3 p-2 rounded-full bg-black/40"
-                  >
-                    <MaterialIcons
-                      name={vendor.isFavorite ? 'favorite' : 'favorite-border'}
-                      size={20}
-                      color={vendor.isFavorite ? '#ee2bcd' : 'white'}
-                    />
-                  </Pressable>
-
-                  {/* Rating Badge */}
-                  <View className="absolute bottom-3 left-3 px-2 py-1 bg-black/60 rounded-md flex-row items-center gap-1">
-                    <MaterialIcons name="star" size={14} color="#ee2bcd" />
-                    <Text className="text-white text-xs font-bold">{vendor.rating}</Text>
-                    <Text className="text-white/60 text-[10px]">({vendor.reviews})</Text>
-                  </View>
-                </ImageBackground>
-              </View>
-
-              {/* Content Section */}
-              <View className="p-4">
-                <Text className="text-[#ee2bcd] text-xs font-semibold uppercase tracking-wider mb-1">
-                  {vendor.category}
-                </Text>
-                <Text className="text-white text-lg font-bold">{vendor.name}</Text>
-                <Text className="text-white/60 text-sm italic mt-1" numberOfLines={2}>
-                  "{vendor.tagline}"
-                </Text>
-
-                {/* Footer */}
-                <View className="flex-row items-center justify-between border-t border-white/5 pt-3 mt-3">
-                  <View className="flex-row items-center gap-1">
-                    <MaterialIcons name="location-on" size={14} color="rgba(255,255,255,0.4)" />
-                    <Text className="text-white/40 text-xs">{vendor.location}</Text>
-                  </View>
-                  <Pressable className="bg-white/10 px-3 py-1.5 rounded-md active:bg-[#ee2bcd]">
-                    <Text className="text-xs font-bold text-white">View Profile</Text>
-                  </Pressable>
-                </View>
-              </View>
-            </View>
-          </View>
+      {/* Vendor List */}
+      <ScrollView
+        className="flex-1"
+        contentContainerClassName="px-4 gap-5 pt-2 pb-32"
+        showsVerticalScrollIndicator={false}
+      >
+        {VENDORS.map((vendor) => (
+          <VendorCard key={vendor.id} vendor={vendor} />
         ))}
       </ScrollView>
 
-      {/* Bottom Navigation */}
-      {/* <View className="absolute bottom-0 left-0 right-0 bg-[#22101f]/95 border-t border-white/5 pb-5 pt-3 px-6">
-        <View className="flex-row justify-between items-center max-w-md mx-auto">
-          <Pressable className="items-center w-16">
-            <MaterialIcons name="event" size={24} color="rgba(255,255,255,0.5)" />
-            <Text className="text-[10px] font-medium text-white/50 mt-1">Events</Text>
-          </Pressable>
-          
-          <Pressable className="items-center w-16">
-            <View className="relative">
-              <MaterialIcons name="explore" size={24} color="#ee2bcd" />
-              <View className="absolute -top-1 -right-1 w-2 h-2 bg-[#ee2bcd] rounded-full" />
-            </View>
-            <Text className="text-[10px] font-bold text-[#ee2bcd] mt-1">Explore</Text>
-          </Pressable>
-          
-          <Pressable className="items-center w-16">
-            <MaterialIcons name="notifications" size={24} color="rgba(255,255,255,0.5)" />
-            <Text className="text-[10px] font-medium text-white/50 mt-1">Alerts</Text>
-          </Pressable>
-          
-          <Pressable className="items-center w-16">
-            <MaterialIcons name="person" size={24} color="rgba(255,255,255,0.5)" />
-            <Text className="text-[10px] font-medium text-white/50 mt-1">Profile</Text>
+      {/* Floating Bottom Banner - TODO: Show only for unauthenticated users */}
+      <View className="absolute bottom-6 left-4 right-4 p-2">
+        <View className="bg-white rounded-xl p-4 flex-row items-center justify-between shadow-lg border border-gray-100">
+          <View>
+            <Text className="text-sm font-bold text-gray-900">
+              Log in to save favorites
+            </Text>
+            <Text className="text-xs text-gray-500">
+              Keep track of vendors you love
+            </Text>
+          </View>
+          {/* TODO: Change bg-secondary-500 to your primary/pink color */}
+          <Pressable className="bg-primary py-2.5 px-6 rounded-md"
+     
+		  >
+			
+            <Text className="text-white text-sm font-semibold">Log In</Text>
           </Pressable>
         </View>
-      </View> */}
-    </View>
+      </View>
+    </SafeAreaView>
   );
 }

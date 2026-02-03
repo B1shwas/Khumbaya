@@ -17,6 +17,7 @@ module.exports = {
           DEFAULT: "#FFFFFF",
           secondary: "#F9FAFB",
           tertiary: "#F3F4F6",
+          success: "bg-green-900/30",
         },
         // Text colors
         text: {
@@ -25,6 +26,14 @@ module.exports = {
           tertiary: "#6B7280",
           disabled: "#9CA3AF",
           inverse: "#FFFFFF",
+        },
+        // Success colors for the success status throughout the application 
+        success: {
+          50: "#F0FDF4",
+          100: "#D1FAE5",
+          200: "#BBF7D0",
+          500: "#22C55E",
+          700: "#15803D",
         },
         // Border colors
         border: {
