@@ -23,13 +23,12 @@ export default function HomePage() {
   const router = useRouter();
 
   const handleExploreVendors = useCallback(() => {
-    router.push("/explore");
+    router.push("/(public)/explore-vendors" as any);
   }, [router]);
 
   const handleCreateEvent = useCallback(() => {
-    // TODO: Implement create event functionality
-    console.log("Create event pressed");
-  }, []);
+    router.push("/(auth)/login");
+  }, [router]);
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
