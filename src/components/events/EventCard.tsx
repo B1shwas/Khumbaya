@@ -23,7 +23,7 @@ interface EventCardProps {
 export default function EventCard({ event }: EventCardProps) {
   const handlePress = () => {
     router.push({
-      pathname: '/event-overview',
+      pathname: '/(event)/event-overview' as any,
       params: { eventId: event.id }
     });
   };

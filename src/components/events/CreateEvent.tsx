@@ -91,7 +91,7 @@ export default function CreateEvent() {
     setSelectedSubType(subTypeId);
     // Navigate to event form with selected category and type
     router.push({
-      pathname: '/create-event-form',
+      pathname: '/Eventcrud/create-event-form' as any,
       params: {
         category: selectedCategory,
         subType: subTypeId,

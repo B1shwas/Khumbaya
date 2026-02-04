@@ -73,7 +73,7 @@ export default function ListEvent() {
 
   const handleEventPress = (eventId: string) => {
     router.push({
-      pathname: '/event-overview',
+      pathname: '/(event)/event-overview' as any,
       params: { eventId }
     });
   };
@@ -183,7 +183,7 @@ export default function ListEvent() {
             <Text className="text-gray-500 text-lg mt-4">No events found</Text>
             <TouchableOpacity
               className="mt-4 bg-primary px-6 py-3 rounded-lg"
-              onPress={() => router.push('/create-event')}
+              onPress={() => router.push('/Eventcrud/create-event' as any)}
               activeOpacity={0.8}
             >
               <Text className="text-white font-semibold">Create Event</Text>
