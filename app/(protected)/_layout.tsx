@@ -1,21 +1,22 @@
 import { useAuth } from "@/src/store/AuthContext";
-import { Redirect, Slot } from "expo-router";
-import { ActivityIndicator, View } from "react-native";
+import { Redirect, Stack } from "expo-router";
 
 export default function ProtectedLayout() {
-  const { isAuthenticated, isLoading } = useAuth();
-
-  if (isLoading) {
-    return (
-      <View className="flex-1 items-center justify-center bg-gray-50">
-        <ActivityIndicator size="large" color="#000" />
-      </View>
-    );
-  }
+  const { isAuthenticated } = useAuth();
 
   if (!isAuthenticated) {
-    return <Redirect href={"/" as any} />;
+    return <Redirect href="/(onboarding)" />;
   }
 
-  return <Slot />;
+  return (
+    <Stack
+      screenOptions={{
+        headerShown: false,
+        animation: "slide_from_right",
+      }}
+    >
+      <Stack.Screen name="(client-tabs)" />
+      <Stack.Screen name="(vendor-tabs)" />
+    </Stack>
+  );
 }
