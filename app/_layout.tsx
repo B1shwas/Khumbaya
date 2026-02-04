@@ -1,3 +1,4 @@
+import { AuthProvider } from "@/src/store/AuthContext";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
@@ -29,13 +30,16 @@ export default function RootLayout() {
   }
 
   return (
-    <SafeAreaProvider>
-      <StatusBar barStyle="dark-content" />
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="index" />
-        <Stack.Screen name="(auth)" />
-        <Stack.Screen name="(tabs)" />
-      </Stack>
-    </SafeAreaProvider>
+    <AuthProvider>
+      <SafeAreaProvider>
+        <StatusBar barStyle="dark-content" />
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="index" />
+          <Stack.Screen name="(public)" />
+          <Stack.Screen name="(auth)" />
+          <Stack.Screen name="(protected)" />
+        </Stack>
+      </SafeAreaProvider>
+    </AuthProvider>
   );
 }
