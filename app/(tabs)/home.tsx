@@ -1,3 +1,3 @@
-import HomePage from "@/src/screen/home/HomePage";
+import ExploreVendors from "@/src/screen/home/HomePage";
 
-export default HomePage;
+export default ExploreVendors;
