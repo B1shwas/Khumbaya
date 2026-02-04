@@ -1,9 +1,8 @@
-import HomePage from "@/src/screen/home/HomePage";
 import { useAuth } from "@/src/store/AuthContext";
-import { Redirect } from "expo-router";
+import { Redirect, Slot } from "expo-router";
 import { ActivityIndicator, View } from "react-native";
 
-export default function Index() {
+export default function ProtectedLayout() {
   const { isAuthenticated, isLoading } = useAuth();
 
   if (isLoading) {
@@ -14,9 +13,9 @@ export default function Index() {
     );
   }
 
-  if (isAuthenticated) {
-    return <Redirect href={"/home" as any} />;
+  if (!isAuthenticated) {
+    return <Redirect href={"/" as any} />;
   }
 
-  return <HomePage />;
+  return <Slot />;
 }
