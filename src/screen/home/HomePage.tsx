@@ -23,11 +23,11 @@ export default function HomePage() {
   const router = useRouter();
 
   const handleExploreVendors = useCallback(() => {
-    router.push("/(public)/explore-vendors" as any);
+    router.push("/(onboarding)/explore-vendors" as any);
   }, [router]);
 
   const handleCreateEvent = useCallback(() => {
-    router.push("/(auth)/login");
+    router.push("/(onboarding)/login");
   }, [router]);
 
   return (
@@ -101,7 +101,7 @@ function LoginPrompt() {
       <Text className="text-muted-light text-base" variant="body">
         {CONTENT.loginPrompt}{" "}
       </Text>
-      <Link href="/(auth)/login" asChild>
+      <Link href="/(onboarding)/login" asChild>
         <TouchableOpacity accessibilityRole="link" accessibilityLabel="Login">
           <Text className="text-primary text-base font-semibold underline">
             {CONTENT.loginCta}
