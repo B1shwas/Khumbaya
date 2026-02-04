@@ -33,12 +33,7 @@ export default function RootLayout() {
     <AuthProvider>
       <SafeAreaProvider>
         <StatusBar barStyle="dark-content" />
-        <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="index" />
-          <Stack.Screen name="(public)" />
-          <Stack.Screen name="(auth)" />
-          <Stack.Screen name="(protected)" />
-        </Stack>
+        <Stack screenOptions={{ headerShown: false }} />
       </SafeAreaProvider>
     </AuthProvider>
   );
