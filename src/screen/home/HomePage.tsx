@@ -4,10 +4,13 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function HomePage() {
   const explorevendorclick =()=> {
-    router.push('/explore' as any);
+    router.push('/home/explorevendors' as any);
   }
   const eventclick =()=> {
-    router.push('/events' as any);
+    router.push('/(event)/events' as any);
+  }
+  const createEventClick =()=> {
+    router.push('/Eventcrud/select-event-type' as any);
   }
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
@@ -42,6 +45,7 @@ export default function HomePage() {
           <TouchableOpacity
             className="bg-primary py-4 rounded-md mb-4 shadow-lg"
             style={{ shadowColor: "#ee2b8c", shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.3, shadowRadius: 4 }}
+            onPress={createEventClick}
             activeOpacity={0.8}
           >
             <Text className="text-white text-center text-lg font-semibold">
