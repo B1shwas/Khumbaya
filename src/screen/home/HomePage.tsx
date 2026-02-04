@@ -1,95 +1,114 @@
-import { Link, router } from "expo-router";
-import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { Button } from "@/src/components/ui/Button";
+import { Text } from "@/src/components/ui/Text";
+import { Link, useRouter } from "expo-router";
+import { useCallback } from "react";
+import { Image, ScrollView, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+const HERO_IMAGE = require("@/assets/images/home.png");
+
+const CONTENT = {
+  title: "Find Top Vendors",
+  description:
+    "Discover and book the best photographers, caterers, and decorators for your big day.",
+  buttons: {
+    createEvent: "Create Event",
+    exploreVendors: "Explore Vendors",
+  },
+  loginPrompt: "Already have an account?",
+  loginCta: "Login",
+} as const;
+
 export default function HomePage() {
-  const explorevendorclick =()=> {
-    router.push('/home/explorevendors' as any);
-  }
-  const eventclick =()=> {
-    router.push('/(event)/events' as any);
-  }
-  const createEventClick =()=> {
-    router.push('/Eventcrud/select-event-type' as any);
-  }
+  const router = useRouter();
+
+  const handleExploreVendors = useCallback(() => {
+    router.push("/explore");
+  }, [router]);
+
+  const handleCreateEvent = useCallback(() => {
+    // TODO: Implement create event functionality
+    console.log("Create event pressed");
+  }, []);
+
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
       <ScrollView
         className="flex-1"
         contentContainerStyle={{ paddingBottom: 40 }}
+        showsVerticalScrollIndicator={false}
       >
         <View className="flex-1 px-6 pt-8">
-          {/* Hero Image */}
-          <View className="mb-8">
-            <View className="relative">
-              <Image
-                source={require("@/assets/images/home.png")}
-                className="w-full h-[50vh] rounded-3xl"
-                resizeMode="cover"
-              />
-            </View>
-          </View>
+          <HeroImage />
+          <TitleDescription />
 
-          {/* Title */}
-          <Text className="text-2xl font-bold text-gray-900 text-center mb-4">
-            Find Top Vendors
-          </Text>
-
-          {/* Description */}
-          <Text className="text-base text-gray-500 text-center mb-8 px-2 leading-6">
-            Discover and book the best photographers, caterers, and decorators
-            for your big day.
-          </Text>
-
-          {/* Create Event Button */}
-          <TouchableOpacity
-            className="bg-primary py-4 rounded-md mb-4 shadow-lg"
-            style={{ shadowColor: "#ee2b8c", shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.3, shadowRadius: 4 }}
-            onPress={createEventClick}
-            activeOpacity={0.8}
+          <Button
+            variant="primary"
+            onPress={handleCreateEvent}
+            className="mb-4"
+            accessibilityLabel="Create a new event"
           >
-            <Text className="text-white text-center text-lg font-semibold">
-              Create Event
-            </Text>
-          </TouchableOpacity>
+            {CONTENT.buttons.createEvent}
+          </Button>
 
-          {/* Events Button */}
-          <TouchableOpacity
-            className="bg-primary/10 py-4 rounded-md mb-4 shadow-lg"
-            onPress={eventclick}
-            activeOpacity={0.8}
+          <Button
+            variant="secondary"
+            onPress={handleExploreVendors}
+            className="mb-6"
+            accessibilityLabel="Explore available vendors"
           >
-            <Text className="text-primary text-center text-lg font-semibold">
-              View Events
-            </Text>
-          </TouchableOpacity>
+            {CONTENT.buttons.exploreVendors}
+          </Button>
 
-          {/* Explore Vendors Button */}
-          <TouchableOpacity
-            className="bg-primary/10 py-4 rounded-md mb-6 shadow-lg"
-            onPress={explorevendorclick}
-            activeOpacity={0.8}
-          >
-            <Text className="text-primary text-center text-lg font-semibold ">
-              Explore Vendors
-            </Text>
-          </TouchableOpacity>
-
-          {/* Login Link */}
-          <View className="flex-row justify-center items-center">
-            <Text className="text-muted-light text-base">
-              Already have an account?{" "}
-            </Text>
-            <Link href="/(auth)/login" asChild>
-              <TouchableOpacity>
-                <Text className="text-primary text-base font-semibold underline">
-                  Login
-                </Text>
-              </TouchableOpacity>
-            </Link>
-          </View>
+          <LoginPrompt />
         </View>
       </ScrollView>
     </SafeAreaView>
+  );
+}
+
+function HeroImage() {
+  return (
+    <View className="mb-8">
+      <Image
+        source={HERO_IMAGE}
+        className="w-full h-[50vh] rounded-3xl"
+        resizeMode="cover"
+        accessibilityLabel="Wedding venue hero image"
+      />
+    </View>
+  );
+}
+
+function TitleDescription() {
+  return (
+    <View>
+      <Text variant="h1" className="text-center mb-4">
+        {CONTENT.title}
+      </Text>
+      <Text
+        variant="body"
+        className="text-gray-500 text-center mb-8 px-2 leading-6"
+      >
+        {CONTENT.description}
+      </Text>
+    </View>
+  );
+}
+
+function LoginPrompt() {
+  return (
+    <View className="flex-row justify-center items-center">
+      <Text className="text-muted-light text-base" variant="body">
+        {CONTENT.loginPrompt}{" "}
+      </Text>
+      <Link href="/(auth)/login" asChild>
+        <TouchableOpacity accessibilityRole="link" accessibilityLabel="Login">
+          <Text className="text-primary text-base font-semibold underline">
+            {CONTENT.loginCta}
+          </Text>
+        </TouchableOpacity>
+      </Link>
+    </View>
   );
 }

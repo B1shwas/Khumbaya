@@ -4,7 +4,7 @@ export default function Index() {
   const isLoggedIn = true;
 
   if (!isLoggedIn) {
-    return <Redirect href="/(auth)/login" />;
+    return <Redirect href="/home" />;
   }
 
   return <Redirect href="/(tabs)/home" />;
