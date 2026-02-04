@@ -27,7 +27,7 @@ module.exports = {
           disabled: "#9CA3AF",
           inverse: "#FFFFFF",
         },
-        // Success colors for the success status throughout the application 
+        // Success colors for the success status throughout the application
         success: {
           50: "#F0FDF4",
           100: "#D1FAE5",
@@ -43,6 +43,7 @@ module.exports = {
         },
       },
       fontFamily: {
+        sans: ["PlusJakartaSans"],
         jakarta: ["PlusJakartaSans"],
         "jakarta-medium": ["PlusJakartaSans-Medium"],
         "jakarta-semibold": ["PlusJakartaSans-SemiBold"],

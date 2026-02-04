@@ -4,6 +4,7 @@ interface User {
   id: string;
   email: string;
   name: string;
+  role: "client" | "vendor";
 }
 
 interface AuthContextType {
@@ -17,7 +18,12 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User | null>({
+    role: "vendor",
+    id: "1",
+    email: "client@example.com",
+    name: "Client User",
+  });
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -58,7 +64,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     <AuthContext.Provider
       value={{
         user,
-        isAuthenticated: false,
+        isAuthenticated: true,
         isLoading,
         login,
         logout,

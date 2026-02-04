@@ -1,20 +1,21 @@
+import { Text } from "@/src/components/ui/Text";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useState } from "react";
-import {
-	Image,
-	Pressable,
-	ScrollView,
-	Text,
-	TextInput,
-	View,
-} from "react-native";
+import { Image, Pressable, ScrollView, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 // TODO: Update these colors to match your app's theme (currently using HTML's pink #ee2b8c)
 const PINK_PRIMARY = "#ee2b8c";
 
 // Mock data - replace with actual data fetching
-const CATEGORIES = ["All", "Venues", "Catering", "Decoration", "Photography", "Planners"];
+const CATEGORIES = [
+  "All",
+  "Venues",
+  "Catering",
+  "Decoration",
+  "Photography",
+  "Planners",
+];
 
 const VENDORS = [
   {
@@ -25,7 +26,8 @@ const VENDORS = [
     reviews: 120,
     priceLevel: "$$$$",
     location: "Manhattan, NY",
-    image: "https://lh3.googleusercontent.com/aida-public/AB6AXuAYtTzLRQz7BrZfq0tS2qrOfefnfcwCrHTEifBG4xNigaYOav65joOcdh27d3-JCVydPTEImmycDRAhop49JtNIRP3J0Wug1dEBdbcPR5InAwdT8bjFmGJbmiE6rz2IE1pwNuRYsu9VJC-gRS4yYZ2QcKqjf21WraWaNEPAA-VgY2-m6niNNf9Qh2jI48G9XtOwTnulf2if0os5TopuuLJq5UmwIebQoF5UXPNFuUfVktzG6AmLIwXS-DWBS1Sylpu926qox0_vicE",
+    image:
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuAYtTzLRQz7BrZfq0tS2qrOfefnfcwCrHTEifBG4xNigaYOav65joOcdh27d3-JCVydPTEImmycDRAhop49JtNIRP3J0Wug1dEBdbcPR5InAwdT8bjFmGJbmiE6rz2IE1pwNuRYsu9VJC-gRS4yYZ2QcKqjf21WraWaNEPAA-VgY2-m6niNNf9Qh2jI48G9XtOwTnulf2if0os5TopuuLJq5UmwIebQoF5UXPNFuUfVktzG6AmLIwXS-DWBS1Sylpu926qox0_vicE",
   },
   {
     id: "2",
@@ -35,7 +37,8 @@ const VENDORS = [
     reviews: 85,
     priceLevel: "$$",
     location: "Brooklyn, NY",
-    image: "https://lh3.googleusercontent.com/aida-public/AB6AXuBFkFs3gMkYt9YZPAxte3M9V8lfrQHKSHytk5Uum7-Xh1k-fgp_z7QVUApiiZI8o2hOqZKZYYib8kCKmVtZSuQPTzMRHUSXBwe781PrBY9A22B7YliBuCrsTbO1L0-fOMP6DjilY6yrDaHPwgjMIYOlrSXgxpFRyN389s0uvcLzbGmR-jpOrzj_XGiW4hZopaaD_8PCLUMA1777j2x2K7_WrZsvZlxyb559Jtcfgt9JsWhblfdrfGFSEtyAW6OA9tVMscn173mciWA",
+    image:
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuBFkFs3gMkYt9YZPAxte3M9V8lfrQHKSHytk5Uum7-Xh1k-fgp_z7QVUApiiZI8o2hOqZKZYYib8kCKmVtZSuQPTzMRHUSXBwe781PrBY9A22B7YliBuCrsTbO1L0-fOMP6DjilY6yrDaHPwgjMIYOlrSXgxpFRyN389s0uvcLzbGmR-jpOrzj_XGiW4hZopaaD_8PCLUMA1777j2x2K7_WrZsvZlxyb559Jtcfgt9JsWhblfdrfGFSEtyAW6OA9tVMscn173mciWA",
   },
   {
     id: "3",
@@ -45,7 +48,8 @@ const VENDORS = [
     reviews: 200,
     priceLevel: "$$$",
     location: "Queens, NY",
-    image: "https://lh3.googleusercontent.com/aida-public/AB6AXuAvVZMXfDTrga8zlthrkGcE34uboSRvgDDcGLV4Zv05QfinRcbOcUhO7YxzJDSKoasGHbtFJH0UmnkG8X8UON89yrr6V4bGUfBVQlAUS3Yvl2ry003gX7zVTFcr8MpyGdQXOYELOepoGOdh8Co7cqFq4Pp9hITgiHCiyZ6sxn0oZ__JPXGJPDdNxtso9fIuDKFION8HWjPQK1EfcvmqcaD60ubDeRI4zSm4eUtGseLOtbvMSimHsbEAShXSiIUlQJY1YnUx6R2XOtY",
+    image:
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuAvVZMXfDTrga8zlthrkGcE34uboSRvgDDcGLV4Zv05QfinRcbOcUhO7YxzJDSKoasGHbtFJH0UmnkG8X8UON89yrr6V4bGUfBVQlAUS3Yvl2ry003gX7zVTFcr8MpyGdQXOYELOepoGOdh8Co7cqFq4Pp9hITgiHCiyZ6sxn0oZ__JPXGJPDdNxtso9fIuDKFION8HWjPQK1EfcvmqcaD60ubDeRI4zSm4eUtGseLOtbvMSimHsbEAShXSiIUlQJY1YnUx6R2XOtY",
   },
   {
     id: "4",
@@ -55,7 +59,8 @@ const VENDORS = [
     reviews: 45,
     priceLevel: "$$$",
     location: "Staten Island, NY",
-    image: "https://lh3.googleusercontent.com/aida-public/AB6AXuBC9La7FaYaWmrN3p7F2OnkUEEwBPZHRiGNa7O46CpMyG62MzfxvYlSK5kE_VKyRKEqJhBDU1Wy6bNK6rno2gVVpRDIxz0TfrfW1A8hJXZR7FVCjXQnJfqlt0bj7UhUByiHYI7Z90787lDMRIONhA-L1L5szOoK0YeoJSsHXzQX39EOUB-MXXPmSA8fxVyYQOeGZovNXJOCypE58rcE7nlTZlzbu3b_PM7LujfCuclSYkKNLqsHyo3wstxyWxmKbYqVyBwffkx2uF0",
+    image:
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuBC9La7FaYaWmrN3p7F2OnkUEEwBPZHRiGNa7O46CpMyG62MzfxvYlSK5kE_VKyRKEqJhBDU1Wy6bNK6rno2gVVpRDIxz0TfrfW1A8hJXZR7FVCjXQnJfqlt0bj7UhUByiHYI7Z90787lDMRIONhA-L1L5szOoK0YeoJSsHXzQX39EOUB-MXXPmSA8fxVyYQOeGZovNXJOCypE58rcE7nlTZlzbu3b_PM7LujfCuclSYkKNLqsHyo3wstxyWxmKbYqVyBwffkx2uF0",
   },
 ];
 
@@ -87,11 +92,7 @@ function CategoryChip({
         isActive ? "bg-primary" : "bg-white border border-gray-100"
       }`}
     >
-      <Text
-        className={`text-sm font-medium ${
-          isActive ? "text-white" : "text-gray-700"
-        }`}
-      >
+      <Text className={`text-sm  ${isActive ? "text-white" : "text-gray-700"}`}>
         {label}
       </Text>
     </Pressable>
@@ -111,14 +112,14 @@ function VendorCard({ vendor }: { vendor: Vendor }) {
           className="w-full h-full"
           resizeMode="cover"
         />
-        
+
         {/* Favorite Button */}
         <Pressable
           onPress={() => setIsFavorite(!isFavorite)}
           className="absolute top-3 right-3 bg-white/20 rounded-full p-2"
         >
           <MaterialIcons
-            name={isFavorite ? "favorite" : "favorite-border"} // Asynchrounous api call in this 
+            name={isFavorite ? "favorite" : "favorite-border"} // Asynchrounous api call in this
             size={20}
             color="white"
           />
@@ -127,8 +128,12 @@ function VendorCard({ vendor }: { vendor: Vendor }) {
         {/* Rating Badge */}
         <View className="absolute bottom-3 left-3 bg-white/90 rounded-lg px-2 py-1 flex-row items-center gap-1">
           <MaterialIcons name="star" size={16} color="#EAB308" />
-          <Text className="text-xs font-bold text-gray-900">{vendor.rating}</Text>
-          <Text className="text-xs text-gray-500">({vendor.reviews})</Text>
+          <Text variant="caption" className="font-bold text-gray-900">
+            {vendor.rating}
+          </Text>
+          <Text variant="caption" className="text-xs text-gray-500">
+            ({vendor.reviews})
+          </Text>
         </View>
       </View>
 
@@ -136,13 +141,18 @@ function VendorCard({ vendor }: { vendor: Vendor }) {
       <View className="p-4 gap-2">
         <View className="flex-row justify-between items-start">
           <View className="flex-1">
-            <Text className="text-lg font-bold text-gray-900">{vendor.name}</Text>
-            <Text className="text-primary/90 text-sm font-medium mt-1 shadow-[0_0_15px_5px_primary]">
+            <Text className="text-lg text-gray-900" variant="h1">
+              {vendor.name}
+            </Text>
+            <Text
+              variant="caption"
+              className="text-primary/90 text-sm mt-1 shadow-[0_0_15px_5px_primary]"
+            >
               {vendor.category}
             </Text>
           </View>
           <View className="bg-success-50 px-2 py-1 rounded">
-            <Text className="text-success-700 text-xs font-semibold ">
+            <Text variant="caption" className="text-success-700 font-semibold ">
               {vendor.priceLevel}
             </Text>
           </View>
@@ -150,7 +160,9 @@ function VendorCard({ vendor }: { vendor: Vendor }) {
 
         <View className="flex-row items-center gap-1 mt-1">
           <MaterialIcons name="location-on" size={18} color="#6B7280" />
-          <Text className="text-sm text-gray-500">{vendor.location}</Text>
+          <Text variant="caption" className="text-gray-500">
+            {vendor.location}
+          </Text>
         </View>
       </View>
     </Pressable>
@@ -166,10 +178,10 @@ export default function ExploreVendors() {
     <SafeAreaView className="flex-1 bg-gray-50">
       {/* Header & Search - TODO: Make this sticky if needed */}
       <View className="px-4 pt-6 pb-2 bg-gray-50 ">
-        <Text className="text-2xl font-bold mb-4 px-1 text-gray-900">
+        <Text className="text-2xl mb-4 px-1 text-gray-900" variant="h1">
           Find your dream team
         </Text>
-        
+
         {/* Search Input */}
         <View className="flex-row items-center h-12 bg-white rounded-xl px-4">
           {/* TODO: Change color to match your primary/pink */}
@@ -190,7 +202,7 @@ export default function ExploreVendors() {
           horizontal
           showsHorizontalScrollIndicator={false}
           contentContainerClassName="px-4 gap-3 pb-2"
-	style={{ overflow: 'visible' }}// To show shadow
+          style={{ overflow: "visible" }} // To show shadow
         >
           {CATEGORIES.map((category) => (
             <CategoryChip
@@ -218,19 +230,16 @@ export default function ExploreVendors() {
       <View className="absolute bottom-6 left-4 right-4 p-2">
         <View className="bg-white rounded-xl p-4 flex-row items-center justify-between shadow-lg border border-gray-100">
           <View>
-            <Text className="text-sm font-bold text-gray-900">
+            <Text className="text-sm  text-gray-900" variant="h1">
               Log in to save favorites
             </Text>
-            <Text className="text-xs text-gray-500">
+            <Text className="text-xs text-gray-500" variant="body">
               Keep track of vendors you love
             </Text>
           </View>
           {/* TODO: Change bg-secondary-500 to your primary/pink color */}
-          <Pressable className="bg-primary py-2.5 px-6 rounded-md"
-     
-		  >
-			
-            <Text className="text-white text-sm font-semibold">Log In</Text>
+          <Pressable className="bg-primary py-2.5 px-6 rounded-md">
+            <Text className="text-white text-sm">Log In</Text>
           </Pressable>
         </View>
       </View>
