@@ -1,11 +1,9 @@
+import LoginPage from "@/src/screen/home/LoginPage";
 import React from "react";
-import { StyleSheet, Text, View } from "react-native";
-
+import { StyleSheet } from "react-native";
 const Login = () => {
   return (
-    <View>
-      <Text className="text-blue-500">Login</Text>
-    </View>
+    <LoginPage/>
   );
 };
 

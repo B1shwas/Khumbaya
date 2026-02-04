@@ -1,7 +1,10 @@
-import { Link } from "expo-router";
+import { Link, router } from "expo-router";
 import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 export default function HomePage() {
+  const explorevendorclick =()=> {
+    router.push('/explore');
+  }
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
       <ScrollView
@@ -34,6 +37,7 @@ export default function HomePage() {
           {/* Create Event Button */}
           <TouchableOpacity
             className="bg-primary py-4 rounded-md mb-4 shadow-lg"
+            style={{ shadowColor: "#ee2b8c", shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.3, shadowRadius: 4 }}
             activeOpacity={0.8}
           >
             <Text className="text-white text-center text-lg font-semibold">
@@ -44,6 +48,7 @@ export default function HomePage() {
           {/* Explore Vendors Button */}
           <TouchableOpacity
             className="bg-primary/10  py-4 rounded-md mb-6 shadow-lg"
+            onPress={explorevendorclick}
             activeOpacity={0.8}
           >
             <Text className="text-primary text-center text-lg font-semibold ">
