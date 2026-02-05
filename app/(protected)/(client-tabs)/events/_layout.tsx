@@ -5,6 +5,10 @@ export default function EventLayout() {
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="index" />
       <Stack.Screen name="[eventId]" />
+      <Stack.Screen name="timeline" />
+      <Stack.Screen name="budget" />
+      <Stack.Screen name="guests" />
+      <Stack.Screen name="gallery" />
     </Stack>
   );
 }
