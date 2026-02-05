@@ -49,7 +49,7 @@ export function Button({
   return (
     <TouchableOpacity
       className={cn(
-        "rounded-md shadow-lg items-center justify-center",
+        "rounded-md  items-center justify-center",
         variantStyles[variant],
         sizeStyles[size],
         disabled && "opacity-50",

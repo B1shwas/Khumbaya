@@ -1,7 +1,14 @@
 import { Text } from "@/src/components/ui/Text";
 import { MaterialIcons } from "@expo/vector-icons";
+import { router } from "expo-router";
 import { useState } from "react";
-import { Image, Pressable, ScrollView, TextInput, View } from "react-native";
+import {
+  Image,
+  Pressable,
+  ScrollView,
+  TextInput,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 // TODO: Update these colors to match your app's theme (currently using HTML's pink #ee2b8c)
@@ -88,11 +95,13 @@ function CategoryChip({
   return (
     <Pressable
       onPress={onPress}
-      className={`h-9 px-5 rounded-full items-center justify-center ${
-        isActive ? "bg-primary" : "bg-white border border-gray-100"
-      }`}
+      className={`h-9 px-5 rounded-full items-center justify-center ${isActive ? "bg-primary" : "bg-white border border-gray-100"
+        }`}
     >
-      <Text className={`text-sm  ${isActive ? "text-white" : "text-gray-700"}`}>
+      <Text
+        className={`text-sm font-medium ${isActive ? "text-white" : "text-gray-700"
+          }`}
+      >
         {label}
       </Text>
     </Pressable>
@@ -202,7 +211,7 @@ export default function ExploreVendors() {
           horizontal
           showsHorizontalScrollIndicator={false}
           contentContainerClassName="px-4 gap-3 pb-2"
-          style={{ overflow: "visible" }} // To show shadow
+          style={{ overflow: 'visible' }}// To show shadow
         >
           {CATEGORIES.map((category) => (
             <CategoryChip
@@ -238,8 +247,12 @@ export default function ExploreVendors() {
             </Text>
           </View>
           {/* TODO: Change bg-secondary-500 to your primary/pink color */}
-          <Pressable className="bg-primary py-2.5 px-6 rounded-md">
-            <Text className="text-white text-sm">Log In</Text>
+          <Pressable className="bg-primary py-2.5 px-6 rounded-md"
+            onPress={() => router.push("/login")}
+
+          >
+
+            <Text className="text-white text-sm font-semibold">Log In</Text>
           </Pressable>
         </View>
       </View>

@@ -40,6 +40,15 @@ export default function HomePage() {
         <View className="flex-1 px-6 pt-8">
           <HeroImage />
           <TitleDescription />
+          <Button
+            variant="secondary"
+            onPress={handleExploreVendors}
+            className="mb-6 "
+            accessibilityLabel="Explore available vendors"
+          >
+            {CONTENT.buttons.exploreVendors}
+          </Button>
+
 
           <Button
             variant="primary"
@@ -50,14 +59,6 @@ export default function HomePage() {
             {CONTENT.buttons.createEvent}
           </Button>
 
-          <Button
-            variant="secondary"
-            onPress={handleExploreVendors}
-            className="mb-6"
-            accessibilityLabel="Explore available vendors"
-          >
-            {CONTENT.buttons.exploreVendors}
-          </Button>
 
           <LoginPrompt />
         </View>
