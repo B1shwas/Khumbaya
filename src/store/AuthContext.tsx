@@ -107,15 +107,13 @@ function NavigationHandler({ children }: { children: React.ReactNode }) {
 }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  // TODO: Set to null for production (currently mocked for testing)
-  const [user, setUser] = useState<User | null>(null);
-
-  // {
-  //   id: "1",
-  //   email: "vendor@example.com",
-  //   name: "Vendor User",
-  //   role: "client",
-  // }
+  // Mock user for testing (set to null for production)
+  const [user, setUser] = useState<User | null>({
+    id: "1",
+    email: "user@example.com",
+    name: "Priya",
+    role: "client",
+  });
   const [isLoading, setIsLoading] = useState(true);
 
   // Check auth on mount
