@@ -1,0 +1,329 @@
+import { Text } from "@/src/components/ui/Text";
+import { MaterialIcons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
+import React, { useState } from "react";
+import {
+    ScrollView,
+    TextInput,
+    TouchableOpacity,
+    View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+
+// Color constants from tailwind config:
+// primary = #ee2b8c
+// background-light = #f8f6f7
+// background-dark = #221019
+// text-light = #181114
+// gray-200 = #e5e7eb
+// slate-400 = #94a3b8
+// slate-500 = #64748b
+// slate-600 = #475569
+// slate-700 = #334155
+// slate-900 = #0f172a
+// yellow-400 = #facc15
+// yellow-600 = #ca8a04
+
+type PasswordStrength = "weak" | "medium" | "strong" | "very-strong";
+
+export default function VendorContacts() {
+  const [formData, setFormData] = useState({
+    fullName: "",
+    email: "",
+    countryCode: "US +1",
+    phone: "",
+    password: "",
+  });
+  const [showPassword, setShowPassword] = useState(false);
+  const [passwordStrength, setPasswordStrength] = useState<PasswordStrength>("weak");
+
+  const calculatePasswordStrength = (pwd: string): PasswordStrength => {
+    if (pwd.length === 0) return "weak";
+    if (pwd.length < 6) return "weak";
+    if (pwd.length < 10) return "medium";
+    if (pwd.length < 14) return "strong";
+    return "very-strong";
+  };
+
+  const handlePasswordChange = (pwd: string) => {
+    setFormData({ ...formData, password: pwd });
+    setPasswordStrength(calculatePasswordStrength(pwd));
+  };
+
+  const strengthConfig = {
+    weak: { bars: 1, color: "#ef4444", label: "Weak" },
+    medium: { bars: 2, color: "#facc15", label: "Medium strength" },
+    strong: { bars: 3, color: "#10b981", label: "Strong" },
+    "very-strong": { bars: 4, color: "#10b981", label: "Very strong" },
+  };
+
+  const strength = strengthConfig[passwordStrength];
+
+  return (
+    <View className="flex-1 bg-background-light dark:bg-background-dark">
+      <SafeAreaView className="flex-1">
+        {/* Header */}
+        <View className="flex-row items-center px-4 pt-6 pb-2 justify-between">
+          <TouchableOpacity className="items-center justify-center rounded-full size-10">
+            {/* text-light = #181114 */}
+            <MaterialIcons name="arrow-back-ios-new" size={24} color="#181114" />
+          </TouchableOpacity>
+          <Text className="text-lg font-bold flex-1 text-center pr-10" style={{ color: "#181114" }}>
+            Sign Up
+          </Text>
+        </View>
+
+        {/* Progress Bar */}
+        <View className="px-4 py-2">
+          <View className="flex-row w-full items-center justify-between" style={{ gap: 8 }}>
+            {/* primary = #ee2b8c */}
+            <View className="h-1.5 flex-1 rounded-full bg-primary" />
+            {/* gray-200 = #e5e7eb */}
+            <View className="h-1.5 flex-1 rounded-full" style={{ backgroundColor: "#e5e7eb" }} />
+            <View className="h-1.5 flex-1 rounded-full" style={{ backgroundColor: "#e5e7eb" }} />
+            <View className="h-1.5 flex-1 rounded-full" style={{ backgroundColor: "#e5e7eb" }} />
+            <View className="h-1.5 flex-1 rounded-full" style={{ backgroundColor: "#e5e7eb" }} />
+          </View>
+          {/* slate-500 = #64748b */}
+          <Text className="text-xs mt-2 text-right font-medium" style={{ color: "#64748b" }}>
+            Step 1 of 5
+          </Text>
+        </View>
+
+        {/* Scrollable Content */}
+        <ScrollView className="flex-1 px-6 pb-6 pt-2" showsVerticalScrollIndicator={false}>
+          {/* Headline */}
+          <View className="mb-8">
+            {/* text-light = #181114 */}
+            <Text className="text-3xl font-bold leading-tight mb-3" style={{ color: "#181114" }}>
+              Let's get started
+            </Text>
+            {/* slate-600 = #475569 */}
+            <Text className="text-base font-normal leading-relaxed" style={{ color: "#475569" }}>
+              Create an account to start managing bookings and connecting with couples.
+            </Text>
+          </View>
+
+          {/* Form Fields */}
+          <View style={{ gap: 20 }}>
+            {/* Full Name */}
+            <View style={{ gap: 6 }}>
+              {/* text-light = #181114 */}
+              <Text className="text-sm font-semibold" style={{ color: "#181114" }}>
+                Full Name
+              </Text>
+              <View className="relative">
+                <TextInput
+                  value={formData.fullName}
+                  onChangeText={(v) => setFormData({ ...formData, fullName: v })}
+                  placeholder="Jane Doe"
+                  placeholderTextColor="#94a3b8" // slate-400
+                  className="w-full rounded-xl px-4 py-3.5 text-base"
+                  style={{
+                    borderWidth: 1,
+                    borderColor: "#e5e7eb", // gray-200
+                    backgroundColor: "#ffffff",
+                    color: "#181114", // text-light
+                    paddingRight: 48,
+                  }}
+                />
+                <View className="absolute right-4 top-1/2" style={{ transform: [{ translateY: -10 }] }}>
+                  {/* slate-400 = #94a3b8 */}
+                  <MaterialIcons name="person" size={20} color="#94a3b8" />
+                </View>
+              </View>
+            </View>
+
+            {/* Email */}
+            <View style={{ gap: 6 }}>
+              <Text className="text-sm font-semibold" style={{ color: "#181114" }}>
+                Work Email
+              </Text>
+              <View className="relative">
+                <TextInput
+                  value={formData.email}
+                  onChangeText={(v) => setFormData({ ...formData, email: v })}
+                  placeholder="jane@events.com"
+                  placeholderTextColor="#94a3b8"
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  className="w-full rounded-xl px-4 py-3.5 text-base"
+                  style={{
+                    borderWidth: 1,
+                    borderColor: "#e5e7eb",
+                    backgroundColor: "#ffffff",
+                    color: "#181114",
+                    paddingRight: 48,
+                  }}
+                />
+                <View className="absolute right-4 top-1/2" style={{ transform: [{ translateY: -10 }] }}>
+                  <MaterialIcons name="mail" size={20} color="#94a3b8" />
+                </View>
+              </View>
+            </View>
+
+            {/* Phone Number */}
+            <View style={{ gap: 6 }}>
+              <Text className="text-sm font-semibold" style={{ color: "#181114" }}>
+                Phone Number
+              </Text>
+              <View className="flex-row" style={{ gap: 12 }}>
+                {/* Country Code Picker - simplified to TextInput for React Native */}
+                <View className="w-24 shrink-0">
+                  <TextInput
+                    value={formData.countryCode}
+                    editable={false}
+                    className="w-full rounded-xl px-3 py-3.5 text-base text-center"
+                    style={{
+                      borderWidth: 1,
+                      borderColor: "#e5e7eb",
+                      backgroundColor: "#ffffff",
+                      color: "#181114",
+                    }}
+                  />
+                </View>
+                <TextInput
+                  value={formData.phone}
+                  onChangeText={(v) => setFormData({ ...formData, phone: v })}
+                  placeholder="(555) 123-4567"
+                  placeholderTextColor="#94a3b8"
+                  keyboardType="phone-pad"
+                  className="flex-1 rounded-xl px-4 py-3.5 text-base"
+                  style={{
+                    borderWidth: 1,
+                    borderColor: "#e5e7eb",
+                    backgroundColor: "#ffffff",
+                    color: "#181114",
+                  }}
+                />
+              </View>
+            </View>
+
+            {/* Password */}
+            <View style={{ gap: 6 }}>
+              <Text className="text-sm font-semibold" style={{ color: "#181114" }}>
+                Password
+              </Text>
+              <View className="relative">
+                <TextInput
+                  value={formData.password}
+                  onChangeText={handlePasswordChange}
+                  placeholder="Create a password"
+                  placeholderTextColor="#94a3b8"
+                  secureTextEntry={!showPassword}
+                  className="w-full rounded-xl px-4 py-3.5 text-base"
+                  style={{
+                    borderWidth: 1,
+                    borderColor: "#e5e7eb",
+                    backgroundColor: "#ffffff",
+                    color: "#181114",
+                    paddingRight: 48,
+                  }}
+                />
+                <TouchableOpacity
+                  className="absolute right-4 top-1/2"
+                  style={{ transform: [{ translateY: -10 }] }}
+                  onPress={() => setShowPassword(!showPassword)}
+                >
+                  <MaterialIcons
+                    name={showPassword ? "visibility" : "visibility-off"}
+                    size={20}
+                    color="#94a3b8"
+                  />
+                </TouchableOpacity>
+              </View>
+
+              {/* Password Strength Meter */}
+              {formData.password.length > 0 && (
+                <View className="mt-1">
+                  <View className="flex-row w-full mb-1" style={{ gap: 6, height: 6 }}>
+                    {[1, 2, 3, 4].map((bar) => (
+                      <View
+                        key={bar}
+                        className="flex-1 rounded-full"
+                        style={{
+                          backgroundColor: bar <= strength.bars ? strength.color : "#e5e7eb",
+                        }}
+                      />
+                    ))}
+                  </View>
+                  <Text className="text-xs font-medium" style={{ color: strength.color }}>
+                    {strength.label}
+                  </Text>
+                </View>
+              )}
+            </View>
+
+            {/* Continue Button */}
+            <View className="mt-4">
+              <TouchableOpacity
+                className="w-full rounded-full py-3.5 items-center justify-center shadow-md"
+                style={{ backgroundColor: "#ee2b8c" }} // primary
+                activeOpacity={0.9}
+              >
+                <Text className="text-white font-bold text-lg">Continue</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* Divider */}
+          <View className="flex-row items-center my-6 py-2">
+            <View className="flex-1" style={{ height: 1, backgroundColor: "#e5e7eb" }} />
+            {/* slate-500 = #64748b */}
+            <Text className="mx-4 text-sm font-medium" style={{ color: "#64748b" }}>
+              Or sign up with
+            </Text>
+            <View className="flex-1" style={{ height: 1, backgroundColor: "#e5e7eb" }} />
+          </View>
+
+          {/* Social Login */}
+          <View className="flex-row" style={{ gap: 16 }}>
+            <TouchableOpacity
+              className="flex-1 flex-row items-center justify-center rounded-xl py-3"
+              style={{ borderWidth: 1, borderColor: "#e5e7eb", backgroundColor: "#ffffff", gap: 8 }}
+              activeOpacity={0.7}
+            >
+              <LinearGradient
+                colors={["#4285F4", "#34A853"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                className="size-5 rounded-full items-center justify-center"
+              >
+                <Text className="text-[10px] text-white font-bold">G</Text>
+              </LinearGradient>
+              {/* slate-700 = #334155 */}
+              <Text className="text-sm font-semibold" style={{ color: "#334155" }}>
+                Google
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              className="flex-1 flex-row items-center justify-center rounded-xl py-3"
+              style={{ borderWidth: 1, borderColor: "#e5e7eb", backgroundColor: "#ffffff", gap: 8 }}
+              activeOpacity={0.7}
+            >
+              <View
+                className="size-5 rounded-full items-center justify-center"
+                style={{ backgroundColor: "#000000" }}
+              >
+                <Text className="text-[10px] text-white font-bold">A</Text>
+              </View>
+              <Text className="text-sm font-semibold" style={{ color: "#334155" }}>
+                Apple
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Footer */}
+          <View className="mt-8 items-center pb-4">
+            {/* slate-500 = #64748b */}
+            <Text className="text-sm" style={{ color: "#64748b" }}>
+              Already have an account?{" "}
+              <Text className="text-primary font-bold">Log in</Text>
+            </Text>
+          </View>
+        </ScrollView>
+      </SafeAreaView>
+    </View>
+  );
+}
