@@ -1,11 +1,5 @@
-import { Text } from "@/src/components/ui/Text";
-import { View } from "react-native";
+import VendorCalendarScreen from '@/src/screen/vendor/VendorCalnder';
 
-export default function CalendarScreen() {
-  return (
-    <View className="flex-1 items-center justify-center bg-gray-50">
-      <Text className="text-2xl font-bold">Calendar</Text>
-      <Text className="text-gray-600 mt-2">Your schedule</Text>
-    </View>
-  );
+export default function CalendarTab() {
+  return <VendorCalendarScreen />;
 }
