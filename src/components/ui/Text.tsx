@@ -1,25 +1,36 @@
-import { Text as RNText, TextProps } from "react-native";
-import { cn } from "../../utils/cn";
+import { cn } from "@/src/utils/cn";
+import { Text as RNText, TextProps as RNTextProps } from "react-native";
 
-type Variant = "h1" | "h2" | "body" | "caption";
+type TextVariant = "h1" | "h2" | "h3" | "h4" | "body" | "caption" | "small";
 
-interface Props extends TextProps {
-  variant?: Variant;
+interface TextProps extends RNTextProps {
+  variant?: TextVariant;
   className?: string;
+  children: React.ReactNode;
 }
 
-export function Text({ variant = "body", className, ...props }: Props) {
+const variantStyles = {
+  h1: "text-3xl font-bold text-gray-900",
+  h2: "text-2xl font-bold text-gray-900",
+  h3: "text-xl font-semibold text-gray-900",
+  h4: "text-lg font-semibold text-gray-900",
+  body: "text-base text-gray-700",
+  caption: "text-sm text-gray-500",
+  small: "text-xs text-gray-500",
+};
+
+export function Text({
+  variant = "body",
+  className,
+  children,
+  ...props
+}: TextProps) {
   return (
     <RNText
+      className={cn(variantStyles[variant], className)}
       {...props}
-      className={cn(
-        "text-gray-900",
-        variant === "h1" && "font-jakarta-bold text-2xl",
-        variant === "h2" && "font-jakarta-semi text-xl",
-        variant === "body" && "font-jakarta text-base",
-        variant === "caption" && "font-jakarta-medium text-sm text-gray-500",
-        className,
-      )}
-    />
+    >
+      {children}
+    </RNText>
   );
 }
