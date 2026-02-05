@@ -3,7 +3,7 @@ import { Redirect } from "expo-router";
 import { ActivityIndicator, View } from "react-native";
 
 export default function Index() {
-  const { user, isAuthenticated, isLoading } = useAuth();
+  const { user, isLoading } = useAuth();
 
   if (isLoading) {
     return (
@@ -13,7 +13,7 @@ export default function Index() {
     );
   }
 
-  if (isAuthenticated && user) {
+  if (user) {
     if (user.role === "vendor") {
       return <Redirect href="/(protected)/(vendor-tabs)/home" />;
     }
