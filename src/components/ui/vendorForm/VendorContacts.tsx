@@ -3,12 +3,11 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import React, { useState } from "react";
 import {
-    ScrollView,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ScrollView,
+  TextInput,
+  TouchableOpacity,
+  View
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 // Color constants from tailwind config:
 // primary = #ee2b8c
@@ -26,7 +25,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 type PasswordStrength = "weak" | "medium" | "strong" | "very-strong";
 
-export default function VendorContacts() {
+export default function VendorContacts({onNext, onBack   }: {onNext: () => void, onBack: () => void}) {
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -61,35 +60,11 @@ export default function VendorContacts() {
 
   return (
     <View className="flex-1 bg-background-light dark:bg-background-dark">
-      <SafeAreaView className="flex-1">
+     
         {/* Header */}
-        <View className="flex-row items-center px-4 pt-6 pb-2 justify-between">
-          <TouchableOpacity className="items-center justify-center rounded-full size-10">
-            {/* text-light = #181114 */}
-            <MaterialIcons name="arrow-back-ios-new" size={24} color="#181114" />
-          </TouchableOpacity>
-          <Text className="text-lg font-bold flex-1 text-center pr-10" style={{ color: "#181114" }}>
-            Sign Up
-          </Text>
-        </View>
+       
 
-        {/* Progress Bar */}
-        <View className="px-4 py-2">
-          <View className="flex-row w-full items-center justify-between" style={{ gap: 8 }}>
-            {/* primary = #ee2b8c */}
-            <View className="h-1.5 flex-1 rounded-full bg-primary" />
-            {/* gray-200 = #e5e7eb */}
-            <View className="h-1.5 flex-1 rounded-full" style={{ backgroundColor: "#e5e7eb" }} />
-            <View className="h-1.5 flex-1 rounded-full" style={{ backgroundColor: "#e5e7eb" }} />
-            <View className="h-1.5 flex-1 rounded-full" style={{ backgroundColor: "#e5e7eb" }} />
-            <View className="h-1.5 flex-1 rounded-full" style={{ backgroundColor: "#e5e7eb" }} />
-          </View>
-          {/* slate-500 = #64748b */}
-          <Text className="text-xs mt-2 text-right font-medium" style={{ color: "#64748b" }}>
-            Step 1 of 5
-          </Text>
-        </View>
-
+      
         {/* Scrollable Content */}
         <ScrollView className="flex-1 px-6 pb-6 pt-2" showsVerticalScrollIndicator={false}>
           {/* Headline */}
@@ -259,6 +234,7 @@ export default function VendorContacts() {
               <TouchableOpacity
                 className="w-full rounded-full py-3.5 items-center justify-center shadow-md"
                 style={{ backgroundColor: "#ee2b8c" }} // primary
+                onPress={onNext}
                 activeOpacity={0.9}
               >
                 <Text className="text-white font-bold text-lg">Continue</Text>
@@ -323,7 +299,7 @@ export default function VendorContacts() {
             </Text>
           </View>
         </ScrollView>
-      </SafeAreaView>
+    
     </View>
   );
 }
