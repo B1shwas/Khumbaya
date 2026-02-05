@@ -17,27 +17,27 @@ export interface VendorCardProps {
 const STATUS_CONFIG = {
   contracted: {
     label: "Contracted",
-    bg: "bg-blue-50 ",
+    bg: "bg-blue-50",
     text: "text-blue-700",
-    ring: "ring-blue-700/10 ",
+    ring: "ring-blue-700/10",
   },
   deposit: {
     label: "Deposit Paid",
     bg: "bg-amber-50",
     text: "text-amber-700",
-    ring: "ring-amber-600/20 ",
+    ring: "ring-amber-600/20",
   },
   pending: {
     label: "Pending",
-    bg: "bg-slate-50 ",
-    text: "text-slate-600 ",
-    ring: "ring-slate-500/10 ",
+    bg: "bg-slate-50",
+    text: "text-slate-600",
+    ring: "ring-slate-500/10",
   },
   paid: {
     label: "Paid in Full",
-    bg: "bg-green-50 ",
-    text: "text-green-700 ",
-    ring: "ring-green-600/20 ",
+    bg: "bg-green-50",
+    text: "text-green-700",
+    ring: "ring-green-600/20",
   },
 };
 
@@ -57,7 +57,7 @@ const VendorCard = memo<VendorCardProps>(
 
     return (
       <Pressable
-        className="bg-background-light rounded-3xl border border-gray-100 p-4 mb-4 active:opacity-95"
+        className="bg-background-light rounded-3xl border border-gray-100 p-4 mb-4 shadow-md active:opacity-95"
         android_ripple={{ color: "#f3f4f6" }}
         accessibilityRole="button"
         accessibilityLabel={`Vendor: ${name}, ${type}, ${price}`}
@@ -72,7 +72,7 @@ const VendorCard = memo<VendorCardProps>(
                 resizeMode="cover"
                 accessibilityIgnoresInvertColors
               />
-              <View className="absolute -bottom-1 -right-1 bg-white  rounded-full p-1.5 border border-gray-50 shadow-sm">
+              <View className="absolute -bottom-1 -right-1 bg-white rounded-full p-1.5 border border-gray-50 shadow-sm">
                 <MaterialIcons
                   name={ICON_MAPPING[icon] as any}
                   size={14}
@@ -82,14 +82,14 @@ const VendorCard = memo<VendorCardProps>(
             </View>
 
             <View className="flex-1 justify-center min-w-0">
-            <Text
-                className="text-background-dark  text-base font-bold leading-tight mb-0.5"
+              <Text
+                className="text-background-dark text-base font-bold leading-tight mb-0.5"
                 numberOfLines={1}
-            >
+              >
                 {name}
               </Text>
               <Text
-                className="text-text-light  text-xs font-medium mb-1.5"
+                className="text-text-light text-xs font-medium mb-1.5"
                 numberOfLines={1}
               >
                 {type}
@@ -110,7 +110,7 @@ const VendorCard = memo<VendorCardProps>(
 
           {/* Price & Action */}
           <View className="items-end gap-y-2">
-            <Text className="text-primary  text-md" variant="h1">
+            <Text className="text-primary text-md" variant="h1">
               {price}
             </Text>
             <Pressable
