@@ -169,37 +169,7 @@ const EventVendorsScreen = () => {
             </Pressable>
 
             {/* Bottom Navigation */}
-            <View
-                className="absolute bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800"
-                style={{ paddingBottom: Platform.OS === 'ios' ? 34 : 16, paddingTop: 12 }}
-            >
-                <View className="flex-row justify-around">
-                    {[
-                        { id: 'home', icon: 'home', label: 'Home' },
-                        { id: 'guests', icon: 'people', label: 'Guests' },
-                        { id: 'vendors', icon: 'storefront', label: 'Vendors' },
-                        { id: 'budget', icon: 'account-balance-wallet', label: 'Budget' },
-                    ].map((tab) => (
-                        <Pressable
-                            key={tab.id}
-                            className="flex-1 flex-col items-center"
-                            onPress={() => setActiveTab(tab.id)}
-                            accessibilityRole="tab"
-                            accessibilityState={{ selected: activeTab === tab.id }}
-                            accessibilityLabel={tab.label}
-                        >
-                            <MaterialIcons
-                                name={tab.icon as any}
-                                size={24}
-                                color={activeTab === tab.id ? '#ee2b8c' : (isDark ? '#64748b' : '#94a3b8')}
-                            />
-                            <Text className={`text-[10px] font-bold mt-1 ${activeTab === tab.id ? 'text-primary' : 'text-slate-400 dark:text-slate-500'}`}>
-                                {tab.label}
-                            </Text>
-                        </Pressable>
-                    ))}
-                </View>
-            </View>
+          
         </SafeAreaView>
     );
 };

@@ -23,11 +23,11 @@ export default function HomePage() {
   const router = useRouter();
 
   const handleExploreVendors = useCallback(() => {
-    router.push("/(onboarding)/explore-vendors" as any);
+    router.push("/explore-vendors"); 
   }, [router]);
 
   const handleCreateEvent = useCallback(() => {
-    router.push("/(onboarding)/login");
+    router.push("/login");
   }, [router]);
 
   return (
@@ -102,12 +102,19 @@ function LoginPrompt() {
       <Text className="text-muted-light text-base" variant="body">
         {CONTENT.loginPrompt}{" "}
       </Text>
-      <Link href="/(onboarding)/login" asChild>
+      <Link href="/login" asChild>
         <TouchableOpacity accessibilityRole="link" accessibilityLabel="Login">
           <Text className="text-primary text-base font-semibold underline">
             {CONTENT.loginCta}
           </Text>
         </TouchableOpacity>
+      </Link>
+      <Link href="/(testing)/eventvendor"  asChild>
+      <TouchableOpacity accessibilityRole="link" accessibilityLabel="Explore Vendors">
+        <Text className="text-primary text-base font-semibold underline">
+          Go to vendor tabs
+        </Text>
+      </TouchableOpacity>
       </Link>
     </View>
   );
