@@ -1,5 +1,3 @@
-import VendorHomeScreen from '@/src/screen/vendor/vendorHome';
+import VendorHomeScreen from "@/src/screen/vendor/VendorHome";
 
-export default function HomeTab() {
-  return <VendorHomeScreen />;
-}
+export default VendorHomeScreen;
