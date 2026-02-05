@@ -1,4 +1,5 @@
 import { Text } from "@/src/components/ui/Text";
+import BusinessDetail from "@/src/components/ui/vendorForm/BuisnessDetail";
 import { MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -65,6 +66,8 @@ export default function VendorForm() {
     businessName: "",
     bio: "",
     location: "",
+    websiteOrLink: "",
+    serviceableCities: [] as string[],
     experience: "",
     photos: INITIAL_PHOTOS,
   });
@@ -139,19 +142,19 @@ export default function VendorForm() {
         </View>
 
         {/* Progress Bar */}
-        <View className="flex-col gap-2 px-6 pb-4">
+        <View className="flex-col gap-3 px-6 pb-4">
           <View className="flex-row justify-between items-center">
-            <Text className="text-sm font-semibold" style={{ color: "#181114" }}>
-              Step {currentStep} of 5
+            <Text className="text-sm font-semibold" style={{ color: "#181113" }}>
+              Step {currentStep} of 4
             </Text>
             <Text className="text-xs font-bold text-primary">{Math.round(progress)}%</Text>
           </View>
-          <View className="h-2 w-full rounded-full overflow-hidden" style={{ backgroundColor: "#e6dbe0" }}>
+          <View className="h-3 w-full rounded-full overflow-hidden" style={{ backgroundColor: "#e6dbe0" }}>
             <Animated.View 
               className="h-full rounded-full bg-primary" 
               style={{ width: progressAnim.interpolate({
-                inputRange: [0, 100],
-                outputRange: ['0%', '100%']
+                inputRange: [-1, 100],
+                outputRange: ['-1%', '100%']
               }) }} 
             />
           </View>
@@ -180,7 +183,17 @@ export default function VendorForm() {
           )}
 
           {currentStep === 3 && (
-            <StepAdditionalDetails /> // Placeholder for now
+            <BusinessDetail
+              data={{
+                businessName: formData.businessName,
+                websiteOrLink: formData.websiteOrLink,
+                serviceableCities: formData.serviceableCities,
+                bio: formData.bio,
+              }}
+              onChange={(updates) => updateFormData(updates)}
+              onBack={handleBack}
+              onNext={handleNext}
+            />
           )}
 
           {currentStep === 4 && (

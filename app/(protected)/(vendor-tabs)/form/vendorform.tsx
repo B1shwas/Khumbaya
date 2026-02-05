@@ -1,6 +1,6 @@
-import VendorForm from "@/src/screen/vendor/VendorForm";
+import VendorFormFlow from "@/src/components/ui/vendorForm"
 export default function VendorFormScreen() {
-    return (
-        <VendorForm />
-    );
+    return <>
+    <VendorFormFlow/>
+    </>
 }   
