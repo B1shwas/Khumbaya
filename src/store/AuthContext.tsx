@@ -112,7 +112,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     id: "1",
     email: "vendor@example.com",
     name: "Vendor User",
-    role: "vendor",
+    role: "client",
   });
 
   const [isLoading, setIsLoading] = useState(true);

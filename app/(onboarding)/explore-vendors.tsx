@@ -1,3 +1,3 @@
-import ExploreVendors from "@/src/screen/home/explorevendors";
+import ExploreVendors from "@/src/screen/home/ExploreVendors";
 
 export default ExploreVendors;

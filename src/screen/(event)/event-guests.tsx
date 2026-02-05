@@ -1,12 +1,14 @@
 import { useLocalSearchParams } from 'expo-router';
 import { ScrollView, Text, View, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { events } from '@/src/data/events';
+// import { events } from '@/src/data/events';
 import { Ionicons } from '@expo/vector-icons';
 
 export default function EventGuests() {
   const { eventId } = useLocalSearchParams();
-  const event = events.find((e: any) => e.id === eventId);
+  // const event = events.find((e: any) => e.id === eventId);
+
+  const event  = [] as any;
 
   if (!event) {
     return (
