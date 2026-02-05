@@ -8,12 +8,11 @@ export default function Index() {
   if (isLoading) {
     return (
       <View className="flex-1 items-center justify-center bg-gray-50">
-        <ActivityIndicator size="large" color="#000" />
+        <ActivityIndicator size="large" color="#ee2b8c" />
       </View>
     );
   }
 
-  // Redirect based on auth state and role
   if (isAuthenticated && user) {
     if (user.role === "vendor") {
       return <Redirect href="/(protected)/(vendor-tabs)/home" />;
@@ -21,6 +20,5 @@ export default function Index() {
     return <Redirect href="/(protected)/(client-tabs)/home" />;
   }
 
-  // Not authenticated - go to onboarding
   return <Redirect href="/(onboarding)" />;
 }
