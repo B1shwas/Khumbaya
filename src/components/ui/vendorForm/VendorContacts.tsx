@@ -1,7 +1,9 @@
 import { Text } from "@/src/components/ui/Text";
+import { calculatePasswordStrength } from "@/src/utils/helper";
 import { MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import React, { useState } from "react";
+import { Controller, useFormContext, useWatch } from "react-hook-form";
 import {
   ScrollView,
   TextInput,
@@ -9,45 +11,22 @@ import {
   View
 } from "react-native";
 
-// Color constants from tailwind config:
-// primary = #ee2b8c
-// background-light = #f8f6f7
-// background-dark = #221019
-// text-light = #181114
-// gray-200 = #e5e7eb
-// slate-400 = #94a3b8
-// slate-500 = #64748b
-// slate-600 = #475569
-// slate-700 = #334155
-// slate-900 = #0f172a
-// yellow-400 = #facc15
-// yellow-600 = #ca8a04
 
-type PasswordStrength = "weak" | "medium" | "strong" | "very-strong";
+type VendorContactsFormValues = {
+  fullName: string;
+  email: string;
+  countryCode: string;
+  phone: string;
+  password: string;
+};
 
 export default function VendorContacts({onNext, onBack   }: {onNext: () => void, onBack: () => void}) {
-  const [formData, setFormData] = useState({
-    fullName: "",
-    email: "",
-    countryCode: "US +1",
-    phone: "",
-    password: "",
-  });
+  const { control, formState: { errors } } = useFormContext<VendorContactsFormValues>();
   const [showPassword, setShowPassword] = useState(false);
-  const [passwordStrength, setPasswordStrength] = useState<PasswordStrength>("weak");
+  const passwordValue = useWatch({ control, name: "password" }) ?? "";
 
-  const calculatePasswordStrength = (pwd: string): PasswordStrength => {
-    if (pwd.length === 0) return "weak";
-    if (pwd.length < 6) return "weak";
-    if (pwd.length < 10) return "medium";
-    if (pwd.length < 14) return "strong";
-    return "very-strong";
-  };
 
-  const handlePasswordChange = (pwd: string) => {
-    setFormData({ ...formData, password: pwd });
-    setPasswordStrength(calculatePasswordStrength(pwd));
-  };
+ 
 
   const strengthConfig = {
     weak: { bars: 1, color: "#ef4444", label: "Weak" },
@@ -56,7 +35,7 @@ export default function VendorContacts({onNext, onBack   }: {onNext: () => void,
     "very-strong": { bars: 4, color: "#10b981", label: "Very strong" },
   };
 
-  const strength = strengthConfig[passwordStrength];
+  const strength = strengthConfig[calculatePasswordStrength(passwordValue)];
 
   return (
     <View className="flex-1 bg-background-light dark:bg-background-dark">
@@ -88,25 +67,36 @@ export default function VendorContacts({onNext, onBack   }: {onNext: () => void,
                 Full Name
               </Text>
               <View className="relative">
-                <TextInput
-                  value={formData.fullName}
-                  onChangeText={(v) => setFormData({ ...formData, fullName: v })}
-                  placeholder="Jane Doe"
-                  placeholderTextColor="#94a3b8" // slate-400
-                  className="w-full rounded-xl px-4 py-3.5 text-base"
-                  style={{
-                    borderWidth: 1,
-                    borderColor: "#e5e7eb", // gray-200
-                    backgroundColor: "#ffffff",
-                    color: "#181114", // text-light
-                    paddingRight: 48,
-                  }}
+                <Controller
+                  control={control}
+                  name="fullName"
+                  render={({ field: { value, onChange } }) => (
+                    <TextInput
+                      value={value}
+                      onChangeText={onChange}
+                      placeholder="Jane Doe"
+                      placeholderTextColor="#94a3b8" // slate-400
+                      className="w-full rounded-xl px-4 py-3.5 text-base"
+                      style={{
+                        borderWidth: 1,
+                        borderColor: "#e5e7eb", // gray-200
+                        backgroundColor: "#ffffff",
+                        color: "#181114", // text-light
+                        paddingRight: 48,
+                      }}
+                    />
+                  )}
                 />
                 <View className="absolute right-4 top-1/2" style={{ transform: [{ translateY: -10 }] }}>
                   {/* slate-400 = #94a3b8 */}
                   <MaterialIcons name="person" size={20} color="#94a3b8" />
                 </View>
               </View>
+              {errors.fullName?.message && (
+                <Text className="text-xs" style={{ color: "#ef4444" }}>
+                  {errors.fullName.message}
+                </Text>
+              )}
             </View>
 
             {/* Email */}
@@ -115,26 +105,37 @@ export default function VendorContacts({onNext, onBack   }: {onNext: () => void,
                 Work Email
               </Text>
               <View className="relative">
-                <TextInput
-                  value={formData.email}
-                  onChangeText={(v) => setFormData({ ...formData, email: v })}
-                  placeholder="jane@events.com"
-                  placeholderTextColor="#94a3b8"
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  className="w-full rounded-xl px-4 py-3.5 text-base"
-                  style={{
-                    borderWidth: 1,
-                    borderColor: "#e5e7eb",
-                    backgroundColor: "#ffffff",
-                    color: "#181114",
-                    paddingRight: 48,
-                  }}
+                <Controller
+                  control={control}
+                  name="email"
+                  render={({ field: { value, onChange } }) => (
+                    <TextInput
+                      value={value}
+                      onChangeText={onChange}
+                      placeholder="jane@events.com"
+                      placeholderTextColor="#94a3b8"
+                      keyboardType="email-address"
+                      autoCapitalize="none"
+                      className="w-full rounded-xl px-4 py-3.5 text-base"
+                      style={{
+                        borderWidth: 1,
+                        borderColor: "#e5e7eb",
+                        backgroundColor: "#ffffff",
+                        color: "#181114",
+                        paddingRight: 48,
+                      }}
+                    />
+                  )}
                 />
                 <View className="absolute right-4 top-1/2" style={{ transform: [{ translateY: -10 }] }}>
                   <MaterialIcons name="mail" size={20} color="#94a3b8" />
                 </View>
               </View>
+              {errors.email?.message && (
+                <Text className="text-xs" style={{ color: "#ef4444" }}>
+                  {errors.email.message}
+                </Text>
+              )}
             </View>
 
             {/* Phone Number */}
@@ -145,33 +146,50 @@ export default function VendorContacts({onNext, onBack   }: {onNext: () => void,
               <View className="flex-row" style={{ gap: 12 }}>
                 {/* Country Code Picker - simplified to TextInput for React Native */}
                 <View className="w-24 shrink-0">
-                  <TextInput
-                    value={formData.countryCode}
-                    editable={false}
-                    className="w-full rounded-xl px-3 py-3.5 text-base text-center"
-                    style={{
-                      borderWidth: 1,
-                      borderColor: "#e5e7eb",
-                      backgroundColor: "#ffffff",
-                      color: "#181114",
-                    }}
+                  <Controller
+                    control={control}
+                    name="countryCode"
+                    render={({ field: { value } }) => (
+                      <TextInput
+                        value={value}
+                        editable={false}
+                        className="w-full rounded-xl px-3 py-3.5 text-base text-center"
+                        style={{
+                          borderWidth: 1,
+                          borderColor: "#e5e7eb",
+                          backgroundColor: "#ffffff",
+                          color: "#181114",
+                        }}
+                      />
+                    )}
                   />
                 </View>
-                <TextInput
-                  value={formData.phone}
-                  onChangeText={(v) => setFormData({ ...formData, phone: v })}
-                  placeholder="(555) 123-4567"
-                  placeholderTextColor="#94a3b8"
-                  keyboardType="phone-pad"
-                  className="flex-1 rounded-xl px-4 py-3.5 text-base"
-                  style={{
-                    borderWidth: 1,
-                    borderColor: "#e5e7eb",
-                    backgroundColor: "#ffffff",
-                    color: "#181114",
-                  }}
+                <Controller
+                  control={control}
+                  name="phone"
+                  render={({ field: { value, onChange } }) => (
+                    <TextInput
+                      value={value}
+                      onChangeText={onChange}
+                      placeholder="(555) 123-4567"
+                      placeholderTextColor="#94a3b8"
+                      keyboardType="phone-pad"
+                      className="flex-1 rounded-xl px-4 py-3.5 text-base"
+                      style={{
+                        borderWidth: 1,
+                        borderColor: "#e5e7eb",
+                        backgroundColor: "#ffffff",
+                        color: "#181114",
+                      }}
+                    />
+                  )}
                 />
               </View>
+              {errors.phone?.message && (
+                <Text className="text-xs" style={{ color: "#ef4444" }}>
+                  {errors.phone.message}
+                </Text>
+              )}
             </View>
 
             {/* Password */}
@@ -180,20 +198,26 @@ export default function VendorContacts({onNext, onBack   }: {onNext: () => void,
                 Password
               </Text>
               <View className="relative">
-                <TextInput
-                  value={formData.password}
-                  onChangeText={handlePasswordChange}
-                  placeholder="Create a password"
-                  placeholderTextColor="#94a3b8"
-                  secureTextEntry={!showPassword}
-                  className="w-full rounded-xl px-4 py-3.5 text-base"
-                  style={{
-                    borderWidth: 1,
-                    borderColor: "#e5e7eb",
-                    backgroundColor: "#ffffff",
-                    color: "#181114",
-                    paddingRight: 48,
-                  }}
+                <Controller
+                  control={control}
+                  name="password"
+                  render={({ field: { value, onChange } }) => (
+                    <TextInput
+                      value={value}
+                      onChangeText={onChange}
+                      placeholder="Create a password"
+                      placeholderTextColor="#94a3b8"
+                      secureTextEntry={!showPassword}
+                      className="w-full rounded-xl px-4 py-3.5 text-base"
+                      style={{
+                        borderWidth: 1,
+                        borderColor: "#e5e7eb",
+                        backgroundColor: "#ffffff",
+                        color: "#181114",
+                        paddingRight: 48,
+                      }}
+                    />
+                  )}
                 />
                 <TouchableOpacity
                   className="absolute right-4 top-1/2"
@@ -207,9 +231,14 @@ export default function VendorContacts({onNext, onBack   }: {onNext: () => void,
                   />
                 </TouchableOpacity>
               </View>
+              {errors.password?.message && (
+                <Text className="text-xs" style={{ color: "#ef4444" }}>
+                  {errors.password.message}
+                </Text>
+              )}
 
               {/* Password Strength Meter */}
-              {formData.password.length > 0 && (
+              {passwordValue.length > 0 && (
                 <View className="mt-1">
                   <View className="flex-row w-full mb-1" style={{ gap: 6, height: 6 }}>
                     {[1, 2, 3, 4].map((bar) => (

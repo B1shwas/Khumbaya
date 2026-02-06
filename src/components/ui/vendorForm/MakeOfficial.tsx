@@ -1,6 +1,7 @@
 import { Text } from "@/src/components/ui/Text";
 import { MaterialIcons } from "@expo/vector-icons";
-import React, { useState } from "react";
+import React from "react";
+import { useFormContext, useWatch } from "react-hook-form";
 import {
   Alert,
   ScrollView,
@@ -13,14 +14,23 @@ type DocumentType = "government" | "business";
 type MakeOfficialProps = {
   onBack: () => void;
   onNext: () => void;
+  onSubmit: () => void | Promise<void>;
 };
 
-export default function MakeOfficial({ onBack, onNext }: MakeOfficialProps) {
-  const [docType, setDocType] = useState<DocumentType>("government");
-  const [uploadedFile, setUploadedFile] = useState<{
-    name: string;
-    size: number;
-  } | null>(null);
+type UploadedFile = {
+  name: string;
+  size: number;
+};
+
+type MakeOfficialFormValues = {
+  docType: DocumentType;
+  uploadedFile: UploadedFile | null;
+};
+
+export default function MakeOfficial({ onBack, onNext, onSubmit }: MakeOfficialProps) {
+  const { setValue, control } = useFormContext<MakeOfficialFormValues>();
+  const docType = useWatch({ control, name: "docType" }) ?? "government";
+  const uploadedFile = useWatch({ control, name: "uploadedFile" }) ?? null;
 
   const handleFilePick = () => {
     // TODO: Implement with expo-image-picker or expo-document-picker once installed
@@ -32,10 +42,10 @@ export default function MakeOfficial({ onBack, onNext }: MakeOfficialProps) {
         {
           text: "Add Mock File",
           onPress: () => {
-            setUploadedFile({
+            setValue("uploadedFile", {
               name: `${docType === "government" ? "government_id" : "business_license"}.pdf`,
               size: 2.5,
-            });
+            }, { shouldDirty: true });
           },
         },
         { text: "Cancel" },
@@ -48,7 +58,7 @@ export default function MakeOfficial({ onBack, onNext }: MakeOfficialProps) {
       Alert.alert("Missing Document", "Please upload a document first");
       return;
     }
-    onNext();
+    onSubmit();
   };
 
   return (
@@ -81,7 +91,7 @@ export default function MakeOfficial({ onBack, onNext }: MakeOfficialProps) {
               {/* Government ID */}
               <TouchableOpacity
                 className="flex-1"
-                onPress={() => setDocType("government")}
+                onPress={() => setValue("docType", "government", { shouldDirty: true })}
               >
                 <View
                   className={`flex items-center justify-center py-2.5 px-3 rounded-lg ${
@@ -105,7 +115,7 @@ export default function MakeOfficial({ onBack, onNext }: MakeOfficialProps) {
               {/* Business License */}
               <TouchableOpacity
                 className="flex-1"
-                onPress={() => setDocType("business")}
+                onPress={() => setValue("docType", "business", { shouldDirty: true })}
               >
                 <View
                   className={`flex items-center justify-center py-2.5 px-3 rounded-lg ${
@@ -172,7 +182,7 @@ export default function MakeOfficial({ onBack, onNext }: MakeOfficialProps) {
                     </Text>
                   </View>
                 </View>
-                <TouchableOpacity onPress={() => setUploadedFile(null)}>
+                <TouchableOpacity onPress={() => setValue("uploadedFile", null, { shouldDirty: true })}>
                   <MaterialIcons
                     name="delete"
                     size={20}
