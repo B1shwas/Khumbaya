@@ -192,14 +192,14 @@ export default function MakeOfficial({ onBack, onNext }: MakeOfficialProps) {
           </View>
         </ScrollView>
 
-        {/* Fixed Footer Action */}
-        <View className="absolute bottom-0 left-0 right-0  px-6">
+        <View className="px-6">
           <TouchableOpacity
             onPress={handleSubmit}
-            className="flex-row items-center justify-center gap-2 bg-primary rounded-xl py-4 px-6"
+            className="w-full rounded-full bg-primary py-4 px-6 flex-row items-center justify-center gap-2"
+            activeOpacity={0.9}
           >
-            <Text className="text-white font-bold">Submit for Review</Text>
-            <MaterialIcons name="check-circle" size={20} color="white" />
+            <Text className="text-white text-base font-bold leading-tight">Submit for Review</Text>
+            <MaterialIcons name="arrow-forward" size={18} color="#ffffff" />
           </TouchableOpacity>
         </View>
     
