@@ -1,3 +1,6 @@
-import VendorHomeScreen from "@/src/screen/vendor/VendorHome";
+// TODO: Vendor home - coming soon
+// import VendorHomeScreen from "@/src/screen/vendor/VendorHome";
 
-export default VendorHomeScreen;
+export default function VendorHome() {
+  return null; // Placeholder - vendor tabs disabled for now
+}
