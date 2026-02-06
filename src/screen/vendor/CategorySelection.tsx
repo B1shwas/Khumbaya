@@ -55,21 +55,7 @@ export default function VendorLoginFlowScreen() {
         </View>
 
         {/* Progress Bar */}
-        <View className="flex-col gap-2 px-6 pb-4">
-          <View className="flex-row gap-6 justify-between items-center">
-            {/* text-light = #181114 */}
-            <Text className="text-sm font-semibold" style={{ color: "#181114" }}>
-              Step 2 of 5
-            </Text>
-            {/* primary = #ee2b8c */}
-            <Text className="text-xs font-bold text-primary">{PROGRESS}%</Text>
-          </View>
-          {/* Track background light = #e6dbe0 (not in config) */}
-          <View className="h-2 w-full rounded-full overflow-hidden" style={{ backgroundColor: "#e6dbe0" }}>
-            {/* Fill primary = #ee2b8c */}
-            <View className="h-full rounded-full bg-primary" style={{ width: `${PROGRESS}%` }} />
-          </View>
-        </View>
+    
 
         {/* Scrollable Content */}
         <ScrollView className="flex-1 px-6 pb-32" showsVerticalScrollIndicator={false}>

@@ -46,53 +46,19 @@ export default function CategorySelection({ selectedCategories, onChange, onBack
   };
   return (
     <View className="flex-1 bg-background-light dark:bg-background-dark">
-
-        {/* Top App Bar */}
-        <View className="flex-row items-center px-4 pt-6 pb-2 justify-between">
-          <TouchableOpacity
-            className="items-center justify-center rounded-full"
-            accessibilityRole="button"
-            onPress={onBack}
-          >
-            {/* text-light = #181114 (commented for reference); dark text is white */}
-            {/* TODO: Add text-light to tailwind config as #181114 */}
-            <MaterialIcons name="arrow-back-ios-new" size={24} color="#181114" />
-          </TouchableOpacity>
-          <Text className="text-lg font-bold leading-tight tracking-tight flex-1 text-center pr-10 text-white dark:text-white" style={{ color: "#181114" }}>
-            Vendor Onboarding
-          </Text>
-        </View>
-
-        {/* Progress Bar */}
-        <View className="flex-col gap-2 px-6 pb-4">
-          <View className="flex-row gap-6 justify-between items-center">
-            {/* text-light = #181114 */}
-            <Text className="text-sm font-semibold" style={{ color: "#181114" }}>
-              Step 2 of 5
-            </Text>
-            {/* primary = #ee2b8c */}
-            <Text className="text-xs font-bold text-primary">{PROGRESS}%</Text>
-          </View>
-          {/* Track background light = #e6dbe0 (not in config) */}
-          <View className="h-2 w-full rounded-full overflow-hidden" style={{ backgroundColor: "#e6dbe0" }}>
-            {/* Fill primary = #ee2b8c */}
-            <View className="h-full rounded-full bg-primary" style={{ width: `${PROGRESS}%` }} />
-          </View>
-        </View>
-        <View className=" relative  p-6 ">
-                  <Text className="text-[28px] font-bold leading-tight pt-2 pb-3 text-white" style={{ color: "#181114" }}>
-            What services do you offer?
-          </Text>
-          {/* Body Text */}
-          {/* gray-600 = #4B5563; dark: gray-400 = #9CA3AF */}
-          <Text className="text-base font-normal leading-relaxed" style={{ color: "#4B5563" }}>
-            Choose one or more categories that best describe your business. This helps couples find you easily.
-          </Text>
-
-
-        </View>
         {/* Scrollable Content */}
-        <ScrollView className="flex-1 px-6" showsVerticalScrollIndicator={false}>
+        <ScrollView className="flex-1 px-6 pb-6 pt-2" showsVerticalScrollIndicator={false}>
+          {/* Headline */}
+          <View className="mb-8">
+            {/* text-light = #181114 */}
+            <Text className="text-3xl font-bold leading-tight mb-3" style={{ color: "#181114" }}>
+              What services do you offer?
+            </Text>
+            {/* slate-600 = #475569 */}
+            <Text className="text-base font-normal leading-relaxed" style={{ color: "#475569" }}>
+              Choose one or more categories that best describe your business. This helps couples find you easily.
+            </Text>
+          </View>
           {/* Headline */}
   
           {/* Categories Grid */}

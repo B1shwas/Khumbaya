@@ -2,10 +2,10 @@ import { Text } from "@/src/components/ui/Text";
 import { MaterialIcons } from "@expo/vector-icons";
 import React, { useState } from "react";
 import {
-    Alert,
-    ScrollView,
-    TouchableOpacity,
-    View,
+  Alert,
+  ScrollView,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 type DocumentType = "government" | "business";
@@ -53,22 +53,19 @@ export default function MakeOfficial({ onBack, onNext }: MakeOfficialProps) {
 
   return (
     <View className="flex-1">
-      
-        {/* Content Scroll Area */}
+        {/* Scrollable Content */}
         <ScrollView
-          className="flex-1 p-6 "
+          className="flex-1 px-6 pb-6 pt-2"
           showsVerticalScrollIndicator={false}
         >
           {/* Headline */}
-          <View className="pt-4 pb-2">
-            <Text className="text-[28px] font-bold leading-tight text-text-light dark:text-white">
+          <View className="mb-8">
+            {/* text-light = #181114 */}
+            <Text className="text-3xl font-bold leading-tight mb-3" style={{ color: "#181114" }}>
               Let's make it official
             </Text>
-          </View>
-
-          {/* Body Text */}
-          <View className="pb-6">
-            <Text className="text-base font-normal leading-relaxed text-muted-light dark:text-muted-dark">
+            {/* slate-600 = #475569 */}
+            <Text className="text-base font-normal leading-relaxed" style={{ color: "#475569" }}>
               To ensure the safety of our couples, we require proof of identity
               or business registration. Verified vendors get{" "}
               <Text className="font-bold text-primary">
