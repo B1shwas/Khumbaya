@@ -1,9 +1,5 @@
-import { Text, View } from "react-native";
+import { EventDetail } from "@/src/screen/user/View/index";
 
 export default function EventDetailScreen() {
-  return (
-    <View>
-      <Text>Event Detail Screen - Coming soon...</Text>
-    </View>
-  );
+  return <EventDetail />;
 }
