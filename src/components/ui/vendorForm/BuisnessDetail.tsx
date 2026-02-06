@@ -235,38 +235,15 @@ export default function BusinessDetail({ data, onChange, onBack, onNext }: Busin
           <View style={{ height: 32 }} />
         </ScrollView>
 
-        {/* Fixed Bottom Navigation */}
-        <View
-          className="absolute bottom-0 left-0 right-0 border-t p-4 pb-6"
-          style={{
-            backgroundColor: "rgba(255, 255, 255, 0.8)",
-            borderColor: "#e5e7eb", // gray-200
-          }}
-        >
-          <View className="flex-row" style={{ gap: 16 }}>
-            <TouchableOpacity
-              className="flex-1 h-12 rounded-full items-center justify-center border"
-              style={{
-                borderColor: "#e5e7eb",
-                backgroundColor: "transparent",
-              }}
-              onPress={onBack}
-            >
-              {/* slate-900 = #0f172a */}
-              <Text className="font-semibold text-base" style={{ color: "#0f172a" }}>
-                Back
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              className="flex-1 h-12 rounded-full items-center justify-center flex-row gap-2 bg-primary"
-              onPress={onNext}
-              activeOpacity={0.9}
-            >
-              <Text className="text-white font-semibold text-base">Next</Text>
-              <MaterialIcons name="arrow-forward" size={20} color="#ffffff" />
-            </TouchableOpacity>
-          </View>
+        <View className="px-6">
+          <TouchableOpacity
+            className="w-full rounded-full bg-primary py-4 px-6 flex-row items-center justify-center gap-2"
+            activeOpacity={0.9}
+            onPress={onNext}
+          >
+            <Text className="text-white text-base font-bold leading-tight">Continue</Text>
+            <MaterialIcons name="arrow-forward" size={18} color="#ffffff" />
+          </TouchableOpacity>
         </View>
     
     </View>

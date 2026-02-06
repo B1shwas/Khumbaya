@@ -59,8 +59,7 @@ export default function CategorySelection({ selectedCategories, onChange, onBack
               Choose one or more categories that best describe your business. This helps couples find you easily.
             </Text>
           </View>
-          {/* Headline */}
-  
+
           {/* Categories Grid */}
           <View className="mt-6 flex-row flex-wrap justify-between pb-8" style={{ gap: 16 }}>
             {CATEGORIES.map((item) => (

@@ -95,7 +95,7 @@ export default function VendorFormFlow() {
   // Map of step IDs to components
   const steps: Record<number, React.ReactNode> = {
     1: (<>
-    <Header handleBack={handleBack} progress={progress} />
+    <Header handleBack={handleBack} progress={progress} currentStep={1} />
       <VendorContacts
         onBack={handleBack}
         onNext={handleNext} 
@@ -105,7 +105,7 @@ export default function VendorFormFlow() {
     ),
     2: (
       <>
-      <Header handleBack={handleBack} progress={progress} />
+      <Header handleBack={handleBack} progress={progress} currentStep={2} />
       <TellUs
         selectedType={formData.businessType}
         onChange={(type) => updateFormData({ businessType: type })}
@@ -116,7 +116,7 @@ export default function VendorFormFlow() {
   
     ),
     3: (<>
-    <Header handleBack={handleBack} progress={progress} />
+    <Header handleBack={handleBack} progress={progress} currentStep={3} />
     <CategorySelection
         selectedCategories={formData.selectedCategories}
         onChange={(categories) => updateFormData({ selectedCategories: categories })}
@@ -128,7 +128,7 @@ export default function VendorFormFlow() {
     ),
     4: (
       <>
-      <Header handleBack={handleBack} progress={progress} />
+      <Header handleBack={handleBack} progress={progress} currentStep={4} />
         <BusinessDetail
         data={{
           businessName: formData.businessName,
@@ -146,7 +146,7 @@ export default function VendorFormFlow() {
     5: (
       <>
          {/* Top App Bar */}
-               <Header handleBack={handleBack} progress={progress} />
+               <Header handleBack={handleBack} progress={progress} currentStep={5} />
                 <MakeOfficial  
         onBack={handleBack}
         onNext={handleNext}
@@ -167,7 +167,7 @@ export default function VendorFormFlow() {
   );
 }
 
-function Header({handleBack, progress}: {handleBack: () => void, progress: number}) {
+function Header({handleBack, progress, currentStep}: {handleBack: () => void, progress: number, currentStep: number}) {
     return(
       <>
        <View className="flex-row items-center px-4 pt-6 pb-2 justify-between">
@@ -189,7 +189,7 @@ function Header({handleBack, progress}: {handleBack: () => void, progress: numbe
                 <View className="flex-row gap-6 justify-between items-center">
                   {/* text-light = #181114 */}
                   <Text className="text-sm font-semibold" style={{ color: "#181114" }}>
-                    Step 5 of 5
+                    Step {currentStep} of 5
                   </Text>
                   {/* primary = #ee2b8c */}
                   <Text className="text-xs font-bold text-primary">{progress}%</Text>

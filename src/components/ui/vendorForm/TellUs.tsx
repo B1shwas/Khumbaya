@@ -123,22 +123,15 @@ export default function TellUs({ selectedType, onChange, onBack, onNext }: TellU
           </View>
         </ScrollView>
 
-        {/* Bottom Action Bar */}
-        <View
-          className="absolute bottom-0 left-0 right-0 p-6  z-20 h-24"
-         
-        >
-          <View className="flex-row items-center max-w-md mx-auto w-full" style={{ gap: 16 }}>
-        
-
-            <TouchableOpacity
-              className="flex-1 px-6 py-3.5 bg-primary rounded-xl items-center justify-center shadow-lg"
-              onPress={onNext}
-              activeOpacity={0.9}
-            >
-              <Text className="text-white text-sm font-bold">Continue</Text>
-            </TouchableOpacity>
-          </View>
+        <View className="px-6">
+          <TouchableOpacity
+            className="w-full rounded-full bg-primary py-4 px-6 flex-row items-center justify-center gap-2"
+            activeOpacity={0.9}
+            onPress={onNext}
+          >
+            <Text className="text-white text-base font-bold leading-tight">Continue</Text>
+            <MaterialIcons name="arrow-forward" size={18} color="#ffffff" />
+          </TouchableOpacity>
         </View>
     
     </View>
