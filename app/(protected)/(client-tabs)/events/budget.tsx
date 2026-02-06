@@ -1,4 +1,4 @@
-import { BudgetPage } from "@/src/screen/user/View";
+import { BudgetPage } from "@/src/screen/user/View/index";
 
 export default function BudgetScreen() {
   return <BudgetPage />;
