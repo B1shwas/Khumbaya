@@ -53,45 +53,16 @@ export default function BusinessDetail({ data, onChange, onBack, onNext }: Busin
 
   return (
     <View className="flex-1 bg-background-light "> 
-        {/* Top App Bar */}
-        
-        <View className="sticky top-0 z-10 flex-row items-center bg-background-light/90 p-4 justify-between "
-          style={{ borderColor: "#e5e7eb" }} // gray-200
-        >
-          <TouchableOpacity
-            className="flex size-10 shrink-0 items-center justify-center rounded-full"
-            style={{ 
-              backgroundColor: "#f3f4f6", // gray-100 equiv
-              borderWidth: 1,
-              borderColor: "#e5e7eb"
-            }}
-          >
-            {/* slate-800 = #1e293b */}
-            <MaterialIcons name="arrow-back-ios-new" size={24} color="#1e293b" />
-          </TouchableOpacity>
-          {/* slate-900 = #0f172a */}
-          <Text className="text-lg font-bold flex-1 text-center " style={{ color: "#0f172a" }}>
-            Vendor onboarding
-          </Text>
-        </View>
-
-        {/* Progress Indicators */}
-     
-
-        {/* Content Scroll Area */}
-        <ScrollView className="flex-1 px-4 pb-32" showsVerticalScrollIndicator={false}>
+        {/* Scrollable Content */}
+        <ScrollView className="flex-1 px-6 pb-6 pt-2" showsVerticalScrollIndicator={false}>
           {/* Headline */}
-          <View className="pt-4 pb-2">
-            {/* slate-900 = #0f172a */}
-            <Text className="text-[28px] font-bold leading-tight text-left" style={{ color: "#0f172a" }}>
-              Business Details
+          <View className="mb-8">
+            {/* text-light = #181114 */}
+            <Text className="text-3xl font-bold leading-tight mb-3" style={{ color: "#181114" }}>
+              Your Business Details
             </Text>
-          </View>
-
-          {/* Subtitle */}
-          <View className="pb-6">
-            {/* gray-600 = #4b5563 */}
-            <Text className="text-base font-normal leading-normal " style={{ color: "#4b5563" }}>
+            {/* slate-600 = #475569 */}
+            <Text className="text-base font-normal leading-relaxed" style={{ color: "#475569" }}>
               Help couples find you by sharing the basics about your services.
             </Text>
           </View>

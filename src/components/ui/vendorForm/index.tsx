@@ -1,5 +1,7 @@
+import { Text } from "@/src/components/ui/Text";
+import { MaterialIcons } from "@expo/vector-icons";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Animated, View } from "react-native";
+import { Animated, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import BusinessDetail from "./BuisnessDetail";
 import CategorySelection from "./CategorySelection";
@@ -92,30 +94,42 @@ export default function VendorFormFlow() {
 
   // Map of step IDs to components
   const steps: Record<number, React.ReactNode> = {
-    1: (
+    1: (<>
+    <Header handleBack={handleBack} progress={progress} />
       <VendorContacts
         onBack={handleBack}
         onNext={handleNext} 
       />
+    </>
+    
     ),
     2: (
+      <>
+      <Header handleBack={handleBack} progress={progress} />
       <TellUs
         selectedType={formData.businessType}
         onChange={(type) => updateFormData({ businessType: type })}
         onBack={handleBack}
         onNext={handleNext}
       />
+      </>
+  
     ),
-    3: (
-      <CategorySelection
+    3: (<>
+    <Header handleBack={handleBack} progress={progress} />
+    <CategorySelection
         selectedCategories={formData.selectedCategories}
         onChange={(categories) => updateFormData({ selectedCategories: categories })}
         onBack={handleBack}
         onNext={handleNext}
       />
+    </>
+  
     ),
     4: (
-      <BusinessDetail
+      <>
+      <Header handleBack={handleBack} progress={progress} />
+        <BusinessDetail
         data={{
           businessName: formData.businessName,
           websiteOrLink: formData.websiteOrLink,
@@ -126,20 +140,66 @@ export default function VendorFormFlow() {
         onBack={handleBack}
         onNext={handleNext}
       />
+      </>
+    
     ),
     5: (
-      <MakeOfficial  
+      <>
+         {/* Top App Bar */}
+               <Header handleBack={handleBack} progress={progress} />
+                <MakeOfficial  
         onBack={handleBack}
         onNext={handleNext}
       />
+      </>
+    
     ),
   };
 
   return (  
      <View className="flex-1 bg-background-light dark:bg-background-dark">
       <SafeAreaView className="flex-1">
+        {/* Progress bar  */}
         {steps[currentStep]}
       </SafeAreaView>
+      {/* Button to update the current or the submit based on the number of the steps */}
     </View>
   );
+}
+
+function Header({handleBack, progress}: {handleBack: () => void, progress: number}) {
+    return(
+      <>
+       <View className="flex-row items-center px-4 pt-6 pb-2 justify-between">
+                <TouchableOpacity
+                  className="items-center justify-center rounded-full"
+                  accessibilityRole="button"
+                  onPress={handleBack}
+                >
+                  {/* text-light = #181114 (commented for reference); dark text is white */}
+                  {/* TODO: Add text-light to tailwind config as #181114 */}
+                  <MaterialIcons name="arrow-back-ios-new" size={24} color="#181114" />
+                </TouchableOpacity>
+                <Text className="text-lg font-bold leading-tight tracking-tight flex-1 text-center pr-10 text-white dark:text-white" style={{ color: "#181114" }}>
+                  Vendor Onboarding
+                </Text>
+              </View>
+      
+              <View className="flex-col gap-2 px-6 pb-4">
+                <View className="flex-row gap-6 justify-between items-center">
+                  {/* text-light = #181114 */}
+                  <Text className="text-sm font-semibold" style={{ color: "#181114" }}>
+                    Step 5 of 5
+                  </Text>
+                  {/* primary = #ee2b8c */}
+                  <Text className="text-xs font-bold text-primary">{progress}%</Text>
+                </View>
+                {/* Track background light = #e6dbe0 (not in config) */}
+                <View className="h-2 w-full rounded-full overflow-hidden" style={{ backgroundColor: "#e6dbe0" }}>
+                  {/* Fill primary = #ee2b8c */}
+                  <View className="h-full rounded-full bg-primary" style={{ width: `${progress}%` }} />
+                </View>
+              </View>
+      </>
+   )
 }
