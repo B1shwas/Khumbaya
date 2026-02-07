@@ -111,7 +111,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Mock user for testing (set to null for production)
   const [user, setUser] = useState<User | null>({
     id: "1",
-    email: "user@example.com",
+    email: "client@example.com",
     name: "Priya",
     role: "client",
   });
