@@ -248,7 +248,7 @@ export default function ExploreVendors() {
           </View>
           {/* TODO: Change bg-secondary-500 to your primary/pink color */}
           <Pressable className="bg-primary py-2.5 px-6 rounded-md"
-            onPress={() => router.push("/login")}
+            onPress={() => router.push("/(onboarding)/login")}
 
           >
 
