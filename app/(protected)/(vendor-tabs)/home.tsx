@@ -1,5 +1,5 @@
-import VendorHomeScreen from "@/src/screen/vendor/VendorHome";
+import VendorHomeScreen from "@/src/screen/vendor/vendorHome";
 
 export default function VendorHome() {
-  return null; // Placeholder - vendor tabs disabled for now
+  return VendorHomeScreen; // Placeholder - vendor tabs disabled for now
 }
