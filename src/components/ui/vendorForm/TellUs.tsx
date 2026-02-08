@@ -2,9 +2,9 @@ import { Text } from "@/src/components/ui/Text";
 import { MaterialIcons } from "@expo/vector-icons";
 import React from "react";
 import {
-  ScrollView,
-  TouchableOpacity,
-  View,
+    ScrollView,
+    TouchableOpacity,
+    View,
 } from "react-native";
 
 // Color constants from tailwind config:
@@ -27,9 +27,10 @@ type TellUsProps = {
   onNext: () => void;
 };
 
+// dark: styles removed for nativewind consistency
 export default function TellUs({ selectedType, onChange, onBack, onNext }: TellUsProps) {
   return (
-    <View className="flex-1 bg-background-light dark:bg-background-dark">   
+    <View className="flex-1 bg-background-light">   
         {/* Scrollable Content */}
         <ScrollView className="flex-1 px-6 pb-6 pt-2" showsVerticalScrollIndicator={false}>
           {/* Headline */}

@@ -1,4 +1,5 @@
 import { Text } from "@/src/components/ui/Text";
+import { useAuth } from "@/src/store/AuthContext";
 import { MaterialIcons } from "@expo/vector-icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import React, { useCallback, useEffect, useRef, useState } from "react";
@@ -46,8 +47,10 @@ type BusinessType = VendorFormValues["businessType"];
 
 const TOTAL_STEPS = 5;
 
+// dark: styles removed for nativewind consistency
 export default function VendorFormFlow() {
   const [currentStep, setCurrentStep] = useState(1);
+  const { login } = useAuth();
   const formMethods = useForm<VendorFormValues>({
     resolver: zodResolver(vendorFormSchema),
     defaultValues: {
@@ -164,11 +167,14 @@ export default function VendorFormFlow() {
   const formValues = watch();
 
   const handleSubmitFinal = handleSubmit((finalData) => {
-
     console.log("Submitting data:", finalData);
-    //Validdatoin on the form 
-    //Submit the data in the api 
 
+    login({
+      id: `vendor-${Date.now()}`,
+      email: finalData.email,
+      name: finalData.fullName,
+      role: "vendor",
+    });
   });
 
 
@@ -239,7 +245,7 @@ export default function VendorFormFlow() {
 
   return (
     <FormProvider {...formMethods}>
-      <View className="flex-1 bg-background-light dark:bg-background-dark">
+      <View className="flex-1 bg-background-light">
         <SafeAreaView className="flex-1">
           {/* Progress bar  */}
           {steps[currentStep]}
@@ -250,6 +256,7 @@ export default function VendorFormFlow() {
   );
 }
 
+// dark: styles removed for nativewind consistency
 function Header({ handleBack, progress, currentStep }: { handleBack: () => void, progress: number, currentStep: number }) {
   return (
     <>
@@ -263,7 +270,7 @@ function Header({ handleBack, progress, currentStep }: { handleBack: () => void,
           {/* TODO: Add text-light to tailwind config as #181114 */}
           <MaterialIcons name="arrow-back-ios-new" size={24} color="#181114" />
         </TouchableOpacity>
-        <Text className="text-lg font-bold leading-tight tracking-tight flex-1 text-center pr-10 text-white dark:text-white" style={{ color: "#181114" }}>
+        <Text className="text-lg font-bold leading-tight tracking-tight flex-1 text-center pr-10 text-white" style={{ color: "#181114" }}>
           Vendor Onboarding
         </Text>
       </View>
