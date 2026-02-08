@@ -9,7 +9,12 @@ export default function EventLayout() {
       <Stack.Screen name="budget" />
       <Stack.Screen name="guests" />
       <Stack.Screen name="gallery" />
-      {/* CMS Routes are in (eventCms) route group */}
+      {/* CMS Routes */}
+      <Stack.Screen name="create" />
+      <Stack.Screen name="event-location" />
+      <Stack.Screen name="event-estimates" />
+      <Stack.Screen name="subevent-create" />
+      <Stack.Screen name="success" />
     </Stack>
   );
 }

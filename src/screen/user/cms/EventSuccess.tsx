@@ -77,7 +77,7 @@ export default function EventSuccess() {
   };
 
   const handleCreateSubEvent = () => {
-    router.push('/(protected)/(client-tabs)/events/(eventCms)/subevent-create' as any);
+    router.push('/(protected)/(client-tabs)/events/subevent-create' as any);
   };
 
   const handleViewMyEvents = () => {
