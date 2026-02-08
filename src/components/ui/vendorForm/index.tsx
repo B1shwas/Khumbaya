@@ -167,9 +167,15 @@ export default function VendorFormFlow() {
 
   const formValues = watch();
 
+<<<<<<< HEAD
   const handleSubmitFinal = handleSubmit(async (finalData) => {
     console.log("Submitting data:", finalData);
     await AsyncStorage.setItem("vendorData", JSON.stringify(finalData));
+=======
+  const handleSubmitFinal = handleSubmit((finalData) => {
+    console.log("Submitting data:", finalData);
+
+>>>>>>> d76a22b (update in teh user signup)
     login({
       id: `vendor-${Date.now()}`,
       email: finalData.email,
