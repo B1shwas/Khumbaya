@@ -1,4 +1,5 @@
 import { Text } from "@/src/components/ui/Text";
+import { useAuth } from "@/src/store/AuthContext";
 import { MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useState } from "react";
@@ -182,6 +183,7 @@ function VendorCard({ vendor }: { vendor: Vendor }) {
 export default function ExploreVendors() {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
+  const { user } =useAuth() ;
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
@@ -236,6 +238,7 @@ export default function ExploreVendors() {
       </ScrollView>
 
       {/* Floating Bottom Banner - TODO: Show only for unauthenticated users */}
+      {!user &&
       <View className="absolute bottom-6 left-4 right-4 p-2">
         <View className="bg-white rounded-xl p-4 flex-row items-center justify-between shadow-lg border border-gray-100">
           <View>
@@ -247,6 +250,7 @@ export default function ExploreVendors() {
             </Text>
           </View>
           {/* TODO: Change bg-secondary-500 to your primary/pink color */}
+            
           <Pressable className="bg-primary py-2.5 px-6 rounded-md"
             onPress={() => router.push("/login")}
 
@@ -254,8 +258,9 @@ export default function ExploreVendors() {
 
             <Text className="text-white text-sm font-semibold">Log In</Text>
           </Pressable>
+
         </View>
-      </View>
+      </View>}
     </SafeAreaView>
   );
 }
