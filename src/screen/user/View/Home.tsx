@@ -190,7 +190,7 @@ export default function HomePage() {
               </View>
               <TouchableOpacity
                 className="flex-row items-center justify-center gap-2 rounded-xl h-10 px-5 bg-primary active:opacity-90"
-                onPress={() => router.push("/(protected)/(client-tabs)/events/(eventCms)/create" as RelativePathString)}
+                onPress={() => router.push("/(protected)/(client-tabs)/events/create" as RelativePathString)}
               >
                 <Ionicons name="add-circle" size={20} color="white" />
                 <Text className="text-white text-sm font-semibold">Create New Event</Text>
@@ -244,7 +244,7 @@ export default function HomePage() {
       {/* Floating Action Button for Create Event */}
       <TouchableOpacity
         className="absolute bottom-24 right-6 w-14 h-14 items-center justify-center rounded-full bg-primary shadow-lg shadow-primary/30"
-        onPress={() => router.push("/(protected)/(client-tabs)/events/(eventCms)/create" as RelativePathString)}
+        onPress={() => router.push("/(protected)/(client-tabs)/events/create" as RelativePathString)}
         activeOpacity={0.8}
         style={{ shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 8 }}
       >

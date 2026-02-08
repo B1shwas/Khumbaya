@@ -76,7 +76,7 @@ export default function EventLocation() {
     // 3. Update event location: PUT /api/events/{id}/location
     // 4. Navigate to estimates step
     
-    router.push('/(protected)/(client-tabs)/events/(eventCms)/event-estimates' as any);
+    router.push('/(protected)/(client-tabs)/events/event-estimates' as any);
   };
 
   const handleBack = () => {
