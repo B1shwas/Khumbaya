@@ -44,7 +44,7 @@ export default function EventSuccess() {
 
   const handleStartTimeline = () => {
     // Navigate to sub-event creation with todo-like timeline
-    router.push('/(protected)/(client-tabs)/eventCms/subevent-create' as any);
+    router.push('/(protected)/(client-tabs)/events/(eventCms)/subevent-create' as any);
   };
 
   const handleInviteGuests = () => {
@@ -54,7 +54,7 @@ export default function EventSuccess() {
 
   const handleCreateSubEvent = () => {
     // Navigate to sub-event creation
-    router.push('/(protected)/(client-tabs)/eventCms/subevent-create' as any);
+    router.push('/(protected)/(client-tabs)/events/(eventCms)/subevent-create' as any);
   };
 
   const handleSelectVendors = () => {

@@ -92,7 +92,7 @@ export default function EventCreate() {
     console.log('Form data ready for API submission:', formData);
     
     // Navigate to location step
-    router.push('/(protected)/(client-tabs)/eventCms/event-location' as any);
+    router.push('/(protected)/(client-tabs)/events/(eventCms)/event-location' as any);
   };
 
   const handleBack = () => {
