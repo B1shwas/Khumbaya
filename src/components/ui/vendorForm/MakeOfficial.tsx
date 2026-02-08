@@ -3,10 +3,10 @@ import { MaterialIcons } from "@expo/vector-icons";
 import React from "react";
 import { useFormContext, useWatch } from "react-hook-form";
 import {
-  Alert,
-  ScrollView,
-  TouchableOpacity,
-  View,
+    Alert,
+    ScrollView,
+    TouchableOpacity,
+    View,
 } from "react-native";
 
 type DocumentType = "government" | "business";
@@ -27,6 +27,7 @@ type MakeOfficialFormValues = {
   uploadedFile: UploadedFile | null;
 };
 
+// dark: styles removed for nativewind consistency
 export default function MakeOfficial({ onBack, onNext, onSubmit }: MakeOfficialProps) {
   const { setValue, control } = useFormContext<MakeOfficialFormValues>();
   const docType = useWatch({ control, name: "docType" }) ?? "government";
@@ -87,7 +88,7 @@ export default function MakeOfficial({ onBack, onNext, onSubmit }: MakeOfficialP
 
           {/* Segmented Control */}
           <View className="pb-6">
-            <View className="flex-row rounded-xl p-1 bg-gray-200 dark:bg-white/5">
+            <View className="flex-row rounded-xl p-1 bg-gray-200">
               {/* Government ID */}
               <TouchableOpacity
                 className="flex-1"
@@ -96,7 +97,7 @@ export default function MakeOfficial({ onBack, onNext, onSubmit }: MakeOfficialP
                 <View
                   className={`flex items-center justify-center py-2.5 px-3 rounded-lg ${
                     docType === "government"
-                      ? "bg-white dark:bg-background-dark rounded-xl"
+                      ? "bg-white rounded-xl"
                       : ""
                   }`}
                 >
@@ -104,7 +105,7 @@ export default function MakeOfficial({ onBack, onNext, onSubmit }: MakeOfficialP
                     className={`text-sm font-semibold ${
                       docType === "government"
                         ? "text-primary"
-                        : "text-muted-light dark:text-muted-dark"
+                        : "text-muted-light"
                     }`}
                   >
                     Government ID
@@ -120,7 +121,7 @@ export default function MakeOfficial({ onBack, onNext, onSubmit }: MakeOfficialP
                 <View
                   className={`flex items-center justify-center py-2.5 px-3 rounded-lg ${
                     docType === "business"
-                      ? "bg-white dark:bg-background-dark rounded-xl"
+                      ? "bg-white rounded-xl"
                       : ""
                   }`}
                 >
@@ -128,7 +129,7 @@ export default function MakeOfficial({ onBack, onNext, onSubmit }: MakeOfficialP
                     className={`text-sm font-semibold ${
                       docType === "business"
                         ? "text-primary"
-                        : "text-muted-light dark:text-muted-dark"
+                        : "text-muted-light"
                     }`}
                   >
                     Business License
@@ -141,9 +142,9 @@ export default function MakeOfficial({ onBack, onNext, onSubmit }: MakeOfficialP
           {/* Upload Area */}
           <View className="pb-4">
             <TouchableOpacity onPress={handleFilePick}>
-              <View className="flex-col items-center justify-center rounded-2xl border-2 border-dashed border-gray-300 dark:border-gray-700 py-14 bg-gray-100 dark:bg-white/5">
+              <View className="flex-col items-center justify-center rounded-2xl border-2 border-dashed border-gray-300 py-14 bg-gray-100">
                 {/* Cloud Icon */}
-                <View className="h-14 w-14 mb-3 rounded-full flex items-center justify-center bg-pink-100 dark:bg-primary/20">
+                <View className="h-14 w-14 mb-3 rounded-full flex items-center justify-center bg-pink-100">
                   <MaterialIcons
                     name="cloud-upload"
                     size={28}
@@ -151,10 +152,10 @@ export default function MakeOfficial({ onBack, onNext, onSubmit }: MakeOfficialP
                   />
                 </View>
 
-                <Text className="mb-1 text-sm font-semibold text-center text-text-light dark:text-white">
+                <Text className="mb-1 text-sm font-semibold text-center text-text-light">
                   Tap to upload document
                 </Text>
-                <Text className="text-xs text-center px-6 text-muted-light dark:text-muted-dark">
+                <Text className="text-xs text-center px-6 text-muted-light">
                   SVG, PNG, JPG or PDF (max. 5MB)
                 </Text>
               </View>
@@ -164,9 +165,9 @@ export default function MakeOfficial({ onBack, onNext, onSubmit }: MakeOfficialP
           {/* Uploaded File Display */}
           {uploadedFile && (
             <View className="pb-4 px-2">
-              <View className="flex-row items-center justify-between p-3 rounded-xl bg-gray-100 dark:bg-white/5">
+              <View className="flex-row items-center justify-between p-3 rounded-xl bg-gray-100">
                 <View className="flex-row items-center flex-1 gap-3">
-                  <View className="h-10 w-10 rounded-lg flex items-center justify-center bg-green-100 dark:bg-green-900/30">
+                  <View className="h-10 w-10 rounded-lg flex items-center justify-center bg-green-100">
                     <MaterialIcons
                       name="description"
                       size={20}
@@ -174,10 +175,10 @@ export default function MakeOfficial({ onBack, onNext, onSubmit }: MakeOfficialP
                     />
                   </View>
                   <View className="flex-1">
-                    <Text className="text-sm font-semibold text-text-light dark:text-white">
+                    <Text className="text-sm font-semibold text-text-light">
                       {uploadedFile.name}
                     </Text>
-                    <Text className="text-xs text-muted-light dark:text-muted-dark">
+                    <Text className="text-xs text-muted-light">
                       {uploadedFile.size.toFixed(1)} MB • Ready
                     </Text>
                   </View>
@@ -196,7 +197,7 @@ export default function MakeOfficial({ onBack, onNext, onSubmit }: MakeOfficialP
           {/* Security Note */}
           <View className="px-2 py-2 flex-row items-center justify-center gap-2">
             <MaterialIcons name="lock" size={16} color="#896175" />
-            <Text className="text-xs font-medium text-muted-light dark:text-muted-dark">
+            <Text className="text-xs font-medium text-muted-light">
               Your data is encrypted and secure.
             </Text>
           </View>

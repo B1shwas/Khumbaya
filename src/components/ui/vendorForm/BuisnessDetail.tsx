@@ -2,10 +2,10 @@ import { Text } from "@/src/components/ui/Text";
 import { MaterialIcons } from "@expo/vector-icons";
 import React, { useState } from "react";
 import {
-  ScrollView,
-  TextInput,
-  TouchableOpacity,
-  View,
+    ScrollView,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 
 // Color constants from tailwind config:
@@ -31,6 +31,7 @@ type BusinessDetailProps = {
   onNext: () => void;
 };
 
+// dark: styles removed for nativewind consistency
 export default function BusinessDetail({ data, onChange, onBack, onNext }: BusinessDetailProps) {
   const [bioCharCount, setBioCharCount] = useState(data.bio.length);
   const [citiesOpen, setCitiesOpen] = useState(false);
