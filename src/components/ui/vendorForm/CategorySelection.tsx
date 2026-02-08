@@ -37,6 +37,7 @@ type CategorySelectionProps = {
   onNext: () => void;
 };
 
+// dark: styles removed for nativewind consistency
 export default function CategorySelection({ selectedCategories, onChange, onBack, onNext }: CategorySelectionProps) {
   const toggleCategory = (key: string) => {
     const updated = selectedCategories.includes(key)
@@ -45,7 +46,7 @@ export default function CategorySelection({ selectedCategories, onChange, onBack
     onChange(updated);
   };
   return (
-    <View className="flex-1 bg-background-light dark:bg-background-dark">
+    <View className="flex-1 bg-background-light">
         {/* Scrollable Content */}
         <ScrollView className="flex-1 px-6 pb-6 pt-2" showsVerticalScrollIndicator={false}>
           {/* Headline */}

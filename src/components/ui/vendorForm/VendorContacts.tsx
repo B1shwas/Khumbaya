@@ -20,6 +20,7 @@ type VendorContactsFormValues = {
   password: string;
 };
 
+// dark: styles removed for nativewind consistency
 export default function VendorContacts({onNext, onBack   }: {onNext: () => void, onBack: () => void}) {
   const { control, formState: { errors } } = useFormContext<VendorContactsFormValues>();
   const [showPassword, setShowPassword] = useState(false);
@@ -38,7 +39,7 @@ export default function VendorContacts({onNext, onBack   }: {onNext: () => void,
   const strength = strengthConfig[calculatePasswordStrength(passwordValue)];
 
   return (
-    <View className="flex-1 bg-background-light dark:bg-background-dark">
+    <View className="flex-1 bg-background-light">
      
         {/* Header */}
        
