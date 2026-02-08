@@ -1,3 +1,4 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRootNavigationState, useRouter, useSegments } from "expo-router";
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { ActivityIndicator, View } from "react-native";
@@ -20,6 +21,8 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
+
+const USER_STORAGE_KEY = "auth_user";
 
 export function useAuth() {
   const context = useContext(AuthContext);
@@ -120,7 +123,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // const data = await SecureStore.getItemAsync('user_data');
         // if (token && data) setUser(JSON.parse(data));
 
-        await new Promise((r) => setTimeout(r, 500)); // Simulate delay
+        const storedUser = await AsyncStorage.getItem(USER_STORAGE_KEY);
+        if (storedUser) {
+          try {
+            const parsedUser = JSON.parse(storedUser) as User;
+            setUser(parsedUser);
+          } catch (parseError) {
+            console.warn("Failed to parse stored user, clearing.", parseError);
+            await AsyncStorage.removeItem(USER_STORAGE_KEY);
+          }
+        }
       } catch (e) {
         console.error("Auth check failed:", e);
       } finally {
@@ -132,12 +144,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = (userData: User) => {
     setUser(userData);
-    // TODO: SecureStore.setItemAsync('user_data', JSON.stringify(userData));
+    void AsyncStorage.setItem(USER_STORAGE_KEY, JSON.stringify(userData));
   };
 
   const logout = () => {
     setUser(null);
-    // TODO: SecureStore.deleteItemAsync('user_data');
+    void AsyncStorage.removeItem(USER_STORAGE_KEY);
   };
 
   return (

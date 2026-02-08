@@ -1,3 +1,3 @@
-import VendorBuisnessInfoScreen from "@/src/screen/vendor/VendorBuisnessInfo";
+import Profile from "@/src/screen/vendor/Profile";
 
-export default VendorBuisnessInfoScreen;
+export default Profile;
