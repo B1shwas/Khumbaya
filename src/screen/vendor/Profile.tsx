@@ -1,7 +1,8 @@
 import { Text } from "@/src/components/ui/Text";
+import { useAuth } from "@/src/store/AuthContext";
 import { MaterialIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import React from "react";
+import React, { useState } from "react";
 import {
     Image,
     ImageBackground,
@@ -62,6 +63,15 @@ const REVIEWS = [
 ];
 
 export default function Profile() {
+    const {logout}   = useAuth();
+    const [logginOut, setLoggingOut] = useState(false);
+  if (logginOut) {
+    return (
+      <View className="flex-1 items-center justify-center bg-gray-50">
+        <Text className="text-lg text-gray-600">Logging out...</Text>
+      </View>
+    );
+  }
   return (
     <SafeAreaView className="flex-1 bg-[#fafafa]">
       <ScrollView
@@ -250,7 +260,8 @@ export default function Profile() {
                  <Pressable className="flex-1 h-12 items-center justify-center rounded-xl bg-primary "
               onPress={async()=>{
                 await AsyncStorage.removeItem("auth_user").then(() => {
-                  window.location.reload();
+                  setLoggingOut(true);
+                    logout();
                 });
 
               }}>
