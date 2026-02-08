@@ -23,9 +23,6 @@ const {logout}  = useAuth();
         AsyncStorage.removeItem(storageKey).then(() => {;
           setLoggingOut(true);
           logout();
-          
-       
-        
       });
       }}>
         <View>
