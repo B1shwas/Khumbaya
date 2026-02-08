@@ -1,16 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router, type RelativePathString } from "expo-router";
 import { useState } from "react";
-import {
-  Alert,
-  Image,
-  RefreshControl,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { RefreshControl, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 type EventStatus = "Planning" | "Confirmed" | "Completed";
@@ -359,8 +350,10 @@ export default function EventsPage() {
                 My Events
               </Text>
             </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.tab, activeTab === "invited" && styles.tabActive]}
+            <View
+             className={`flex-1 py-2 px-4 rounded-lg transition-all ${activeTab === "invited" ? "bg-white shadow-sm" : "bg-transparent"}`}
+            >
+                <TouchableOpacity
               onPress={() => setActiveTab("invited")}
             >
               <Text
@@ -372,6 +365,9 @@ export default function EventsPage() {
                 Invited
               </Text>
             </TouchableOpacity>
+
+            </View>
+          
           </View>
         </View>
       </View>
