@@ -264,24 +264,7 @@ const VendorCalendarScreen: React.FC = () => {
       </TouchableOpacity>
 
       {/* Bottom Tab Bar */}
-      <View className="fixed bottom-0 left-0 right-0 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border-t border-slate-200 dark:border-slate-800 px-6 py-3 flex-row justify-between items-center z-20">
-        <TouchableOpacity className="flex-col items-center gap-1">
-          <Text className="text-primary text-2xl">📅</Text>
-          <Text className="text-[10px] font-medium text-primary">Calendar</Text>
-        </TouchableOpacity>
-        <TouchableOpacity className="flex-col items-center gap-1">
-          <Text className="text-2xl">📋</Text>
-          <Text className="text-[10px] font-medium text-slate-400">Agenda</Text>
-        </TouchableOpacity>
-        <TouchableOpacity className="flex-col items-center gap-1">
-          <Text className="text-2xl">🔔</Text>
-          <Text className="text-[10px] font-medium text-slate-400">Alerts</Text>
-        </TouchableOpacity>
-        <TouchableOpacity className="flex-col items-center gap-1">
-          <Text className="text-2xl">⚙️</Text>
-          <Text className="text-[10px] font-medium text-slate-400">Settings</Text>
-        </TouchableOpacity>
-      </View>
+  
     </SafeAreaView>
   );
 };

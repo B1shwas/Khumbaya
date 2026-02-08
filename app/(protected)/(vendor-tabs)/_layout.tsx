@@ -59,15 +59,7 @@ export default function VendorTabsLayout() {
           ),
         }}
       />
-      <Tabs.Screen
-        name="(form)/vendorform"
-        options={{
-          title: "Vendor Form",
-          tabBarIcon: ({ color }) => (
-            <MaterialIcons name="person" size={24} color={color} />
-          ),
-        }}
-      />
+    
     </Tabs>
   );
 }

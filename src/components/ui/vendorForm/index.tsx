@@ -2,6 +2,7 @@ import { Text } from "@/src/components/ui/Text";
 import { useAuth } from "@/src/store/AuthContext";
 import { MaterialIcons } from "@expo/vector-icons";
 import { zodResolver } from "@hookform/resolvers/zod";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { Animated, TouchableOpacity, View } from "react-native";
@@ -166,9 +167,9 @@ export default function VendorFormFlow() {
 
   const formValues = watch();
 
-  const handleSubmitFinal = handleSubmit((finalData) => {
+  const handleSubmitFinal = handleSubmit(async (finalData) => {
     console.log("Submitting data:", finalData);
-
+    await AsyncStorage.setItem("vendorData", JSON.stringify(finalData));
     login({
       id: `vendor-${Date.now()}`,
       email: finalData.email,
