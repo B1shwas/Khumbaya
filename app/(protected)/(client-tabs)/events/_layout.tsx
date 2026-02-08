@@ -9,6 +9,7 @@ export default function EventLayout() {
       <Stack.Screen name="budget" />
       <Stack.Screen name="guests" />
       <Stack.Screen name="gallery" />
+      {/* CMS Routes are in (eventCms) route group */}
     </Stack>
   );
 }

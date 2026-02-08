@@ -10,16 +10,20 @@ export default function ClientTabsLayout() {
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: "#ee2b8c",
+        tabBarInactiveTintColor: "#9ca3af",
+        tabBarShowLabel: true,
         tabBarStyle: {
           borderTopWidth: 1,
+          borderTopColor: "#e5e7eb",
           height: 60 + insets.bottom,
           paddingBottom: insets.bottom,
           paddingTop: 8,
+          backgroundColor: "#ffffff",
         },
         tabBarLabelStyle: {
-          fontSize: 10,
-          fontWeight: "700",
-          marginTop: 4,
+          fontSize: 11,
+          fontWeight: "600",
+          marginTop: 2,
         },
       }}
     >
@@ -62,3 +66,4 @@ export default function ClientTabsLayout() {
     </Tabs>
   );
 }
+
