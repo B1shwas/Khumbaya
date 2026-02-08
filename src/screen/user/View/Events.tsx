@@ -1,9 +1,8 @@
-import { useState } from "react";
-import { View, Text, ScrollView, Image, TouchableOpacity, RefreshControl } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
-import { type RelativePathString } from "expo-router";
+import { router, type RelativePathString } from "expo-router";
+import { useState } from "react";
+import { RefreshControl, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 type EventStatus = "Planning" | "Confirmed" | "Completed";
 type EventTab = "myEvents" | "invited";
@@ -179,14 +178,19 @@ export default function EventsPage() {
                 My Events
               </Text>
             </TouchableOpacity>
-            <TouchableOpacity
-              className={`flex-1 py-2 px-4 rounded-lg transition-all ${activeTab === "invited" ? "bg-white shadow-sm" : "bg-transparent"}`}
+            <View
+             className={`flex-1 py-2 px-4 rounded-lg transition-all ${activeTab === "invited" ? "bg-white shadow-sm" : "bg-transparent"}`}
+            >
+                <TouchableOpacity
               onPress={() => setActiveTab("invited")}
             >
               <Text className={`text-sm font-bold text-center ${activeTab === "invited" ? "text-primary" : "text-gray-500"}`}>
                 Invited
               </Text>
             </TouchableOpacity>
+
+            </View>
+          
           </View>
         </View>
       </View>
