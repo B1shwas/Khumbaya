@@ -16,6 +16,8 @@ export default function EventLayout() {
       <Stack.Screen name="subevent-create" />
       <Stack.Screen name="subevent-detail" />
       <Stack.Screen name="table-management" />
+      <Stack.Screen name="seat-planning" />
+      <Stack.Screen name="rsvp" />
       <Stack.Screen name="card-making" />
       <Stack.Screen name="success" />
     </Stack>

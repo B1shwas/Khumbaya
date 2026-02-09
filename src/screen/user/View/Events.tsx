@@ -1,7 +1,15 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router, type RelativePathString } from "expo-router";
 import { useState } from "react";
-import { Alert, Image, RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  Image,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 type EventStatus = "Planning" | "Confirmed" | "Completed";
@@ -266,12 +274,12 @@ const EventCard = ({ event }: { event: Event }) => (
             style={styles.actionButton}
             onPress={() =>
               router.push(
-                `/events/table-management?eventId=${event.id}` as RelativePathString,
+                `/events/seat-planning?eventId=${event.id}` as RelativePathString,
               )
             }
           >
             <Ionicons name="grid-outline" size={18} color="#3B82F6" />
-            <Text style={styles.actionButtonText}>Manage Tables</Text>
+            <Text style={styles.actionButtonText}>Seat Planning</Text>
           </TouchableOpacity>
         </>
       ) : (
@@ -279,15 +287,10 @@ const EventCard = ({ event }: { event: Event }) => (
           <TouchableOpacity
             style={[styles.actionButton, styles.rsvpButton]}
             onPress={() => {
-              Alert.alert("RSVP", `Would you like to RSVP to ${event.title}?`, [
-                { text: "Cancel", style: "cancel" },
-                {
-                  text: "Confirm RSVP",
-                  onPress: () => {
-                    Alert.alert("Success", "Your RSVP has been submitted!");
-                  },
-                },
-              ]);
+              router.push({
+                pathname: "/events/rsvp",
+                params: { eventId: event.id, eventTitle: event.title },
+              } as unknown as RelativePathString);
             }}
           >
             <Ionicons
@@ -363,7 +366,6 @@ export default function EventsPage() {
                 Invited
               </Text>
             </TouchableOpacity>
-          
           </View>
         </View>
       </View>

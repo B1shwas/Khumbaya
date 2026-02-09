@@ -276,7 +276,7 @@ const VendorCard = ({
   imageUrl,
 }: VendorCardProps) => (
   <TouchableOpacity
-    className="w-48 bg-white dark:bg-surface-dark rounded-xl overflow-hidden shadow-sm border border-gray-100 mr-4"
+    className="w-64 bg-white dark:bg-surface-dark rounded-xl overflow-hidden shadow-sm border border-gray-100 mr-4"
     onPress={() =>
       router.push({
         pathname: "/vendor-detail",
@@ -732,9 +732,9 @@ const {user }= useAuth()
               Events You're Attending
             </Text>
             <TouchableOpacity onPress={() => router.push("/events")}>
-              <Text className="text-primary text-sm font-semibold">
+              {/* <Text className="text-primary text-sm font-semibold">
                 See All
-              </Text>
+              </Text> */}
             </TouchableOpacity>
           </View>
           <ScrollView
@@ -764,9 +764,9 @@ const {user }= useAuth()
             <TouchableOpacity
               onPress={() => router.push("/venues" as RelativePathString)}
             >
-              <Text className="text-primary text-sm font-semibold">
+              {/* <Text className="text-primary text-sm font-semibold">
                 See All
-              </Text>
+              </Text> */}
             </TouchableOpacity>
           </View>
           <ScrollView
@@ -817,9 +817,9 @@ const {user }= useAuth()
             <TouchableOpacity
               onPress={() => router.push("/explore" as RelativePathString)}
             >
-              <Text className="text-primary text-sm font-semibold">
+              {/* <Text className="text-primary text-sm font-semibold">
                 Explore All
-              </Text>
+              </Text> */}
             </TouchableOpacity>
           </View>
           <ScrollView
@@ -843,9 +843,9 @@ const {user }= useAuth()
             <TouchableOpacity
               onPress={() => router.push("/couples" as RelativePathString)}
             >
-              <Text className="text-primary text-sm font-semibold">
+              {/* <Text className="text-primary text-sm font-semibold">
                 View All
-              </Text>
+              </Text> */}
             </TouchableOpacity>
           </View>
           <View className="px-4">
@@ -867,9 +867,9 @@ const {user }= useAuth()
             <TouchableOpacity
               onPress={() => router.push("/blog" as RelativePathString)}
             >
-              <Text className="text-primary text-sm font-semibold">
+              {/* <Text className="text-primary text-sm font-semibold">
                 View Blog
-              </Text>
+              </Text> */}
             </TouchableOpacity>
           </View>
           <View className="px-4">
@@ -906,3 +906,4 @@ const {user }= useAuth()
     </SafeAreaView>
   );
 }
+
