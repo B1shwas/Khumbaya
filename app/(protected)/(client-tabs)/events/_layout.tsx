@@ -14,6 +14,7 @@ export default function EventLayout() {
       <Stack.Screen name="event-location" />
       <Stack.Screen name="event-estimates" />
       <Stack.Screen name="subevent-create" />
+      <Stack.Screen name="card-making" />
       <Stack.Screen name="success" />
     </Stack>
   );
