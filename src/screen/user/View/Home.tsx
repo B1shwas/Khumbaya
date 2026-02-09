@@ -407,7 +407,7 @@ export default function HomePage() {
       time: "7:00 PM",
       location: "Mumbai",
       imageUrl:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuAlIo5Riz1lkFJ_RuteTIAm2y3rd8oBoiVd--YgiDKI9SWNtoi02gv4vVl6fF4ejDrBnqe5q72BQ6qsui1DP8huSDdLBTOvwigwdmaucm_GrOMrgc4yjcmy8CsD_Az3WzzyNPaGpOZrYyGNSAxa2sH-m8BdLINT7oSjw_l1pkV0bByvZ71qrWJ7qoCgghqUkxlmX0xolbydQwkG0DZ8NqGNtsgIhVT7GnsgccuFXXYoZaXORufx25ptCi9XnUyFfJTKHtk7fddTY8s",
+        "https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?w=800&q=80",
     },
     {
       id: "2",
@@ -416,7 +416,7 @@ export default function HomePage() {
       time: "6:00 PM",
       location: "New York",
       imageUrl:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuDSiNZxjryxVvBt_Qvd2BsU8jmuyGXsbWyZqiGyTJOFCn4I4QdwE-xrJUmE938nQ2sYjA0qbPec911z6qe-blSH_epWVfQJy2W2NwU5R-4dwi1k7uUfEgPutKfIV3RpR1EUutrAFt_7SBxXq5yRfR9EkuQCohSjZJpWgX0eNFvBY3F5rZ-xWmmB8Em-xGg1AvxCRQDlpUPXbLlpkcqBsqbQXGIi5tNUNw3p5WrCahAWFPRTkzEE0B8v47AYzYa8b-aEAMvtdko47AM",
+        "https://images.unsplash.com/photo-1522673607200-1645062cd5d1?w=800&q=80",
     },
   ];
 
@@ -430,7 +430,7 @@ export default function HomePage() {
       readTime: "5 min read",
       categoryColor: "bg-primary/10 text-primary",
       imageUrl:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuAjQm7mifn0fMG6WRrjsN8AnfnBwriviaEzlFUizzC6qlOGlX1I_GPyMHQYarIWc3WCWLG2uiNI6hqB_fLbQyarr14QhxettqBmN2Ne5O-Z5XBJfDsSH3tY8eyJOryddaeMlZJ6zS7f_gn2WU2x4U1nCWe9JcYuxtfgPt3zI5zsJ0mrP-PGqnBIflNTTSDDI1wZzZhMgietr5A1DwoKijQfvQng79SZASQw174qkFvvNc18z6jRW4U6ElvURSvLe4p8DcTSuO4yBTo",
+        "https://images.unsplash.com/photo-1459411552884-841db9b3cc2a?w=800&q=80",
     },
     {
       id: "2",
@@ -441,7 +441,7 @@ export default function HomePage() {
       readTime: "8 min read",
       categoryColor: "bg-blue-100 text-blue-600",
       imageUrl:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuCjQ9pOojs1lIjHSdtFYj_YBxb3II0DBI5ZJdZmUjATLzdN-5Gmc3YYoCtQItdNNo9mYOHG0uCgXOQB2ZSYM8pTyc05kM8Xf0SJlYvOf9ssUC2hHxlWfQsCFaW29BGDK4Tmikg9u2JlrGsOkdQnYsiA8jpqZr4dcI0WlAkZc0yzd9L3Le575S1C7PKMZGn3Iy1bziiTpA6mD_OWpu2VyYHSvODhvkiB7C3KB2Cc4yJaCD_7mmdJXfMEokuoL6piXEZ7sLDjGwq9MkQ",
+        "https://images.unsplash.com/photo-1555244162-803834f70033?w=800&q=80",
     },
     {
       id: "3",
@@ -451,7 +451,7 @@ export default function HomePage() {
       readTime: "4 min read",
       categoryColor: "bg-purple-100 text-purple-600",
       imageUrl:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuAdB2PGxAQONC2RYcFKi3Fp50J_EpdsPR3uO67c0XBbMecLNL6tmPs4wvZfkjR4HdUMPDELShvGj7eQXEqSDdVDQLDI2oxYXQ3qdeYJXegdybdBbHxvdMi4cQRIUe7ZTiED9iCUAqoApg6uibnjRIYjifeTwnF92qM7wLjrULSnjAFqZSTo5m3n2b5rsMjYxT7XEXlGfDH-KGGLnBLzdkvHPfZyHqJ0PlWteFzPG1GorvwYlrJZIp-po1_i-mZI_xTgnLlWdjoLETE",
+        "https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=800&q=80",
     },
   ];
 
@@ -464,7 +464,7 @@ export default function HomePage() {
       price: "₹2L - ₹5L",
       rating: 4.8,
       imageUrl:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuBkJGvZkV8cG4G4K8cF1y2vI9q8K7l5n2p1o0k9j8i7h6g5f4e3d2c1b0a9z8y7x6w5v4u3t2s1r0q",
+        "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=800&q=80",
       type: "Banquet Hall",
     },
     {
@@ -475,7 +475,7 @@ export default function HomePage() {
       price: "₹1.5L - ₹3L",
       rating: 4.6,
       imageUrl:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuBkJGvZkV8cG4G4K8cF1y2vI9q8K7l5n2p1o0k9j8i7h6g5f4e3d2c1b0a9z8y7x6w5v4u3t2s1r0q",
+        "https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=800&q=80",
       type: "Outdoor Garden",
     },
     {
@@ -486,7 +486,7 @@ export default function HomePage() {
       price: "₹3L - ₹6L",
       rating: 4.9,
       imageUrl:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuBkJGvZkV8cG4G4K8cF1y2vI9q8K7l5n2p1o0k9j8i7h6g5f4e3d2c1b0a9z8y7x6w5v4u3t2s1r0q",
+        "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&q=80",
       type: "Palace",
     },
   ];
@@ -500,7 +500,7 @@ export default function HomePage() {
       price: "₹8,500/night",
       rating: 4.7,
       imageUrl:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuBkJGvZkV8cG4G4K8cF1y2vI9q8K7l5n2p1o0k9j8i7h6g5f4e3d2c1b0a9z8y7x6w5v4u3t2s1r0q",
+        "https://images.unsplash.com/photo-1564501049412-61c2a3083791?w=800&q=80",
       amenities: ["Pool", "Spa", "WiFi"],
     },
     {
@@ -511,7 +511,7 @@ export default function HomePage() {
       price: "₹12,000/night",
       rating: 4.9,
       imageUrl:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuBkJGvZkV8cG4G4K8cF1y2vI9q8K7l5n2p1o0k9j8i7h6g5f4e3d2c1b0a9z8y7x6w5v4u3t2s1r0q",
+        "https://images.unsplash.com/photo-1582719508461-905c673771fd?w=800&q=80",
       amenities: ["Pool", "Spa", "Gym"],
     },
     {
@@ -522,7 +522,7 @@ export default function HomePage() {
       price: "₹7,500/night",
       rating: 4.5,
       imageUrl:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuBkJGvZkV8cG4G4K8cF1y2vI9q8K7l5n2p1o0k9j8i7h6g5f4e3d2c1b0a9z8y7x6w5v4u3t2s1r0q",
+        "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=800&q=80",
       amenities: ["Pool", "WiFi", "Breakfast"],
     },
   ];
@@ -536,7 +536,7 @@ export default function HomePage() {
       reviews: 156,
       price: "₹50K - ₹2L",
       imageUrl:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuBkJGvZkV8cG4G4K8cF1y2vI9q8K7l5n2p1o0k9j8i7h6g5f4e3d2c1b0a9z8y7x6w5v4u3t2s1r0q",
+        "https://images.unsplash.com/photo-1459411552884-841db9b3cc2a?w=800&q=80",
     },
     {
       id: "2",
@@ -546,7 +546,7 @@ export default function HomePage() {
       reviews: 234,
       price: "₹1.5K/plate",
       imageUrl:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuBkJGvZkV8cG4G4K8cF1y2vI9q8K7l5n2p1o0k9j8i7h6g5f4e3d2c1b0a9z8y7x6w5v4u3t2s1r0q",
+        "https://images.unsplash.com/photo-1555244162-803834f70033?w=800&q=80",
     },
     {
       id: "3",
@@ -556,7 +556,7 @@ export default function HomePage() {
       reviews: 189,
       price: "₹75K - ₹3L",
       imageUrl:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuBkJGvZkV8cG4G4K8cF1y2vI9q8K7l5n2p1o0k9j8i7h6g5f4e3d2c1b0a9z8y7x6w5v4u3t2s1r0q",
+        "https://images.unsplash.com/photo-1519741497674-611481863552?w=800&q=80",
     },
     {
       id: "4",
@@ -566,7 +566,7 @@ export default function HomePage() {
       reviews: 98,
       price: "₹25K - ₹80K",
       imageUrl:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuBkJGvZkV8cG4G4K8cF1y2vI9q8K7l5n2p1o0k9j8i7h6g5f4e3d2c1b0a9z8y7x6w5v4u3t2s1r0q",
+        "https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?w=800&q=80",
     },
   ];
 
@@ -577,7 +577,7 @@ export default function HomePage() {
       date: "Dec 15, 2024",
       location: "Udaipur",
       imageUrl:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuBkJGvZkV8cG4G4K8cF1y2vI9q8K7l5n2p1o0k9j8i7h6g5f4e3d2c1b0a9z8y7x6w5v4u3t2s1r0q",
+        "https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?w=800&q=80",
       story:
         "A magical royal wedding at the City of Lakes with 500 guests celebrating love.",
     },
@@ -587,7 +587,7 @@ export default function HomePage() {
       date: "Nov 20, 2024",
       location: "Goa",
       imageUrl:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuBkJGvZkV8cG4G4K8cF1y2vI9q8K7l5n2p1o0k9j8i7h6g5f4e3d2c1b0a9z8y7x6w5v4u3t2s1r0q",
+        "https://images.unsplash.com/photo-1522673607200-1645062cd5d1?w=800&q=80",
       story:
         "Beachfront sunset ceremony with an intimate gathering of close family and friends.",
     },
@@ -597,7 +597,7 @@ export default function HomePage() {
       date: "Oct 10, 2024",
       location: "Delhi",
       imageUrl:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuBkJGvZkV8cG4G4K8cF1y2vI9q8K7l5n2p1o0k9j8i7h6g5f4e3d2c1b0a9z8y7x6w5v4u3t2s1r0q",
+        "https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?w=800&q=80",
       story:
         "Traditional Hindu wedding with vibrant colors and joyous celebrations.",
     },
@@ -644,7 +644,7 @@ export default function HomePage() {
               className="w-10 h-10 rounded-full bg-cover bg-center ring-2 ring-primary/20"
               style={{
                 backgroundImage:
-                  'url("https://lh3.googleusercontent.com/aida-public/AB6AXuDtl7IUwAI91iyDWykWrOtd9l0BBUbhhMy29F6orSVgFuBdztzvl6KZq4BMRao1fMnQcGC5DPVr9MfFyU-ObuXudfCML10ixySRdQ3xhQs8PwI18-aF53_ZEODz231aqzmJRtiY-ol3-hNzGpyiYIYPYaVQF1Mfl6Hv33vDFwbA4itR7rb7VbcXy_BOO5hh5NndyAtkJRHkjO6PP7CU2VNbKVqio9kVLTagelGQOsG_dNUHUEM2ks9eYdK6asH8ac23CUoDrfocMrs")',
+                  'url("https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&q=80")',
               }}
             />
             <View className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-surface-light" />
@@ -673,7 +673,7 @@ export default function HomePage() {
             <View className="absolute inset-0">
               <Image
                 source={{
-                  uri: "https://lh3.googleusercontent.com/aida-public/AB6AXuDdtvK-ixs8VqOnmkwjEz-w30IdLr_CJXv7u17AV3ZbVB1EsiUWMOciEmaP5f2ILsH4NUo9khfReP92XK9L-FDj2udqkEfjgreIC7L7I8Rxs5viUSKjF9hS4-OpccyKfJzPvZ7qMk3c5MOFL4jEt-PffcaxIrlshDCzyF25uk-8RGYZaygNjJh4pCg9XQaBflhrH5fM7NR1LD0KCdKfK07AWfWQPT_wFz_s-kn-bkkecpSzFKI8fkUMQFrk9_X1O-huqjjjFdeKOz8",
+                  uri: "https://images.unsplash.com/photo-1519741497674-611481863552?w=800&q=80",
                 }}
                 className="w-full h-full"
                 resizeMode="cover"
