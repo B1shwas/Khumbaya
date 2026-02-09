@@ -350,10 +350,8 @@ export default function EventsPage() {
                 My Events
               </Text>
             </TouchableOpacity>
-            <View
-             className={`flex-1 py-2 px-4 rounded-lg transition-all ${activeTab === "invited" ? "bg-white shadow-sm" : "bg-transparent"}`}
-            >
-                <TouchableOpacity
+            <TouchableOpacity
+              style={[styles.tab, activeTab === "invited" && styles.tabActive]}
               onPress={() => setActiveTab("invited")}
             >
               <Text
@@ -365,8 +363,6 @@ export default function EventsPage() {
                 Invited
               </Text>
             </TouchableOpacity>
-
-            </View>
           
           </View>
         </View>
