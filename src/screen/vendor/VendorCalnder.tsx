@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Image } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { useColorScheme } from 'nativewind';
+import React, { useState } from 'react';
+import { Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const DAYS_OF_WEEK = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 const MONTHS = [
@@ -75,7 +75,7 @@ const EventCard: React.FC<EventCardProps> = ({
 
 const VendorCalendarScreen: React.FC = () => {
   const { colorScheme } = useColorScheme();
-  const isDark = colorScheme === 'dark';
+  // const isDark = colorScheme === 'dark';
   const [currentMonth, setCurrentMonth] = useState(9); // October (0-indexed)
   const [currentYear, setCurrentYear] = useState(2023);
   const [selectedDay, setSelectedDay] = useState(5);
@@ -167,7 +167,8 @@ const VendorCalendarScreen: React.FC = () => {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-background-light dark:bg-background-dark" edges={['top']}>
+    // dark:bg-background-dark
+    <SafeAreaView className="flex-1 bg-background-light " edges={['top']}>
       <ScrollView showsVerticalScrollIndicator={false} className="flex-1">
         {/* Header */}
         <View className="px-4 pt-4 pb-4">
@@ -178,7 +179,8 @@ const VendorCalendarScreen: React.FC = () => {
             >
               <Text className="text-2xl">←</Text>
             </TouchableOpacity>
-            <Text className="text-lg font-bold tracking-tight text-slate-900 dark:text-white">
+            {/* dark:text-white */}
+            <Text className="text-lg font-bold tracking-tight text-slate-900 ">
               {MONTHS[currentMonth]} {currentYear}
             </Text>
             <TouchableOpacity 
@@ -192,7 +194,8 @@ const VendorCalendarScreen: React.FC = () => {
 
         {/* Calendar Grid */}
         <View className="px-4 mb-6">
-          <View className="bg-white dark:bg-slate-900/50 rounded-xl p-4 shadow-sm">
+          {/* dark:bg-slate-900/50 */}
+          <View className="bg-white  rounded-xl p-4 shadow-sm">
             {/* Day Headers */}
             <View className="flex-row mb-2">
               {DAYS_OF_WEEK.map((day, index) => (
@@ -219,7 +222,8 @@ const VendorCalendarScreen: React.FC = () => {
                       </Text>
                     </View>
                   ) : (
-                    <Text className={`text-sm ${day.isCurrentMonth ? 'text-slate-900 dark:text-white' : 'text-slate-400'}`}>
+                    // dark:text-white
+                    <Text className={`text-sm ${day.isCurrentMonth ? 'text-slate-900 ' : 'text-slate-400'}`}>
                       {day.day}
                     </Text>
                   )}
@@ -235,7 +239,8 @@ const VendorCalendarScreen: React.FC = () => {
         {/* Events List */}
         <View className="px-4 pb-32">
           <View className="flex-row items-center justify-between mb-4">
-            <Text className="text-xl font-bold text-slate-900 dark:text-white">Today's Events</Text>
+            {/* dark:text-white */}
+            <Text className="text-xl font-bold text-slate-900 ">Today's Events</Text>
             <Text className="text-primary text-sm font-medium">{selectedDay} Oct</Text>
           </View>
 
