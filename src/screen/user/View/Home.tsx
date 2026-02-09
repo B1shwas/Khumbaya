@@ -131,7 +131,7 @@ const VenueCard = ({
   type,
 }: VenueCardProps) => (
   <TouchableOpacity
-    className="w-64 bg-white dark:bg-surface-dark rounded-xl overflow-hidden shadow-sm border border-gray-100 mr-4"
+    className="flex-none w-[280px] bg-white dark:bg-surface-dark rounded-xl overflow-hidden shadow-sm border border-gray-100 mr-4"
     onPress={() =>
       router.push({
         pathname: "/venue-detail",
@@ -685,9 +685,6 @@ const {user }= useAuth()
             {/* Content */}
             <View className="relative z-10 p-6 gap-4">
               <View className="gap-1">
-                <Text className="inline-flex items-center px-2 py-1 rounded bg-white/20 text-white text-xs font-semibold w-fit border border-white/10">
-                  ✨ New Feature
-                </Text>
                 <Text className="text-white text-2xl font-bold max-w-[80%]">
                   Plan your dream celebration.
                 </Text>
@@ -697,7 +694,7 @@ const {user }= useAuth()
                 </Text>
               </View>
               <TouchableOpacity
-                className="flex-row items-center justify-center gap-2 rounded-xl h-10 px-5 bg-primary active:opacity-90"
+                className="flex-row items-center justify-center gap-2 rounded-xl h- py-5 bg-primary active:opacity-90"
                 onPress={() =>
                   router.push(
                     "/(protected)/(client-tabs)/events/create" as RelativePathString,
@@ -705,16 +702,31 @@ const {user }= useAuth()
                 }
               >
                 <Ionicons name="add-circle" size={20} color="white" />
-                <Text className="text-white text-sm font-semibold">
+                <Text className="text-white text-md font-bold">
                   Create New Event
                 </Text>
               </TouchableOpacity>
             </View>
           </View>
         </View>
+          {/* Services Quick Access */}
+        <View className="mt-4 pb-6 px-4">
+          <View className="flex-row items-center justify-between  pb-3">
+            <Text className="text-lg font-bold text-gray-900">
+              Quick Services
+            </Text>
+          </View>
+          <View className="w-full ">
+            <View className="flex-row flex-wrap gap-3 justify-center">
+              {quickServices.map((service) => (
+                <QuickServiceButton key={service.id} {...service} />
+              ))}
+            </View>
+          </View>
+        </View>
 
         {/* Horizontal Scroll: Events Attending */}
-        <View className="py-4">
+        <View className=" mb-4 py-4">
           <View className="flex-row items-center justify-between px-4 pb-3">
             <Text className="text-lg font-bold text-gray-900">
               Events You're Attending
@@ -731,6 +743,7 @@ const {user }= useAuth()
             contentContainerStyle={{ paddingLeft: 16, paddingRight: 4 }}
             snapToInterval={296}
             decelerationRate="fast"
+            className=""
           >
             {events.map((event) => (
               <EventCard key={event.id} {...event} />
@@ -741,26 +754,7 @@ const {user }= useAuth()
         </View>
 
         {/* Vertical List: Planning Tips */}
-        <View className="pb-6">
-          <View className="flex-row items-center justify-between px-4 pb-3 pt-2">
-            <Text className="text-lg font-bold text-gray-900">
-              Planning Tips & Trends
-            </Text>
-            <TouchableOpacity
-              onPress={() => router.push("/blog" as RelativePathString)}
-            >
-              <Text className="text-primary text-sm font-semibold">
-                View Blog
-              </Text>
-            </TouchableOpacity>
-          </View>
-          <View className="px-4">
-            {articles.map((article) => (
-              <ArticleCard key={article.id} {...article} />
-            ))}
-          </View>
-        </View>
-
+     
         {/* Venues Section */}
         <View className="pb-4">
           <View className="flex-row items-center justify-between px-4 pb-3">
@@ -779,6 +773,9 @@ const {user }= useAuth()
             horizontal
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={{ paddingLeft: 16, paddingRight: 4 }}
+            snapToInterval={296}
+            decelerationRate="fast"
+            className=""
           >
             {venues.map((venue) => (
               <VenueCard key={venue.id} {...venue} />
@@ -788,7 +785,7 @@ const {user }= useAuth()
         </View>
 
         {/* Hotels Section */}
-        <View className="pb-4">
+        {/* <View className="pb-4">
           <View className="flex-row items-center justify-between px-4 pb-3">
             <Text className="text-lg font-bold text-gray-900">
               Recommended Hotels
@@ -811,10 +808,10 @@ const {user }= useAuth()
             ))}
             <View className="w-1 shrink-0" />
           </ScrollView>
-        </View>
+        </View> */}
 
         {/* Vendors Section */}
-        <View className="pb-4">
+        <View className="mt-4 pb-4">
           <View className="flex-row items-center justify-between px-4 pb-3">
             <Text className="text-lg font-bold text-gray-900">Top Vendors</Text>
             <TouchableOpacity
@@ -858,25 +855,33 @@ const {user }= useAuth()
           </View>
         </View>
 
-        {/* Services Quick Access */}
-        <View className="pb-6">
-          <View className="flex-row items-center justify-between px-4 pb-3">
-            <Text className="text-lg font-bold text-gray-900">
-              Quick Services
-            </Text>
-          </View>
-          <View className="px-4">
-            <View className="flex-row flex-wrap gap-3">
-              {quickServices.map((service) => (
-                <QuickServiceButton key={service.id} {...service} />
-              ))}
-            </View>
-          </View>
-        </View>
+      
 
         {/* Bottom padding for safe area */}
         <View className="h-24" />
+           <View className="pb-6">
+          <View className="flex-row items-center justify-between px-4 pb-3 pt-2">
+            <Text className="text-lg font-bold text-gray-900">
+              Planning Tips & Trends
+            </Text>
+            <TouchableOpacity
+              onPress={() => router.push("/blog" as RelativePathString)}
+            >
+              <Text className="text-primary text-sm font-semibold">
+                View Blog
+              </Text>
+            </TouchableOpacity>
+          </View>
+          <View className="px-4">
+            {articles.map((article) => (
+              <ArticleCard key={article.id} {...article} />
+            ))}
+          </View>
+        </View>
+
       </ScrollView>
+    {/* Tips wala section */}
+      
 
       {/* Floating Action Button for Create Event */}
       <TouchableOpacity
