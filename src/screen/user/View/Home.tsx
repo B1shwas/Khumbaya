@@ -1,3 +1,4 @@
+import { useAuth } from "@/src/store/AuthContext";
 import { Ionicons } from "@expo/vector-icons";
 import { router, type RelativePathString } from "expo-router";
 import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
@@ -72,32 +73,34 @@ const ArticleCard = ({
   categoryColor,
 }: ArticleCardProps) => (
   <TouchableOpacity
-    className="flex-row items-center gap-3 p-2 bg-white dark:bg-surface-dark rounded-xl shadow-sm border border-gray-100 mb-3"
+    className="flex-row items-center gap-3 p-2 bg-white dark:bg-surface-dark rounded-xl shadow-sm border border-gray-100 mb-3 h-[14vh]"
     onPress={() => router.push("/blog" as RelativePathString)}
     activeOpacity={0.8}
   >
-    <View className="shrink-0 w-20 h-20 rounded-lg overflow-hidden">
+    <View className="shrink-0 w-[25%] h-[10vh] rounded-lg overflow-hidden  ">
       <Image
         source={{ uri: imageUrl }}
         className="w-full h-full"
         resizeMode="cover"
       />
     </View>
-    <View className="flex-1 gap-1 pr-2">
-      <View className="flex-row items-center gap-2">
-        <Text
-          className={`text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded ${categoryColor}`}
-        >
+    <View className="flex-1 gap-1 pr-2 h-[10vh]">
+      <View className="flex-row items-center justify-start gap-2">
+        <Text className={`text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded ${categoryColor}`}>
           {category}
         </Text>
         <Text className="text-[10px] text-secondary-content">• {readTime}</Text>
       </View>
-      <Text className="font-bold text-sm text-gray-900" numberOfLines={1}>
+      <View className="mt-2">
+          <Text className="font-bold text-md text-gray-900" numberOfLines={1}>
         {title}
       </Text>
-      <Text className="text-xs text-secondary-content" numberOfLines={2}>
+      <Text className=" text-xs text-secondary-content" numberOfLines={2}>
         {description}
       </Text>
+
+      </View>
+    
     </View>
     <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
   </TouchableOpacity>
@@ -633,7 +636,7 @@ export default function HomePage() {
       route: "/timeline",
     },
   ];
-
+const {user }= useAuth()
   return (
     <SafeAreaView className="flex-1 bg-background-light">
       {/* Top App Bar */}
@@ -650,17 +653,15 @@ export default function HomePage() {
             <View className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-surface-light" />
           </View>
           <View className="flex-col">
-            <Text className="text-xs font-medium text-secondary-content">
-              Good Morning,
-            </Text>
-            <Text className="text-lg font-bold text-gray-900">Priya 👋</Text>
+            <Text className="text-xs font-medium text-secondary-content">Good Morning,</Text>
+            <Text className="text-lg font-bold text-gray-900">Client name</Text>
           </View>
         </View>
         <TouchableOpacity
-          className="w-10 h-10 items-center justify-center rounded-full hover:bg-gray-100"
+          className="w-10 h-10 items-center justify-center rounded-full hover:bg-gray-100 border "
           onPress={() => router.push("/notifications" as RelativePathString)}
         >
-          <Ionicons name="notifications" size={24} color="#181114" />
+          <Ionicons name="notifications" size={24}  />
           <View className="absolute top-2.5 right-2.5 w-2 h-2 bg-primary rounded-full" />
         </TouchableOpacity>
       </View>
