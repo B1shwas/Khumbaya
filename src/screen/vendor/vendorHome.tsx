@@ -44,8 +44,10 @@ const schedule = [
     time: "14:00",
     title: "Client Meeting",
     subtitle: "Video Call (Zoom)",
-    accent: "bg-blue-50 dark:bg-blue-900/30",
-    text: "text-blue-600 dark:text-blue-300",
+    // dark:bg-blue-900/30
+    accent: "bg-blue-50 ",
+    text: "text-blue-600 ",
+    // dark:text-blue-300
     border: "border-primary",
     labelColor: "text-primary",
   },
@@ -55,10 +57,14 @@ const schedule = [
     time: "17:00",
     title: "Setup: Gold Banquet",
     subtitle: "Hilton Downtown",
-    accent: "bg-orange-50 dark:bg-orange-900/30",
-    text: "text-orange-600 dark:text-orange-300",
-    border: "border-gray-200 dark:border-white/10",
-    labelColor: "text-gray-500 dark:text-gray-400",
+    // dark:bg-orange-900/30
+    accent: "bg-orange-50 ",
+    // dark:text-orange-300
+    text: "text-orange-600 ",
+    // dark:border-white/10
+    border: "border-gray-200 ",
+    // dark:text-gray-400
+    labelColor: "text-gray-500 ",
   },
   {
     id: "wednesday",
@@ -66,10 +72,14 @@ const schedule = [
     time: "10:00",
     title: "Deposit Due",
     subtitle: "Sarah & Mike Wedding",
-    accent: "bg-purple-50 dark:bg-purple-900/30",
-    text: "text-purple-600 dark:text-purple-300",
-    border: "border-gray-200 dark:border-white/10",
-    labelColor: "text-gray-500 dark:text-gray-400",
+    // dark:bg-purple-900/30
+    accent: "bg-purple-50 ",
+    // dark:text-purple-300
+    text: "text-purple-600 ",
+    // dark:border-white/10
+    border: "border-gray-200 ",
+    // dark:text-gray-400
+    labelColor: "text-gray-500 ",
   },
 ];
 
@@ -80,32 +90,40 @@ const VendorHomeScreen: React.FC = () => {
   const cardSpacing = 16;
 
   return (
-    <SafeAreaView className="flex-1 bg-background-light dark:bg-background-dark" edges={["top"]}>
+    // dark:bg-background-dark
+    <SafeAreaView className="flex-1 bg-background-light" edges={["top"]}>
       <ScrollView
         className="flex-1"
         stickyHeaderIndices={[0]}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 120 }}
       >
-        <View className="flex-row items-center px-4 py-3 justify-between bg-background-light/95 dark:bg-background-dark/95 border-b border-transparent">
+        {/* dark:bg-background-dark/95 */}
+        <View className="flex-row items-center px-4 py-3 justify-between bg-background-light/95  border-b border-transparent">
           <View className="flex-row items-center gap-3">
             <View className="relative">
               <Image
                 source={{ uri: profileImage }}
-                className="w-10 h-10 rounded-full border-2 border-white dark:border-white/10"
+                //  dark:border-white/10
+                className="w-10 h-10 rounded-full border-2 border-white"
               />
-              <View className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-green-500 border-2 border-white dark:border-[#221019]" />
+              {/* dark:border-[#221019] */}
+              <View className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-green-500 border-2 border-white" />
             </View>
             <View>
-              <Text className="text-xs font-medium text-gray-500 dark:text-gray-400">Welcome back,</Text>
-              <Text className="text-[#181114] dark:text-white text-lg font-bold tracking-tight">
+              {/* dark:text-gray-400 */}
+              <Text className="text-xs font-medium text-gray-500 ">Welcome back,</Text>
+              {/* dark:text-white */}
+              <Text className="text-[#181114]  text-lg font-bold tracking-tight">
                 Radiant Events
               </Text>
             </View>
           </View>
           <TouchableOpacity
             activeOpacity={0.7}
-            className="relative w-10 h-10 items-center justify-center rounded-full bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10"
+            // dark:bg-white/5
+            // dark:border-white/10
+            className="relative w-10 h-10 items-center justify-center rounded-full bg-white border border-gray-100"
           >
             <MaterialIcons name="notifications" size={24} color="#181114" />
             <View className="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full" />
@@ -114,44 +132,60 @@ const VendorHomeScreen: React.FC = () => {
 
         <View className="px-4 py-2">
           <View className="flex-row flex-wrap gap-3">
-            <View className="flex-1 min-w-[140px] rounded-xl p-4 bg-white dark:bg-white/5 border border-transparent dark:border-white/10" style={{ elevation: 2 }}>
+            {/* dark:bg-white/5 */}
+            {/* dark:border-white/10 */}
+            <View className="flex-1 min-w-[140px] rounded-xl p-4 bg-white border border-transparent" style={{ elevation: 2 }}>
               <View className="flex-row items-center gap-2 mb-1">
-                <View className="p-1.5 rounded-lg bg-green-50 dark:bg-green-500/20">
+                {/* dark:bg-green-500/20 */}
+                <View className="p-1.5 rounded-lg bg-green-50">
                   <MaterialIcons name="attach-money" size={20} color="#16a34a" />
                 </View>
-                <Text className="text-gray-500 dark:text-gray-400 text-xs font-semibold uppercase tracking-wider">
+                {/* dark:text-gray-400 */}
+                <Text className="text-gray-500 text-xs font-semibold uppercase tracking-wider">
                   Earnings
                 </Text>
               </View>
-              <Text className="text-[#181114] dark:text-white text-2xl font-bold tracking-tight">$4,250</Text>
-              <Text className="text-xs text-green-600 dark:text-green-400 font-medium">+12% vs last month</Text>
+              {/* dark:text-white */}
+              <Text className="text-[#181114] text-2xl font-bold tracking-tight">$4,250</Text>
+              {/* dark:text-green-400 */}
+              <Text className="text-xs text-green-600 font-medium">+12% vs last month</Text>
             </View>
 
-            <View className="flex-1 min-w-[140px] rounded-xl p-4 bg-white dark:bg-white/5 border border-transparent dark:border-white/10" style={{ elevation: 2 }}>
+            {/* dark:bg-white/5 */}
+            {/* dark:border-white/10 */}
+            <View className="flex-1 min-w-[140px] rounded-xl p-4 bg-white border border-transparent" style={{ elevation: 2 }}>
               <View className="flex-row items-center gap-2 mb-1">
                 <View className="p-1.5 rounded-lg bg-primary/10">
                   <MaterialIcons name="calendar-month" size={20} color="#ee2b8c" />
                 </View>
-                <Text className="text-gray-500 dark:text-gray-400 text-xs font-semibold uppercase tracking-wider">
+                {/* dark:text-gray-400 */}
+                <Text className="text-gray-500 text-xs font-semibold uppercase tracking-wider">
                   Active
                 </Text>
               </View>
-              <Text className="text-[#181114] dark:text-white text-2xl font-bold tracking-tight">8</Text>
-              <Text className="text-xs text-gray-400 dark:text-gray-500 font-medium">2 pending actions</Text>
+              {/* dark:text-white */}
+              <Text className="text-[#181114] text-2xl font-bold tracking-tight">8</Text>
+              {/* dark:text-gray-500 */}
+              <Text className="text-xs text-gray-400 font-medium">2 pending actions</Text>
             </View>
           </View>
 
-          <View className="mt-3 w-full rounded-xl p-4 bg-white dark:bg-white/5 border border-transparent dark:border-white/10" style={{ elevation: 2 }}>
+          {/* dark:bg-white/5 */}
+          {/* dark:border-white/10 */}
+          <View className="mt-3 w-full rounded-xl p-4 bg-white border border-transparent" style={{ elevation: 2 }}>
             <View className="flex-row items-center justify-between">
               <View className="flex-row items-center gap-2">
-                <View className="p-1.5 rounded-lg bg-yellow-50 dark:bg-yellow-500/20">
+                {/* dark:bg-yellow-500/20 */}
+                <View className="p-1.5 rounded-lg bg-yellow-50">
                   <MaterialIcons name="star" size={20} color="#eab308" />
                 </View>
-                <Text className="text-gray-500 dark:text-gray-400 text-xs font-semibold uppercase tracking-wider">
+                {/* dark:text-gray-400 */}
+                <Text className="text-gray-500 text-xs font-semibold uppercase tracking-wider">
                   Rating
                 </Text>
               </View>
-              <Text className="text-[#181114] dark:text-white text-lg font-bold tracking-tight">
+              {/* dark:text-white */}
+              <Text className="text-[#181114] text-lg font-bold tracking-tight">
                 4.9 <Text className="text-sm font-normal text-gray-400">/ 5.0</Text>
               </Text>
             </View>
@@ -160,7 +194,8 @@ const VendorHomeScreen: React.FC = () => {
 
         <View className="mt-6">
           <View className="flex-row items-center justify-between px-4 pb-3">
-            <Text className="text-[#181114] dark:text-white text-lg font-bold tracking-tight">New Invites</Text>
+            {/* dark:text-white */}
+            <Text className="text-[#181114] text-lg font-bold tracking-tight">New Invites</Text>
             <TouchableOpacity activeOpacity={0.7}>
               <Text className="text-primary text-sm font-semibold">See All</Text>
             </TouchableOpacity>
@@ -176,7 +211,9 @@ const VendorHomeScreen: React.FC = () => {
             {invites.map((invite, index) => (
               <View
                 key={invite.id}
-                className="rounded-xl bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 overflow-hidden mr-4"
+                // dark:bg-white/5
+                // dark:border-white/10
+                className="rounded-xl bg-white border border-gray-100 overflow-hidden mr-4"
                 style={{ width: cardWidth, elevation: 3, marginRight: index === invites.length - 1 ? 0 : cardSpacing }}
               >
                 <ImageBackground source={{ uri: invite.image }} className="h-36 w-full">
@@ -192,23 +229,28 @@ const VendorHomeScreen: React.FC = () => {
                 </ImageBackground>
 
                 <View className="p-4">
-                  <Text className="text-[#181114] dark:text-white text-lg font-bold leading-snug">
+                  {/* dark:text-white */}
+                  <Text className="text-[#181114] text-lg font-bold leading-snug">
                     {invite.title}
                   </Text>
                   <View className="flex-row items-center gap-1 mt-1">
                     <MaterialIcons name="calendar-today" size={16} color="#6b7280" />
-                    <Text className="text-gray-500 dark:text-gray-400 text-sm">{invite.date}</Text>
+                    {/* dark:text-gray-400 */}
+                    <Text className="text-gray-500 text-sm">{invite.date}</Text>
                     <Text className="text-gray-400 mx-1">•</Text>
                     <MaterialIcons name="location-on" size={16} color="#6b7280" />
-                    <Text className="text-gray-500 dark:text-gray-400 text-sm">{invite.location}</Text>
+                    {/* dark:text-gray-400 */}
+                    <Text className="text-gray-500 text-sm">{invite.location}</Text>
                   </View>
 
                   <View className="flex-row gap-3 mt-4">
                     <TouchableOpacity
                       activeOpacity={0.7}
-                      className="flex-1 h-10 rounded-lg border border-gray-200 dark:border-white/20 items-center justify-center"
+                      // dark:border-white/20
+                      className="flex-1 h-10 rounded-lg border border-gray-200 items-center justify-center"
                     >
-                      <Text className="text-[#181114] dark:text-white text-sm font-bold">Decline</Text>
+                      {/* dark:text-white */}
+                      <Text className="text-[#181114] text-sm font-bold">Decline</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                       activeOpacity={0.8}
@@ -225,7 +267,8 @@ const VendorHomeScreen: React.FC = () => {
 
         <View className="mt-2 px-4">
           <View className="flex-row items-center justify-between pb-4 pt-4">
-            <Text className="text-[#181114] dark:text-white text-lg font-bold">Your Schedule</Text>
+            {/* dark:text-white */}
+            <Text className="text-[#181114] text-lg font-bold">Your Schedule</Text>
             <TouchableOpacity activeOpacity={0.7}>
               <Text className="text-primary text-sm font-semibold">View Calendar</Text>
             </TouchableOpacity>
@@ -237,13 +280,17 @@ const VendorHomeScreen: React.FC = () => {
                 <Text className={`${item.labelColor} text-xs font-bold uppercase tracking-wider mb-2`}>
                   {item.label}
                 </Text>
-                <View className="flex-row items-center p-3 bg-white dark:bg-white/5 rounded-lg border border-gray-100 dark:border-white/10" style={{ elevation: 2 }}>
+                {/* dark:bg-white/5 */}
+                {/* dark:border-white/10 */}
+                <View className="flex-row items-center p-3 bg-white rounded-lg border border-gray-100" style={{ elevation: 2 }}>
                   <View className={`h-12 w-12 rounded-lg items-center justify-center mr-4 ${item.accent}`}>
                     <Text className={`text-xs font-bold ${item.text}`}>{item.time}</Text>
                   </View>
                   <View className="flex-1">
-                    <Text className="font-bold text-[#181114] dark:text-white text-base">{item.title}</Text>
-                    <Text className="text-sm text-gray-500 dark:text-gray-400">{item.subtitle}</Text>
+                    {/* dark:text-white */}
+                    <Text className="font-bold text-[#181114] text-base">{item.title}</Text>
+                    {/* dark:text-gray-400 */}
+                    <Text className="text-sm text-gray-500">{item.subtitle}</Text>
                   </View>
                   <TouchableOpacity activeOpacity={0.7} className="p-2">
                     <MaterialIcons name="chevron-right" size={20} color="#9ca3af" />
