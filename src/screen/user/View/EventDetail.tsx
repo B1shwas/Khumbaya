@@ -1,18 +1,21 @@
-import { useState } from "react";
-import { View, Text, ScrollView, Image, TouchableOpacity } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
-import { type RelativePathString } from "expo-router";
+import { router, type RelativePathString } from "expo-router";
+import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-const EventDetail = () => {
+interface EventDetailProps {
+  isInvitedGuest?: boolean;
+}
+
+const EventDetail = ({ isInvitedGuest = false }: EventDetailProps) => {
   const event = {
     id: "1",
     title: "Sarah & Mike's Wedding",
     date: "August 24, 2024",
     location: "San Francisco, CA",
     venue: "Grand Plaza Hotel",
-    imageUrl: "https://lh3.googleusercontent.com/aida-public/AB6AXuDeW7ylSiob80ww9XoAOOV3fReuakm7CdifvgqSXNruTM_9zAafkSATg54Dmx3H7FAZ5KXTRd39NLDkX59Y3q3sxo1tkE7A7izp0iVgffzw7wQD1ZGNTwh0GVaKomwXQ9aAgwXmkYiHuyLVXHjwPa43pqfUwcXAnj00ohS22F1JIFaI0gqlP4ljcXEqU0-A1ZjuQLfYmk0FeUhi3kPIuFPTGwNPv_HTUqTqGaOGf9I_Hr5lb4N45xrwpUyAvH3ZVxD2I2QRXr3HmhQ",
+    imageUrl:
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuDeW7ylSiob80ww9XoAOOV3fReuakm7CdifvgqSXNruTM_9zAafkSATg54Dmx3H7FAZ5KXTRd39NLDkX59Y3q3sxo1tkE7A7izp0iVgffzw7wQD1ZGNTwh0GVaKomwXQ9aAgwXmkYiHuyLVXHjwPa43pqfUwcXAnj00ohS22F1JIFaI0gqlP4ljcXEqU0-A1ZjuQLfYmk0FeUhi3kPIuFPTGwNPv_HTUqTqGaOGf9I_Hr5lb4N45xrwpUyAvH3ZVxD2I2QRXr3HmhQ",
     status: "Upcoming",
     days: 124,
     hours: 8,
@@ -23,6 +26,8 @@ const EventDetail = () => {
     vendors: { booked: 6, pending: 2 },
     nextTask: "Cake Tasting @ 2 PM",
   };
+
+  const budgetRemaining = event.budget.total - event.budget.spent;
 
   return (
     <SafeAreaView className="flex-1 bg-background-light">
@@ -35,7 +40,7 @@ const EventDetail = () => {
             resizeMode="cover"
           />
           <View className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-black/30" />
-          
+
           {/* Top Navigation */}
           <View className="absolute top-0 left-0 w-full p-4 pt-12 flex-row justify-between items-center z-10">
             <TouchableOpacity
@@ -78,18 +83,30 @@ const EventDetail = () => {
         <View className="px-4 -mt-10 z-20">
           <View className="bg-surface-light dark:bg-surface-dark rounded-2xl shadow-xl p-5 flex-row justify-between items-center border border-gray-100 dark:border-gray-800">
             <View className="flex-col items-center flex-1">
-              <Text className="text-2xl font-black text-primary">{event.days}</Text>
-              <Text className="text-xs text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wider">Days</Text>
+              <Text className="text-2xl font-black text-primary">
+                {event.days}
+              </Text>
+              <Text className="text-xs text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wider">
+                Days
+              </Text>
             </View>
             <View className="h-8 w-[1px] bg-gray-200 dark:bg-gray-700" />
             <View className="flex-col items-center flex-1">
-              <Text className="text-2xl font-black text-primary">{String(event.hours).padStart(2, '0')}</Text>
-              <Text className="text-xs text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wider">Hrs</Text>
+              <Text className="text-2xl font-black text-primary">
+                {String(event.hours).padStart(2, "0")}
+              </Text>
+              <Text className="text-xs text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wider">
+                Hrs
+              </Text>
             </View>
             <View className="h-8 w-[1px] bg-gray-200 dark:bg-gray-700" />
             <View className="flex-col items-center flex-1">
-              <Text className="text-2xl font-black text-primary">{String(event.minutes).padStart(2, '0')}</Text>
-              <Text className="text-xs text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wider">Mins</Text>
+              <Text className="text-2xl font-black text-primary">
+                {String(event.minutes).padStart(2, "0")}
+              </Text>
+              <Text className="text-xs text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wider">
+                Mins
+              </Text>
             </View>
           </View>
         </View>
@@ -97,43 +114,66 @@ const EventDetail = () => {
         {/* Quick Stats Row */}
         <View className="mt-6 px-4">
           <View className="flex-row items-center justify-between mb-3">
-            <Text className="text-lg font-bold dark:text-white">Quick Stats</Text>
+            <Text className="text-lg font-bold dark:text-white">
+              Quick Stats
+            </Text>
             <TouchableOpacity>
-              <Text className="text-sm font-semibold text-primary">View All</Text>
+              <Text className="text-sm font-semibold text-primary">
+                View All
+              </Text>
             </TouchableOpacity>
           </View>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 12 }}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{ gap: 12 }}
+          >
             {/* Guests Card */}
             <View className="min-w-[160px] flex-1 bg-surface-light dark:bg-surface-dark p-4 rounded-xl shadow-sm border border-gray-50 dark:border-gray-800 flex-col items-center justify-center gap-2">
               <View className="relative w-16 h-16">
                 <View className="absolute inset-0 rounded-full border-4 border-gray-100 dark:border-gray-700" />
-                <View 
-                  className="absolute inset-0 rounded-full border-4 border-primary" 
-                  style={{ borderBottomColor: 'transparent', borderRightColor: 'transparent', transform: [{ rotate: '270deg' }] }} 
+                <View
+                  className="absolute inset-0 rounded-full border-4 border-primary"
+                  style={{
+                    borderBottomColor: "transparent",
+                    borderRightColor: "transparent",
+                    transform: [{ rotate: "270deg" }],
+                  }}
                 />
                 <View className="absolute inset-0 flex items-center justify-center">
-                  <Text className="text-xs font-bold text-gray-700 dark:text-white">75%</Text>
+                  <Text className="text-xs font-bold text-gray-700 dark:text-white">
+                    75%
+                  </Text>
                 </View>
               </View>
               <View className="text-center">
-                <Text className="text-sm font-bold text-gray-900 dark:text-white">Guests</Text>
+                <Text className="text-sm font-bold text-gray-900 dark:text-white">
+                  Guests
+                </Text>
                 <Text className="text-xs text-gray-500">150/200 Yes</Text>
               </View>
             </View>
 
-            {/* Budget Card */}
-            <View className="min-w-[160px] flex-1 bg-surface-light dark:bg-surface-dark p-4 rounded-xl shadow-sm border border-gray-50 dark:border-gray-800 flex-col justify-between">
-              <View>
-                <View className="p-1.5 bg-green-100 text-green-600 rounded-lg w-fit dark:bg-green-900/30 dark:text-green-400">
-                  <Ionicons name="pricetag" size={20} color="#16A34A" />
+            {/* Budget Card - Only show for owners */}
+            {!isInvitedGuest && (
+              <View className="min-w-[160px] flex-1 bg-surface-light dark:bg-surface-dark p-4 rounded-xl shadow-sm border border-gray-50 dark:border-gray-800 flex-col justify-between">
+                <View>
+                  <View className="p-1.5 bg-green-100 text-green-600 rounded-lg w-fit dark:bg-green-900/30 dark:text-green-400">
+                    <Ionicons name="pricetag" size={20} color="#16A34A" />
+                  </View>
+                  <Text className="text-sm font-bold mt-2 text-gray-900 dark:text-white">
+                    Budget
+                  </Text>
+                  <Text className="text-xs text-gray-500">$12k / $30k</Text>
                 </View>
-                <Text className="text-sm font-bold mt-2 text-gray-900 dark:text-white">Budget</Text>
-                <Text className="text-xs text-gray-500">$12k / $30k</Text>
+                <View className="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-1.5 mt-3">
+                  <View
+                    className="bg-primary h-1.5 rounded-full"
+                    style={{ width: "40%" }}
+                  />
+                </View>
               </View>
-              <View className="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-1.5 mt-3">
-                <View className="bg-primary h-1.5 rounded-full" style={{ width: '40%' }} />
-              </View>
-            </View>
+            )}
 
             {/* Tasks Card */}
             <View className="min-w-[160px] flex-1 bg-surface-light dark:bg-surface-dark p-4 rounded-xl shadow-sm border border-gray-50 dark:border-gray-800 flex-col justify-between">
@@ -141,11 +181,16 @@ const EventDetail = () => {
                 <View className="p-1.5 bg-orange-100 text-orange-600 rounded-lg w-fit dark:bg-orange-900/30 dark:text-orange-400">
                   <Ionicons name="checkmark-circle" size={20} color="#EA580C" />
                 </View>
-                <Text className="text-sm font-bold mt-2 text-gray-900 dark:text-white">Tasks</Text>
+                <Text className="text-sm font-bold mt-2 text-gray-900 dark:text-white">
+                  Tasks
+                </Text>
                 <Text className="text-xs text-gray-500">12 Pending</Text>
               </View>
               <View className="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-1.5 mt-3">
-                <View className="bg-orange-500 h-1.5 rounded-full" style={{ width: '65%' }} />
+                <View
+                  className="bg-orange-500 h-1.5 rounded-full"
+                  style={{ width: "65%" }}
+                />
               </View>
             </View>
           </ScrollView>
@@ -153,12 +198,16 @@ const EventDetail = () => {
 
         {/* Main Navigation Grid */}
         <View className="mt-6 px-4 pb-4">
-          <Text className="text-lg font-bold mb-3 dark:text-white">Manage Event</Text>
+          <Text className="text-lg font-bold mb-3 dark:text-white">
+            Manage Event
+          </Text>
           <View className="flex-row flex-wrap gap-3">
             {/* Timeline */}
-            <TouchableOpacity 
+            <TouchableOpacity
               className="w-[calc(50%-6px)] bg-white p-4 rounded-xl shadow-sm border border-gray-100 active:scale-[0.98] transition-transform"
-              onPress={() => router.push("/events/timeline" as RelativePathString)}
+              onPress={() =>
+                router.push("/events/timeline" as RelativePathString)
+              }
             >
               <View className="flex-row justify-between items-start mb-3">
                 <View className="p-2.5 bg-purple-50 rounded-full">
@@ -166,14 +215,20 @@ const EventDetail = () => {
                 </View>
                 <Ionicons name="chevron-forward" size={20} color="#D1D5DB" />
               </View>
-              <Text className="font-bold text-gray-900 text-base">Timeline</Text>
-              <Text className="text-xs text-gray-500 mt-1" numberOfLines={1}>Next: Cake Tasting @ 2 PM</Text>
+              <Text className="font-bold text-gray-900 text-base">
+                Timeline
+              </Text>
+              <Text className="text-xs text-gray-500 mt-1" numberOfLines={1}>
+                Next: Cake Tasting @ 2 PM
+              </Text>
             </TouchableOpacity>
 
             {/* Guest List */}
-            <TouchableOpacity 
+            <TouchableOpacity
               className="w-[calc(50%-6px)] bg-white p-4 rounded-xl shadow-sm border border-gray-100 active:scale-[0.98] transition-transform"
-              onPress={() => router.push("/events/guests" as RelativePathString)}
+              onPress={() =>
+                router.push("/events/guests" as RelativePathString)
+              }
             >
               <View className="flex-row justify-between items-start mb-3">
                 <View className="p-2.5 bg-blue-50 rounded-full">
@@ -181,14 +236,18 @@ const EventDetail = () => {
                 </View>
                 <Ionicons name="chevron-forward" size={20} color="#D1D5DB" />
               </View>
-              <Text className="font-bold text-gray-900 text-base">Guest List</Text>
+              <Text className="font-bold text-gray-900 text-base">
+                Guest List
+              </Text>
               <Text className="text-xs text-gray-500 mt-1">Manage RSVPs</Text>
             </TouchableOpacity>
 
             {/* Vendors */}
-            <TouchableOpacity 
+            <TouchableOpacity
               className="w-[calc(50%-6px)] bg-white p-4 rounded-xl shadow-sm border border-gray-100 active:scale-[0.98] transition-transform"
-              onPress={() => router.push("/events/vendors" as RelativePathString)}
+              onPress={() =>
+                router.push("/events/vendors" as RelativePathString)
+              }
             >
               <View className="flex-row justify-between items-start mb-3">
                 <View className="p-2.5 bg-rose-50 rounded-full">
@@ -197,42 +256,69 @@ const EventDetail = () => {
                 <Ionicons name="chevron-forward" size={20} color="#D1D5DB" />
               </View>
               <Text className="font-bold text-gray-900 text-base">Vendors</Text>
-              <Text className="text-xs text-gray-500 mt-1">6 Booked, 2 Pending</Text>
+              <Text className="text-xs text-gray-500 mt-1">
+                6 Booked, 2 Pending
+              </Text>
             </TouchableOpacity>
 
-            {/* Budget */}
-            <TouchableOpacity 
-              className="w-[calc(50%-6px)] bg-white p-4 rounded-xl shadow-sm border border-gray-100 active:scale-[0.98] transition-transform"
-              onPress={() => router.push("/events/budget" as RelativePathString)}
-            >
-              <View className="flex-row justify-between items-start mb-3">
-                <View className="p-2.5 bg-emerald-50 rounded-full">
-                  <Ionicons name="wallet" size={20} color="#059669" />
+            {/* Budget - Only show for owners */}
+            {!isInvitedGuest && (
+              <TouchableOpacity
+                className="w-[calc(50%-6px)] bg-white p-4 rounded-xl shadow-sm border border-gray-100 active:scale-[0.98] transition-transform"
+                onPress={() =>
+                  router.push("/events/budget" as RelativePathString)
+                }
+              >
+                <View className="flex-row justify-between items-start mb-3">
+                  <View className="p-2.5 bg-emerald-50 rounded-full">
+                    <Ionicons name="wallet" size={20} color="#059669" />
+                  </View>
+                  <Ionicons name="chevron-forward" size={20} color="#D1D5DB" />
                 </View>
-                <Ionicons name="chevron-forward" size={20} color="#D1D5DB" />
-              </View>
-              <Text className="font-bold text-gray-900 text-base">Budget</Text>
-              <Text className="text-xs text-gray-500 mt-1">$18k Remaining</Text>
-            </TouchableOpacity>
+                <Text className="font-bold text-gray-900 text-base">
+                  Budget
+                </Text>
+                <Text className="text-xs text-gray-500 mt-1">
+                  $18k Remaining
+                </Text>
+              </TouchableOpacity>
+            )}
 
             {/* Gallery - Full Width */}
-            <TouchableOpacity 
+            <TouchableOpacity
               className="w-full bg-white p-4 rounded-xl shadow-sm border border-gray-100 active:scale-[0.98] transition-transform flex-row items-center gap-4"
-              onPress={() => router.push("/events/gallery" as RelativePathString)}
+              onPress={() =>
+                router.push("/events/gallery" as RelativePathString)
+              }
             >
               <View className="p-2.5 bg-primary/10 rounded-full shrink-0">
                 <Ionicons name="images" size={20} color="#ee2b8c" />
               </View>
               <View className="flex-1">
-                <Text className="font-bold text-gray-900 text-base">Gallery</Text>
-                <Text className="text-xs text-gray-500">Upload & Share Photos</Text>
+                <Text className="font-bold text-gray-900 text-base">
+                  Gallery
+                </Text>
+                <Text className="text-xs text-gray-500">
+                  Upload & Share Photos
+                </Text>
               </View>
               <Ionicons name="chevron-forward" size={20} color="#D1D5DB" />
             </TouchableOpacity>
           </View>
         </View>
 
-     
+        {/* Invited Guest Notice */}
+        {isInvitedGuest && (
+          <View className="mx-4 mb-4 p-4 bg-blue-50 rounded-xl border border-blue-100">
+            <View className="flex-row items-center gap-2">
+              <Ionicons name="information-circle" size={20} color="#3B82F6" />
+              <Text className="text-sm text-blue-700">
+                You're viewing this event as a guest. Some features like budget
+                management are only available to the event organizer.
+              </Text>
+            </View>
+          </View>
+        )}
 
         {/* Bottom spacer */}
         <View className="h-24" />

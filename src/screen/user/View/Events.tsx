@@ -193,7 +193,11 @@ const EventCard = ({ event }: { event: Event }) => (
   <View style={styles.eventCard}>
     <TouchableOpacity
       style={styles.eventCardTouchable}
-      onPress={() => router.push(`/events/${event.id}` as RelativePathString)}
+      onPress={() =>
+        router.push(
+          `/events/${event.id}?isInvited=${!event.isMyEvent}` as RelativePathString,
+        )
+      }
       activeOpacity={0.8}
     >
       <View style={styles.eventImageContainer}>
