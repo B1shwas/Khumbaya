@@ -1,12 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
-import {
-  router,
-  useGlobalSearchParams,
-  type RelativePathString,
-} from "expo-router";
+import { router, type RelativePathString } from "expo-router";
 import { useState } from "react";
 import {
-  Alert,
   Image,
   RefreshControl,
   ScrollView,
@@ -292,15 +287,9 @@ const EventCard = ({ event }: { event: Event }) => (
           <TouchableOpacity
             style={[styles.actionButton, styles.rsvpButton]}
             onPress={() => {
-              Alert.alert("RSVP", `Would you like to RSVP to ${event.title}?`, [
-                { text: "Cancel", style: "cancel" },
-                {
-                  text: "Confirm RSVP",
-                  onPress: () => {
-                    Alert.alert("Success", "Your RSVP has been submitted!");
-                  },
-                },
-              ]);
+              router.push(
+                `/events/rsvp?eventId=${event.id}` as RelativePathString,
+              );
             }}
           >
             <Ionicons
@@ -321,12 +310,6 @@ const EventCard = ({ event }: { event: Event }) => (
 export default function EventsPage() {
   const [activeTab, setActiveTab] = useState<EventTab>("myEvents");
   const [refreshing, setRefreshing] = useState(false);
-  const params = useGlobalSearchParams();
-  const showSuccess = params?.success === "true";
-
-  const handleDismissSuccess = () => {
-    router.replace("/events" as RelativePathString);
-  };
 
   const handleCreateSubEvent = () => {
     router.push("/events/subevent-create" as RelativePathString);
@@ -398,84 +381,6 @@ export default function EventsPage() {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
-        {/* Success View */}
-        {showSuccess && (
-          <View style={styles.successContainer}>
-            <View style={styles.successHeroCircle}>
-              <View style={styles.successHeroInner}>
-                <Image
-                  source={{
-                    uri: "https://lh3.googleusercontent.com/aida-public/AB6AXuCDBTMpF5OGVFMpt0SFd1YYHvT0dbWhsJ1OiXWYAZtZHva3uRWvfDLTe0o9wji8CCfff_spyNbGa1EqMQAzU8TSgsZHHZyZczilaJjXsgkwdrHYtnhNzzELEAqjVUidiCPT2fu982NW88FUu6OLV-YHywILAwdx8LLdR69ManJPsqTJW1tjKuLVKnk4MgCSOSRbFhMOSEYIzSWmW-zWQIRd6Gn2odEDu-GJKhVcxGiy5nXwWuauIW5Hx3EfnwvPUTBI8LDijYJeRSk",
-                  }}
-                  style={styles.successHeroImage}
-                  resizeMode="cover"
-                />
-              </View>
-              <View style={[styles.successFloatIcon, styles.successFloatIcon1]}>
-                <Ionicons
-                  name="heart"
-                  size={20}
-                  color="#ee2b8c"
-                  fill="#ee2b8c"
-                />
-              </View>
-              <View style={[styles.successFloatIcon, styles.successFloatIcon2]}>
-                <Ionicons name="star" size={16} color="#ee2b8c" />
-              </View>
-              <View style={[styles.successFloatIcon, styles.successFloatIcon3]}>
-                <Ionicons name="sparkles" size={14} color="#ee2b8c" />
-              </View>
-            </View>
-            <View style={styles.successTextContent}>
-              <Text style={styles.successTitle}>Congratulations!</Text>
-              <Text style={styles.successTitle}>Your event is live.</Text>
-              <Text style={styles.successSubtitle}>
-                Your dream wedding is now set up. What's next?
-              </Text>
-            </View>
-            <View style={styles.successOptions}>
-              <TouchableOpacity
-                style={styles.successOptionButton}
-                onPress={handleCreateSubEvent}
-                activeOpacity={0.8}
-              >
-                <View style={styles.successOptionIconContainer}>
-                  <Ionicons name="sparkles" size={24} color="#9333EA" />
-                </View>
-                <View style={styles.successOptionTextContainer}>
-                  <Text style={styles.successOptionTitle}>
-                    Create Sub Event
-                  </Text>
-                  <Text style={styles.successOptionSubtitle}>
-                    Sangeet, Mehendi, Reception
-                  </Text>
-                </View>
-                <Ionicons name="chevron-forward" size={20} color="#D1D5DB" />
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.successOptionButton}
-                onPress={handleDismissSuccess}
-                activeOpacity={0.8}
-              >
-                <View
-                  style={[
-                    styles.successOptionIconContainer,
-                    { backgroundColor: "#EE2B8C20" },
-                  ]}
-                >
-                  <Ionicons name="calendar" size={24} color="#ee2b8c" />
-                </View>
-                <View style={styles.successOptionTextContainer}>
-                  <Text style={styles.successOptionTitle}>View My Events</Text>
-                  <Text style={styles.successOptionSubtitle}>
-                    See all your events
-                  </Text>
-                </View>
-                <Ionicons name="chevron-forward" size={20} color="#D1D5DB" />
-              </TouchableOpacity>
-            </View>
-          </View>
-        )}
         {/* Upcoming Events */}
         {upcomingEvents.length > 0 && (
           <View style={styles.section}>
@@ -516,7 +421,11 @@ export default function EventsPage() {
       {/* Floating Action Button */}
       <TouchableOpacity
         style={styles.fab}
-        onPress={() => router.push("/create-event" as RelativePathString)}
+        onPress={() =>
+          router.push(
+            "/(protected)/(client-tabs)/events/create" as RelativePathString,
+          )
+        }
       >
         <Ionicons name="add" size={28} color="white" />
       </TouchableOpacity>

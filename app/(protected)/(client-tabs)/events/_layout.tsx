@@ -8,6 +8,7 @@ export default function EventLayout() {
       <Stack.Screen name="timeline" />
       <Stack.Screen name="budget" />
       <Stack.Screen name="guests" />
+      <Stack.Screen name="vendors" />
       <Stack.Screen name="gallery" />
       {/* CMS Routes */}
       <Stack.Screen name="create" />
@@ -18,6 +19,7 @@ export default function EventLayout() {
       <Stack.Screen name="table-management" />
       <Stack.Screen name="card-making" />
       <Stack.Screen name="success" />
+      <Stack.Screen name="rsvp" />
     </Stack>
   );
 }
