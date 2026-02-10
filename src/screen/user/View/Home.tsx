@@ -86,21 +86,21 @@ const ArticleCard = ({
     </View>
     <View className="flex-1 gap-1 pr-2 h-[10vh]">
       <View className="flex-row items-center justify-start gap-2">
-        <Text className={`text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded ${categoryColor}`}>
+        <Text
+          className={`text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded ${categoryColor}`}
+        >
           {category}
         </Text>
         <Text className="text-[10px] text-secondary-content">• {readTime}</Text>
       </View>
       <View className="mt-2">
-          <Text className="font-bold text-md text-gray-900" numberOfLines={1}>
-        {title}
-      </Text>
-      <Text className=" text-xs text-secondary-content" numberOfLines={2}>
-        {description}
-      </Text>
-
+        <Text className="font-bold text-md text-gray-900" numberOfLines={1}>
+          {title}
+        </Text>
+        <Text className=" text-xs text-secondary-content" numberOfLines={2}>
+          {description}
+        </Text>
       </View>
-    
     </View>
     <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
   </TouchableOpacity>
@@ -276,7 +276,7 @@ const VendorCard = ({
   imageUrl,
 }: VendorCardProps) => (
   <TouchableOpacity
-    className="w-48 bg-white dark:bg-surface-dark rounded-xl overflow-hidden shadow-sm border border-gray-100 mr-4"
+    className="flex-none w-[280px] bg-white dark:bg-surface-dark rounded-xl overflow-hidden shadow-sm border border-gray-100 mr-4"
     onPress={() =>
       router.push({
         pathname: "/vendor-detail",
@@ -285,29 +285,35 @@ const VendorCard = ({
     }
     activeOpacity={0.8}
   >
-    <View className="h-32 w-full relative">
+    <View className="h-36 w-full relative">
       <Image
         source={{ uri: imageUrl }}
         className="w-full h-full"
         resizeMode="cover"
       />
-      <View className="absolute top-2 right-2 bg-white/90 px-2 py-1 rounded shadow-sm flex-row items-center gap-1">
+      <View className="absolute top-3 right-3 bg-white/90 px-2 py-1 rounded shadow-sm flex-row items-center gap-1">
         <Ionicons name="star" size={12} color="#F59E0B" fill="#F59E0B" />
         <Text className="text-xs font-bold text-gray-900">{rating}</Text>
       </View>
     </View>
-    <View className="p-3">
+    <View className="p-4">
       <Text className="text-[10px] font-semibold text-primary uppercase tracking-wider mb-1">
         {category}
       </Text>
-      <Text className="font-bold text-sm text-gray-900" numberOfLines={1}>
+      <Text
+        className="font-bold text-base text-gray-900 mb-2"
+        numberOfLines={1}
+      >
         {name}
       </Text>
-      <View className="flex-row items-center justify-between mt-2">
-        <Text className="text-xs text-secondary-content">
-          {reviews} reviews
-        </Text>
-        <Text className="text-xs font-bold text-gray-900">{price}</Text>
+      <View className="flex-row items-center justify-between">
+        <View className="flex-row items-center gap-1">
+          <Ionicons name="people" size={14} color="#6B7280" />
+          <Text className="text-xs text-secondary-content">
+            {reviews} reviews
+          </Text>
+        </View>
+        <Text className="text-sm font-bold text-primary">{price}</Text>
       </View>
     </View>
   </TouchableOpacity>
@@ -636,7 +642,7 @@ export default function HomePage() {
       route: "/timeline",
     },
   ];
-const {user }= useAuth()
+  const { user } = useAuth();
   return (
     <SafeAreaView className="flex-1 bg-background-light">
       {/* Top App Bar */}
@@ -653,7 +659,9 @@ const {user }= useAuth()
             <View className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-surface-light" />
           </View>
           <View className="flex-col">
-            <Text className="text-xs font-medium text-secondary-content">Good Morning,</Text>
+            <Text className="text-xs font-medium text-secondary-content">
+              Good Morning,
+            </Text>
             <Text className="text-lg font-bold text-gray-900">Client name</Text>
           </View>
         </View>
@@ -661,7 +669,7 @@ const {user }= useAuth()
           className="w-10 h-10 items-center justify-center rounded-full hover:bg-gray-100 border "
           onPress={() => router.push("/notifications" as RelativePathString)}
         >
-          <Ionicons name="notifications" size={24}  />
+          <Ionicons name="notifications" size={24} />
           <View className="absolute top-2.5 right-2.5 w-2 h-2 bg-primary rounded-full" />
         </TouchableOpacity>
       </View>
@@ -709,7 +717,7 @@ const {user }= useAuth()
             </View>
           </View>
         </View>
-          {/* Services Quick Access */}
+        {/* Services Quick Access */}
         <View className="mt-4 pb-6 px-4">
           <View className="flex-row items-center justify-between  pb-3">
             <Text className="text-lg font-bold text-gray-900">
@@ -726,21 +734,21 @@ const {user }= useAuth()
         </View>
 
         {/* Horizontal Scroll: Events Attending */}
-        <View className=" mb-4 py-4">
+        <View className="mb-4 py-4">
           <View className="flex-row items-center justify-between px-4 pb-3">
             <Text className="text-lg font-bold text-gray-900">
               Events You're Attending
             </Text>
             <TouchableOpacity onPress={() => router.push("/events")}>
-              <Text className="text-primary text-sm font-semibold">
+              {/* <Text className="text-primary text-sm font-semibold">
                 See All
-              </Text>
+              </Text> */}
             </TouchableOpacity>
           </View>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ paddingLeft: 16, paddingRight: 4 }}
+            contentContainerStyle={{ paddingLeft: 16, paddingRight: 16 }}
             snapToInterval={296}
             decelerationRate="fast"
             className=""
@@ -754,7 +762,7 @@ const {user }= useAuth()
         </View>
 
         {/* Vertical List: Planning Tips */}
-     
+
         {/* Venues Section */}
         <View className="pb-4">
           <View className="flex-row items-center justify-between px-4 pb-3">
@@ -764,15 +772,15 @@ const {user }= useAuth()
             <TouchableOpacity
               onPress={() => router.push("/venues" as RelativePathString)}
             >
-              <Text className="text-primary text-sm font-semibold">
+              {/* <Text className="text-primary text-sm font-semibold">
                 See All
-              </Text>
+              </Text> */}
             </TouchableOpacity>
           </View>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ paddingLeft: 16, paddingRight: 4 }}
+            contentContainerStyle={{ paddingLeft: 16, paddingRight: 16 }}
             snapToInterval={296}
             decelerationRate="fast"
             className=""
@@ -817,15 +825,15 @@ const {user }= useAuth()
             <TouchableOpacity
               onPress={() => router.push("/explore" as RelativePathString)}
             >
-              <Text className="text-primary text-sm font-semibold">
+              {/* <Text className="text-primary text-sm font-semibold">
                 Explore All
-              </Text>
+              </Text> */}
             </TouchableOpacity>
           </View>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ paddingLeft: 16, paddingRight: 4 }}
+            contentContainerStyle={{ paddingLeft: 16, paddingRight: 16 }}
           >
             {vendors.map((vendor) => (
               <VendorCard key={vendor.id} {...vendor} />
@@ -843,9 +851,9 @@ const {user }= useAuth()
             <TouchableOpacity
               onPress={() => router.push("/couples" as RelativePathString)}
             >
-              <Text className="text-primary text-sm font-semibold">
+              {/* <Text className="text-primary text-sm font-semibold">
                 View All
-              </Text>
+              </Text> */}
             </TouchableOpacity>
           </View>
           <View className="px-4">
@@ -855,11 +863,123 @@ const {user }= useAuth()
           </View>
         </View>
 
-      
-
         {/* Bottom padding for safe area */}
         <View className="h-24" />
-           <View className="pb-6">
+
+        {/* Vendor Quick Actions */}
+        <View className="pb-6">
+          <View className="flex-row items-center justify-between px-4 pb-3 pt-2">
+            <Text className="text-lg font-bold text-gray-900">
+              Vendor Dashboard
+            </Text>
+            <TouchableOpacity
+              onPress={() => router.push("/vendor" as RelativePathString)}
+            >
+              <Text className="text-primary text-sm font-semibold">
+                View All
+              </Text>
+            </TouchableOpacity>
+          </View>
+          <View className="flex-row flex-wrap gap-3 justify-center px-4">
+            <TouchableOpacity
+              className="flex-row items-center gap-2 px-4 py-4 bg-white dark:bg-surface-dark rounded-xl shadow-sm border border-gray-100"
+              onPress={() =>
+                router.push("/vendor/earnings" as RelativePathString)
+              }
+              activeOpacity={0.8}
+              style={{ width: "47%" }}
+            >
+              <View
+                className="w-10 h-10 rounded-full items-center justify-center"
+                style={{ backgroundColor: "#10B981" }}
+              >
+                <Ionicons name="wallet" size={20} color="white" />
+              </View>
+              <View className="flex-1">
+                <Text className="font-semibold text-sm text-gray-900">
+                  Track Money
+                </Text>
+                <Text className="text-xs text-secondary-content">
+                  Monitor earnings
+                </Text>
+              </View>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              className="flex-row items-center gap-2 px-4 py-4 bg-white dark:bg-surface-dark rounded-xl shadow-sm border border-gray-100"
+              onPress={() =>
+                router.push("/vendor/events" as RelativePathString)
+              }
+              activeOpacity={0.8}
+              style={{ width: "47%" }}
+            >
+              <View
+                className="w-10 h-10 rounded-full items-center justify-center"
+                style={{ backgroundColor: "#3B82F6" }}
+              >
+                <Ionicons name="calendar" size={20} color="white" />
+              </View>
+              <View className="flex-1">
+                <Text className="font-semibold text-sm text-gray-900">
+                  Manage Events
+                </Text>
+                <Text className="text-xs text-secondary-content">
+                  View schedules
+                </Text>
+              </View>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              className="flex-row items-center gap-2 px-4 py-4 bg-white dark:bg-surface-dark rounded-xl shadow-sm border border-gray-100"
+              onPress={() =>
+                router.push("/vendor/clients" as RelativePathString)
+              }
+              activeOpacity={0.8}
+              style={{ width: "47%" }}
+            >
+              <View
+                className="w-10 h-10 rounded-full items-center justify-center"
+                style={{ backgroundColor: "#8B5CF6" }}
+              >
+                <Ionicons name="people" size={20} color="white" />
+              </View>
+              <View className="flex-1">
+                <Text className="font-semibold text-sm text-gray-900">
+                  Find Clients
+                </Text>
+                <Text className="text-xs text-secondary-content">
+                  Grow business
+                </Text>
+              </View>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              className="flex-row items-center gap-2 px-4 py-4 bg-white dark:bg-surface-dark rounded-xl shadow-sm border border-gray-100"
+              onPress={() =>
+                router.push("/vendor/analytics" as RelativePathString)
+              }
+              activeOpacity={0.8}
+              style={{ width: "47%" }}
+            >
+              <View
+                className="w-10 h-10 rounded-full items-center justify-center"
+                style={{ backgroundColor: "#F59E0B" }}
+              >
+                <Ionicons name="stats-chart" size={20} color="white" />
+              </View>
+              <View className="flex-1">
+                <Text className="font-semibold text-sm text-gray-900">
+                  Analytics
+                </Text>
+                <Text className="text-xs text-secondary-content">
+                  Track growth
+                </Text>
+              </View>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        <View className="pb-6">
           <View className="flex-row items-center justify-between px-4 pb-3 pt-2">
             <Text className="text-lg font-bold text-gray-900">
               Planning Tips & Trends
@@ -878,10 +998,8 @@ const {user }= useAuth()
             ))}
           </View>
         </View>
-
       </ScrollView>
-    {/* Tips wala section */}
-      
+      {/* Tips wala section */}
 
       {/* Floating Action Button for Create Event */}
       <TouchableOpacity

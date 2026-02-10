@@ -1,1 +1,16 @@
-export { default } from '@/src/screen/user/cms/EventSuccess';
+import { router, useGlobalSearchParams } from "expo-router";
+import { useEffect } from "react";
+
+export default function EventSuccessRedirect() {
+  const params = useGlobalSearchParams();
+
+  useEffect(() => {
+    // Redirect to events page with success parameter
+    router.replace({
+      pathname: "/(protected)/(client-tabs)/events",
+      params: { success: "true" },
+    });
+  }, []);
+
+  return null;
+}
