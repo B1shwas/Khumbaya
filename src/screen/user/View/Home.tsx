@@ -870,14 +870,14 @@ export default function HomePage() {
         <View className="pb-6">
           <View className="flex-row items-center justify-between px-4 pb-3 pt-2">
             <Text className="text-lg font-bold text-gray-900">
-              Vendor Dashboard
+              Vendor Services
             </Text>
             <TouchableOpacity
               onPress={() => router.push("/vendor" as RelativePathString)}
             >
-              <Text className="text-primary text-sm font-semibold">
+              {/* <Text className="text-primary text-sm font-semibold">
                 View All
-              </Text>
+              </Text> */}
             </TouchableOpacity>
           </View>
           <View className="flex-row flex-wrap gap-3 justify-center px-4">
@@ -899,9 +899,9 @@ export default function HomePage() {
                 <Text className="font-semibold text-sm text-gray-900">
                   Track Money
                 </Text>
-                <Text className="text-xs text-secondary-content">
+                {/* <Text className="text-xs text-secondary-content">
                   Monitor earnings
-                </Text>
+                </Text> */}
               </View>
             </TouchableOpacity>
 
@@ -923,9 +923,9 @@ export default function HomePage() {
                 <Text className="font-semibold text-sm text-gray-900">
                   Manage Events
                 </Text>
-                <Text className="text-xs text-secondary-content">
+                {/* <Text className="text-xs text-secondary-content">
                   View schedules
-                </Text>
+                </Text> */}
               </View>
             </TouchableOpacity>
 
@@ -947,9 +947,9 @@ export default function HomePage() {
                 <Text className="font-semibold text-sm text-gray-900">
                   Find Clients
                 </Text>
-                <Text className="text-xs text-secondary-content">
+                {/* <Text className="text-xs text-secondary-content">
                   Grow business
-                </Text>
+                </Text> */}
               </View>
             </TouchableOpacity>
 
@@ -971,9 +971,9 @@ export default function HomePage() {
                 <Text className="font-semibold text-sm text-gray-900">
                   Analytics
                 </Text>
-                <Text className="text-xs text-secondary-content">
+                {/* <Text className="text-xs text-secondary-content">
                   Track growth
-                </Text>
+                </Text> */}
               </View>
             </TouchableOpacity>
           </View>
@@ -987,9 +987,9 @@ export default function HomePage() {
             <TouchableOpacity
               onPress={() => router.push("/blog" as RelativePathString)}
             >
-              <Text className="text-primary text-sm font-semibold">
+              {/* <Text className="text-primary text-sm font-semibold">
                 View Blog
-              </Text>
+              </Text> */}
             </TouchableOpacity>
           </View>
           <View className="px-4">
