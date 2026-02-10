@@ -1,7 +1,20 @@
 import { Ionicons } from "@expo/vector-icons";
-import { router, type RelativePathString } from "expo-router";
+import {
+  router,
+  useGlobalSearchParams,
+  type RelativePathString,
+} from "expo-router";
 import { useState } from "react";
-import { Alert, Image, RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  Alert,
+  Image,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 type EventStatus = "Planning" | "Confirmed" | "Completed";
@@ -308,6 +321,16 @@ const EventCard = ({ event }: { event: Event }) => (
 export default function EventsPage() {
   const [activeTab, setActiveTab] = useState<EventTab>("myEvents");
   const [refreshing, setRefreshing] = useState(false);
+  const params = useGlobalSearchParams();
+  const showSuccess = params?.success === "true";
+
+  const handleDismissSuccess = () => {
+    router.replace("/events" as RelativePathString);
+  };
+
+  const handleCreateSubEvent = () => {
+    router.push("/events/subevent-create" as RelativePathString);
+  };
 
   const filteredEvents = eventsData.filter(
     (e) => e.isMyEvent === (activeTab === "myEvents"),
@@ -363,7 +386,6 @@ export default function EventsPage() {
                 Invited
               </Text>
             </TouchableOpacity>
-          
           </View>
         </View>
       </View>
@@ -376,6 +398,84 @@ export default function EventsPage() {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
+        {/* Success View */}
+        {showSuccess && (
+          <View style={styles.successContainer}>
+            <View style={styles.successHeroCircle}>
+              <View style={styles.successHeroInner}>
+                <Image
+                  source={{
+                    uri: "https://lh3.googleusercontent.com/aida-public/AB6AXuCDBTMpF5OGVFMpt0SFd1YYHvT0dbWhsJ1OiXWYAZtZHva3uRWvfDLTe0o9wji8CCfff_spyNbGa1EqMQAzU8TSgsZHHZyZczilaJjXsgkwdrHYtnhNzzELEAqjVUidiCPT2fu982NW88FUu6OLV-YHywILAwdx8LLdR69ManJPsqTJW1tjKuLVKnk4MgCSOSRbFhMOSEYIzSWmW-zWQIRd6Gn2odEDu-GJKhVcxGiy5nXwWuauIW5Hx3EfnwvPUTBI8LDijYJeRSk",
+                  }}
+                  style={styles.successHeroImage}
+                  resizeMode="cover"
+                />
+              </View>
+              <View style={[styles.successFloatIcon, styles.successFloatIcon1]}>
+                <Ionicons
+                  name="heart"
+                  size={20}
+                  color="#ee2b8c"
+                  fill="#ee2b8c"
+                />
+              </View>
+              <View style={[styles.successFloatIcon, styles.successFloatIcon2]}>
+                <Ionicons name="star" size={16} color="#ee2b8c" />
+              </View>
+              <View style={[styles.successFloatIcon, styles.successFloatIcon3]}>
+                <Ionicons name="sparkles" size={14} color="#ee2b8c" />
+              </View>
+            </View>
+            <View style={styles.successTextContent}>
+              <Text style={styles.successTitle}>Congratulations!</Text>
+              <Text style={styles.successTitle}>Your event is live.</Text>
+              <Text style={styles.successSubtitle}>
+                Your dream wedding is now set up. What's next?
+              </Text>
+            </View>
+            <View style={styles.successOptions}>
+              <TouchableOpacity
+                style={styles.successOptionButton}
+                onPress={handleCreateSubEvent}
+                activeOpacity={0.8}
+              >
+                <View style={styles.successOptionIconContainer}>
+                  <Ionicons name="sparkles" size={24} color="#9333EA" />
+                </View>
+                <View style={styles.successOptionTextContainer}>
+                  <Text style={styles.successOptionTitle}>
+                    Create Sub Event
+                  </Text>
+                  <Text style={styles.successOptionSubtitle}>
+                    Sangeet, Mehendi, Reception
+                  </Text>
+                </View>
+                <Ionicons name="chevron-forward" size={20} color="#D1D5DB" />
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.successOptionButton}
+                onPress={handleDismissSuccess}
+                activeOpacity={0.8}
+              >
+                <View
+                  style={[
+                    styles.successOptionIconContainer,
+                    { backgroundColor: "#EE2B8C20" },
+                  ]}
+                >
+                  <Ionicons name="calendar" size={24} color="#ee2b8c" />
+                </View>
+                <View style={styles.successOptionTextContainer}>
+                  <Text style={styles.successOptionTitle}>View My Events</Text>
+                  <Text style={styles.successOptionSubtitle}>
+                    See all your events
+                  </Text>
+                </View>
+                <Ionicons name="chevron-forward" size={20} color="#D1D5DB" />
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
         {/* Upcoming Events */}
         {upcomingEvents.length > 0 && (
           <View style={styles.section}>
@@ -724,5 +824,113 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 8,
+  },
+  // Success View Styles
+  successContainer: {
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 20,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+  },
+  successHeroCircle: {
+    width: 140,
+    height: 140,
+    borderRadius: 70,
+    backgroundColor: "#FDF2F8",
+    alignItems: "center",
+    justifyContent: "center",
+    position: "relative",
+    marginBottom: 16,
+  },
+  successHeroInner: {
+    width: 110,
+    height: 110,
+    borderRadius: 55,
+    overflow: "hidden",
+    borderWidth: 3,
+    borderColor: "#FBCFE8",
+  },
+  successHeroImage: {
+    width: "100%",
+    height: "100%",
+  },
+  successFloatIcon: {
+    position: "absolute",
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 6,
+    shadowColor: "#ee2b8c",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  successFloatIcon1: {
+    top: 10,
+    right: 10,
+  },
+  successFloatIcon2: {
+    bottom: 15,
+    left: 10,
+  },
+  successFloatIcon3: {
+    bottom: 10,
+    right: 15,
+  },
+  successTextContent: {
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  successTitle: {
+    fontFamily: "PlusJakartaSans-Bold",
+    fontSize: 22,
+    color: "#181114",
+    textAlign: "center",
+  },
+  successSubtitle: {
+    fontFamily: "PlusJakartaSans-Regular",
+    fontSize: 14,
+    color: "#6B7280",
+    textAlign: "center",
+    marginTop: 8,
+  },
+  successOptions: {
+    width: "100%",
+    gap: 12,
+  },
+  successOptionButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F9FAFB",
+    borderRadius: 14,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+  },
+  successOptionIconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 12,
+    backgroundColor: "#9333EA20",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  successOptionTextContainer: {
+    flex: 1,
+    marginLeft: 12,
+  },
+  successOptionTitle: {
+    fontFamily: "PlusJakartaSans-SemiBold",
+    fontSize: 15,
+    color: "#181114",
+  },
+  successOptionSubtitle: {
+    fontFamily: "PlusJakartaSans-Regular",
+    fontSize: 12,
+    color: "#6B7280",
+    marginTop: 2,
   },
 });
