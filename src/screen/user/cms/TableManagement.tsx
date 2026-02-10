@@ -1,15 +1,23 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useState } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import {
-    Alert,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View
+  Alert,
+  Animated,
+  Dimensions,
+  Modal,
+  PanResponder,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
+
+const STORAGE_KEY = "@table_assignments";
 
 // ============================================
 // Types
@@ -20,520 +28,855 @@ interface Guest {
   name: string;
   familySize: number;
   relation: string;
+  groupId: string;
   tableId: string | null;
+  seatNumber: number | null;
   assigned: boolean;
+}
+
+interface GuestGroup {
+  id: string;
+  name: string;
+  members: Guest[];
+  totalSize: number;
+  assigned: boolean;
+}
+
+interface Seat {
+  id: string;
+  number: number;
+  guestId: string | null;
 }
 
 interface Table {
   id: string;
   name: string;
+  type: "rectangle" | "circle";
+  x: number;
+  y: number;
   capacity: number;
-  assignedGuests: number;
-  guests: Guest[];
+  seats: Seat[];
+}
+
+interface TableTemplate {
+  type: "rectangle" | "circle";
+  name: string;
+  capacity: number;
 }
 
 // ============================================
-// Mock Data
+// Mock Data with Groups
 // ============================================
 
 const MOCK_GUESTS: Guest[] = [
-  {
-    id: "1",
-    name: "Priya Sharma",
-    familySize: 4,
-    relation: "Family",
-    tableId: null,
-    assigned: false,
-  },
-  {
-    id: "2",
-    name: "Rahul Kapoor",
-    familySize: 6,
-    relation: "Family",
-    tableId: null,
-    assigned: false,
-  },
-  {
-    id: "3",
-    name: "Sarah Jenkins",
-    familySize: 2,
-    relation: "Friend",
-    tableId: null,
-    assigned: false,
-  },
-  {
-    id: "4",
-    name: "Mike Ross",
-    familySize: 3,
-    relation: "Colleague",
-    tableId: null,
-    assigned: false,
-  },
-  {
-    id: "5",
-    name: "Amara Singh",
-    familySize: 5,
-    relation: "Family",
-    tableId: null,
-    assigned: false,
-  },
-  {
-    id: "6",
-    name: "John Doe",
-    familySize: 2,
-    relation: "Friend",
-    tableId: null,
-    assigned: false,
-  },
-  {
-    id: "7",
-    name: "Emily Chen",
-    familySize: 4,
-    relation: "Friend",
-    tableId: null,
-    assigned: false,
-  },
-  {
-    id: "8",
-    name: "David Kumar",
-    familySize: 6,
-    relation: "Family",
-    tableId: null,
-    assigned: false,
-  },
-  {
-    id: "9",
-    name: "Lisa Wang",
-    familySize: 2,
-    relation: "Colleague",
-    tableId: null,
-    assigned: false,
-  },
-  {
-    id: "10",
-    name: "Tom Brown",
-    familySize: 3,
-    relation: "Friend",
-    tableId: null,
-    assigned: false,
-  },
+  // Group 1: Vance Family (4 members)
+  { id: "1", name: "Eleanor Vance", familySize: 4, relation: "Family", groupId: "group-1", tableId: null, seatNumber: null, assigned: false },
+  { id: "2", name: "Henry Vance", familySize: 4, relation: "Family", groupId: "group-1", tableId: null, seatNumber: null, assigned: false },
+  { id: "3", name: "Mrs. Vance", familySize: 4, relation: "Family", groupId: "group-1", tableId: null, seatNumber: null, assigned: false },
+  { id: "4", name: "Julia Vance", familySize: 4, relation: "Family", groupId: "group-1", tableId: null, seatNumber: null, assigned: false },
+  // Group 2: Crain Family (3 members)
+  { id: "5", name: "Steven Crain", familySize: 3, relation: "Family", groupId: "group-2", tableId: null, seatNumber: null, assigned: false },
+  { id: "6", name: "Nell Crain", familySize: 3, relation: "Family", groupId: "group-2", tableId: null, seatNumber: null, assigned: false },
+  { id: "7", name: "Luke Crain", familySize: 3, relation: "Family", groupId: "group-2", tableId: null, seatNumber: null, assigned: false },
+  // Group 3: Friends (2 members)
+  { id: "8", name: "Luke S.", familySize: 2, relation: "Friend", groupId: "group-3", tableId: null, seatNumber: null, assigned: false },
+  { id: "9", name: "Shirley H.", familySize: 2, relation: "Friend", groupId: "group-3", tableId: null, seatNumber: null, assigned: false },
+  // Group 4: Colleagues (2 members)
+  { id: "10", name: "Arthur Vance", familySize: 2, relation: "Colleague", groupId: "group-4", tableId: null, seatNumber: null, assigned: false },
+  { id: "11", name: "Olivia V.", familySize: 2, relation: "Colleague", groupId: "group-4", tableId: null, seatNumber: null, assigned: false },
+  // Group 5: Singleton
+  { id: "12", name: "Theodora C.", familySize: 1, relation: "Friend", groupId: "group-5", tableId: null, seatNumber: null, assigned: false },
 ];
+
+const TABLE_TEMPLATES: TableTemplate[] = [
+  { type: "rectangle", name: "Head Table", capacity: 12 },
+  { type: "circle", name: "Round Table", capacity: 8 },
+  { type: "circle", name: "Round Table", capacity: 10 },
+];
+
+// ============================================
+// Draggable Table Component with Guest Display
+// ============================================
+
+interface TableCardProps {
+  table: Table;
+  guests: Guest[];
+  isSelected: boolean;
+  onSelect: (tableId: string) => void;
+  panHandlers: any;
+}
+
+const TableCard = ({ table, guests, isSelected, onSelect, panHandlers }: TableCardProps) => {
+  const occupancy = table.seats.filter(s => s.guestId).length;
+  const occupancyPercent = (occupancy / table.capacity) * 100;
+
+  const getOccupancyColor = () => {
+    if (occupancyPercent === 100) return "#10B981";
+    if (occupancyPercent >= 70) return "#F59E0B";
+    return "#6B7280";
+  };
+
+  const getOccupancyText = () => {
+    if (occupancy === table.capacity) return "FULL";
+    return `${occupancy} / ${table.capacity} SEATS`;
+  };
+
+  return (
+    <Animated.View
+      style={[
+        styles.tableCard,
+        {
+          left: table.x,
+          top: table.y,
+        },
+        table.type === "circle" && styles.tableCardCircle,
+        isSelected && styles.tableCardSelected,
+      ]}
+      {...panHandlers}
+      onPress={() => onSelect(table.id)}
+    >
+      {/* Seat placeholders for rectangle table with guest names */}
+      {table.type === "rectangle" && (
+        <View style={styles.rectangleSeats}>
+          <View style={styles.rectangleSeatTop}>
+            {Array.from({ length: 4 }).map((_, i) => {
+              const seat = table.seats[i];
+              const guest = seat?.guestId ? guests.find(g => g.id === seat.guestId) : null;
+              return (
+                <View
+                  key={`top-${i}`}
+                  style={[
+                    styles.rectangleSeatBox,
+                    guest ? styles.seatFilled : styles.seatEmpty,
+                  ]}
+                >
+                  {guest ? (
+                    <Text style={styles.seatGuestLabel} numberOfLines={1}>
+                      {guest.name.split(" ")[0]}
+                    </Text>
+                  ) : (
+                    <Text style={styles.seatNumberLabel}>{i + 1}</Text>
+                  )}
+                </View>
+              );
+            })}
+          </View>
+          <View style={styles.rectangleSeatBottom}>
+            {Array.from({ length: 4 }).map((_, i) => {
+              const seat = table.seats[i + 4];
+              const guest = seat?.guestId ? guests.find(g => g.id === seat.guestId) : null;
+              return (
+                <View
+                  key={`bottom-${i}`}
+                  style={[
+                    styles.rectangleSeatBox,
+                    guest ? styles.seatFilled : styles.seatEmpty,
+                  ]}
+                >
+                  {guest ? (
+                    <Text style={styles.seatGuestLabel} numberOfLines={1}>
+                      {guest.name.split(" ")[0]}
+                    </Text>
+                  ) : (
+                    <Text style={styles.seatNumberLabel}>{i + 5}</Text>
+                  )}
+                </View>
+              );
+            })}
+          </View>
+        </View>
+      )}
+
+      {/* Circle table */}
+      {table.type === "circle" && (
+        <>
+          <View style={styles.circleTable}>
+            <Text style={styles.tableLabel}>TABLE</Text>
+            <Text style={styles.tableNumber}>{table.name}</Text>
+          </View>
+          <View
+            style={[
+              styles.occupancyBadge,
+              { backgroundColor: getOccupancyColor() },
+            ]}
+          >
+            <Text style={styles.occupancyText}>{getOccupancyText()}</Text>
+          </View>
+          {/* Show seated guests on circle table */}
+          <View style={styles.circleGuests}>
+            {table.seats.slice(0, 6).map((seat, i) => {
+              const guest = seat?.guestId ? guests.find(g => g.id === seat.guestId) : null;
+              if (!guest) return null;
+              return (
+                <View key={seat.id} style={styles.circleGuestDot}>
+                  <Text style={styles.circleGuestInitial}>{guest.name.charAt(0)}</Text>
+                </View>
+              );
+            })}
+            {table.seats.filter(s => s.guestId).length > 6 && (
+              <Text style={styles.moreGuests}>+{table.seats.filter(s => s.guestId).length - 6}</Text>
+            )}
+          </View>
+        </>
+      )}
+
+      {/* Selected indicator */}
+      {isSelected && <View style={styles.selectedRing} />}
+    </Animated.View>
+  );
+};
+
+// ============================================
+// Guest Group Chip Component
+// ============================================
+
+interface GroupChipProps {
+  group: GuestGroup;
+  isSelected: boolean;
+  onSelect: () => void;
+}
+
+const GroupChip = ({ group, isSelected, onSelect }: GroupChipProps) => {
+  return (
+    <TouchableOpacity
+      style={[styles.groupChip, isSelected && styles.groupChipSelected]}
+      onPress={onSelect}
+    >
+      <View style={styles.groupChipHeader}>
+        <Text style={styles.groupChipName}>{group.name}</Text>
+        <View style={styles.groupChipBadge}>
+          <Text style={styles.groupChipBadgeText}>{group.totalSize}</Text>
+        </View>
+      </View>
+      <Text style={styles.groupChipMembers}>
+        {group.members.slice(0, 3).map(m => m.name.split(" ")[0]).join(", ")}
+        {group.members.length > 3 && ` +${group.members.length - 3}`}
+      </Text>
+    </TouchableOpacity>
+  );
+};
+
+// ============================================
+// Main Component
+// ============================================
 
 export default function TableManagement() {
   const router = useRouter();
   const params = useLocalSearchParams();
-  const eventId = params.eventId as string;
+  const eventId = params.eventId as string || "default";
 
   const [guests, setGuests] = useState<Guest[]>(MOCK_GUESTS);
-  const [tables, setTables] = useState<Table[]>([]);
-  const [tableName, setTableName] = useState("");
-  const [tableCapacity, setTableCapacity] = useState("");
-  const [selectedTab, setSelectedTab] = useState<"unassigned" | "tables">(
-    "unassigned",
-  );
-
-  // Auto-assign logic based on family size
-  const handleAutoAssign = () => {
-    Alert.alert(
-      "Auto Assign Tables",
-      "This will automatically assign guests to tables based on their family size. Continue?",
-      [
-        { text: "Cancel", style: "cancel" },
-        { text: "Assign", onPress: () => performAutoAssign() },
+  const [tables, setTables] = useState<Table[]>([
+    {
+      id: "table-1",
+      name: "01",
+      type: "rectangle",
+      x: 20,
+      y: 60,
+      capacity: 12,
+      seats: [
+        { id: "s1", number: 1, guestId: null },
+        { id: "s2", number: 2, guestId: null },
+        { id: "s3", number: 3, guestId: null },
+        { id: "s4", number: 4, guestId: null },
+        { id: "s5", number: 5, guestId: null },
+        { id: "s6", number: 6, guestId: null },
+        { id: "s7", number: 7, guestId: null },
+        { id: "s8", number: 8, guestId: null },
+        { id: "s9", number: 9, guestId: null },
+        { id: "s10", number: 10, guestId: null },
+        { id: "s11", number: 11, guestId: null },
+        { id: "s12", number: 12, guestId: null },
       ],
-    );
-  };
+    },
+    {
+      id: "table-2",
+      name: "02",
+      type: "circle",
+      x: 200,
+      y: 100,
+      capacity: 10,
+      seats: [
+        { id: "s21", number: 1, guestId: null },
+        { id: "s22", number: 2, guestId: null },
+        { id: "s23", number: 3, guestId: null },
+        { id: "s24", number: 4, guestId: null },
+        { id: "s25", number: 5, guestId: null },
+        { id: "s26", number: 6, guestId: null },
+        { id: "s27", number: 7, guestId: null },
+        { id: "s28", number: 8, guestId: null },
+        { id: "s29", number: 9, guestId: null },
+        { id: "s30", number: 10, guestId: null },
+      ],
+    },
+  ]);
+  const [selectedTableId, setSelectedTableId] = useState<string | null>(null);
+  const [showAddTable, setShowAddTable] = useState(false);
+  const [showGroupSelector, setShowGroupSelector] = useState(false);
+  const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
+  const [selectedTableAnim] = useState(new Animated.Value(0));
+  const [isSaving, setIsSaving] = useState(false);
 
-  const performAutoAssign = () => {
-    const unassignedGuests = guests.filter((g) => !g.assigned);
-    const newTables: Table[] = [...tables];
-    let currentTableIndex = newTables.length;
+  // Load saved data on mount
+  useEffect(() => {
+    loadSavedData();
+  }, []);
 
-    // Sort guests by family size (largest first) for better packing
-    const sortedGuests = unassignedGuests.sort(
-      (a, b) => b.familySize - a.familySize,
-    );
-
-    for (const guest of sortedGuests) {
-      // Try to find existing table with space
-      let assigned = false;
-
-      for (let i = 0; i < newTables.length; i++) {
-        const table = newTables[i];
-        const availableSpace = table.capacity - table.assignedGuests;
-
-        if (availableSpace >= guest.familySize) {
-          // Assign to existing table
-          table.guests.push(guest);
-          table.assignedGuests += guest.familySize;
-
-          setGuests((prev) =>
-            prev.map((g) =>
-              g.id === guest.id
-                ? { ...g, tableId: table.id, assigned: true }
-                : g,
-            ),
-          );
-          assigned = true;
-          break;
-        }
+  const loadSavedData = async () => {
+    try {
+      const savedData = await AsyncStorage.getItem(`${STORAGE_KEY}_${eventId}`);
+      if (savedData) {
+        const parsed = JSON.parse(savedData);
+        if (parsed.tables) setTables(parsed.tables);
+        if (parsed.guests) setGuests(parsed.guests);
       }
+    } catch (error) {
+      console.log("Failed to load saved data:", error);
+    }
+  };
 
-      // Create new table if not assigned
-      if (!assigned) {
-        const newTableId = `table-${Date.now()}-${currentTableIndex}`;
-        const newTable: Table = {
-          id: newTableId,
-          name: `Table ${currentTableIndex + 1}`,
-          capacity: Math.max(guest.familySize * 2, 8), // At least 8 seats or double family size
-          assignedGuests: guest.familySize,
-          guests: [guest],
-        };
+  const saveData = async () => {
+    setIsSaving(true);
+    try {
+      const dataToSave = {
+        tables: tables,
+        guests: guests,
+        savedAt: new Date().toISOString(),
+      };
+      await AsyncStorage.setItem(`${STORAGE_KEY}_${eventId}`, JSON.stringify(dataToSave));
+      Alert.alert("Success", "Table assignments saved successfully!");
+    } catch (error) {
+      Alert.alert("Error", "Failed to save assignments. Please try again.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
-        newTables.push(newTable);
-        currentTableIndex++;
-
-        setGuests((prev) =>
-          prev.map((g) =>
-            g.id === guest.id
-              ? { ...g, tableId: newTableId, assigned: true }
-              : g,
-          ),
-        );
+  // Build groups from guests
+  const groups: GuestGroup[] = useMemo(() => {
+    const groupMap = new Map<string, Guest[]>();
+    
+    guests.forEach(guest => {
+      if (!groupMap.has(guest.groupId)) {
+        groupMap.set(guest.groupId, []);
       }
-    }
+      groupMap.get(guest.groupId)!.push(guest);
+    });
 
-    setTables(newTables);
+    return Array.from(groupMap.entries()).map(([id, members]) => ({
+      id,
+      name: members[0].relation || "Group",
+      members,
+      totalSize: members.reduce((sum, m) => sum + m.familySize, 0),
+      assigned: members.every(m => m.assigned),
+    }));
+  }, [guests]);
+
+  const unassignedGroups = groups.filter(g => !g.assigned);
+  const selectedTable = tables.find(t => t.id === selectedTableId);
+
+  // Pan handlers for tables
+  const createTablePanHandlers = (tableId: string) => {
+    return PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onPanResponderGrant: () => {
+        setSelectedTableId(tableId);
+      },
+      onPanResponderMove: (_, gesture) => {
+        setTables(prev => prev.map(t => {
+          if (t.id === tableId) {
+            return {
+              ...t,
+              x: Math.max(0, Math.min(SCREEN_WIDTH - 150, t.x + gesture.dx)),
+              y: Math.max(80, Math.min(SCREEN_HEIGHT - 250, t.y + gesture.dy)),
+            };
+          }
+          return t;
+        }));
+      },
+      onPanResponderRelease: () => {},
+    }).panHandlers;
   };
-
-  const handleAddTable = () => {
-    if (!tableName.trim()) {
-      Alert.alert("Error", "Please enter table name");
-      return;
-    }
-
-    const capacity = parseInt(tableCapacity) || 8;
-
-    const newTable: Table = {
-      id: `table-${Date.now()}`,
-      name: tableName.trim(),
-      capacity,
-      assignedGuests: 0,
-      guests: [],
-    };
-
-    setTables((prev) => [...prev, newTable]);
-    setTableName("");
-    setTableCapacity("");
-  };
-
-  const handleDeleteTable = (tableId: string) => {
-    // Unassign guests from deleted table
-    setGuests((prev) =>
-      prev.map((g) =>
-        g.tableId === tableId ? { ...g, tableId: null, assigned: false } : g,
-      ),
-    );
-
-    // Remove table
-    setTables((prev) => prev.filter((t) => t.id !== tableId));
-  };
-
-  const handleRemoveGuestFromTable = (guestId: string, tableId: string) => {
-    const table = tables.find((t) => t.id === tableId);
-    if (!table) return;
-
-    const guest = table.guests.find((g) => g.id === guestId);
-    if (!guest) return;
-
-    // Update table
-    setTables((prev) =>
-      prev.map((t) => {
-        if (t.id === tableId) {
-          return {
-            ...t,
-            assignedGuests: t.assignedGuests - guest.familySize,
-            guests: t.guests.filter((g) => g.id !== guestId),
-          };
-        }
-        return t;
-      }),
-    );
-
-    // Update guest
-    setGuests((prev) =>
-      prev.map((g) =>
-        g.id === guestId ? { ...g, tableId: null, assigned: false } : g,
-      ),
-    );
-  };
-
-  const unassignedGuests = guests.filter((g) => !g.assigned);
-  const totalGuests = guests.reduce((acc, g) => acc + g.familySize, 0);
-  const assignedGuests = guests
-    .filter((g) => g.assigned)
-    .reduce((acc, g) => acc + g.familySize, 0);
 
   const handleBack = () => {
     router.back();
   };
 
+  const handleSave = () => {
+    saveData();
+  };
+
+  const handleAutoAssign = () => {
+    // Auto-assign groups to tables
+    let groupIndex = 0;
+    
+    setTables(prev => prev.map(table => {
+      const tableGroups = [...groups].slice(groupIndex);
+      const remainingCapacity = table.capacity - table.seats.filter(s => s.guestId).length;
+      
+      let seatsToFill = remainingCapacity;
+      const newSeats = [...table.seats];
+      
+      for (const group of tableGroups) {
+        if (seatsToFill <= 0) break;
+        
+        const groupMembers = group.members.filter(m => !m.assigned);
+        for (let i = 0; i < groupMembers.length && seatsToFill > 0; i++) {
+          const seatIndex = newSeats.findIndex(s => !s.guestId);
+          if (seatIndex >= 0) {
+            newSeats[seatIndex] = { ...newSeats[seatIndex], guestId: groupMembers[i].id };
+            seatsToFill--;
+            groupIndex++;
+          }
+        }
+      }
+      
+      return { ...table, seats: newSeats };
+    }));
+
+    // Update guests
+    setGuests(prev => prev.map(guest => {
+      const table = tables.find(t => t.seats.some(s => s.guestId === guest.id));
+      if (table) {
+        return { ...guest, assigned: true, tableId: table.id };
+      }
+      return guest;
+    }));
+  };
+
+  const handleAddTable = (template: TableTemplate) => {
+    const newTable: Table = {
+      id: `table-${Date.now()}`,
+      name: `${tables.length + 1}`.padStart(2, "0"),
+      type: template.type,
+      x: 50 + Math.random() * 100,
+      y: 100 + Math.random() * 100,
+      capacity: template.capacity,
+      seats: Array.from({ length: template.capacity }, (_, i) => ({
+        id: `s-${Date.now()}-${i}`,
+        number: i + 1,
+        guestId: null,
+      })),
+    };
+    setTables(prev => [...prev, newTable]);
+    setShowAddTable(false);
+  };
+
+  const handleRemoveGuestFromSeat = (seatId: string) => {
+    if (!selectedTable) return;
+
+    const seat = selectedTable.seats.find(s => s.id === seatId);
+    if (!seat?.guestId) return;
+
+    setTables(prev =>
+      prev.map(table => {
+        if (table.id === selectedTableId) {
+          return {
+            ...table,
+            seats: table.seats.map(s =>
+              s.id === seatId ? { ...s, guestId: null } : s,
+            ),
+          };
+        }
+        return table;
+      }),
+    );
+
+    setGuests(prev =>
+      prev.map(guest => {
+        if (guest.id === seat.guestId) {
+          return { ...guest, assigned: false, tableId: null, seatNumber: null };
+        }
+        return guest;
+      }),
+    );
+  };
+
+  const handleRemoveGroupFromTable = (groupId: string) => {
+    // Remove all members of the group from the table
+    const groupMembers = guests.filter(g => g.groupId === groupId && g.tableId === selectedTableId);
+    
+    setTables(prev =>
+      prev.map(table => {
+        if (table.id === selectedTableId) {
+          return {
+            ...table,
+            seats: table.seats.map(s => {
+              const member = groupMembers.find(m => m.id === s.guestId);
+              return member ? { ...s, guestId: null } : s;
+            }),
+          };
+        }
+        return table;
+      }),
+    );
+
+    setGuests(prev =>
+      prev.map(guest => {
+        if (guest.groupId === groupId) {
+          return { ...guest, assigned: false, tableId: null, seatNumber: null };
+        }
+        return guest;
+      }),
+    );
+  };
+
+  const handleAssignGroupToTable = (group: GuestGroup) => {
+    if (!selectedTable) return;
+
+    const availableSeats = selectedTable.seats.filter(s => !s.guestId);
+    const availableCapacity = availableSeats.length;
+    const groupMembers = group.members.filter(m => !m.assigned);
+    const totalNeeded = groupMembers.reduce((sum, m) => sum + m.familySize, 0);
+
+    if (availableCapacity < totalNeeded) {
+      Alert.alert(
+        "Not Enough Seats",
+        `This group needs ${totalNeeded} seats but only ${availableCapacity} are available.`,
+        [{ text: "OK" }]
+      );
+      return;
+    }
+
+    // Assign group members to seats
+    const memberIds = groupMembers.map(m => m.id);
+
+    setTables(prev =>
+      prev.map(table => {
+        if (table.id === selectedTableId) {
+          const newSeats = table.seats.map(s => {
+            if (!s.guestId && memberIds.length > 0) {
+              const guestId = memberIds.shift();
+              return { ...s, guestId: guestId! };
+            }
+            return s;
+          });
+          return { ...table, seats: newSeats };
+        }
+        return table;
+      }),
+    );
+
+    setGuests(prev =>
+      prev.map(guest => {
+        if (guest.groupId === group.id) {
+          return { ...guest, assigned: true, tableId: selectedTable.id };
+        }
+        return guest;
+      }),
+    );
+
+    setShowGroupSelector(false);
+    setSelectedGroupId(null);
+  };
+
+  const handleSelectSeatForGroup = (seatId: string) => {
+    if (!selectedTable) return;
+    
+    const seat = selectedTable.seats.find(s => s.id === seatId);
+    if (!seat?.guestId) {
+      setShowGroupSelector(true);
+    }
+  };
+
+  const totalGuests = guests.length;
+  const seatedGuests = guests.filter(g => g.assigned).length;
+
   return (
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={handleBack} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={20} color="#181114" />
+        <TouchableOpacity onPress={handleBack} style={styles.headerButton}>
+          <Ionicons name="arrow-back" size={20} color="#6B7280" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Manage Tables</Text>
-        <TouchableOpacity style={styles.headerButton}>
-          <Text style={styles.headerButtonText}>Save</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Summary Stats */}
-      <View style={styles.summaryContainer}>
-        <View style={styles.summaryCard}>
-          <Text style={styles.summaryNumber}>{guests.length}</Text>
-          <Text style={styles.summaryLabel}>Families</Text>
-        </View>
-        <View style={styles.summaryCard}>
-          <Text style={styles.summaryNumber}>{totalGuests}</Text>
-          <Text style={styles.summaryLabel}>Total Guests</Text>
-        </View>
-        <View style={styles.summaryCard}>
-          <Text style={styles.summaryNumber}>{assignedGuests}</Text>
-          <Text style={styles.summaryLabel}>Seated</Text>
-        </View>
-        <View style={styles.summaryCard}>
-          <Text style={styles.summaryNumber}>{tables.length}</Text>
-          <Text style={styles.summaryLabel}>Tables</Text>
-        </View>
-      </View>
-
-      {/* Tabs */}
-      <View style={styles.tabsContainer}>
-        <TouchableOpacity
-          style={[styles.tab, selectedTab === "unassigned" && styles.tabActive]}
-          onPress={() => setSelectedTab("unassigned")}
+        <Text style={styles.headerTitle}>Seating Plan</Text>
+        <TouchableOpacity 
+          onPress={handleSave} 
+          style={styles.headerButton}
+          disabled={isSaving}
         >
-          <Ionicons
-            name="people-outline"
-            size={20}
-            color={selectedTab === "unassigned" ? "#ee2b8c" : "#6B7280"}
-          />
-          <Text
-            style={[
-              styles.tabText,
-              selectedTab === "unassigned" && styles.tabTextActive,
-            ]}
-          >
-            Unassigned ({unassignedGuests.length})
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.tab, selectedTab === "tables" && styles.tabActive]}
-          onPress={() => setSelectedTab("tables")}
-        >
-          <Ionicons
-            name="grid-outline"
-            size={20}
-            color={selectedTab === "tables" ? "#ee2b8c" : "#6B7280"}
-          />
-          <Text
-            style={[
-              styles.tabText,
-              selectedTab === "tables" && styles.tabTextActive,
-            ]}
-          >
-            Tables ({tables.length})
+          <Text style={[styles.saveButton, isSaving && styles.saveButtonDisabled]}>
+            {isSaving ? "Saving..." : "Save"}
           </Text>
         </TouchableOpacity>
       </View>
 
-      <ScrollView
-        style={styles.scrollView}
-        showsVerticalScrollIndicator={false}
-      >
-        {selectedTab === "unassigned" ? (
-          /* Unassigned Guests Section */
-          <View style={styles.section}>
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Unassigned Guests</Text>
-              <TouchableOpacity
-                style={styles.autoAssignButton}
-                onPress={handleAutoAssign}
-              >
-                <Ionicons name="flash-outline" size={16} color="white" />
-                <Text style={styles.autoAssignButtonText}>Auto Assign</Text>
-              </TouchableOpacity>
-            </View>
+      {/* Main Content */}
+      <View style={styles.mainContent}>
+        {/* Unassigned Groups Section */}
+        <View style={styles.unassignedSection}>
+          <View style={styles.unassignedHeader}>
+            <View style={styles.pulseDot} />
+            <Text style={styles.unassignedTitle}>
+              Unassigned ({unassignedGroups.length} groups)
+            </Text>
+            <TouchableOpacity
+              onPress={handleAutoAssign}
+              style={styles.autoAssignButton}
+            >
+              <Ionicons name="sparkles" size={14} color="#ee2b8c" />
+              <Text style={styles.autoAssignText}>Auto-Assign</Text>
+            </TouchableOpacity>
+          </View>
 
-            {/* Add Table Form */}
-            <View style={styles.addTableForm}>
-              <Text style={styles.formLabel}>Create New Table</Text>
-              <View style={styles.formRow}>
-                <TextInput
-                  style={[styles.formInput, { flex: 1 }]}
-                  placeholder="Table name (e.g., Table 1)"
-                  placeholderTextColor="#9CA3AF"
-                  value={tableName}
-                  onChangeText={setTableName}
-                />
-                <TextInput
-                  style={[styles.formInput, { width: 80 }]}
-                  placeholder="Seats"
-                  placeholderTextColor="#9CA3AF"
-                  value={tableCapacity}
-                  onChangeText={setTableCapacity}
-                  keyboardType="numeric"
-                />
-              </View>
-              <TouchableOpacity
-                style={styles.addTableButton}
-                onPress={handleAddTable}
-              >
-                <Ionicons name="add" size={20} color="white" />
-                <Text style={styles.addTableButtonText}>Add Table</Text>
-              </TouchableOpacity>
-            </View>
-
-            {/* Guest List */}
-            {unassignedGuests.map((guest) => (
-              <View key={guest.id} style={styles.guestCard}>
-                <View style={styles.guestAvatar}>
-                  <Text style={styles.guestAvatarText}>
-                    {guest.name.charAt(0)}
-                  </Text>
-                </View>
-                <View style={styles.guestInfo}>
-                  <Text style={styles.guestName}>{guest.name}</Text>
-                  <Text style={styles.guestRelation}>{guest.relation}</Text>
-                </View>
-                <View style={styles.guestFamilyBadge}>
-                  <Text style={styles.guestFamilyText}>
-                    {guest.familySize} seats
-                  </Text>
-                </View>
-              </View>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.guestChipsContainer}
+          >
+            {unassignedGroups.map(group => (
+              <GroupChip
+                key={group.id}
+                group={group}
+                isSelected={selectedGroupId === group.id}
+                onSelect={() => {
+                  if (selectedTable) {
+                    handleAssignGroupToTable(group);
+                  } else {
+                    setSelectedGroupId(group.id);
+                  }
+                }}
+              />
             ))}
+          </ScrollView>
+        </View>
 
-            {unassignedGuests.length === 0 && (
-              <View style={styles.emptyState}>
-                <Ionicons
-                  name="checkmark-circle-outline"
-                  size={48}
-                  color="#10B981"
-                />
-                <Text style={styles.emptyTitle}>All guests assigned!</Text>
-                <Text style={styles.emptySubtitle}>
-                  Go to Tables tab to view assigned tables
+        {/* Floor Plan Canvas */}
+        <View style={styles.canvasContainer}>
+          <View style={styles.canvasGrid}>
+            {tables.map(table => (
+              <TableCard
+                key={table.id}
+                table={table}
+                guests={guests}
+                isSelected={selectedTableId === table.id}
+                onSelect={setSelectedTableId}
+                panHandlers={createTablePanHandlers(table.id)}
+              />
+            ))}
+          </View>
+
+          {/* Canvas Info Overlay */}
+          <View style={styles.canvasInfo}>
+            <View style={styles.guestAvatars}>
+              <View style={styles.avatarDot}>
+                <Text style={styles.avatarText}>JD</Text>
+              </View>
+              <View style={styles.avatarDot}>
+                <Text style={styles.avatarText}>EV</Text>
+              </View>
+              <View style={styles.avatarDot}>
+                <Text style={styles.avatarText}>+12</Text>
+              </View>
+            </View>
+            <Text style={styles.canvasInfoText}>
+              {seatedGuests}/{totalGuests} seated
+            </Text>
+          </View>
+
+          {/* Floating Controls */}
+          <View style={styles.floatingControls}>
+            <TouchableOpacity style={styles.fab}>
+              <Ionicons name="expand" size={20} color="#6B7280" />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.fab, styles.fabAdd]}
+              onPress={() => setShowAddTable(true)}
+            >
+              <Ionicons name="add" size={28} color="white" />
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+
+      {/* Bottom Drawer */}
+      {selectedTable && (
+        <Animated.View
+          style={[
+            styles.drawer,
+            { transform: [{ translateY: selectedTableAnim }] },
+          ]}
+        >
+          <View style={styles.drawerHandle} />
+          <View style={styles.drawerContent}>
+            <View style={styles.drawerHeader}>
+              <View>
+                <Text style={styles.drawerTitle}>
+                  Table {selectedTable.name}
+                </Text>
+                <Text style={styles.drawerSubtitle}>
+                  {selectedTable.seats.filter(s => !s.guestId).length} seats available
                 </Text>
               </View>
-            )}
-          </View>
-        ) : (
-          /* Tables Section */
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Tables</Text>
+              <TouchableOpacity style={styles.editButton}>
+                <Ionicons name="create" size={20} color="#ee2b8c" />
+              </TouchableOpacity>
+            </View>
 
-            {tables.map((table) => {
-              const occupancyRate = Math.round(
-                (table.assignedGuests / table.capacity) * 100,
-              );
+            <View style={styles.seatsGrid}>
+              {selectedTable.seats.map((seat, index) => {
+                const guest = guests.find(g => g.id === seat.guestId);
+                const group = guest ? groups.find(g => g.id === guest.groupId) : null;
+                const isFirstSeatOfGroup = guest && 
+                  selectedTable.seats.findIndex(s => s.guestId === guest.id) === index;
 
-              return (
-                <View key={table.id} style={styles.tableCard}>
-                  <View style={styles.tableHeader}>
-                    <View style={styles.tableInfo}>
-                      <Text style={styles.tableName}>{table.name}</Text>
-                      <Text style={styles.tableCapacity}>
-                        {table.assignedGuests}/{table.capacity} seats (
-                        {occupancyRate}%)
-                      </Text>
-                    </View>
-                    <TouchableOpacity
-                      style={styles.deleteTableButton}
-                      onPress={() => handleDeleteTable(table.id)}
-                    >
-                      <Ionicons
-                        name="trash-outline"
-                        size={18}
-                        color="#EF4444"
-                      />
-                    </TouchableOpacity>
-                  </View>
-
-                  {/* Occupancy Bar */}
-                  <View style={styles.occupancyBar}>
+                return (
+                  <TouchableOpacity
+                    key={seat.id}
+                    style={[
+                      styles.seatSlot,
+                      guest && styles.seatSlotFilled,
+                      group && styles.seatSlotGroup,
+                    ]}
+                    onPress={() => {
+                      if (guest) {
+                        if (isFirstSeatOfGroup) {
+                          handleRemoveGroupFromTable(group!.id);
+                        } else {
+                          handleRemoveGuestFromSeat(seat.id);
+                        }
+                      } else {
+                        handleSelectSeatForGroup(seat.id);
+                      }
+                    }}
+                  >
                     <View
                       style={[
-                        styles.occupancyFill,
-                        { width: `${occupancyRate}%` },
-                        occupancyRate > 90 && styles.occupancyHigh,
-                        occupancyRate > 70 &&
-                          occupancyRate <= 90 &&
-                          styles.occupancyMedium,
+                        styles.seatNumber,
+                        guest && styles.seatNumberFilled,
+                        isFirstSeatOfGroup && styles.seatNumberGroup,
                       ]}
-                    />
-                  </View>
-
-                  {/* Assigned Guests */}
-                  <View style={styles.tableGuests}>
-                    {table.guests.map((guest) => (
-                      <View key={guest.id} style={styles.tableGuestItem}>
-                        <View style={styles.tableGuestAvatar}>
-                          <Text style={styles.tableGuestAvatarText}>
-                            {guest.name.charAt(0)}
+                    >
+                      <Text
+                        style={[
+                          styles.seatNumberText,
+                          guest && styles.seatNumberTextFilled,
+                        ]}
+                      >
+                        {index + 1}
+                      </Text>
+                    </View>
+                    {guest ? (
+                      <View style={styles.seatGuestInfo}>
+                        <Text style={styles.seatGuestName}>{guest.name}</Text>
+                        {isFirstSeatOfGroup && (
+                          <Text style={styles.seatGroupLabel}>
+                            {group!.name} ({group!.totalSize})
                           </Text>
-                        </View>
-                        <View style={styles.tableGuestInfo}>
-                          <Text style={styles.tableGuestName}>
-                            {guest.name}
-                          </Text>
-                          <Text style={styles.tableGuestFamily}>
-                            {guest.familySize} seats
-                          </Text>
-                        </View>
-                        <TouchableOpacity
-                          style={styles.removeGuestButton}
-                          onPress={() =>
-                            handleRemoveGuestFromTable(guest.id, table.id)
-                          }
-                        >
-                          <Ionicons
-                            name="close-circle"
-                            size={16}
-                            color="#EF4444"
-                          />
-                        </TouchableOpacity>
+                        )}
                       </View>
-                    ))}
-                  </View>
-
-                  {table.guests.length === 0 && (
-                    <Text style={styles.emptyTableText}>
-                      No guests assigned yet
-                    </Text>
-                  )}
-                </View>
-              );
-            })}
-
-            {tables.length === 0 && (
-              <View style={styles.emptyState}>
-                <Ionicons name="grid-outline" size={48} color="#D1D5DB" />
-                <Text style={styles.emptyTitle}>No tables created</Text>
-                <Text style={styles.emptySubtitle}>
-                  Create tables in the Unassigned tab or use Auto Assign
-                </Text>
-              </View>
-            )}
+                    ) : (
+                      <Text style={styles.seatEmptyText}>Empty</Text>
+                    )}
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
           </View>
-        )}
+        </Animated.View>
+      )}
 
-        <View style={styles.bottomSpacing} />
-      </ScrollView>
+      {/* Group Selector Modal */}
+      <Modal
+        visible={showGroupSelector}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowGroupSelector(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHandle} />
+            <Text style={styles.modalTitle}>Select Group</Text>
+            <Text style={styles.modalSubtitle}>
+              Tap a group to assign all members to this table
+            </Text>
+
+            <ScrollView style={styles.groupList}>
+              {unassignedGroups.map(group => {
+                const groupMembers = group.members.filter(m => !m.assigned);
+                const totalNeeded = groupMembers.reduce((sum, m) => sum + m.familySize, 0);
+                const availableSeats = selectedTable?.seats.filter(s => !s.guestId).length || 0;
+                const canAssign = availableSeats >= totalNeeded;
+
+                return (
+                  <TouchableOpacity
+                    key={group.id}
+                    style={[styles.groupOption, !canAssign && styles.groupOptionDisabled]}
+                    onPress={() => canAssign && handleAssignGroupToTable(group)}
+                    disabled={!canAssign}
+                  >
+                    <View style={styles.groupOptionInfo}>
+                      <Text style={styles.groupOptionName}>{group.name}</Text>
+                      <Text style={styles.groupOptionMembers}>
+                        {groupMembers.map(m => m.name).join(", ")}
+                      </Text>
+                      <Text style={styles.groupOptionSize}>
+                        Seats needed: {totalNeeded}
+                      </Text>
+                    </View>
+                    <View style={[styles.groupOptionCheck, canAssign && styles.groupOptionCheckActive]}>
+                      <Ionicons
+                        name={canAssign ? "checkmark" : "close"}
+                        size={18}
+                        color={canAssign ? "white" : "#9CA3AF"}
+                      />
+                    </View>
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
+
+            <TouchableOpacity
+              style={styles.modalClose}
+              onPress={() => setShowGroupSelector(false)}
+            >
+              <Text style={styles.modalCloseText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Add Table Modal */}
+      {showAddTable && (
+        <Modal
+          visible={showAddTable}
+          transparent
+          animationType="slide"
+          onRequestClose={() => setShowAddTable(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              <View style={styles.modalHandle} />
+              <Text style={styles.modalTitle}>Add Table</Text>
+              <View style={styles.tableOptions}>
+                {TABLE_TEMPLATES.map((template, index) => (
+                  <TouchableOpacity
+                    key={index}
+                    style={styles.tableOption}
+                    onPress={() => handleAddTable(template)}
+                  >
+                    <Ionicons
+                      name={template.type === "rectangle" ? "square" : "ellipse"}
+                      size={24}
+                      color="#ee2b8c"
+                    />
+                    <Text style={styles.tableOptionName}>{template.name}</Text>
+                    <Text style={styles.tableOptionCapacity}>
+                      {template.capacity} seats
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+              <TouchableOpacity
+                style={styles.modalClose}
+                onPress={() => setShowAddTable(false)}
+              >
+                <Text style={styles.modalCloseText}>Cancel</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+      )}
     </View>
   );
 }
@@ -541,334 +884,546 @@ export default function TableManagement() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f8f6f7",
+    backgroundColor: "#f8f6f6",
   },
   header: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 16,
-    paddingTop: 60,
-    paddingBottom: 8,
+    paddingVertical: 12,
     backgroundColor: "white",
-  },
-  backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "#F3F4F6",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  headerTitle: {
-    fontFamily: "PlusJakartaSans-Bold",
-    fontSize: 18,
-    color: "#181114",
+    borderBottomWidth: 1,
+    borderBottomColor: "#ee2b8c10",
   },
   headerButton: {
-    backgroundColor: "#ee2b8c",
-    borderRadius: 10,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
+    padding: 8,
   },
-  headerButtonText: {
-    fontFamily: "PlusJakartaSans-Bold",
+  headerTitle: {
     fontSize: 14,
-    color: "white",
-  },
-  summaryContainer: {
-    flexDirection: "row",
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-    gap: 10,
-  },
-  summaryCard: {
-    flex: 1,
-    backgroundColor: "white",
-    borderRadius: 12,
-    padding: 12,
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: "#E5E7EB",
-  },
-  summaryNumber: {
-    fontFamily: "PlusJakartaSans-Bold",
-    fontSize: 20,
-    color: "#181114",
-  },
-  summaryLabel: {
-    fontFamily: "PlusJakartaSans-Regular",
-    fontSize: 11,
+    fontWeight: "700",
     color: "#6B7280",
-    marginTop: 2,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
   },
-  tabsContainer: {
-    flexDirection: "row",
-    paddingHorizontal: 16,
-    paddingBottom: 8,
-    gap: 8,
-  },
-  tab: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "white",
-    borderRadius: 12,
-    paddingVertical: 12,
-    gap: 8,
-    borderWidth: 1,
-    borderColor: "#E5E7EB",
-  },
-  tabActive: {
-    backgroundColor: "#FDF2F8",
-    borderColor: "#ee2b8c",
-  },
-  tabText: {
-    fontFamily: "PlusJakartaSans-SemiBold",
-    fontSize: 13,
-    color: "#6B7280",
-  },
-  tabTextActive: {
+  saveButton: {
+    fontSize: 14,
+    fontWeight: "600",
     color: "#ee2b8c",
   },
-  scrollView: {
+  saveButtonDisabled: {
+    opacity: 0.5,
+  },
+  mainContent: {
     flex: 1,
   },
-  section: {
-    paddingHorizontal: 16,
-    paddingTop: 16,
-  },
-  sectionHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 12,
-  },
-  sectionTitle: {
-    fontFamily: "PlusJakartaSans-Bold",
-    fontSize: 18,
-    color: "#181114",
-  },
-  addTableForm: {
+  unassignedSection: {
     backgroundColor: "white",
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: "#E5E7EB",
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+    zIndex: 40,
   },
-  formLabel: {
-    fontFamily: "PlusJakartaSans-SemiBold",
-    fontSize: 14,
-    color: "#374151",
-    marginBottom: 10,
-  },
-  formRow: {
-    flexDirection: "row",
-    gap: 10,
-    marginBottom: 12,
-  },
-  formInput: {
-    backgroundColor: "#F9FAFB",
-    borderRadius: 10,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    fontFamily: "PlusJakartaSans-Regular",
-    fontSize: 14,
-    color: "#181114",
-    borderWidth: 1,
-    borderColor: "#E5E7EB",
-  },
-  addTableButton: {
+  unassignedHeader: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#10B981",
-    borderRadius: 10,
-    paddingVertical: 12,
-    gap: 6,
+    justifyContent: "space-between",
+    marginBottom: 12,
+    paddingHorizontal: 4,
   },
-  addTableButtonText: {
-    fontFamily: "PlusJakartaSans-Bold",
-    fontSize: 14,
-    color: "white",
+  pulseDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "#10B981",
+    marginRight: 8,
+  },
+  unassignedTitle: {
+    flex: 1,
+    fontSize: 12,
+    fontWeight: "700",
+    color: "#6B7280",
+    textTransform: "uppercase",
+    letterSpacing: 1,
   },
   autoAssignButton: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#F59E0B",
-    borderRadius: 10,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    gap: 6,
+    gap: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
   },
-  autoAssignButtonText: {
-    fontFamily: "PlusJakartaSans-SemiBold",
-    fontSize: 13,
-    color: "white",
+  autoAssignText: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: "#ee2b8c",
   },
-  guestCard: {
+  guestChipsContainer: {
+    flexDirection: "row",
+    gap: 8,
+  },
+  groupChip: {
+    backgroundColor: "#f8f6f6",
+    borderWidth: 1,
+    borderColor: "#e5e7eb",
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    minWidth: 120,
+  },
+  groupChipSelected: {
+    borderColor: "#ee2b8c",
+    backgroundColor: "#ee2b8c10",
+  },
+  groupChipHeader: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 4,
+  },
+  groupChipName: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#374151",
+  },
+  groupChipBadge: {
+    backgroundColor: "#ee2b8c",
+    borderRadius: 10,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+  },
+  groupChipBadgeText: {
+    fontSize: 10,
+    fontWeight: "700",
+    color: "white",
+  },
+  groupChipMembers: {
+    fontSize: 10,
+    color: "#6B7280",
+  },
+  canvasContainer: {
+    flex: 1,
+    position: "relative",
+  },
+  canvasGrid: {
+    flex: 1,
+    backgroundColor: "#f0f0f0",
+    padding: 32,
+    paddingTop: 64,
+  },
+  tableCard: {
+    position: "absolute",
     backgroundColor: "white",
     borderRadius: 12,
-    padding: 12,
-    marginBottom: 8,
-    borderWidth: 1,
-    borderColor: "#E5E7EB",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
   },
-  guestAvatar: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: "#F472B6",
+  tableCardCircle: {
+    borderRadius: 80,
+    width: 160,
+    height: 160,
     alignItems: "center",
     justifyContent: "center",
   },
-  guestAvatarText: {
-    fontFamily: "PlusJakartaSans-Bold",
-    fontSize: 18,
-    color: "white",
-  },
-  guestInfo: {
-    flex: 1,
-    marginLeft: 12,
-  },
-  guestName: {
-    fontFamily: "PlusJakartaSans-SemiBold",
-    fontSize: 15,
-    color: "#181114",
-  },
-  guestRelation: {
-    fontFamily: "PlusJakartaSans-Regular",
-    fontSize: 13,
-    color: "#6B7280",
-  },
-  guestFamilyBadge: {
-    backgroundColor: "#F3F4F6",
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-  },
-  guestFamilyText: {
-    fontFamily: "PlusJakartaSans-SemiBold",
-    fontSize: 12,
-    color: "#374151",
-  },
-  tableCard: {
-    backgroundColor: "white",
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 12,
+  tableCardSelected: {
+    borderColor: "#ee2b8c",
     borderWidth: 2,
-    borderColor: "#E5E7EB",
   },
-  tableHeader: {
+  rectangleSeats: {
+    padding: 8,
+  },
+  rectangleSeatTop: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "flex-start",
-    marginBottom: 12,
+    marginBottom: 8,
   },
-  tableInfo: {
-    flex: 1,
+  rectangleSeatBottom: {
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
-  tableName: {
-    fontFamily: "PlusJakartaSans-Bold",
-    fontSize: 16,
-    color: "#181114",
+  rectangleSeatBox: {
+    width: 40,
+    height: 24,
+    borderRadius: 6,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
   },
-  tableCapacity: {
-    fontFamily: "PlusJakartaSans-Regular",
-    fontSize: 13,
+  seatEmpty: {
+    borderColor: "#e5e7eb",
+    backgroundColor: "#f9fafb",
+  },
+  seatFilled: {
+    backgroundColor: "#10B981",
+    borderColor: "#10B981",
+  },
+  seatGuestLabel: {
+    fontSize: 8,
+    fontWeight: "600",
+    color: "white",
+  },
+  seatNumberLabel: {
+    fontSize: 8,
+    color: "#9CA3AF",
+  },
+  circleTable: {
+    alignItems: "center",
+  },
+  tableLabel: {
+    fontSize: 10,
+    fontWeight: "700",
+    color: "#ee2b8c",
+    letterSpacing: 1,
+  },
+  tableNumber: {
+    fontSize: 28,
+    fontWeight: "700",
+    color: "#374151",
+  },
+  circleGuests: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "center",
+    marginTop: 8,
+    paddingHorizontal: 16,
+  },
+  circleGuestDot: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: "#8B5CF6",
+    alignItems: "center",
+    justifyContent: "center",
+    margin: 2,
+  },
+  circleGuestInitial: {
+    fontSize: 10,
+    fontWeight: "700",
+    color: "white",
+  },
+  moreGuests: {
+    fontSize: 10,
+    color: "#6B7280",
+    marginLeft: 4,
+  },
+  occupancyBadge: {
+    position: "absolute",
+    bottom: -12,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  occupancyText: {
+    fontSize: 10,
+    fontWeight: "700",
+    color: "white",
+  },
+  selectedRing: {
+    position: "absolute",
+    inset: -4,
+    borderRadius: 16,
+    borderWidth: 2,
+    borderColor: "#ee2b8c",
+    borderStyle: "dashed",
+  },
+  canvasInfo: {
+    position: "absolute",
+    bottom: 24,
+    left: 24,
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(255,255,255,0.9)",
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "#ee2b8c10",
+  },
+  guestAvatars: {
+    flexDirection: "row",
+    marginRight: 12,
+  },
+  avatarDot: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: "#f3f4f6",
+    borderWidth: 2,
+    borderColor: "white",
+    alignItems: "center",
+    justifyContent: "center",
+    marginLeft: -8,
+  },
+  avatarText: {
+    fontSize: 8,
+    fontWeight: "700",
+    color: "#6B7280",
+  },
+  canvasInfoText: {
+    fontSize: 10,
+    fontWeight: "600",
+    color: "#374151",
+  },
+  floatingControls: {
+    position: "absolute",
+    bottom: 24,
+    right: 24,
+    flexDirection: "column",
+    gap: 12,
+  },
+  fab: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: "white",
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  fabAdd: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: "#ee2b8c",
+    shadowColor: "#ee2b8c",
+    shadowOpacity: 0.3,
+  },
+  drawer: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: "white",
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -10 },
+    shadowOpacity: 0.15,
+    shadowRadius: 20,
+    elevation: 10,
+  },
+  drawerHandle: {
+    width: 48,
+    height: 4,
+    backgroundColor: "#e5e7eb",
+    borderRadius: 2,
+    alignSelf: "center",
+    marginTop: 12,
+  },
+  drawerContent: {
+    paddingHorizontal: 24,
+    paddingBottom: 40,
+  },
+  drawerHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginTop: 20,
+    marginBottom: 24,
+  },
+  drawerTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#1f2937",
+  },
+  drawerSubtitle: {
+    fontSize: 12,
     color: "#6B7280",
     marginTop: 2,
   },
-  deleteTableButton: {
-    padding: 4,
-  },
-  occupancyBar: {
-    height: 6,
-    backgroundColor: "#F3F4F6",
-    borderRadius: 3,
-    overflow: "hidden",
-    marginBottom: 12,
-  },
-  occupancyFill: {
-    height: "100%",
-    backgroundColor: "#10B981",
-    borderRadius: 3,
-  },
-  occupancyMedium: {
-    backgroundColor: "#F59E0B",
-  },
-  occupancyHigh: {
-    backgroundColor: "#EF4444",
-  },
-  tableGuests: {
-    gap: 8,
-  },
-  tableGuestItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#F9FAFB",
-    borderRadius: 10,
-    padding: 10,
-  },
-  tableGuestAvatar: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: "#F472B6",
+  editButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: "#ee2b8c10",
     alignItems: "center",
     justifyContent: "center",
   },
-  tableGuestAvatarText: {
-    fontFamily: "PlusJakartaSans-Bold",
-    fontSize: 14,
-    color: "white",
+  seatsGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 12,
   },
-  tableGuestInfo: {
-    flex: 1,
-    marginLeft: 10,
+  seatSlot: {
+    width: "47%",
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 12,
+    backgroundColor: "#f8f6f6",
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: "#ee2b8c20",
+    borderStyle: "dashed",
   },
-  tableGuestName: {
-    fontFamily: "PlusJakartaSans-SemiBold",
-    fontSize: 13,
-    color: "#181114",
+  seatSlotFilled: {
+    backgroundColor: "white",
+    borderStyle: "solid",
+    borderColor: "#10B981",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
   },
-  tableGuestFamily: {
-    fontFamily: "PlusJakartaSans-Regular",
-    fontSize: 11,
+  seatSlotGroup: {
+    borderColor: "#8B5CF6",
+  },
+  seatNumber: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: "#f3f4f6",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 10,
+  },
+  seatNumberFilled: {
+    backgroundColor: "#10B981",
+  },
+  seatNumberGroup: {
+    backgroundColor: "#8B5CF6",
+  },
+  seatNumberText: {
+    fontSize: 12,
+    fontWeight: "700",
     color: "#6B7280",
   },
-  removeGuestButton: {
-    padding: 4,
+  seatNumberTextFilled: {
+    color: "white",
   },
-  emptyTableText: {
-    fontFamily: "PlusJakartaSans-Regular",
-    fontSize: 13,
+  seatGuestInfo: {
+    flex: 1,
+  },
+  seatGuestName: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#374151",
+  },
+  seatGroupLabel: {
+    fontSize: 10,
+    color: "#8B5CF6",
+    fontWeight: "600",
+  },
+  seatEmptyText: {
+    flex: 1,
+    fontSize: 14,
     color: "#9CA3AF",
-    textAlign: "center",
+  },
+  modalOverlay: {
+    position: "absolute",
+    inset: 0,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "flex-end",
+  },
+  modalContent: {
+    backgroundColor: "white",
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 24,
+    paddingBottom: 40,
+    maxHeight: "70%",
+  },
+  modalHandle: {
+    width: 48,
+    height: 4,
+    backgroundColor: "#e5e7eb",
+    borderRadius: 2,
+    alignSelf: "center",
+    marginBottom: 20,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#1f2937",
+    marginBottom: 8,
+  },
+  modalSubtitle: {
+    fontSize: 14,
+    color: "#6B7280",
+    marginBottom: 16,
+  },
+  groupList: {
+    maxHeight: 300,
+  },
+  groupOption: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 16,
+    backgroundColor: "#f8f6f6",
+    borderRadius: 12,
+    marginBottom: 8,
+  },
+  groupOptionDisabled: {
+    opacity: 0.5,
+  },
+  groupOptionInfo: {
+    flex: 1,
+  },
+  groupOptionName: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#1f2937",
+  },
+  groupOptionMembers: {
+    fontSize: 12,
+    color: "#6B7280",
+    marginTop: 2,
+  },
+  groupOptionSize: {
+    fontSize: 11,
+    color: "#9CA3AF",
+    marginTop: 4,
+  },
+  groupOptionCheck: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: "#e5e7eb",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  groupOptionCheckActive: {
+    backgroundColor: "#10B981",
+  },
+  tableOptions: {
+    flexDirection: "row",
+    gap: 16,
+    marginBottom: 24,
+  },
+  tableOption: {
+    flex: 1,
+    alignItems: "center",
+    padding: 20,
+    backgroundColor: "#f8f6f6",
+    borderRadius: 16,
+  },
+  tableOptionName: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#374151",
     marginTop: 8,
   },
-  emptyState: {
-    alignItems: "center",
-    paddingVertical: 40,
-  },
-  emptyTitle: {
-    fontFamily: "PlusJakartaSans-Bold",
-    fontSize: 16,
-    color: "#374151",
-    marginTop: 12,
-  },
-  emptySubtitle: {
-    fontFamily: "PlusJakartaSans-Regular",
-    fontSize: 13,
+  tableOptionCapacity: {
+    fontSize: 12,
     color: "#6B7280",
     marginTop: 4,
   },
-  bottomSpacing: {
-    height: 100,
+  modalClose: {
+    alignItems: "center",
+    paddingVertical: 16,
+  },
+  modalCloseText: {
+    fontSize: 16,
+    color: "#6B7280",
   },
 });
