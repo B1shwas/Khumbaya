@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import {
     Alert,
     FlatList,
+    Image,
     Modal,
     ScrollView,
     StyleSheet,
@@ -46,6 +47,11 @@ interface Vendor {
     phone?: string;
     email?: string;
     selected?: boolean;
+    imageUrl?: string;
+    verified?: boolean;
+    reviews?: number;
+    yearsExperience?: number;
+    description?: string;
 }
 
 export default function SubEventDetail() {
@@ -53,6 +59,7 @@ export default function SubEventDetail() {
     const params = useLocalSearchParams();
     const subEventId = params.subEventId as string;
     const eventId = params.eventId as string;
+    const isNew = params.isNew === "true" as boolean || false;
 
     const [template, setTemplate] = useState<SubEventTemplate | null>(null);
     const [date, setDate] = useState("");
@@ -67,6 +74,7 @@ export default function SubEventDetail() {
     const [showAddGuestModal, setShowAddGuestModal] = useState(false);
     const [showExcelModal, setShowExcelModal] = useState(false);
     const [showVendorContactModal, setShowVendorContactModal] = useState(false);
+    const [showVendorDetailModal, setShowVendorDetailModal] = useState(false);
     const [selectedVendor, setSelectedVendor] = useState<Vendor | null>(null);
 
     // New guest form
@@ -88,6 +96,40 @@ export default function SubEventDetail() {
         "Other",
     ];
 
+    // Vendor category colors
+    const getCategoryColor = (category: string): string => {
+        const colors: Record<string, string> = {
+            Music: "#8B5CF6",
+            Decoration: "#10B981",
+            Food: "#F59E0B",
+            Photography: "#EC4899",
+            Lighting: "#6366F1",
+            Video: "#14B8A6",
+            Catering: "#EF4444",
+            Florist: "#F97316",
+            Makeup: "#D946EF",
+            DJ: "#06B6D4",
+        };
+        return colors[category] || "#6B7280";
+    };
+
+    // Get vendor placeholder image based on category
+    const getVendorPlaceholderImage = (category: string): string => {
+        const images: Record<string, string> = {
+            Music: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=200&h=200&fit=crop",
+            Decoration: "https://images.unsplash.com/photo-1519225421980-715cb0202128?w=200&h=200&fit=crop",
+            Food: "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=200&h=200&fit=crop",
+            Photography: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=200&h=200&fit=crop",
+            Lighting: "https://images.unsplash.com/photo-1504701954957-2010ec3bcec1?w=200&h=200&fit=crop",
+            Video: "https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?w=200&h=200&fit=crop",
+            Catering: "https://images.unsplash.com/photo-1555244162-803834f70033?w=200&h=200&fit=crop",
+            Florist: "https://images.unsplash.com/photo-1487530811176-3780de880c2d?w=200&h=200&fit=crop",
+            Makeup: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=200&h=200&fit=crop",
+            DJ: "https://images.unsplash.com/photo-1571266028243-3716002dbc84?w=200&h=200&fit=crop",
+        };
+        return images[category] || "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=200&h=200&fit=crop";
+    };
+
     useEffect(() => {
         // Load template data
         const foundTemplate = SUB_EVENT_TEMPLATES.find(
@@ -97,7 +139,7 @@ export default function SubEventDetail() {
             setTemplate(foundTemplate);
         }
 
-        // Initialize mock vendors
+        // Initialize mock vendors with images
         setVendors([
             {
                 id: "v1",
@@ -107,6 +149,11 @@ export default function SubEventDetail() {
                 price: "$$$",
                 phone: "+91 98765 12345",
                 email: "djbeats@email.com",
+                verified: true,
+                reviews: 124,
+                yearsExperience: 8,
+                description: "Professional DJ services for weddings and parties with state-of-the-art equipment.",
+                imageUrl: getVendorPlaceholderImage("Music"),
             },
             {
                 id: "v2",
@@ -116,6 +163,11 @@ export default function SubEventDetail() {
                 price: "$$",
                 phone: "+91 98765 12346",
                 email: "flowers@email.com",
+                verified: true,
+                reviews: 89,
+                yearsExperience: 12,
+                description: "Exquisite floral arrangements and venue decoration for all occasions.",
+                imageUrl: getVendorPlaceholderImage("Decoration"),
             },
             {
                 id: "v3",
@@ -125,6 +177,11 @@ export default function SubEventDetail() {
                 price: "$$$",
                 phone: "+91 98765 12347",
                 email: "catering@email.com",
+                verified: true,
+                reviews: 156,
+                yearsExperience: 15,
+                description: "Multi-cuisine catering with live cooking stations and bar service.",
+                imageUrl: getVendorPlaceholderImage("Food"),
             },
             {
                 id: "v4",
@@ -134,6 +191,11 @@ export default function SubEventDetail() {
                 price: "$$",
                 phone: "+91 98765 12348",
                 email: "photo@email.com",
+                verified: true,
+                reviews: 203,
+                yearsExperience: 10,
+                description: "Capturing your precious moments with cinematic photography and albums.",
+                imageUrl: getVendorPlaceholderImage("Photography"),
             },
             {
                 id: "v5",
@@ -143,6 +205,11 @@ export default function SubEventDetail() {
                 price: "$$$",
                 phone: "+91 98765 12349",
                 email: "lighting@email.com",
+                verified: false,
+                reviews: 45,
+                yearsExperience: 5,
+                description: "Transform your venue with stunning LED lighting, dance floors, and special effects.",
+                imageUrl: getVendorPlaceholderImage("Lighting"),
             },
         ]);
 
@@ -251,6 +318,11 @@ export default function SubEventDetail() {
                 v.id === vendorId ? { ...v, selected: !v.selected } : v
             )
         );
+    };
+
+    const handleShowVendorDetail = (vendor: Vendor) => {
+        setSelectedVendor(vendor);
+        setShowVendorDetailModal(true);
     };
 
     const handleContactVendor = (vendor: Vendor) => {
@@ -443,6 +515,212 @@ export default function SubEventDetail() {
                     </View>
                 </View>
 
+                {/* Vendors Section - Enhanced with Images */}
+                <View style={styles.section}>
+                    <View style={styles.sectionHeader}>
+                        <View>
+                            <Text style={styles.sectionTitle}>Vendors</Text>
+                            <Text style={styles.sectionSubtitle}>
+                                {selectedVendorsCount} selected
+                            </Text>
+                        </View>
+                    </View>
+
+                    {/* Selected Vendors Summary */}
+                    {selectedVendorsCount > 0 && (
+                        <View style={styles.selectedVendorsSummary}>
+                            <Text style={styles.selectedVendorsTitle}>
+                                Assigned Vendors
+                            </Text>
+                            <ScrollView
+                                horizontal
+                                showsHorizontalScrollIndicator={false}
+                                contentContainerStyle={styles.selectedVendorsList}
+                            >
+                                {vendors
+                                    .filter((v) => v.selected)
+                                    .map((vendor) => (
+                                        <View
+                                            key={vendor.id}
+                                            style={styles.selectedVendorChip}
+                                        >
+                                            <Image
+                                                source={{ uri: vendor.imageUrl }}
+                                                style={styles.selectedVendorImage}
+                                            />
+                                            <Text
+                                                style={
+                                                    styles.selectedVendorName
+                                                }
+                                                numberOfLines={1}
+                                            >
+                                                {vendor.name}
+                                            </Text>
+                                            <TouchableOpacity
+                                                onPress={() =>
+                                                    handleToggleVendor(vendor.id)
+                                                }
+                                                style={
+                                                    styles.selectedVendorRemove
+                                                }
+                                            >
+                                                <Ionicons
+                                                    name="close-circle"
+                                                    size={18}
+                                                    color="#EF4444"
+                                                />
+                                            </TouchableOpacity>
+                                        </View>
+                                    ))}
+                            </ScrollView>
+                        </View>
+                    )}
+
+                    {/* Vendor Cards with Images */}
+                    <View style={styles.vendorGrid}>
+                        {vendors.map((vendor) => (
+                            <TouchableOpacity
+                                key={vendor.id}
+                                style={[
+                                    styles.vendorCard,
+                                    vendor.selected && styles.vendorCardSelected,
+                                ]}
+                                onPress={() => handleShowVendorDetail(vendor)}
+                                activeOpacity={0.8}
+                            >
+                                {/* Vendor Image */}
+                                <View style={styles.vendorImageContainer}>
+                                    <Image
+                                        source={{ uri: vendor.imageUrl }}
+                                        style={styles.vendorImage}
+                                    />
+                                    <View
+                                        style={[
+                                            styles.vendorCategoryBadge,
+                                            {
+                                                backgroundColor:
+                                                    getCategoryColor(vendor.category) +
+                                                    "20",
+                                            },
+                                        ]}
+                                    >
+                                        <Text
+                                            style={[
+                                                styles.vendorCategoryText,
+                                                {
+                                                    color: getCategoryColor(
+                                                        vendor.category
+                                                    ),
+                                                },
+                                            ]}
+                                        >
+                                            {vendor.category}
+                                        </Text>
+                                    </View>
+                                    {vendor.verified && (
+                                        <View style={styles.verifiedBadge}>
+                                            <Ionicons
+                                                name="checkmark-circle"
+                                                size={16}
+                                                color="#10B981"
+                                                fill="#10B981"
+                                            />
+                                        </View>
+                                    )}
+                                </View>
+
+                                <View style={styles.vendorInfo}>
+                                    <Text
+                                        style={styles.vendorName}
+                                        numberOfLines={1}
+                                    >
+                                        {vendor.name}
+                                    </Text>
+
+                                    <View style={styles.vendorRatingRow}>
+                                        <Ionicons
+                                            name="star"
+                                            size={14}
+                                            color="#F59E0B"
+                                            fill="#F59E0B"
+                                        />
+                                        <Text style={styles.vendorRatingText}>
+                                            {vendor.rating}
+                                        </Text>
+                                        <Text
+                                            style={styles.vendorReviewsText}
+                                        >
+                                            ({vendor.reviews} reviews)
+                                        </Text>
+                                        <Text
+                                            style={styles.vendorPriceText}
+                                        >{` • ${vendor.price}`}</Text>
+                                    </View>
+
+                                    <Text
+                                        style={styles.vendorExperience}
+                                    >
+                                        {vendor.yearsExperience}+ years experience
+                                    </Text>
+
+                                    {/* Action Buttons */}
+                                    <View style={styles.vendorActions}>
+                                        <TouchableOpacity
+                                            style={[
+                                                styles.vendorSelectButton,
+                                                vendor.selected &&
+                                                    styles.vendorSelectButtonSelected,
+                                            ]}
+                                            onPress={(e) => {
+                                                e.stopPropagation();
+                                                handleToggleVendor(vendor.id);
+                                            }}
+                                        >
+                                            <Ionicons
+                                                name={
+                                                    vendor.selected
+                                                        ? "checkmark-circle"
+                                                        : "add-circle-outline"
+                                                }
+                                                size={20}
+                                                color={
+                                                    vendor.selected
+                                                        ? "white"
+                                                        : "#ee2b8c"
+                                                }
+                                            />
+                                            <Text
+                                                style={[
+                                                    styles.vendorSelectText,
+                                                    vendor.selected &&
+                                                        styles.vendorSelectTextSelected,
+                                                ]}
+                                            >
+                                                {vendor.selected
+                                                    ? "Assigned"
+                                                    : "Assign"}
+                                            </Text>
+                                        </TouchableOpacity>
+                                        <TouchableOpacity
+                                            style={styles.vendorContactButton}
+                                            onPress={(e) => {
+                                                e.stopPropagation();
+                                                handleContactVendor(vendor);
+                                            }}
+                                        >
+                                            <Ionicons
+                                                name="call-outline"
+                                                size={18}
+                                                color="#ee2b8c"
+                                            />
+                                        </TouchableOpacity>
+                                    </View>
+                                </View>
+                            </TouchableOpacity>
+                        ))}
+                    </View>
+                </View>
+
                 {/* Activities Section */}
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>
@@ -567,107 +845,6 @@ export default function SubEventDetail() {
                             );
                         })}
                     </View>
-                </View>
-
-                {/* Vendors Section */}
-                <View style={styles.section}>
-                    <View style={styles.sectionHeader}>
-                        <View>
-                            <Text style={styles.sectionTitle}>Vendors</Text>
-                            <Text style={styles.sectionSubtitle}>
-                                {selectedVendorsCount} selected
-                            </Text>
-                        </View>
-                    </View>
-
-                    {vendors.map((vendor) => (
-                        <View
-                            key={vendor.id}
-                            style={[
-                                styles.vendorCard,
-                                vendor.selected && styles.vendorCardSelected,
-                            ]}
-                        >
-                            <View style={styles.vendorInfo}>
-                                <View style={styles.vendorHeader}>
-                                    <Text style={styles.vendorName}>
-                                        {vendor.name}
-                                    </Text>
-                                    {vendor.selected && (
-                                        <View style={styles.selectedBadge}>
-                                            <Text
-                                                style={
-                                                    styles.selectedBadgeText
-                                                }
-                                            >
-                                                Selected
-                                            </Text>
-                                        </View>
-                                    )}
-                                </View>
-                                <Text style={styles.vendorCategory}>
-                                    {vendor.category}
-                                </Text>
-                                <View style={styles.vendorRating}>
-                                    <Ionicons
-                                        name="star"
-                                        size={14}
-                                        color="#F59E0B"
-                                        fill="#F59E0B"
-                                    />
-                                    <Text style={styles.vendorRatingText}>
-                                        {vendor.rating}
-                                    </Text>
-                                    <Text
-                                        style={styles.vendorPrice}
-                                    >{` • ${vendor.price}`}</Text>
-                                </View>
-                            </View>
-                            <View style={styles.vendorActions}>
-                                <TouchableOpacity
-                                    style={[
-                                        styles.vendorSelectButton,
-                                        vendor.selected &&
-                                            styles.vendorSelectButtonSelected,
-                                    ]}
-                                    onPress={() =>
-                                        handleToggleVendor(vendor.id)
-                                    }
-                                >
-                                    <Ionicons
-                                        name={
-                                            vendor.selected
-                                                ? "checkmark-circle"
-                                                : "add-circle-outline"
-                                        }
-                                        size={20}
-                                        color={
-                                            vendor.selected ? "white" : "#ee2b8c"
-                                        }
-                                    />
-                                    <Text
-                                        style={[
-                                            styles.vendorSelectText,
-                                            vendor.selected &&
-                                                styles.vendorSelectTextSelected,
-                                        ]}
-                                    >
-                                        {vendor.selected ? "Selected" : "Select"}
-                                    </Text>
-                                </TouchableOpacity>
-                                <TouchableOpacity
-                                    style={styles.vendorContactButton}
-                                    onPress={() => handleContactVendor(vendor)}
-                                >
-                                    <Ionicons
-                                        name="call-outline"
-                                        size={18}
-                                        color="#ee2b8c"
-                                    />
-                                </TouchableOpacity>
-                            </View>
-                        </View>
-                    ))}
                 </View>
 
                 {/* Guest Management Section */}
@@ -801,20 +978,29 @@ export default function SubEventDetail() {
                                                 />
                                             )}
                                         </View>
-                                    </TouchableOpacity>
-                                    <View style={styles.guestInfo}>
-                                        <Text style={styles.guestName}>
+                                        <Text
+                                            style={[
+                                                styles.guestName,
+                                                item.invited &&
+                                                    styles.guestNameInvited,
+                                            ]}
+                                        >
                                             {item.name}
                                         </Text>
-                                        <Text style={styles.guestDetails}>
-                                            {item.relation} • {item.phone}
-                                        </Text>
-                                    </View>
+                                    </TouchableOpacity>
+
+                                    <Text
+                                        style={styles.guestRelation}
+                                        numberOfLines={1}
+                                    >
+                                        {item.relation}
+                                    </Text>
+
                                     <TouchableOpacity
-                                        style={styles.deleteButton}
                                         onPress={() =>
                                             handleDeleteGuest(item.id)
                                         }
+                                        style={styles.deleteButton}
                                     >
                                         <Ionicons
                                             name="trash-outline"
@@ -824,15 +1010,288 @@ export default function SubEventDetail() {
                                     </TouchableOpacity>
                                 </View>
                             )}
-                            contentContainerStyle={styles.guestList}
+                            style={styles.guestList}
                         />
+                    </View>
+                </View>
+            </Modal>
 
-                        <TouchableOpacity
-                            style={styles.modalSaveButton}
-                            onPress={() => setShowGuestModal(false)}
-                        >
-                            <Text style={styles.modalSaveButtonText}>Done</Text>
-                        </TouchableOpacity>
+            {/* Vendor Detail Modal */}
+            <Modal
+                visible={showVendorDetailModal}
+                animationType="slide"
+                transparent={true}
+                onRequestClose={() => setShowVendorDetailModal(false)}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={styles.vendorDetailModalContent}>
+                        <View style={styles.vendorDetailHeader}>
+                            <TouchableOpacity
+                                onPress={() => setShowVendorDetailModal(false)}
+                            >
+                                <Ionicons name="close" size={24} color="#181114" />
+                            </TouchableOpacity>
+                            <Text style={styles.vendorDetailTitle}>
+                                Vendor Details
+                            </Text>
+                            <View style={{ width: 40 }} />
+                        </View>
+
+                        {selectedVendor && (
+                            <ScrollView
+                                style={styles.vendorDetailContent}
+                                showsVerticalScrollIndicator={false}
+                            >
+                                <Image
+                                    source={{ uri: selectedVendor.imageUrl }}
+                                    style={styles.vendorDetailImage}
+                                />
+                                <View style={styles.vendorDetailInfo}>
+                                    <View
+                                        style={
+                                            styles.vendorDetailCategoryBadge
+                                        }
+                                    >
+                                        <Text
+                                            style={[
+                                                styles.vendorDetailCategoryText,
+                                                {
+                                                    color: getCategoryColor(
+                                                        selectedVendor.category
+                                                    ),
+                                                },
+                                            ]}
+                                        >
+                                            {selectedVendor.category}
+                                        </Text>
+                                    </View>
+
+                                    <Text style={styles.vendorDetailName}>
+                                        {selectedVendor.name}
+                                    </Text>
+
+                                    <View
+                                        style={styles.vendorDetailRatingRow}
+                                    >
+                                        <Ionicons
+                                            name="star"
+                                            size={16}
+                                            color="#F59E0B"
+                                            fill="#F59E0B"
+                                        />
+                                        <Text
+                                            style={
+                                                styles.vendorDetailRatingText
+                                            }
+                                        >
+                                            {selectedVendor.rating}
+                                        </Text>
+                                        <Text
+                                            style={
+                                                styles.vendorDetailReviewsText
+                                            }
+                                        >
+                                            ({selectedVendor.reviews} reviews)
+                                        </Text>
+                                        <Text
+                                            style={
+                                                styles.vendorDetailPriceText
+                                            }
+                                        >{` • ${selectedVendor.price}`}</Text>
+                                    </View>
+
+                                    {selectedVendor.verified && (
+                                        <View
+                                            style={
+                                                styles.vendorDetailVerified
+                                            }
+                                        >
+                                            <Ionicons
+                                                name="checkmark-circle"
+                                                size={16}
+                                                color="#10B981"
+                                            />
+                                            <Text
+                                                style={
+                                                    styles.vendorDetailVerifiedText
+                                                }
+                                            >
+                                                Verified Vendor
+                                            </Text>
+                                        </View>
+                                    )}
+
+                                    <Text
+                                        style={styles.vendorDetailExperience}
+                                    >
+                                        {selectedVendor.yearsExperience}+ years
+                                        of experience
+                                    </Text>
+
+                                    <Text
+                                        style={styles.vendorDetailDescription}
+                                    >
+                                        {selectedVendor.description}
+                                    </Text>
+
+                                    {/* Assign Button */}
+                                    <TouchableOpacity
+                                        style={[
+                                            styles.vendorDetailAssignButton,
+                                            selectedVendor.selected &&
+                                                styles.vendorDetailAssignButtonSelected,
+                                        ]}
+                                        onPress={() => {
+                                            handleToggleVendor(
+                                                selectedVendor.id
+                                            );
+                                            if (!selectedVendor.selected) {
+                                                setShowVendorDetailModal(false);
+                                            }
+                                        }}
+                                    >
+                                        <Ionicons
+                                            name={
+                                                selectedVendor.selected
+                                                    ? "checkmark-circle"
+                                                    : "add-circle-outline"
+                                            }
+                                            size={20}
+                                            color="white"
+                                        />
+                                        <Text
+                                            style={
+                                                styles.vendorDetailAssignButtonText
+                                            }
+                                        >
+                                            {selectedVendor.selected
+                                                ? "Assigned"
+                                                : "Assign to Event"}
+                                        </Text>
+                                    </TouchableOpacity>
+
+                                    {/* Contact Buttons */}
+                                    <View
+                                        style={
+                                            styles.vendorDetailContactButtons
+                                        }
+                                    >
+                                        <TouchableOpacity
+                                            style={
+                                                styles.vendorDetailContactButton
+                                            }
+                                            onPress={() =>
+                                                handleCallVendor(selectedVendor)
+                                            }
+                                        >
+                                            <Ionicons
+                                                name="call-outline"
+                                                size={20}
+                                                color="#ee2b8c"
+                                            />
+                                            <Text
+                                                style={
+                                                    styles.vendorDetailContactButtonText
+                                                }
+                                            >
+                                                Call
+                                            </Text>
+                                        </TouchableOpacity>
+                                        <TouchableOpacity
+                                            style={
+                                                styles.vendorDetailContactButton
+                                            }
+                                            onPress={() =>
+                                                handleEmailVendor(selectedVendor)
+                                            }
+                                        >
+                                            <Ionicons
+                                                name="mail-outline"
+                                                size={20}
+                                                color="#ee2b8c"
+                                            />
+                                            <Text
+                                                style={
+                                                    styles.vendorDetailContactButtonText
+                                                }
+                                            >
+                                                Email
+                                            </Text>
+                                        </TouchableOpacity>
+                                    </View>
+                                </View>
+                            </ScrollView>
+                        )}
+                    </View>
+                </View>
+            </Modal>
+
+            {/* Vendor Contact Modal */}
+            <Modal
+                visible={showVendorContactModal}
+                animationType="slide"
+                transparent={true}
+                onRequestClose={() => setShowVendorContactModal(false)}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContent}>
+                        <View style={styles.modalHeader}>
+                            <Text style={styles.modalTitle}>
+                                Contact Vendor
+                            </Text>
+                            <TouchableOpacity
+                                onPress={() => setShowVendorContactModal(false)}
+                            >
+                                <Ionicons name="close" size={24} color="#181114" />
+                            </TouchableOpacity>
+                        </View>
+
+                        {selectedVendor && (
+                            <View style={styles.contactContent}>
+                                <View style={styles.contactVendorInfo}>
+                                    <Image
+                                        source={{ uri: selectedVendor.imageUrl }}
+                                        style={styles.contactVendorImage}
+                                    />
+                                    <Text style={styles.contactVendorName}>
+                                        {selectedVendor.name}
+                                    </Text>
+                                    <Text
+                                        style={styles.contactVendorCategory}
+                                    >
+                                        {selectedVendor.category}
+                                    </Text>
+                                </View>
+
+                                <TouchableOpacity
+                                    style={styles.contactButton}
+                                    onPress={() => handleCallVendor(selectedVendor)}
+                                >
+                                    <Ionicons
+                                        name="call"
+                                        size={24}
+                                        color="white"
+                                    />
+                                    <Text style={styles.contactButtonText}>
+                                        Call {selectedVendor.phone}
+                                    </Text>
+                                </TouchableOpacity>
+
+                                <TouchableOpacity
+                                    style={styles.contactButton}
+                                    onPress={() => handleEmailVendor(selectedVendor)}
+                                >
+                                    <Ionicons
+                                        name="mail"
+                                        size={24}
+                                        color="white"
+                                    />
+                                    <Text style={styles.contactButtonText}>
+                                        Email {selectedVendor.email}
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
+                        )}
                     </View>
                 </View>
             </Modal>
@@ -847,7 +1306,7 @@ export default function SubEventDetail() {
                 <View style={styles.modalOverlay}>
                     <View style={styles.modalContent}>
                         <View style={styles.modalHeader}>
-                            <Text style={styles.modalTitle}>Add Guest Manually</Text>
+                            <Text style={styles.modalTitle}>Add Guest</Text>
                             <TouchableOpacity
                                 onPress={() => setShowAddGuestModal(false)}
                             >
@@ -855,80 +1314,68 @@ export default function SubEventDetail() {
                             </TouchableOpacity>
                         </View>
 
-                        <ScrollView style={styles.formScroll}>
-                            <View style={styles.formGroup}>
-                                <Text style={styles.formLabel}>Guest Name *</Text>
-                                <TextInput
-                                    style={styles.formInput}
-                                    placeholder="Enter guest name"
-                                    placeholderTextColor="#9CA3AF"
-                                    value={newGuestName}
-                                    onChangeText={setNewGuestName}
-                                />
-                            </View>
+                        <View style={styles.formContainer}>
+                            <TextInput
+                                style={styles.formInput}
+                                placeholder="Guest Name *"
+                                placeholderTextColor="#9CA3AF"
+                                value={newGuestName}
+                                onChangeText={setNewGuestName}
+                            />
+                            <TextInput
+                                style={styles.formInput}
+                                placeholder="Phone Number"
+                                placeholderTextColor="#9CA3AF"
+                                value={newGuestPhone}
+                                onChangeText={setNewGuestPhone}
+                                keyboardType="phone-pad"
+                            />
+                            <TextInput
+                                style={styles.formInput}
+                                placeholder="Email Address"
+                                placeholderTextColor="#9CA3AF"
+                                value={newGuestEmail}
+                                onChangeText={setNewGuestEmail}
+                                keyboardType="email-address"
+                            />
 
-                            <View style={styles.formGroup}>
-                                <Text style={styles.formLabel}>Phone Number</Text>
-                                <TextInput
-                                    style={styles.formInput}
-                                    placeholder="Enter phone number"
-                                    placeholderTextColor="#9CA3AF"
-                                    value={newGuestPhone}
-                                    onChangeText={setNewGuestPhone}
-                                    keyboardType="phone-pad"
-                                />
-                            </View>
-
-                            <View style={styles.formGroup}>
-                                <Text style={styles.formLabel}>Email</Text>
-                                <TextInput
-                                    style={styles.formInput}
-                                    placeholder="Enter email"
-                                    placeholderTextColor="#9CA3AF"
-                                    value={newGuestEmail}
-                                    onChangeText={setNewGuestEmail}
-                                    keyboardType="email-address"
-                                />
-                            </View>
-
-                            <View style={styles.formGroup}>
-                                <Text style={styles.formLabel}>Relationship</Text>
-                                <View style={styles.relationChips}>
-                                    {relations.map((relation) => (
-                                        <TouchableOpacity
-                                            key={relation}
+                            <View style={styles.relationContainer}>
+                                {relations.map((relation) => (
+                                    <TouchableOpacity
+                                        key={relation}
+                                        style={[
+                                            styles.relationChip,
+                                            newGuestRelation === relation &&
+                                                styles.relationChipSelected,
+                                        ]}
+                                        onPress={() =>
+                                            setNewGuestRelation(relation)
+                                        }
+                                    >
+                                        <Text
                                             style={[
-                                                styles.relationChip,
+                                                styles.relationChipText,
                                                 newGuestRelation ===
-                                                    relation &&
-                                                    styles.relationChipSelected,
+                                                    relation && {
+                                                    color: "white",
+                                                },
                                             ]}
-                                            onPress={() =>
-                                                setNewGuestRelation(relation)
-                                            }
                                         >
-                                            <Text
-                                                style={[
-                                                    styles.relationChipText,
-                                                    newGuestRelation ===
-                                                        relation &&
-                                                        styles.relationChipTextSelected,
-                                                ]}
-                                            >
-                                                {relation}
-                                            </Text>
-                                        </TouchableOpacity>
-                                    ))}
-                                </View>
+                                            {relation}
+                                        </Text>
+                                    </TouchableOpacity>
+                                ))}
                             </View>
-                        </ScrollView>
 
-                        <TouchableOpacity
-                            style={styles.modalSaveButton}
-                            onPress={handleAddGuest}
-                        >
-                            <Text style={styles.modalSaveButtonText}>Add Guest</Text>
-                        </TouchableOpacity>
+                            <TouchableOpacity
+                                style={styles.addButton}
+                                onPress={handleAddGuest}
+                            >
+                                <Text style={styles.addButtonText}>
+                                    Add Guest
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
                     </View>
                 </View>
             </Modal>
@@ -938,246 +1385,61 @@ export default function SubEventDetail() {
                 visible={showExcelModal}
                 animationType="slide"
                 transparent={true}
-                onRequestClose={() => !isUploading && setShowExcelModal(false)}
+                onRequestClose={() => setShowExcelModal(false)}
             >
                 <View style={styles.modalOverlay}>
                     <View style={styles.modalContent}>
                         <View style={styles.modalHeader}>
-                            <Text style={styles.modalTitle}>Upload Guest List</Text>
+                            <Text style={styles.modalTitle}>Upload Excel</Text>
                             <TouchableOpacity
-                                onPress={() =>
-                                    !isUploading && setShowExcelModal(false)
-                                }
+                                onPress={() => setShowExcelModal(false)}
+                            >
+                                <Ionicons name="close" size={24} color="#181114" />
+                            </TouchableOpacity>
+                        </View>
+
+                        <View style={styles.uploadContainer}>
+                            <TouchableOpacity
+                                style={styles.uploadButton}
+                                onPress={handleUploadExcel}
                                 disabled={isUploading}
                             >
                                 <Ionicons
-                                    name="close"
-                                    size={24}
-                                    color={isUploading ? "#D1D5DB" : "#181114"}
+                                    name="cloud-upload-outline"
+                                    size={48}
+                                    color="#ee2b8c"
                                 />
-                            </TouchableOpacity>
-                        </View>
-
-                        <View style={styles.excelUploadArea}>
-                            {isUploading ? (
-                                <View style={styles.uploadingContainer}>
-                                    <Ionicons
-                                        name="cloud-upload-outline"
-                                        size={48}
-                                        color="#ee2b8c"
-                                    />
-                                    <Text style={styles.uploadingText}>
-                                        Uploading...
-                                    </Text>
-                                    <Text
-                                        style={styles.uploadingSubtext}
-                                    >
-                                        Please wait while we process your file
-                                    </Text>
-                                </View>
-                            ) : excelFileName ? (
-                                <View style={styles.uploadedContainer}>
-                                    <Ionicons
-                                        name="document-text"
-                                        size={48}
-                                        color="#10B981"
-                                    />
-                                    <Text style={styles.uploadedFileName}>
-                                        {excelFileName}
-                                    </Text>
-                                    <Text style={styles.uploadedCount}>
-                                        3 guests imported
-                                    </Text>
-                                    <TouchableOpacity
-                                        style={styles.uploadAgainButton}
-                                        onPress={() => setExcelFileName("")}
-                                    >
-                                        <Text
-                                            style={styles.uploadAgainText}
-                                        >
-                                            Upload Different File
-                                        </Text>
-                                    </TouchableOpacity>
-                                </View>
-                            ) : (
-                                <TouchableOpacity
-                                    style={styles.uploadButton}
-                                    onPress={handleUploadExcel}
-                                >
-                                    <Ionicons
-                                        name="cloud-upload-outline"
-                                        size={48}
-                                        color="#ee2b8c"
-                                    />
-                                    <Text style={styles.uploadTitle}>
-                                        Upload Excel File
-                                    </Text>
-                                    <Text style={styles.uploadSubtitle}>
-                                        Supported formats: .xlsx, .xls, .csv
-                                    </Text>
-                                    <Text style={styles.uploadHint}>
-                                        Make sure columns include: Name, Phone,
-                                        Email, Relation
-                                    </Text>
-                                </TouchableOpacity>
-                            )}
-                        </View>
-
-                        {!isUploading && (
-                            <TouchableOpacity
-                                style={styles.modalSaveButton}
-                                onPress={() => setShowExcelModal(false)}
-                            >
-                                <Text style={styles.modalSaveButtonText}>
-                                    Done
+                                <Text style={styles.uploadTitle}>
+                                    {excelFileName || "Upload Guest List"}
+                                </Text>
+                                <Text style={styles.uploadSubtitle}>
+                                    {isUploading
+                                        ? "Uploading..."
+                                        : "Supported formats: .xlsx, .csv"}
                                 </Text>
                             </TouchableOpacity>
-                        )}
-                    </View>
-                </View>
-            </Modal>
 
-            {/* Vendor Contact Modal */}
-            <Modal
-                visible={showVendorContactModal}
-                animationType="fade"
-                transparent={true}
-                onRequestClose={() => setShowVendorContactModal(false)}
-            >
-                <View style={styles.contactModalOverlay}>
-                    <View style={styles.contactModalContent}>
-                        {selectedVendor && (
-                            <>
-                                <View style={styles.contactModalHeader}>
-                                    <Text style={styles.contactModalTitle}>
-                                        Contact {selectedVendor.name}
-                                    </Text>
-                                    <TouchableOpacity
-                                        onPress={() =>
-                                            setShowVendorContactModal(false)
-                                        }
-                                    >
-                                        <Ionicons
-                                            name="close"
-                                            size={24}
-                                            color="#181114"
-                                        />
-                                    </TouchableOpacity>
-                                </View>
+                            <Text style={styles.orText}>OR</Text>
 
-                                <View style={styles.contactModalBody}>
-                                    <TouchableOpacity
-                                        style={styles.contactOption}
-                                        onPress={() => {
-                                            setShowVendorContactModal(false);
-                                            handleCallVendor(selectedVendor);
-                                        }}
-                                    >
-                                        <View
-                                            style={
-                                                styles.contactOptionIconCall
-                                            }
-                                        >
-                                            <Ionicons
-                                                name="call"
-                                                size={24}
-                                                color="white"
-                                            />
-                                        </View>
-                                        <View style={styles.contactOptionInfo}>
-                                            <Text
-                                                style={
-                                                    styles.contactOptionTitle
-                                                }
-                                            >
-                                                Call
-                                            </Text>
-                                            <Text
-                                                style={
-                                                    styles.contactOptionValue
-                                                }
-                                            >
-                                                {selectedVendor.phone}
-                                            </Text>
-                                        </View>
-                                    </TouchableOpacity>
-
-                                    <TouchableOpacity
-                                        style={styles.contactOption}
-                                        onPress={() => {
-                                            setShowVendorContactModal(false);
-                                            handleEmailVendor(selectedVendor);
-                                        }}
-                                    >
-                                        <View
-                                            style={
-                                                styles.contactOptionIconEmail
-                                            }
-                                        >
-                                            <Ionicons
-                                                name="mail"
-                                                size={24}
-                                                color="white"
-                                            />
-                                        </View>
-                                        <View style={styles.contactOptionInfo}>
-                                            <Text
-                                                style={
-                                                    styles.contactOptionTitle
-                                                }
-                                            >
-                                                Email
-                                            </Text>
-                                            <Text
-                                                style={
-                                                    styles.contactOptionValue
-                                                }
-                                            >
-                                                {selectedVendor.email}
-                                            </Text>
-                                        </View>
-                                    </TouchableOpacity>
-
-                                    <TouchableOpacity
-                                        style={styles.contactOption}
-                                        onPress={() => {
-                                            Alert.alert(
-                                                "Message",
-                                                "Messaging feature coming soon!"
-                                            );
-                                        }}
-                                    >
-                                        <View
-                                            style={
-                                                styles.contactOptionIconMessage
-                                            }
-                                        >
-                                            <Ionicons
-                                                name="chatbubble-ellipses"
-                                                size={24}
-                                                color="white"
-                                            />
-                                        </View>
-                                        <View style={styles.contactOptionInfo}>
-                                            <Text
-                                                style={
-                                                    styles.contactOptionTitle
-                                                }
-                                            >
-                                                Message
-                                            </Text>
-                                            <Text
-                                                style={
-                                                    styles.contactOptionValue
-                                                }
-                                            >
-                                                Send WhatsApp/SMS
-                                            </Text>
-                                        </View>
-                                    </TouchableOpacity>
-                                </View>
-                            </>
-                        )}
+                            <TouchableOpacity
+                                style={styles.downloadButton}
+                                onPress={() => {
+                                    Alert.alert(
+                                        "Download Template",
+                                        "Download sample Excel template"
+                                    );
+                                }}
+                            >
+                                <Ionicons
+                                    name="download-outline"
+                                    size={20}
+                                    color="#10B981"
+                                />
+                                <Text style={styles.downloadButtonText}>
+                                    Download Sample Template
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
                     </View>
                 </View>
             </Modal>
@@ -1195,15 +1457,13 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "space-between",
         paddingHorizontal: 16,
-        paddingTop: 60,
-        paddingBottom: 8,
+        paddingVertical: 12,
         backgroundColor: "white",
     },
     backButton: {
         width: 40,
         height: 40,
         borderRadius: 20,
-        backgroundColor: "#F3F4F6",
         alignItems: "center",
         justifyContent: "center",
     },
@@ -1213,72 +1473,235 @@ const styles = StyleSheet.create({
         color: "#181114",
     },
     saveButton: {
-        backgroundColor: "#ee2b8c",
-        borderRadius: 10,
         paddingHorizontal: 16,
         paddingVertical: 8,
+        backgroundColor: "#ee2b8c",
+        borderRadius: 8,
     },
     saveButtonText: {
-        fontFamily: "PlusJakartaSans-Bold",
+        fontFamily: "PlusJakartaSans-SemiBold",
         fontSize: 14,
         color: "white",
     },
     scrollView: {
         flex: 1,
+        paddingHorizontal: 16,
     },
     section: {
-        paddingHorizontal: 16,
-        paddingTop: 24,
-    },
-    sectionHeader: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-        marginBottom: 12,
+        backgroundColor: "white",
+        borderRadius: 16,
+        padding: 16,
+        marginTop: 16,
+        marginBottom: 8,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 8,
+        elevation: 3,
     },
     sectionTitle: {
         fontFamily: "PlusJakartaSans-Bold",
-        fontSize: 18,
+        fontSize: 16,
         color: "#181114",
+        marginBottom: 4,
     },
     sectionSubtitle: {
         fontFamily: "PlusJakartaSans-Regular",
-        fontSize: 14,
+        fontSize: 12,
         color: "#6B7280",
-        marginTop: 4,
+        marginBottom: 12,
+    },
+    sectionHeader: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        marginBottom: 12,
     },
     inputContainer: {
         flexDirection: "row",
         alignItems: "center",
-        backgroundColor: "white",
+        backgroundColor: "#f9fafb",
         borderRadius: 12,
-        paddingHorizontal: 14,
+        paddingHorizontal: 16,
         marginBottom: 12,
         borderWidth: 1,
-        borderColor: "#E5E7EB",
+        borderColor: "#f3f4f6",
     },
     textInput: {
         flex: 1,
-        paddingVertical: 12,
-        paddingHorizontal: 10,
+        paddingVertical: 14,
+        paddingHorizontal: 12,
         fontFamily: "PlusJakartaSans-Regular",
         fontSize: 14,
         color: "#181114",
     },
-    activitiesList: {
+    // Vendor Section Styles
+    selectedVendorsSummary: {
+        backgroundColor: "#f9fafb",
+        borderRadius: 12,
+        padding: 12,
         marginBottom: 16,
     },
-    activityItem: {
-        backgroundColor: "white",
-        borderRadius: 12,
-        padding: 14,
+    selectedVendorsTitle: {
+        fontFamily: "PlusJakartaSans-SemiBold",
+        fontSize: 14,
+        color: "#6B7280",
         marginBottom: 8,
+    },
+    selectedVendorsList: {
+        gap: 8,
+    },
+    selectedVendorChip: {
+        flexDirection: "row",
+        alignItems: "center",
+        backgroundColor: "white",
+        borderRadius: 20,
+        padding: 4,
+        paddingRight: 8,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.05,
+        shadowRadius: 4,
+        elevation: 2,
+    },
+    selectedVendorImage: {
+        width: 32,
+        height: 32,
+        borderRadius: 16,
+        marginRight: 8,
+    },
+    selectedVendorName: {
+        fontFamily: "PlusJakartaSans-SemiBold",
+        fontSize: 12,
+        color: "#181114",
+        maxWidth: 80,
+    },
+    selectedVendorRemove: {
+        marginLeft: 4,
+    },
+    vendorGrid: {
+        gap: 12,
+    },
+    vendorCard: {
+        backgroundColor: "white",
+        borderRadius: 16,
+        overflow: "hidden",
+        borderWidth: 2,
+        borderColor: "transparent",
+    },
+    vendorCardSelected: {
+        borderColor: "#10B981",
+        backgroundColor: "#f0fdf4",
+    },
+    vendorImageContainer: {
+        position: "relative",
+        height: 120,
+    },
+    vendorImage: {
+        width: "100%",
+        height: "100%",
+    },
+    vendorCategoryBadge: {
+        position: "absolute",
+        top: 8,
+        left: 8,
+        paddingHorizontal: 10,
+        paddingVertical: 4,
+        borderRadius: 8,
+    },
+    vendorCategoryText: {
+        fontFamily: "PlusJakartaSans-SemiBold",
+        fontSize: 11,
+    },
+    verifiedBadge: {
+        position: "absolute",
+        top: 8,
+        right: 8,
+    },
+    vendorInfo: {
+        padding: 12,
+    },
+    vendorName: {
+        fontFamily: "PlusJakartaSans-Bold",
+        fontSize: 16,
+        color: "#181114",
+        marginBottom: 4,
+    },
+    vendorRatingRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        marginBottom: 4,
+    },
+    vendorRatingText: {
+        fontFamily: "PlusJakartaSans-SemiBold",
+        fontSize: 12,
+        color: "#181114",
+        marginLeft: 4,
+    },
+    vendorReviewsText: {
+        fontFamily: "PlusJakartaSans-Regular",
+        fontSize: 11,
+        color: "#6B7280",
+        marginLeft: 2,
+    },
+    vendorPriceText: {
+        fontFamily: "PlusJakartaSans-Regular",
+        fontSize: 11,
+        color: "#6B7280",
+    },
+    vendorExperience: {
+        fontFamily: "PlusJakartaSans-Regular",
+        fontSize: 11,
+        color: "#6B7280",
+        marginBottom: 12,
+    },
+    vendorActions: {
+        flexDirection: "row",
+        gap: 8,
+    },
+    vendorSelectButton: {
+        flex: 1,
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: "#fceaf4",
+        borderRadius: 10,
+        paddingVertical: 10,
+        gap: 4,
+    },
+    vendorSelectButtonSelected: {
+        backgroundColor: "#10B981",
+    },
+    vendorSelectText: {
+        fontFamily: "PlusJakartaSans-SemiBold",
+        fontSize: 12,
+        color: "#ee2b8c",
+    },
+    vendorSelectTextSelected: {
+        color: "white",
+    },
+    vendorContactButton: {
+        width: 42,
+        height: 42,
+        borderRadius: 10,
+        backgroundColor: "#fceaf4",
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    // Activities Section
+    activitiesList: {
+        gap: 8,
+    },
+    activityItem: {
+        backgroundColor: "#f9fafb",
+        borderRadius: 12,
+        padding: 12,
         borderWidth: 1,
-        borderColor: "#E5E7EB",
+        borderColor: "transparent",
     },
     activityItemSelected: {
-        backgroundColor: "#FDF2F8",
-        borderColor: "#F472B6",
+        backgroundColor: "#fceaf4",
+        borderColor: "#ee2b8c",
     },
     activityHeader: {
         flexDirection: "row",
@@ -1289,7 +1712,7 @@ const styles = StyleSheet.create({
         height: 22,
         borderRadius: 6,
         borderWidth: 2,
-        borderColor: "#D1D5DB",
+        borderColor: "#d1d5db",
         alignItems: "center",
         justifyContent: "center",
         marginRight: 12,
@@ -1318,7 +1741,9 @@ const styles = StyleSheet.create({
     },
     activityInputsContainer: {
         marginTop: 12,
-        marginLeft: 34,
+        paddingTop: 12,
+        borderTopWidth: 1,
+        borderTopColor: "#e5e7eb",
     },
     activityInputRow: {
         flexDirection: "row",
@@ -1326,117 +1751,38 @@ const styles = StyleSheet.create({
         backgroundColor: "white",
         borderRadius: 8,
         paddingHorizontal: 12,
-        paddingVertical: 8,
-        borderWidth: 1,
-        borderColor: "#E5E7EB",
         marginBottom: 8,
+        borderWidth: 1,
+        borderColor: "#e5e7eb",
     },
     activityInput: {
         flex: 1,
-        marginLeft: 8,
+        paddingVertical: 10,
+        paddingHorizontal: 8,
         fontFamily: "PlusJakartaSans-Regular",
-        fontSize: 14,
+        fontSize: 13,
         color: "#181114",
     },
-    vendorCard: {
+    // Guest Section
+    addGuestButton: {
         flexDirection: "row",
         alignItems: "center",
-        justifyContent: "space-between",
-        backgroundColor: "white",
-        borderRadius: 12,
-        padding: 14,
-        marginBottom: 10,
-        borderWidth: 2,
-        borderColor: "#E5E7EB",
-    },
-    vendorCardSelected: {
-        borderColor: "#ee2b8c",
-        backgroundColor: "#FDF2F8",
-    },
-    vendorInfo: {
-        flex: 1,
-    },
-    vendorHeader: {
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 8,
-    },
-    vendorName: {
-        fontFamily: "PlusJakartaSans-SemiBold",
-        fontSize: 15,
-        color: "#181114",
-    },
-    selectedBadge: {
-        backgroundColor: "#10B981",
-        borderRadius: 4,
-        paddingHorizontal: 6,
-        paddingVertical: 2,
-    },
-    selectedBadgeText: {
-        fontFamily: "PlusJakartaSans-Regular",
-        fontSize: 10,
-        color: "white",
-    },
-    vendorCategory: {
-        fontFamily: "PlusJakartaSans-Regular",
-        fontSize: 13,
-        color: "#6B7280",
-    },
-    vendorRating: {
-        flexDirection: "row",
-        alignItems: "center",
-        marginTop: 4,
-    },
-    vendorRatingText: {
-        fontFamily: "PlusJakartaSans-Regular",
-        fontSize: 13,
-        color: "#6B7280",
-        marginLeft: 4,
-    },
-    vendorPrice: {
-        fontFamily: "PlusJakartaSans-Regular",
-        fontSize: 13,
-        color: "#6B7280",
-    },
-    vendorActions: {
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 8,
-    },
-    vendorSelectButton: {
-        flexDirection: "row",
-        alignItems: "center",
-        backgroundColor: "#FDF2F8",
-        borderRadius: 8,
-        paddingHorizontal: 12,
-        paddingVertical: 6,
+        backgroundColor: "#ee2b8c",
+        paddingHorizontal: 14,
+        paddingVertical: 8,
+        borderRadius: 10,
         gap: 4,
     },
-    vendorSelectButtonSelected: {
-        backgroundColor: "#10B981",
-    },
-    vendorSelectText: {
+    addGuestButtonText: {
         fontFamily: "PlusJakartaSans-SemiBold",
-        fontSize: 12,
-        color: "#ee2b8c",
-    },
-    vendorSelectTextSelected: {
+        fontSize: 13,
         color: "white",
-    },
-    vendorContactButton: {
-        width: 36,
-        height: 36,
-        borderRadius: 18,
-        backgroundColor: "#FDF2F8",
-        alignItems: "center",
-        justifyContent: "center",
     },
     guestStats: {
         flexDirection: "row",
-        backgroundColor: "white",
+        backgroundColor: "#f9fafb",
         borderRadius: 12,
         padding: 16,
-        marginBottom: 16,
     },
     guestStat: {
         flex: 1,
@@ -1444,50 +1790,37 @@ const styles = StyleSheet.create({
     },
     guestStatNumber: {
         fontFamily: "PlusJakartaSans-Bold",
-        fontSize: 24,
+        fontSize: 20,
         color: "#181114",
     },
     guestStatLabel: {
         fontFamily: "PlusJakartaSans-Regular",
-        fontSize: 12,
+        fontSize: 11,
         color: "#6B7280",
-    },
-    addGuestButton: {
-        flexDirection: "row",
-        alignItems: "center",
-        backgroundColor: "#ee2b8c",
-        borderRadius: 10,
-        paddingHorizontal: 14,
-        paddingVertical: 8,
-        gap: 6,
-    },
-    addGuestButtonText: {
-        fontFamily: "PlusJakartaSans-SemiBold",
-        fontSize: 14,
-        color: "white",
     },
     bottomSpacing: {
         height: 100,
     },
+    // Modal Styles
     modalOverlay: {
         flex: 1,
-        backgroundColor: "rgba(0,0,0,0.5)",
+        backgroundColor: "rgba(0, 0, 0, 0.5)",
         justifyContent: "flex-end",
     },
     modalContent: {
         backgroundColor: "white",
         borderTopLeftRadius: 24,
         borderTopRightRadius: 24,
-        maxHeight: "90%",
+        paddingBottom: 32,
+        maxHeight: "85%",
     },
     modalHeader: {
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-between",
-        paddingHorizontal: 20,
-        paddingVertical: 16,
+        padding: 16,
         borderBottomWidth: 1,
-        borderBottomColor: "#F3F4F6",
+        borderBottomColor: "#f3f4f6",
     },
     modalTitle: {
         fontFamily: "PlusJakartaSans-Bold",
@@ -1496,8 +1829,7 @@ const styles = StyleSheet.create({
     },
     modalActions: {
         flexDirection: "row",
-        paddingHorizontal: 20,
-        paddingVertical: 16,
+        padding: 16,
         gap: 12,
     },
     modalActionButton: {
@@ -1505,277 +1837,330 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "center",
-        backgroundColor: "#F9FAFB",
+        backgroundColor: "#f9fafb",
         borderRadius: 12,
         padding: 14,
         gap: 8,
-        borderWidth: 1,
-        borderColor: "#E5E7EB",
     },
     modalActionText: {
         fontFamily: "PlusJakartaSans-SemiBold",
-        fontSize: 14,
-        color: "#374151",
+        fontSize: 13,
+        color: "#181114",
     },
     guestList: {
-        paddingHorizontal: 20,
-        paddingVertical: 16,
+        paddingHorizontal: 16,
     },
     guestItem: {
         flexDirection: "row",
         alignItems: "center",
-        backgroundColor: "#F9FAFB",
+        backgroundColor: "#f9fafb",
         borderRadius: 12,
         padding: 12,
-        marginBottom: 10,
-        borderWidth: 1,
-        borderColor: "#E5E7EB",
+        marginBottom: 8,
     },
     guestItemInvited: {
-        backgroundColor: "#FDF2F8",
-        borderColor: "#F472B6",
+        backgroundColor: "#f0fdf4",
     },
     guestToggle: {
-        padding: 4,
+        flex: 1,
+        flexDirection: "row",
+        alignItems: "center",
     },
     inviteCheckbox: {
-        width: 24,
-        height: 24,
-        borderRadius: 12,
+        width: 22,
+        height: 22,
+        borderRadius: 6,
         borderWidth: 2,
-        borderColor: "#D1D5DB",
+        borderColor: "#d1d5db",
         alignItems: "center",
         justifyContent: "center",
+        marginRight: 10,
     },
     inviteCheckboxSelected: {
-        backgroundColor: "#ee2b8c",
-        borderColor: "#ee2b8c",
-    },
-    guestInfo: {
-        flex: 1,
-        marginLeft: 12,
+        backgroundColor: "#10B981",
+        borderColor: "#10B981",
     },
     guestName: {
         fontFamily: "PlusJakartaSans-SemiBold",
-        fontSize: 15,
+        fontSize: 14,
         color: "#181114",
     },
-    guestDetails: {
+    guestNameInvited: {
+        color: "#10B981",
+    },
+    guestRelation: {
         fontFamily: "PlusJakartaSans-Regular",
-        fontSize: 13,
+        fontSize: 12,
         color: "#6B7280",
+        marginRight: 12,
+        maxWidth: 80,
     },
     deleteButton: {
         padding: 4,
     },
-    modalSaveButton: {
-        backgroundColor: "#ee2b8c",
-        borderRadius: 12,
-        paddingVertical: 16,
-        alignItems: "center",
-        marginHorizontal: 20,
-        marginBottom: 20,
-    },
-    modalSaveButtonText: {
-        fontFamily: "PlusJakartaSans-Bold",
-        fontSize: 16,
-        color: "white",
-    },
-    formScroll: {
-        paddingHorizontal: 20,
-        paddingTop: 20,
-    },
-    formGroup: {
-        marginBottom: 16,
-    },
-    formLabel: {
-        fontFamily: "PlusJakartaSans-SemiBold",
-        fontSize: 14,
-        color: "#374151",
-        marginBottom: 8,
+    // Form Styles
+    formContainer: {
+        padding: 16,
     },
     formInput: {
-        backgroundColor: "#F9FAFB",
+        backgroundColor: "#f9fafb",
         borderRadius: 12,
-        paddingHorizontal: 14,
-        paddingVertical: 12,
+        paddingHorizontal: 16,
+        paddingVertical: 14,
         fontFamily: "PlusJakartaSans-Regular",
         fontSize: 14,
         color: "#181114",
+        marginBottom: 12,
         borderWidth: 1,
-        borderColor: "#E5E7EB",
+        borderColor: "#f3f4f6",
     },
-    relationChips: {
+    relationContainer: {
         flexDirection: "row",
         flexWrap: "wrap",
         gap: 8,
+        marginBottom: 16,
     },
     relationChip: {
         paddingHorizontal: 14,
         paddingVertical: 8,
         borderRadius: 20,
-        backgroundColor: "#F3F4F6",
+        backgroundColor: "#f9fafb",
         borderWidth: 1,
-        borderColor: "#E5E7EB",
+        borderColor: "#e5e7eb",
     },
     relationChipSelected: {
         backgroundColor: "#ee2b8c",
         borderColor: "#ee2b8c",
     },
     relationChipText: {
-        fontFamily: "PlusJakartaSans-Regular",
-        fontSize: 13,
-        color: "#374151",
-    },
-    relationChipTextSelected: {
-        color: "white",
         fontFamily: "PlusJakartaSans-SemiBold",
+        fontSize: 12,
+        color: "#6B7280",
     },
-    excelUploadArea: {
-        padding: 30,
+    addButton: {
+        backgroundColor: "#ee2b8c",
+        borderRadius: 12,
+        paddingVertical: 14,
         alignItems: "center",
-        justifyContent: "center",
-        minHeight: 200,
+    },
+    addButtonText: {
+        fontFamily: "PlusJakartaSans-Bold",
+        fontSize: 16,
+        color: "white",
+    },
+    // Upload Styles
+    uploadContainer: {
+        padding: 24,
+        alignItems: "center",
     },
     uploadButton: {
-        alignItems: "center",
-        justifyContent: "center",
-        padding: 30,
-        borderWidth: 2,
-        borderColor: "#F472B6",
-        borderStyle: "dashed",
+        backgroundColor: "#f9fafb",
         borderRadius: 16,
-        backgroundColor: "#FDF2F8",
+        padding: 32,
+        alignItems: "center",
+        borderWidth: 2,
+        borderColor: "#e5e7eb",
+        borderStyle: "dashed",
+        width: "100%",
     },
     uploadTitle: {
-        fontFamily: "PlusJakartaSans-Bold",
-        fontSize: 18,
+        fontFamily: "PlusJakartaSans-SemiBold",
+        fontSize: 16,
         color: "#181114",
         marginTop: 12,
     },
     uploadSubtitle: {
         fontFamily: "PlusJakartaSans-Regular",
-        fontSize: 13,
+        fontSize: 12,
         color: "#6B7280",
         marginTop: 4,
     },
-    uploadHint: {
+    orText: {
         fontFamily: "PlusJakartaSans-Regular",
-        fontSize: 11,
-        color: "#9CA3AF",
-        marginTop: 8,
-        textAlign: "center",
+        fontSize: 14,
+        color: "#9ca3af",
+        marginVertical: 16,
     },
-    uploadingContainer: {
+    downloadButton: {
+        flexDirection: "row",
         alignItems: "center",
+        gap: 8,
     },
-    uploadingText: {
-        fontFamily: "PlusJakartaSans-Bold",
-        fontSize: 18,
-        color: "#181114",
-        marginTop: 12,
-    },
-    uploadingSubtext: {
-        fontFamily: "PlusJakartaSans-Regular",
-        fontSize: 13,
-        color: "#6B7280",
-        marginTop: 4,
-    },
-    uploadedContainer: {
-        alignItems: "center",
-    },
-    uploadedFileName: {
-        fontFamily: "PlusJakartaSans-Bold",
-        fontSize: 16,
-        color: "#181114",
-        marginTop: 12,
-    },
-    uploadedCount: {
-        fontFamily: "PlusJakartaSans-Regular",
-        fontSize: 13,
-        color: "#10B981",
-        marginTop: 4,
-    },
-    uploadAgainButton: {
-        marginTop: 16,
-    },
-    uploadAgainText: {
+    downloadButtonText: {
         fontFamily: "PlusJakartaSans-SemiBold",
         fontSize: 14,
-        color: "#ee2b8c",
+        color: "#10B981",
     },
-    contactModalOverlay: {
-        flex: 1,
-        backgroundColor: "rgba(0,0,0,0.5)",
-        alignItems: "center",
-        justifyContent: "center",
-    },
-    contactModalContent: {
+    // Vendor Detail Modal
+    vendorDetailModalContent: {
         backgroundColor: "white",
-        borderRadius: 20,
-        width: "85%",
-        overflow: "hidden",
+        borderTopLeftRadius: 24,
+        borderTopRightRadius: 24,
+        height: "85%",
     },
-    contactModalHeader: {
+    vendorDetailHeader: {
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-between",
         padding: 16,
         borderBottomWidth: 1,
-        borderBottomColor: "#F3F4F6",
+        borderBottomColor: "#f3f4f6",
     },
-    contactModalTitle: {
+    vendorDetailTitle: {
         fontFamily: "PlusJakartaSans-Bold",
-        fontSize: 16,
+        fontSize: 18,
         color: "#181114",
     },
-    contactModalBody: {
+    vendorDetailContent: {
+        flex: 1,
+    },
+    vendorDetailImage: {
+        width: "100%",
+        height: 200,
+    },
+    vendorDetailInfo: {
         padding: 16,
     },
-    contactOption: {
+    vendorDetailCategoryBadge: {
+        paddingHorizontal: 10,
+        paddingVertical: 4,
+        borderRadius: 8,
+        alignSelf: "flex-start",
+        marginBottom: 8,
+    },
+    vendorDetailCategoryText: {
+        fontFamily: "PlusJakartaSans-SemiBold",
+        fontSize: 11,
+    },
+    vendorDetailName: {
+        fontFamily: "PlusJakartaSans-Bold",
+        fontSize: 22,
+        color: "#181114",
+        marginBottom: 8,
+    },
+    vendorDetailRatingRow: {
         flexDirection: "row",
         alignItems: "center",
-        padding: 12,
-        borderRadius: 12,
         marginBottom: 8,
-        backgroundColor: "#F9FAFB",
     },
-    contactOptionIconCall: {
-        width: 48,
-        height: 48,
-        borderRadius: 24,
-        backgroundColor: "#10B981",
-        alignItems: "center",
-        justifyContent: "center",
-    },
-    contactOptionIconEmail: {
-        width: 48,
-        height: 48,
-        borderRadius: 24,
-        backgroundColor: "#3B82F6",
-        alignItems: "center",
-        justifyContent: "center",
-    },
-    contactOptionIconMessage: {
-        width: 48,
-        height: 48,
-        borderRadius: 24,
-        backgroundColor: "#F59E0B",
-        alignItems: "center",
-        justifyContent: "center",
-    },
-    contactOptionInfo: {
-        flex: 1,
-        marginLeft: 12,
-    },
-    contactOptionTitle: {
+    vendorDetailRatingText: {
         fontFamily: "PlusJakartaSans-SemiBold",
-        fontSize: 15,
+        fontSize: 14,
         color: "#181114",
+        marginLeft: 4,
     },
-    contactOptionValue: {
+    vendorDetailReviewsText: {
+        fontFamily: "PlusJakartaSans-Regular",
+        fontSize: 12,
+        color: "#6B7280",
+        marginLeft: 4,
+    },
+    vendorDetailPriceText: {
+        fontFamily: "PlusJakartaSans-Regular",
+        fontSize: 12,
+        color: "#6B7280",
+    },
+    vendorDetailVerified: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 4,
+        marginBottom: 8,
+    },
+    vendorDetailVerifiedText: {
+        fontFamily: "PlusJakartaSans-SemiBold",
+        fontSize: 12,
+        color: "#10B981",
+    },
+    vendorDetailExperience: {
         fontFamily: "PlusJakartaSans-Regular",
         fontSize: 13,
         color: "#6B7280",
+        marginBottom: 12,
+    },
+    vendorDetailDescription: {
+        fontFamily: "PlusJakartaSans-Regular",
+        fontSize: 14,
+        color: "#181114",
+        lineHeight: 20,
+        marginBottom: 16,
+    },
+    vendorDetailAssignButton: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: "#ee2b8c",
+        borderRadius: 12,
+        paddingVertical: 14,
+        gap: 8,
+        marginBottom: 16,
+    },
+    vendorDetailAssignButtonSelected: {
+        backgroundColor: "#10B981",
+    },
+    vendorDetailAssignButtonText: {
+        fontFamily: "PlusJakartaSans-Bold",
+        fontSize: 16,
+        color: "white",
+    },
+    vendorDetailContactButtons: {
+        flexDirection: "row",
+        gap: 12,
+    },
+    vendorDetailContactButton: {
+        flex: 1,
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: "#fceaf4",
+        borderRadius: 12,
+        paddingVertical: 12,
+        gap: 6,
+    },
+    vendorDetailContactButtonText: {
+        fontFamily: "PlusJakartaSans-SemiBold",
+        fontSize: 14,
+        color: "#ee2b8c",
+    },
+    // Contact Modal
+    contactContent: {
+        padding: 24,
+        alignItems: "center",
+    },
+    contactVendorInfo: {
+        alignItems: "center",
+        marginBottom: 24,
+    },
+    contactVendorImage: {
+        width: 80,
+        height: 80,
+        borderRadius: 40,
+        marginBottom: 12,
+    },
+    contactVendorName: {
+        fontFamily: "PlusJakartaSans-Bold",
+        fontSize: 18,
+        color: "#181114",
+        marginBottom: 4,
+    },
+    contactVendorCategory: {
+        fontFamily: "PlusJakartaSans-Regular",
+        fontSize: 14,
+        color: "#6B7280",
+    },
+    contactButton: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: "#ee2b8c",
+        borderRadius: 12,
+        paddingVertical: 14,
+        width: "100%",
+        gap: 8,
+        marginBottom: 12,
+    },
+    contactButtonText: {
+        fontFamily: "PlusJakartaSans-Bold",
+        fontSize: 16,
+        color: "white",
     },
 });
