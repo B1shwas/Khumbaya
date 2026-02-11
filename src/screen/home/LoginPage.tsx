@@ -173,7 +173,7 @@ export default function LoginPage() {
                             </Pressable>
 
                             <View className="items-center gap-3 pt-1">
-                                <Link href="/(onboarding)/(usersignup)" asChild>
+                                <Link href="/(onboarding)/user-signup" asChild>
                                     <Pressable accessibilityRole="link">
                                         <Text className="text-sm text-muted-light">
                                             {COPY.signupPrompt} {" "}
@@ -184,7 +184,7 @@ export default function LoginPage() {
                                     </Pressable>
                                 </Link>
 
-                                <Link href="/(onboarding)/(vendorsignup)" asChild>
+                                <Link href="/(onboarding)/vendor-signup" asChild>
                                     <Pressable accessibilityRole="link">
                                         <Text className="text-sm text-muted-light">
                                             {COPY.vendorPrompt} {" "}
