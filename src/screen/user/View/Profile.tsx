@@ -1,8 +1,8 @@
+import { useAuth } from "@/src/store/AuthContext";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useState } from "react";
 import { Image, Pressable, ScrollView, Switch, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-
 const PROFILE_IMAGE =
     "https://lh3.googleusercontent.com/aida-public/AB6AXuCdkO95jYAsgD-tHT0l8PitJku9U0PYgsN46dLAfx3PtcZADmhzG5DIJ9fwFE53zZ2lTuyjK_stwFjrqzykITWedJJLCu1GfaSL39aHXer3wr6a9bHVMEa6kZmmVfnpsc9Ha_3shT06wNP776rHOOQW5hIFHAmx_PCNBHt8Z5RBFm5nmL8Up_zXeGF3GB_QIKDQxQdIOKfyFJ_ABVdt-ANir7346Ra3fo1YNqAuly_YLt64FSMRTHSHRBM85iWyTBq6R8z60Hf6Aok";
 
@@ -41,6 +41,11 @@ const MenuItem = ({ label, icon, badge, onPress }: MenuItemProps) => {
 export default function Profile() {
     const [isVendorMode, setIsVendorMode] = useState(false);
     const mutedColor = "#896175";
+     const { logout } = useAuth();
+    const pressedFunction = ()=>{
+        logout(); 
+        
+    }
 
     return (
         <SafeAreaView className="flex-1 bg-background-light">
@@ -118,7 +123,8 @@ export default function Profile() {
 
                     {/* Footer Actions */}
                     <View className="mt-8 px-6 pb-8 items-center gap-4 ">
-                        <Pressable className="w-full rounded-lg py-2 bg-primary/10 items-center active:scale-[0.98] transition-transform">
+                        <Pressable className="w-full rounded-lg py-2 bg-primary/10 items-center active:scale-[0.98] transition-transform"
+                    onPress={pressedFunction}>
                             <Text className="text-center font-semibold text-base text-[#ef4444]">
                                 Log Out
                             </Text>
