@@ -1,11 +1,11 @@
+import QuickServiceButton from "@/src/components/ui/event/NavigateComponent";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { router, type RelativePathString } from "expo-router";
 import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-const EventDetail = ({ eventId }: { eventId?: string }) => {
-  const isInvitedGuest = false; // TODO: Replace with actual logic to determine if user is an invited guest 
+const EventDetail = ({ eventId, isInvitedGuest = false }: { eventId?: string, isInvitedGuest?: boolean }) => {
   const event = {
     id: "1",
     title: "Sarah & Mike's Wedding",
@@ -24,6 +24,37 @@ const EventDetail = ({ eventId }: { eventId?: string }) => {
     vendors: { booked: 6, pending: 2 },
     nextTask: "Cake Tasting @ 2 PM",
   };
+
+  const manageActions = [
+    {
+      id: "timeline",
+      name: "Timeline",
+      icon: "time",
+      color: "#F59E0B",
+      route: `/(protected)/(client-stack)/events/${eventId || event.id}/timeline`,
+    },
+    {
+      id: "guests",
+      name: "Guest List",
+      icon: "people",
+      color: "#8B5CF6",
+      route: `/(protected)/(client-stack)/events/${eventId || event.id}/guests`,
+    },
+    {
+      id: "vendors",
+      name: "Vendors",
+      icon: "business",
+      color: "#3B82F6",
+      route: `/(protected)/(client-stack)/events/${eventId || event.id}/vendors`,
+    },
+    {
+      id: "budget",
+      name: "Budget",
+      icon: "wallet",
+      color: "#10B981",
+      route: `/(protected)/(client-stack)/events/${eventId || event.id}/budget`,
+    },
+  ];
 
   const budgetRemaining = event.budget.total - event.budget.spent;
 
@@ -44,13 +75,13 @@ const EventDetail = ({ eventId }: { eventId?: string }) => {
             end={{ x: 0.5, y: 0 }}
             className="absolute inset-0"
           />
-          
+
           {/* Top Navigation notification and three dots */}
           <View className="absolute top-0 left-0 w-full p-4 pt-6 flex-row justify-between items-start z-10">
-           
-                 <TouchableOpacity
+
+            <TouchableOpacity
               className="p-2 rounded-full bg-white/20 backdrop-blur-sm"
-              onPress={() => router.replace("/(protected)/(client-tabs)/event")}
+              onPress={() => router.replace("/(protected)/(client-tabs)/events")}
             >
               <Ionicons name="arrow-back" size={26} color="white" />
             </TouchableOpacity>
@@ -61,7 +92,7 @@ const EventDetail = ({ eventId }: { eventId?: string }) => {
               <TouchableOpacity className="p-2 rounded-full bg-white/20 backdrop-blur-sm">
                 <Ionicons name="ellipsis-vertical" size={26} color="white" />
               </TouchableOpacity>
-            </View>     
+            </View>
           </View>
 
           {/* Hero Content */}
@@ -86,7 +117,7 @@ const EventDetail = ({ eventId }: { eventId?: string }) => {
 
         {/* Countdown Timer */}
         <View className="px-4 -mt-10 z-20">
-         
+
           {/* dark:border-gray-800 removed */}
           {/* surface light */}
           <View className="bg-surface-light rounded-2xl shadow-sm shadow-black p-5 flex-row justify-between items-center border border-gray-100">
@@ -143,9 +174,9 @@ const EventDetail = ({ eventId }: { eventId?: string }) => {
               <View className="relative w-16 h-16">
                 {/* dark:border-gray-700 removed */}
                 <View className="absolute inset-0 rounded-full border-4 border-gray-100" />
-                <View 
-                  className="absolute inset-0 rounded-full border-4 border-primary" 
-                  style={{ borderBottomColor: 'transparent', borderRightColor: 'transparent', transform: [{ rotate: '270deg' }] }} 
+                <View
+                  className="absolute inset-0 rounded-full border-4 border-primary"
+                  style={{ borderBottomColor: 'transparent', borderRightColor: 'transparent', transform: [{ rotate: '270deg' }] }}
                 />
                 <View className="absolute inset-0 flex items-center justify-center">
                   {/* dark:text-white removed */}
@@ -201,36 +232,10 @@ const EventDetail = ({ eventId }: { eventId?: string }) => {
         <View className="  mt-6 px-4 pb-4">
           {/* dark:text-white removed */}
           <Text className="text-lg font-bold mb-3">Manage Event</Text>
-          <View className="flex-row flex-wrap gap-3 bg-black justify-center ">
-            {/* Timeline */}
-            <TouchableOpacity 
-              className=" bg-white p-4 rounded-xl shadow-sm border border-gray-100 active:scale-[0.98] transition-transform "
-              onPress={() => router.push("/(protected)/(client-stack)/events/[eventId]/timeline")}
-            >
-            
-            </TouchableOpacity>
-
-            {/* Guest List */}
-            <TouchableOpacity 
-              className=" bg-white p-4 rounded-xl shadow-sm border border-gray-100 active:scale-[0.98] transition-transform"
-              onPress={() => router.push("/(protected)/(client-stack)/events/[eventId]/guests")}
-            >
-            </TouchableOpacity>
-
-            {/* Vendors */}
-            <TouchableOpacity 
-              className=" bg-white p-4 rounded-xl shadow-sm border border-gray-100 active:scale-[0.98] transition-transform"
-              onPress={() => router.push("/(protected)/(client-stack)/events/[eventId]/vendors")}
-            >
-
-            </TouchableOpacity>
-
-            {/* Budget */}
-            <TouchableOpacity 
-              className=" bg-white p-4 rounded-xl shadow-sm border border-gray-100 active:scale-[0.98] transition-transform"
-              onPress={() => router.push("/(protected)/(client-stack)/events/[eventId]/budget" )}
-            >
-              </TouchableOpacity>
+          <View className="flex-row flex-wrap gap-3 justify-center">
+            {manageActions.map((action) => (
+              <QuickServiceButton key={action.id} {...action} />
+            ))}
 
             {/* Gallery - Full Width */}
             <TouchableOpacity

@@ -1,9 +1,9 @@
+import QuickServiceButton from "@/src/components/ui/event/NavigateComponent";
 import { useAuth } from "@/src/store/AuthContext";
 import { Ionicons } from "@expo/vector-icons";
 import { router, type RelativePathString } from "expo-router";
 import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-
 interface EventCardProps {
   title: string;
   date: string;
@@ -377,35 +377,9 @@ const CoupleCard = ({
 // Quick Service Button Component
 // ============================================
 
-interface QuickServiceButtonProps {
-  id: string;
-  name: string;
-  icon: string;
-  color: string;
-  route: string;
-}
 
-const QuickServiceButton = ({
-  name,
-  icon,
-  color,
-  route,
-}: QuickServiceButtonProps) => (
-  <TouchableOpacity
-    className="flex-row items-center gap-2 px-4 py-3 bg-white dark:bg-surface-dark rounded-xl shadow-sm border border-gray-100"
-    onPress={() => router.push(route as RelativePathString)}
-    activeOpacity={0.8}
-    style={{ width: "47%" }}
-  >
-    <View
-      className="w-10 h-10 rounded-full items-center justify-center"
-      style={{ backgroundColor: color }}
-    >
-      <Ionicons name={icon as any} size={20} color="white" />
-    </View>
-    <Text className="font-semibold text-sm text-gray-900">{name}</Text>
-  </TouchableOpacity>
-);
+
+
 
 export default function HomePage() {
   const events = [
