@@ -13,7 +13,7 @@ export default function Index() {
     );
   }
 
-  if (user) {
+  if (user && !isLoading) {
     if (user.role === "vendor") {
       return <Redirect href="/(protected)/(vendor-tabs)/home" />;
     }

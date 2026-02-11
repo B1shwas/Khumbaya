@@ -18,7 +18,16 @@ module.exports = {
           secondary: "#F9FAFB",
           tertiary: "#F3F4F6",
           success: "bg-green-900/30",
+          light:"#f8f6f7"
         },
+        surface:{
+          DEFAULT: "#FFFFFF",
+          secondary: "#F9FAFB",
+          tertiary: "#F3F4F6",
+          success: "bg-green-900/30",
+          light:"#f8f6f7"
+        },
+        
         // Text colors
         text: {
           primary: "#111827",

@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import { router, type RelativePathString } from "expo-router";
+import { router, useGlobalSearchParams, type RelativePathString } from "expo-router";
 import { useState } from "react";
 import {
   Image,
@@ -165,7 +165,7 @@ const SubEventCard = ({ subEvent }: { subEvent: SubEvent }) => (
     style={styles.subEventCard}
     onPress={() =>
       router.push(
-        `/events/subevent-detail?subEventId=${subEvent.id}&eventId=1` as RelativePathString,
+        `/(protected)/(client-stack)/events/subevent-detail?subEventId=${subEvent.id}&eventId=1`,
       )
     }
   >
@@ -193,11 +193,7 @@ const EventCard = ({ event }: { event: Event }) => (
   <View style={styles.eventCard}>
     <TouchableOpacity
       style={styles.eventCardTouchable}
-      onPress={() =>
-        router.push(
-          `/events/${event.id}?isInvited=${!event.isMyEvent}` as RelativePathString,
-        )
-      }
+      onPress={() => router.push(`/(protected)/(client-stack)/events/${event.id}`)} // go to the related event with the id number 
       activeOpacity={0.8}
     >
       <View style={styles.eventImageContainer}>
@@ -267,7 +263,7 @@ const EventCard = ({ event }: { event: Event }) => (
             style={styles.actionButton}
             onPress={() =>
               router.push(
-                `/events/subevent-create?eventId=${event.id}` as RelativePathString,
+                `/(protected)/(client-stack)/events/subevent-create?eventId=${event.id}` ,
               )
             }
           >
@@ -278,7 +274,7 @@ const EventCard = ({ event }: { event: Event }) => (
             style={styles.actionButton}
             onPress={() =>
               router.push(
-                `/events/table-management?eventId=${event.id}` as RelativePathString,
+                `/(protected)/(client-stack)/events/table-management?eventId=${event.id}` ,
               )
             }
           >
@@ -314,9 +310,15 @@ const EventCard = ({ event }: { event: Event }) => (
 export default function EventsPage() {
   const [activeTab, setActiveTab] = useState<EventTab>("myEvents");
   const [refreshing, setRefreshing] = useState(false);
+  const params = useGlobalSearchParams();
+  const showSuccess = params?.success === "true";
+
+  const handleDismissSuccess = () => {
+    router.replace("/(protected)/(client-tabs)/event" as RelativePathString);
+  };
 
   const handleCreateSubEvent = () => {
-    router.push("/events/subevent-create" as RelativePathString);
+    router.push("/(protected)/(client-stack)/events/subevent-create" as RelativePathString);
   };
 
   const filteredEvents = eventsData.filter(

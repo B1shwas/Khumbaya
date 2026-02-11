@@ -5,7 +5,7 @@ import { Link, useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Animated,
-  ImageBackground,
+  Image,
   Pressable,
   TextInput,
   View
@@ -81,12 +81,12 @@ export default function LoginPage() {
            
                 <View className=" w-full max-w-md overflow-hidden rounded-xl  ">
                     <View className="h-[35vh] w-full overflow-hidden rounded-b-xl">
-                        <ImageBackground
-                            source={HERO_IMAGE}
-                            className="h-full w-full"
-                            resizeMode="cover"
-                            accessibilityLabel="Elegant wedding reception table setting"
-                        >
+                        <Image
+                                source={HERO_IMAGE}
+                                className="w-full h-[50vh] rounded-3xl"
+                                resizeMode="cover"
+                                accessibilityLabel="Wedding venue hero image"
+                            />
                             <LinearGradient
                                 colors={["rgba(22,33,62,0.6)", "transparent"]}
                                 className="absolute inset-0"
@@ -99,7 +99,6 @@ export default function LoginPage() {
                                     <MaterialIcons name="favorite" size={28} color="#ee2b8c" />
                                 </Animated.View>
                             </View>
-                        </ImageBackground>
                     </View>
 
                     <View className="px-6 pb-8 pt-6">
