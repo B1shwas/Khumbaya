@@ -16,7 +16,6 @@ type MenuItemProps = {
 const MenuItem = ({ label, icon, badge, onPress }: MenuItemProps) => {
     const labelColor = "#181114";
     const mutedColor = "#896175";
-   
 
     return (
         <Pressable
