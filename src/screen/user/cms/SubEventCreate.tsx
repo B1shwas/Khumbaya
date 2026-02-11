@@ -3,7 +3,7 @@ import {
   SUB_EVENT_TEMPLATES,
   SubEventTemplate,
   TemplateActivity,
-} from "@/src/data/subeventTemplates";
+} from "@/src/constants/subeventTemplates";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
@@ -12,7 +12,7 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-  View
+  View,
 } from "react-native";
 
 // ============================================

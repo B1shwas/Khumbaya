@@ -1,22 +1,22 @@
 import {
-    SUB_EVENT_TEMPLATES,
-    SubEventTemplate,
-    TemplateActivity,
-} from "@/src/data/subeventTemplates";
+  SUB_EVENT_TEMPLATES,
+  SubEventTemplate,
+  TemplateActivity,
+} from "@/src/constants/subeventTemplates";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
-    Alert,
-    FlatList,
-    Image,
-    Modal,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  FlatList,
+  Image,
+  Modal,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 // ============================================

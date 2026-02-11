@@ -1,4 +1,4 @@
-import { SubEventTemplate } from "@/src/data/subeventTemplates";
+import { SubEventTemplate } from "@/src/constants/subeventTemplates";
 import { Ionicons } from "@expo/vector-icons";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
