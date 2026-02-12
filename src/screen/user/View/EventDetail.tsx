@@ -5,7 +5,13 @@ import { router, type RelativePathString } from "expo-router";
 import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-const EventDetail = ({ eventId, isInvitedGuest = false }: { eventId?: string, isInvitedGuest?: boolean }) => {
+const EventDetail = ({
+  eventId,
+  isInvitedGuest = false,
+}: {
+  eventId?: string;
+  isInvitedGuest?: boolean;
+}) => {
   const event = {
     id: "1",
     title: "Sarah & Mike's Wedding",
@@ -78,10 +84,11 @@ const EventDetail = ({ eventId, isInvitedGuest = false }: { eventId?: string, is
 
           {/* Top Navigation notification and three dots */}
           <View className="absolute top-0 left-0 w-full p-4 pt-6 flex-row justify-between items-start z-10">
-
             <TouchableOpacity
               className="p-2 rounded-full bg-white/20 backdrop-blur-sm"
-              onPress={() => router.replace("/(protected)/(client-tabs)/events")}
+              onPress={() =>
+                router.replace("/(protected)/(client-tabs)/events")
+              }
             >
               <Ionicons name="arrow-back" size={26} color="white" />
             </TouchableOpacity>
@@ -106,10 +113,14 @@ const EventDetail = ({ eventId, isInvitedGuest = false }: { eventId?: string, is
               </Text>
               <View className="flex-row items-center gap-2 text-white/90 mt-1">
                 <Ionicons name="calendar" size={18} color="white" />
-                <Text className="text-sm font-medium text-white">{event.date}</Text>
+                <Text className="text-sm font-medium text-white">
+                  {event.date}
+                </Text>
                 <Text className="mx-1 opacity-50">•</Text>
                 <Ionicons name="location" size={18} color="white" />
-                <Text className="text-sm font-medium text-white">{event.location}</Text>
+                <Text className="text-sm font-medium text-white">
+                  {event.location}
+                </Text>
               </View>
             </View>
           </View>
@@ -117,7 +128,6 @@ const EventDetail = ({ eventId, isInvitedGuest = false }: { eventId?: string, is
 
         {/* Countdown Timer */}
         <View className="px-4 -mt-10 z-20">
-
           {/* dark:border-gray-800 removed */}
           {/* surface light */}
           <View className="bg-surface-light rounded-2xl shadow-sm shadow-black p-5 flex-row justify-between items-center border border-gray-100">
@@ -176,7 +186,11 @@ const EventDetail = ({ eventId, isInvitedGuest = false }: { eventId?: string, is
                 <View className="absolute inset-0 rounded-full border-4 border-gray-100" />
                 <View
                   className="absolute inset-0 rounded-full border-4 border-primary"
-                  style={{ borderBottomColor: 'transparent', borderRightColor: 'transparent', transform: [{ rotate: '270deg' }] }}
+                  style={{
+                    borderBottomColor: "transparent",
+                    borderRightColor: "transparent",
+                    transform: [{ rotate: "270deg" }],
+                  }}
                 />
                 <View className="absolute inset-0 flex items-center justify-center">
                   {/* dark:text-white removed */}
@@ -199,12 +213,17 @@ const EventDetail = ({ eventId, isInvitedGuest = false }: { eventId?: string, is
                   <Ionicons name="pricetag" size={20} color="#16A34A" />
                 </View>
                 {/* dark:text-white removed */}
-                <Text className="text-sm font-bold mt-2 text-gray-900">Budget</Text>
+                <Text className="text-sm font-bold mt-2 text-gray-900">
+                  Budget
+                </Text>
                 <Text className="text-xs text-gray-500">$12k / $30k</Text>
               </View>
               {/* dark:bg-gray-700 removed */}
               <View className="w-full bg-gray-100 rounded-full h-1.5 mt-3">
-                <View className="bg-primary h-1.5 rounded-full" style={{ width: '40%' }} />
+                <View
+                  className="bg-primary h-1.5 rounded-full"
+                  style={{ width: "40%" }}
+                />
               </View>
             </View>
 
@@ -217,12 +236,17 @@ const EventDetail = ({ eventId, isInvitedGuest = false }: { eventId?: string, is
                   <Ionicons name="checkmark-circle" size={20} color="#EA580C" />
                 </View>
                 {/* dark:text-white removed */}
-                <Text className="text-sm font-bold mt-2 text-gray-900">Tasks</Text>
+                <Text className="text-sm font-bold mt-2 text-gray-900">
+                  Tasks
+                </Text>
                 <Text className="text-xs text-gray-500">12 Pending</Text>
               </View>
               {/* dark:bg-gray-700 removed */}
               <View className="w-full bg-gray-100 rounded-full h-1.5 mt-3">
-                <View className="bg-orange-500 h-1.5 rounded-full" style={{ width: '65%' }} />
+                <View
+                  className="bg-orange-500 h-1.5 rounded-full"
+                  style={{ width: "65%" }}
+                />
               </View>
             </View>
           </ScrollView>
