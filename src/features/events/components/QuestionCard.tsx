@@ -1,8 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
 import React, { useState } from "react";
 import { Text, TextInput, TouchableOpacity, View } from "react-native";
+import { styles } from "../styles/RSVP.styles";
 import type { RSVPQuestion } from "../types/rsvp";
-import { styles } from "./styles/RSVP.styles";
 
 interface QuestionCardProps {
   question: RSVPQuestion;

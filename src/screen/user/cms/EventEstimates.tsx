@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useNavigation } from "expo-router";
+import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
   KeyboardAvoidingView,
@@ -19,7 +19,7 @@ const HEADER_HEIGHT = 80;
 const FOOTER_HEIGHT = 120;
 
 export default function EventEstimates() {
-  const navigation = useNavigation();
+  const router = useRouter();
   const {
     formData,
     handleGuestCountChange,
@@ -44,7 +44,7 @@ export default function EventEstimates() {
         <View style={[styles.header, { paddingTop: HEADER_HEIGHT }]}>
           <TouchableOpacity
             style={styles.headerButton}
-            onPress={() => navigation.goBack()}
+            onPress={() => router.back()}
           >
             <Ionicons name="chevron-back" size={20} color="#181114" />
           </TouchableOpacity>
@@ -211,14 +211,18 @@ export default function EventEstimates() {
         <View style={styles.footer}>
           <TouchableOpacity
             style={styles.backButton}
-            onPress={() => navigation.goBack()}
+            onPress={() => router.back()}
           >
             <Ionicons name="chevron-back" size={20} color="#6B7280" />
             <Text style={styles.backButtonText}>Back</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.nextButton}
-            onPress={() => navigation.navigate("subevent-create" as never)}
+            onPress={() =>
+              router.push(
+                "/(protected)/(client-tabs)/events/event-success" as any,
+              )
+            }
           >
             <Text style={styles.nextButtonText}>Next</Text>
             <Ionicons name="chevron-forward" size={20} color="white" />

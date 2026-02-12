@@ -1,8 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useSuccess } from "./hooks/useSuccess";
-import { styles } from "./styles/success.styles";
+import { useSuccess } from "@/src/features/events/hooks/useSuccess";
+import { styles } from "@/src/features/events/styles/success.styles";
 
 export default function EventSuccessPage() {
   const { handleCreateSubEvent, handleViewEvents } = useSuccess();

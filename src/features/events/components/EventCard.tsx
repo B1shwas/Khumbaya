@@ -1,8 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import { Image, Text, View } from "react-native";
+import { styles } from "../styles/RSVP.styles";
 import type { InvitedEvent } from "../types/rsvp";
-import { styles } from "./styles/RSVP.styles";
 
 interface EventCardProps {
   event: InvitedEvent;

@@ -30,12 +30,21 @@ export default function EventsPage() {
       <View style={styles.header}>
         <View style={styles.headerContent}>
           <Text style={styles.headerTitle}>Your Events</Text>
-          <TouchableOpacity
-            style={styles.settingsButton}
-            onPress={() => router.push("/settings" as RelativePathString)}
-          >
-            <Ionicons name="settings" size={24} color="#374151" />
-          </TouchableOpacity>
+          <View style={styles.headerActions}>
+            <TouchableOpacity
+              style={styles.vendorButton}
+              onPress={() => router.push("/explore" as RelativePathString)}
+            >
+              <Ionicons name="storefront" size={20} color="#ee2b8c" />
+              <Text style={styles.vendorButtonText}>Find Vendors</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.settingsButton}
+              onPress={() => router.push("/settings" as RelativePathString)}
+            >
+              <Ionicons name="settings" size={24} color="#374151" />
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* Tabs */}

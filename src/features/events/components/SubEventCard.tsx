@@ -1,8 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import { Text, View } from "react-native";
+import { styles } from "../styles/RSVP.styles";
 import type { SubEvent } from "../types/rsvp";
-import { styles } from "./styles/RSVP.styles";
 
 interface SubEventCardProps {
   subEvent: SubEvent;

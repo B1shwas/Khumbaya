@@ -1,8 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import { Text, View } from "react-native";
+import { styles } from "../styles/RSVP.styles";
 import type { RSVPStep } from "../types/rsvp";
-import { styles } from "./styles/RSVP.styles";
 
 interface StepIndicatorProps {
   currentStep: RSVPStep;

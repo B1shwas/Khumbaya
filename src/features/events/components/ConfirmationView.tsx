@@ -1,8 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import { Alert, Image, Text, TouchableOpacity, View } from "react-native";
+import { styles } from "../styles/RSVP.styles";
 import type { InvitedEvent, RSVPQuestion } from "../types/rsvp";
-import { styles } from "./styles/RSVP.styles";
 
 interface ConfirmationViewProps {
   event: InvitedEvent;

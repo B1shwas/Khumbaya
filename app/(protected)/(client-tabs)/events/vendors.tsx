@@ -2,9 +2,9 @@ import { Ionicons } from "@expo/vector-icons";
 import { router, type RelativePathString } from "expo-router";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { VendorCard } from "./components/VendorCard";
-import { useVendors } from "./hooks/useVendors";
-import { styles } from "./styles/vendors.styles";
+import { VendorCard } from "@/src/features/events/components/VendorCard";
+import { useVendors } from "@/src/features/events/hooks/useVendors";
+import { styles } from "@/src/features/events/styles/vendors.styles";
 
 export default function EventVendorsPage() {
   const { filteredVendors, stats, tabs, activeTab, setActiveTab } =

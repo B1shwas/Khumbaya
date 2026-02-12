@@ -2,15 +2,15 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { styles } from "./components/styles/RSVP.styles";
-import { useRSVPPage } from "./hooks/useRSVPPage";
-import { invitedEventData, rsvpQuestions } from "./types/rsvp";
+import { styles } from "@/src/features/events/styles/RSVP.styles";
+import { useRSVPPage } from "@/src/features/events/hooks/useRSVPPage";
+import { invitedEventData, rsvpQuestions } from "@/src/features/events/types/rsvp";
 
 // Components
-import { ConfirmationView } from "./components/ConfirmationView";
-import { DecisionView } from "./components/DecisionView";
-import { QuestionsView } from "./components/QuestionsView";
-import { StepIndicator } from "./components/StepIndicator";
+import { ConfirmationView } from "@/src/features/events/components/ConfirmationView";
+import { DecisionView } from "@/src/features/events/components/DecisionView";
+import { QuestionsView } from "@/src/features/events/components/QuestionsView";
+import { StepIndicator } from "@/src/features/events/components/StepIndicator";
 
 export default function RSVPPage() {
   const { rsvpData, currentStep, handleDecision, handleAnswer, handleSubmit } =

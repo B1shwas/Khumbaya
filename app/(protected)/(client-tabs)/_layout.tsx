@@ -34,6 +34,7 @@ export default function ClientTabsLayout() {
           tabBarIcon: ({ color }) => (
             <MaterialIcons name="home" size={24} color={color} />
           ),
+          href: "/(protected)/(client-tabs)/home",
         }}
       />
       <Tabs.Screen
@@ -43,6 +44,7 @@ export default function ClientTabsLayout() {
           tabBarIcon: ({ color }) => (
             <MaterialIcons name="event" size={24} color={color} />
           ),
+          href: "/(protected)/(client-tabs)/events",
         }}
       />
       <Tabs.Screen
@@ -52,6 +54,7 @@ export default function ClientTabsLayout() {
           tabBarIcon: ({ color }) => (
             <MaterialIcons name="explore" size={24} color={color} />
           ),
+          href: "/(protected)/(client-tabs)/explore",
         }}
       />
       <Tabs.Screen
@@ -61,9 +64,9 @@ export default function ClientTabsLayout() {
           tabBarIcon: ({ color }) => (
             <MaterialIcons name="person" size={24} color={color} />
           ),
+          href: "/(protected)/(client-tabs)/profile",
         }}
       />
     </Tabs>
   );
 }
-

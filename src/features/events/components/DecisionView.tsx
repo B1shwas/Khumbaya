@@ -1,9 +1,9 @@
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import { Text, TouchableOpacity, View } from "react-native";
+import { styles } from "../styles/RSVP.styles";
 import type { InvitedEvent, SubEvent } from "../types/rsvp";
 import { EventCard } from "./EventCard";
-import { styles } from "./styles/RSVP.styles";
 import { SubEventCard } from "./SubEventCard";
 
 interface DecisionViewProps {
