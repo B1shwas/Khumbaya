@@ -1,5 +1,5 @@
 import { MaterialIcons } from "@expo/vector-icons";
-import { router, type RelativePathString } from "expo-router";
+import { router } from "expo-router";
 import { useMemo, useState } from "react";
 import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -93,7 +93,7 @@ const tabs: VendorEventTab[] = ["Upcoming", "Requests", "Completed"];
 
 export default function EventvendorScreen() {
     const [activeTab, setActiveTab] = useState<VendorEventTab>("Upcoming");
-  
+
     const sections = useMemo(() => {
         const grouped = events.reduce<Record<string, VendorEvent[]>>(
             (acc, event) => {
@@ -151,15 +151,13 @@ export default function EventvendorScreen() {
                                     accessibilityState={{ selected: isActive }}
                                 >
                                     <View
-                                        className={`absolute inset-0 rounded-lg shadow-sm ${
-                                            isActive ? "bg-white" : "bg-transparent"
-                                        }`}
+                                        className={`absolute inset-0 rounded-lg shadow-sm ${isActive ? "bg-white" : "bg-transparent"
+                                            }`}
                                     />
                                     {/* NOTE: dark:text-gray-400 and dark:peer-checked:text-white omitted. */}
                                     <Text
-                                        className={`relative z-10 text-sm font-bold ${
-                                            isActive ? "text-primary" : "text-[#896175]"
-                                        }`}
+                                        className={`relative z-10 text-sm font-bold ${isActive ? "text-primary" : "text-[#896175]"
+                                            }`}
                                     >
                                         {tab}
                                     </Text>
@@ -196,7 +194,7 @@ export default function EventvendorScreen() {
                                         accessibilityLabel={`Open ${event.title}`}
                                         onPress={() =>
                                             router.push(
-                                                `/events/${event.id}` as RelativePathString,
+                                                `/(protected)/(vendor-tabs)/events/${event.id}`,
                                             )
                                         }
                                     >
@@ -204,11 +202,10 @@ export default function EventvendorScreen() {
                                             {/* Date Block */}
                                             {/* NOTE: dark:bg-primary/20 and dark:text-primary-300 omitted. */}
                                             <View
-                                                className={`h-[70px] w-[70px] items-center  justify-center  rounded-xl ${
-                                                    event.status === "Confirmed"
-                                                        ? "bg-primary/10"
-                                                        : "border border-gray-100 bg-background-light"
-                                                }`}
+                                                className={`h-[70px] w-[70px] items-center  justify-center  rounded-xl ${event.status === "Confirmed"
+                                                    ? "bg-primary/10"
+                                                    : "border border-gray-100 bg-background-light"
+                                                    }`}
                                             >
                                                 <Text className="text-xs font-bold uppercase tracking-wide text-[#896175]">
                                                     {event.month}

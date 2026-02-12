@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-import QuickServiceButton from "@/src/components/ui/event/NavigateComponent";
-=======
 import NavigateComponent from "@/src/components/ui/event/NavigateComponent";
->>>>>>> update/stack
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { router, type RelativePathString } from "expo-router";
@@ -124,11 +120,7 @@ const EventDetail = ({ eventId, isInvitedGuest = false }: { eventId?: string, is
 
           {/* dark:border-gray-800 removed */}
           {/* surface light */}
-<<<<<<< HEAD
-          <View className="bg-surface-light rounded-2xl shadow-sm shadow-black p-5 flex-row justify-between items-center border border-gray-100">
-=======
           <View className="bg-background-light rounded-2xl shadow-sm shadow-black p-5 flex-row justify-between items-center border border-gray-100">
->>>>>>> update/stack
             <View className="flex-col items-center flex-1">
               <Text className="text-2xl font-black text-primary">
                 {event.days}
@@ -242,11 +234,7 @@ const EventDetail = ({ eventId, isInvitedGuest = false }: { eventId?: string, is
           <Text className="text-lg font-bold mb-3">Manage Event</Text>
           <View className="flex-row flex-wrap gap-3 justify-center">
             {manageActions.map((action) => (
-<<<<<<< HEAD
-              <QuickServiceButton key={action.id} {...action} />
-=======
               <NavigateComponent key={action.id} {...action} />
->>>>>>> update/stack
             ))}
 
             {/* Gallery - Full Width */}
