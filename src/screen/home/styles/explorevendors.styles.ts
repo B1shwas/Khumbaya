@@ -1,0 +1,198 @@
+import { StyleSheet } from "react-native";
+
+export const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#f8f6f7",
+  },
+  header: {
+    paddingHorizontal: 16,
+    paddingTop: 24,
+    paddingBottom: 8,
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: "700",
+    color: "#181114",
+    marginBottom: 16,
+  },
+  searchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    height: 48,
+    backgroundColor: "white",
+    borderRadius: 12,
+    paddingHorizontal: 16,
+  },
+  searchIcon: {
+    marginRight: 12,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 16,
+    color: "#181114",
+  },
+  categoriesContainer: {
+    paddingTop: 12,
+    paddingBottom: 16,
+  },
+  categoryChip: {
+    height: 36,
+    paddingHorizontal: 20,
+    borderRadius: 18,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 12,
+  },
+  categoryChipActive: {
+    backgroundColor: "#ee2b8c",
+  },
+  categoryChipInactive: {
+    backgroundColor: "white",
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+  },
+  categoryText: {
+    fontSize: 14,
+    fontWeight: "500",
+  },
+  categoryTextActive: {
+    color: "white",
+  },
+  categoryTextInactive: {
+    color: "#374151",
+  },
+  vendorList: {
+    flex: 1,
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    paddingBottom: 128,
+    gap: 16,
+  },
+  vendorCard: {
+    backgroundColor: "white",
+    borderRadius: 16,
+    overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  vendorImageContainer: {
+    width: "100%",
+    aspectRatio: 4 / 3,
+    position: "relative",
+  },
+  vendorImage: {
+    width: "100%",
+    height: "100%",
+  },
+  favoriteButton: {
+    position: "absolute",
+    top: 12,
+    right: 12,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "rgba(255,255,255,0.2)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  ratingBadge: {
+    position: "absolute",
+    bottom: 12,
+    left: 12,
+    backgroundColor: "rgba(255,255,255,0.9)",
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  vendorInfo: {
+    padding: 16,
+    gap: 8,
+  },
+  vendorHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+  },
+  vendorName: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#181114",
+  },
+  vendorCategory: {
+    fontSize: 14,
+    color: "#ee2b8c",
+    marginTop: 4,
+  },
+  priceLevel: {
+    backgroundColor: "#DCFCE7",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+  priceLevelText: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: "#16A34A",
+  },
+  vendorLocation: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    marginTop: 4,
+  },
+  locationText: {
+    fontSize: 13,
+    color: "#6B7280",
+  },
+  bottomBanner: {
+    position: "absolute",
+    bottom: 24,
+    left: 16,
+    right: 16,
+    padding: 8,
+  },
+  bannerContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: "white",
+    borderRadius: 16,
+    padding: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  bannerTextContainer: {
+    flex: 1,
+  },
+  bannerTitle: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#181114",
+  },
+  bannerSubtitle: {
+    fontSize: 12,
+    color: "#6B7280",
+    marginTop: 2,
+  },
+  loginButton: {
+    backgroundColor: "#ee2b8c",
+    paddingHorizontal: 24,
+    paddingVertical: 10,
+    borderRadius: 8,
+  },
+  loginButtonText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "white",
+  },
+});

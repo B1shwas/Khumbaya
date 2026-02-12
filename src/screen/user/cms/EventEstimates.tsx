@@ -1,192 +1,149 @@
-import React, { useState } from 'react';
+import { Ionicons } from "@expo/vector-icons";
+import { useNavigation } from "expo-router";
+import { useState } from "react";
 import {
-  View,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
   Text,
   TextInput,
   TouchableOpacity,
-  ScrollView,
-  StyleSheet,
-  KeyboardAvoidingView,
-  Platform,
-  Switch,
-} from 'react-native';
-import { useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
-import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+  View,
+} from "react-native";
+import { useEventEstimates } from "./hooks/useEventEstimates";
+import { styles } from "./styles/EventEstimates.styles";
+import { CURRENCIES } from "./types/eventEstimates";
 
-// ============================================
-// BACKEND INTEGRATION NOTES:
-// ============================================
-// 1. API Endpoints:
-//    - PUT /api/events/{id}/estimates - Update guest count & budget
-//    - GET /api/events/{id}/estimates - Get current estimates
-//
-// 2. Budget Management:
-//    - Currency conversion API for multi-currency support
-//    - Budget breakdown by categories (future feature)
-//
-// 3. Guest Management:
-//    - Guest list integration
-//    - RSVP tracking
-// ============================================
-
-interface EstimatesFormData {
-  guestCount: string;
-  budget: string;
-  currency: string;
-  isBudgetPrivate: boolean;
-}
-
-const CURRENCIES = ['USD', 'EUR', 'GBP', 'INR'];
+const HEADER_HEIGHT = 80;
+const FOOTER_HEIGHT = 120;
 
 export default function EventEstimates() {
-  const router = useRouter();
-  
-  const [formData, setFormData] = useState<EstimatesFormData>({
-    guestCount: '',
-    budget: '',
-    currency: 'USD',
-    isBudgetPrivate: true,
-  });
+  const navigation = useNavigation();
+  const {
+    formData,
+    handleGuestCountChange,
+    handleBudgetChange,
+    handleCurrencyChange,
+    toggleBudgetPrivacy,
+  } = useEventEstimates();
+  const [budgetFocused, setBudgetFocused] = useState(false);
 
-  const scale = useSharedValue(1);
-
-  const handleGuestCountChange = (text: string) => {
-    // Only allow numbers
-    const numericText = text.replace(/[^0-9]/g, '');
-    setFormData(prev => ({ ...prev, guestCount: numericText }));
+  const getCurrencySymbol = (currency: string) => {
+    const curr = CURRENCIES.find((c) => c.code === currency);
+    return curr ? curr.symbol : "$";
   };
-
-  const handleBudgetChange = (text: string) => {
-    // Only allow numbers and decimal
-    const numericText = text.replace(/[^0-9.]/g, '');
-    setFormData(prev => ({ ...prev, budget: numericText }));
-  };
-
-  const handleCurrencyChange = (currency: string) => {
-    setFormData(prev => ({ ...prev, currency }));
-  };
-
-  const toggleBudgetPrivacy = () => {
-    setFormData(prev => ({ ...prev, isBudgetPrivate: !prev.isBudgetPrivate }));
-  };
-
-  const handleNextStep = () => {
-    // TODO: Backend Integration
-    // 1. Validate numeric fields
-    // 2. Update estimates: PUT /api/events/{id}/estimates
-    // 3. Navigate to success page
-    
-    router.push('/(protected)/(client-tabs)/events/success' as any);
-  };
-
-  const handleBack = () => {
-    router.back();
-  };
-
-  const animatedButtonStyle = useAnimatedStyle(() => {
-    return {
-      transform: [{ scale: withTiming(scale.value, { duration: 150 }) }],
-    };
-  });
 
   return (
     <View style={styles.container}>
-      <KeyboardAvoidingView 
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.keyboardAvoidingView}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         {/* Header */}
-        <View style={styles.header}>
-          <TouchableOpacity onPress={handleBack} style={styles.headerButton}>
-            <Ionicons name="arrow-back" size={20} color="#181114" />
+        <View style={[styles.header, { paddingTop: HEADER_HEIGHT }]}>
+          <TouchableOpacity
+            style={styles.headerButton}
+            onPress={() => navigation.goBack()}
+          >
+            <Ionicons name="chevron-back" size={20} color="#181114" />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Create Event</Text>
+          <Text style={styles.headerTitle}>Create an Event</Text>
           <View style={styles.headerSpacer} />
         </View>
 
-        {/* Progress Bar */}
+        {/* Progress */}
         <View style={styles.progressContainer}>
           <View style={styles.progressLabels}>
-            <Text style={styles.progressStep}>Step 3 of 4</Text>
-            <Text style={styles.progressLabel}>Estimates</Text>
+            <Text style={styles.progressStep}>Step 2/7</Text>
+            <Text style={styles.progressLabel}>Event Estimates</Text>
           </View>
           <View style={styles.progressBarBackground}>
-            <Animated.View 
-              style={[styles.progressBarFill, { width: '75%' }, animatedButtonStyle]} 
-            />
+            <View style={[styles.progressBarFill, { width: "28.57%" }]} />
           </View>
         </View>
 
-        <ScrollView 
+        <ScrollView
           style={styles.scrollView}
           showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
         >
-          {/* Title Section */}
+          {/* Title */}
           <View style={styles.titleSection}>
-            <Text style={styles.title}>Guest & Budget Estimates</Text>
+            <Text style={styles.title}>Event Estimates</Text>
             <Text style={styles.subtitle}>
-              Set your initial targets. You can always adjust these later as your planning evolves.
+              Help vendors understand your budget expectations by providing your
+              estimated guest count and budget.
             </Text>
           </View>
 
-          {/* Guest Count Input */}
+          {/* Guest Count */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Estimated Guest Count</Text>
+            <Text style={styles.sectionTitle}>
+              How many guests are you expecting?
+            </Text>
             <View style={styles.inputContainer}>
               <TextInput
                 style={styles.textInput}
-                placeholder="e.g. 150"
+                placeholder="0"
                 placeholderTextColor="#9CA3AF"
+                keyboardType="number-pad"
                 value={formData.guestCount}
                 onChangeText={handleGuestCountChange}
-                keyboardType="number-pad"
               />
               <View style={styles.inputIcon}>
-                <Ionicons name="people" size={20} color="#9CA3AF" />
+                <Ionicons name="people-outline" size={20} color="#6B7280" />
               </View>
             </View>
           </View>
 
-          {/* Total Budget Input */}
+          {/* Budget */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Total Budget</Text>
+            <Text style={styles.sectionTitle}>
+              What's your estimated budget?
+            </Text>
             <View style={styles.budgetRow}>
-              <View style={[styles.inputContainer, styles.budgetInput]}>
+              <View style={[styles.budgetInput, { position: "relative" }]}>
                 <View style={styles.currencyIcon}>
-                  <Text style={styles.currencySymbol}>$</Text>
+                  <Text style={styles.currencySymbol}>
+                    {getCurrencySymbol(formData.currency)}
+                  </Text>
                 </View>
                 <TextInput
-                  style={styles.textInput}
+                  style={[styles.textInput, { paddingLeft: 36 }]}
                   placeholder="0.00"
                   placeholderTextColor="#9CA3AF"
+                  keyboardType="decimal-pad"
                   value={formData.budget}
                   onChangeText={handleBudgetChange}
-                  keyboardType="decimal-pad"
+                  onFocus={() => setBudgetFocused(true)}
+                  onBlur={() => setBudgetFocused(false)}
                 />
               </View>
-              
-              {/* Currency Selector */}
-              <ScrollView 
-                horizontal 
+              <ScrollView
+                horizontal
                 showsHorizontalScrollIndicator={false}
                 style={styles.currencyScroll}
+                contentContainerStyle={{ flexDirection: "row", gap: 8 }}
               >
                 {CURRENCIES.map((currency) => (
                   <TouchableOpacity
-                    key={currency}
-                    onPress={() => handleCurrencyChange(currency)}
+                    key={currency.code}
                     style={[
                       styles.currencyButton,
-                      formData.currency === currency && styles.currencyButtonSelected,
+                      formData.currency === currency.code &&
+                        styles.currencyButtonSelected,
                     ]}
+                    onPress={() => handleCurrencyChange(currency.code)}
+                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                   >
-                    <Text style={[
-                      styles.currencyText,
-                      formData.currency === currency && styles.currencyTextSelected,
-                    ]}>
-                      {currency}
+                    <Text
+                      style={[
+                        styles.currencyText,
+                        formData.currency === currency.code &&
+                          styles.currencyTextSelected,
+                      ]}
+                    >
+                      {currency.code}
                     </Text>
                   </TouchableOpacity>
                 ))}
@@ -196,53 +153,74 @@ export default function EventEstimates() {
 
           {/* Privacy Toggle */}
           <View style={styles.privacySection}>
-            <View style={styles.privacyContainer}>
+            <Pressable
+              style={styles.privacyContainer}
+              onPress={toggleBudgetPrivacy}
+            >
               <View style={styles.privacyTextContainer}>
-                <Text style={styles.privacyTitle}>Keep Budget Private</Text>
+                <Text style={styles.privacyTitle}>Keep my budget private</Text>
                 <Text style={styles.privacySubtitle}>
-                  Only organizers will see the financial breakdown.
+                  Only show budget range to vendors you directly contact
                 </Text>
               </View>
-              <Switch
-                value={formData.isBudgetPrivate}
-                onValueChange={toggleBudgetPrivacy}
-                trackColor={{ false: '#E5E7EB', true: '#ee2b8c' }}
-                thumbColor="white"
-              />
-            </View>
+              <View
+                style={{
+                  width: 48,
+                  height: 24,
+                  borderRadius: 12,
+                  backgroundColor: formData.isBudgetPrivate
+                    ? "#ee2b8c"
+                    : "#E5E7EB",
+                  justifyContent: "center",
+                  paddingHorizontal: 2,
+                }}
+              >
+                <View
+                  style={{
+                    width: 20,
+                    height: 20,
+                    borderRadius: 10,
+                    backgroundColor: "white",
+                    alignSelf: formData.isBudgetPrivate
+                      ? "flex-end"
+                      : "flex-start",
+                    shadowColor: "#000",
+                    shadowOffset: { width: 0, height: 1 },
+                    shadowOpacity: 0.15,
+                    shadowRadius: 2,
+                    elevation: 2,
+                  }}
+                />
+              </View>
+            </Pressable>
           </View>
 
-          {/* Quick Tip */}
+          {/* Tip */}
           <View style={styles.tipContainer}>
-            <Ionicons name="bulb" size={20} color="#ee2b8c" />
+            <Ionicons name="bulb-outline" size={20} color="#6B7280" />
             <Text style={styles.tipText}>
-              Tip: For large cultural weddings, adding a 10% buffer to your guest count is recommended for unexpected RSVPs.
+              Tip: Including a budget range helps vendors provide more accurate
+              quotes and speeds up the planning process.
             </Text>
           </View>
 
-          {/* Bottom spacing */}
           <View style={styles.bottomSpacing} />
         </ScrollView>
 
-        {/* Sticky Footer */}
+        {/* Footer */}
         <View style={styles.footer}>
           <TouchableOpacity
-            onPress={handleBack}
             style={styles.backButton}
-            activeOpacity={0.8}
+            onPress={() => navigation.goBack()}
           >
             <Ionicons name="chevron-back" size={20} color="#6B7280" />
             <Text style={styles.backButtonText}>Back</Text>
           </TouchableOpacity>
-
           <TouchableOpacity
-            onPress={handleNextStep}
             style={styles.nextButton}
-            activeOpacity={0.8}
-            onPressIn={() => { scale.value = 0.98; }}
-            onPressOut={() => { scale.value = 1; }}
+            onPress={() => navigation.navigate("event-location" as never)}
           >
-            <Text style={styles.nextButtonText}>Next Step</Text>
+            <Text style={styles.nextButtonText}>Next</Text>
             <Ionicons name="chevron-forward" size={20} color="white" />
           </TouchableOpacity>
         </View>
@@ -250,274 +228,3 @@ export default function EventEstimates() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f8f6f7',
-  },
-  keyboardAvoidingView: {
-    flex: 1,
-    maxWidth: 480,
-    alignSelf: 'center',
-    width: '100%',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingTop: 60,
-    paddingBottom: 8,
-    backgroundColor: '#f8f6f7',
-  },
-  headerButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(0,0,0,0.05)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  headerTitle: {
-    fontFamily: 'PlusJakartaSans-Bold',
-    fontSize: 18,
-    color: '#181114',
-    flex: 1,
-    textAlign: 'center',
-  },
-  headerSpacer: {
-    width: 40,
-  },
-  progressContainer: {
-    paddingHorizontal: 16,
-    paddingTop: 8,
-  },
-  progressLabels: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  progressStep: {
-    fontFamily: 'PlusJakartaSans-SemiBold',
-    fontSize: 12,
-    color: '#6B7280',
-  },
-  progressLabel: {
-    fontFamily: 'PlusJakartaSans-Bold',
-    fontSize: 12,
-    color: '#ee2b8c',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
-  progressBarBackground: {
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: '#E5E7EB',
-    overflow: 'hidden',
-  },
-  progressBarFill: {
-    height: '100%',
-    borderRadius: 3,
-    backgroundColor: '#ee2b8c',
-  },
-  scrollView: {
-    flex: 1,
-  },
-  titleSection: {
-    paddingHorizontal: 16,
-    paddingTop: 24,
-    paddingBottom: 16,
-  },
-  title: {
-    fontFamily: 'PlusJakartaSans-Bold',
-    fontSize: 24,
-    color: '#181114',
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontFamily: 'PlusJakartaSans-Regular',
-    fontSize: 16,
-    color: '#6B7280',
-    lineHeight: 24,
-  },
-  section: {
-    paddingHorizontal: 16,
-    paddingTop: 16,
-  },
-  sectionTitle: {
-    fontFamily: 'PlusJakartaSans-SemiBold',
-    fontSize: 14,
-    color: '#181114',
-    marginBottom: 12,
-  },
-  inputContainer: {
-    position: 'relative',
-  },
-  textInput: {
-    width: '100%',
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    backgroundColor: 'white',
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    paddingRight: 48,
-    fontSize: 16,
-    fontFamily: 'PlusJakartaSans-Medium',
-    color: '#181114',
-  },
-  inputIcon: {
-    position: 'absolute',
-    right: 16,
-    top: 0,
-    bottom: 0,
-    justifyContent: 'center',
-  },
-  budgetRow: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  budgetInput: {
-    flex: 2,
-  },
-  currencyIcon: {
-    position: 'absolute',
-    left: 16,
-    top: 0,
-    bottom: 0,
-    justifyContent: 'center',
-  },
-  currencySymbol: {
-    fontFamily: 'PlusJakartaSans-Bold',
-    fontSize: 16,
-    color: '#6B7280',
-  },
-  currencyScroll: {
-    flex: 1,
-  },
-  currencyButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    backgroundColor: 'white',
-    marginRight: 8,
-  },
-  currencyButtonSelected: {
-    backgroundColor: '#ee2b8c',
-    borderColor: '#ee2b8c',
-  },
-  currencyText: {
-    fontFamily: 'PlusJakartaSans-SemiBold',
-    fontSize: 14,
-    color: '#6B7280',
-  },
-  currencyTextSelected: {
-    color: 'white',
-  },
-  privacySection: {
-    paddingHorizontal: 16,
-    paddingTop: 24,
-  },
-  privacyContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: 16,
-    backgroundColor: 'rgba(238, 43, 140, 0.1)',
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: 'rgba(238, 43, 140, 0.2)',
-  },
-  privacyTextContainer: {
-    flex: 1,
-    paddingRight: 16,
-  },
-  privacyTitle: {
-    fontFamily: 'PlusJakartaSans-Bold',
-    fontSize: 14,
-    color: '#181114',
-    marginBottom: 4,
-  },
-  privacySubtitle: {
-    fontFamily: 'PlusJakartaSans-Regular',
-    fontSize: 12,
-    color: '#6B7280',
-  },
-  tipContainer: {
-    flexDirection: 'row',
-    gap: 12,
-    marginHorizontal: 16,
-    marginTop: 32,
-    padding: 16,
-    backgroundColor: '#F9FAFB',
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-  },
-  tipText: {
-    flex: 1,
-    fontFamily: 'PlusJakartaSans-Regular',
-    fontSize: 12,
-    color: '#6B7280',
-    fontStyle: 'italic',
-    lineHeight: 18,
-  },
-  bottomSpacing: {
-    height: 140,
-  },
-  footer: {
-    flexDirection: 'row',
-    gap: 12,
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    padding: 16,
-    paddingBottom: 32,
-    backgroundColor: '#f8f6f7',
-    maxWidth: 480,
-    alignSelf: 'center',
-    width: '100%',
-  },
-  backButton: {
-    flex: 1,
-    height: 56,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    backgroundColor: 'white',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-  },
-  backButtonText: {
-    fontFamily: 'PlusJakartaSans-Bold',
-    fontSize: 16,
-    color: '#6B7280',
-  },
-  nextButton: {
-    flex: 2,
-    height: 56,
-    borderRadius: 16,
-    backgroundColor: '#ee2b8c',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    shadowColor: '#ee2b8c',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  nextButtonText: {
-    fontFamily: 'PlusJakartaSans-Bold',
-    fontSize: 16,
-    color: 'white',
-  },
-});
