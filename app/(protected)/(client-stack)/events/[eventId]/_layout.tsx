@@ -7,6 +7,9 @@ export default function EventLayout() {
             <Stack.Screen name="event-location" />
             <Stack.Screen name="event-estimates" options={{ headerShown: true }} />
             <Stack.Screen name="subevent-detail" />
+            <Stack.Screen name="rsvp" options={{ headerShown: true }} />
+            <Stack.Screen name="table-management" options={{ headerShown: true }} />
+            <Stack.Screen name="subevent-create" options={{ headerShown: true }} />
             <Stack.Screen name="vendor" options={{ headerShown: true }} />
         </Stack>
     )
