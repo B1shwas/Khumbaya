@@ -18,6 +18,12 @@ interface AuthContextType {
 
   login: (user: User) => void;
   logout: () => void;
+  register: (
+    name: string,
+    email: string,
+    password: string,
+    role: Role,
+  ) => Promise<User>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -152,8 +158,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     void AsyncStorage.removeItem(USER_STORAGE_KEY);
   };
 
+  const register = async (
+    name: string,
+    email: string,
+    password: string,
+    role: Role,
+  ): Promise<User> => {
+    // Simulate API call for registration
+    // In a real app, this would call your backend API
+    const newUser: User = {
+      id: Date.now().toString(),
+      email,
+      name,
+      role,
+    };
+
+    // Store user and auto-login
+    setUser(newUser);
+    await AsyncStorage.setItem(USER_STORAGE_KEY, JSON.stringify(newUser));
+
+    return newUser;
+  };
+
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, logout }}>
+    <AuthContext.Provider value={{ user, isLoading, login, logout, register }}>
       <NavigationHandler>{children}</NavigationHandler>
     </AuthContext.Provider>
   );
