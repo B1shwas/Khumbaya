@@ -15,9 +15,7 @@ import {
   View,
 } from "react-native";
 
-// ============================================
-// Types
-// ============================================
+
 
 interface SelectedActivity {
   activity: TemplateActivity;
@@ -54,7 +52,7 @@ export default function SubEventCreate() {
     if (existingIndex >= 0) {
       // Navigate to edit page
       router.push({
-        pathname: "/events/subevent-detail" as any,
+        pathname: "/(protected)/(client-stack)/events/[eventId]/subevent-detail",
         params: {
           subEventId: template.id,
           eventId: eventId || "1",
@@ -72,7 +70,7 @@ export default function SubEventCreate() {
 
       // Navigate to detail page for new sub-event
       router.push({
-        pathname: "/events/subevent-detail" as any,
+        pathname: "/(protected)/(client-stack)/events/[eventId]/subevent-detail",
         params: {
           subEventId: template.id,
           eventId: eventId || "1",
@@ -93,11 +91,11 @@ export default function SubEventCreate() {
   // ============================================
 
   const handleNavigateToCardMaking = () => {
-    router.push("/events/card-making" as any);
+    router.push("/(protected)/(client-stack)/events/card-making" );
   };
 
   const handleNavigateToGuests = () => {
-    router.push("/events/guests" as any);
+    router.push("/(protected)/(client-stack)/events/guests" );
   };
 
   const handleSaveAll = () => {
@@ -200,7 +198,8 @@ export default function SubEventCreate() {
                 style={styles.selectedCard}
                 onPress={() =>
                   router.push({
-                    pathname: "/events/subevent-detail" as any,
+                      pathname:
+                        "/(protected)/(client-stack)/events/[eventId]/subevent-detail",
                     params: {
                       subEventId: subEvent.template.id,
                       eventId: eventId || "1",

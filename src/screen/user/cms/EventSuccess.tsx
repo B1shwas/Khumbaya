@@ -339,14 +339,14 @@ export default function EventSuccess() {
         <View style={styles.headerSpacer} />
       </View>
 
-      <ScrollView 
+      <View 
         style={styles.scrollView}
-        showsVerticalScrollIndicator={false}
+        // showsVerticalScrollIndicator={false}
       >
         {viewMode === 'success' && renderSuccessView()}
         {viewMode === 'events' && renderEventsView()}
         {viewMode === 'subevent' && selectedEvent && renderSubEventView()}
-      </ScrollView>
+      </View>
     </View>
   );
 }
