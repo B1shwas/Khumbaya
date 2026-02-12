@@ -3,7 +3,6 @@ import { Text } from "@/src/components/ui/Text";
 import { Link, useRouter } from "expo-router";
 import { useCallback } from "react";
 import { Image, ScrollView, TouchableOpacity, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 const HERO_IMAGE = require("@/assets/images/home.png");
 
@@ -31,37 +30,35 @@ export default function HomePage() {
   }, [router]);
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
-      <ScrollView
-        className="flex-1"
-        contentContainerStyle={{ paddingBottom: 40 }}
-        showsVerticalScrollIndicator={false}
-      >
-        <View className="flex-1 px-6 pt-8">
-          <HeroImage />
-          <TitleDescription />
-          <Button
-            variant="secondary"
-            onPress={handleExploreVendors}
-            className="mb-6 "
-            accessibilityLabel="Explore available vendors"
-          >
-            {CONTENT.buttons.exploreVendors}
-          </Button>
+    <ScrollView
+      className="flex-1 bg-gray-50"
+      contentContainerStyle={{ paddingBottom: 40 }}
+      showsVerticalScrollIndicator={false}
+    >
+      <View className=" pt-8">
+        <HeroImage />
+        <TitleDescription />
+        <Button
+          variant="secondary"
+          onPress={handleExploreVendors}
+          className="mb-6 "
+          accessibilityLabel="Explore available vendors"
+        >
+          {CONTENT.buttons.exploreVendors}
+        </Button>
 
-          <Button
-            variant="primary"
-            onPress={handleCreateEvent}
-            className="mb-4"
-            accessibilityLabel="Create a new event"
-          >
-            {CONTENT.buttons.createEvent}
-          </Button>
+        <Button
+          variant="primary"
+          onPress={handleCreateEvent}
+          className="mb-4"
+          accessibilityLabel="Create a new event"
+        >
+          {CONTENT.buttons.createEvent}
+        </Button>
 
-          <LoginPrompt />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+        <LoginPrompt />
+      </View>
+    </ScrollView>
   );
 }
 

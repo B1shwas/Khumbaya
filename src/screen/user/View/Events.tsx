@@ -1,5 +1,9 @@
 import { Ionicons } from "@expo/vector-icons";
-import { router, useGlobalSearchParams, type RelativePathString } from "expo-router";
+import {
+  router,
+  useGlobalSearchParams,
+  type RelativePathString,
+} from "expo-router";
 import { useState } from "react";
 import {
   Image,
@@ -322,7 +326,9 @@ export default function EventsPage() {
   };
 
   const handleCreateSubEvent = () => {
-    router.push("/(protected)/(client-stack)/events/create/subevent-create");
+    router.push(
+      "/(protected)/(client-stack)/events/subevent-create" as RelativePathString,
+    );
   };
 
   const filteredEvents = eventsData.filter(
@@ -381,9 +387,7 @@ export default function EventsPage() {
                   Invited
                 </Text>
               </TouchableOpacity>
-
             </View>
-
           </View>
         </View>
       </View>

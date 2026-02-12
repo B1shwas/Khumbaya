@@ -5,7 +5,7 @@ import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import { StatusBar } from "react-native";
 import "react-native-reanimated";
-import { SafeAreaProvider } from "react-native-safe-area-context";
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import "./global.css";
 
 SplashScreen.preventAutoHideAsync();
@@ -33,15 +33,17 @@ export default function RootLayout() {
     <AuthProvider>
       <SafeAreaProvider>
         <StatusBar barStyle="dark-content" />
-        <Stack
-          screenOptions={{
-            headerShown: false,
-            animation: "slide_from_right",
-          }}
-        >
-          <Stack.Screen name="(onboarding)" />
-          <Stack.Screen name="(protected)" />
-        </Stack>
+        <SafeAreaView className="flex-1 px-4 " edges={["top", "bottom"]}>
+          <Stack
+            screenOptions={{
+              headerShown: false,
+              animation: "slide_from_right",
+            }}
+          >
+            <Stack.Screen name="(onboarding)" />
+            <Stack.Screen name="(protected)" />
+          </Stack>
+        </SafeAreaView>
       </SafeAreaProvider>
     </AuthProvider>
   );
