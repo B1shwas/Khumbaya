@@ -3,7 +3,6 @@ import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { router, type RelativePathString } from "expo-router";
 import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 const EventDetail = ({ eventId, isInvitedGuest = false }: { eventId?: string, isInvitedGuest?: boolean }) => {
   const event = {
@@ -59,23 +58,25 @@ const EventDetail = ({ eventId, isInvitedGuest = false }: { eventId?: string, is
   const budgetRemaining = event.budget.total - event.budget.spent;
 
   return (
-    <SafeAreaView className="flex-1 bg-background-light">
-      <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
+    
+      <ScrollView className="flex-1 bg-background-light" showsVerticalScrollIndicator={false}>
         {/* Hero Section */}
-        <View className="relative w-full h-[38vh] min-h-[300px] ">
+        <View className="relative w-full h-[38vh] min-h-[300px] rounded-full ">
           <Image
             source={{ uri: event.imageUrl }}
-            className="absolute inset-0 w-full h-full"
+            className="absolute inset-0 w-full h-full rounded-3xl "
             resizeMode="cover"
           />
-          {/* NOTE: NativeWind doesn't support bg-gradient-to-* in RN. */}
-          <LinearGradient
-            colors={["rgba(0,0,0,1)", "rgba(0,0,0,0.2)", "rgba(0,0,0,0.3)"]}
-            start={{ x: 0.5, y: 1 }}
-            end={{ x: 0.5, y: 0 }}
-            className="absolute inset-0"
-          />
-
+          {/* Dark overlay gradient */}
+          <View className="absolute inset-0 rounded-3xl overflow-hidden z-10">
+            <LinearGradient
+              colors={["rgba(0,0,0,0.7)", "rgba(0,0,0,0.3)", "transparent"]}
+              start={{ x: 0.5, y: 1 }}
+              end={{ x: 0.5, y: 0 }}
+              style={{ flex: 1 }}
+            />
+          </View>
+        
           {/* Top Navigation notification and three dots */}
           <View className="absolute top-0 left-0 w-full p-4 pt-6 flex-row justify-between items-start z-10">
 
@@ -276,7 +277,7 @@ const EventDetail = ({ eventId, isInvitedGuest = false }: { eventId?: string, is
         {/* Bottom spacer */}
         <View className="h-24" />
       </ScrollView>
-    </SafeAreaView>
+   
   );
 };
 export default EventDetail;
