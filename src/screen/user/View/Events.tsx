@@ -165,7 +165,7 @@ const SubEventCard = ({ subEvent }: { subEvent: SubEvent }) => (
     style={styles.subEventCard}
     onPress={() =>
       router.push(
-        `/events/subevent-detail?subEventId=${subEvent.id}&eventId=1` as RelativePathString,
+        `/(protected)/(client-stack)/events/${subEvent.id}/subevent-detail?subEventId=${subEvent.id}`,
       )
     }
   >
@@ -195,7 +195,7 @@ const EventCard = ({ event }: { event: Event }) => (
       style={styles.eventCardTouchable}
       onPress={() =>
         router.push(
-          `/events/${event.id}?isInvited=${!event.isMyEvent}` as RelativePathString,
+          `/(protected)/(client-stack)/events/${event.id}`,
         )
       }
       activeOpacity={0.8}
@@ -267,7 +267,7 @@ const EventCard = ({ event }: { event: Event }) => (
             style={styles.actionButton}
             onPress={() =>
               router.push(
-                `/events/subevent-create?eventId=${event.id}` as RelativePathString,
+                `/(protected)/(client-stack)/events/${event.id}/subevent-create`
               )
             }
           >
@@ -278,7 +278,7 @@ const EventCard = ({ event }: { event: Event }) => (
             style={styles.actionButton}
             onPress={() =>
               router.push(
-                `/events/table-management?eventId=${event.id}` as RelativePathString,
+                `/(protected)/(client-stack)/events/${event.id}/table-management`,
               )
             }
           >
@@ -292,7 +292,7 @@ const EventCard = ({ event }: { event: Event }) => (
             style={[styles.actionButton, styles.rsvpButton]}
             onPress={() => {
               router.push(
-                `/events/rsvp?eventId=${event.id}` as RelativePathString,
+                `/(protected)/(client-stack)/events/${event.id}/rsvp`,
               );
             }}
           >
@@ -316,7 +316,7 @@ export default function EventsPage() {
   const [refreshing, setRefreshing] = useState(false);
 
   const handleCreateSubEvent = () => {
-    router.push("/events/subevent-create" as RelativePathString);
+    router.push("/(protected)/(client-stack)/events/create/subevent-create");
   };
 
   const filteredEvents = eventsData.filter(
@@ -427,7 +427,7 @@ export default function EventsPage() {
         style={styles.fab}
         onPress={() =>
           router.push(
-            "/(protected)/(client-tabs)/events/create" as RelativePathString,
+            "/(protected)/(client-stack)/events/create",
           )
         }
       >

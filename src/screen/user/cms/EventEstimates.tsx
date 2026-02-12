@@ -1,17 +1,17 @@
-import React, { useState } from 'react';
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import { useState } from 'react';
 import {
-  View,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Switch,
   Text,
   TextInput,
   TouchableOpacity,
-  ScrollView,
-  StyleSheet,
-  KeyboardAvoidingView,
-  Platform,
-  Switch,
+  View,
 } from 'react-native';
-import { useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
 // ============================================
@@ -41,7 +41,7 @@ const CURRENCIES = ['USD', 'EUR', 'GBP', 'INR'];
 
 export default function EventEstimates() {
   const router = useRouter();
-  
+
   const [formData, setFormData] = useState<EstimatesFormData>({
     guestCount: '',
     budget: '',
@@ -76,8 +76,8 @@ export default function EventEstimates() {
     // 1. Validate numeric fields
     // 2. Update estimates: PUT /api/events/{id}/estimates
     // 3. Navigate to success page
-    
-    router.push('/(protected)/(client-tabs)/events/success' as any);
+
+    router.push('/(protected)/(client-stack)/events/success');
   };
 
   const handleBack = () => {
@@ -92,7 +92,7 @@ export default function EventEstimates() {
 
   return (
     <View style={styles.container}>
-      <KeyboardAvoidingView 
+      <KeyboardAvoidingView
         style={styles.keyboardAvoidingView}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
@@ -112,13 +112,13 @@ export default function EventEstimates() {
             <Text style={styles.progressLabel}>Estimates</Text>
           </View>
           <View style={styles.progressBarBackground}>
-            <Animated.View 
-              style={[styles.progressBarFill, { width: '75%' }, animatedButtonStyle]} 
+            <Animated.View
+              style={[styles.progressBarFill, { width: '75%' }, animatedButtonStyle]}
             />
           </View>
         </View>
 
-        <ScrollView 
+        <ScrollView
           style={styles.scrollView}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
@@ -166,10 +166,10 @@ export default function EventEstimates() {
                   keyboardType="decimal-pad"
                 />
               </View>
-              
+
               {/* Currency Selector */}
-              <ScrollView 
-                horizontal 
+              <ScrollView
+                horizontal
                 showsHorizontalScrollIndicator={false}
                 style={styles.currencyScroll}
               >

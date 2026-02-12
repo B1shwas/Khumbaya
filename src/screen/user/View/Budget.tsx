@@ -250,7 +250,7 @@ export default function BudgetPage() {
       {/* Floating Action Button */}
       <TouchableOpacity 
         style={styles.fab}
-        onPress={() => router.push("/events/budget" as any)}
+        onPress={() => router.push("/(protected)/(client-stack)/events/[eventId]/budget")}
       >
         <Ionicons name="add" size={28} color="white" />
       </TouchableOpacity>
