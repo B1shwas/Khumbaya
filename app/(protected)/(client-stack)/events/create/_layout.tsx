@@ -3,7 +3,11 @@ import { Stack } from "expo-router";
 export default function EventLayout() {
   return (
     <Stack screenOptions={{ headerShown: false }}>
+<<<<<<< HEAD
       <Stack.Screen name="create" />
+=======
+      <Stack.Screen name="index" />
+>>>>>>> update/stack
       <Stack.Screen name="event-location" />
       <Stack.Screen name="event-estimates" />
       <Stack.Screen name="subevent-create" />

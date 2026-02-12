@@ -165,7 +165,11 @@ const SubEventCard = ({ subEvent }: { subEvent: SubEvent }) => (
     style={styles.subEventCard}
     onPress={() =>
       router.push(
+<<<<<<< HEAD
         `/(protected)/(client-stack)/events/subevent-detail?subEventId=${subEvent.id}&eventId=1`,
+=======
+        `/(protected)/(client-stack)/events/${subEvent.id}/subevent-detail?subEventId=${subEvent.id}`,
+>>>>>>> update/stack
       )
     }
   >
@@ -193,7 +197,15 @@ const EventCard = ({ event }: { event: Event }) => (
   <View style={styles.eventCard}>
     <TouchableOpacity
       style={styles.eventCardTouchable}
+<<<<<<< HEAD
       onPress={() => router.push(`/(protected)/(client-stack)/events/${event.id}`)} // go to the related event with the id number 
+=======
+      onPress={() =>
+        router.push(
+          `/(protected)/(client-stack)/events/${event.id}`,
+        )
+      }
+>>>>>>> update/stack
       activeOpacity={0.8}
     >
       <View style={styles.eventImageContainer}>
@@ -263,7 +275,11 @@ const EventCard = ({ event }: { event: Event }) => (
             style={styles.actionButton}
             onPress={() =>
               router.push(
+<<<<<<< HEAD
                 `/(protected)/(client-stack)/events/subevent-create?eventId=${event.id}` ,
+=======
+                `/(protected)/(client-stack)/events/${event.id}/subevent-create`
+>>>>>>> update/stack
               )
             }
           >
@@ -274,7 +290,11 @@ const EventCard = ({ event }: { event: Event }) => (
             style={styles.actionButton}
             onPress={() =>
               router.push(
+<<<<<<< HEAD
                 `/(protected)/(client-stack)/events/table-management?eventId=${event.id}` ,
+=======
+                `/(protected)/(client-stack)/events/${event.id}/table-management`,
+>>>>>>> update/stack
               )
             }
           >
@@ -288,7 +308,7 @@ const EventCard = ({ event }: { event: Event }) => (
             style={[styles.actionButton, styles.rsvpButton]}
             onPress={() => {
               router.push(
-                `/events/rsvp?eventId=${event.id}` as RelativePathString,
+                `/(protected)/(client-stack)/events/${event.id}/rsvp`,
               );
             }}
           >
@@ -318,7 +338,11 @@ export default function EventsPage() {
   };
 
   const handleCreateSubEvent = () => {
+<<<<<<< HEAD
     router.push("/(protected)/(client-stack)/events/subevent-create" as RelativePathString);
+=======
+    router.push("/(protected)/(client-stack)/events/create/subevent-create");
+>>>>>>> update/stack
   };
 
   const filteredEvents = eventsData.filter(
@@ -434,7 +458,7 @@ export default function EventsPage() {
         style={styles.fab}
         onPress={() =>
           router.push(
-            "/(protected)/(client-tabs)/events/create" as RelativePathString,
+            "/(protected)/(client-stack)/events/create",
           )
         }
       >

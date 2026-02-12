@@ -1,16 +1,16 @@
-import React, { useState } from 'react';
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import { useState } from 'react';
 import {
-  View,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  ScrollView,
-  StyleSheet,
-  KeyboardAvoidingView,
-  Platform,
+  View,
 } from 'react-native';
-import { useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
 // ============================================
@@ -40,7 +40,7 @@ interface LocationFormData {
 
 export default function EventLocation() {
   const router = useRouter();
-  
+
   const [formData, setFormData] = useState<LocationFormData>({
     city: '',
     address: '',
@@ -48,7 +48,7 @@ export default function EventLocation() {
     latitude: null,
     longitude: null,
   });
-  
+
   const [isManualMode, setIsManualMode] = useState(false);
 
   const scale = useSharedValue(1);
@@ -75,8 +75,8 @@ export default function EventLocation() {
     // 2. Geocode address to get lat/lng
     // 3. Update event location: PUT /api/events/{id}/location
     // 4. Navigate to estimates step
-    
-    router.push('/(protected)/(client-tabs)/events/event-estimates' as any);
+
+    router.push('/(protected)/(client-stack)/events/event-estimates' as any);
   };
 
   const handleBack = () => {
@@ -95,7 +95,7 @@ export default function EventLocation() {
 
   return (
     <View style={styles.container}>
-      <KeyboardAvoidingView 
+      <KeyboardAvoidingView
         style={styles.keyboardAvoidingView}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
@@ -115,13 +115,13 @@ export default function EventLocation() {
             <Text style={styles.progressStep}>Step 2 of 4</Text>
           </View>
           <View style={styles.progressBarBackground}>
-            <Animated.View 
-              style={[styles.progressBarFill, { width: '50%' }, animatedButtonStyle]} 
+            <Animated.View
+              style={[styles.progressBarFill, { width: '50%' }, animatedButtonStyle]}
             />
           </View>
         </View>
 
-        <ScrollView 
+        <ScrollView
           style={styles.scrollView}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
@@ -144,7 +144,7 @@ export default function EventLocation() {
           </View>
 
           {/* Manual Toggle */}
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.manualToggle}
             onPress={toggleManualMode}
             activeOpacity={0.8}

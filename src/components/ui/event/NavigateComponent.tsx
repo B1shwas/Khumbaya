@@ -1,5 +1,9 @@
 import { Ionicons } from "@expo/vector-icons";
+<<<<<<< HEAD
 import { router } from "expo-router";
+=======
+import { RelativePathString, router } from "expo-router";
+>>>>>>> update/stack
 import { Text, TouchableOpacity, View } from "react-native";
 
 interface QuickServiceButtonProps {
@@ -19,7 +23,11 @@ export default function NavigateComponent({
     return (
         <TouchableOpacity
             className="flex-row items-center gap-2 px-4 py-3 bg-white dark:bg-surface-dark rounded-xl shadow-sm border border-gray-100"
+<<<<<<< HEAD
             onPress={() => router.push(route)}
+=======
+            onPress={() => router.push(route as RelativePathString)}
+>>>>>>> update/stack
             activeOpacity={0.8}
             style={{ width: "47%" }}
         >

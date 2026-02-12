@@ -3,10 +3,9 @@ import * as Contacts from "expo-contacts";
 import * as DocumentPicker from "expo-document-picker";
 import {
   router,
-  useLocalSearchParams,
-  type RelativePathString,
+  type RelativePathString
 } from "expo-router";
-import { useState, useCallback } from "react";
+import { useCallback, useState } from "react";
 import {
   ActionSheetIOS,
   Alert,
@@ -22,7 +21,6 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { LinearGradient } from "expo-linear-gradient";
 
 type RSVPStatus = "All" | "Confirmed" | "Pending" | "Not Invited";
 type GuestStatus = "Going" | "Pending" | "Not Going" | "Not Invited";
@@ -255,22 +253,21 @@ const RelationChip = ({
   isSelected: boolean;
   onPress: () => void;
 }) => (
-  <TouchableOpacity
-    className={`px-3 py-1.5 rounded-full border ${
-      isSelected
-        ? "bg-primary border-primary"
-        : "bg-white border-gray-200"
-    }`}
+  <Pressable
+    className={`p-4 py-6 rounded-full w-fit  ${isSelected
+      ? "bg-primary border-primary"
+      : "bg-white border-gray-200"
+      }`}
     onPress={onPress}
   >
     <Text
-      className={`text-xs font-medium ${
-        isSelected ? "text-white" : "text-gray-600"
-      }`}
+      className={`text-xs font-medium ${isSelected ? "text-white" : "text-gray-600"
+        }`}
     >
       {relation}
     </Text>
-  </TouchableOpacity>
+  </Pressable>
+
 );
 
 const QuickAction = ({
@@ -353,7 +350,7 @@ const GuestCard = ({
             )}
           </View>
           {guest.dietaryRestrictions &&
-          guest.dietaryRestrictions.length > 0 ? (
+            guest.dietaryRestrictions.length > 0 ? (
             <View className="flex-row items-center gap-1 flex-wrap mt-1">
               {guest.dietaryRestrictions.map((restriction, index) => (
                 <View
@@ -379,20 +376,20 @@ const GuestCard = ({
               guest.status === "Going"
                 ? "checkmark"
                 : guest.status === "Not Going"
-                ? "close"
-                : guest.status === "Not Invited"
-                ? "mail-outline"
-                : "time"
+                  ? "close"
+                  : guest.status === "Not Invited"
+                    ? "mail-outline"
+                    : "time"
             }
             size={16}
             color={
               guest.status === "Going"
                 ? "#16A34A"
                 : guest.status === "Not Going"
-                ? "#DC2626"
-                : guest.status === "Not Invited"
-                ? "#9CA3AF"
-                : "#EA580C"
+                  ? "#DC2626"
+                  : guest.status === "Not Invited"
+                    ? "#9CA3AF"
+                    : "#EA580C"
             }
           />
         </View>
@@ -477,7 +474,7 @@ const CategoryPills = ({
   <ScrollView
     horizontal
     showsHorizontalScrollIndicator={false}
-    contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 8 }}
+    className="bg-black"
   >
     {categories.map((cat) => (
       <RelationChip
@@ -485,14 +482,16 @@ const CategoryPills = ({
         relation={cat === "All" ? "All" : cat}
         isSelected={selected === cat}
         onPress={() => onSelect(cat)}
+
       />
     ))}
   </ScrollView>
 );
 
 export default function GuestListPage() {
-  const params = useLocalSearchParams();
-  const eventId = params.eventId as string;
+  // const params = useLocalSearchParams();
+  const params = 1;
+  const eventId = params || 1;
 
   const [activeTab, setActiveTab] = useState<RSVPStatus>("All");
   const [searchQuery, setSearchQuery] = useState("");
@@ -781,7 +780,7 @@ export default function GuestListPage() {
       />
 
       {/* Search Bar with Sort */}
-      <View className="px-4 py-2">
+      <View className="px-4 py-2 ">
         <View className="flex-row items-center h-12 rounded-xl bg-white px-3 shadow-sm border border-gray-100">
           <Ionicons name="search" size={20} color="#9CA3AF" />
           <TextInput
@@ -817,18 +816,16 @@ export default function GuestListPage() {
             ].map((option) => (
               <TouchableOpacity
                 key={option.value}
-                className={`px-3 py-2 rounded-lg flex-row items-center justify-between ${
-                  sortBy === option.value ? "bg-primary/10" : ""
-                }`}
+                className={`px-3 py-2 rounded-lg flex-row items-center justify-between ${sortBy === option.value ? "bg-primary/10" : ""
+                  }`}
                 onPress={() => {
                   setSortBy(option.value as SortOption);
                   setShowSortOptions(false);
                 }}
               >
                 <Text
-                  className={`text-sm font-medium ${
-                    sortBy === option.value ? "text-primary" : "text-gray-700"
-                  }`}
+                  className={`text-sm font-medium ${sortBy === option.value ? "text-primary" : "text-gray-700"
+                    }`}
                 >
                   {option.label}
                 </Text>
@@ -849,7 +846,7 @@ export default function GuestListPage() {
       />
 
       {/* Quick Actions */}
-      <View className="px-6 py-2 flex-row justify-between items-center">
+      <View className="px-6 py-2 flex-row justify-between items-center ">
         <Text className="text-xs font-semibold uppercase tracking-wider text-gray-400">
           {filteredGuests.length} Guests
         </Text>
@@ -917,15 +914,13 @@ export default function GuestListPage() {
             (tab) => (
               <TouchableOpacity
                 key={tab}
-                className={`flex-1 items-center justify-center rounded-md ${
-                  activeTab === tab ? "bg-white shadow-sm" : ""
-                }`}
+                className={`flex-1 items-center justify-center rounded-md ${activeTab === tab ? "bg-white shadow-sm" : ""
+                  }`}
                 onPress={() => setActiveTab(tab)}
               >
                 <Text
-                  className={`text-xs font-semibold ${
-                    activeTab === tab ? "text-primary" : "text-gray-500"
-                  }`}
+                  className={`text-xs font-semibold ${activeTab === tab ? "text-primary" : "text-gray-500"
+                    }`}
                 >
                   {tab === "Not Invited" ? "Not Invited" : tab}
                 </Text>
@@ -1066,7 +1061,7 @@ export default function GuestListPage() {
                 <Text className="text-sm font-semibold text-gray-700 mb-3">
                   Relationship
                 </Text>
-                <View className="flex-row flex-wrap gap-2">
+                <View className="flex-row flex-wrap gap-2 ">
                   {relations.map((relation) => (
                     <RelationChip
                       key={relation}
@@ -1079,9 +1074,8 @@ export default function GuestListPage() {
               </View>
 
               <TouchableOpacity
-                className={`w-full py-4 rounded-xl items-center ${
-                  newGuestName.trim() ? "bg-primary" : "bg-gray-300"
-                }`}
+                className={`w-full py-4 rounded-xl items-center ${newGuestName.trim() ? "bg-primary" : "bg-gray-300"
+                  }`}
                 onPress={handleAddGuest}
                 disabled={!newGuestName.trim()}
               >
@@ -1136,29 +1130,26 @@ export default function GuestListPage() {
                   ].map((option) => (
                     <TouchableOpacity
                       key={option.value}
-                      className={`flex-row items-center justify-between px-3 py-2 rounded-lg ${
-                        selectedInvitation === option.value
-                          ? "bg-primary/10"
-                          : ""
-                      }`}
+                      className={`flex-row items-center justify-between px-3 py-2 rounded-lg ${selectedInvitation === option.value
+                        ? "bg-primary/10"
+                        : ""
+                        }`}
                       onPress={() =>
                         setSelectedInvitation(option.value as InvitationStatus)
                       }
                     >
                       <View className="flex-row items-center gap-2">
                         <View
-                          className={`w-4 h-4 rounded-full border-2 ${
-                            selectedInvitation === option.value
-                              ? "border-primary bg-primary"
-                              : "border-gray-300"
-                          }`}
+                          className={`w-4 h-4 rounded-full border-2 ${selectedInvitation === option.value
+                            ? "border-primary bg-primary"
+                            : "border-gray-300"
+                            }`}
                         />
                         <Text
-                          className={`text-sm font-medium ${
-                            selectedInvitation === option.value
-                              ? "text-primary"
-                              : "text-gray-700"
-                          }`}
+                          className={`text-sm font-medium ${selectedInvitation === option.value
+                            ? "text-primary"
+                            : "text-gray-700"
+                            }`}
                         >
                           {option.label}
                         </Text>
@@ -1183,20 +1174,18 @@ export default function GuestListPage() {
                   ].map((option) => (
                     <TouchableOpacity
                       key={option.value}
-                      className={`flex-row items-center justify-between px-3 py-2 rounded-lg ${
-                        sortBy === option.value ? "bg-primary/10" : ""
-                      }`}
+                      className={`flex-row items-center justify-between px-3 py-2 rounded-lg ${sortBy === option.value ? "bg-primary/10" : ""
+                        }`}
                       onPress={() => {
                         setSortBy(option.value as SortOption);
                         setShowFilterSidebar(false);
                       }}
                     >
                       <Text
-                        className={`text-sm font-medium ${
-                          sortBy === option.value
-                            ? "text-primary"
-                            : "text-gray-700"
-                        }`}
+                        className={`text-sm font-medium ${sortBy === option.value
+                          ? "text-primary"
+                          : "text-gray-700"
+                          }`}
                       >
                         {option.label}
                       </Text>
