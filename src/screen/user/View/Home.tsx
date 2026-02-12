@@ -1,4 +1,4 @@
-import ArticleCard from "@/src/features/home/components/ArticleCard";
+ import ArticleCard from "@/src/features/home/components/ArticleCard";
 import CoupleCard from "@/src/features/home/components/CoupleCard";
 import EventCard from "@/src/features/home/components/EventCard";
 import HotelCard from "@/src/features/home/components/HotelCard";

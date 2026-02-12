@@ -218,7 +218,7 @@ export default function EventEstimates() {
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.nextButton}
-            onPress={() => navigation.navigate("event-location" as never)}
+            onPress={() => navigation.navigate("subevent-create" as never)}
           >
             <Text style={styles.nextButtonText}>Next</Text>
             <Ionicons name="chevron-forward" size={20} color="white" />

@@ -209,6 +209,17 @@ export default function SubEventCreate() {
 
         <View style={styles.bottomSpacing} />
       </ScrollView>
+
+      {/* Continue Button */}
+      <View style={styles.footer}>
+        <TouchableOpacity
+          style={styles.continueButton}
+          onPress={handleNavigateToCardMaking}
+        >
+          <Text style={styles.continueButtonText}>Continue to Invitations</Text>
+          <Ionicons name="arrow-forward" size={20} color="white" />
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }

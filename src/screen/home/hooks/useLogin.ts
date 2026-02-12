@@ -1,7 +1,7 @@
 import { useRouter } from "expo-router";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { Alert, Animated } from "react-native";
-import { useAuth } from "../../store/AuthContext";
+import { useAuth } from "../../../store/AuthContext";
 import type { MockUser } from "../types/login";
 
 export const useLogin = () => {

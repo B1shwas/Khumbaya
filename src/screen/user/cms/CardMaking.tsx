@@ -106,6 +106,19 @@ export default function CardMaking() {
         onClose={() => setShowImageModal(false)}
         onSelectImage={handleSelectImage}
       />
+
+      {/* Continue Button */}
+      <View style={styles.footer}>
+        <TouchableOpacity
+          style={styles.continueButton}
+          onPress={() =>
+            router.push("/(protected)/(client-tabs)/events/success" as any)
+          }
+        >
+          <Text style={styles.continueButtonText}>Continue to Summary</Text>
+          <Ionicons name="arrow-forward" size={20} color="white" />
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }

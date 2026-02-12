@@ -155,4 +155,27 @@ export const styles = StyleSheet.create({
   bottomSpacing: {
     height: 100,
   },
+  footer: {
+    flexDirection: "row",
+    padding: 16,
+    paddingBottom: 32,
+    backgroundColor: "white",
+    borderTopWidth: 1,
+    borderTopColor: "#F3F4F6",
+  },
+  continueButton: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    backgroundColor: "#ee2b8c",
+    borderRadius: 12,
+    paddingVertical: 16,
+  },
+  continueButtonText: {
+    fontFamily: "PlusJakartaSans-Bold",
+    fontSize: 16,
+    color: "white",
+  },
 });
