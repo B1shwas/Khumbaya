@@ -75,6 +75,12 @@ export default function EventsStackLayout() {
         }}
       />
       <Stack.Screen
+        name="event-success"
+        options={{
+          title: "Success",
+        }}
+      />
+      <Stack.Screen
         name="subevent-create"
         options={{
           title: "Create Sub Event",
