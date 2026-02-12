@@ -326,9 +326,7 @@ export default function EventsPage() {
   };
 
   const handleCreateSubEvent = () => {
-    router.push(
-      "/(protected)/(client-stack)/events/subevent-create" as RelativePathString,
-    );
+    router.push("/(protected)/(client-stack)/events/create/subevent-create");
   };
 
   const filteredEvents = eventsData.filter(
