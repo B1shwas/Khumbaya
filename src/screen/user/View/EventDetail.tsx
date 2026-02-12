@@ -45,14 +45,14 @@ const EventDetail = ({ eventId, isInvitedGuest = false }: { eventId?: string, is
       name: "Vendors",
       icon: "business",
       color: "#3B82F6",
-      route: `/(protected)/(client-stack)/events/${eventId || event.id}/vendors`,
+      route: `/(protected)/(client-stack)/events/${eventId || 1}/vendors`,
     },
     {
       id: "budget",
       name: "Budget",
       icon: "wallet",
       color: "#10B981",
-      route: `/(protected)/(client-stack)/events/${eventId || event.id}/budget`,
+      route: `/(protected)/(client-stack)/events/${eventId || 1}/budget`,
     },
   ];
 

@@ -455,7 +455,7 @@ export default function EventsPage() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f8f6f7",
+    backgroundColor: "#F9FAFB",
   },
   header: {
     backgroundColor: "white",
