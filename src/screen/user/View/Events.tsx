@@ -385,7 +385,9 @@ export default function EventsPage() {
                   Invited
                 </Text>
               </TouchableOpacity>
+
             </View>
+
           </View>
         </View>
       </View>
