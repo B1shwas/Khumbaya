@@ -1,13 +1,15 @@
-import { cn } from "@/src/utils/cn";
 import { Ionicons } from "@expo/vector-icons";
 import {
-  router 
+  router,
+  useGlobalSearchParams,
+  type RelativePathString,
 } from "expo-router";
 import { useState } from "react";
 import {
   Image,
   RefreshControl,
   ScrollView,
+  StyleSheet,
   Text,
   TouchableOpacity,
   View,
@@ -164,31 +166,27 @@ const getDateColor = (isPast: boolean) => {
 // SubEvent Card Component
 const SubEventCard = ({ subEvent }: { subEvent: SubEvent }) => (
   <TouchableOpacity
-    className="flex-row items-center bg-background-secondary rounded-xl p-3 mb-2 border border-border"
+    style={styles.subEventCard}
     onPress={() =>
       router.push(
         `/(protected)/(client-stack)/events/${subEvent.id}/subevent-detail?subEventId=${subEvent.id}`,
       )
     }
   >
-    <View className="w-10 h-10 rounded-[10px] bg-pink-50 items-center justify-center">
+    <View style={styles.subEventIcon}>
       <Ionicons name={subEvent.icon as any} size={20} color="#ee2b8c" />
     </View>
-    <View className="flex-1 ml-2.5">
-      <Text className="font-jakarta-semibold text-sm text-text-light">
-        {subEvent.name}
-      </Text>
-      <Text className="font-jakarta text-xs text-text-tertiary mt-0.5">
+    <View style={styles.subEventInfo}>
+      <Text style={styles.subEventName}>{subEvent.name}</Text>
+      <Text style={styles.subEventDetails}>
         {subEvent.date} • {subEvent.time}
       </Text>
     </View>
-    <View className="items-end">
-      <Text className="font-jakarta text-[11px] text-text-tertiary">
+    <View style={styles.subEventStats}>
+      <Text style={styles.subEventStatLabel}>
         {subEvent.activitiesCount} activities
       </Text>
-      <Text className="font-jakarta-semibold text-xs text-success-500">
-        {subEvent.budget}
-      </Text>
+      <Text style={styles.subEventStatBudget}>{subEvent.budget}</Text>
     </View>
     <Ionicons name="chevron-forward" size={16} color="#9CA3AF" />
   </TouchableOpacity>
@@ -196,9 +194,9 @@ const SubEventCard = ({ subEvent }: { subEvent: SubEvent }) => (
 
 // Event Card Component
 const EventCard = ({ event }: { event: Event }) => (
-  <View className="bg-white rounded-lg mb-4 overflow-hidden border border-border">
+  <View style={styles.eventCard}>
     <TouchableOpacity
-      className="flex-row p-3"
+      style={styles.eventCardTouchable}
       onPress={() =>
         router.push(
           `/(protected)/(client-stack)/events/${event.id}`,
@@ -206,51 +204,42 @@ const EventCard = ({ event }: { event: Event }) => (
       }
       activeOpacity={0.8}
     >
-      <View className="w-20 h-20 rounded-lg overflow-hidden">
+      <View style={styles.eventImageContainer}>
         <Image
           source={{ uri: event.imageUrl }}
-          className={cn("w-full h-full", event.isPast && "opacity-60")}
+          style={[styles.eventImage, event.isPast && styles.eventImagePast]}
         />
       </View>
-      <View className="flex-1 ml-3 justify-between">
-        <View className="flex-row justify-between items-start">
-          <Text className="font-jakarta-bold text-base text-text-light flex-1 mr-2" numberOfLines={2}>
+      <View style={styles.eventInfo}>
+        <View style={styles.eventHeader}>
+          <Text style={styles.eventTitle} numberOfLines={2}>
             {event.title}
           </Text>
           <View
-            className={cn(
-              "px-2.5 py-1 rounded-md bg-pink-50 border border-pink-200",
-              event.isPast && "bg-background-tertiary border-border",
-            )}
+            style={[styles.statusBadge, event.isPast && styles.statusBadgePast]}
           >
             <Text
-              className={cn(
-                "font-jakarta-bold text-[10px] text-primary uppercase",
-                event.isPast && "text-text-tertiary",
-              )}
+              style={[styles.statusText, event.isPast && styles.statusTextPast]}
             >
               {event.status}
             </Text>
           </View>
         </View>
         <View>
-          <View className="flex-row items-center mt-2">
+          <View style={styles.eventLocationRow}>
             <Ionicons name="location" size={14} color="#6B7280" />
-            <Text className="font-jakarta text-[13px] text-text-tertiary ml-1" numberOfLines={1}>
+            <Text style={styles.eventLocation} numberOfLines={1}>
               {event.location}
             </Text>
           </View>
-          <View className="flex-row items-center mt-1">
+          <View style={styles.eventDateRow}>
             <Ionicons
               name="calendar"
               size={14}
               color={event.isPast ? "#9CA3AF" : "#ee2b8c"}
             />
             <Text
-              className={cn(
-                "font-jakarta-semibold text-[13px] text-primary ml-1",
-                event.isPast && "text-text-disabled",
-              )}
+              style={[styles.eventDate, event.isPast && styles.eventDatePast]}
             >
               {event.date} • {event.time}
             </Text>
@@ -261,12 +250,10 @@ const EventCard = ({ event }: { event: Event }) => (
 
     {/* Sub Events Section */}
     {event.subEvents && event.subEvents.length > 0 && (
-      <View className="border-t border-border-subtle p-3">
-        <View className="flex-row justify-between items-center mb-2">
-          <Text className="font-jakarta-semibold text-sm text-text-light">
-            Sub Events
-          </Text>
-          <Text className="font-jakarta text-xs text-text-tertiary">
+      <View style={styles.subEventsSection}>
+        <View style={styles.subEventsHeader}>
+          <Text style={styles.subEventsTitle}>Sub Events</Text>
+          <Text style={styles.subEventsCount}>
             {event.subEvents.length} scheduled
           </Text>
         </View>
@@ -277,11 +264,11 @@ const EventCard = ({ event }: { event: Event }) => (
     )}
 
     {/* Action Buttons */}
-    <View className="flex-row border-t border-border-subtle p-3 gap-3">
+    <View style={styles.eventActions}>
       {event.isMyEvent ? (
         <>
           <TouchableOpacity
-            className="flex-1 flex-row items-center justify-center bg-background-secondary rounded-[10px] py-2.5 gap-1.5 border border-border"
+            style={styles.actionButton}
             onPress={() =>
               router.push(
                 `/(protected)/(client-stack)/events/${event.id}/subevent-create`
@@ -289,12 +276,10 @@ const EventCard = ({ event }: { event: Event }) => (
             }
           >
             <Ionicons name="add-circle-outline" size={18} color="#ee2b8c" />
-            <Text className="font-jakarta-semibold text-[13px] text-gray-700">
-              Add Sub Event
-            </Text>
+            <Text style={styles.actionButtonText}>Add Sub Event</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            className="flex-1 flex-row items-center justify-center bg-background-secondary rounded-[10px] py-2.5 gap-1.5 border border-border"
+            style={styles.actionButton}
             onPress={() =>
               router.push(
                 `/(protected)/(client-stack)/events/${event.id}/table-management`,
@@ -302,15 +287,13 @@ const EventCard = ({ event }: { event: Event }) => (
             }
           >
             <Ionicons name="grid-outline" size={18} color="#3B82F6" />
-            <Text className="font-jakarta-semibold text-[13px] text-gray-700">
-              Manage Tables
-            </Text>
+            <Text style={styles.actionButtonText}>Manage Tables</Text>
           </TouchableOpacity>
         </>
       ) : (
         !event.isPast && (
           <TouchableOpacity
-            className="flex-1 flex-row items-center justify-center bg-success-50 rounded-[10px] py-2.5 gap-1.5 border border-success-500"
+            style={[styles.actionButton, styles.rsvpButton]}
             onPress={() => {
               router.push(
                 `/(protected)/(client-stack)/events/${event.id}/rsvp`,
@@ -322,7 +305,7 @@ const EventCard = ({ event }: { event: Event }) => (
               size={18}
               color="#10B981"
             />
-            <Text className="font-jakarta-semibold text-[13px] text-success-500">
+            <Text style={[styles.actionButtonText, styles.rsvpButtonText]}>
               RSVP Now
             </Text>
           </TouchableOpacity>
@@ -335,6 +318,16 @@ const EventCard = ({ event }: { event: Event }) => (
 export default function EventsPage() {
   const [activeTab, setActiveTab] = useState<EventTab>("myEvents");
   const [refreshing, setRefreshing] = useState(false);
+  const params = useGlobalSearchParams();
+  const showSuccess = params?.success === "true";
+
+  const handleDismissSuccess = () => {
+    router.replace("/(protected)/(client-tabs)/event" as RelativePathString);
+  };
+
+  const handleCreateSubEvent = () => {
+    router.push("/(protected)/(client-stack)/events/create/subevent-create");
+  };
 
   const filteredEvents = eventsData.filter(
     (e) => e.isMyEvent === (activeTab === "myEvents"),
@@ -348,64 +341,58 @@ export default function EventsPage() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-background-secondary">
+    <SafeAreaView style={styles.container}>
       {/* Header */}
-      <View className="bg-white px-4 pt-2 pb-3 border-b border-border-subtle">
-        <View className="flex-row items-center justify-between">
-          <Text className="font-jakarta-bold text-xl text-text-light">
-            Your Events
-          </Text>
+      <View style={styles.header}>
+        <View style={styles.headerContent}>
+          <Text style={styles.headerTitle}>Your Events</Text>
           <TouchableOpacity
-            className="w-10 h-10 rounded-full bg-background-tertiary items-center justify-center"
-            onPress={() => router.push("/(protected)/(client-tabs)/profile")}
+            style={styles.settingsButton}
+            onPress={() => router.push("/settings" as RelativePathString)}
           >
             <Ionicons name="settings" size={24} color="#374151" />
           </TouchableOpacity>
         </View>
 
         {/* Tabs */}
-        <View className="mt-3">
-          <View className="flex-row bg-background-tertiary rounded p-1">
+        <View style={styles.tabsContainer}>
+          <View style={styles.tabs}>
             <TouchableOpacity
-              className={cn(
-                "flex-1 py-2.5 items-center rounded-[10px]",
-                activeTab === "myEvents" && "bg-white shadow-sm",
-              )}
-              onPress={() => {setActiveTab("myEvents")}}
+              style={[styles.tab, activeTab === "myEvents" && styles.tabActive]}
+              onPress={() => setActiveTab("myEvents")}
             >
               <Text
-                className={cn(
-                  "font-jakarta-semibold text-sm text-text-tertiary",
-                  activeTab === "myEvents" && "text-primary",
-                )}
+                style={[
+                  styles.tabText,
+                  activeTab === "myEvents" && styles.tabTextActive,
+                ]}
               >
                 My Events
               </Text>
             </TouchableOpacity>
-           
-              <TouchableOpacity
-               className={cn(
-                 "flex-1 py-2.5 items-center rounded-[10px]",
-                 activeTab === "invited" && "bg-white shadow-sm",
-               )}
-                onPress={() =>{ setActiveTab("invited")}}
+
+            <TouchableOpacity
+              style={[styles.tab, activeTab === "invited" && styles.tabActive]}
+              onPress={() => setActiveTab("invited")}
+            >
+              <Text
+                style={[
+                  styles.tabText,
+                  activeTab === "invited" && styles.tabTextActive,
+                ]}
               >
-                <Text
-                  className={cn(
-                    "font-jakarta-semibold text-sm text-text-tertiary",
-                    activeTab === "invited" && "text-primary",
-                  )}
-                >
-                  Invited
-                </Text>
-              </TouchableOpacity>
+                Invited
+              </Text>
+            </TouchableOpacity>
+
+
           </View>
         </View>
       </View>
 
       {/* Content List */}
       <ScrollView
-        className="flex-1 px-4 pt-4"
+        style={styles.content}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
@@ -413,10 +400,8 @@ export default function EventsPage() {
       >
         {/* Upcoming Events */}
         {upcomingEvents.length > 0 && (
-          <View className="mb-6">
-            <Text className="font-jakarta-bold text-sm text-text-tertiary uppercase tracking-[0.5px] mb-3">
-              Upcoming
-            </Text>
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Upcoming</Text>
             {upcomingEvents.map((event) => (
               <EventCard key={event.id} event={event} />
             ))}
@@ -425,10 +410,8 @@ export default function EventsPage() {
 
         {/* Past Events */}
         {pastEvents.length > 0 && (
-          <View className="mb-6">
-            <Text className="font-jakarta-bold text-sm text-text-tertiary uppercase tracking-[0.5px] mb-3">
-              Past Events
-            </Text>
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Past Events</Text>
             {pastEvents.map((event) => (
               <EventCard key={event.id} event={event} />
             ))}
@@ -437,12 +420,10 @@ export default function EventsPage() {
 
         {/* Empty State */}
         {filteredEvents.length === 0 && (
-          <View className="items-center justify-center py-15">
+          <View style={styles.emptyState}>
             <Ionicons name="calendar-outline" size={64} color="#D1D5DB" />
-            <Text className="font-jakarta-bold text-lg text-text-tertiary mt-4">
-              No events found
-            </Text>
-            <Text className="font-jakarta text-sm text-text-disabled mt-1">
+            <Text style={styles.emptyTitle}>No events found</Text>
+            <Text style={styles.emptySubtitle}>
               {activeTab === "myEvents"
                 ? "Create your first event to get started"
                 : "No pending invitations"}
@@ -451,12 +432,12 @@ export default function EventsPage() {
         )}
 
         {/* Bottom spacer */}
-        <View className="h-20" />
+        <View style={styles.bottomSpacer} />
       </ScrollView>
 
       {/* Floating Action Button */}
       <TouchableOpacity
-        className="absolute bottom-6 right-6 w-14 h-14 rounded-full bg-primary items-center justify-center shadow-lg"
+        style={styles.fab}
         onPress={() =>
           router.push(
             "/(protected)/(client-stack)/events/create",
@@ -468,3 +449,414 @@ export default function EventsPage() {
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#f8f6f7",
+  },
+  header: {
+    backgroundColor: "white",
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F3F4F6",
+  },
+  headerContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  headerTitle: {
+    fontFamily: "PlusJakartaSans-Bold",
+    fontSize: 20,
+    color: "#181114",
+  },
+  settingsButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#F3F4F6",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  tabsContainer: {
+    marginTop: 12,
+  },
+  tabs: {
+    flexDirection: "row",
+    backgroundColor: "#F3F4F6",
+    borderRadius: 12,
+    padding: 4,
+  },
+  tab: {
+    flex: 1,
+    paddingVertical: 10,
+    alignItems: "center",
+    borderRadius: 10,
+  },
+  tabActive: {
+    backgroundColor: "white",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  tabText: {
+    fontFamily: "PlusJakartaSans-SemiBold",
+    fontSize: 14,
+    color: "#6B7280",
+  },
+  tabTextActive: {
+    color: "#ee2b8c",
+  },
+  content: {
+    flex: 1,
+    paddingHorizontal: 16,
+    paddingTop: 16,
+  },
+  section: {
+    marginBottom: 24,
+  },
+  sectionTitle: {
+    fontFamily: "PlusJakartaSans-Bold",
+    fontSize: 14,
+    color: "#6B7280",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+    marginBottom: 12,
+  },
+  eventCard: {
+    backgroundColor: "white",
+    borderRadius: 16,
+    marginBottom: 16,
+    overflow: "hidden",
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+  },
+  eventCardTouchable: {
+    flexDirection: "row",
+    padding: 12,
+  },
+  eventImageContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 12,
+    overflow: "hidden",
+  },
+  eventImage: {
+    width: "100%",
+    height: "100%",
+  },
+  eventImagePast: {
+    opacity: 0.6,
+  },
+  eventInfo: {
+    flex: 1,
+    marginLeft: 12,
+    justifyContent: "space-between",
+  },
+  eventHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+  },
+  eventTitle: {
+    fontFamily: "PlusJakartaSans-Bold",
+    fontSize: 16,
+    color: "#181114",
+    flex: 1,
+    marginRight: 8,
+  },
+  statusBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
+    backgroundColor: "#FDF2F8",
+    borderWidth: 1,
+    borderColor: "#FBCFE8",
+  },
+  statusBadgePast: {
+    backgroundColor: "#F3F4F6",
+    borderColor: "#E5E7EB",
+  },
+  statusText: {
+    fontFamily: "PlusJakartaSans-Bold",
+    fontSize: 10,
+    color: "#ee2b8c",
+    textTransform: "uppercase",
+  },
+  statusTextPast: {
+    color: "#6B7280",
+  },
+  eventLocationRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 8,
+  },
+  eventLocation: {
+    fontFamily: "PlusJakartaSans-Regular",
+    fontSize: 13,
+    color: "#6B7280",
+    marginLeft: 4,
+  },
+  eventDateRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 4,
+  },
+  eventDate: {
+    fontFamily: "PlusJakartaSans-SemiBold",
+    fontSize: 13,
+    color: "#ee2b8c",
+    marginLeft: 4,
+  },
+  eventDatePast: {
+    color: "#9CA3AF",
+  },
+  subEventsSection: {
+    borderTopWidth: 1,
+    borderTopColor: "#F3F4F6",
+    padding: 12,
+  },
+  subEventsHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  subEventsTitle: {
+    fontFamily: "PlusJakartaSans-SemiBold",
+    fontSize: 14,
+    color: "#181114",
+  },
+  subEventsCount: {
+    fontFamily: "PlusJakartaSans-Regular",
+    fontSize: 12,
+    color: "#6B7280",
+  },
+  subEventCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F9FAFB",
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+  },
+  subEventIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 10,
+    backgroundColor: "#FDF2F8",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  subEventInfo: {
+    flex: 1,
+    marginLeft: 10,
+  },
+  subEventName: {
+    fontFamily: "PlusJakartaSans-SemiBold",
+    fontSize: 14,
+    color: "#181114",
+  },
+  subEventDetails: {
+    fontFamily: "PlusJakartaSans-Regular",
+    fontSize: 12,
+    color: "#6B7280",
+    marginTop: 2,
+  },
+  subEventStats: {
+    alignItems: "flex-end",
+  },
+  subEventStatLabel: {
+    fontFamily: "PlusJakartaSans-Regular",
+    fontSize: 11,
+    color: "#6B7280",
+  },
+  subEventStatBudget: {
+    fontFamily: "PlusJakartaSans-SemiBold",
+    fontSize: 12,
+    color: "#10B981",
+  },
+  eventActions: {
+    flexDirection: "row",
+    borderTopWidth: 1,
+    borderTopColor: "#F3F4F6",
+    padding: 12,
+    gap: 12,
+  },
+  actionButton: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#F9FAFB",
+    borderRadius: 10,
+    paddingVertical: 10,
+    gap: 6,
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+  },
+  actionButtonText: {
+    fontFamily: "PlusJakartaSans-SemiBold",
+    fontSize: 13,
+    color: "#374151",
+  },
+  emptyState: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 60,
+  },
+  emptyTitle: {
+    fontFamily: "PlusJakartaSans-Bold",
+    fontSize: 18,
+    color: "#6B7280",
+    marginTop: 16,
+  },
+  emptySubtitle: {
+    fontFamily: "PlusJakartaSans-Regular",
+    fontSize: 14,
+    color: "#9CA3AF",
+    marginTop: 4,
+  },
+  bottomSpacer: {
+    height: 80,
+  },
+  rsvpButton: {
+    backgroundColor: "#ECFDF5",
+    borderWidth: 1,
+    borderColor: "#10B981",
+  },
+  rsvpButtonText: {
+    color: "#10B981",
+  },
+  fab: {
+    position: "absolute",
+    bottom: 24,
+    right: 24,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: "#ee2b8c",
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#ee2b8c",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  // Success View Styles
+  successContainer: {
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 20,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+  },
+  successHeroCircle: {
+    width: 140,
+    height: 140,
+    borderRadius: 70,
+    backgroundColor: "#FDF2F8",
+    alignItems: "center",
+    justifyContent: "center",
+    position: "relative",
+    marginBottom: 16,
+  },
+  successHeroInner: {
+    width: 110,
+    height: 110,
+    borderRadius: 55,
+    overflow: "hidden",
+    borderWidth: 3,
+    borderColor: "#FBCFE8",
+  },
+  successHeroImage: {
+    width: "100%",
+    height: "100%",
+  },
+  successFloatIcon: {
+    position: "absolute",
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 6,
+    shadowColor: "#ee2b8c",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  successFloatIcon1: {
+    top: 10,
+    right: 10,
+  },
+  successFloatIcon2: {
+    bottom: 15,
+    left: 10,
+  },
+  successFloatIcon3: {
+    bottom: 10,
+    right: 15,
+  },
+  successTextContent: {
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  successTitle: {
+    fontFamily: "PlusJakartaSans-Bold",
+    fontSize: 22,
+    color: "#181114",
+    textAlign: "center",
+  },
+  successSubtitle: {
+    fontFamily: "PlusJakartaSans-Regular",
+    fontSize: 14,
+    color: "#6B7280",
+    textAlign: "center",
+    marginTop: 8,
+  },
+  successOptions: {
+    width: "100%",
+    gap: 12,
+  },
+  successOptionButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F9FAFB",
+    borderRadius: 14,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+  },
+  successOptionIconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 12,
+    backgroundColor: "#9333EA20",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  successOptionTextContainer: {
+    flex: 1,
+    marginLeft: 12,
+  },
+  successOptionTitle: {
+    fontFamily: "PlusJakartaSans-SemiBold",
+    fontSize: 15,
+    color: "#181114",
+  },
+  successOptionSubtitle: {
+    fontFamily: "PlusJakartaSans-Regular",
+    fontSize: 12,
+    color: "#6B7280",
+    marginTop: 2,
+  },
+});

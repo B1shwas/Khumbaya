@@ -14,7 +14,7 @@ function RootNavigation() {
   const { user, isLoading } = useAuth();
 
   if (isLoading) {
-    return null ; 
+    return null;
   }
 
   return (
@@ -27,7 +27,7 @@ function RootNavigation() {
       {user ? (
         <Stack.Screen name="(protected)" />
       ) : (
-        <Stack.Screen name="(onboarding)"/>
+        <Stack.Screen name="(onboarding)" />
       )}
     </Stack>
   );
