@@ -3,6 +3,7 @@
 # dependencies
 node_modules/
 package-lock.json
+package-lock*
 pnpm-lock.yaml
 pnpm-lock*
 # Expo
