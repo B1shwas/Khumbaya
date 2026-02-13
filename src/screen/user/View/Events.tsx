@@ -9,7 +9,7 @@ import {
   ScrollView,
   Text,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -169,7 +169,7 @@ const EventCard = ({
           </View>
         </View>
         <View>
-          <View className="flex-row items-center mt-2">
+          <View style={styles.eventLocationRow}>
             <Ionicons name="location" size={14} color="#6B7280" />
             <Text
               className="font-jakarta text-[13px] text-text-tertiary ml-1"
