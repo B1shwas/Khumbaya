@@ -1,4 +1,17 @@
-import React, { useCallback } from "react";
+import {
+  ArticleCard,
+  CoupleCard,
+  EventCard,
+  HeroCard,
+  HotelCard,
+  QuickServices,
+  SectionHeader,
+  VenueCard,
+} from "@/src/components/ui/home";
+import { useAuth } from "@/src/store/AuthContext";
+import { Ionicons } from "@expo/vector-icons";
+import { router, type RelativePathString } from "expo-router";
+import { useCallback } from "react";
 import {
   FlatList,
   StyleSheet,
@@ -7,17 +20,6 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { router, type RelativePathString } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
-import { useAuth } from "@/src/store/AuthContext";
-import {
-  ArticleCard,
-  CoupleCard,
-  EventCard,
-  HotelCard,
-  SectionHeader,
-  VenueCard,
-} from "@/src/components/ui/home";
 
 // ============================================
 // STATIC DATA (Moved outside component)
@@ -61,8 +63,7 @@ const ARTICLES = [
     category: "Finance",
     categoryColor: "#3b82f6",
     title: "Budgeting 101: Where to Splurge",
-    description:
-      "Expert advice on allocating your wedding funds effectively.",
+    description: "Expert advice on allocating your wedding funds effectively.",
     readTime: "8 min read",
     imageUrl:
       "https://images.unsplash.com/photo-1555244162-803834f70033?w=800&q=80",
@@ -170,7 +171,8 @@ export default function HomePage() {
 
   // Navigation handlers wrapped in useCallback
   const navigateToEvents = useCallback(
-    () => router.push("/(protected)/(client-tabs)/events" as RelativePathString),
+    () =>
+      router.push("/(protected)/(client-tabs)/events" as RelativePathString),
     [],
   );
 
@@ -191,7 +193,8 @@ export default function HomePage() {
 
   const navigateToBlog = useCallback(
     () => router.push("/blog" as RelativePathString),
-    []);
+    [],
+  );
 
   // Render functions for FlatList items
   const renderEventItem = useCallback(
@@ -250,6 +253,12 @@ export default function HomePage() {
               </TouchableOpacity>
             </View> */}
 
+            {/* Hero Card */}
+            <HeroCard />
+
+            {/* Quick Services */}
+            <QuickServices />
+
             {/* Your Events Section */}
             <SectionHeader title="Your Events" />
             <FlatList
@@ -306,7 +315,17 @@ export default function HomePage() {
         }
       />
 
-    
+      {/* Floating Action Button */}
+      <TouchableOpacity
+        style={styles.fab}
+        onPress={() =>
+          router.push(
+            "/(protected)/(client-stack)/events/createevent" as RelativePathString,
+          )
+        }
+      >
+        <Ionicons name="add" size={28} color="white" />
+      </TouchableOpacity>
     </SafeAreaView>
   );
 }
@@ -404,6 +423,22 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     marginTop: -30,
+    shadowColor: "#ee2b8c",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  fab: {
+    position: "absolute",
+    right: 20,
+    bottom: 30,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: "#ee2b8c",
+    alignItems: "center",
+    justifyContent: "center",
     shadowColor: "#ee2b8c",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
