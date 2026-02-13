@@ -1,17 +1,17 @@
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
-  View,
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  ScrollView,
-  Image,
-  StyleSheet,
-  KeyboardAvoidingView,
-  Platform,
+  View,
 } from 'react-native';
-import { useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
 // ============================================
@@ -92,7 +92,7 @@ export default function EventCreate() {
     console.log('Form data ready for API submission:', formData);
     
     // Navigate to location step
-    router.push('/(protected)/(client-tabs)/events/event-location' as any);
+    router.push('/(protected)/(client-stack)/events/create/event-location');
   };
 
   const handleBack = () => {

@@ -1,5 +1,5 @@
-import { Event } from "@/src/screen/user/View";
+import { EventCreate } from "@/src/screen/user/cms";
 
-export default function EventsScreen() {
-  return <Event />;
+export default function CreateScreen() {
+  return <EventCreate />;
 }

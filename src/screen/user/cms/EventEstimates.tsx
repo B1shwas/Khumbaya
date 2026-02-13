@@ -77,7 +77,7 @@ export default function EventEstimates() {
     // 2. Update estimates: PUT /api/events/{id}/estimates
     // 3. Navigate to success page
 
-    router.push('/(protected)/(client-stack)/events/success');
+    router.push('/(protected)/(client-stack)/events/create/success');
   };
 
   const handleBack = () => {

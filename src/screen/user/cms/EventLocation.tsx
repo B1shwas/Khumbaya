@@ -76,7 +76,7 @@ export default function EventLocation() {
     // 3. Update event location: PUT /api/events/{id}/location
     // 4. Navigate to estimates step
 
-    router.push('/(protected)/(client-stack)/events/event-estimates' as any);
+    router.push('/(protected)/(client-stack)/events/create/event-estimates');
   };
 
   const handleBack = () => {

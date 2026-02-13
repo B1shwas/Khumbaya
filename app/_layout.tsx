@@ -1,4 +1,4 @@
-import { AuthProvider } from "@/src/store/AuthContext";
+import { AuthProvider, useAuth } from "@/src/store/AuthContext";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
@@ -9,6 +9,29 @@ import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import "./global.css";
 
 SplashScreen.preventAutoHideAsync();
+
+function RootNavigation() {
+  const { user, isLoading } = useAuth();
+
+  if (isLoading) {
+    return null ; 
+  }
+
+  return (
+    <Stack
+      screenOptions={{
+        headerShown: false,
+        animation: "slide_from_right",
+      }}
+    >
+      {user ? (
+        <Stack.Screen name="(protected)" />
+      ) : (
+        <Stack.Screen name="(onboarding)"/>
+      )}
+    </Stack>
+  );
+}
 
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
@@ -34,15 +57,7 @@ export default function RootLayout() {
       <SafeAreaProvider>
         <StatusBar barStyle="dark-content" />
         <SafeAreaView className="flex-1 px-4 " edges={["top", "bottom"]}>
-          <Stack
-            screenOptions={{
-              headerShown: false,
-              animation: "slide_from_right",
-            }}
-          >
-            <Stack.Screen name="(onboarding)" />
-            <Stack.Screen name="(protected)" />
-          </Stack>
+          <RootNavigation />
         </SafeAreaView>
       </SafeAreaProvider>
     </AuthProvider>
