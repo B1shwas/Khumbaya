@@ -1,4 +1,3 @@
-import { cn } from "@/src/utils/cn";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
@@ -7,6 +6,7 @@ import {
   Pressable,
   RefreshControl,
   ScrollView,
+  StyleSheet,
   Text,
   TouchableOpacity,
   View,
@@ -169,7 +169,7 @@ const EventCard = ({
           </View>
         </View>
         <View>
-          <View className="flex-row items-center mt-2">
+          <View style={styles.eventLocationRow}>
             <Ionicons name="location" size={14} color="#6B7280" />
             <Text
               className="font-jakarta text-[13px] text-text-tertiary ml-1"
