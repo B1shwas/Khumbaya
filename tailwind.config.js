@@ -18,16 +18,16 @@ module.exports = {
           secondary: "#F9FAFB",
           tertiary: "#F3F4F6",
           success: "bg-green-900/30",
-          light:"#f8f6f7"
+          light: "#f8f6f7",
         },
-        surface:{
+        surface: {
           DEFAULT: "#FFFFFF",
           secondary: "#F9FAFB",
           tertiary: "#F3F4F6",
           success: "bg-green-900/30",
-          light:"#f8f6f7"
+          light: "#f8f6f7",
         },
-        
+
         // Text colors
         text: {
           primary: "#111827",
@@ -102,7 +102,7 @@ module.exports = {
         inner: "inset 0 2px 4px 0 rgba(0, 0, 0, 0.05)",
         none: "none",
         // Custom shadows
-        card: "0 2px 8px rgba(0, 0, 0, 0.08)",
+        card: "0px 4px 6px rgba(0,0,0,0.1)",
         "card-hover": "0 4px 16px rgba(0, 0, 0, 0.12)",
         button: "0 1px 2px rgba(0, 0, 0, 0.1)",
         "button-hover": "0 2px 4px rgba(0, 0, 0, 0.15)",
