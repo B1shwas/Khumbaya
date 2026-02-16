@@ -79,8 +79,6 @@ const eventsData: Event[] = [
   },
 ];
 
-// ✅ KEY FIX: Every class string must be a complete literal for NativeWind's
-// Babel plugin to detect at build time. Never build class strings dynamically.
 const roleConfig: Record<
   EventRole,
   { wrapperClass: string; textClass: string }
@@ -106,25 +104,63 @@ const EventCard = ({
   event: Event;
   onPress: () => void;
 }) => {
+  const router = useRouter();
   const { wrapperClass, textClass } = roleConfig[event.role];
 
   return (
-    <Pressable onPress={onPress} className="flex-row p-3">
-      {/* Event Image */}
-      <View className="w-20 h-20 rounded-lg overflow-hidden">
-        <Image
-          source={{ uri: event.imageUrl }}
-          className="w-full h-full"
-          resizeMode="cover"
-        />
-      </View>
+    // <Pressable onPress={onPress} className="flex-row p-3">
+    //   {/* Event Image */}
+    //   <View className="w-20 h-20 rounded-lg overflow-hidden">
+    //     <Image
+    //       source={{ uri: event.imageUrl }}
+    //       className="w-full h-full"
+    //       resizeMode="cover"
+    //     />
+    //   </View>
 
-      <View className="p-4">
-        {/* Title + Role Badge */}
-        <View className="flex-row items-start justify-between mb-2">
+    //   <View className="p-4">
+    //     {/* Title + Role Badge */}
+    //     <View className="flex-row items-start justify-between mb-2">
+    //       <Text
+    //         className="text-gray-900 font-semibold text-base flex-1 mr-2"
+    //         numberOfLines={1}
+    //       >
+    //         {event.title}
+    //       </Text>
+    //       <View className={wrapperClass}>
+    //         <Text className={textClass}>{event.role}</Text>
+    //       </View>
+    //     </View>
+
+    //     {/* Location */}
+    //     <View className="flex-row items-center mb-1">
+    //       <Ionicons name="location-outline" size={14} color="#6b7280" />
+    //       <Text className="text-gray-500 text-sm ml-1">{event.location}</Text>
+    //     </View>
+
+    //     {/* Date & Time */}
+    //     <View className="flex-row items-center">
+    //       <Ionicons name="calendar-outline" size={14} color="#6b7280" />
+    //       <Text className="text-gray-500 text-sm ml-1">
+    //         {event.date} • {event.time}
+    //       </Text>
+    //     </View>
+    //   </View>
+    // </Pressable>
+    <Pressable
+      className="flex-row p-3 bg-background-tertiary border-[1px] border-gray-200 b my-2 rounded-md"
+      onPress={() =>
+        router.push(`/(protected)/(client-stack)/events/${event.id}`)
+      }
+    >
+      <View className="w-20 h-20 rounded-lg overflow-hidden">
+        <Image source={{ uri: event.imageUrl }} className="w-full h-full" />
+      </View>
+      <View className="flex-1 ml-3 justify-between">
+        <View className="flex-row justify-between items-start">
           <Text
-            className="text-gray-900 font-semibold text-base flex-1 mr-2"
-            numberOfLines={1}
+            className="font-jakarta-bold text-base text-text-light flex-1 mr-2"
+            numberOfLines={2}
           >
             {event.title}
           </Text>
@@ -132,19 +168,22 @@ const EventCard = ({
             <Text className={textClass}>{event.role}</Text>
           </View>
         </View>
-
-        {/* Location */}
-        <View className="flex-row items-center mb-1">
-          <Ionicons name="location-outline" size={14} color="#6b7280" />
-          <Text className="text-gray-500 text-sm ml-1">{event.location}</Text>
-        </View>
-
-        {/* Date & Time */}
-        <View className="flex-row items-center">
-          <Ionicons name="calendar-outline" size={14} color="#6b7280" />
-          <Text className="text-gray-500 text-sm ml-1">
-            {event.date} • {event.time}
-          </Text>
+        <View>
+          <View className="flex-row items-center mt-2">
+            <Ionicons name="location" size={14} color="#6B7280" />
+            <Text
+              className="font-jakarta text-[13px] text-text-tertiary ml-1"
+              numberOfLines={1}
+            >
+              {event.location}
+            </Text>
+          </View>
+          <View className="flex-row items-center mt-1">
+            <Ionicons name="calendar" size={14} color={"#ee2b8c"} />
+            <Text className="font-jakarta-semibold text-[13px] text-primary ml-1">
+              {event.date} • {event.time}
+            </Text>
+          </View>
         </View>
       </View>
     </Pressable>
@@ -191,20 +230,20 @@ export default function EventsPage() {
       </View>
 
       {/* Tabs */}
-      <View className="flex-row p-1 mb-4 gap-2 bg-gray-200 !rounded-md">
+      <View className="flex-row p-1 mb-4 gap-2 bg-background-tertiary !rounded-md">
         {tabs.map((tab) => (
           <Pressable
             key={tab.value}
             onPress={() => setActiveTab(tab.value)}
             className={cn(
               "flex-1 py-2 rounded-md items-center",
-              activeTab === tab.value ? "bg-primary" : "text-gray-600",
+              activeTab === tab.value ? "bg-white" : "text-gray-600",
             )}
           >
             <Text
               className={cn(
                 "text-sm font-jakarta-semibold p-1",
-                activeTab === tab.value ? "text-white" : "text-gray-500",
+                activeTab === tab.value ? "text-primary" : "text-gray-500",
               )}
             >
               {tab.label}
@@ -250,7 +289,7 @@ export default function EventsPage() {
         onPress={() => {
           router.push("/(protected)/(client-stack)/events/create");
         }}
-        className="absolute bottom-6 right-6 w-14 h-14 bg-purple-600 rounded-full items-center justify-center shadow-lg"
+        className="absolute bottom-6 right-6 w-14 h-14 bg-primary rounded-full items-center justify-center shadow-lg"
       >
         <Ionicons name="add" size={28} color="white" />
       </TouchableOpacity>
