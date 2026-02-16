@@ -10,7 +10,6 @@ export default function EventLayout() {
             <Stack.Screen name="rsvp" />
             <Stack.Screen name="table-management" />
             <Stack.Screen name="subevent-create" />
-            <Stack.Screen name="vendor" />
         </Stack>
     )
 }

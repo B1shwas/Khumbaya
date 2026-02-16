@@ -167,18 +167,16 @@ export default function VendorEventDetailScreen() {
                                 return (
                                     <TouchableOpacity
                                         key={tab}
-                                        className={`flex-1 items-center justify-center border-b-2 pb-3 pt-4 ${
-                                            isActive ? "border-primary" : "border-transparent"
-                                        }`}
+                                        className={`flex-1 items-center justify-center border-b-2 pb-3 pt-4 ${isActive ? "border-primary" : "border-transparent"
+                                            }`}
                                         accessibilityRole="button"
                                         accessibilityState={{ selected: isActive }}
                                         onPress={() => setActiveTab(tab)}
                                     >
                                         {/* NOTE: dark:text-gray-400 omitted. */}
                                         <Text
-                                            className={`text-sm font-bold tracking-wide ${
-                                                isActive ? "text-primary" : "text-gray-500"
-                                            }`}
+                                            className={`text-sm font-bold tracking-wide ${isActive ? "text-primary" : "text-gray-500"
+                                                }`}
                                         >
                                             {tab}
                                         </Text>
@@ -200,13 +198,12 @@ export default function VendorEventDetailScreen() {
                                     <View key={item.id} className="flex-row gap-3">
                                         <View className="items-center">
                                             <View
-                                                className={`h-8 w-8 items-center justify-center rounded-full ${
-                                                    isActive
-                                                        ? "bg-primary"
-                                                        : isCompleted
-                                                            ? "bg-gray-100"
-                                                            : "border-2 border-gray-300 bg-white"
-                                                }`}
+                                                className={`h-8 w-8 items-center justify-center rounded-full ${isActive
+                                                    ? "bg-primary"
+                                                    : isCompleted
+                                                        ? "bg-gray-100"
+                                                        : "border-2 border-gray-300 bg-white"
+                                                    }`}
                                             >
                                                 <MaterialIcons
                                                     name={
@@ -264,11 +261,10 @@ export default function VendorEventDetailScreen() {
                                                     <View className="flex-row items-baseline justify-between">
                                                         {/* NOTE: dark:text-white omitted. */}
                                                         <Text
-                                                            className={`text-lg ${
-                                                                isCompleted
-                                                                    ? "font-semibold line-through decoration-gray-400"
-                                                                    : "font-medium"
-                                                            } text-slate-900`}
+                                                            className={`text-lg ${isCompleted
+                                                                ? "font-semibold line-through decoration-gray-400"
+                                                                : "font-medium"
+                                                                } text-slate-900`}
                                                         >
                                                             {item.title}
                                                         </Text>
