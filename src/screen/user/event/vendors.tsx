@@ -2,12 +2,12 @@ import { Ionicons } from "@expo/vector-icons";
 import { router, type RelativePathString } from "expo-router";
 import { useState } from "react";
 import {
-    Image,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -286,7 +286,7 @@ export default function EventVendorsPage() {
       {/* Floating Action Button: Add Vendor */}
       <TouchableOpacity
         style={styles.fab}
-        onPress={() => router.push("/explore" as RelativePathString)}
+        onPress={() => router.push("/(shared)/explore/explore")}
       >
         <Ionicons name="add" size={28} color="white" />
       </TouchableOpacity>
