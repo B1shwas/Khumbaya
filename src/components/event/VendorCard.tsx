@@ -1,5 +1,5 @@
 import { MaterialIcons } from "@expo/vector-icons";
-import React, { memo } from "react";
+import { memo } from "react";
 import { Image, Pressable, View } from "react-native";
 import { Text } from "../ui/Text";
 
