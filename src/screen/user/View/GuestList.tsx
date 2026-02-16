@@ -784,7 +784,7 @@ export default function GuestListPage() {
         <View className="flex-row items-center h-12 rounded-xl bg-white px-3 shadow-sm border border-gray-100">
           <Ionicons name="search" size={20} color="#9CA3AF" />
           <TextInput
-            className="flex-1 h-full px-3 text-base text-gray-900 placeholder:text-gray-400"
+            className="flex-1 h-full px-3 text-base text-gray-900 "
             placeholder="Search guests..."
             value={searchQuery}
             onChangeText={setSearchQuery}

@@ -2,13 +2,13 @@ import { Text } from "@/src/components/ui/Text";
 import { useAuth } from "@/src/store/AuthContext";
 import { MaterialIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import React, { useState } from "react";
+import { useState } from "react";
 import {
-    Image,
-    ImageBackground,
-    Pressable,
-    ScrollView,
-    View,
+  Image,
+  ImageBackground,
+  Pressable,
+  ScrollView,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -63,8 +63,8 @@ const REVIEWS = [
 ];
 
 export default function Profile() {
-    const {logout}   = useAuth();
-    const [logginOut, setLoggingOut] = useState(false);
+  const { logout } = useAuth();
+  const [logginOut, setLoggingOut] = useState(false);
   if (logginOut) {
     return (
       <View className="flex-1 items-center justify-center bg-gray-50">
@@ -190,7 +190,7 @@ export default function Profile() {
               <Pressable className="h-12 w-12 items-center justify-center rounded-xl border border-gray-200 bg-white">
                 <MaterialIcons name="chat-bubble" size={20} color="#6B7280" />
               </Pressable>
-             
+
             </View>
             <View className="flex-row gap-2">
               <View className="flex-1 aspect-square rounded-xl overflow-hidden shadow-sm">
@@ -257,21 +257,21 @@ export default function Profile() {
           </View>
         </View>
         <View className="p-6">
-                 <Pressable className="flex-1 h-12 items-center justify-center rounded-xl bg-primary "
-              onPress={async()=>{
-                await AsyncStorage.removeItem("auth_user").then(() => {
-                  setLoggingOut(true);
-                    logout();
-                });
+          <Pressable className="flex-1 h-12 items-center justify-center rounded-xl bg-primary "
+            onPress={async () => {
+              await AsyncStorage.removeItem("auth_user").then(() => {
+                setLoggingOut(true);
+                logout();
+              });
 
-              }}>
-                <Text className="text-white text-base font-bold">
-                  Log Out
-                </Text>
-              </Pressable>
+            }}>
+            <Text className="text-white text-base font-bold">
+              Log Out
+            </Text>
+          </Pressable>
 
         </View>
-     
+
 
         <View className="px-4 py-6 bg-white mt-2">
           <View className="flex-row justify-between items-baseline mb-4">
@@ -285,7 +285,7 @@ export default function Profile() {
             </View>
             <Text className="text-primary text-sm font-bold">View All</Text>
           </View>
-         
+
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}

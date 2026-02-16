@@ -19,7 +19,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 // ============================================
 // STATIC DATA (Moved outside component)
@@ -187,7 +186,7 @@ export default function HomePage() {
   );
 
   const navigateToVendors = useCallback(
-    () => router.push("/explore" as RelativePathString),
+    () => router.push("/(shared)/explore" as RelativePathString),
     [],
   );
 
@@ -218,9 +217,8 @@ export default function HomePage() {
   );
 
   return (
-    <SafeAreaView style={styles.container} edges={["top"]}>
-      {/* Header */}
-      <View style={styles.header}>
+    <>
+      < View style={styles.header} className="px-4" >
         <View style={styles.headerContent}>
           <View>
             <Text style={styles.greeting}>Hi, {user?.name || "Guest"} 👋</Text>
@@ -230,7 +228,7 @@ export default function HomePage() {
             <Ionicons name="notifications-outline" size={24} color="#1f2937" />
           </TouchableOpacity>
         </View>
-      </View>
+      </View >
 
       <FlatList
         data={[]} // Empty data for scroll, we render sections manually
@@ -326,7 +324,8 @@ export default function HomePage() {
       >
         <Ionicons name="add" size={28} color="white" />
       </TouchableOpacity>
-    </SafeAreaView>
+    </>
+
   );
 }
 

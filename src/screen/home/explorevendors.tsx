@@ -21,7 +21,7 @@ export default function ExploreVendors() {
   const { user } = useAuth();
 
   return (
-    <View className="flex-1 bg-gray-50">
+    <View className="flex-1 bg-gray-50 px-4">
       <HeaderExploreVendor />
       <View className="py-3">
         <ScrollView

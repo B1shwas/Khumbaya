@@ -1,6 +1,6 @@
 import { Text } from "@/src/components/ui/Text";
 import { MaterialIcons } from "@expo/vector-icons";
-import { Image } from "expo-image";
+import { ImageBackground } from "expo-image";
 import { Link, useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -23,7 +23,7 @@ const COPY = {
   title: "Plan Your Perfect Day",
   subtitle: "Enter your credentials to access your exclusive event dashboard.",
   usernameLabel: "Username or Email",
-  usernamePlaceholder: "emma@wedding.com",
+  usernamePlaceholder: "Emma@wedding.com",
   passwordLabel: "Password",
   passwordPlaceholder: "••••••••",
   login: "Login",
@@ -50,8 +50,8 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
 
   // Validation
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  const isValidEmail = emailRegex.test(username.trim());
+
+  const isValidEmail = true;
   const isValidPassword = password.length >= 6;
   const emailError =
     username.trim().length > 0 && !isValidEmail
@@ -163,10 +163,10 @@ export default function LoginPage() {
       >
         {/* Hero Image Section */}
         <View className="h-[35vh] w-full overflow-hidden rounded-b-xl">
-          <Image
+          <ImageBackground
             source={HERO_IMAGE}
             className="w-full h-[50vh] rounded-3xl"
-            resizeMode="cover"
+            contentFit="cover"
             accessibilityLabel="Wedding venue hero image"
           />
 
@@ -203,12 +203,11 @@ export default function LoginPage() {
                 value={username}
                 onChangeText={setUsername}
                 placeholder={COPY.usernamePlaceholder}
-                placeholderTextColor="#94A3B8"
+                placeholderTextColor="text-muted-light"
                 autoCapitalize="none"
                 keyboardType="email-address"
-                className={`h-12 rounded-lg border bg-slate-50 px-4 text-base font-medium text-text-light ${
-                  emailError ? "border-red-500" : "border-gray-200"
-                }`}
+                className={`h-14 rounded-md border bg-white px-4 text-base text-text-light ${emailError ? "border-red-500" : "border-gray-200"
+                  }`}
               />
               {emailError && (
                 <Text className="ml-1 mt-1 text-xs text-red-500">
@@ -226,11 +225,10 @@ export default function LoginPage() {
                   value={password}
                   onChangeText={setPassword}
                   placeholder={COPY.passwordPlaceholder}
-                  placeholderTextColor="#94A3B8"
+                  placeholderTextColor="text-muted-light"
                   secureTextEntry={!isPasswordVisible}
-                  className={`h-12 rounded-lg border bg-slate-50 px-4 pr-12 text-base font-medium text-text-light ${
-                    passwordError ? "border-red-500" : "border-gray-200"
-                  }`}
+                  className={`h-14 rounded-md border bg-white px-4 text-base text-text-light ${passwordError ? "border-red-500" : "border-gray-200"
+                    }`}
                 />
                 <Pressable
                   onPress={() => setIsPasswordVisible((prev) => !prev)}
@@ -243,7 +241,7 @@ export default function LoginPage() {
                   <MaterialIcons
                     name={isPasswordVisible ? "visibility-off" : "visibility"}
                     size={20}
-                    color="#94A3B8"
+                    color="text-muted-light"
                   />
                 </Pressable>
               </View>
@@ -257,9 +255,8 @@ export default function LoginPage() {
             <Pressable
               onPress={handleLogin}
               disabled={isLoginDisabled || isLoading}
-              className={`h-12 flex-row items-center justify-center gap-2 rounded-lg bg-primary shadow-md shadow-primary/20 ${
-                isLoginDisabled || isLoading ? "opacity-60" : ""
-              }`}
+              className={`h-14 flex-row items-center justify-center gap-2 rounded-md bg-primary shadow-md shadow-primary/20 ${isLoginDisabled || isLoading ? "opacity-60" : ""
+                }`}
               accessibilityRole="button"
               accessibilityLabel="Login"
             >

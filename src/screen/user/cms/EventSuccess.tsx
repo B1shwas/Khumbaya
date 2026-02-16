@@ -1,16 +1,16 @@
-import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  ScrollView,
-  StyleSheet,
-  FlatList,
-  Image,
-} from 'react-native';
-import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
+import { useRouter } from 'expo-router';
+import { useState } from 'react';
+import {
+  FlatList,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
 // ============================================
 // BACKEND INTEGRATION NOTES:
@@ -101,8 +101,8 @@ export default function EventSuccess() {
   };
 
   const toggleSubEvent = (subEventId: string) => {
-    setExpandedSubEvents(prev => 
-      prev.includes(subEventId) 
+    setExpandedSubEvents(prev =>
+      prev.includes(subEventId)
         ? prev.filter(id => id !== subEventId)
         : [...prev, subEventId]
     );
@@ -111,7 +111,7 @@ export default function EventSuccess() {
   const handleAddVendor = (subEventId: string) => {
     // TODO: Navigate to vendor selection for this sub-event
     console.log('Add vendor for sub-event:', subEventId);
-    router.push('/(protected)/(client-tabs)/explore' as any);
+    router.push('/(shared)/explore/explore');
   };
 
   const handleCopyLink = async (event: typeof MOCK_EVENTS[0]) => {
@@ -131,7 +131,7 @@ export default function EventSuccess() {
               resizeMode="cover"
             />
           </View>
-          
+
           {/* Floating decorative icons */}
           <View style={[styles.floatIcon, styles.floatIcon1]}>
             <Ionicons name="heart" size={24} color="#ee2b8c" fill="#ee2b8c" />
@@ -149,7 +149,7 @@ export default function EventSuccess() {
       <View style={styles.textContent}>
         <Text style={styles.title}>Congratulations!</Text>
         <Text style={styles.title}>Your event is live.</Text>
-        
+
         <Text style={styles.subtitle}>
           Your dream wedding is now set up. What's next?
         </Text>
@@ -339,9 +339,9 @@ export default function EventSuccess() {
         <View style={styles.headerSpacer} />
       </View>
 
-      <View 
+      <View
         style={styles.scrollView}
-        // showsVerticalScrollIndicator={false}
+      // showsVerticalScrollIndicator={false}
       >
         {viewMode === 'success' && renderSuccessView()}
         {viewMode === 'events' && renderEventsView()}
