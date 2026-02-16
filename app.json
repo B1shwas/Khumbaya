@@ -34,8 +34,8 @@
         {
           "image": "./assets/images/screen.png",
           "imageWidth": 200,
-          "resizeMode": "contain",
-          "backgroundColor": "#ffffff",
+          "contentFit": "cover",
+          "backgroundColor": "#E6F4FE",
           "dark": {
             "backgroundColor": "#000000"
           }
