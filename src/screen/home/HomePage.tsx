@@ -22,7 +22,7 @@ export default function HomePage() {
   const router = useRouter();
 
   const handleExploreVendors = useCallback(() => {
-    router.push("/explore-vendors");
+    router.push("/(onboarding)/vendor");
   }, [router]);
 
   const handleCreateEvent = useCallback(() => {

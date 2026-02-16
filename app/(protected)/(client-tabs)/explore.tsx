@@ -1,2 +1,2 @@
-import ExploreVendors from "@/app/(onboarding)/explore-vendors";
-export default ExploreVendors; 
+import ExploreVendors from "@/app/(onboarding)/vendor/explore";
+export default ExploreVendors;

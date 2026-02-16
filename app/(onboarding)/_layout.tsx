@@ -9,7 +9,7 @@ export default function OnboardingLayout() {
       }}
     >
       <Stack.Screen name="index" />
-      <Stack.Screen name="explore-vendors" />
+      <Stack.Screen name="vendor" />
       <Stack.Screen name="login" />
       <Stack.Screen name="user-signup" />
       <Stack.Screen name="vendor-signup" />

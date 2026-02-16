@@ -1,4 +1,5 @@
 import { MaterialIcons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Image, Pressable, View } from "react-native";
 import { Text } from "../ui/Text";
@@ -15,10 +16,16 @@ interface Vendor {
 }
 
 export function VendorCard({ vendor }: { vendor: Vendor }) {
+  const router = useRouter(); 
+  const goToVendorDetail = () => {
+    // Implement navigation to vendor detail page
+    router.push(`/vendor/${vendor.id}`);
+  };
   const [isFavorite, setIsFavorite] = useState(false);
 
   return (
-    <Pressable className="bg-white rounded-xl overflow-hidden">
+    <Pressable className="bg-white rounded-xl overflow-hidden" 
+    onPress={goToVendorDetail}>
       <View className="relative w-full aspect-[4/3] bg-gray-200">
         <Image
           source={{ uri: vendor.image }}
