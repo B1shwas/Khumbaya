@@ -17,6 +17,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 // --- Constants & Types ---
 
+
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const PADDING = 24;
 const GAP = 16;

@@ -2,7 +2,7 @@ import { Text } from "@/src/components/ui/Text";
 import { ONBOARDING_VENDORS } from "@/src/constants/vendors";
 import { useAuth } from "@/src/store/AuthContext";
 import { MaterialIcons } from "@expo/vector-icons";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import {
   Image,
   ImageBackground,
@@ -61,11 +61,11 @@ const REVIEWS = [
   },
 ];
 
-export default function VendorDetailed() {
+export default function VendorDetailed({vendorId = "1"}: {vendorId: string | string[]}) {
 
   const { logout } = useAuth();
   const router = useRouter();
-  const { vendorId } = useLocalSearchParams();
+ 
   // Find the vendor data based on the vendorId from route params
   const resolvedId = Array.isArray(vendorId) ? vendorId[0] : vendorId;
   const vendor = ONBOARDING_VENDORS.find((v) => v.id === resolvedId);
@@ -84,14 +84,36 @@ export default function VendorDetailed() {
   }
 
   return (
-
+<>
+      <View className="absolute bottom-0 left-0 right-0 z-10 h-24">
+        <View className="bg-white/90 border-t border-gray-200  px-4 py-4">
+          <View className="w-full max-w-md self-center">
+            <View className="flex-row gap-3">
+              <Pressable className="flex-1 rounded-lg bg-primary py-3.5 px-4 items-center justify-center shadow-lg shadow-primary/30 active:scale-[0.98]"
+             onPress={() =>
+               router.push({
+                 pathname: "/(shared)/explore/[vendorId]/enquiryform",
+                 params: { vendorId: resolvedId },
+               })
+             }
+             >
+                <Text className="text-lg font-bold text-white font-display">
+                 Send Enquiry
+                </Text>
+              </Pressable>
+              
+            </View>
+          </View>
+        </View>
+      </View>
     <ScrollView
       className="flex-1"
-      contentContainerClassName="pb-8"
+      contentContainerClassName="pb-32"
       stickyHeaderIndices={[4]}
       showsVerticalScrollIndicator={false}
     >
       <View className="relative w-full">
+        
         <ImageBackground
           source={{ uri: HEADER_IMAGE }}
           className="w-full h-[280px]"
@@ -117,6 +139,7 @@ export default function VendorDetailed() {
               resizeMode="cover"
             />
           </View>
+         
         </View>
       </View>
 
@@ -125,12 +148,30 @@ export default function VendorDetailed() {
           <Text className="text-2xl font-bold leading-tight tracking-tight text-[#181114]">
             {vendor?.name || "Vendor Name"}
           </Text>
-          <View className="flex-row items-center gap-1 bg-green-50 px-2 py-1 rounded-full border border-green-100">
-            <MaterialIcons name="verified" size={14} color="#16a34a" />
-            <Text className="text-[10px] font-bold text-green-700 uppercase tracking-wider">
-              Verified
-            </Text>
+          <View className="flex  gap-2">
+             <View className="flex-row items-center gap-1 bg-green-50 px-2 py-1 rounded-full border border-green-100">
+              <MaterialIcons name="verified" size={14} color="#16a34a" />
+              <Text className="text-[10px] font-bold text-green-700 uppercase tracking-wider">
+                Verified
+              </Text>
+          
           </View>
+            <View className="flex-row gap-2">
+              <Pressable className="flex-row items-center gap-1 bg-green-50 px-2 py-1 rounded-full border border-green-100"
+                onPress={() => router.push(`/(shared)/explore/${resolvedId}/vendorcomparision`)}
+              >
+                <MaterialIcons name="compare-arrows" size={18} color="#16a34a" />
+             
+              <Text className="text-[10px] font-bold text-green-700 uppercase tracking-wider">
+                Compare
+              </Text>
+                 </Pressable>
+
+            </View>
+
+          </View>
+         
+          
         </View>
         <View className="flex-row items-center gap-1 mt-1">
           <MaterialIcons name="location-on" size={18} color="#6B7280" />
@@ -148,6 +189,7 @@ export default function VendorDetailed() {
           </Text>
         </View>
       </View>
+    
 
       <ScrollView
         horizontal
@@ -155,6 +197,8 @@ export default function VendorDetailed() {
         className="bg-white"
         contentContainerClassName="px-4 py-2 gap-2"
       >
+           
+        
         {TAGS.map((tag) => (
           <View
             key={tag}
@@ -325,10 +369,15 @@ export default function VendorDetailed() {
                 "{review.text}"
               </Text>
             </View>
+            
           ))}
+          
         </ScrollView>
+        
       </View>
+      
     </ScrollView>
+    </>
 
   );
 }

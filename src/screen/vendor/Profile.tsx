@@ -76,7 +76,7 @@ export default function Profile() {
     <SafeAreaView className="flex-1 bg-[#fafafa]">
       <ScrollView
         className="flex-1"
-        contentContainerClassName="pb-8"
+        contentContainerClassName="pb-28"
         stickyHeaderIndices={[4]}
         showsVerticalScrollIndicator={false}
       >
