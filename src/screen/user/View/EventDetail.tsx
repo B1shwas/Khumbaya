@@ -1,10 +1,16 @@
-import NavigateComponent from "@/src/components/ui/event/NavigateComponent";
+import NavigateComponent from "@/src/components/event/NavigateComponent";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { router, type RelativePathString } from "expo-router";
 import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
 
-const EventDetail = ({ eventId, isInvitedGuest = false }: { eventId?: string, isInvitedGuest?: boolean }) => {
+const EventDetail = ({
+  eventId,
+  isInvitedGuest = true,
+}: {
+  eventId?: string;
+  isInvitedGuest?: boolean;
+}) => {
   const event = {
     id: "1",
     title: "Sarah & Mike's Wedding",
@@ -58,8 +64,10 @@ const EventDetail = ({ eventId, isInvitedGuest = false }: { eventId?: string, is
   const budgetRemaining = event.budget.total - event.budget.spent;
 
   return (
-
-    <ScrollView className="flex-1 bg-background-light" showsVerticalScrollIndicator={false}>
+    <ScrollView
+      className="flex-1 bg-background-light"
+      showsVerticalScrollIndicator={false}
+    >
       {/* Hero Section */}
       <View className="relative w-full h-[38vh] min-h-[300px] rounded-full ">
         <Image
@@ -79,7 +87,6 @@ const EventDetail = ({ eventId, isInvitedGuest = false }: { eventId?: string, is
 
         {/* Top Navigation notification and three dots */}
         <View className="absolute top-0 left-0 w-full p-4 pt-6 flex-row justify-between items-start z-10">
-
           <TouchableOpacity
             className="p-2 rounded-full bg-white/20 backdrop-blur-sm"
             onPress={() => router.back()}
@@ -102,15 +109,20 @@ const EventDetail = ({ eventId, isInvitedGuest = false }: { eventId?: string, is
             <Text className="px-4 py-2 bg-primary/90 text-white text-sm font-bold rounded mb-2 tracking-wide text-center">
               {event.status}
             </Text>
+
             <Text className="text-3xl font-extrabold text-white leading-tight tracking-tight text-center">
               {event.title}
             </Text>
             <View className="flex-row items-center gap-2 text-white/90 mt-1">
               <Ionicons name="calendar" size={18} color="white" />
-              <Text className="text-sm font-medium text-white">{event.date}</Text>
+              <Text className="text-sm font-medium text-white">
+                {event.date}
+              </Text>
               <Text className="mx-1 opacity-50">•</Text>
               <Ionicons name="location" size={18} color="white" />
-              <Text className="text-sm font-medium text-white">{event.location}</Text>
+              <Text className="text-sm font-medium text-white">
+                {event.location}
+              </Text>
             </View>
           </View>
         </View>
@@ -118,7 +130,6 @@ const EventDetail = ({ eventId, isInvitedGuest = false }: { eventId?: string, is
 
       {/* Countdown Timer */}
       <View className="px-4 -mt-10 z-20">
-
         {/* dark:border-gray-800 removed */}
         {/* surface light */}
         <View className="bg-background-light rounded-2xl shadow-sm shadow-black p-5 flex-row justify-between items-center border border-gray-100">
@@ -159,9 +170,7 @@ const EventDetail = ({ eventId, isInvitedGuest = false }: { eventId?: string, is
           {/* dark:text-white removed */}
           <Text className="text-lg font-bold">Quick Stats</Text>
           <TouchableOpacity>
-            <Text className="text-sm font-semibold text-primary">
-              View All
-            </Text>
+            <Text className="text-sm font-semibold text-primary">View All</Text>
           </TouchableOpacity>
         </View>
         <ScrollView
@@ -172,12 +181,16 @@ const EventDetail = ({ eventId, isInvitedGuest = false }: { eventId?: string, is
           {/* Guests Card */}
           {/* dark:bg-surface-dark and dark:border-gray-800 removed */}
           <View className="min-w-[160px] flex-1 bg-white p-4 rounded-xl shadow-sm border border-gray-50 flex-col items-center justify-center gap-2">
-            <View className="relative w-16 h-16">
+            <View className="relative h-16 w-16">
               {/* dark:border-gray-700 removed */}
               <View className="absolute inset-0 rounded-full border-4 border-gray-100" />
               <View
                 className="absolute inset-0 rounded-full border-4 border-primary"
-                style={{ borderBottomColor: 'transparent', borderRightColor: 'transparent', transform: [{ rotate: '270deg' }] }}
+                style={{
+                  borderBottomColor: "transparent",
+                  borderRightColor: "transparent",
+                  transform: [{ rotate: "270deg" }],
+                }}
               />
               <View className="absolute inset-0 flex items-center justify-center">
                 {/* dark:text-white removed */}
@@ -192,20 +205,24 @@ const EventDetail = ({ eventId, isInvitedGuest = false }: { eventId?: string, is
           </View>
 
           {/* Budget Card */}
-          {/* dark:bg-surface-dark and dark:border-gray-800 removed */}
+
           <View className="min-w-[160px] flex-1 bg-white p-4 rounded-xl shadow-sm border border-gray-50 flex-col justify-between">
             <View>
-              {/* dark:bg-green-900/30 and dark:text-green-400 removed */}
-              <View className="p-1.5 bg-green-100 text-green-600 rounded-lg w-fit">
+              <View className="bg-green-100 p-3 rounded-sm self-start">
                 <Ionicons name="pricetag" size={20} color="#16A34A" />
               </View>
               {/* dark:text-white removed */}
-              <Text className="text-sm font-bold mt-2 text-gray-900">Budget</Text>
+              <Text className="text-sm font-bold mt-2 text-gray-900">
+                Budget
+              </Text>
               <Text className="text-xs text-gray-500">$12k / $30k</Text>
             </View>
             {/* dark:bg-gray-700 removed */}
             <View className="w-full bg-gray-100 rounded-full h-1.5 mt-3">
-              <View className="bg-primary h-1.5 rounded-full" style={{ width: '40%' }} />
+              <View
+                className="bg-primary h-1.5 rounded-full"
+                style={{ width: "40%" }}
+              />
             </View>
           </View>
 
@@ -214,16 +231,26 @@ const EventDetail = ({ eventId, isInvitedGuest = false }: { eventId?: string, is
           <View className="min-w-[160px] flex-1 bg-white p-4 rounded-xl shadow-sm border border-gray-50 flex-col justify-between">
             <View>
               {/* dark:bg-orange-900/30 and dark:text-orange-400 removed */}
-              <View className="p-1.5 bg-orange-100 text-orange-600 rounded-lg w-fit">
-                <Ionicons name="checkmark-circle" size={20} color="#EA580C" />
+              <View className="bg-orange-100 p-3 rounded-sm self-start">
+                <Ionicons
+                  name="checkmark-circle"
+                  size={20}
+                  color="#EA580C"
+                  className="text-orange-600"
+                />
               </View>
               {/* dark:text-white removed */}
-              <Text className="text-sm font-bold mt-2 text-gray-900">Tasks</Text>
+              <Text className="text-sm font-bold mt-2 text-gray-900">
+                Tasks
+              </Text>
               <Text className="text-xs text-gray-500">12 Pending</Text>
             </View>
             {/* dark:bg-gray-700 removed */}
             <View className="w-full bg-gray-100 rounded-full h-1.5 mt-3">
-              <View className="bg-orange-500 h-1.5 rounded-full" style={{ width: '65%' }} />
+              <View
+                className="bg-orange-500 h-1.5 rounded-full"
+                style={{ width: "65%" }}
+              />
             </View>
           </View>
         </ScrollView>
@@ -241,17 +268,13 @@ const EventDetail = ({ eventId, isInvitedGuest = false }: { eventId?: string, is
           {/* Gallery - Full Width */}
           <TouchableOpacity
             className="w-full bg-white p-4 rounded-xl shadow-sm border border-gray-100 active:scale-[0.98] transition-transform flex-row items-center gap-4"
-            onPress={() =>
-              router.push("/events/gallery" as RelativePathString)
-            }
+            onPress={() => router.push("/events/gallery" as RelativePathString)}
           >
             <View className="p-2.5 bg-primary/10 rounded-full shrink-0">
               <Ionicons name="images" size={20} color="#ee2b8c" />
             </View>
             <View className="flex-1">
-              <Text className="font-bold text-gray-900 text-base">
-                Gallery
-              </Text>
+              <Text className="font-bold text-gray-900 text-base">Gallery</Text>
               <Text className="text-xs text-gray-500">
                 Upload & Share Photos
               </Text>
@@ -264,9 +287,9 @@ const EventDetail = ({ eventId, isInvitedGuest = false }: { eventId?: string, is
       {/* Invited Guest Notice */}
       {isInvitedGuest && (
         <View className="mx-4 mb-4 p-4 bg-blue-50 rounded-xl border border-blue-100">
-          <View className="flex-row items-center gap-2">
+          <View className="flex-row items-center gap-6">
             <Ionicons name="information-circle" size={20} color="#3B82F6" />
-            <Text className="text-sm text-blue-700">
+            <Text className="text-sm text-blue-700 flex-shrink">
               You're viewing this event as a guest. Some features like budget
               management are only available to the event organizer.
             </Text>
@@ -277,7 +300,6 @@ const EventDetail = ({ eventId, isInvitedGuest = false }: { eventId?: string, is
       {/* Bottom spacer */}
       <View className="h-24" />
     </ScrollView>
-
   );
 };
 export default EventDetail;

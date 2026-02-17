@@ -7,7 +7,7 @@ import {
   QuickServices,
   SectionHeader,
   VenueCard,
-} from "@/src/components/ui/home";
+} from "@/src/components/home";
 import { useAuth } from "@/src/store/AuthContext";
 import { Ionicons } from "@expo/vector-icons";
 import { router, type RelativePathString } from "expo-router";

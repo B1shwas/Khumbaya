@@ -1,2 +1,2 @@
-import index from "@/src/components/ui/usersignup/index";
+import index from "@/src/components/usersignup/index";
 export default index;
