@@ -6,7 +6,8 @@ import {
   QuickServices,
   SectionHeader,
   VenueCard,
-} from "@/src/components/ui/home";
+} from "@/src/components/home";
+
 import EventList from "@/src/constants/event";
 import VENUES from "@/src/constants/venues";
 import { useAuth } from "@/src/store/AuthContext";
@@ -15,15 +16,15 @@ import { router, type RelativePathString } from "expo-router";
 import { useCallback } from "react";
 import {
   FlatList,
-  StyleSheet, Text, TouchableOpacity,
-  View
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 // ============================================
 // STATIC DATA (Moved outside component)
 // ============================================
-
-
 
 const HOTELS = [
   {
@@ -128,9 +129,9 @@ export default function HomePage() {
 
   return (
     <>
-      < View style={styles.header} className="px-4" >
+      <View style={styles.header} className="px-4">
         <View style={styles.headerContent}>
-           <View>
+          <View>
             <Text style={styles.greeting}>Hi, {user?.name || "Guest"} 👋</Text>
             <Text style={styles.title}>Plan Your Dream Event</Text>
           </View>
@@ -138,7 +139,7 @@ export default function HomePage() {
             <Ionicons name="notifications-outline" size={24} color="#1f2937" />
           </TouchableOpacity>
         </View>
-      </View >
+      </View>
 
       <FlatList
         data={[]} // Empty data for scroll, we render sections manually
@@ -148,7 +149,6 @@ export default function HomePage() {
         contentContainerStyle={styles.scrollContent}
         ListHeaderComponent={
           <>
-            
             {/* Hero Card */}
             <HeroCard />
 
@@ -170,7 +170,6 @@ export default function HomePage() {
             <SectionHeader title="Popular Venues" onPress={navigateToVenues} />
             <FlatList
               data={VENUES}
-              
               renderItem={renderVenueItem}
               keyExtractor={(item) => item.id}
               horizontal
@@ -224,7 +223,6 @@ export default function HomePage() {
         <Ionicons name="add" size={28} color="white" />
       </TouchableOpacity>
     </>
-
   );
 }
 

@@ -1,3 +1,4 @@
+import Card from "@/src/components/ui/Card";
 import { cn } from "@/src/utils/cn";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -108,85 +109,48 @@ const EventCard = ({
   const { wrapperClass, textClass } = roleConfig[event.role];
 
   return (
-    // <Pressable onPress={onPress} className="flex-row p-3">
-    //   {/* Event Image */}
-    //   <View className="w-20 h-20 rounded-lg overflow-hidden">
-    //     <Image
-    //       source={{ uri: event.imageUrl }}
-    //       className="w-full h-full"
-    //       resizeMode="cover"
-    //     />
-    //   </View>
-
-    //   <View className="p-4">
-    //     {/* Title + Role Badge */}
-    //     <View className="flex-row items-start justify-between mb-2">
-    //       <Text
-    //         className="text-gray-900 font-semibold text-base flex-1 mr-2"
-    //         numberOfLines={1}
-    //       >
-    //         {event.title}
-    //       </Text>
-    //       <View className={wrapperClass}>
-    //         <Text className={textClass}>{event.role}</Text>
-    //       </View>
-    //     </View>
-
-    //     {/* Location */}
-    //     <View className="flex-row items-center mb-1">
-    //       <Ionicons name="location-outline" size={14} color="#6b7280" />
-    //       <Text className="text-gray-500 text-sm ml-1">{event.location}</Text>
-    //     </View>
-
-    //     {/* Date & Time */}
-    //     <View className="flex-row items-center">
-    //       <Ionicons name="calendar-outline" size={14} color="#6b7280" />
-    //       <Text className="text-gray-500 text-sm ml-1">
-    //         {event.date} • {event.time}
-    //       </Text>
-    //     </View>
-    //   </View>
-    // </Pressable>
-    <Pressable
-      className="flex-row p-3 bg-background-tertiary border-[1px] border-gray-200 b my-2 rounded-md"
-      onPress={() =>
-        router.push(`/(protected)/(client-stack)/events/${event.id}`)
-      }
-    >
-      <View className="w-20 h-20 rounded-lg overflow-hidden">
-        <Image source={{ uri: event.imageUrl }} className="w-full h-full" />
-      </View>
-      <View className="flex-1 ml-3 justify-between">
-        <View className="flex-row justify-between items-start">
-          <Text
-            className="font-jakarta-bold text-base text-text-light flex-1 mr-2"
-            numberOfLines={2}
-          >
-            {event.title}
-          </Text>
-          <View className={wrapperClass}>
-            <Text className={textClass}>{event.role}</Text>
-          </View>
+    <Card className="my-2">
+      <Pressable
+        className="flex-row p-3 rounded-md overflow-hidden"
+        onPress={() =>
+          router.push(`/(protected)/(client-stack)/events/${event.id}`)
+        }
+      >
+        <View className="w-20 h-20 rounded-lg overflow-hidden">
+          <Image source={{ uri: event.imageUrl }} className="w-full h-full" />
         </View>
-        <View>
-          <View className="flex-row items-center mt-2">
-            <Ionicons name="location" size={14} color="#6B7280" />
+        <View className="flex-1 ml-3 justify-between">
+          <View className="flex-row justify-between items-start">
             <Text
-              className="font-jakarta text-[13px] text-text-tertiary ml-1"
-              numberOfLines={1}
+              className="font-jakarta-bold text-base text-text-light flex-1 mr-2"
+              numberOfLines={2}
             >
-              {event.location}
+              {event.title}
             </Text>
+            <View className={wrapperClass}>
+              <Text className={textClass}>{event.role}</Text>
+            </View>
           </View>
-          <View className="flex-row items-center mt-1">
-            <Ionicons name="calendar" size={14} color={"#ee2b8c"} />
-            <Text className="font-jakarta-semibold text-[13px] text-primary ml-1">
-              {event.date} • {event.time}
-            </Text>
+          <View>
+            <View className="flex-row items-center mt-2">
+              <Ionicons name="location" size={14} color="#6B7280" />
+              <Text
+                className="font-jakarta text-[13px] text-text-tertiary ml-1"
+                numberOfLines={1}
+              >
+                {event.location}
+              </Text>
+            </View>
+            <View className="flex-row items-center mt-1">
+              <Ionicons name="calendar" size={14} color={"#ee2b8c"} />
+              <Text className="font-jakarta-semibold text-[13px] text-primary ml-1">
+                {event.date} • {event.time}
+              </Text>
+            </View>
           </View>
         </View>
-      </View>
-    </Pressable>
+      </Pressable>
+    </Card>
   );
 };
 
