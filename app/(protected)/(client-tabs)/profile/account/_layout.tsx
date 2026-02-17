@@ -4,8 +4,13 @@ export default function AccountLayout() {
   return (
     <Stack
       screenOptions={{
-        headerShown: false,
+        headerShown: true,
         animation: "fade",
+        headerTitleStyle: {
+          fontSize: 18,
+          fontWeight: "600",
+        },
+        headerTintColor: "#ee2b8c",
       }}
     >
       <Stack.Screen name="edit-profile" options={{ title: "Edit Profile" }} />
@@ -15,6 +20,10 @@ export default function AccountLayout() {
         options={{ title: "Privacy & Security" }}
       />
       <Stack.Screen name="app-settings" options={{ title: "App Settings" }} />
+      <Stack.Screen
+        name="change-password"
+        options={{ title: "Change Password" }}
+      />
     </Stack>
   );
 }
