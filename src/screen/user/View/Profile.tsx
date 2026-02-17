@@ -26,8 +26,11 @@ export default function ProfileScreen() {
     logout();
   };
 
-  const handleNavigation = (screen: string) => {
-    router.push({ pathname: `/profile/${screen}` });
+  const handleNavigation = (
+    section: "business" | "account",
+    screen: string,
+  ) => {
+    router.push({ pathname: `/profile/${section}/${screen}` } as any);
   };
 
   return (
@@ -86,7 +89,7 @@ export default function ProfileScreen() {
         {tab === "account" ? (
           <Account onNavigate={handleNavigation} />
         ) : (
-          <Info />
+          <Info onNavigate={handleNavigation} />
         )}
 
         {/* LOGOUT */}
@@ -141,7 +144,11 @@ const Row = ({ icon, title, onPress }: RowProps & { onPress?: () => void }) => (
 
 /* ---------- Sections ---------- */
 
-const Account = ({ onNavigate }: { onNavigate: (screen: string) => void }) => (
+const Account = ({
+  onNavigate,
+}: {
+  onNavigate: (section: "business" | "account", screen: string) => void;
+}) => (
   <View className="mx-6 mt-8">
     <Text className="text-xs font-bold text-gray-400 mb-4 uppercase tracking-wider">
       BUSINESS
@@ -150,35 +157,55 @@ const Account = ({ onNavigate }: { onNavigate: (screen: string) => void }) => (
     <Row
       icon="business"
       title="Business Information"
-      onPress={() => onNavigate("business-information")}
+      onPress={() => onNavigate("business", "business-information")}
     />
     <Row
       icon="sell"
       title="Services & Pricing"
-      onPress={() => onNavigate("services-pricing")}
+      onPress={() => onNavigate("business", "services-pricing")}
     />
     <Row
       icon="photo-library"
       title="Portfolio"
-      onPress={() => onNavigate("portfolio")}
+      onPress={() => onNavigate("business", "portfolio")}
     />
     <Row
       icon="verified"
       title="Vendor Verification"
-      onPress={() => onNavigate("vendor-verification")}
+      onPress={() => onNavigate("business", "vendor-verification")}
     />
   </View>
 );
 
-const Info = () => (
+const Info = ({
+  onNavigate,
+}: {
+  onNavigate: (section: "business" | "account", screen: string) => void;
+}) => (
   <View className="mx-6 mt-8">
     <Text className="text-xs font-bold text-gray-400 mb-4 uppercase tracking-wider">
       PERSONAL
     </Text>
 
-    <Row icon="person" title="Edit Profile" />
-    <Row icon="notifications" title="Notifications" />
-    <Row icon="lock" title="Privacy & Security" />
-    <Row icon="settings" title="App Settings" />
+    <Row
+      icon="person"
+      title="Edit Profile"
+      onPress={() => onNavigate("account", "edit-profile")}
+    />
+    <Row
+      icon="notifications"
+      title="Notifications"
+      onPress={() => onNavigate("account", "notifications")}
+    />
+    <Row
+      icon="lock"
+      title="Privacy & Security"
+      onPress={() => onNavigate("account", "privacy-security")}
+    />
+    <Row
+      icon="settings"
+      title="App Settings"
+      onPress={() => onNavigate("account", "app-settings")}
+    />
   </View>
 );
