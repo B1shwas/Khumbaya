@@ -1,143 +1,211 @@
 import { useAuth } from "@/src/store/AuthContext";
 import { MaterialIcons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
+import { useRouter } from "expo-router";
 import { useState } from "react";
-import { Image, Pressable, ScrollView, Switch, Text, View } from "react-native";
+import { Image, Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-const PROFILE_IMAGE =
-    "https://lh3.googleusercontent.com/aida-public/AB6AXuCdkO95jYAsgD-tHT0l8PitJku9U0PYgsN46dLAfx3PtcZADmhzG5DIJ9fwFE53zZ2lTuyjK_stwFjrqzykITWedJJLCu1GfaSL39aHXer3wr6a9bHVMEa6kZmmVfnpsc9Ha_3shT06wNP776rHOOQW5hIFHAmx_PCNBHt8Z5RBFm5nmL8Up_zXeGF3GB_QIKDQxQdIOKfyFJ_ABVdt-ANir7346Ra3fo1YNqAuly_YLt64FSMRTHSHRBM85iWyTBq6R8z60Hf6Aok";
 
-type MenuItemProps = {
-    label: string;
-    icon: keyof typeof MaterialIcons.glyphMap;
-    badge?: string;
-    onPress?: () => void;
+type ToggleButtonProps = {
+  title: string;
+  active: boolean;
+  onPress: () => void;
 };
 
-const MenuItem = ({ label, icon, badge, onPress }: MenuItemProps) => {
-    const labelColor = "#181114";
-    const mutedColor = "#896175";
+type RowProps = {
+  icon: keyof typeof MaterialIcons.glyphMap;
+  title: string;
+};
 
-    return (
-        <Pressable
-            className="flex-row items-center gap-4 bg-white p-4 rounded-xl shadow-sm active:scale-[0.98] transition-transform"
-            onPress={onPress}
-        >
-            <View className="flex items-center justify-center rounded-full bg-background-light shrink-0 h-10 w-10">
-                <MaterialIcons name={icon} size={20} color={labelColor} />
+export default function ProfileScreen() {
+  const [tab, setTab] = useState<"account" | "info">("account");
+  const { logout } = useAuth();
+  const router = useRouter();
+
+  const handleLogout = () => {
+    logout();
+  };
+
+  const handleNavigation = (
+    section: "business" | "account",
+    screen: string,
+  ) => {
+    router.push({ pathname: `/profile/${section}/${screen}` } as any);
+  };
+
+  return (
+    <SafeAreaView className="flex-1 bg-gray-50">
+      <ScrollView showsVerticalScrollIndicator={false}>
+        {/* HEADER */}
+        <View className="flex-row justify-between items-center px-6 py-4 bg-white">
+          <MaterialIcons name="arrow-back-ios" size={20} color="#1f2937" />
+          <Text className="text-lg font-bold text-gray-900">Profile</Text>
+          <MaterialIcons name="more-horiz" size={24} color="#1f2937" />
+        </View>
+
+        {/* PROFILE */}
+        <View className="items-center mt-6 mb-6 bg-white py-6">
+          <LinearGradient
+            colors={["#ec4899", "#db2777"]}
+            className="p-[3px] rounded-full"
+          >
+            <View className="bg-white p-1 rounded-full">
+              <Image
+                source={{
+                  uri: "https://lh3.googleusercontent.com/aida-public/AB6AXuD8QYwLdrh7xjte39mVYvDpi053GDi8rf6uQT5uRehpkzgSaSUO1bU-gjQR3vC5rz0trs8aPuTJQ-NF-7EWhF0dW0Sncg_Vhq_mo8NftERtP4ZVATWyqgiFk4YEYtjMq-kH0vubWOCRAWN0iY_YzSfmg5zLdv55nlQE84xdxw-TTt-IVuBhKoAuBzCQypf1qEhxeHZNxVPFpTjsCytpO95l4FHsaMS3HtpB0dJJssJtnyKpr-sBd50Vrtk2mkFa_ESaiscwocjW8do",
+                }}
+                className="w-32 h-32 rounded-full"
+              />
             </View>
-            <Text className="text-base font-medium flex-1 text-[#181114]">
-                {label}
-            </Text>
-            {badge ? (
-                <View className="bg-primary/10 px-2 py-0.5 rounded mr-2">
-                    <Text className="text-primary text-xs font-bold">{badge}</Text>
-                </View>
-            ) : null}
-            <MaterialIcons name="chevron-right" size={20} color={mutedColor} />
+          </LinearGradient>
+
+          {/* camera */}
+          <Pressable className="absolute bottom-[70px] right-[140px] bg-pink-500 p-2 rounded-full shadow-lg">
+            <MaterialIcons name="photo-camera" size={18} color="white" />
+          </Pressable>
+
+          <Text className="text-2xl font-bold mt-4 text-gray-900">
+            Sarah Mitchell
+          </Text>
+
+          <Text className="text-gray-500 text-sm">Premium Member</Text>
+        </View>
+
+        {/* GLASS TOGGLE */}
+        <View className="mx-6 mt-8 bg-white rounded-2xl p-1 flex-row shadow-sm">
+          <ToggleButton
+            title=" Business"
+            active={tab === "account"}
+            onPress={() => setTab("account")}
+          />
+          <ToggleButton
+            title="Account"
+            active={tab === "info"}
+            onPress={() => setTab("info")}
+          />
+        </View>
+
+        {/* CONTENT */}
+        {tab === "account" ? (
+          <Account onNavigate={handleNavigation} />
+        ) : (
+          <Info onNavigate={handleNavigation} />
+        )}
+
+        {/* LOGOUT */}
+        <Pressable className="mx-6 mt-10 mb-20" onPress={handleLogout}>
+          <View className="bg-pink-500 rounded-2xl py-4 items-center">
+            <Text className="text-white font-bold text-lg">Log Out</Text>
+          </View>
         </Pressable>
-    );
-};
-
-export default function Profile() {
-    const [isVendorMode, setIsVendorMode] = useState(false);
-    const mutedColor = "#896175";
-     const { logout } = useAuth();
-    const pressedFunction = ()=>{
-        logout(); 
-        
-    }
-
-    return (
-        <SafeAreaView className="flex-1 bg-background-light">
-            <View className="flex-1">
-                {/* Top App Bar */}
-                <View className="flex-row items-center justify-between px-4 pt-6 pb-4 bg-white border-b border-[#f4f0f2]">
-                    <View className="w-10" />
-                    <Text className="text-lg font-bold text-[#181114]">
-                        Profile
-                    </Text>
-                    <Pressable className="w-10 items-end">
-                        <MaterialIcons name="edit" size={22} color="#ee2b8c" />
-                    </Pressable>
-                </View>
-
-                <ScrollView className="flex-1" contentContainerClassName="pb-28">
-                    {/* Profile Header */}
-                    <View className="items-center pt-8 pb-6 px-4 bg-white rounded-b-[32px] shadow-sm mb-6">
-                        <Pressable className="relative">
-                            <Image
-                                source={{ uri: PROFILE_IMAGE }}
-                                className="h-32 w-32 rounded-full border-4 border-background-light"
-                            />
-                            <View className="absolute bottom-0 right-0 bg-primary rounded-full p-1.5 shadow-md border-2 border-white">
-                                <MaterialIcons name="photo-camera" size={14} color="#ffffff" />
-                            </View>
-                        </Pressable>
-                        <View className="mt-4 items-center">
-                            <Text className="text-2xl font-bold text-[#181114]">
-                                Sarah Jenkins
-                            </Text>
-                            <Text className="text-sm font-medium mt-1 text-[#896175]">
-                                sarah.j@example.com
-                            </Text>
-                        </View>
-                    </View>
-
-                    {/* Action Panel: Vendor Mode */}
-                    <View className="px-4 mb-6">
-                        <View
-                            className="flex-row items-center justify-between gap-4 rounded-2xl border border-[#e6dbe0] bg-white p-5 shadow-sm"
-                        >
-                            <View className="flex-row items-center gap-4">
-                                <View className="bg-primary/10 rounded-full p-2.5">
-                                    <MaterialIcons name="storefront" size={22} color="#ee2b8c" />
-                                </View>
-                                <View>
-                                    <Text className="text-base font-bold text-[#181114]">
-                                        Vendor Mode
-                                    </Text>
-                                    <Text className="text-sm mt-0.5 text-[#896175]">
-                                        Manage services & bookings
-                                    </Text>
-                                </View>
-                            </View>
-                            <Switch
-                                value={isVendorMode}
-                                onValueChange={setIsVendorMode}
-                                trackColor={{ false: "#f4f0f2", true: "#ee2b8c" }}
-                                thumbColor="#ffffff"
-                            />
-                        </View>
-                    </View>
-
-                    {/* Navigation List */}
-                    <View className="px-4 gap-3">
-                        <Text className="text-xs font-bold uppercase tracking-wider px-2 text-[#896175]">
-                            Account
-                        </Text>
-                        <MenuItem label="My Information" icon="person" />
-                        <MenuItem label="Payment Methods" icon="credit-card" />
-                        <MenuItem label="Saved Vendors" icon="favorite" badge="12" />
-                        <MenuItem label="App Settings" icon="settings" />
-                    </View>
-
-                    {/* Footer Actions */}
-                    <View className="mt-8 px-6 pb-8 items-center gap-4 ">
-                        <Pressable className="w-full rounded-lg py-2 bg-primary/10 items-center active:scale-[0.98] transition-transform"
-                    onPress={pressedFunction}>
-                            <Text className="text-center font-semibold text-base text-[#ef4444]">
-                                Log Out
-                            </Text>
-                        </Pressable>
-                        <Text className="text-xs text-[#896175]">
-                            Version 1.2.0
-                        </Text>
-                    </View>
-                </ScrollView>
-
-                {/* Bottom Navigation Bar (Visual Only) */}
-        
-            </View>
-        </SafeAreaView>
-    );
+      </ScrollView>
+    </SafeAreaView>
+  );
 }
+
+/* ---------- Toggle ---------- */
+
+const ToggleButton = ({ title, active, onPress }: ToggleButtonProps) => (
+  <Pressable
+    onPress={onPress}
+    className={`flex-1 py-3 rounded-xl ${active ? "bg-pink-50 shadow-sm" : ""}`}
+  >
+    <Text
+      className={`text-center font-semibold ${
+        active ? "text-pink-500" : "text-gray-400"
+      }`}
+    >
+      {title}
+    </Text>
+  </Pressable>
+);
+
+/* ---------- Row ---------- */
+
+const Row = ({ icon, title, onPress }: RowProps & { onPress?: () => void }) => (
+  <Pressable
+    className="flex-row items-center justify-between bg-white p-4 rounded-2xl mb-3 shadow-sm active:scale-[0.98]"
+    onPress={onPress}
+  >
+    <View className="flex-row items-center gap-3">
+      <LinearGradient
+        colors={["#ec489933", "#db277733"]}
+        className="p-2 rounded-xl"
+      >
+        <MaterialIcons name={icon} size={20} color="#ec4899" />
+      </LinearGradient>
+
+      <Text className="font-semibold text-gray-900">{title}</Text>
+    </View>
+
+    <MaterialIcons name="chevron-right" size={22} color="#9ca3af" />
+  </Pressable>
+);
+
+/* ---------- Sections ---------- */
+
+const Account = ({
+  onNavigate,
+}: {
+  onNavigate: (section: "business" | "account", screen: string) => void;
+}) => (
+  <View className="mx-6 mt-8">
+    <Text className="text-xs font-bold text-gray-400 mb-4 uppercase tracking-wider">
+      BUSINESS
+    </Text>
+
+    <Row
+      icon="business"
+      title="Business Information"
+      onPress={() => onNavigate("business", "business-information")}
+    />
+    <Row
+      icon="sell"
+      title="Services & Pricing"
+      onPress={() => onNavigate("business", "services-pricing")}
+    />
+    <Row
+      icon="photo-library"
+      title="Portfolio"
+      onPress={() => onNavigate("business", "portfolio")}
+    />
+    <Row
+      icon="verified"
+      title="Vendor Verification"
+      onPress={() => onNavigate("business", "vendor-verification")}
+    />
+  </View>
+);
+
+const Info = ({
+  onNavigate,
+}: {
+  onNavigate: (section: "business" | "account", screen: string) => void;
+}) => (
+  <View className="mx-6 mt-8">
+    <Text className="text-xs font-bold text-gray-400 mb-4 uppercase tracking-wider">
+      PERSONAL
+    </Text>
+
+    <Row
+      icon="person"
+      title="Edit Profile"
+      onPress={() => onNavigate("account", "edit-profile")}
+    />
+    <Row
+      icon="notifications"
+      title="Notifications"
+      onPress={() => onNavigate("account", "notifications")}
+    />
+    <Row
+      icon="lock"
+      title="Privacy & Security"
+      onPress={() => onNavigate("account", "privacy-security")}
+    />
+    <Row
+      icon="settings"
+      title="App Settings"
+      onPress={() => onNavigate("account", "app-settings")}
+    />
+  </View>
+);
