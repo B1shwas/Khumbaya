@@ -62,14 +62,13 @@ const REVIEWS = [
 ];
 
 export default function VendorDetailed() {
+
   const { logout } = useAuth();
   const router = useRouter();
   const { vendorId } = useLocalSearchParams();
-
   // Find the vendor data based on the vendorId from route params
-  const vendor = ONBOARDING_VENDORS.find((v) => v.id === vendorId);
-
-  // If vendor not found, show error state
+  const resolvedId = Array.isArray(vendorId) ? vendorId[0] : vendorId;
+  const vendor = ONBOARDING_VENDORS.find((v) => v.id === resolvedId);
   if (!vendor) {
     return (
       <View className="flex-1 items-center justify-center bg-gray-50">

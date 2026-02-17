@@ -257,13 +257,16 @@ export default function Profile() {
           </View>
         </View>
         <View className="p-6">
-          <Pressable className="flex-1 h-12 items-center justify-center rounded-xl bg-primary "
+        <Pressable className="flex-1 h-12 items-center justify-center rounded-xl bg-primary"
             onPress={async () => {
-              await AsyncStorage.removeItem("auth_user").then(() => {
+              try {
                 setLoggingOut(true);
+                await AsyncStorage.removeItem("auth_user");
                 logout();
-              });
-
+              } catch (e) {
+                setLoggingOut(false);
+                // TODO: show error feedback
+              }
             }}>
             <Text className="text-white text-base font-bold">
               Log Out
