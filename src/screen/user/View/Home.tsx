@@ -1,5 +1,4 @@
 import {
-  ArticleCard,
   CoupleCard,
   EventCard,
   HeroCard,
@@ -8,112 +7,23 @@ import {
   SectionHeader,
   VenueCard,
 } from "@/src/components/ui/home";
+import EventList from "@/src/constants/event";
+import VENUES from "@/src/constants/venues";
 import { useAuth } from "@/src/store/AuthContext";
 import { Ionicons } from "@expo/vector-icons";
 import { router, type RelativePathString } from "expo-router";
 import { useCallback } from "react";
 import {
   FlatList,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+  StyleSheet, Text, TouchableOpacity,
+  View
 } from "react-native";
 
 // ============================================
 // STATIC DATA (Moved outside component)
 // ============================================
 
-const EVENTS = [
-  {
-    id: "1",
-    title: "Rahul & Simran's Sangeet",
-    date: "DEC 12",
-    time: "7:00 PM",
-    location: "Mumbai",
-    imageUrl:
-      "https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?w=800&q=80",
-  },
-  {
-    id: "2",
-    title: "Annual Cultural Gala",
-    date: "JAN 15",
-    time: "6:00 PM",
-    location: "New York",
-    imageUrl:
-      "https://images.unsplash.com/photo-1522673607200-1645062cd5d1?w=800&q=80",
-  },
-];
 
-const ARTICLES = [
-  {
-    id: "1",
-    category: "Decor",
-    categoryColor: "#ee2b8c",
-    title: "Top 10 Floral Trends for 2024",
-    description:
-      "From cascading bouquets to sustainable centerpieces, here is what is trending.",
-    readTime: "5 min read",
-    imageUrl:
-      "https://images.unsplash.com/photo-1459411552884-841db9b3cc2a?w=800&q=80",
-  },
-  {
-    id: "2",
-    category: "Finance",
-    categoryColor: "#3b82f6",
-    title: "Budgeting 101: Where to Splurge",
-    description: "Expert advice on allocating your wedding funds effectively.",
-    readTime: "8 min read",
-    imageUrl:
-      "https://images.unsplash.com/photo-1555244162-803834f70033?w=800&q=80",
-  },
-  {
-    id: "3",
-    category: "Fashion",
-    categoryColor: "#8b5cf6",
-    title: "Styling Modern Traditional Wear",
-    description: "Mixing contemporary silhouettes with classic fabrics.",
-    readTime: "4 min read",
-    imageUrl:
-      "https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=800&q=80",
-  },
-];
-
-const VENUES = [
-  {
-    id: "1",
-    name: "Grand Ballroom Palace",
-    location: "Downtown Mumbai",
-    capacity: "500-1000 guests",
-    price: "₹2L - ₹5L",
-    rating: 4.8,
-    imageUrl:
-      "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=800&q=80",
-    type: "Banquet Hall",
-  },
-  {
-    id: "2",
-    name: "Sunset Garden Venue",
-    location: "Lonavala",
-    capacity: "200-400 guests",
-    price: "₹1.5L - ₹3L",
-    rating: 4.6,
-    imageUrl:
-      "https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=800&q=80",
-    type: "Outdoor Garden",
-  },
-  {
-    id: "3",
-    name: "Royal Palace Resort",
-    location: "Jaipur",
-    capacity: "300-600 guests",
-    price: "₹3L - ₹6L",
-    rating: 4.9,
-    imageUrl:
-      "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&q=80",
-    type: "Palace",
-  },
-];
 
 const HOTELS = [
   {
@@ -176,7 +86,7 @@ export default function HomePage() {
   );
 
   const navigateToVenues = useCallback(
-    () => router.push("/venues" as RelativePathString),
+    () => router.push("/(shared)/explore/explore"),
     [],
   );
 
@@ -197,7 +107,7 @@ export default function HomePage() {
 
   // Render functions for FlatList items
   const renderEventItem = useCallback(
-    ({ item }: { item: (typeof EVENTS)[0] }) => <EventCard {...item} />,
+    ({ item }: { item: (typeof EventList)[0] }) => <EventCard {...item} />,
     [],
   );
 
@@ -220,7 +130,7 @@ export default function HomePage() {
     <>
       < View style={styles.header} className="px-4" >
         <View style={styles.headerContent}>
-          <View>
+           <View>
             <Text style={styles.greeting}>Hi, {user?.name || "Guest"} 👋</Text>
             <Text style={styles.title}>Plan Your Dream Event</Text>
           </View>
@@ -238,19 +148,7 @@ export default function HomePage() {
         contentContainerStyle={styles.scrollContent}
         ListHeaderComponent={
           <>
-            {/* Search Bar */}
-            {/* <View style={styles.searchContainer}>
-              <TouchableOpacity
-                style={styles.searchBar}
-                onPress={() => router.push("/search" as RelativePathString)}
-              >
-                <Ionicons name="search" size={20} color="#9CA3AF" />
-                <Text style={styles.searchPlaceholder}>
-                  Search venues, vendors, services...
-                </Text>
-              </TouchableOpacity>
-            </View> */}
-
+            
             {/* Hero Card */}
             <HeroCard />
 
@@ -260,7 +158,7 @@ export default function HomePage() {
             {/* Your Events Section */}
             <SectionHeader title="Your Events" />
             <FlatList
-              data={EVENTS}
+              data={EventList}
               renderItem={renderEventItem}
               keyExtractor={(item) => item.id}
               horizontal
@@ -272,6 +170,7 @@ export default function HomePage() {
             <SectionHeader title="Popular Venues" onPress={navigateToVenues} />
             <FlatList
               data={VENUES}
+              
               renderItem={renderVenueItem}
               keyExtractor={(item) => item.id}
               horizontal
@@ -291,21 +190,21 @@ export default function HomePage() {
             /> */}
 
             {/* Wedding Stories Section */}
-            <SectionHeader title="Wedding Stories" />
-            <FlatList
+            {/* <SectionHeader title="Wedding Stories" /> */}
+            {/* <FlatList
               data={COUPLES}
               renderItem={renderCoupleItem}
               keyExtractor={(item) => item.id}
               horizontal
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={styles.horizontalList}
-            />
+            /> */}
 
             {/* Articles & Tips Section */}
-            <SectionHeader title="Articles & Tips" onPress={navigateToBlog} />
+            {/* <SectionHeader title="Articles & Tips" onPress={navigateToBlog} />
             {ARTICLES.map((article) => (
               <ArticleCard key={article.id} {...article} />
-            ))}
+            ))} */}
 
             {/* Bottom Spacer */}
             <View style={styles.bottomSpacer} />

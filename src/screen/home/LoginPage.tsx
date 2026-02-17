@@ -1,10 +1,10 @@
 import { Text } from "@/src/components/ui/Text";
 import { MaterialIcons } from "@expo/vector-icons";
-import { ImageBackground } from "expo-image";
 import { Link, useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Animated,
+  ImageBackground,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -21,7 +21,7 @@ const HERO_IMAGE = {
 
 const COPY = {
   title: "Plan Your Perfect Day",
-  subtitle: "Enter your credentials to access your exclusive event dashboard.",
+  subtitle: "Get Started with Your Account",
   usernameLabel: "Username or Email",
   usernamePlaceholder: "Emma@wedding.com",
   passwordLabel: "Password",
@@ -165,8 +165,8 @@ export default function LoginPage() {
         <View className="h-[35vh] w-full overflow-hidden rounded-b-xl">
           <ImageBackground
             source={HERO_IMAGE}
-            className="w-full h-[50vh] rounded-3xl"
-            contentFit="cover"
+            className="w-full h-[35vh]"
+            resizeMode="cover"
             accessibilityLabel="Wedding venue hero image"
           />
 

@@ -35,7 +35,7 @@ export default function HomePage() {
       contentContainerStyle={{ paddingBottom: 40 }}
       showsVerticalScrollIndicator={false}
     >
-      <View className=" pt-8">
+      <View className=" pt-2">
         <HeroImage />
         <TitleDescription />
         <Button
