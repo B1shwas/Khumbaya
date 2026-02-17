@@ -45,22 +45,17 @@ export default function ProfileScreen() {
 
         {/* PROFILE */}
         <View className="items-center mt-6 mb-6 bg-white py-6">
-          <LinearGradient
-            colors={["#ec4899", "#db2777"]}
-            className="p-[3px] rounded-full"
-          >
-            <View className="bg-white p-1 rounded-full">
-              <Image
-                source={{
-                  uri: "https://lh3.googleusercontent.com/aida-public/AB6AXuD8QYwLdrh7xjte39mVYvDpi053GDi8rf6uQT5uRehpkzgSaSUO1bU-gjQR3vC5rz0trs8aPuTJQ-NF-7EWhF0dW0Sncg_Vhq_mo8NftERtP4ZVATWyqgiFk4YEYtjMq-kH0vubWOCRAWN0iY_YzSfmg5zLdv55nlQE84xdxw-TTt-IVuBhKoAuBzCQypf1qEhxeHZNxVPFpTjsCytpO95l4FHsaMS3HtpB0dJJssJtnyKpr-sBd50Vrtk2mkFa_ESaiscwocjW8do",
-                }}
-                className="w-32 h-32 rounded-full"
-              />
-            </View>
-          </LinearGradient>
+          <View className="bg-white p-1 rounded-full !bg-primary">
+            <Image
+              source={{
+                uri: "https://lh3.googleusercontent.com/aida-public/AB6AXuD8QYwLdrh7xjte39mVYvDpi053GDi8rf6uQT5uRehpkzgSaSUO1bU-gjQR3vC5rz0trs8aPuTJQ-NF-7EWhF0dW0Sncg_Vhq_mo8NftERtP4ZVATWyqgiFk4YEYtjMq-kH0vubWOCRAWN0iY_YzSfmg5zLdv55nlQE84xdxw-TTt-IVuBhKoAuBzCQypf1qEhxeHZNxVPFpTjsCytpO95l4FHsaMS3HtpB0dJJssJtnyKpr-sBd50Vrtk2mkFa_ESaiscwocjW8do",
+              }}
+              className="w-32 h-32 rounded-full"
+            />
+          </View>
 
           {/* camera */}
-          <Pressable className="absolute bottom-[70px] right-[140px] bg-pink-500 p-2 rounded-full shadow-lg">
+          <Pressable className="absolute bottom-[85px] right-[150px] bg-pink-500 p-2 rounded-full shadow-lg">
             <MaterialIcons name="photo-camera" size={18} color="white" />
           </Pressable>
 
@@ -105,20 +100,20 @@ export default function ProfileScreen() {
 
 /* ---------- Toggle ---------- */
 
-const ToggleButton = ({ title, active, onPress }: ToggleButtonProps) => (
-  <Pressable
-    onPress={onPress}
-    className={`flex-1 py-3 rounded-xl ${active ? "bg-pink-50 shadow-sm" : ""}`}
-  >
-    <Text
-      className={`text-center font-semibold ${
-        active ? "text-pink-500" : "text-gray-400"
-      }`}
+const ToggleButton = ({ title, active, onPress }: ToggleButtonProps) => {
+  const activeButton = "flex-1 py-3 rounded-xl bg-pink-500 shadow-sm";
+  const notActiveButton = "flex-1 py-3 rounded-xl";
+  const activeText = "text-center font-semibold text-pink-500";
+  const notActiveText = "text-center font-semibold text-gray-400";
+  return (
+    <Pressable
+      onPress={onPress}
+      className={active ? activeButton : notActiveButton}
     >
-      {title}
-    </Text>
-  </Pressable>
-);
+      <Text className={active ? activeText : notActiveText}>{title}</Text>
+    </Pressable>
+  );
+};
 
 /* ---------- Row ---------- */
 
