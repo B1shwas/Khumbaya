@@ -119,14 +119,8 @@ const EventCard = ({
         <View className="w-20 h-20 rounded-lg overflow-hidden">
           <Image source={{ uri: event.imageUrl }} className="w-full h-full" />
         </View>
-<<<<<<< HEAD
         <View className="flex-1 ml-3 justify-between">
           <View className="flex-row justify-between items-start">
-=======
-        <View>
-          <View style={styles.eventLocationRow}>
-            <Ionicons name="location" size={14} color="#6B7280" />
->>>>>>> 03c2e44 (cupdate the files inside the stack)
             <Text
               className="font-jakarta-bold text-base text-text-light flex-1 mr-2"
               numberOfLines={2}
