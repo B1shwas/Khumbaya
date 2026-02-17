@@ -20,7 +20,7 @@ export default function PrivacySecurityScreen() {
   const router = useRouter();
 
   const handleChangePassword = () => {
-    router.push({ pathname: "/profile/account/change-password" });
+    router.push({ pathname: "/profile/change-password" });
   };
 
   const handleDeleteAccount = () => {

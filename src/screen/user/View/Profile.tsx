@@ -1,7 +1,7 @@
 import { useAuth } from "@/src/store/AuthContext";
 import { MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { useRouter } from "expo-router";
+import { Link } from "expo-router";
 import { useState } from "react";
 import { Image, Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -20,17 +20,9 @@ type RowProps = {
 export default function ProfileScreen() {
   const [tab, setTab] = useState<"account" | "info">("account");
   const { logout } = useAuth();
-  const router = useRouter();
 
   const handleLogout = () => {
     logout();
-  };
-
-  const handleNavigation = (
-    section: "business" | "account",
-    screen: string,
-  ) => {
-    router.push({ pathname: `/profile/${section}/${screen}` } as any);
   };
 
   return (
@@ -81,11 +73,7 @@ export default function ProfileScreen() {
         </View>
 
         {/* CONTENT */}
-        {tab === "account" ? (
-          <Account onNavigate={handleNavigation} />
-        ) : (
-          <Info onNavigate={handleNavigation} />
-        )}
+        {tab === "account" ? <Account /> : <Info />}
 
         {/* LOGOUT */}
         <Pressable className="mx-6 mt-10 mb-20" onPress={handleLogout}>
@@ -101,49 +89,58 @@ export default function ProfileScreen() {
 /* ---------- Toggle ---------- */
 
 const ToggleButton = ({ title, active, onPress }: ToggleButtonProps) => {
-  const activeButton = "flex-1 py-3 rounded-xl bg-pink-500 shadow-sm";
-  const notActiveButton = "flex-1 py-3 rounded-xl";
-  const activeText = "text-center font-semibold text-pink-500";
-  const notActiveText = "text-center font-semibold text-gray-400";
   return (
     <Pressable
       onPress={onPress}
-      className={active ? activeButton : notActiveButton}
+      style={{
+        flex: 1,
+        paddingVertical: 12,
+        borderRadius: 12,
+        backgroundColor: active ? "#ec4899" : "transparent",
+        shadowColor: active ? "#000" : undefined,
+        shadowOffset: active ? { width: 0, height: 1 } : undefined,
+        shadowOpacity: active ? 0.1 : undefined,
+        shadowRadius: active ? 2 : undefined,
+        elevation: active ? 2 : undefined,
+      }}
     >
-      <Text className={active ? activeText : notActiveText}>{title}</Text>
+      <Text
+        style={{
+          textAlign: "center",
+          fontWeight: "600",
+          color: active ? "#ffffff" : "#9ca3af",
+        }}
+      >
+        {title}
+      </Text>
     </Pressable>
   );
 };
 
 /* ---------- Row ---------- */
 
-const Row = ({ icon, title, onPress }: RowProps & { onPress?: () => void }) => (
-  <Pressable
-    className="flex-row items-center justify-between bg-white p-4 rounded-2xl mb-3 shadow-sm active:scale-[0.98]"
-    onPress={onPress}
-  >
-    <View className="flex-row items-center gap-3">
-      <LinearGradient
-        colors={["#ec489933", "#db277733"]}
-        className="p-2 rounded-xl"
-      >
-        <MaterialIcons name={icon} size={20} color="#ec4899" />
-      </LinearGradient>
+const Row = ({ icon, title, href }: RowProps & { href: string }) => (
+  <Link href={href as any} asChild>
+    <Pressable className="flex-row items-center justify-between bg-white p-4 rounded-2xl mb-3 shadow-sm active:scale-[0.98]">
+      <View className="flex-row items-center gap-3">
+        <LinearGradient
+          colors={["#ec489933", "#db277733"]}
+          className="p-2 rounded-xl"
+        >
+          <MaterialIcons name={icon} size={20} color="#ec4899" />
+        </LinearGradient>
 
-      <Text className="font-semibold text-gray-900">{title}</Text>
-    </View>
+        <Text className="font-semibold text-gray-900">{title}</Text>
+      </View>
 
-    <MaterialIcons name="chevron-right" size={22} color="#9ca3af" />
-  </Pressable>
+      <MaterialIcons name="chevron-right" size={22} color="#9ca3af" />
+    </Pressable>
+  </Link>
 );
 
 /* ---------- Sections ---------- */
 
-const Account = ({
-  onNavigate,
-}: {
-  onNavigate: (section: "business" | "account", screen: string) => void;
-}) => (
+const Account = () => (
   <View className="mx-6 mt-8">
     <Text className="text-xs font-bold text-gray-400 mb-4 uppercase tracking-wider">
       BUSINESS
@@ -152,55 +149,39 @@ const Account = ({
     <Row
       icon="business"
       title="Business Information"
-      onPress={() => onNavigate("business", "business-information")}
+      href="/profile/business-information"
     />
     <Row
       icon="sell"
       title="Services & Pricing"
-      onPress={() => onNavigate("business", "services-pricing")}
+      href="/profile/services-pricing"
     />
-    <Row
-      icon="photo-library"
-      title="Portfolio"
-      onPress={() => onNavigate("business", "portfolio")}
-    />
+    <Row icon="photo-library" title="Portfolio" href="/profile/portfolio" />
     <Row
       icon="verified"
       title="Vendor Verification"
-      onPress={() => onNavigate("business", "vendor-verification")}
+      href="/profile/vendor-verification"
     />
   </View>
 );
 
-const Info = ({
-  onNavigate,
-}: {
-  onNavigate: (section: "business" | "account", screen: string) => void;
-}) => (
+const Info = () => (
   <View className="mx-6 mt-8">
     <Text className="text-xs font-bold text-gray-400 mb-4 uppercase tracking-wider">
       PERSONAL
     </Text>
 
-    <Row
-      icon="person"
-      title="Edit Profile"
-      onPress={() => onNavigate("account", "edit-profile")}
-    />
+    <Row icon="person" title="Edit Profile" href="/profile/edit-profile" />
     <Row
       icon="notifications"
       title="Notifications"
-      onPress={() => onNavigate("account", "notifications")}
+      href="/profile/notifications"
     />
     <Row
       icon="lock"
       title="Privacy & Security"
-      onPress={() => onNavigate("account", "privacy-security")}
+      href="/profile/privacy-security"
     />
-    <Row
-      icon="settings"
-      title="App Settings"
-      onPress={() => onNavigate("account", "app-settings")}
-    />
+    <Row icon="settings" title="App Settings" href="/profile/app-settings" />
   </View>
 );
