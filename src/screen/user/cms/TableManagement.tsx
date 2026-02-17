@@ -1,6 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useState, useMemo, useEffect, useCallback } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Alert,
   Animated,
@@ -13,7 +14,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
@@ -656,7 +656,7 @@ export default function TableManagement() {
             ))}
           </View>
 
-          {/* Canvas Info Overlay */}
+          Canvas Info Overlay
           <View style={styles.canvasInfo}>
             <View style={styles.guestAvatars}>
               <View style={styles.avatarDot}>

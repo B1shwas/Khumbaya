@@ -22,7 +22,7 @@ export default function HomePage() {
   const router = useRouter();
 
   const handleExploreVendors = useCallback(() => {
-    router.push("/explore-vendors");
+    router.push("/(shared)/explore/explore");
   }, [router]);
 
   const handleCreateEvent = useCallback(() => {
@@ -31,11 +31,11 @@ export default function HomePage() {
 
   return (
     <ScrollView
-      className="flex-1 bg-gray-50"
+      className="flex-1 bg-gray-50 px-4"
       contentContainerStyle={{ paddingBottom: 40 }}
       showsVerticalScrollIndicator={false}
     >
-      <View className=" pt-8">
+      <View className=" pt-2">
         <HeroImage />
         <TitleDescription />
         <Button

@@ -14,7 +14,7 @@ function RootNavigation() {
   const { user, isLoading } = useAuth();
 
   if (isLoading) {
-    return null ; 
+    return null;
   }
 
   return (
@@ -27,7 +27,7 @@ function RootNavigation() {
       {user ? (
         <Stack.Screen name="(protected)" />
       ) : (
-        <Stack.Screen name="(onboarding)"/>
+        <Stack.Screen name="(onboarding)" />
       )}
     </Stack>
   );
@@ -56,7 +56,7 @@ export default function RootLayout() {
     <AuthProvider>
       <SafeAreaProvider>
         <StatusBar barStyle="dark-content" />
-        <SafeAreaView className="flex-1 px-4 " edges={["top", "bottom"]}>
+        <SafeAreaView className="flex-1  " edges={["top", "bottom"]}>
           <RootNavigation />
         </SafeAreaView>
       </SafeAreaProvider>
