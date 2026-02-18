@@ -6,36 +6,12 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
-import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
-
-// ============================================
-// BACKEND INTEGRATION NOTES:
-// ============================================
-// 1. API Endpoints to use:
-//    - POST /api/events - Create new event
-//    - GET /api/event-types - Fetch event types
-//    - POST /api/events/{id}/cover - Upload cover image
-//    - GET /api/events/{id} - Get event details for editing
-//
-// 2. State Management:
-//    - Use context or state management library (Zustand/Redux) for event data
-//    - Persist form data across wizard steps
-//
-// 3. Image Upload:
-//    - Use react-native-image-picker or expo-image-picker
-//    - Upload to cloud storage (AWS S3, Cloudinary, etc.)
-//    - Store returned URL in event state
-//
-// 4. Form Validation:
-//    - Add validation library (zod, yup, react-hook-form)
-//    - Validate all fields before API call
-// ============================================
+import { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
 interface EventFormData {
   name: string;
@@ -92,7 +68,7 @@ export default function EventCreate() {
     console.log('Form data ready for API submission:', formData);
     
     // Navigate to location step
-    router.push('/(protected)/(client-stack)/events/create/event-location');
+    router.push('/(protected)/(client-tabs)/events');
   };
 
   const handleBack = () => {
@@ -154,7 +130,7 @@ export default function EventCreate() {
     
     for (let i = firstDay - 1; i >= 0; i--) {
       days.push(
-        <Text key={`prev-${i}`} style={[styles.calendarDay, styles.calendarDayInactive]}>
+        <Text key={`prev-${i}`} className="w-10 text-center leading-10 text-sm font-medium text-gray-300">
           {prevMonthDays - i}
         </Text>
       );
@@ -172,20 +148,23 @@ export default function EventCreate() {
         new Date().getMonth() === currentMonth &&
         new Date().getFullYear() === currentYear;
 
+      const dayContainerClass = isSelected 
+        ? "w-10 h-10 items-center justify-center rounded-full bg-primary shadow-lg shadow-primary/30" 
+        : "w-10 h-10 items-center justify-center rounded-full";
+      
+      const dayTextClass = isSelected 
+        ? "text-sm font-semibold text-white" 
+        : isToday 
+          ? "text-sm font-semibold text-primary" 
+          : "text-sm font-medium text-gray-900";
+
       days.push(
         <TouchableOpacity
           key={`current-${day}`}
           onPress={() => handleDateSelect(day)}
-          style={[
-            styles.calendarDayContainer,
-            isSelected && styles.calendarDaySelected,
-          ]}
+          className={dayContainerClass}
         >
-          <Text style={[
-            styles.calendarDay,
-            isSelected && styles.calendarDaySelectedText,
-            isToday && !isSelected && styles.calendarDayToday,
-          ]}>
+          <Text className={dayTextClass}>
             {day}
           </Text>
         </TouchableOpacity>
@@ -197,7 +176,7 @@ export default function EventCreate() {
     const remainingCells = 42 - totalCells;
     for (let i = 1; i <= remainingCells; i++) {
       days.push(
-        <Text key={`next-${i}`} style={[styles.calendarDay, styles.calendarDayInactive]}>
+        <Text key={`next-${i}`} className="w-10 text-center leading-10 text-sm font-medium text-gray-300">
           {i}
         </Text>
       );
@@ -207,65 +186,51 @@ export default function EventCreate() {
   };
 
   return (
-    <View style={styles.container}>
+    <View className="flex-1 bg-[#f8f6f7]">
       <KeyboardAvoidingView 
-        style={styles.keyboardAvoidingView}
+        className="flex-1 max-w-[480px] self-center w-full"
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         {/* Header */}
-        <View style={styles.header}>
-          <TouchableOpacity onPress={handleBack} style={styles.headerButton}>
+        <View className="flex-row items-center justify-between px-4 py-2 pb-2 bg-[#f8f6f7]">
+          <TouchableOpacity onPress={handleBack} className="w-10 h-10 rounded-full bg-black/5 items-center justify-center">
             <Ionicons name="arrow-back" size={20} color="#181114" />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Create New Event</Text>
-          <View style={styles.headerSpacer} />
+          <Text className="font-plusjakartasans-bold text-lg text-[#181114] flex-1 text-center">Create New Event</Text>
+          <View className="w-10" />
         </View>
-
-        {/* Progress Bar */}
-        <View style={styles.progressContainer}>
-          <View style={styles.progressLabels}>
-            <Text style={styles.progressLabel}>Basic Information</Text>
-            <Text style={styles.progressStep}>1 of 4</Text>
-          </View>
-          <View style={styles.progressBarBackground}>
-            <Animated.View 
-              style={[styles.progressBarFill, { width: '25%' }, animatedButtonStyle]} 
-            />
-          </View>
-        </View>
-
         <ScrollView 
-          style={styles.scrollView}
+          className="flex-1 mb-4"
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
           {/* Cover Image Upload */}
-          <View style={styles.section}>
+          <View className="px-4 pt-3">
             <TouchableOpacity 
               onPress={handleCoverPress}
-              style={styles.coverUploadContainer}
+              className="w-full aspect-video rounded-2xl overflow-hidden border-2 border-dashed border-gray-200"
               activeOpacity={0.8}
             >
               <Image
                 source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuC4baplBpAzVE_Kbv7m5jmbgfKEsZdzJcLTblHvHyn_CNxgGJ-spHw_-lcr1J_eQJK_onSfJPDupULCeQLMZd-cLvKBMgzzViLvDItg2ng1UIiZVvbQ5CwFEo-lqmLVbH5gyK4fkgRNsiRz8-wcyZYDzkYCmyI3K2pgzYajYnxOThBEL1RbDkAhjz-hv9j9fNN8MKdGjJ7oqMlN1vqSDKRDlWWbxdNT1jniUPXUy5mcnJ7XsOCE2Qz6WO5pgIHRrOKlvu-5NrxRhU8' }}
-                style={styles.coverImage}
+                className="w-full h-full absolute"
                 resizeMode="cover"
               />
-              <View style={styles.coverOverlay}>
-                <View style={styles.coverIconContainer}>
+              <View className="absolute top-0 left-0 right-0 bottom-0 bg-black/20 items-center justify-center">
+                <View className="w-12 h-12 rounded-full bg-white/20 items-center justify-center mb-2">
                   <Ionicons name="camera" size={24} color="white" />
                 </View>
-                <Text style={styles.coverTitle}>Add Event Cover</Text>
-                <Text style={styles.coverSubtitle}>High quality JPG or PNG</Text>
+                <Text className="font-plusjakartasans-medium text-base text-white">Add Event Cover</Text>
+                <Text className="font-plusjakartasans-regular text-xs text-white/70 mt-1">High quality JPG or PNG</Text>
               </View>
             </TouchableOpacity>
           </View>
 
           {/* Event Name Input */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Event Name</Text>
+          <View className="px-4 pt-3">
+            <Text className="font-plusjakartasans-bold text-base text-[#181114] mb-3">Event Name</Text>
             <TextInput
-              style={styles.textInput}
+              className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-4 text-base font-plusjakartasans-regular text-[#181114]"
               placeholder="e.g., Aisha & Omar's Wedding"
               placeholderTextColor="#9CA3AF"
               value={formData.name}
@@ -274,48 +239,52 @@ export default function EventCreate() {
           </View>
 
           {/* Event Type Selection */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>What type of event is it?</Text>
-            <View style={styles.chipContainer}>
-              {EVENT_TYPES.map((type) => (
-                <TouchableOpacity
-                  key={type}
-                  onPress={() => handleEventTypeSelect(type)}
-                  style={[
-                    styles.chip,
-                    formData.eventType === type && styles.chipSelected,
-                  ]}
-                >
-                  <Text style={[
-                    styles.chipText,
-                    formData.eventType === type && styles.chipTextSelected,
-                  ]}>
-                    {type}
-                  </Text>
-                </TouchableOpacity>
-              ))}
+          <View className="px-4 pt-3">
+            <Text className="font-plusjakartasans-bold text-base text-[#181114] mb-3">What type of event is it?</Text>
+            <View className="flex-row flex-wrap gap-2">
+              {EVENT_TYPES.map((type) => {
+                const isSelected = formData.eventType === type;
+                const chipClassName = isSelected 
+                  ? "px-5 py-2.5 rounded-full bg-[#ee2b8c] border border-[#ee2b8c]"
+                  : "px-5 py-2.5 rounded-full bg-white border border-gray-200";
+                const textClassName = isSelected
+                  ? "font-plusjakartasans-medium text-sm text-white"
+                  : "font-plusjakartasans-medium text-sm text-gray-600";
+                
+                return (
+                  <TouchableOpacity
+                    key={type}
+                    onPress={() => handleEventTypeSelect(type)}
+                    className={chipClassName}
+                  >
+                    <Text className={textClassName}>
+                      {type}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
             </View>
           </View>
 
           {/* Date Picker */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>When is the big day?</Text>
-            <View style={styles.calendarContainer}>
+          <View className="px-4 pt-3">
+            <Text className="font-plusjakartasans-bold text-base text-[#181114] mb-3">When is the big day?</Text>
+            <View className="bg-white rounded-2xl border border-gray-200 p-4">
               {/* Calendar Header */}
-              <View style={styles.calendarHeader}>
-                <Text style={styles.calendarMonth}>
+              <View className="flex-row justify-between items-center mb-4">
+                <Text className="font-plusjakartasans-bold text-lg text-[#181114]">
                   {MONTHS[currentMonth]} {currentYear}
                 </Text>
-                <View style={styles.calendarNavigation}>
+                <View className="flex-row gap-2">
                   <TouchableOpacity 
                     onPress={() => handleMonthChange('prev')}
-                    style={styles.calendarNavButton}
+                    className="p-1"
                   >
                     <Ionicons name="chevron-back" size={24} color="#ee2b8c" />
                   </TouchableOpacity>
                   <TouchableOpacity 
                     onPress={() => handleMonthChange('next')}
-                    style={styles.calendarNavButton}
+                    className="p-1"
                   >
                     <Ionicons name="chevron-forward" size={24} color="#ee2b8c" />
                   </TouchableOpacity>
@@ -323,315 +292,39 @@ export default function EventCreate() {
               </View>
 
               {/* Day of Week Headers */}
-              <View style={styles.calendarWeekHeader}>
+              <View className="flex-row mb-2 justify-around">
                 {['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'].map((day) => (
-                  <Text key={day} style={styles.calendarWeekDay}>
+                  <Text key={day} className="font-plusjakartasans-bold text-xs text-gray-400 text-center w-10">
                     {day}
                   </Text>
                 ))}
               </View>
 
               {/* Calendar Grid */}
-              <View style={styles.calendarGrid}>
+              <View className="flex-row flex-wrap justify-start">
                 {renderCalendarDays()}
               </View>
             </View>
           </View>
 
           {/* Bottom spacing for footer */}
-          <View style={styles.bottomSpacing} />
+          <View className="h-[100px]" />
         </ScrollView>
 
         {/* Sticky Footer */}
-        <View style={styles.footer}>
+        <View className="absolute bottom-0 left-0 right-0 p-6 pb-8  max-w-[480px] self-center w-full">
           <TouchableOpacity
             onPress={handleNextStep}
-            style={styles.nextButton}
+            className="w-full bg-[#ee2b8c] flex-row items-center justify-center gap-2 py-4 rounded-2xl shadow-lg shadow-[#ee2b8c]/25"
             activeOpacity={0.8}
             onPressIn={() => { scale.value = 0.98; }}
             onPressOut={() => { scale.value = 1; }}
           >
-            <Text style={styles.nextButtonText}>Next Step</Text>
-            <Ionicons name="arrow-forward" size={20} color="white" />
+            <Text className="font-plusjakartasans-bold text-base text-white">Create Event</Text>
+            {/* <Ionicons name="arrow-forward" size={20} color="white" /> */}
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f8f6f7',
-  },
-  keyboardAvoidingView: {
-    flex: 1,
-    maxWidth: 480,
-    alignSelf: 'center',
-    width: '100%',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingTop: 60,
-    paddingBottom: 8,
-    backgroundColor: '#f8f6f7',
-  },
-  headerButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(0,0,0,0.05)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  headerTitle: {
-    fontFamily: 'PlusJakartaSans-Bold',
-    fontSize: 18,
-    color: '#181114',
-    flex: 1,
-    textAlign: 'center',
-  },
-  headerSpacer: {
-    width: 40,
-  },
-  progressContainer: {
-    paddingHorizontal: 16,
-    paddingTop: 8,
-  },
-  progressLabels: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  progressLabel: {
-    fontFamily: 'PlusJakartaSans-SemiBold',
-    fontSize: 12,
-    color: '#181114',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
-  progressStep: {
-    fontFamily: 'PlusJakartaSans-Bold',
-    fontSize: 12,
-    color: '#ee2b8c',
-  },
-  progressBarBackground: {
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: 'rgba(238, 43, 140, 0.1)',
-    overflow: 'hidden',
-  },
-  progressBarFill: {
-    height: '100%',
-    borderRadius: 4,
-    backgroundColor: '#ee2b8c',
-  },
-  scrollView: {
-    flex: 1,
-  },
-  section: {
-    paddingHorizontal: 16,
-    paddingTop: 12,
-  },
-  sectionTitle: {
-    fontFamily: 'PlusJakartaSans-Bold',
-    fontSize: 16,
-    color: '#181114',
-    marginBottom: 12,
-  },
-  coverUploadContainer: {
-    width: '100%',
-    aspectRatio: 16 / 9,
-    borderRadius: 16,
-    overflow: 'hidden',
-    borderWidth: 2,
-    borderStyle: 'dashed',
-    borderColor: '#E5E7EB',
-  },
-  coverImage: {
-    width: '100%',
-    height: '100%',
-    position: 'absolute',
-  },
-  coverOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0,0,0,0.2)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  coverIconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 8,
-  },
-  coverTitle: {
-    fontFamily: 'PlusJakartaSans-Medium',
-    fontSize: 16,
-    color: 'white',
-  },
-  coverSubtitle: {
-    fontFamily: 'PlusJakartaSans-Regular',
-    fontSize: 12,
-    color: 'rgba(255,255,255,0.7)',
-    marginTop: 4,
-  },
-  textInput: {
-    width: '100%',
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    backgroundColor: 'white',
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-    fontSize: 16,
-    fontFamily: 'PlusJakartaSans-Regular',
-    color: '#181114',
-  },
-  chipContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  chip: {
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 9999,
-    backgroundColor: 'white',
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-  },
-  chipSelected: {
-    backgroundColor: '#ee2b8c',
-    borderColor: '#ee2b8c',
-  },
-  chipText: {
-    fontFamily: 'PlusJakartaSans-Medium',
-    fontSize: 14,
-    color: '#6B7280',
-  },
-  chipTextSelected: {
-    color: 'white',
-  },
-  calendarContainer: {
-    backgroundColor: 'white',
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    padding: 16,
-  },
-  calendarHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  calendarMonth: {
-    fontFamily: 'PlusJakartaSans-Bold',
-    fontSize: 18,
-    color: '#181114',
-  },
-  calendarNavigation: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  calendarNavButton: {
-    padding: 4,
-  },
-  calendarWeekHeader: {
-    flexDirection: 'row',
-    marginBottom: 8,
-    justifyContent: 'space-around',
-  },
-  calendarWeekDay: {
-    fontFamily: 'PlusJakartaSans-Bold',
-    fontSize: 12,
-    color: '#9CA3AF',
-    textAlign: 'center',
-    width: 40,
-  },
-  calendarGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'flex-start',
-  },
-  calendarDayContainer: {
-    width: 40,
-    height: 40,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 20,
-  },
-  calendarDaySelected: {
-    backgroundColor: '#ee2b8c',
-    shadowColor: '#ee2b8c',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  calendarDay: {
-    fontFamily: 'PlusJakartaSans-Medium',
-    fontSize: 14,
-    color: '#181114',
-    textAlign: 'center',
-    width: 40,
-    lineHeight: 40,
-  },
-  calendarDayInactive: {
-    color: '#D1D5DB',
-  },
-  calendarDaySelectedText: {
-    color: 'white',
-  },
-  calendarDayToday: {
-    color: '#ee2b8c',
-  },
-  bottomSpacing: {
-    height: 100,
-  },
-  footer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    padding: 24,
-    paddingBottom: 32,
-    backgroundColor: '#f8f6f7',
-    maxWidth: 480,
-    alignSelf: 'center',
-    width: '100%',
-  },
-  nextButton: {
-    width: '100%',
-    backgroundColor: '#ee2b8c',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    paddingVertical: 16,
-    borderRadius: 16,
-    shadowColor: '#ee2b8c',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  nextButtonText: {
-    fontFamily: 'PlusJakartaSans-Bold',
-    fontSize: 16,
-    color: 'white',
-  },
-});

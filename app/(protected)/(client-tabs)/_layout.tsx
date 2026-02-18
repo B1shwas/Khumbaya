@@ -46,7 +46,7 @@ export default function ClientTabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="clientvendor"
+        name="clientexplore"
         options={{
           title: "Explore",
           tabBarIcon: ({ color }) => (

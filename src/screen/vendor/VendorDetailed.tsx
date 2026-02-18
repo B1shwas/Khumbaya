@@ -112,11 +112,11 @@ export default function VendorDetailed({vendorId = "1"}: {vendorId: string | str
       stickyHeaderIndices={[4]}
       showsVerticalScrollIndicator={false}
     >
-      <View className="relative w-full">
+      <View className="relative w-full rounded-md" >
         
         <ImageBackground
           source={{ uri: HEADER_IMAGE }}
-          className="w-full h-[280px]"
+          className="w-full h-[24vh]  "
           resizeMode="cover"
         >
           <View className="flex-row justify-between items-center px-4 pt-4">
@@ -131,8 +131,8 @@ export default function VendorDetailed({vendorId = "1"}: {vendorId: string | str
             </Pressable>
           </View>
         </ImageBackground>
-        <View className="absolute -bottom-16 left-4">
-          <View className="h-32 w-32 rounded-full border-4 border-white bg-white overflow-hidden shadow-md">
+        <View className=" h-32 w-32 absolute -bottom-16 left-4 z-20 border-1 rounded-full  border-primary bg-primary p-1">
+          <View className="h-full w-full rounded-full border-4 border-white bg-white overflow-hidden shadow-md">
             <Image
               source={{ uri: AVATAR_IMAGE }}
               className="h-full w-full"
@@ -156,7 +156,7 @@ export default function VendorDetailed({vendorId = "1"}: {vendorId: string | str
               </Text>
           
           </View>
-            <View className="flex-row gap-2">
+            <View className="flex-row gap-2 shadow-sm shadow-black">
               <Pressable className="flex-row items-center gap-1 bg-green-50 px-2 py-1 rounded-full border border-green-100"
                 onPress={() => router.push(`/(shared)/explore/${resolvedId}/vendorcomparision`)}
               >
