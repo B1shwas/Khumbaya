@@ -4,6 +4,6 @@ export default function VendorStack() {
         <Stack>
             <Stack.Screen name="explore" options={{ headerShown: false }} />
             <Stack.Screen name="[vendorId]" options={{ headerShown: false }} />
-        </Stack>
+         </Stack>
     )
 }

@@ -474,7 +474,8 @@ const CategoryPills = ({
   <ScrollView
     horizontal
     showsHorizontalScrollIndicator={false}
-    className="bg-black"
+    className="px-4 py-3"
+    contentContainerStyle={{ alignItems: 'center' }}
   >
     {categories.map((cat) => (
       <RelationChip
@@ -482,12 +483,10 @@ const CategoryPills = ({
         relation={cat === "All" ? "All" : cat}
         isSelected={selected === cat}
         onPress={() => onSelect(cat)}
-
       />
     ))}
   </ScrollView>
 );
-
 export default function GuestListPage() {
   // const params = useLocalSearchParams();
   const params = 1;
@@ -499,8 +498,7 @@ export default function GuestListPage() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showFilterSidebar, setShowFilterSidebar] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<CategoryType>("All");
-  const [selectedInvitation, setSelectedInvitation] =
-    useState<InvitationStatus>("All");
+  const [selectedInvitation, setSelectedInvitation] = useState<InvitationStatus>("All");
   const [isImporting, setIsImporting] = useState(false);
   const [sortBy, setSortBy] = useState<SortOption>("name");
   const [refreshing, setRefreshing] = useState(false);
@@ -843,7 +841,7 @@ export default function GuestListPage() {
         categories={categories}
         selected={selectedCategory}
         onSelect={setSelectedCategory}
-      />
+      /> 
 
       {/* Quick Actions */}
       <View className="px-6 py-2 flex-row justify-between items-center ">
