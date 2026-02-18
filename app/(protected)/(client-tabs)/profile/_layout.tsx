@@ -5,9 +5,10 @@ export default function ProfileLayout() {
     <Stack
       screenOptions={{
         headerShown: false,
-        animation: "slide_from_left",
+        animation: "fade",
       }}
     >
+<<<<<<< HEAD
       <Stack.Screen
         name="index"
         options={{
@@ -70,6 +71,11 @@ export default function ProfileLayout() {
           presentation: "card",
         }}
       />
+=======
+      <Stack.Screen name="index" options={{ title: "Profile" }} />
+      <Stack.Screen name="business" options={{ headerShown: false }} />
+      <Stack.Screen name="account" options={{ headerShown: false }} />
+>>>>>>> f0a202fb17fe5ea886476dde06a436b4b6cfc1e0
     </Stack>
   );
 }

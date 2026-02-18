@@ -3,17 +3,7 @@ import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Image, Pressable, View } from "react-native";
 import { Text } from "../ui/Text";
-
-interface Vendor {
-  id: string;
-  name: string;
-  category: string;
-  rating: number;
-  reviews: number;
-  priceLevel: string;
-  location: string;
-  image: string;
-}
+import type { Vendor } from "@/src/utils/type/vendor";
 
 export function VendorCard({ vendor }: { vendor: Vendor }) {
   const router = useRouter();

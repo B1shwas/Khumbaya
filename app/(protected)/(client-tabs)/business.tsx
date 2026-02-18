@@ -108,7 +108,7 @@ export default function VendorDashboard() {
 
             <View className="flex-row flex-wrap gap-3 px-4 mt-3">
               <Action icon="view-agenda" label="View Bookings" primary />
-              <Action icon="chat" label="Messages" />
+              <Action icon="chat" label="growth" />
               <Action icon="calendar-month" label="Calendar" />
               <Action icon="storefront" label="Services" />
             </View>

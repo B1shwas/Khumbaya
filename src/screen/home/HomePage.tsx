@@ -67,7 +67,7 @@ function HeroImage() {
     <View className="mb-8">
       <Image
         source={HERO_IMAGE}
-        className="w-full h-[50vh] rounded-3xl"
+        className="w-full h-[50vh] rounded-xl"
         resizeMode="cover"
         accessibilityLabel="Wedding venue hero image"
       />
