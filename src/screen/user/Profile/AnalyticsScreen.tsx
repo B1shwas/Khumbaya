@@ -121,6 +121,7 @@ export default function AnalyticsScreen() {
   const [filteredActivities, setFilteredActivities] = useState(
     analytics.activities,
   );
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     // Filter activities based on selected time period
@@ -161,6 +162,15 @@ export default function AnalyticsScreen() {
     return analytics.reviews; // In real app, filter based on selected time period
   };
 
+  // Handle refresh
+  const handleRefresh = async () => {
+    setIsLoading(true);
+    // TODO: Implement refresh with real data
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 1000);
+  };
+
   return (
     <View className="flex-1 bg-gray-50">
       <SafeAreaView className="flex-1">
@@ -170,6 +180,7 @@ export default function AnalyticsScreen() {
             className="size-10 items-center justify-center rounded-full z-10"
             accessibilityRole="button"
             onPress={() => router.back()}
+            disabled={isLoading}
           >
             <MaterialIcons
               name="arrow-back-ios-new"
@@ -180,6 +191,18 @@ export default function AnalyticsScreen() {
           <Text className="text-lg font-bold text-gray-900 flex-1 text-center">
             Analytics
           </Text>
+          <TouchableOpacity
+            className="size-10 items-center justify-center rounded-full z-10"
+            accessibilityRole="button"
+            onPress={handleRefresh}
+            disabled={isLoading}
+          >
+            <MaterialIcons
+              name={isLoading ? "hourglass-empty" : "refresh"}
+              size={24}
+              color="#0f172a"
+            />
+          </TouchableOpacity>
         </View>
 
         {/* Filter Tabs */}
@@ -196,6 +219,7 @@ export default function AnalyticsScreen() {
                   selectedFilter === option.id ? "bg-pink-500" : "bg-gray-100"
                 }`}
                 onPress={() => setSelectedFilter(option.id)}
+                disabled={isLoading}
               >
                 <Text
                   className={`text-sm font-medium text-center ${
@@ -212,204 +236,239 @@ export default function AnalyticsScreen() {
         </View>
 
         {/* Main Content */}
-        <ScrollView
-          className="flex-1 px-4 pt-4 pb-32"
-          showsVerticalScrollIndicator={false}
-        >
-          {/* Summary Cards */}
-          <View className="gap-4 mb-6">
-            <View className="bg-white rounded-2xl p-4 shadow-sm">
-              <Text className="text-gray-500 text-sm mb-2">Total Earnings</Text>
-              <Text className="text-3xl font-bold text-gray-900">
-                {analytics.totalEarnings}
-              </Text>
-              <Text className="text-green-600 text-sm mt-1">
-                ↑ 12% from last month
-              </Text>
-            </View>
-
-            <View className="grid grid-cols-2 gap-3">
-              <View className="bg-white rounded-2xl p-4 shadow-sm">
-                <Text className="text-gray-500 text-sm mb-2">
-                  Jobs Completed
-                </Text>
-                <Text className="text-2xl font-bold text-gray-900">
-                  {analytics.jobsCompleted}
-                </Text>
-              </View>
-
-              <View className="bg-white rounded-2xl p-4 shadow-sm">
-                <Text className="text-gray-500 text-sm mb-2">Avg Rating</Text>
-                <Text className="text-2xl font-bold text-gray-900">
-                  {analytics.avgRating}
-                </Text>
-              </View>
-
-              <View className="bg-white rounded-2xl p-4 shadow-sm">
-                <Text className="text-gray-500 text-sm mb-2">
-                  Total Reviews
-                </Text>
-                <Text className="text-2xl font-bold text-gray-900">
-                  {analytics.totalReviews}
-                </Text>
-              </View>
-
-              <View className="bg-white rounded-2xl p-4 shadow-sm">
-                <Text className="text-gray-500 text-sm mb-2">
-                  Monthly Earnings
-                </Text>
-                <Text className="text-2xl font-bold text-gray-900">
-                  {analytics.monthlyEarnings}
-                </Text>
-              </View>
-            </View>
+        {isLoading ? (
+          <View className="flex-1 items-center justify-center">
+            <Text className="text-gray-500">Loading...</Text>
           </View>
-
-          {/* Monthly Trend Chart */}
-          <View className="bg-white rounded-2xl p-4 shadow-sm mb-6">
-            <Text className="text-lg font-bold text-gray-900 mb-4">
-              Monthly Earnings Trend
-            </Text>
-            <View className="h-32 flex-row items-end justify-between px-2">
-              {analytics.monthlyTrend.map((trend, index) => (
-                <View key={index} className="flex-1 items-center">
-                  <View
-                    className="bg-pink-500 rounded-t"
-                    style={{
-                      height: (trend.earnings / maxEarnings) * 100,
-                      width: 20,
-                    }}
-                  />
-                  <Text className="text-xs text-gray-500 mt-1">
-                    {trend.month}
+        ) : (
+          <ScrollView
+            className="flex-1 px-4 pt-4 pb-32"
+            showsVerticalScrollIndicator={false}
+          >
+            {/* Summary Cards */}
+            <View className="gap-4 mb-6">
+              <View className="bg-gradient-to-r from-pink-500 to-purple-600 rounded-2xl p-4 shadow-lg">
+                <Text className="text-white text-sm mb-2 opacity-90">
+                  Total Earnings
+                </Text>
+                <Text className="text-white text-3xl font-bold">
+                  {analytics.totalEarnings}
+                </Text>
+                <View className="flex-row items-center gap-1 mt-1">
+                  <MaterialIcons name="trending-up" size={14} color="#10b981" />
+                  <Text className="text-green-300 text-sm">
+                    ↑ 12% from last month
                   </Text>
                 </View>
-              ))}
-            </View>
-          </View>
+              </View>
 
-          {/* Services Booked */}
-          <View className="bg-white rounded-2xl p-4 shadow-sm mb-6">
-            <Text className="text-lg font-bold text-gray-900 mb-4">
-              Services Booked
-            </Text>
-            <View className="gap-3">
-              {analytics.servicesBooked.map((service, index) => (
-                <View
-                  key={index}
-                  className="flex-row justify-between items-center pb-3 border-b border-gray-100"
-                >
-                  <View>
-                    <Text className="font-semibold text-gray-900">
-                      {service.name}
-                    </Text>
-                    <Text className="text-xs text-gray-500">
-                      {service.count} bookings
+              <View className="grid grid-cols-2 gap-3">
+                <View className="bg-white rounded-2xl p-4 shadow-sm">
+                  <Text className="text-gray-500 text-sm mb-2">
+                    Jobs Completed
+                  </Text>
+                  <Text className="text-2xl font-bold text-gray-900">
+                    {analytics.jobsCompleted}
+                  </Text>
+                </View>
+
+                <View className="bg-white rounded-2xl p-4 shadow-sm">
+                  <Text className="text-gray-500 text-sm mb-2">Avg Rating</Text>
+                  <Text className="text-2xl font-bold text-gray-900">
+                    {analytics.avgRating}
+                  </Text>
+                  <View className="flex-row mt-1">
+                    {[...Array(5)].map((_, i) => (
+                      <MaterialIcons
+                        key={i}
+                        name={
+                          i < Math.floor(analytics.avgRating)
+                            ? "star"
+                            : "star-outline"
+                        }
+                        size={14}
+                        color="#fbbf24"
+                      />
+                    ))}
+                  </View>
+                </View>
+
+                <View className="bg-white rounded-2xl p-4 shadow-sm">
+                  <Text className="text-gray-500 text-sm mb-2">
+                    Total Reviews
+                  </Text>
+                  <Text className="text-2xl font-bold text-gray-900">
+                    {analytics.totalReviews}
+                  </Text>
+                </View>
+
+                <View className="bg-white rounded-2xl p-4 shadow-sm">
+                  <Text className="text-gray-500 text-sm mb-2">
+                    Monthly Earnings
+                  </Text>
+                  <Text className="text-2xl font-bold text-gray-900">
+                    {analytics.monthlyEarnings}
+                  </Text>
+                </View>
+              </View>
+            </View>
+
+            {/* Monthly Trend Chart */}
+            <View className="bg-white rounded-2xl p-4 shadow-sm mb-6">
+              <Text className="text-lg font-bold text-gray-900 mb-4">
+                Monthly Earnings Trend
+              </Text>
+              <View className="h-32 flex-row items-end justify-between px-2">
+                {analytics.monthlyTrend.map((trend, index) => (
+                  <View key={index} className="flex-1 items-center">
+                    <View
+                      className="bg-gradient-to-t from-pink-500 to-purple-600 rounded-t"
+                      style={{
+                        height: (trend.earnings / maxEarnings) * 100,
+                        width: 20,
+                      }}
+                    />
+                    <Text className="text-xs text-gray-500 mt-1">
+                      {trend.month}
                     </Text>
                   </View>
-                  <Text className="font-bold text-pink-500">
-                    {service.revenue}
-                  </Text>
-                </View>
-              ))}
+                ))}
+              </View>
             </View>
-          </View>
 
-          {/* Customer Reviews */}
-          <View className="bg-white rounded-2xl p-4 shadow-sm">
-            <Text className="text-lg font-bold text-gray-900 mb-4">
-              Customer Reviews
-            </Text>
-            <View className="gap-4">
-              {getFilteredReviews().map((review) => (
-                <View key={review.id} className="pb-3 border-b border-gray-100">
-                  <View className="flex-row items-center gap-3 mb-2">
-                    <Image
-                      source={{ uri: review.avatar }}
-                      className="w-10 h-10 rounded-full"
-                    />
-                    <View className="flex-1">
-                      <View className="flex-row items-center gap-2">
-                        <Text className="font-semibold text-gray-900">
-                          {review.name}
-                        </Text>
-                        <View className="flex-row">
-                          {[...Array(5)].map((_, i) => (
-                            <MaterialIcons
-                              key={i}
-                              name={i < review.rating ? "star" : "star-outline"}
-                              size={14}
-                              color="#fbbf24"
-                            />
-                          ))}
-                        </View>
-                        <Text className="text-xs text-gray-500">
-                          {review.date}
-                        </Text>
-                      </View>
-                      <Text className="text-xs text-pink-500">
-                        {review.service}
+            {/* Services Booked */}
+            <View className="bg-white rounded-2xl p-4 shadow-sm mb-6">
+              <Text className="text-lg font-bold text-gray-900 mb-4">
+                Services Booked
+              </Text>
+              <View className="gap-3">
+                {analytics.servicesBooked.map((service, index) => (
+                  <View
+                    key={index}
+                    className="flex-row justify-between items-center pb-3 border-b border-gray-100"
+                  >
+                    <View>
+                      <Text className="font-semibold text-gray-900">
+                        {service.name}
+                      </Text>
+                      <Text className="text-xs text-gray-500">
+                        {service.count} bookings
                       </Text>
                     </View>
-                  </View>
-                  <Text className="text-sm text-gray-700">
-                    {expandedReview === review.id
-                      ? review.comment
-                      : review.comment.length > 100
-                        ? review.comment.substring(0, 100) + "..."
-                        : review.comment}
-                  </Text>
-                  {review.comment.length > 100 && (
-                    <TouchableOpacity
-                      onPress={() =>
-                        setExpandedReview(
-                          expandedReview === review.id ? null : review.id,
-                        )
-                      }
-                    >
-                      <Text className="text-sm text-pink-500 mt-1">
-                        {expandedReview === review.id
-                          ? "Show Less"
-                          : "Read More"}
-                      </Text>
-                    </TouchableOpacity>
-                  )}
-                </View>
-              ))}
-            </View>
-          </View>
-
-          {/* Activity History */}
-          <View className="bg-white rounded-2xl p-4 shadow-sm mt-6">
-            <Text className="text-lg font-bold text-gray-900 mb-4">
-              Recent Activity
-            </Text>
-            <View className="gap-4">
-              {filteredActivities.map((activity) => (
-                <View key={activity.id} className="flex-row items-center gap-3">
-                  <View className="bg-gray-100 p-2 rounded-full">
-                    <MaterialIcons
-                      name={activity.icon as any}
-                      size={20}
-                      color={activity.color}
-                    />
-                  </View>
-                  <View className="flex-1">
-                    <Text className="font-semibold text-gray-900">
-                      {activity.title}
+                    <Text className="font-bold text-pink-500">
+                      {service.revenue}
                     </Text>
-                    {activity.amount && (
-                      <Text className="text-xs text-gray-500">
-                        {activity.amount}
-                      </Text>
+                  </View>
+                ))}
+              </View>
+            </View>
+
+            {/* Customer Reviews */}
+            <View className="bg-white rounded-2xl p-4 shadow-sm">
+              <Text className="text-lg font-bold text-gray-900 mb-4">
+                Customer Reviews
+              </Text>
+              <View className="gap-4">
+                {getFilteredReviews().map((review) => (
+                  <View
+                    key={review.id}
+                    className="pb-3 border-b border-gray-100"
+                  >
+                    <View className="flex-row items-center gap-3 mb-2">
+                      <Image
+                        source={{ uri: review.avatar }}
+                        className="w-10 h-10 rounded-full"
+                      />
+                      <View className="flex-1">
+                        <View className="flex-row items-center gap-2">
+                          <Text className="font-semibold text-gray-900">
+                            {review.name}
+                          </Text>
+                          <View className="flex-row">
+                            {[...Array(5)].map((_, i) => (
+                              <MaterialIcons
+                                key={i}
+                                name={
+                                  i < review.rating ? "star" : "star-outline"
+                                }
+                                size={14}
+                                color="#fbbf24"
+                              />
+                            ))}
+                          </View>
+                          <Text className="text-xs text-gray-500">
+                            {review.date}
+                          </Text>
+                        </View>
+                        <Text className="text-xs text-pink-500">
+                          {review.service}
+                        </Text>
+                      </View>
+                    </View>
+                    <Text className="text-sm text-gray-700">
+                      {expandedReview === review.id
+                        ? review.comment
+                        : review.comment.length > 100
+                          ? review.comment.substring(0, 100) + "..."
+                          : review.comment}
+                    </Text>
+                    {review.comment.length > 100 && (
+                      <TouchableOpacity
+                        onPress={() =>
+                          setExpandedReview(
+                            expandedReview === review.id ? null : review.id,
+                          )
+                        }
+                      >
+                        <Text className="text-sm text-pink-500 mt-1">
+                          {expandedReview === review.id
+                            ? "Show Less"
+                            : "Read More"}
+                        </Text>
+                      </TouchableOpacity>
                     )}
                   </View>
-                  <Text className="text-xs text-gray-500">{activity.date}</Text>
-                </View>
-              ))}
+                ))}
+              </View>
             </View>
-          </View>
-        </ScrollView>
+
+            {/* Activity History */}
+            <View className="bg-white rounded-2xl p-4 shadow-sm mt-6">
+              <Text className="text-lg font-bold text-gray-900 mb-4">
+                Recent Activity
+              </Text>
+              <View className="gap-4">
+                {filteredActivities.map((activity) => (
+                  <View
+                    key={activity.id}
+                    className="flex-row items-center gap-3"
+                  >
+                    <View className="bg-gray-100 p-2 rounded-full">
+                      <MaterialIcons
+                        name={activity.icon as any}
+                        size={20}
+                        color={activity.color}
+                      />
+                    </View>
+                    <View className="flex-1">
+                      <Text className="font-semibold text-gray-900">
+                        {activity.title}
+                      </Text>
+                      {activity.amount && (
+                        <Text className="text-xs text-gray-500">
+                          {activity.amount}
+                        </Text>
+                      )}
+                    </View>
+                    <Text className="text-xs text-gray-500">
+                      {activity.date}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+            </View>
+          </ScrollView>
+        )}
       </SafeAreaView>
     </View>
   );

@@ -11,7 +11,9 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function EventSuccessPage() {
   const handleCreateSubEvent = () => {
-    router.push("/event/subevent-create" );
+    // This is a placeholder - in a real app, you would navigate to the subevent creation screen
+    // with the event ID from the current context
+    router.push("/(protected)/(client-stack)/events/[eventId]/subevent-create" as any);
   };
 
   const handleViewEvents = () => {

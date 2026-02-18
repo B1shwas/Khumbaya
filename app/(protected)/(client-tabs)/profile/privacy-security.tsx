@@ -1,8 +1,18 @@
+import { MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { Alert, Pressable, Switch, Text, View } from "react-native";
+import {
+  Alert,
+  Pressable,
+  Switch,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function PrivacySecurityScreen() {
+  const router = useRouter();
   const [privacySettings, setPrivacySettings] = useState({
     showProfilePublic: true,
     shareDataWithPartners: false,
@@ -16,8 +26,6 @@ export default function PrivacySecurityScreen() {
       [field]: value,
     }));
   };
-
-  const router = useRouter();
 
   const handleChangePassword = () => {
     router.push({ pathname: "/profile/change-password" });
@@ -42,139 +50,129 @@ export default function PrivacySecurityScreen() {
 
   return (
     <View className="flex-1 bg-gray-50">
-      <View className="bg-white p-6">
-        <Text className="text-2xl font-bold text-gray-900 mb-6">
-          Privacy & Security
-        </Text>
-
-        {/* Privacy Settings */}
-        <Text className="text-lg font-semibold text-gray-900 mb-4">
-          Privacy Settings
-        </Text>
-
-        <View className="flex-row items-center justify-between mb-6">
-          <View>
-            <Text className="text-base font-semibold text-gray-900">
-              Public Profile
-            </Text>
-            <Text className="text-sm text-gray-500">
-              Allow others to view your profile
-            </Text>
-          </View>
-          <Switch
-            value={privacySettings.showProfilePublic}
-            onValueChange={(value) => handleToggle("showProfilePublic", value)}
-            trackColor={{ false: "#d1d5db", true: "#ec4899" }}
-            thumbColor="#fff"
-          />
+      <SafeAreaView className="flex-1">
+        {/* Top App Bar */}
+        <View className="sticky top-0 z-10 flex-row items-center justify-between px-4 py-4 bg-white shadow-sm">
+          <TouchableOpacity
+            className="size-10 items-center justify-center rounded-full"
+            accessibilityRole="button"
+            onPress={() => router.back()}
+          >
+            <MaterialIcons
+              name="arrow-back-ios-new"
+              size={24}
+              color="#0f172a"
+            />
+          </TouchableOpacity>
+          <Text className="text-lg font-bold text-gray-900">
+            Privacy & Security
+          </Text>
+          <View className="size-10" />
         </View>
 
-        <View className="flex-row items-center justify-between mb-6">
-          <View>
-            <Text className="text-base font-semibold text-gray-900">
-              Share Data
-            </Text>
-            <Text className="text-sm text-gray-500">
-              Share data with partners
-            </Text>
-          </View>
-          <Switch
-            value={privacySettings.shareDataWithPartners}
-            onValueChange={(value) =>
-              handleToggle("shareDataWithPartners", value)
-            }
-            trackColor={{ false: "#d1d5db", true: "#ec4899" }}
-            thumbColor="#fff"
-          />
-        </View>
+        <View className="bg-white p-6">
+          {/* Privacy Settings */}
+          <Text className="text-lg font-semibold text-gray-900 mb-4">
+            Privacy Settings
+          </Text>
 
-        {/* Security Settings */}
-        <Text className="text-lg font-semibold text-gray-900 mb-4 mt-8">
-          Security Settings
-        </Text>
-
-        <View className="flex-row items-center justify-between mb-6">
-          <View>
-            <Text className="text-base font-semibold text-gray-900">
-              Two-Factor Authentication
-            </Text>
-            <Text className="text-sm text-gray-500">
-              Add extra security to your account
-            </Text>
-          </View>
-          <Switch
-            value={privacySettings.enableTwoFactor}
-            onValueChange={(value) => handleToggle("enableTwoFactor", value)}
-            trackColor={{ false: "#d1d5db", true: "#ec4899" }}
-            thumbColor="#fff"
-          />
-        </View>
-
-        {/* Change Password */}
-        <Pressable
-          className="bg-gray-50 border border-gray-200 rounded-lg py-4 px-4 mb-6"
-          onPress={handleChangePassword}
-        >
-          <View className="flex-row items-center justify-between">
+          <View className="flex-row items-center justify-between mb-6">
             <View>
               <Text className="text-base font-semibold text-gray-900">
-                Change Password
+                Public Profile
               </Text>
               <Text className="text-sm text-gray-500">
-                Update your password
+                Allow others to view your profile
               </Text>
             </View>
-            <Text className="text-pink-500 font-semibold">Change</Text>
+            <Switch
+              value={privacySettings.showProfilePublic}
+              onValueChange={(value) =>
+                handleToggle("showProfilePublic", value)
+              }
+              trackColor={{ false: "#d1d5db", true: "#ec4899" }}
+              thumbColor="#fff"
+            />
           </View>
-        </Pressable>
 
-        {/* Analytics */}
-        <View className="flex-row items-center justify-between mb-6">
-          <View>
-            <Text className="text-base font-semibold text-gray-900">
-              Analytics
-            </Text>
-            <Text className="text-sm text-gray-500">
-              Help improve our services
-            </Text>
+          <View className="flex-row items-center justify-between mb-6">
+            <View>
+              <Text className="text-base font-semibold text-gray-900">
+                Share Data
+              </Text>
+              <Text className="text-sm text-gray-500">
+                Share data with partners
+              </Text>
+            </View>
+            <Switch
+              value={privacySettings.shareDataWithPartners}
+              onValueChange={(value) =>
+                handleToggle("shareDataWithPartners", value)
+              }
+              trackColor={{ false: "#d1d5db", true: "#ec4899" }}
+              thumbColor="#fff"
+            />
           </View>
-          <Switch
-            value={privacySettings.allowAnalytics}
-            onValueChange={(value) => handleToggle("allowAnalytics", value)}
-            trackColor={{ false: "#d1d5db", true: "#ec4899" }}
-            thumbColor="#fff"
-          />
-        </View>
 
-        {/* Delete Account */}
-        <Pressable
-          className="bg-red-50 border border-red-200 rounded-lg py-4 px-4"
-          onPress={handleDeleteAccount}
-        >
-          <Text className="text-red-600 font-semibold text-center">
-            Delete Account
+          {/* Security Settings */}
+          <Text className="text-lg font-semibold text-gray-900 mb-4 mt-8">
+            Security Settings
           </Text>
-        </Pressable>
-      </View>
 
-      {/* Backend integration comments */}
-      {/* 
-        // Backend integration example for change password
-        import { changePassword } from '@/src/api/auth';
-        
-        const handleChangePassword = async () => {
-          try {
-            const response = await changePassword(oldPassword, newPassword);
-            if (response.success) {
-              Alert.alert('Success', 'Password changed successfully!');
-            } else {
-              Alert.alert('Error', response.message);
-            }
-          } catch (error) {
-            Alert.alert('Error', 'Failed to change password');
-          }
-        };
-      */}
+          <View className="flex-row items-center justify-between mb-6">
+            <View>
+              <Text className="text-base font-semibold text-gray-900">
+                Two-Factor Authentication
+              </Text>
+              <Text className="text-sm text-gray-500">
+                Add an extra layer of security
+              </Text>
+            </View>
+            <Switch
+              value={privacySettings.enableTwoFactor}
+              onValueChange={(value) => handleToggle("enableTwoFactor", value)}
+              trackColor={{ false: "#d1d5db", true: "#ec4899" }}
+              thumbColor="#fff"
+            />
+          </View>
+
+          <View className="flex-row items-center justify-between mb-6">
+            <View>
+              <Text className="text-base font-semibold text-gray-900">
+                Allow Analytics
+              </Text>
+              <Text className="text-sm text-gray-500">
+                Help us improve by sharing usage data
+              </Text>
+            </View>
+            <Switch
+              value={privacySettings.allowAnalytics}
+              onValueChange={(value) => handleToggle("allowAnalytics", value)}
+              trackColor={{ false: "#d1d5db", true: "#ec4899" }}
+              thumbColor="#fff"
+            />
+          </View>
+
+          {/* Actions */}
+          <Text className="text-lg font-semibold text-gray-900 mb-4 mt-8">
+            Actions
+          </Text>
+
+          <Pressable
+            className="py-4 border-t border-gray-200"
+            onPress={handleChangePassword}
+          >
+            <Text className="text-base text-gray-900">Change Password</Text>
+          </Pressable>
+
+          <Pressable
+            className="py-4 border-t border-gray-200"
+            onPress={handleDeleteAccount}
+          >
+            <Text className="text-base text-red-500">Delete Account</Text>
+          </Pressable>
+        </View>
+      </SafeAreaView>
     </View>
   );
 }

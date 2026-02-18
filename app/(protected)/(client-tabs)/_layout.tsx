@@ -46,6 +46,15 @@ export default function ClientTabsLayout() {
         }}
       />
       <Tabs.Screen
+        name="business"
+        options={{
+          title: "Business",
+          tabBarIcon: ({ color }) => (
+            <MaterialIcons name="business" size={24} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="clientvendor"
         options={{
           title: "Explore",
@@ -66,4 +75,3 @@ export default function ClientTabsLayout() {
     </Tabs>
   );
 }
-
