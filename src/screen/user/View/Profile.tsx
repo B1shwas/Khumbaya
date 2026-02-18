@@ -1,26 +1,17 @@
 import { useAuth } from "@/src/store/AuthContext";
 import { MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { useRouter } from "expo-router";
+import { Link } from "expo-router";
 import { useState } from "react";
 import { Image, Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-const PROFILE_IMAGE =
-    "https://lh3.googleusercontent.com/aida-public/AB6AXuCdkO95jYAsgD-tHT0l8PitJku9U0PYgsN46dLAfx3PtcZADmhzG5DIJ9fwFE53zZ2lTuyjK_stwFjrqzykITWedJJLCu1GfaSL39aHXer3wr6a9bHVMEa6kZmmVfnpsc9Ha_3shT06wNP776rHOOQW5hIFHAmx_PCNBHt8Z5RBFm5nmL8Up_zXeGF3GB_QIKDQxQdIOKfyFJ_ABVdt-ANir7346Ra3fo1YNqAuly_YLt64FSMRTHSHRBM85iWyTBq6R8z60Hf6Aok";
 
-type ToggleButtonProps = {
-  title: string;
-  active: boolean;
-  onPress: () => void;
 type ToggleButtonProps = {
   title: string;
   active: boolean;
   onPress: () => void;
 };
 
-type RowProps = {
-  icon: keyof typeof MaterialIcons.glyphMap;
-  title: string;
 type RowProps = {
   icon: keyof typeof MaterialIcons.glyphMap;
   title: string;
@@ -29,28 +20,11 @@ type RowProps = {
 export default function ProfileScreen() {
   const [tab, setTab] = useState<"account" | "info">("account");
   const { logout } = useAuth();
-  const router = useRouter();
 
   const handleLogout = () => {
     logout();
   };
 
-  const handleNavigation = (
-    section: "business" | "account",
-    screen: string,
-  ) => {
-    router.push({ pathname: `/profile/${section}/${screen}` } as any);
-  };
-
-  return (
-    <SafeAreaView className="flex-1 bg-gray-50">
-      <ScrollView showsVerticalScrollIndicator={false}>
-        {/* HEADER */}
-        <View className="flex-row justify-between items-center px-6 py-4 bg-white">
-          <MaterialIcons name="arrow-back-ios" size={20} color="#1f2937" />
-          <Text className="text-lg font-bold text-gray-900">Profile</Text>
-          <MaterialIcons name="more-horiz" size={24} color="#1f2937" />
-        </View>
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
       <ScrollView showsVerticalScrollIndicator={false}>
@@ -63,22 +37,17 @@ export default function ProfileScreen() {
 
         {/* PROFILE */}
         <View className="items-center mt-6 mb-6 bg-white py-6">
-          <LinearGradient
-            colors={["#ec4899", "#db2777"]}
-            className="p-[3px] rounded-full"
-          >
-            <View className="bg-white p-1 rounded-full">
-              <Image
-                source={{
-                  uri: "https://lh3.googleusercontent.com/aida-public/AB6AXuD8QYwLdrh7xjte39mVYvDpi053GDi8rf6uQT5uRehpkzgSaSUO1bU-gjQR3vC5rz0trs8aPuTJQ-NF-7EWhF0dW0Sncg_Vhq_mo8NftERtP4ZVATWyqgiFk4YEYtjMq-kH0vubWOCRAWN0iY_YzSfmg5zLdv55nlQE84xdxw-TTt-IVuBhKoAuBzCQypf1qEhxeHZNxVPFpTjsCytpO95l4FHsaMS3HtpB0dJJssJtnyKpr-sBd50Vrtk2mkFa_ESaiscwocjW8do",
-                }}
-                className="w-32 h-32 rounded-full"
-              />
-            </View>
-          </LinearGradient>
+          <View className="bg-white p-1 rounded-full !bg-primary">
+            <Image
+              source={{
+                uri: "https://lh3.googleusercontent.com/aida-public/AB6AXuD8QYwLdrh7xjte39mVYvDpi053GDi8rf6uQT5uRehpkzgSaSUO1bU-gjQR3vC5rz0trs8aPuTJQ-NF-7EWhF0dW0Sncg_Vhq_mo8NftERtP4ZVATWyqgiFk4YEYtjMq-kH0vubWOCRAWN0iY_YzSfmg5zLdv55nlQE84xdxw-TTt-IVuBhKoAuBzCQypf1qEhxeHZNxVPFpTjsCytpO95l4FHsaMS3HtpB0dJJssJtnyKpr-sBd50Vrtk2mkFa_ESaiscwocjW8do",
+              }}
+              className="w-32 h-32 rounded-full"
+            />
+          </View>
 
           {/* camera */}
-          <Pressable className="absolute bottom-[70px] right-[140px] bg-pink-500 p-2 rounded-full shadow-lg">
+          <Pressable className="absolute bottom-[85px] right-[150px] bg-pink-500 p-2 rounded-full shadow-lg">
             <MaterialIcons name="photo-camera" size={18} color="white" />
           </Pressable>
 
@@ -104,11 +73,7 @@ export default function ProfileScreen() {
         </View>
 
         {/* CONTENT */}
-        {tab === "account" ? (
-          <Account onNavigate={handleNavigation} />
-        ) : (
-          <Info onNavigate={handleNavigation} />
-        )}
+        {tab === "account" ? <Account /> : <Info />}
 
         {/* LOGOUT */}
         <Pressable className="mx-6 mt-10 mb-20" onPress={handleLogout}>
@@ -123,50 +88,59 @@ export default function ProfileScreen() {
 
 /* ---------- Toggle ---------- */
 
-const ToggleButton = ({ title, active, onPress }: ToggleButtonProps) => (
-  <Pressable
-    onPress={onPress}
-    className={`flex-1 py-3 rounded-xl ${active ? "bg-pink-50 shadow-sm" : ""}`}
-  >
-    <Text
-      className={`text-center font-semibold ${
-        active ? "text-pink-500" : "text-gray-400"
-      }`}
+const ToggleButton = ({ title, active, onPress }: ToggleButtonProps) => {
+  return (
+    <Pressable
+      onPress={onPress}
+      style={{
+        flex: 1,
+        paddingVertical: 12,
+        borderRadius: 12,
+        backgroundColor: active ? "#ec4899" : "transparent",
+        shadowColor: active ? "#000" : undefined,
+        shadowOffset: active ? { width: 0, height: 1 } : undefined,
+        shadowOpacity: active ? 0.1 : undefined,
+        shadowRadius: active ? 2 : undefined,
+        elevation: active ? 2 : undefined,
+      }}
     >
-      {title}
-    </Text>
-  </Pressable>
-);
+      <Text
+        style={{
+          textAlign: "center",
+          fontWeight: "600",
+          color: active ? "#ffffff" : "#9ca3af",
+        }}
+      >
+        {title}
+      </Text>
+    </Pressable>
+  );
+};
 
 /* ---------- Row ---------- */
 
-const Row = ({ icon, title, onPress }: RowProps & { onPress?: () => void }) => (
-  <Pressable
-    className="flex-row items-center justify-between bg-white p-4 rounded-2xl mb-3 shadow-sm active:scale-[0.98]"
-    onPress={onPress}
-  >
-    <View className="flex-row items-center gap-3">
-      <LinearGradient
-        colors={["#ec489933", "#db277733"]}
-        className="p-2 rounded-xl"
-      >
-        <MaterialIcons name={icon} size={20} color="#ec4899" />
-      </LinearGradient>
+const Row = ({ icon, title, href }: RowProps & { href: string }) => (
+  <Link href={href as any} asChild>
+    <Pressable className="flex-row items-center justify-between bg-white p-4 rounded-2xl mb-3 shadow-sm active:scale-[0.98]">
+      <View className="flex-row items-center gap-3">
+        <LinearGradient
+          colors={["#ec489933", "#db277733"]}
+          className="p-2 rounded-xl"
+        >
+          <MaterialIcons name={icon} size={20} color="#ec4899" />
+        </LinearGradient>
 
-      <Text className="font-semibold text-gray-900">{title}</Text>
-    </View>
+        <Text className="font-semibold text-gray-900">{title}</Text>
+      </View>
 
-    <MaterialIcons name="chevron-right" size={22} color="#9ca3af" />
-  </Pressable>
+      <MaterialIcons name="chevron-right" size={22} color="#9ca3af" />
+    </Pressable>
+  </Link>
 );
 
 /* ---------- Sections ---------- */
 
-const Account = ({
-  onNavigate,
-}: {
-  onNavigate: (section: "business" | "account", screen: string) => void;
-}) => (
+const Account = () => (
   <View className="mx-6 mt-8">
     <Text className="text-xs font-bold text-gray-400 mb-4 uppercase tracking-wider">
       BUSINESS
@@ -175,55 +149,39 @@ const Account = ({
     <Row
       icon="business"
       title="Business Information"
-      onPress={() => onNavigate("business", "business-information")}
+      href="/profile/business-information"
     />
     <Row
       icon="sell"
       title="Services & Pricing"
-      onPress={() => onNavigate("business", "services-pricing")}
+      href="/profile/services-pricing"
     />
-    <Row
-      icon="photo-library"
-      title="Portfolio"
-      onPress={() => onNavigate("business", "portfolio")}
-    />
+    <Row icon="photo-library" title="Portfolio" href="/profile/portfolio" />
     <Row
       icon="verified"
       title="Vendor Verification"
-      onPress={() => onNavigate("business", "vendor-verification")}
+      href="/profile/vendor-verification"
     />
   </View>
 );
 
-const Info = ({
-  onNavigate,
-}: {
-  onNavigate: (section: "business" | "account", screen: string) => void;
-}) => (
+const Info = () => (
   <View className="mx-6 mt-8">
     <Text className="text-xs font-bold text-gray-400 mb-4 uppercase tracking-wider">
       PERSONAL
     </Text>
 
-    <Row
-      icon="person"
-      title="Edit Profile"
-      onPress={() => onNavigate("account", "edit-profile")}
-    />
+    <Row icon="person" title="Edit Profile" href="/profile/edit-profile" />
     <Row
       icon="notifications"
       title="Notifications"
-      onPress={() => onNavigate("account", "notifications")}
+      href="/profile/notifications"
     />
     <Row
       icon="lock"
       title="Privacy & Security"
-      onPress={() => onNavigate("account", "privacy-security")}
+      href="/profile/privacy-security"
     />
-    <Row
-      icon="settings"
-      title="App Settings"
-      onPress={() => onNavigate("account", "app-settings")}
-    />
+    <Row icon="settings" title="App Settings" href="/profile/app-settings" />
   </View>
 );
