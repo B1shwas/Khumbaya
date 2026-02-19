@@ -36,28 +36,28 @@ const EventDetail = ({
       name: "Timeline",
       icon: "time",
       color: "#F59E0B",
-      route: `/(protected)/(client-stack)/events/${eventId || event.id}/timeline`,
+      route: `./timeline`,
     },
     {
       id: "guests",
       name: "Guest List",
       icon: "people",
       color: "#8B5CF6",
-      route: `/(protected)/(client-stack)/events/${eventId || event.id}/guests`,
+      route: `./guests`,
     },
     {
       id: "vendors",
       name: "Vendors",
       icon: "business",
       color: "#3B82F6",
-      route: `/(protected)/(client-stack)/events/${eventId || 1}/vendors`,
+      route: `./vendor`,
     },
     {
       id: "budget",
       name: "Budget",
       icon: "wallet",
       color: "#10B981",
-      route: `/(protected)/(client-stack)/events/${eventId || 1}/budget`,
+      route: `./budget`,
     },
   ];
 
@@ -174,7 +174,7 @@ const EventDetail = ({
           {/* Gallery - Full Width */}
           <TouchableOpacity
             className="w-full bg-white p-4 rounded-xl shadow-sm border border-gray-100 active:scale-[0.98] transition-transform flex-row items-center gap-4"
-            onPress={() => router.push("/events/gallery" as RelativePathString)}
+            onPress={() => router.push("./gallery" as RelativePathString)}
           >
             <View className="p-2.5 bg-primary/10 rounded-full shrink-0">
               <Ionicons name="images" size={20} color="#ee2b8c" />
