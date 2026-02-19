@@ -1,5 +1,5 @@
 import { MaterialIcons } from "@expo/vector-icons";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { useMemo, useState } from "react";
 import {
   ImageBackground,
@@ -74,14 +74,11 @@ export default function VendorEventDetailScreen() {
   const [activeTab, setActiveTab] = useState<TabKey>("Timeline");
 
   const visibleTimeline = useMemo(() => timelineItems, []);
-  const router = useRouter();
 
   return (
-    // NOTE: dark:bg-background-dark omitted.
     <SafeAreaView className="flex-1 bg-background-light">
       <View className="flex-1">
         {/* Top App Bar */}
-        {/* NOTE: dark:bg-background-dark/95 and dark:border-white/10 omitted. */}
         <View className="flex-row items-center justify-between border-b border-gray-200 bg-background-light/95 px-4 py-3">
           <TouchableOpacity
             className="h-10 w-10 items-center justify-center rounded-full"
@@ -118,7 +115,6 @@ export default function VendorEventDetailScreen() {
         >
           {/* Event Summary Card */}
           <View className="p-4">
-            {/* NOTE: dark:bg-white/5 and dark:border-white/5 omitted. */}
             <View className="gap-4 rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
               <View className="gap-4">
                 <View className="gap-2">
@@ -129,14 +125,11 @@ export default function VendorEventDetailScreen() {
                         LIVE NOW
                       </Text>
                     </View>
-                    {/* NOTE: dark:text-gray-400 omitted. */}
                     <Text className="text-xs text-gray-500">Ends 12:00 AM</Text>
                   </View>
-                  {/* NOTE: dark:text-white omitted. */}
                   <Text className="text-xl font-bold leading-tight text-slate-900">
                     Priya & Raj&apos;s Wedding Reception
                   </Text>
-                  {/* NOTE: dark:text-gray-400 omitted. */}
                   <View className="flex-row items-start gap-1.5">
                     <MaterialIcons
                       name="location-on"
@@ -149,7 +142,6 @@ export default function VendorEventDetailScreen() {
                     </Text>
                   </View>
                 </View>
-                {/* NOTE: dark:bg-white/10 and dark:text-white omitted. */}
                 <TouchableOpacity
                   className="w-fit flex-row items-center justify-center gap-2 rounded-lg bg-gray-100 px-4 py-2"
                   accessibilityRole="button"
@@ -179,7 +171,6 @@ export default function VendorEventDetailScreen() {
           </View>
 
           {/* Sticky Tabs */}
-          {/* NOTE: dark:bg-background-dark and dark:border-white/10 omitted. */}
           <View className="border-b border-gray-200 bg-background-light shadow-sm">
             <View className="flex-row px-4">
               {tabs.map((tab) => {
@@ -194,7 +185,6 @@ export default function VendorEventDetailScreen() {
                     accessibilityState={{ selected: isActive }}
                     onPress={() => setActiveTab(tab)}
                   >
-                    {/* NOTE: dark:text-gray-400 omitted. */}
                     <Text
                       className={`text-sm font-bold tracking-wide ${
                         isActive ? "text-primary" : "text-gray-500"
@@ -241,35 +231,29 @@ export default function VendorEventDetailScreen() {
                         />
                       </View>
                       {!isLast ? (
-                        // NOTE: dark:bg-white/10 omitted.
                         <View className="h-10 w-0.5 bg-gray-200" />
                       ) : null}
                     </View>
 
                     <View className="flex-1 pb-2">
                       {isActive ? (
-                        // NOTE: dark:bg-white/5 omitted.
                         <View className="rounded-xl border-l-4 border-primary bg-white p-4 shadow-sm">
                           <View className="mb-1 flex-row items-start justify-between">
                             <Text className="text-xs font-bold uppercase tracking-wider text-primary">
                               {item.highlight}
                             </Text>
-                            {/* NOTE: dark:text-white omitted. */}
                             <Text className="text-sm font-bold text-slate-900">
                               {item.time}
                             </Text>
                           </View>
-                          {/* NOTE: dark:text-white omitted. */}
                           <Text className="text-lg font-bold text-slate-900">
                             {item.title}
                           </Text>
-                          {/* NOTE: dark:text-gray-400 omitted. */}
                           <Text className="mt-2 text-sm text-gray-500">
                             {item.subtitle}
                           </Text>
                           {item.actionLabel ? (
                             <View className="mt-4 flex-row">
-                              {/* NOTE: dark:bg-white/10 and dark:text-gray-200 omitted. */}
                               <View className="flex-row items-center gap-1 rounded-full bg-gray-100 px-3 py-1.5">
                                 <MaterialIcons
                                   name="group"
@@ -286,7 +270,6 @@ export default function VendorEventDetailScreen() {
                       ) : (
                         <View className={`${isCompleted ? "opacity-60" : ""}`}>
                           <View className="flex-row items-baseline justify-between">
-                            {/* NOTE: dark:text-white omitted. */}
                             <Text
                               className={`text-lg ${
                                 isCompleted
@@ -296,12 +279,10 @@ export default function VendorEventDetailScreen() {
                             >
                               {item.title}
                             </Text>
-                            {/* NOTE: dark:text-gray-400 omitted. */}
                             <Text className="text-sm font-medium text-gray-500">
                               {item.time}
                             </Text>
                           </View>
-                          {/* NOTE: dark:text-gray-400 omitted. */}
                           <Text className="mt-1 text-sm text-gray-500">
                             {item.subtitle}
                           </Text>

@@ -1,33 +1,42 @@
 import NavigateComponent from "@/src/components/event/NavigateComponent";
+import { eventsData } from "@/src/constants/event";
 import { Ionicons } from "@expo/vector-icons";
-import { router, type RelativePathString } from "expo-router";
+import {
+  router,
+  useLocalSearchParams,
+  type RelativePathString,
+} from "expo-router";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import EventDetailHero from "./EventDetailHero";
 
 const EventDetail = ({
-  eventId,
-  isInvitedGuest = true,
+  isInvitedGuest = false,
 }: {
-  eventId?: string;
   isInvitedGuest?: boolean;
 }) => {
-  const event = {
-    id: "1",
-    title: "Sarah & Mike's Wedding",
-    date: "August 24, 2024",
-    location: "San Francisco, CA",
-    venue: "Grand Plaza Hotel",
-    imageUrl:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuDeW7ylSiob80ww9XoAOOV3fReuakm7CdifvgqSXNruTM_9zAafkSATg54Dmx3H7FAZ5KXTRd39NLDkX59Y3q3sxo1tkE7A7izp0iVgffzw7wQD1ZGNTwh0GVaKomwXQ9aAgwXmkYiHuyLVXHjwPa43pqfUwcXAnj00ohS22F1JIFaI0gqlP4ljcXEqU0-A1ZjuQLfYmk0FeUhi3kPIuFPTGwNPv_HTUqTqGaOGf9I_Hr5lb4N45xrwpUyAvH3ZVxD2I2QRXr3HmhQ",
-    status: "Upcoming",
-    days: 124,
-    hours: 8,
-    minutes: 45,
-    guests: { confirmed: 150, total: 200 },
-    budget: { spent: 12000, total: 30000 },
-    tasks: { pending: 12 },
-    vendors: { booked: 6, pending: 2 },
-    nextTask: "Cake Tasting @ 2 PM",
+  const { eventId } = useLocalSearchParams<{ eventId: string }>();
+
+  const found = eventsData.find((e) => String(e.id) === String(eventId));
+
+  // Fallback shape so UI never crashes even if event not found
+  const event = found ?? {
+    id: eventId ?? "0",
+    title: "Event Details",
+    date: "—",
+    location: "—",
+    venue: "—",
+    imageUrl: "",
+    role: "Organizer" as const,
+    status: "upcoming" as const,
+    time: "",
+    days: 0,
+    hours: 0,
+    minutes: 0,
+    guests: { confirmed: 0, total: 0 },
+    budget: { spent: 0, total: 0 },
+    tasks: { pending: 0 },
+    vendors: { booked: 0, pending: 0 },
+    nextTask: "",
   };
 
   const manageActions = [
@@ -61,14 +70,18 @@ const EventDetail = ({
     },
   ];
 
-  const budgetRemaining = event.budget.total - event.budget.spent;
-
   return (
     <ScrollView
       className="flex-1 bg-background-light"
       showsVerticalScrollIndicator={false}
     >
-      <EventDetailHero />
+      <EventDetailHero
+        imageUrl={event.imageUrl}
+        status={event.status}
+        title={event.title}
+        date={event.date}
+        location={event.location}
+      />
 
       {/* Quick Stats Row */}
       <View className="mt-6 px-4">

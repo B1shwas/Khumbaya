@@ -5,6 +5,7 @@ export default function OrganizerEventDetailLayout() {
     <Stack
       screenOptions={{ headerShown: false, animation: "slide_from_right" }}
     >
+      <Stack.Screen name="index" />
       <Stack.Screen name="budget" />
       <Stack.Screen name="gallery" />
       <Stack.Screen name="guests" />

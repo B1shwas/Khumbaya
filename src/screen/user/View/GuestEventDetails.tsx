@@ -1,16 +1,27 @@
 import EventScheduleSection from "@/src/components/user/EventScheduleSection";
 import RSVPSection from "@/src/components/user/RSVPSection";
 import VenuesSection from "@/src/components/user/VenuesSection";
+import { eventsData } from "@/src/constants/event";
+import { useLocalSearchParams } from "expo-router";
 import { ScrollView, View } from "react-native";
 import EventDetailHero from "./EventDetailHero";
 
 const GuestEventDetails = () => {
+  const { eventId } = useLocalSearchParams<{ eventId: string }>();
+  const event = eventsData.find((e) => String(e.id) === String(eventId));
+
   return (
     <ScrollView
       className="flex-1 bg-gray-50"
       showsVerticalScrollIndicator={false}
     >
-      <EventDetailHero />
+      <EventDetailHero
+        imageUrl={event?.imageUrl}
+        title={event?.title}
+        date={event?.date}
+        location={event?.location}
+        status={event?.status}
+      />
 
       {/* RSVP Section */}
       <View className="mt-6">

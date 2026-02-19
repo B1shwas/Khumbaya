@@ -52,8 +52,17 @@ const EventCard = ({
       <Pressable
         className="flex-row p-3 rounded-md overflow-hidden"
         onPress={() => {
-          console.log(event.id);
-          router.push(`/(protected)/(client-stack)/events/${event.id}`);
+          if (isRequest && asGuest) {
+            router.push(
+              `/(protected)/(client-stack)/events/${event.id}/(guest)/rsvp`,
+            );
+          } else if (isRequest && !asGuest) {
+            router.push(
+              `/(protected)/(client-stack)/events/${event.id}/(vendor)/`,
+            );
+          } else {
+            router.push(`/(protected)/(client-stack)/events/${event.id}`);
+          }
         }}
       >
         <View className="w-20 h-20 rounded-lg overflow-hidden">
@@ -102,7 +111,14 @@ const EventCard = ({
               </Text>
             </View>
             <View className="flex-row gap-2">
-              <TouchableOpacity className="bg-primary px-3 py-1.5 rounded-full">
+              <TouchableOpacity
+                className="bg-primary px-3 py-1.5 rounded-full"
+                onPress={() =>
+                  router.push(
+                    `/(protected)/(client-stack)/events/${event.id}/(vendor)/`,
+                  )
+                }
+              >
                 <Text className="font-jakarta-semibold text-xs text-white">
                   Accept
                 </Text>
@@ -128,7 +144,14 @@ const EventCard = ({
               </Text>
             </View>
             <View className="flex-row gap-2">
-              <TouchableOpacity className="bg-primary px-3 py-1.5 rounded-full">
+              <TouchableOpacity
+                className="bg-primary px-3 py-1.5 rounded-full"
+                onPress={() =>
+                  router.push(
+                    `/(protected)/(client-stack)/events/${event.id}/rsvp`,
+                  )
+                }
+              >
                 <Text className="font-jakarta-semibold text-xs text-white">
                   Going
                 </Text>

@@ -17,19 +17,20 @@ export default function EventRoleRedirect() {
     case "Organizer":
       return (
         <Redirect
-          href={`/(protected)/(client-stack)/events/(organizer)/${eventId}`}
+          href={`/(protected)/(client-stack)/events/${eventId}/(organizer)/`}
         />
       );
     case "Vendor":
       return (
         <Redirect
-          href={`/(protected)/(client-stack)/events/(vendor)/${eventId}`}
+          href={`/(protected)/(client-stack)/events/${eventId}/(vendor)/`}
         />
       );
     case "Guest":
       return (
+        // Route group syntax in href navigates to (guest)/index.tsx
         <Redirect
-          href={`/(protected)/(client-stack)/events/(guest)/${eventId}`}
+          href={`/(protected)/(client-stack)/events/${eventId}/(guest)/`}
         />
       );
     default:

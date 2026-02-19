@@ -4,21 +4,41 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { Image, Pressable, Text, View } from "react-native";
 
-const staticEvent = {
-  imageUrl:
-    "https://lh3.googleusercontent.com/aida-public/AB6AXuDeW7ylSiob80ww9XoAOOV3fReuakm7CdifvgqSXNruTM_9zAafkSATg54Dmx3H7FAZ5KXTRd39NLDkX59Y3q3sxo1tkE7A7izp0iVgffzw7wQD1ZGNTwh0GVaKomwXQ9aAgwXmkYiHuyLVXHjwPa43pqfUwcXAnj00ohS22F1JIFaI0gqlP4ljcXEqU0-A1ZjuQLfYmk0FeUhi3kPIuFPTGwNPv_HTUqTqGaOGf9I_Hr5lb4N45xrwpUyAvH3ZVxD2I2QRXr3HmhQ",
-  status: "upcoming",
-  title: "Sarah & Mike's Wedding",
-  date: "Oct 24, 2023",
-  location: "San Francisco, CA",
-  days: 15,
-  hours: 8,
-  minutes: 45,
-};
+interface EventDetailHeroProps {
+  imageUrl?: string;
+  status?: string;
+  title?: string;
+  date?: string;
+  location?: string;
+  days?: number;
+  hours?: number;
+  minutes?: number;
+}
 
-const EventDetailHero = () => {
+const FALLBACK_IMAGE =
+  "https://lh3.googleusercontent.com/aida-public/AB6AXuDeW7ylSiob80ww9XoAOOV3fReuakm7CdifvgqSXNruTM_9zAafkSATg54Dmx3H7FAZ5KXTRd39NLDkX59Y3q3sxo1tkE7A7izp0iVgffzw7wQD1ZGNTwh0GVaKomwXQ9aAgwXmkYiHuyLVXHjwPa43pqfUwcXAnj00ohS22F1JIFaI0gqlP4ljcXEqU0-A1ZjuQLfYmk0FeUhi3kPIuFPTGwNPv_HTUqTqGaOGf9I_Hr5lb4N45xrwpUyAvH3ZVxD2I2QRXr3HmhQ";
+
+const EventDetailHero = ({
+  imageUrl,
+  status = "upcoming",
+  title = "Event Details",
+  date = "—",
+  location = "—",
+  days = 0,
+  hours = 0,
+  minutes = 0,
+}: EventDetailHeroProps) => {
   const router = useRouter();
-  const event = staticEvent;
+  const event = {
+    imageUrl: imageUrl || FALLBACK_IMAGE,
+    status,
+    title,
+    date,
+    location,
+    days,
+    hours,
+    minutes,
+  };
 
   return (
     <View>
