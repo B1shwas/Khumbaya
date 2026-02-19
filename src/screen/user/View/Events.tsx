@@ -36,9 +36,13 @@ const roleConfig: Record<
 const EventCard = ({
   event,
   onPress,
+  isRequest,
+  asGuest,
 }: {
   event: Event;
   onPress: () => void;
+  isRequest?: boolean;
+  asGuest?: boolean;
 }) => {
   const router = useRouter();
   const { wrapperClass, textClass } = roleConfig[event.role];
@@ -86,6 +90,58 @@ const EventCard = ({
           </View>
         </View>
       </Pressable>
+      {isRequest && !asGuest && (
+        <View className="border-t border-border mx-3 mt-1 pt-3 pb-2">
+          <View className="flex-row items-center justify-between">
+            <View className="flex-row items-center gap-2">
+              <View className="bg-blue-50 p-1.5 rounded-full">
+                <Ionicons name="briefcase-outline" size={14} color="#3B82F6" />
+              </View>
+              <Text className="font-jakarta-semibold text-xs text-blue-700">
+                Vendor booking request
+              </Text>
+            </View>
+            <View className="flex-row gap-2">
+              <TouchableOpacity className="bg-primary px-3 py-1.5 rounded-full">
+                <Text className="font-jakarta-semibold text-xs text-white">
+                  Accept
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity className="border border-border px-3 py-1.5 rounded-full">
+                <Text className="font-jakarta-semibold text-xs text-text-secondary">
+                  Decline
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      )}
+      {isRequest && asGuest && (
+        <View className="border-t border-border mx-3 mt-1 pt-3 pb-2">
+          <View className="flex-row items-center justify-between">
+            <View className="flex-row items-center gap-2">
+              <View className="bg-pink-50 p-1.5 rounded-full">
+                <Ionicons name="mail-outline" size={14} color="#ee2b8c" />
+              </View>
+              <Text className="font-jakarta-semibold text-xs text-primary">
+                You're invited — RSVP now
+              </Text>
+            </View>
+            <View className="flex-row gap-2">
+              <TouchableOpacity className="bg-primary px-3 py-1.5 rounded-full">
+                <Text className="font-jakarta-semibold text-xs text-white">
+                  Going
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity className="border border-border px-3 py-1.5 rounded-full">
+                <Text className="font-jakarta-semibold text-xs text-text-secondary">
+                  Decline
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      )}
     </Card>
   );
 };
@@ -97,7 +153,7 @@ export default function EventsPage() {
 
   const tabs: { label: string; value: EventTab }[] = [
     { label: "Upcoming", value: "upcoming" },
-    { label: "Requests", value: "requests" },
+    { label: "Invited", value: "invited" },
     { label: "Completed", value: "completed" },
   ];
 
@@ -105,7 +161,7 @@ export default function EventsPage() {
 
   const emptyMessage: Record<EventTab, string> = {
     upcoming: "Create your first event to get started",
-    requests: "No pending invitations",
+    invited: "No pending invitations",
     completed: "No completed events",
   };
 
@@ -169,6 +225,8 @@ export default function EventsPage() {
               onPress={() => {
                 router.push(`/(protected)/(client-stack)/events/${event.id}`);
               }}
+              isRequest={event.status === "invited"}
+              asGuest={event.status === "invited" && event.role === "Guest"}
             />
           ))
         ) : (

@@ -55,7 +55,7 @@ export default function RootLayout() {
   return (
     <AuthProvider>
       <SafeAreaProvider>
-        <StatusBar barStyle="dark-content" />
+        <StatusBar barStyle="dark-content" backgroundColor={"#ffffff"} />
         <SafeAreaView className="flex-1  " edges={["top", "bottom"]}>
           <RootNavigation />
         </SafeAreaView>

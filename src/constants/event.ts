@@ -33,7 +33,7 @@ export interface Event {
 }
 
 export type EventRole = "Vendor" | "Organizer" | "Guest";
-export type EventTab = "upcoming" | "requests" | "completed";
+export type EventTab = "upcoming" | "invited" | "completed";
 
 export const eventsData: Event[] = [
   {
@@ -81,7 +81,19 @@ export const eventsData: Event[] = [
     venue: "San Francisco, CA",
     imageUrl:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuARGMTc7YD75O5-P1JXaqRK-kzu8vG4dIq7cAWSf3T_MtObQL1wDay2EjrgmOhEisjwDrxbgUi5CmmuPeBpNY8oTzyqjiQYIfhoMuhQ4alM838I-CHqYkWS_cPTJX3q8wMUv09PvLSFpA12g4XHRnHkHjl2GhsUzvy9UqCcZCecd_vx_3teq2dxTkkxf581tF1IXSMceXsU8alw80NOAhNnnzmeKmprOew-lXzEx3_2-LLgMplSZ80ITS0ryusXkdprVSAYOc0Y5Mc",
-    role: "Organizer",
-    status: "requests",
+    role: "Vendor",
+    status: "invited",
+  },
+  {
+    id: "5",
+    title: "Summer Music Fest",
+    date: "Jul 10, 2022",
+    time: "2:00 PM",
+    location: "Riverside Park",
+    venue: "San Francisco, CA",
+    imageUrl:
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuARGMTc7YD75O5-P1JXaqRK-kzu8vG4dIq7cAWSf3T_MtObQL1wDay2EjrgmOhEisjwDrxbgUi5CmmuPeBpNY8oTzyqjiQYIfhoMuhQ4alM838I-CHqYkWS_cPTJX3q8wMUv09PvLSFpA12g4XHRnHkHjl2GhsUzvy9UqCcZCecd_vx_3teq2dxTkkxf581tF1IXSMceXsU8alw80NOAhNnnzmeKmprOew-lXzEx3_2-LLgMplSZ80ITS0ryusXkdprVSAYOc0Y5Mc",
+    role: "Guest",
+    status: "invited",
   },
 ];
