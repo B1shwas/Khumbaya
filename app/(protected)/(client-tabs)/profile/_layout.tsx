@@ -8,7 +8,6 @@ export default function ProfileLayout() {
         animation: "fade",
       }}
     >
-<<<<<<< HEAD
       <Stack.Screen
         name="index"
         options={{
@@ -71,11 +70,20 @@ export default function ProfileLayout() {
           presentation: "card",
         }}
       />
-=======
-      <Stack.Screen name="index" options={{ title: "Profile" }} />
-      <Stack.Screen name="business" options={{ headerShown: false }} />
-      <Stack.Screen name="account" options={{ headerShown: false }} />
->>>>>>> f0a202fb17fe5ea886476dde06a436b4b6cfc1e0
+      <Stack.Screen
+        name="business"
+        options={{
+          title: "Business Dashboard",
+          presentation: "card",
+        }}
+      />
+      <Stack.Screen
+        name="account"
+        options={{
+          title: "Account",
+          presentation: "card",
+        }}
+      />
     </Stack>
   );
 }

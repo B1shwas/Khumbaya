@@ -1,56 +1,12 @@
 {
   "expo": {
-    "name": "khumbaya",
-    "slug": "khumbaya",
-    "version": "1.0.0",
-    "orientation": "portrait",
-    "icon": "./assets/images/home.png",
-    "scheme": "khumbaya",
-    "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
-    "ios": {
-      "supportsTablet": true
+    "extra": {
+      "eas": {
+        "projectId": "89cf50c5-e048-4872-a1d9-99b9c88509f6"
+      }
     },
     "android": {
-      "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/screen.png",
-        "backgroundImage": "./assets/images/screen.png",
-        "monochromeImage": "./assets/images/screen.png"
-      },
-      "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false,
-      "package": "com.aaditya_lamichhane.khumbaya"
-    },
-    "web": {
-      "output": "static",
-      "favicon": "./assets/images/favicon.png",
-      "bundler": "metro"
-    },
-    "plugins": [
-      "expo-router",
-      [
-        "expo-splash-screen",
-        {
-          "image": "./assets/images/screen.png",
-          "imageWidth": 200,
-          "contentFit": "cover",
-          "backgroundColor": "#E6F4FE",
-          "dark": {
-            "backgroundColor": "#000000"
-          }
-        }
-      ]
-    ],
-    "experiments": {
-      "typedRoutes": true,
-      "reactCompiler": true
-    },
-    "extra": {
-      "router": {},
-      "eas": {
-        "projectId": "2fc43e7a-14bc-48b0-93f2-b96986ee5427"
-      }
+      "package": "com.reedm3nkey.khumbaya"
     }
   }
 }
