@@ -146,6 +146,7 @@ const Account = () => (
       BUSINESS
     </Text>
 
+    <Row icon="analytics" title="Analytics" href="/profile/analytics" />
     <Row
       icon="business"
       title="Business Information"
