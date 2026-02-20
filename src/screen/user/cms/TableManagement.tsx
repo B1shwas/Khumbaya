@@ -20,6 +20,16 @@ export default function TableManagement() {
   const { eventId } = useLocalSearchParams<{ eventId: string }>();
   const router = useRouter();
 
+  const handleGoBack = () => {
+    // Try to go back, but if there's no history, navigate to event detail
+    if (router.canGoBack()) {
+      router.back();
+    } else {
+      // Fallback: navigate to the event detail page
+      router.push(`/(protected)/(client-stack)/events/${eventId}/(organizer)/`);
+    }
+  };
+
   const {
     tables,
     guests,
@@ -65,10 +75,7 @@ export default function TableManagement() {
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity
-          onPress={() => router.back()}
-          style={styles.backButton}
-        >
+        <TouchableOpacity onPress={handleGoBack} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color="#111827" />
         </TouchableOpacity>
         <Text style={styles.title}>Table Plan</Text>
@@ -353,6 +360,9 @@ const styles = StyleSheet.create({
   canvas: {
     flex: 1,
     position: "relative",
+  },
+  canvasScroll: {
+    flex: 1,
   },
   canvasContent: {
     padding: 16,
