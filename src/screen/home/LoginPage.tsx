@@ -1,8 +1,8 @@
 import { Text } from "@/src/components/ui/Text";
+import { useLogin } from "@/src/features/user/api/use-user";
 import { MaterialIcons } from "@expo/vector-icons";
 import { Link, useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useLogin } from "@/src/features/user/api/use-user";
 import {
   Animated,
   ImageBackground,
@@ -14,7 +14,6 @@ import {
   View,
 } from "react-native";
 
-import { useAuth } from "@/src/store/AuthContext";
 
 const HERO_IMAGE = {
   uri: "https://lh3.googleusercontent.com/aida-public/AB6AXuCN-FEoQhxG6lP-FQVMe1qUei4T3CxXoHkTHsDyNDxSO_IFRDxGIht5dykZ-3DWt2lTQjhV-KLi5ZFosSjyhDNvvSjWAIJ-Rj_-DCV0Lay0B3xe5CiGhhud3kOCrq8ldLXDGfXq9m4ugIBdM8hiHIJkvBfNupxmLg2F9QRVLPclUHCdercJ4mxzdCGPNtzNhEPNcp2BAWODZQu6lJ7We5CmVKBxfHnDhgj8LVVuHJ2dznCSaFIKkzlmhXCI2q2ANN9IH7wGVenBmGA",
@@ -42,9 +41,9 @@ const COPY = {
 } as const;
 
 export default function LoginPage() {
-  // const { mutate: login, isPending } = useLogin();
+  const { mutate: login, isPending } = useLogin();
   const router = useRouter();
-  const { login } = useAuth();
+  // const { login } = useAuth();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
@@ -111,12 +110,18 @@ export default function LoginPage() {
         email: username,
         password: password,
       };
-      // login(loginPayload, {
-      //   onSuccess: (data) => {
-      //     console.log("Login successful:", data);
-      //     // login function will handle setting auth state and redirecting
-      //   },
+      login(loginPayload, {
+        onSuccess: (data) => {
+          // login({
+      //   id: "1",
+      //   email: username,
+      //   name: username.split("@")[0],
+      //   role: "client",
       // });
+          console.log("Login successful:", data);
+          // login function will handle setting auth state and redirecting
+        },
+      });
 
       // try {
 
@@ -134,12 +139,7 @@ export default function LoginPage() {
       // }
 
       // Set user in AuthContext for client role - AuthContext will handle redirect
-      login({
-        id: "1",
-        email: username,
-        name: username.split("@")[0],
-        role: "client",
-      });
+      
 
       // Navigation will be handled by AuthContext's NavigationHandler
     } catch (err) {
