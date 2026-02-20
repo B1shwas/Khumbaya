@@ -1,9 +1,36 @@
 import { MaterialIcons } from "@expo/vector-icons";
-import { Tabs } from "expo-router";
+import { Tabs, usePathname } from "expo-router";
+import { useEffect, useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+// Routes where tab bar should be hidden (inner screens)
+const TAB_BAR_HIDDEN_ROUTES = [
+  "/profile/edit-profile",
+  "/profile/notifications",
+  "/profile/app-settings",
+  "/profile/change-password",
+  "/profile/privacy-security",
+  "/profile/business-information",
+  "/profile/vendor-verification",
+  "/profile/services-pricing",
+  "/profile/portfolio",
+  "/profile/analytics",
+];
 
 export default function ClientTabsLayout() {
   const insets = useSafeAreaInsets();
+  const pathname = usePathname();
+  const [hideTabBar, setHideTabBar] = useState(false);
+
+  // Hide tab bar for profile inner screens
+  useEffect(() => {
+    // Check if current route matches any inner screen route
+    const isInnerScreen = TAB_BAR_HIDDEN_ROUTES.some(
+      (route) => pathname === route || pathname.startsWith(route + "/"),
+    );
+
+    setHideTabBar(isInnerScreen);
+  }, [pathname]);
 
   return (
     <Tabs
@@ -13,6 +40,7 @@ export default function ClientTabsLayout() {
         tabBarInactiveTintColor: "#9ca3af",
         tabBarShowLabel: true,
         tabBarStyle: {
+          display: hideTabBar ? "none" : "flex",
           borderTopWidth: 1,
           borderTopColor: "#e5e7eb",
           height: 60 + insets.bottom,
@@ -66,4 +94,3 @@ export default function ClientTabsLayout() {
     </Tabs>
   );
 }
-
