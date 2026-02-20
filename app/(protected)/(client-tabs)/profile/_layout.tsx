@@ -9,8 +9,6 @@ export default function ProfileLayout() {
       }}
     >
       <Stack.Screen name="index" options={{ title: "Profile" }} />
-      <Stack.Screen name="business" options={{ headerShown: false }} />
-      <Stack.Screen name="account" options={{ headerShown: false }} />
 
       {/* Root level profile pages with header */}
       <Stack.Screen
