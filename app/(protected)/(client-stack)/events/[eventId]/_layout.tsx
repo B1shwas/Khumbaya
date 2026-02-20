@@ -10,6 +10,10 @@ export default function EventStack() {
       <Stack.Screen name="(guest)" options={{ headerShown: false }} />
       {/* Vendor — has its own nested _layout Stack (index) */}
       <Stack.Screen name="(vendor)" options={{ headerShown: false }} />
+      {/* Table Management */}
+      <Stack.Screen name="(table)" options={{ headerShown: false }} />
+      {/* Sub Events */}
+      <Stack.Screen name="(subevent)" options={{ headerShown: false }} />
     </Stack>
   );
 }

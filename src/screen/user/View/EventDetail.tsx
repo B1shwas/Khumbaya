@@ -68,6 +68,20 @@ const EventDetail = ({
       color: "#10B981",
       route: `./budget`,
     },
+    {
+      id: "subevents",
+      name: "Sub Events",
+      icon: "layers-outline",
+      color: "#F97316",
+      route: `../(subevent)/subevent-create`,
+    },
+    {
+      id: "tables",
+      name: "Table Plan",
+      icon: "tablet-landscape",
+      color: "#EC4899",
+      route: `../(table)/table-management`,
+    },
   ];
 
   return (
