@@ -289,7 +289,7 @@ export default function BusinessInformationScreen() {
           className="flex-1"
         >
           <ScrollView
-            className="flex-1 px-4 pt-6 pb-10"
+            className="flex-1 px-4 pt-6 pb-20"
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
           >
@@ -430,40 +430,27 @@ export default function BusinessInformationScreen() {
             </Card>
 
             {/* Tips Card */}
-            <View className="bg-amber-50 rounded-xl p-4 border border-amber-100 mb-6">
-              <View className="flex-row items-start gap-3">
-                <MaterialIcons name="lightbulb" size={24} color="#f59e0b" />
-                <View className="flex-1">
-                  <Text className="text-sm font-semibold text-amber-800 mb-1">
-                    Pro Tips
-                  </Text>
-                  <Text className="text-xs text-amber-700 leading-relaxed">
-                    • Include your specialty (e.g., cultural weddings,
-                    destination events){"\n"}• Mention languages you speak{"\n"}
-                    • Highlight any unique services or packages
-                  </Text>
-                </View>
-              </View>
-            </View>
 
             {/* Save Button */}
-            <TouchableOpacity
-              onPress={saveBusinessInfo}
-              disabled={isLoading}
-              className={`w-full h-14 bg-pink-500 rounded-xl flex-row items-center justify-center shadow-lg shadow-pink-200 
+            <View className="px-6">
+              <TouchableOpacity
+                onPress={saveBusinessInfo}
+                disabled={isLoading}
+                className={`w-full h-14 bg-pink-500 rounded-xl flex-row items-center justify-center shadow-lg shadow-pink-200 
                 ${isLoading ? "opacity-70" : ""}`}
-              activeOpacity={0.9}
-            >
-              <MaterialIcons
-                name="save"
-                size={20}
-                color="#ffffff"
-                className="mr-2"
-              />
-              <Text className="text-white font-bold text-lg">
-                {isLoading ? "Saving..." : "Save & Continue"}
-              </Text>
-            </TouchableOpacity>
+                activeOpacity={0.9}
+              >
+                <MaterialIcons
+                  name="save"
+                  size={16}
+                  color="#ffffff"
+                  className="mr-2"
+                />
+                <Text className="text-white font-bold text-lg">
+                  {isLoading ? "Saving..." : "Save & Continue"}
+                </Text>
+              </TouchableOpacity>
+            </View>
           </ScrollView>
         </KeyboardAvoidingView>
       </SafeAreaView>

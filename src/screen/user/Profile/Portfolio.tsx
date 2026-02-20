@@ -294,7 +294,7 @@ export default function PortfolioScreen() {
           className="flex-1"
         >
           <ScrollView
-            className="flex-1 px-4 pt-6 pb-10"
+            className="flex-1 px-4 pt-6 pb-20"
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
           >
@@ -414,7 +414,7 @@ export default function PortfolioScreen() {
             >
               <MaterialIcons
                 name="save"
-                size={20}
+                size={18}
                 color="#ffffff"
                 className="mr-2"
               />

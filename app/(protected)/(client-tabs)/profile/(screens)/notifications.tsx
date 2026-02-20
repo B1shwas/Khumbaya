@@ -100,7 +100,7 @@ export default function NotificationsScreen() {
         className="flex-1"
       >
         <ScrollView
-          className="flex-1 px-4 pt-6 pb-10"
+          className="flex-1 px-4 pt-6"
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
@@ -162,8 +162,10 @@ export default function NotificationsScreen() {
               icon="campaign"
             />
           </Card>
+        </ScrollView>
 
-          {/* Save Button */}
+        {/* Save Button */}
+        <View className="px-6 pb-6">
           <TouchableOpacity
             onPress={handleSave}
             disabled={isLoading}
@@ -181,7 +183,7 @@ export default function NotificationsScreen() {
               {isLoading ? "Saving..." : "Save Preferences"}
             </Text>
           </TouchableOpacity>
-        </ScrollView>
+        </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );

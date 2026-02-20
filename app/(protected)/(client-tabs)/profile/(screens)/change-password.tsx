@@ -160,7 +160,7 @@ export default function ChangePasswordScreen() {
         className="flex-1"
       >
         <ScrollView
-          className="flex-1 px-4 pt-6 pb-10"
+          className="flex-1 px-4 pt-6"
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
@@ -227,8 +227,10 @@ export default function ChangePasswordScreen() {
               </View>
             </View>
           </View>
+        </ScrollView>
 
-          {/* Change Password Button */}
+        {/* Change Password Button */}
+        <View className="px-6 pb-6">
           <TouchableOpacity
             onPress={handleChangePassword}
             disabled={isLoading}
@@ -246,7 +248,7 @@ export default function ChangePasswordScreen() {
               {isLoading ? "Changing..." : "Change Password"}
             </Text>
           </TouchableOpacity>
-        </ScrollView>
+        </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );

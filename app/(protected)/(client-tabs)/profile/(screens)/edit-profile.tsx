@@ -162,7 +162,7 @@ export default function EditProfileScreen() {
         className="flex-1"
       >
         <ScrollView
-          className="flex-1 px-4 pt-6 pb-10"
+          className="flex-1 px-4 pt-6"
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
@@ -233,8 +233,10 @@ export default function EditProfileScreen() {
               </Text>
             </View>
           </Card>
+        </ScrollView>
 
-          {/* Save Button */}
+        {/* Save Button */}
+        <View className="px-6 pb-6">
           <TouchableOpacity
             onPress={handleSave}
             disabled={isLoading}
@@ -252,7 +254,7 @@ export default function EditProfileScreen() {
               {isLoading ? "Saving..." : "Save Changes"}
             </Text>
           </TouchableOpacity>
-        </ScrollView>
+        </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
