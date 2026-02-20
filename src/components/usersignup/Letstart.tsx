@@ -1,6 +1,6 @@
 import { Button } from "@/src/components/ui/Button";
 import { Text } from "@/src/components/ui/Text";
-import { useAuth } from "@/src/store/AuthContext";
+import { useAuthStore } from "@/src/store/AuthStore";
 import { MaterialIcons } from "@expo/vector-icons";
 import { Link, useRouter } from "expo-router";
 import { useState } from "react";
@@ -35,7 +35,7 @@ export default function Letstart({
     Record<string, string>
   >({});
   const router = useRouter();
-  const { login } = useAuth();
+  const { setAuth } = useAuthStore();
 
   // Validation functions
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -68,11 +68,10 @@ export default function Letstart({
     if (!validateForm()) return;
 
     // Login and navigate to home - AuthContext will handle redirect
-    login({
-      id: `client-${Date.now()}`,
-      email: data.email || "demo@khumbaya.app",
-      name: data.fullName || "Demo Client",
-      role: "client",
+    setAuth("demo-vendor-token", {
+      id: `vendor-${Date.now()}`,
+      email: data.email,
+      name: data.fullName,
     });
 
     // TODO: Uncomment and configure backend URL when ready
@@ -144,9 +143,8 @@ export default function Letstart({
             }}
             placeholder="Jane Doe"
             placeholderTextColor="#896175"
-            className={`h-14 rounded-md border bg-white px-4 text-base text-text-light ${
-              validationErrors.fullName ? "border-red-500" : "border-border"
-            }`}
+            className={`h-14 rounded-md border bg-white px-4 text-base text-text-light ${validationErrors.fullName ? "border-red-500" : "border-border"
+              }`}
           />
           {validationErrors.fullName && (
             <Text className="text-xs text-red-500">
@@ -171,9 +169,8 @@ export default function Letstart({
             placeholderTextColor="#896175"
             keyboardType="email-address"
             autoCapitalize="none"
-            className={`h-14 rounded-xl border bg-white px-4 text-base text-text-light ${
-              validationErrors.email ? "border-red-500" : "border-border"
-            }`}
+            className={`h-14 rounded-xl border bg-white px-4 text-base text-text-light ${validationErrors.email ? "border-red-500" : "border-border"
+              }`}
           />
           {validationErrors.email && (
             <Text className="text-xs text-red-500">
@@ -201,9 +198,8 @@ export default function Letstart({
             Password
           </Text>
           <View
-            className={`flex-row items-center rounded-xl border bg-white px-4 ${
-              validationErrors.password ? "border-red-500" : "border-border"
-            }`}
+            className={`flex-row items-center rounded-xl border bg-white px-4 ${validationErrors.password ? "border-red-500" : "border-border"
+              }`}
           >
             <TextInput
               value={data.password}
