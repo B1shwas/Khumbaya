@@ -2,15 +2,15 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
-    FlatList,
-    Image,
-    Modal,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  FlatList,
+  Image,
+  Modal,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 // ============================================
@@ -142,8 +142,8 @@ export default function CardMaking() {
       // Update the specific card
       setCards((prev) =>
         prev.map((card) =>
-          card.id === selectedCardId ? { ...card, image: uri } : card,
-        ),
+          card.id === selectedCardId ? { ...card, image: uri } : card
+        )
       );
     } else {
       // For new card creation
@@ -155,7 +155,7 @@ export default function CardMaking() {
 
   const handleUpdatePrompt = (cardId: string, prompt: string) => {
     setCards((prev) =>
-      prev.map((card) => (card.id === cardId ? { ...card, prompt } : card)),
+      prev.map((card) => (card.id === cardId ? { ...card, prompt } : card))
     );
   };
 

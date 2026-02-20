@@ -144,8 +144,9 @@ export default function Letstart({
             }}
             placeholder="Jane Doe"
             placeholderTextColor="#896175"
-            className={`h-14 rounded-md border bg-white px-4 text-base text-text-light ${validationErrors.fullName ? "border-red-500" : "border-border"
-              }`}
+            className={`h-14 rounded-md border bg-white px-4 text-base text-text-light ${
+              validationErrors.fullName ? "border-red-500" : "border-border"
+            }`}
           />
           {validationErrors.fullName && (
             <Text className="text-xs text-red-500">
@@ -170,8 +171,9 @@ export default function Letstart({
             placeholderTextColor="#896175"
             keyboardType="email-address"
             autoCapitalize="none"
-            className={`h-14 rounded-xl border bg-white px-4 text-base text-text-light ${validationErrors.email ? "border-red-500" : "border-border"
-              }`}
+            className={`h-14 rounded-xl border bg-white px-4 text-base text-text-light ${
+              validationErrors.email ? "border-red-500" : "border-border"
+            }`}
           />
           {validationErrors.email && (
             <Text className="text-xs text-red-500">
@@ -199,8 +201,9 @@ export default function Letstart({
             Password
           </Text>
           <View
-            className={`flex-row items-center rounded-xl border bg-white px-4 ${validationErrors.password ? "border-red-500" : "border-border"
-              }`}
+            className={`flex-row items-center rounded-xl border bg-white px-4 ${
+              validationErrors.password ? "border-red-500" : "border-border"
+            }`}
           >
             <TextInput
               value={data.password}

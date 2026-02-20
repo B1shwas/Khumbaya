@@ -176,7 +176,9 @@ export default function VendorComparisonScreen({
           <View className="flex-1">
             <View
               className={`w-full aspect-[3/4] rounded-3xl overflow-hidden shadow-lg relative ${
-                vendorA.isTopChoice ? "border-2 border-primary" : "border border-gray-200"
+                vendorA.isTopChoice
+                  ? "border-2 border-primary"
+                  : "border border-gray-200"
               }`}
             >
               <Image
@@ -185,7 +187,7 @@ export default function VendorComparisonScreen({
                 resizeMode="cover"
               />
               <View className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-              
+
               <View className="absolute bottom-3 left-3 right-3">
                 {vendorA.isTopChoice && (
                   <View className="bg-primary text-white px-2 py-0.5 rounded-full w-fit mb-1 shadow-sm">
@@ -211,7 +213,9 @@ export default function VendorComparisonScreen({
           <View className="flex-1">
             <View
               className={`w-full aspect-[3/4] rounded-3xl overflow-hidden shadow-md relative ${
-                vendorB.isTopChoice ? "border-2 border-primary" : "border border-gray-200"
+                vendorB.isTopChoice
+                  ? "border-2 border-primary"
+                  : "border border-gray-200"
               }`}
             >
               <Image
@@ -220,7 +224,7 @@ export default function VendorComparisonScreen({
                 resizeMode="cover"
               />
               <View className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-              
+
               <View className="absolute bottom-3 left-3 right-3">
                 {vendorB.isTopChoice && (
                   <View className="bg-primary px-2 py-0.5 rounded-full w-fit mb-1 shadow-sm">
@@ -371,9 +375,13 @@ export default function VendorComparisonScreen({
               <View className="flex-row gap-4 items-center border-b border-dashed border-gray-100 pb-3">
                 <View className="flex-1 flex-row items-center gap-2">
                   <MaterialIcons
-                    name={vendorA.services.highlightReel ? "check-circle" : "cancel"}
+                    name={
+                      vendorA.services.highlightReel ? "check-circle" : "cancel"
+                    }
                     size={18}
-                    color={vendorA.services.highlightReel ? "#16a34a" : "#9ca3af"}
+                    color={
+                      vendorA.services.highlightReel ? "#16a34a" : "#9ca3af"
+                    }
                   />
                   <Text
                     className={`text-xs font-medium ${
@@ -387,9 +395,13 @@ export default function VendorComparisonScreen({
                 </View>
                 <View className="flex-1 flex-row items-center gap-2">
                   <MaterialIcons
-                    name={vendorB.services.highlightReel ? "check-circle" : "cancel"}
+                    name={
+                      vendorB.services.highlightReel ? "check-circle" : "cancel"
+                    }
                     size={18}
-                    color={vendorB.services.highlightReel ? "#16a34a" : "#9ca3af"}
+                    color={
+                      vendorB.services.highlightReel ? "#16a34a" : "#9ca3af"
+                    }
                   />
                   <Text
                     className={`text-xs font-medium ${
@@ -407,7 +419,9 @@ export default function VendorComparisonScreen({
               <View className="flex-row gap-4 items-center border-b border-dashed border-gray-100 pb-3">
                 <View className="flex-1 flex-row items-center gap-2">
                   <MaterialIcons
-                    name={vendorA.services.rawFootage ? "check-circle" : "cancel"}
+                    name={
+                      vendorA.services.rawFootage ? "check-circle" : "cancel"
+                    }
                     size={18}
                     color={vendorA.services.rawFootage ? "#16a34a" : "#9ca3af"}
                   />
@@ -423,7 +437,9 @@ export default function VendorComparisonScreen({
                 </View>
                 <View className="flex-1 flex-row items-center gap-2">
                   <MaterialIcons
-                    name={vendorB.services.rawFootage ? "check-circle" : "cancel"}
+                    name={
+                      vendorB.services.rawFootage ? "check-circle" : "cancel"
+                    }
                     size={18}
                     color={vendorB.services.rawFootage ? "#16a34a" : "#9ca3af"}
                   />
@@ -443,7 +459,9 @@ export default function VendorComparisonScreen({
               <View className="flex-row gap-4 items-center border-b border-dashed border-gray-100 pb-3">
                 <View className="flex-1 flex-row items-center gap-2">
                   <MaterialIcons
-                    name={vendorA.services.droneShots ? "check-circle" : "cancel"}
+                    name={
+                      vendorA.services.droneShots ? "check-circle" : "cancel"
+                    }
                     size={18}
                     color={vendorA.services.droneShots ? "#16a34a" : "#9ca3af"}
                   />
@@ -459,7 +477,9 @@ export default function VendorComparisonScreen({
                 </View>
                 <View className="flex-1 flex-row items-center gap-2">
                   <MaterialIcons
-                    name={vendorB.services.droneShots ? "check-circle" : "cancel"}
+                    name={
+                      vendorB.services.droneShots ? "check-circle" : "cancel"
+                    }
                     size={18}
                     color={vendorB.services.droneShots ? "#16a34a" : "#9ca3af"}
                   />
@@ -479,9 +499,13 @@ export default function VendorComparisonScreen({
               <View className="flex-row gap-4 items-center">
                 <View className="flex-1 flex-row items-center gap-2">
                   <MaterialIcons
-                    name={vendorA.services.fourKQuality ? "check-circle" : "cancel"}
+                    name={
+                      vendorA.services.fourKQuality ? "check-circle" : "cancel"
+                    }
                     size={18}
-                    color={vendorA.services.fourKQuality ? "#16a34a" : "#9ca3af"}
+                    color={
+                      vendorA.services.fourKQuality ? "#16a34a" : "#9ca3af"
+                    }
                   />
                   <Text
                     className={`text-xs font-medium ${
@@ -495,9 +519,13 @@ export default function VendorComparisonScreen({
                 </View>
                 <View className="flex-1 flex-row items-center gap-2">
                   <MaterialIcons
-                    name={vendorB.services.fourKQuality ? "check-circle" : "cancel"}
+                    name={
+                      vendorB.services.fourKQuality ? "check-circle" : "cancel"
+                    }
                     size={18}
-                    color={vendorB.services.fourKQuality ? "#16a34a" : "#9ca3af"}
+                    color={
+                      vendorB.services.fourKQuality ? "#16a34a" : "#9ca3af"
+                    }
                   />
                   <Text
                     className={`text-xs font-medium ${
@@ -530,7 +558,10 @@ export default function VendorComparisonScreen({
               <Text className="text-[10px] font-bold text-white uppercase tracking-wider mb-0.5">
                 Book Now
               </Text>
-              <Text className="text-sm font-bold text-white font-serif" numberOfLines={1}>
+              <Text
+                className="text-sm font-bold text-white font-serif"
+                numberOfLines={1}
+              >
                 {vendorA.name}
               </Text>
             </View>
@@ -545,7 +576,10 @@ export default function VendorComparisonScreen({
               <Text className="text-[10px] font-bold text-accent uppercase tracking-wider mb-0.5 opacity-90">
                 Book Now
               </Text>
-              <Text className="text-sm font-bold text-accent font-serif" numberOfLines={1}>
+              <Text
+                className="text-sm font-bold text-accent font-serif"
+                numberOfLines={1}
+              >
                 {vendorB.name}
               </Text>
             </View>

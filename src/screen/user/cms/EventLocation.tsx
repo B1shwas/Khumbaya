@@ -1,6 +1,6 @@
-import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
+import { useState } from "react";
 import {
   KeyboardAvoidingView,
   Platform,
@@ -10,8 +10,12 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-} from 'react-native';
-import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+} from "react-native";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
 
 // ============================================
 // BACKEND INTEGRATION NOTES:
@@ -42,9 +46,9 @@ export default function EventLocation() {
   const router = useRouter();
 
   const [formData, setFormData] = useState<LocationFormData>({
-    city: '',
-    address: '',
-    venueName: '',
+    city: "",
+    address: "",
+    venueName: "",
     latitude: null,
     longitude: null,
   });
@@ -55,17 +59,17 @@ export default function EventLocation() {
 
   // TODO: Backend Integration - Venue search
   const handleSearchChange = (text: string) => {
-    setFormData(prev => ({ ...prev, venueName: text }));
+    setFormData((prev) => ({ ...prev, venueName: text }));
     // TODO: Debounced API call to /api/venues?q={text}
   };
 
   const handleCityChange = (text: string) => {
-    setFormData(prev => ({ ...prev, city: text }));
+    setFormData((prev) => ({ ...prev, city: text }));
     // TODO: City autocomplete API
   };
 
   const handleAddressChange = (text: string) => {
-    setFormData(prev => ({ ...prev, address: text }));
+    setFormData((prev) => ({ ...prev, address: text }));
     // TODO: Address geocoding API
   };
 
@@ -76,7 +80,7 @@ export default function EventLocation() {
     // 3. Update event location: PUT /api/events/{id}/location
     // 4. Navigate to estimates step
 
-    router.push('/(protected)/(client-stack)/events/create/event-estimates');
+    router.push("/(protected)/(client-stack)/events/create/event-estimates");
   };
 
   const handleBack = () => {
@@ -97,7 +101,7 @@ export default function EventLocation() {
     <View style={styles.container}>
       <KeyboardAvoidingView
         style={styles.keyboardAvoidingView}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
         {/* Header */}
         <View style={styles.header}>
@@ -116,7 +120,11 @@ export default function EventLocation() {
           </View>
           <View style={styles.progressBarBackground}>
             <Animated.View
-              style={[styles.progressBarFill, { width: '50%' }, animatedButtonStyle]}
+              style={[
+                styles.progressBarFill,
+                { width: "50%" },
+                animatedButtonStyle,
+              ]}
             />
           </View>
         </View>
@@ -154,7 +162,9 @@ export default function EventLocation() {
             </View>
             <View style={styles.manualTextContainer}>
               <Text style={styles.manualTitle}>Not finding your venue?</Text>
-              <Text style={styles.manualSubtitle}>Enter address manually below</Text>
+              <Text style={styles.manualSubtitle}>
+                Enter address manually below
+              </Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color="#ee2b8c" />
           </TouchableOpacity>
@@ -194,7 +204,9 @@ export default function EventLocation() {
                 <Ionicons name="location" size={40} color="#ee2b8c" />
               </View>
               <Text style={styles.mapPlaceholderText}>
-                {formData.address ? formData.address : 'Enter address to see preview'}
+                {formData.address
+                  ? formData.address
+                  : "Enter address to see preview"}
               </Text>
             </View>
           </View>
@@ -217,8 +229,12 @@ export default function EventLocation() {
             onPress={handleNextStep}
             style={styles.nextButton}
             activeOpacity={0.8}
-            onPressIn={() => { scale.value = 0.98; }}
-            onPressOut={() => { scale.value = 1; }}
+            onPressIn={() => {
+              scale.value = 0.98;
+            }}
+            onPressOut={() => {
+              scale.value = 1;
+            }}
           >
             <Text style={styles.nextButtonText}>Next Step</Text>
             <Ionicons name="arrow-forward" size={20} color="white" />
@@ -232,37 +248,37 @@ export default function EventLocation() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f6f7',
+    backgroundColor: "#f8f6f7",
   },
   keyboardAvoidingView: {
     flex: 1,
     maxWidth: 480,
-    alignSelf: 'center',
-    width: '100%',
+    alignSelf: "center",
+    width: "100%",
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     paddingHorizontal: 16,
     paddingTop: 60,
     paddingBottom: 8,
-    backgroundColor: '#f8f6f7',
+    backgroundColor: "#f8f6f7",
   },
   headerButton: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: 'rgba(0,0,0,0.05)',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "rgba(0,0,0,0.05)",
+    alignItems: "center",
+    justifyContent: "center",
   },
   headerTitle: {
-    fontFamily: 'PlusJakartaSans-Bold',
+    fontFamily: "PlusJakartaSans-Bold",
     fontSize: 18,
-    color: '#181114',
+    color: "#181114",
     flex: 1,
-    textAlign: 'center',
+    textAlign: "center",
     paddingRight: 40,
   },
   headerSpacer: {
@@ -273,31 +289,31 @@ const styles = StyleSheet.create({
     paddingTop: 8,
   },
   progressLabels: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 8,
   },
   progressLabel: {
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: "PlusJakartaSans-SemiBold",
     fontSize: 14,
-    color: '#181114',
+    color: "#181114",
   },
   progressStep: {
-    fontFamily: 'PlusJakartaSans-Medium',
+    fontFamily: "PlusJakartaSans-Medium",
     fontSize: 12,
-    color: '#6B7280',
+    color: "#6B7280",
   },
   progressBarBackground: {
     height: 6,
     borderRadius: 3,
-    backgroundColor: '#E5E7EB',
-    overflow: 'hidden',
+    backgroundColor: "#E5E7EB",
+    overflow: "hidden",
   },
   progressBarFill: {
-    height: '100%',
+    height: "100%",
     borderRadius: 3,
-    backgroundColor: '#ee2b8c',
+    backgroundColor: "#ee2b8c",
   },
   scrollView: {
     flex: 1,
@@ -307,44 +323,44 @@ const styles = StyleSheet.create({
     paddingTop: 12,
   },
   sectionTitle: {
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: "PlusJakartaSans-SemiBold",
     fontSize: 14,
-    color: '#6B7280',
+    color: "#6B7280",
     marginBottom: 8,
     marginLeft: 4,
   },
   searchContainer: {
-    position: 'relative',
+    position: "relative",
     marginBottom: 12,
   },
   searchIcon: {
-    position: 'absolute',
+    position: "absolute",
     left: 16,
     top: 0,
     bottom: 0,
-    justifyContent: 'center',
+    justifyContent: "center",
   },
   searchInput: {
-    width: '100%',
+    width: "100%",
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
-    backgroundColor: 'white',
+    borderColor: "#E5E7EB",
+    backgroundColor: "white",
     paddingHorizontal: 48,
     paddingVertical: 14,
     fontSize: 16,
-    fontFamily: 'PlusJakartaSans-Regular',
-    color: '#181114',
+    fontFamily: "PlusJakartaSans-Regular",
+    color: "#181114",
   },
   manualToggle: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 12,
     padding: 16,
-    backgroundColor: 'rgba(238, 43, 140, 0.1)',
+    backgroundColor: "rgba(238, 43, 140, 0.1)",
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: 'rgba(238, 43, 140, 0.2)',
+    borderColor: "rgba(238, 43, 140, 0.2)",
     marginHorizontal: 16,
     marginTop: 8,
   },
@@ -352,116 +368,116 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 12,
-    backgroundColor: 'rgba(238, 43, 140, 0.2)',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "rgba(238, 43, 140, 0.2)",
+    alignItems: "center",
+    justifyContent: "center",
   },
   manualTextContainer: {
     flex: 1,
   },
   manualTitle: {
-    fontFamily: 'PlusJakartaSans-Bold',
+    fontFamily: "PlusJakartaSans-Bold",
     fontSize: 14,
-    color: '#ee2b8c',
+    color: "#ee2b8c",
   },
   manualSubtitle: {
-    fontFamily: 'PlusJakartaSans-Regular',
+    fontFamily: "PlusJakartaSans-Regular",
     fontSize: 12,
-    color: 'rgba(238, 43, 140, 0.8)',
+    color: "rgba(238, 43, 140, 0.8)",
   },
   inputContainer: {
     marginBottom: 16,
   },
   inputLabel: {
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: "PlusJakartaSans-SemiBold",
     fontSize: 14,
-    color: '#6B7280',
+    color: "#6B7280",
     marginBottom: 8,
     marginLeft: 4,
   },
   textInput: {
-    width: '100%',
+    width: "100%",
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
-    backgroundColor: 'white',
+    borderColor: "#E5E7EB",
+    backgroundColor: "white",
     paddingHorizontal: 16,
     paddingVertical: 14,
     fontSize: 16,
-    fontFamily: 'PlusJakartaSans-Regular',
-    color: '#181114',
+    fontFamily: "PlusJakartaSans-Regular",
+    color: "#181114",
   },
   textArea: {
     minHeight: 80,
   },
   mapPlaceholder: {
-    width: '100%',
+    width: "100%",
     aspectRatio: 16 / 9,
     borderRadius: 16,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: "#F3F4F6",
     borderWidth: 1,
-    borderColor: '#E5E7EB',
-    alignItems: 'center',
-    justifyContent: 'center',
+    borderColor: "#E5E7EB",
+    alignItems: "center",
+    justifyContent: "center",
   },
   mapIconContainer: {
     padding: 16,
   },
   mapPlaceholderText: {
-    fontFamily: 'PlusJakartaSans-Regular',
+    fontFamily: "PlusJakartaSans-Regular",
     fontSize: 14,
-    color: '#9CA3AF',
+    color: "#9CA3AF",
   },
   bottomSpacing: {
     height: 140,
   },
   footer: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 12,
-    position: 'absolute',
+    position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
     padding: 16,
     paddingBottom: 32,
-    backgroundColor: '#f8f6f7',
+    backgroundColor: "#f8f6f7",
     maxWidth: 480,
-    alignSelf: 'center',
-    width: '100%',
+    alignSelf: "center",
+    width: "100%",
   },
   backButton: {
     flex: 1,
     height: 56,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
-    backgroundColor: 'white',
-    alignItems: 'center',
-    justifyContent: 'center',
+    borderColor: "#E5E7EB",
+    backgroundColor: "white",
+    alignItems: "center",
+    justifyContent: "center",
   },
   backButtonText: {
-    fontFamily: 'PlusJakartaSans-Bold',
+    fontFamily: "PlusJakartaSans-Bold",
     fontSize: 16,
-    color: '#6B7280',
+    color: "#6B7280",
   },
   nextButton: {
     flex: 2,
     height: 56,
     borderRadius: 16,
-    backgroundColor: '#ee2b8c',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#ee2b8c",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     gap: 8,
-    shadowColor: '#ee2b8c',
+    shadowColor: "#ee2b8c",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.25,
     shadowRadius: 8,
     elevation: 4,
   },
   nextButtonText: {
-    fontFamily: 'PlusJakartaSans-Bold',
+    fontFamily: "PlusJakartaSans-Bold",
     fontSize: 16,
-    color: 'white',
+    color: "white",
   },
 });

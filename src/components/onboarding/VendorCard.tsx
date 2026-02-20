@@ -14,8 +14,10 @@ export function VendorCard({ vendor }: { vendor: Vendor }) {
   const [isFavorite, setIsFavorite] = useState(false);
 
   return (
-    <Pressable className="bg-white rounded-xl overflow-hidden"
-      onPress={goToVendorDetail}>
+    <Pressable
+      className="bg-white rounded-xl overflow-hidden"
+      onPress={goToVendorDetail}
+    >
       <View className="relative w-full aspect-[4/3] bg-gray-200">
         <Image
           source={{ uri: vendor.image }}

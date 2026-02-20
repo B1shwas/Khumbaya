@@ -2,14 +2,14 @@ import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import {
-    Alert,
-    Image,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -187,9 +187,7 @@ const QuestionCard = ({
                     answer === option && styles.optionRadioSelected,
                   ]}
                 >
-                  {answer === option && (
-                    <View style={styles.optionRadioDot} />
-                  )}
+                  {answer === option && <View style={styles.optionRadioDot} />}
                 </View>
                 <Text
                   style={[
@@ -212,7 +210,8 @@ const QuestionCard = ({
                 key={index}
                 style={[
                   styles.optionButton,
-                  selectedOptions.includes(option) && styles.optionButtonSelected,
+                  selectedOptions.includes(option) &&
+                    styles.optionButtonSelected,
                 ]}
                 onPress={() => handleOptionPress(option)}
                 disabled={isSubmitted}
@@ -231,7 +230,8 @@ const QuestionCard = ({
                 <Text
                   style={[
                     styles.optionText,
-                    selectedOptions.includes(option) && styles.optionTextSelected,
+                    selectedOptions.includes(option) &&
+                      styles.optionTextSelected,
                   ]}
                 >
                   {option}
@@ -265,20 +265,22 @@ const QuestionCard = ({
                 const current = parseInt((answer as string) || "0", 10);
                 if (current > 0) onAnswer(String(current - 1));
               }}
-              disabled={isSubmitted || parseInt((answer as string) || "0", 10) <= 0}
+              disabled={
+                isSubmitted || parseInt((answer as string) || "0", 10) <= 0
+              }
             >
               <Ionicons name="remove" size={24} color="#ee2b8c" />
             </TouchableOpacity>
-            <Text style={styles.numberValue}>
-              {(answer as string) || "0"}
-            </Text>
+            <Text style={styles.numberValue}>{(answer as string) || "0"}</Text>
             <TouchableOpacity
               style={styles.numberButton}
               onPress={() => {
                 const current = parseInt((answer as string) || "0", 10);
                 if (current < 10) onAnswer(String(current + 1));
               }}
-              disabled={isSubmitted || parseInt((answer as string) || "0", 10) >= 10}
+              disabled={
+                isSubmitted || parseInt((answer as string) || "0", 10) >= 10
+              }
             >
               <Ionicons name="add" size={24} color="#ee2b8c" />
             </TouchableOpacity>
@@ -329,9 +331,9 @@ export default function RSVPPage() {
     submitted: false,
   });
 
-  const [currentStep, setCurrentStep] = useState<"decision" | "questions" | "confirmation">(
-    "decision"
-  );
+  const [currentStep, setCurrentStep] = useState<
+    "decision" | "questions" | "confirmation"
+  >("decision");
 
   const handleDecision = (attending: boolean) => {
     setRsvpData((prev) => ({ ...prev, attending }));
@@ -381,11 +383,7 @@ export default function RSVPPage() {
   const getStepIndicator = () => {
     const steps = ["Decision", "Questions", "Done"];
     const currentIndex =
-      currentStep === "decision"
-        ? 0
-        : currentStep === "questions"
-        ? 1
-        : 2;
+      currentStep === "decision" ? 0 : currentStep === "questions" ? 1 : 2;
 
     return (
       <View style={styles.stepIndicator}>
@@ -450,10 +448,7 @@ export default function RSVPPage() {
       {getStepIndicator()}
 
       {/* Content */}
-      <ScrollView
-        style={styles.content}
-        showsVerticalScrollIndicator={false}
-      >
+      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {currentStep === "decision" && (
           <View style={styles.decisionContainer}>
             {/* Event Info */}
@@ -476,7 +471,9 @@ export default function RSVPPage() {
                     {invitedEventData.location}
                   </Text>
                 </View>
-                <Text style={styles.hostedBy}>Hosted by {invitedEventData.hostName}</Text>
+                <Text style={styles.hostedBy}>
+                  Hosted by {invitedEventData.hostName}
+                </Text>
               </View>
             </View>
 
@@ -501,7 +498,9 @@ export default function RSVPPage() {
               <View style={styles.decisionIconContainer}>
                 <Ionicons name="checkmark-circle" size={48} color="#10B981" />
               </View>
-              <Text style={styles.decisionButtonTitle}>Yes, I'll be there!</Text>
+              <Text style={styles.decisionButtonTitle}>
+                Yes, I'll be there!
+              </Text>
               <Text style={styles.decisionButtonSubtitle}>
                 I'd love to celebrate with you
               </Text>
@@ -520,7 +519,10 @@ export default function RSVPPage() {
                 <Ionicons name="close-circle" size={48} color="#EF4444" />
               </View>
               <Text
-                style={[styles.decisionButtonTitle, styles.decisionButtonTitleDecline]}
+                style={[
+                  styles.decisionButtonTitle,
+                  styles.decisionButtonTitleDecline,
+                ]}
               >
                 No, I can't make it
               </Text>
@@ -555,7 +557,12 @@ export default function RSVPPage() {
               onPress={handleSubmit}
             >
               <Text style={styles.submitButtonText}>Submit RSVP</Text>
-              <Ionicons name="send" size={20} color="white" style={{ marginLeft: 8 }} />
+              <Ionicons
+                name="send"
+                size={20}
+                color="white"
+                style={{ marginLeft: 8 }}
+              />
             </TouchableOpacity>
           </View>
         )}
@@ -583,27 +590,28 @@ export default function RSVPPage() {
             </Text>
 
             {/* Summary */}
-            {rsvpData.attending && Object.keys(rsvpData.responses).length > 0 && (
-              <View style={styles.summaryCard}>
-                <Text style={styles.summaryTitle}>Your Responses</Text>
-                <View style={styles.summaryContent}>
-                  {rsvpQuestions.slice(0, 3).map((question) => {
-                    const answer = rsvpData.responses[question.id];
-                    if (!answer) return null;
-                    return (
-                      <View key={question.id} style={styles.summaryItem}>
-                        <Text style={styles.summaryQuestion}>{question.question}</Text>
-                        <Text style={styles.summaryAnswer}>
-                          {Array.isArray(answer)
-                            ? answer.join(", ")
-                            : answer}
-                        </Text>
-                      </View>
-                    );
-                  })}
+            {rsvpData.attending &&
+              Object.keys(rsvpData.responses).length > 0 && (
+                <View style={styles.summaryCard}>
+                  <Text style={styles.summaryTitle}>Your Responses</Text>
+                  <View style={styles.summaryContent}>
+                    {rsvpQuestions.slice(0, 3).map((question) => {
+                      const answer = rsvpData.responses[question.id];
+                      if (!answer) return null;
+                      return (
+                        <View key={question.id} style={styles.summaryItem}>
+                          <Text style={styles.summaryQuestion}>
+                            {question.question}
+                          </Text>
+                          <Text style={styles.summaryAnswer}>
+                            {Array.isArray(answer) ? answer.join(", ") : answer}
+                          </Text>
+                        </View>
+                      );
+                    })}
+                  </View>
                 </View>
-              </View>
-            )}
+              )}
 
             {/* Event Details */}
             <View style={styles.confirmationEventCard}>
@@ -634,16 +642,11 @@ export default function RSVPPage() {
             <TouchableOpacity
               style={styles.addToCalendarButton}
               onPress={() => {
-                Alert.alert(
-                  "Calendar",
-                  "Event added to your calendar!"
-                );
+                Alert.alert("Calendar", "Event added to your calendar!");
               }}
             >
               <Ionicons name="calendar-outline" size={20} color="#ee2b8c" />
-              <Text style={styles.addToCalendarText}>
-                Add to Calendar
-              </Text>
+              <Text style={styles.addToCalendarText}>Add to Calendar</Text>
             </TouchableOpacity>
           </View>
         )}

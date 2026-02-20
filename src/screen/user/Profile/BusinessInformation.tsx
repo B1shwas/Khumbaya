@@ -225,7 +225,7 @@ export default function BusinessInformationScreen() {
 
       await AsyncStorage.setItem(
         STORAGE_KEYS.BUSINESS_INFO,
-        JSON.stringify(info),
+        JSON.stringify(info)
       );
 
       // TODO: Backend integration

@@ -197,7 +197,7 @@ export default function EventVendorsPage() {
   const bookedCount = vendorsData.filter((v) => v.status === "booked").length;
   const pendingCount = vendorsData.filter((v) => v.status === "pending").length;
   const availableCount = vendorsData.filter(
-    (v) => v.status === "available",
+    (v) => v.status === "available"
   ).length;
 
   return (

@@ -26,7 +26,7 @@ const SectionHeader = React.memo(
         )}
       </View>
     );
-  },
+  }
 );
 
 const styles = StyleSheet.create({

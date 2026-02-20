@@ -12,7 +12,7 @@ export const uploadImage = async (uri: string) => {
     formData,
     {
       headers: { "Content-Type": "multipart/form-data" },
-    },
+    }
   );
 
   return response.data; // e.g., { url: "https://..." }

@@ -5,17 +5,17 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-  View
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function EventSuccessPage() {
   const handleCreateSubEvent = () => {
-    router.push("/event/subevent-create" );
+    router.push("/event/subevent-create");
   };
 
   const handleViewEvents = () => {
-    router.replace("/(protected)/(client-tabs)/events" );
+    router.replace("/(protected)/(client-tabs)/events");
   };
 
   return (

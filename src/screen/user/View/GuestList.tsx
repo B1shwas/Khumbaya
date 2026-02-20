@@ -1,10 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import * as Contacts from "expo-contacts";
 import * as DocumentPicker from "expo-document-picker";
-import {
-  router,
-  type RelativePathString
-} from "expo-router";
+import { router, type RelativePathString } from "expo-router";
 import { useCallback, useState } from "react";
 import {
   ActionSheetIOS,
@@ -197,7 +194,9 @@ const StatsCard = ({
           <Text className="text-xs text-gray-500 font-medium">{label}</Text>
           <Text className={`text-xl font-bold ${color} mt-1`}>{value}</Text>
         </View>
-        <View className={`${bgColor.replace("bg-", "bg-opacity-20 ")} p-2 rounded-full`}>
+        <View
+          className={`${bgColor.replace("bg-", "bg-opacity-20 ")} p-2 rounded-full`}
+        >
           <Ionicons name={icon as any} size={20} color={color} />
         </View>
       </View>
@@ -236,7 +235,11 @@ const getStatusBgColor = (status: GuestStatus) => {
 const getSourceInfo = (source: Guest["source"]) => {
   switch (source) {
     case "excel":
-      return { icon: "document-text-outline", color: "#10B981", label: "Excel" };
+      return {
+        icon: "document-text-outline",
+        color: "#10B981",
+        label: "Excel",
+      };
     case "contact":
       return { icon: "people-outline", color: "#3B82F6", label: "Contacts" };
     default:
@@ -254,20 +257,19 @@ const RelationChip = ({
   onPress: () => void;
 }) => (
   <Pressable
-    className={`p-4 py-6 rounded-full w-fit  ${isSelected
-      ? "bg-primary border-primary"
-      : "bg-white border-gray-200"
-      }`}
+    className={`p-4 py-6 rounded-full w-fit  ${
+      isSelected ? "bg-primary border-primary" : "bg-white border-gray-200"
+    }`}
     onPress={onPress}
   >
     <Text
-      className={`text-xs font-medium ${isSelected ? "text-white" : "text-gray-600"
-        }`}
+      className={`text-xs font-medium ${
+        isSelected ? "text-white" : "text-gray-600"
+      }`}
     >
       {relation}
     </Text>
   </Pressable>
-
 );
 
 const QuickAction = ({
@@ -349,8 +351,7 @@ const GuestCard = ({
               <Text className="text-xs text-gray-400">{guest.phone}</Text>
             )}
           </View>
-          {guest.dietaryRestrictions &&
-            guest.dietaryRestrictions.length > 0 ? (
+          {guest.dietaryRestrictions && guest.dietaryRestrictions.length > 0 ? (
             <View className="flex-row items-center gap-1 flex-wrap mt-1">
               {guest.dietaryRestrictions.map((restriction, index) => (
                 <View
@@ -358,7 +359,9 @@ const GuestCard = ({
                   className="flex-row items-center gap-1 px-1.5 py-0.5 rounded bg-gray-50"
                 >
                   <Ionicons name="leaf-outline" size={10} color="#6B7280" />
-                  <Text className="text-[10px] text-gray-500">{restriction}</Text>
+                  <Text className="text-[10px] text-gray-500">
+                    {restriction}
+                  </Text>
                 </View>
               ))}
             </View>
@@ -407,8 +410,14 @@ const GuestCard = ({
 
         {/* Source indicator */}
         <View className="flex-row items-center gap-1 px-1.5 py-0.5 rounded-full bg-gray-50">
-          <Ionicons name={sourceInfo.icon as any} size={10} color={sourceInfo.color} />
-          <Text className="text-[10px] font-medium text-gray-400">{sourceInfo.label}</Text>
+          <Ionicons
+            name={sourceInfo.icon as any}
+            size={10}
+            color={sourceInfo.color}
+          />
+          <Text className="text-[10px] font-medium text-gray-400">
+            {sourceInfo.label}
+          </Text>
         </View>
       </View>
     </TouchableOpacity>
@@ -475,7 +484,7 @@ const CategoryPills = ({
     horizontal
     showsHorizontalScrollIndicator={false}
     className="px-4 py-3"
-    contentContainerStyle={{ alignItems: 'center' }}
+    contentContainerStyle={{ alignItems: "center" }}
   >
     {categories.map((cat) => (
       <RelationChip
@@ -498,7 +507,8 @@ export default function GuestListPage() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showFilterSidebar, setShowFilterSidebar] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<CategoryType>("All");
-  const [selectedInvitation, setSelectedInvitation] = useState<InvitationStatus>("All");
+  const [selectedInvitation, setSelectedInvitation] =
+    useState<InvitationStatus>("All");
   const [isImporting, setIsImporting] = useState(false);
   const [sortBy, setSortBy] = useState<SortOption>("name");
   const [refreshing, setRefreshing] = useState(false);
@@ -523,8 +533,13 @@ export default function GuestListPage() {
   const goingCount = guests.filter((g) => g.status === "Going").length;
   const pendingCount = guests.filter((g) => g.status === "Pending").length;
   const notGoingCount = guests.filter((g) => g.status === "Not Going").length;
-  const notInvitedCount = guests.filter((g) => g.status === "Not Invited").length;
-  const totalGuests = guests.reduce((acc, g) => acc + (g.hasPlusOne ? 2 : 1), 0);
+  const notInvitedCount = guests.filter(
+    (g) => g.status === "Not Invited"
+  ).length;
+  const totalGuests = guests.reduce(
+    (acc, g) => acc + (g.hasPlusOne ? 2 : 1),
+    0
+  );
   const invitedGuests = guests.filter((g) => g.status !== "Not Invited").length;
 
   const filteredGuests = guests
@@ -546,9 +561,12 @@ export default function GuestListPage() {
       const matchesInvitation =
         selectedInvitation === "All" ||
         (selectedInvitation === "Invited" && guest.status !== "Not Invited") ||
-        (selectedInvitation === "Not Invited" && guest.status === "Not Invited");
+        (selectedInvitation === "Not Invited" &&
+          guest.status === "Not Invited");
 
-      return matchesTab && matchesSearch && matchesCategory && matchesInvitation;
+      return (
+        matchesTab && matchesSearch && matchesCategory && matchesInvitation
+      );
     })
     .sort((a, b) => {
       if (sortBy === "name") {
@@ -562,9 +580,7 @@ export default function GuestListPage() {
 
   const categories: CategoryType[] = [
     "All",
-    ...Array.from(
-      new Set(guests.map((g) => g.relation).filter(Boolean))
-    ),
+    ...Array.from(new Set(guests.map((g) => g.relation).filter(Boolean))),
   ] as CategoryType[];
 
   const handleAddGuest = () => {
@@ -681,22 +697,24 @@ export default function GuestListPage() {
         return;
       }
 
-      const contactGuests: Guest[] = data.slice(0, 10).map((contact, index) => ({
-        id: `contact-${Date.now()}-${index}`,
-        name: contact.name || "Unknown",
-        initials: (contact.name || "U")
-          .split(" ")
-          .map((n: string) => n[0])
-          .join("")
-          .toUpperCase()
-          .slice(0, 2),
-        phone: contact.phoneNumbers?.[0]?.number,
-        hasPlusOne: false,
-        status: "Not Invited" as GuestStatus,
-        relation: "Contact",
-        source: "contact" as const,
-        createdAt: new Date().toISOString().split("T")[0],
-      }));
+      const contactGuests: Guest[] = data
+        .slice(0, 10)
+        .map((contact, index) => ({
+          id: `contact-${Date.now()}-${index}`,
+          name: contact.name || "Unknown",
+          initials: (contact.name || "U")
+            .split(" ")
+            .map((n: string) => n[0])
+            .join("")
+            .toUpperCase()
+            .slice(0, 2),
+          phone: contact.phoneNumbers?.[0]?.number,
+          hasPlusOne: false,
+          status: "Not Invited" as GuestStatus,
+          relation: "Contact",
+          source: "contact" as const,
+          createdAt: new Date().toISOString().split("T")[0],
+        }));
 
       setGuests((prev) => [...prev, ...contactGuests]);
 
@@ -814,16 +832,18 @@ export default function GuestListPage() {
             ].map((option) => (
               <TouchableOpacity
                 key={option.value}
-                className={`px-3 py-2 rounded-lg flex-row items-center justify-between ${sortBy === option.value ? "bg-primary/10" : ""
-                  }`}
+                className={`px-3 py-2 rounded-lg flex-row items-center justify-between ${
+                  sortBy === option.value ? "bg-primary/10" : ""
+                }`}
                 onPress={() => {
                   setSortBy(option.value as SortOption);
                   setShowSortOptions(false);
                 }}
               >
                 <Text
-                  className={`text-sm font-medium ${sortBy === option.value ? "text-primary" : "text-gray-700"
-                    }`}
+                  className={`text-sm font-medium ${
+                    sortBy === option.value ? "text-primary" : "text-gray-700"
+                  }`}
                 >
                   {option.label}
                 </Text>
@@ -841,7 +861,7 @@ export default function GuestListPage() {
         categories={categories}
         selected={selectedCategory}
         onSelect={setSelectedCategory}
-      /> 
+      />
 
       {/* Quick Actions */}
       <View className="px-6 py-2 flex-row justify-between items-center ">
@@ -870,9 +890,7 @@ export default function GuestListPage() {
             icon="document-text-outline"
             label="Export"
             color="#10B981"
-            onPress={() =>
-              Alert.alert("Export", "Export guest list to file.")
-            }
+            onPress={() => Alert.alert("Export", "Export guest list to file.")}
           />
         </View>
       </View>
@@ -912,13 +930,15 @@ export default function GuestListPage() {
             (tab) => (
               <TouchableOpacity
                 key={tab}
-                className={`flex-1 items-center justify-center rounded-md ${activeTab === tab ? "bg-white shadow-sm" : ""
-                  }`}
+                className={`flex-1 items-center justify-center rounded-md ${
+                  activeTab === tab ? "bg-white shadow-sm" : ""
+                }`}
                 onPress={() => setActiveTab(tab)}
               >
                 <Text
-                  className={`text-xs font-semibold ${activeTab === tab ? "text-primary" : "text-gray-500"
-                    }`}
+                  className={`text-xs font-semibold ${
+                    activeTab === tab ? "text-primary" : "text-gray-500"
+                  }`}
                 >
                   {tab === "Not Invited" ? "Not Invited" : tab}
                 </Text>
@@ -935,7 +955,9 @@ export default function GuestListPage() {
         renderItem={({ item }) => (
           <GuestCard
             guest={item}
-            onPress={() => router.push(`/guests/${item.id}` as RelativePathString)}
+            onPress={() =>
+              router.push(`/guests/${item.id}` as RelativePathString)
+            }
             onSendInvite={() => handleSendInvite(item.id)}
           />
         )}
@@ -1003,7 +1025,9 @@ export default function GuestListPage() {
             <View className="w-16 h-1 bg-gray-200 rounded-full mx-auto mb-6" />
 
             <View className="flex-row items-center justify-between mb-6">
-              <Text className="text-xl font-bold text-gray-900">Add New Guest</Text>
+              <Text className="text-xl font-bold text-gray-900">
+                Add New Guest
+              </Text>
               <TouchableOpacity
                 onPress={() => setShowAddModal(false)}
                 className="p-2"
@@ -1072,12 +1096,15 @@ export default function GuestListPage() {
               </View>
 
               <TouchableOpacity
-                className={`w-full py-4 rounded-xl items-center ${newGuestName.trim() ? "bg-primary" : "bg-gray-300"
-                  }`}
+                className={`w-full py-4 rounded-xl items-center ${
+                  newGuestName.trim() ? "bg-primary" : "bg-gray-300"
+                }`}
                 onPress={handleAddGuest}
                 disabled={!newGuestName.trim()}
               >
-                <Text className="text-white font-bold text-base">Add Guest</Text>
+                <Text className="text-white font-bold text-base">
+                  Add Guest
+                </Text>
               </TouchableOpacity>
             </ScrollView>
           </View>
@@ -1128,26 +1155,29 @@ export default function GuestListPage() {
                   ].map((option) => (
                     <TouchableOpacity
                       key={option.value}
-                      className={`flex-row items-center justify-between px-3 py-2 rounded-lg ${selectedInvitation === option.value
-                        ? "bg-primary/10"
-                        : ""
-                        }`}
+                      className={`flex-row items-center justify-between px-3 py-2 rounded-lg ${
+                        selectedInvitation === option.value
+                          ? "bg-primary/10"
+                          : ""
+                      }`}
                       onPress={() =>
                         setSelectedInvitation(option.value as InvitationStatus)
                       }
                     >
                       <View className="flex-row items-center gap-2">
                         <View
-                          className={`w-4 h-4 rounded-full border-2 ${selectedInvitation === option.value
-                            ? "border-primary bg-primary"
-                            : "border-gray-300"
-                            }`}
+                          className={`w-4 h-4 rounded-full border-2 ${
+                            selectedInvitation === option.value
+                              ? "border-primary bg-primary"
+                              : "border-gray-300"
+                          }`}
                         />
                         <Text
-                          className={`text-sm font-medium ${selectedInvitation === option.value
-                            ? "text-primary"
-                            : "text-gray-700"
-                            }`}
+                          className={`text-sm font-medium ${
+                            selectedInvitation === option.value
+                              ? "text-primary"
+                              : "text-gray-700"
+                          }`}
                         >
                           {option.label}
                         </Text>
@@ -1172,18 +1202,20 @@ export default function GuestListPage() {
                   ].map((option) => (
                     <TouchableOpacity
                       key={option.value}
-                      className={`flex-row items-center justify-between px-3 py-2 rounded-lg ${sortBy === option.value ? "bg-primary/10" : ""
-                        }`}
+                      className={`flex-row items-center justify-between px-3 py-2 rounded-lg ${
+                        sortBy === option.value ? "bg-primary/10" : ""
+                      }`}
                       onPress={() => {
                         setSortBy(option.value as SortOption);
                         setShowFilterSidebar(false);
                       }}
                     >
                       <Text
-                        className={`text-sm font-medium ${sortBy === option.value
-                          ? "text-primary"
-                          : "text-gray-700"
-                          }`}
+                        className={`text-sm font-medium ${
+                          sortBy === option.value
+                            ? "text-primary"
+                            : "text-gray-700"
+                        }`}
                       >
                         {option.label}
                       </Text>

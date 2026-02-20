@@ -66,7 +66,7 @@ const HotelCard = React.memo(
         </View>
       </ImageCard>
     );
-  },
+  }
 );
 
 const styles = StyleSheet.create({

@@ -38,7 +38,12 @@ type CategorySelectionProps = {
 };
 
 // dark: styles removed for nativewind consistency
-export default function CategorySelection({ selectedCategories, onChange, onBack, onNext }: CategorySelectionProps) {
+export default function CategorySelection({
+  selectedCategories,
+  onChange,
+  onBack,
+  onNext,
+}: CategorySelectionProps) {
   const toggleCategory = (key: string) => {
     const updated = selectedCategories.includes(key)
       ? selectedCategories.filter((k) => k !== key)
@@ -47,58 +52,80 @@ export default function CategorySelection({ selectedCategories, onChange, onBack
   };
   return (
     <View className="flex-1 bg-background-light">
-        {/* Scrollable Content */}
-        <ScrollView className="flex-1 px-6 pb-6 pt-2" showsVerticalScrollIndicator={false}>
-          {/* Headline */}
-          <View className="mb-8">
-            {/* text-light = #181114 */}
-            <Text className="text-3xl font-bold leading-tight mb-3" style={{ color: "#181114" }}>
-              What services do you offer?
-            </Text>
-            {/* slate-600 = #475569 */}
-            <Text className="text-base font-normal leading-relaxed" style={{ color: "#475569" }}>
-              Choose one or more categories that best describe your business. This helps couples find you easily.
-            </Text>
-          </View>
+      {/* Scrollable Content */}
+      <ScrollView
+        className="flex-1 px-6 pb-6 pt-2"
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Headline */}
+        <View className="mb-8">
+          {/* text-light = #181114 */}
+          <Text
+            className="text-3xl font-bold leading-tight mb-3"
+            style={{ color: "#181114" }}
+          >
+            What services do you offer?
+          </Text>
+          {/* slate-600 = #475569 */}
+          <Text
+            className="text-base font-normal leading-relaxed"
+            style={{ color: "#475569" }}
+          >
+            Choose one or more categories that best describe your business. This
+            helps couples find you easily.
+          </Text>
+        </View>
 
-          {/* Categories Grid */}
-          <View className="mt-6 flex-row flex-wrap justify-between pb-8" style={{ gap: 16 }}>
-            {CATEGORIES.map((item) => (
-              <CategoryCard
-                key={item.key}
-                item={item}
-                selected={selectedCategories.includes(item.key)}
-                onSelect={() => toggleCategory(item.key)}
-              />
-            ))}
-          </View>
-        </ScrollView>
+        {/* Categories Grid */}
+        <View
+          className="mt-6 flex-row flex-wrap justify-between pb-8"
+          style={{ gap: 16 }}
+        >
+          {CATEGORIES.map((item) => (
+            <CategoryCard
+              key={item.key}
+              item={item}
+              selected={selectedCategories.includes(item.key)}
+              onSelect={() => toggleCategory(item.key)}
+            />
+          ))}
+        </View>
+      </ScrollView>
 
       <View className="px-6">
         <TouchableOpacity
-            className="w-full rounded-full bg-primary py-4 px-6 flex-row items-center justify-center gap-2"
-            activeOpacity={0.9}
-            onPress={onNext}
-          >
-            <Text className="text-white text-base font-bold leading-tight">Continue</Text>
-            {/* text-sm not available for icons; using size prop */}
-            {/* primary = #ee2b8c (button bg) */}
-            <MaterialIcons name="arrow-forward" size={18} color="#ffffff" />
-          </TouchableOpacity>
-
+          className="w-full rounded-full bg-primary py-4 px-6 flex-row items-center justify-center gap-2"
+          activeOpacity={0.9}
+          onPress={onNext}
+        >
+          <Text className="text-white text-base font-bold leading-tight">
+            Continue
+          </Text>
+          {/* text-sm not available for icons; using size prop */}
+          {/* primary = #ee2b8c (button bg) */}
+          <MaterialIcons name="arrow-forward" size={18} color="#ffffff" />
+        </TouchableOpacity>
       </View>
-          
-     
     </View>
   );
 }
 
-function CategoryCard({ item, selected, onSelect }: { item: Category; selected: boolean; onSelect: () => void }) {
+function CategoryCard({
+  item,
+  selected,
+  onSelect,
+}: {
+  item: Category;
+  selected: boolean;
+  onSelect: () => void;
+}) {
   const isSelected = selected;
   return (
     <TouchableOpacity
       className={`relative rounded-2xl p-5 items-center justify-center shadow-sm ${
-        isSelected ? "border-2 border-primary bg-primary/5" : "border-2 border-transparent bg-white"
+        isSelected
+          ? "border-2 border-primary bg-primary/5"
+          : "border-2 border-transparent bg-white"
       }`}
       style={{ width: CARD_WIDTH }}
       activeOpacity={0.9}
@@ -108,10 +135,18 @@ function CategoryCard({ item, selected, onSelect }: { item: Category; selected: 
       {/* Unselected bg = #fcebf4; selected uses white bg */}
       <View
         className={`items-center justify-center rounded-full`}
-        style={{ width: 48, height: 48, backgroundColor: isSelected ? "#ffffff" : "#fcebf4" }}
+        style={{
+          width: 48,
+          height: 48,
+          backgroundColor: isSelected ? "#ffffff" : "#fcebf4",
+        }}
       >
         {/* text-primary = #ee2b8c; dark text white */}
-        <MaterialIcons name={item.icon} size={28} color={isSelected ? "#ee2b8c" : "#ee2b8c"} />
+        <MaterialIcons
+          name={item.icon}
+          size={28}
+          color={isSelected ? "#ee2b8c" : "#ee2b8c"}
+        />
       </View>
 
       {/* Title */}

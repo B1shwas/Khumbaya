@@ -70,22 +70,130 @@ interface TableTemplate {
 
 const MOCK_GUESTS: Guest[] = [
   // Group 1: Vance Family (4 members)
-  { id: "1", name: "Eleanor Vance", familySize: 4, relation: "Family", groupId: "group-1", tableId: null, seatNumber: null, assigned: false },
-  { id: "2", name: "Henry Vance", familySize: 4, relation: "Family", groupId: "group-1", tableId: null, seatNumber: null, assigned: false },
-  { id: "3", name: "Mrs. Vance", familySize: 4, relation: "Family", groupId: "group-1", tableId: null, seatNumber: null, assigned: false },
-  { id: "4", name: "Julia Vance", familySize: 4, relation: "Family", groupId: "group-1", tableId: null, seatNumber: null, assigned: false },
+  {
+    id: "1",
+    name: "Eleanor Vance",
+    familySize: 4,
+    relation: "Family",
+    groupId: "group-1",
+    tableId: null,
+    seatNumber: null,
+    assigned: false,
+  },
+  {
+    id: "2",
+    name: "Henry Vance",
+    familySize: 4,
+    relation: "Family",
+    groupId: "group-1",
+    tableId: null,
+    seatNumber: null,
+    assigned: false,
+  },
+  {
+    id: "3",
+    name: "Mrs. Vance",
+    familySize: 4,
+    relation: "Family",
+    groupId: "group-1",
+    tableId: null,
+    seatNumber: null,
+    assigned: false,
+  },
+  {
+    id: "4",
+    name: "Julia Vance",
+    familySize: 4,
+    relation: "Family",
+    groupId: "group-1",
+    tableId: null,
+    seatNumber: null,
+    assigned: false,
+  },
   // Group 2: Crain Family (3 members)
-  { id: "5", name: "Steven Crain", familySize: 3, relation: "Family", groupId: "group-2", tableId: null, seatNumber: null, assigned: false },
-  { id: "6", name: "Nell Crain", familySize: 3, relation: "Family", groupId: "group-2", tableId: null, seatNumber: null, assigned: false },
-  { id: "7", name: "Luke Crain", familySize: 3, relation: "Family", groupId: "group-2", tableId: null, seatNumber: null, assigned: false },
+  {
+    id: "5",
+    name: "Steven Crain",
+    familySize: 3,
+    relation: "Family",
+    groupId: "group-2",
+    tableId: null,
+    seatNumber: null,
+    assigned: false,
+  },
+  {
+    id: "6",
+    name: "Nell Crain",
+    familySize: 3,
+    relation: "Family",
+    groupId: "group-2",
+    tableId: null,
+    seatNumber: null,
+    assigned: false,
+  },
+  {
+    id: "7",
+    name: "Luke Crain",
+    familySize: 3,
+    relation: "Family",
+    groupId: "group-2",
+    tableId: null,
+    seatNumber: null,
+    assigned: false,
+  },
   // Group 3: Friends (2 members)
-  { id: "8", name: "Luke S.", familySize: 2, relation: "Friend", groupId: "group-3", tableId: null, seatNumber: null, assigned: false },
-  { id: "9", name: "Shirley H.", familySize: 2, relation: "Friend", groupId: "group-3", tableId: null, seatNumber: null, assigned: false },
+  {
+    id: "8",
+    name: "Luke S.",
+    familySize: 2,
+    relation: "Friend",
+    groupId: "group-3",
+    tableId: null,
+    seatNumber: null,
+    assigned: false,
+  },
+  {
+    id: "9",
+    name: "Shirley H.",
+    familySize: 2,
+    relation: "Friend",
+    groupId: "group-3",
+    tableId: null,
+    seatNumber: null,
+    assigned: false,
+  },
   // Group 4: Colleagues (2 members)
-  { id: "10", name: "Arthur Vance", familySize: 2, relation: "Colleague", groupId: "group-4", tableId: null, seatNumber: null, assigned: false },
-  { id: "11", name: "Olivia V.", familySize: 2, relation: "Colleague", groupId: "group-4", tableId: null, seatNumber: null, assigned: false },
+  {
+    id: "10",
+    name: "Arthur Vance",
+    familySize: 2,
+    relation: "Colleague",
+    groupId: "group-4",
+    tableId: null,
+    seatNumber: null,
+    assigned: false,
+  },
+  {
+    id: "11",
+    name: "Olivia V.",
+    familySize: 2,
+    relation: "Colleague",
+    groupId: "group-4",
+    tableId: null,
+    seatNumber: null,
+    assigned: false,
+  },
   // Group 5: Singleton
-  { id: "12", name: "Theodora C.", familySize: 1, relation: "Friend", groupId: "group-5", tableId: null, seatNumber: null, assigned: false },
+  {
+    id: "12",
+    name: "Theodora C.",
+    familySize: 1,
+    relation: "Friend",
+    groupId: "group-5",
+    tableId: null,
+    seatNumber: null,
+    assigned: false,
+  },
 ];
 
 const TABLE_TEMPLATES: TableTemplate[] = [
@@ -106,8 +214,14 @@ interface TableCardProps {
   panHandlers: any;
 }
 
-const TableCard = ({ table, guests, isSelected, onSelect, panHandlers }: TableCardProps) => {
-  const occupancy = table.seats.filter(s => s.guestId).length;
+const TableCard = ({
+  table,
+  guests,
+  isSelected,
+  onSelect,
+  panHandlers,
+}: TableCardProps) => {
+  const occupancy = table.seats.filter((s) => s.guestId).length;
   const occupancyPercent = (occupancy / table.capacity) * 100;
 
   const getOccupancyColor = () => {
@@ -141,7 +255,9 @@ const TableCard = ({ table, guests, isSelected, onSelect, panHandlers }: TableCa
           <View style={styles.rectangleSeatTop}>
             {Array.from({ length: 4 }).map((_, i) => {
               const seat = table.seats[i];
-              const guest = seat?.guestId ? guests.find(g => g.id === seat.guestId) : null;
+              const guest = seat?.guestId
+                ? guests.find((g) => g.id === seat.guestId)
+                : null;
               return (
                 <View
                   key={`top-${i}`}
@@ -164,7 +280,9 @@ const TableCard = ({ table, guests, isSelected, onSelect, panHandlers }: TableCa
           <View style={styles.rectangleSeatBottom}>
             {Array.from({ length: 4 }).map((_, i) => {
               const seat = table.seats[i + 4];
-              const guest = seat?.guestId ? guests.find(g => g.id === seat.guestId) : null;
+              const guest = seat?.guestId
+                ? guests.find((g) => g.id === seat.guestId)
+                : null;
               return (
                 <View
                   key={`bottom-${i}`}
@@ -205,16 +323,22 @@ const TableCard = ({ table, guests, isSelected, onSelect, panHandlers }: TableCa
           {/* Show seated guests on circle table */}
           <View style={styles.circleGuests}>
             {table.seats.slice(0, 6).map((seat, i) => {
-              const guest = seat?.guestId ? guests.find(g => g.id === seat.guestId) : null;
+              const guest = seat?.guestId
+                ? guests.find((g) => g.id === seat.guestId)
+                : null;
               if (!guest) return null;
               return (
                 <View key={seat.id} style={styles.circleGuestDot}>
-                  <Text style={styles.circleGuestInitial}>{guest.name.charAt(0)}</Text>
+                  <Text style={styles.circleGuestInitial}>
+                    {guest.name.charAt(0)}
+                  </Text>
                 </View>
               );
             })}
-            {table.seats.filter(s => s.guestId).length > 6 && (
-              <Text style={styles.moreGuests}>+{table.seats.filter(s => s.guestId).length - 6}</Text>
+            {table.seats.filter((s) => s.guestId).length > 6 && (
+              <Text style={styles.moreGuests}>
+                +{table.seats.filter((s) => s.guestId).length - 6}
+              </Text>
             )}
           </View>
         </>
@@ -249,7 +373,10 @@ const GroupChip = ({ group, isSelected, onSelect }: GroupChipProps) => {
         </View>
       </View>
       <Text style={styles.groupChipMembers}>
-        {group.members.slice(0, 3).map(m => m.name.split(" ")[0]).join(", ")}
+        {group.members
+          .slice(0, 3)
+          .map((m) => m.name.split(" ")[0])
+          .join(", ")}
         {group.members.length > 3 && ` +${group.members.length - 3}`}
       </Text>
     </TouchableOpacity>
@@ -263,7 +390,7 @@ const GroupChip = ({ group, isSelected, onSelect }: GroupChipProps) => {
 export default function TableManagement() {
   const router = useRouter();
   const params = useLocalSearchParams();
-  const eventId = params.eventId as string || "default";
+  const eventId = (params.eventId as string) || "default";
 
   const [guests, setGuests] = useState<Guest[]>(MOCK_GUESTS);
   const [tables, setTables] = useState<Table[]>([
@@ -343,7 +470,10 @@ export default function TableManagement() {
         guests: guests,
         savedAt: new Date().toISOString(),
       };
-      await AsyncStorage.setItem(`${STORAGE_KEY}_${eventId}`, JSON.stringify(dataToSave));
+      await AsyncStorage.setItem(
+        `${STORAGE_KEY}_${eventId}`,
+        JSON.stringify(dataToSave)
+      );
       Alert.alert("Success", "Table assignments saved successfully!");
     } catch (error) {
       Alert.alert("Error", "Failed to save assignments. Please try again.");
@@ -355,8 +485,8 @@ export default function TableManagement() {
   // Build groups from guests
   const groups: GuestGroup[] = useMemo(() => {
     const groupMap = new Map<string, Guest[]>();
-    
-    guests.forEach(guest => {
+
+    guests.forEach((guest) => {
       if (!groupMap.has(guest.groupId)) {
         groupMap.set(guest.groupId, []);
       }
@@ -368,12 +498,12 @@ export default function TableManagement() {
       name: members[0].relation || "Group",
       members,
       totalSize: members.reduce((sum, m) => sum + m.familySize, 0),
-      assigned: members.every(m => m.assigned),
+      assigned: members.every((m) => m.assigned),
     }));
   }, [guests]);
 
-  const unassignedGroups = groups.filter(g => !g.assigned);
-  const selectedTable = tables.find(t => t.id === selectedTableId);
+  const unassignedGroups = groups.filter((g) => !g.assigned);
+  const selectedTable = tables.find((t) => t.id === selectedTableId);
 
   // Pan handlers for tables
   const createTablePanHandlers = (tableId: string) => {
@@ -383,16 +513,21 @@ export default function TableManagement() {
         setSelectedTableId(tableId);
       },
       onPanResponderMove: (_, gesture) => {
-        setTables(prev => prev.map(t => {
-          if (t.id === tableId) {
-            return {
-              ...t,
-              x: Math.max(0, Math.min(SCREEN_WIDTH - 150, t.x + gesture.dx)),
-              y: Math.max(80, Math.min(SCREEN_HEIGHT - 250, t.y + gesture.dy)),
-            };
-          }
-          return t;
-        }));
+        setTables((prev) =>
+          prev.map((t) => {
+            if (t.id === tableId) {
+              return {
+                ...t,
+                x: Math.max(0, Math.min(SCREEN_WIDTH - 150, t.x + gesture.dx)),
+                y: Math.max(
+                  80,
+                  Math.min(SCREEN_HEIGHT - 250, t.y + gesture.dy)
+                ),
+              };
+            }
+            return t;
+          })
+        );
       },
       onPanResponderRelease: () => {},
     }).panHandlers;
@@ -409,39 +544,49 @@ export default function TableManagement() {
   const handleAutoAssign = () => {
     // Auto-assign groups to tables
     let groupIndex = 0;
-    
-    setTables(prev => prev.map(table => {
-      const tableGroups = [...groups].slice(groupIndex);
-      const remainingCapacity = table.capacity - table.seats.filter(s => s.guestId).length;
-      
-      let seatsToFill = remainingCapacity;
-      const newSeats = [...table.seats];
-      
-      for (const group of tableGroups) {
-        if (seatsToFill <= 0) break;
-        
-        const groupMembers = group.members.filter(m => !m.assigned);
-        for (let i = 0; i < groupMembers.length && seatsToFill > 0; i++) {
-          const seatIndex = newSeats.findIndex(s => !s.guestId);
-          if (seatIndex >= 0) {
-            newSeats[seatIndex] = { ...newSeats[seatIndex], guestId: groupMembers[i].id };
-            seatsToFill--;
-            groupIndex++;
+
+    setTables((prev) =>
+      prev.map((table) => {
+        const tableGroups = [...groups].slice(groupIndex);
+        const remainingCapacity =
+          table.capacity - table.seats.filter((s) => s.guestId).length;
+
+        let seatsToFill = remainingCapacity;
+        const newSeats = [...table.seats];
+
+        for (const group of tableGroups) {
+          if (seatsToFill <= 0) break;
+
+          const groupMembers = group.members.filter((m) => !m.assigned);
+          for (let i = 0; i < groupMembers.length && seatsToFill > 0; i++) {
+            const seatIndex = newSeats.findIndex((s) => !s.guestId);
+            if (seatIndex >= 0) {
+              newSeats[seatIndex] = {
+                ...newSeats[seatIndex],
+                guestId: groupMembers[i].id,
+              };
+              seatsToFill--;
+              groupIndex++;
+            }
           }
         }
-      }
-      
-      return { ...table, seats: newSeats };
-    }));
+
+        return { ...table, seats: newSeats };
+      })
+    );
 
     // Update guests
-    setGuests(prev => prev.map(guest => {
-      const table = tables.find(t => t.seats.some(s => s.guestId === guest.id));
-      if (table) {
-        return { ...guest, assigned: true, tableId: table.id };
-      }
-      return guest;
-    }));
+    setGuests((prev) =>
+      prev.map((guest) => {
+        const table = tables.find((t) =>
+          t.seats.some((s) => s.guestId === guest.id)
+        );
+        if (table) {
+          return { ...guest, assigned: true, tableId: table.id };
+        }
+        return guest;
+      })
+    );
   };
 
   const handleAddTable = (template: TableTemplate) => {
@@ -458,75 +603,77 @@ export default function TableManagement() {
         guestId: null,
       })),
     };
-    setTables(prev => [...prev, newTable]);
+    setTables((prev) => [...prev, newTable]);
     setShowAddTable(false);
   };
 
   const handleRemoveGuestFromSeat = (seatId: string) => {
     if (!selectedTable) return;
 
-    const seat = selectedTable.seats.find(s => s.id === seatId);
+    const seat = selectedTable.seats.find((s) => s.id === seatId);
     if (!seat?.guestId) return;
 
-    setTables(prev =>
-      prev.map(table => {
+    setTables((prev) =>
+      prev.map((table) => {
         if (table.id === selectedTableId) {
           return {
             ...table,
-            seats: table.seats.map(s =>
-              s.id === seatId ? { ...s, guestId: null } : s,
+            seats: table.seats.map((s) =>
+              s.id === seatId ? { ...s, guestId: null } : s
             ),
           };
         }
         return table;
-      }),
+      })
     );
 
-    setGuests(prev =>
-      prev.map(guest => {
+    setGuests((prev) =>
+      prev.map((guest) => {
         if (guest.id === seat.guestId) {
           return { ...guest, assigned: false, tableId: null, seatNumber: null };
         }
         return guest;
-      }),
+      })
     );
   };
 
   const handleRemoveGroupFromTable = (groupId: string) => {
     // Remove all members of the group from the table
-    const groupMembers = guests.filter(g => g.groupId === groupId && g.tableId === selectedTableId);
-    
-    setTables(prev =>
-      prev.map(table => {
+    const groupMembers = guests.filter(
+      (g) => g.groupId === groupId && g.tableId === selectedTableId
+    );
+
+    setTables((prev) =>
+      prev.map((table) => {
         if (table.id === selectedTableId) {
           return {
             ...table,
-            seats: table.seats.map(s => {
-              const member = groupMembers.find(m => m.id === s.guestId);
+            seats: table.seats.map((s) => {
+              const member = groupMembers.find((m) => m.id === s.guestId);
               return member ? { ...s, guestId: null } : s;
             }),
           };
         }
         return table;
-      }),
+      })
     );
 
-    setGuests(prev =>
-      prev.map(guest => {
+    setGuests((prev) =>
+      prev.map((guest) => {
         if (guest.groupId === groupId) {
           return { ...guest, assigned: false, tableId: null, seatNumber: null };
         }
         return guest;
-      }),
+      })
     );
   };
 
   const handleAssignGroupToTable = (group: GuestGroup) => {
     if (!selectedTable) return;
 
-    const availableSeats = selectedTable.seats.filter(s => !s.guestId);
+    const availableSeats = selectedTable.seats.filter((s) => !s.guestId);
     const availableCapacity = availableSeats.length;
-    const groupMembers = group.members.filter(m => !m.assigned);
+    const groupMembers = group.members.filter((m) => !m.assigned);
     const totalNeeded = groupMembers.reduce((sum, m) => sum + m.familySize, 0);
 
     if (availableCapacity < totalNeeded) {
@@ -539,12 +686,12 @@ export default function TableManagement() {
     }
 
     // Assign group members to seats
-    const memberIds = groupMembers.map(m => m.id);
+    const memberIds = groupMembers.map((m) => m.id);
 
-    setTables(prev =>
-      prev.map(table => {
+    setTables((prev) =>
+      prev.map((table) => {
         if (table.id === selectedTableId) {
-          const newSeats = table.seats.map(s => {
+          const newSeats = table.seats.map((s) => {
             if (!s.guestId && memberIds.length > 0) {
               const guestId = memberIds.shift();
               return { ...s, guestId: guestId! };
@@ -554,16 +701,16 @@ export default function TableManagement() {
           return { ...table, seats: newSeats };
         }
         return table;
-      }),
+      })
     );
 
-    setGuests(prev =>
-      prev.map(guest => {
+    setGuests((prev) =>
+      prev.map((guest) => {
         if (guest.groupId === group.id) {
           return { ...guest, assigned: true, tableId: selectedTable.id };
         }
         return guest;
-      }),
+      })
     );
 
     setShowGroupSelector(false);
@@ -572,15 +719,15 @@ export default function TableManagement() {
 
   const handleSelectSeatForGroup = (seatId: string) => {
     if (!selectedTable) return;
-    
-    const seat = selectedTable.seats.find(s => s.id === seatId);
+
+    const seat = selectedTable.seats.find((s) => s.id === seatId);
     if (!seat?.guestId) {
       setShowGroupSelector(true);
     }
   };
 
   const totalGuests = guests.length;
-  const seatedGuests = guests.filter(g => g.assigned).length;
+  const seatedGuests = guests.filter((g) => g.assigned).length;
 
   return (
     <View style={styles.container}>
@@ -590,12 +737,14 @@ export default function TableManagement() {
           <Ionicons name="arrow-back" size={20} color="#6B7280" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Seating Plan</Text>
-        <TouchableOpacity 
-          onPress={handleSave} 
+        <TouchableOpacity
+          onPress={handleSave}
           style={styles.headerButton}
           disabled={isSaving}
         >
-          <Text style={[styles.saveButton, isSaving && styles.saveButtonDisabled]}>
+          <Text
+            style={[styles.saveButton, isSaving && styles.saveButtonDisabled]}
+          >
             {isSaving ? "Saving..." : "Save"}
           </Text>
         </TouchableOpacity>
@@ -624,7 +773,7 @@ export default function TableManagement() {
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.guestChipsContainer}
           >
-            {unassignedGroups.map(group => (
+            {unassignedGroups.map((group) => (
               <GroupChip
                 key={group.id}
                 group={group}
@@ -644,7 +793,7 @@ export default function TableManagement() {
         {/* Floor Plan Canvas */}
         <View style={styles.canvasContainer}>
           <View style={styles.canvasGrid}>
-            {tables.map(table => (
+            {tables.map((table) => (
               <TableCard
                 key={table.id}
                 table={table}
@@ -655,7 +804,6 @@ export default function TableManagement() {
               />
             ))}
           </View>
-
           Canvas Info Overlay
           <View style={styles.canvasInfo}>
             <View style={styles.guestAvatars}>
@@ -673,7 +821,6 @@ export default function TableManagement() {
               {seatedGuests}/{totalGuests} seated
             </Text>
           </View>
-
           {/* Floating Controls */}
           <View style={styles.floatingControls}>
             <TouchableOpacity style={styles.fab}>
@@ -705,7 +852,8 @@ export default function TableManagement() {
                   Table {selectedTable.name}
                 </Text>
                 <Text style={styles.drawerSubtitle}>
-                  {selectedTable.seats.filter(s => !s.guestId).length} seats available
+                  {selectedTable.seats.filter((s) => !s.guestId).length} seats
+                  available
                 </Text>
               </View>
               <TouchableOpacity style={styles.editButton}>
@@ -715,10 +863,15 @@ export default function TableManagement() {
 
             <View style={styles.seatsGrid}>
               {selectedTable.seats.map((seat, index) => {
-                const guest = guests.find(g => g.id === seat.guestId);
-                const group = guest ? groups.find(g => g.id === guest.groupId) : null;
-                const isFirstSeatOfGroup = guest && 
-                  selectedTable.seats.findIndex(s => s.guestId === guest.id) === index;
+                const guest = guests.find((g) => g.id === seat.guestId);
+                const group = guest
+                  ? groups.find((g) => g.id === guest.groupId)
+                  : null;
+                const isFirstSeatOfGroup =
+                  guest &&
+                  selectedTable.seats.findIndex(
+                    (s) => s.guestId === guest.id
+                  ) === index;
 
                 return (
                   <TouchableOpacity
@@ -792,29 +945,41 @@ export default function TableManagement() {
             </Text>
 
             <ScrollView style={styles.groupList}>
-              {unassignedGroups.map(group => {
-                const groupMembers = group.members.filter(m => !m.assigned);
-                const totalNeeded = groupMembers.reduce((sum, m) => sum + m.familySize, 0);
-                const availableSeats = selectedTable?.seats.filter(s => !s.guestId).length || 0;
+              {unassignedGroups.map((group) => {
+                const groupMembers = group.members.filter((m) => !m.assigned);
+                const totalNeeded = groupMembers.reduce(
+                  (sum, m) => sum + m.familySize,
+                  0
+                );
+                const availableSeats =
+                  selectedTable?.seats.filter((s) => !s.guestId).length || 0;
                 const canAssign = availableSeats >= totalNeeded;
 
                 return (
                   <TouchableOpacity
                     key={group.id}
-                    style={[styles.groupOption, !canAssign && styles.groupOptionDisabled]}
+                    style={[
+                      styles.groupOption,
+                      !canAssign && styles.groupOptionDisabled,
+                    ]}
                     onPress={() => canAssign && handleAssignGroupToTable(group)}
                     disabled={!canAssign}
                   >
                     <View style={styles.groupOptionInfo}>
                       <Text style={styles.groupOptionName}>{group.name}</Text>
                       <Text style={styles.groupOptionMembers}>
-                        {groupMembers.map(m => m.name).join(", ")}
+                        {groupMembers.map((m) => m.name).join(", ")}
                       </Text>
                       <Text style={styles.groupOptionSize}>
                         Seats needed: {totalNeeded}
                       </Text>
                     </View>
-                    <View style={[styles.groupOptionCheck, canAssign && styles.groupOptionCheckActive]}>
+                    <View
+                      style={[
+                        styles.groupOptionCheck,
+                        canAssign && styles.groupOptionCheckActive,
+                      ]}
+                    >
                       <Ionicons
                         name={canAssign ? "checkmark" : "close"}
                         size={18}
@@ -856,7 +1021,9 @@ export default function TableManagement() {
                     onPress={() => handleAddTable(template)}
                   >
                     <Ionicons
-                      name={template.type === "rectangle" ? "square" : "ellipse"}
+                      name={
+                        template.type === "rectangle" ? "square" : "ellipse"
+                      }
                       size={24}
                       color="#ee2b8c"
                     />

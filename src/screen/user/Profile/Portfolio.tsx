@@ -184,7 +184,7 @@ export default function PortfolioScreen() {
     try {
       setIsLoading(true);
       const storedPortfolio = await AsyncStorage.getItem(
-        STORAGE_KEYS.PORTFOLIO,
+        STORAGE_KEYS.PORTFOLIO
       );
       if (storedPortfolio) {
         setPortfolio(JSON.parse(storedPortfolio));
@@ -203,7 +203,7 @@ export default function PortfolioScreen() {
       setIsLoading(true);
       await AsyncStorage.setItem(
         STORAGE_KEYS.PORTFOLIO,
-        JSON.stringify(portfolio),
+        JSON.stringify(portfolio)
       );
       router.back();
     } catch (error) {

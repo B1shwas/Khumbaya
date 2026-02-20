@@ -1,7 +1,7 @@
-import { Ionicons } from '@expo/vector-icons';
-import * as Haptics from 'expo-haptics';
-import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { Ionicons } from "@expo/vector-icons";
+import * as Haptics from "expo-haptics";
+import { useRouter } from "expo-router";
+import { useState } from "react";
 import {
   FlatList,
   Image,
@@ -10,7 +10,7 @@ import {
   Text,
   TouchableOpacity,
   View,
-} from 'react-native';
+} from "react-native";
 
 // ============================================
 // BACKEND INTEGRATION NOTES:
@@ -35,88 +35,100 @@ import {
 // Mock data for events
 const MOCK_EVENTS = [
   {
-    id: '1',
-    name: 'Emma & James Wedding',
-    date: '2024-12-15',
-    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCDBTMpF5OGVFMpt0SFd1YYHvT0dbWhsJ1OiXWYAZtZHva3uRWvfDLTe0o9wji8CCfff_spyNbGa1EqMQAzU8TSgsZHHZyZczilaJjXsgkwdrHYtnhNzzELEAqjVUidiCPT2fu982NW88FUu6OLV-YHywILAwdx8LLdR69ManJPsqTJW1tjKuLVKnk4MgCSOSRbFhMOSEYIzSWmW-zWQIRd6Gn2odEDu-GJKhVcxGiy5nXwWuauIW5Hx3EfnwvPUTBI8LDijYJeRSk',
+    id: "1",
+    name: "Emma & James Wedding",
+    date: "2024-12-15",
+    image:
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuCDBTMpF5OGVFMpt0SFd1YYHvT0dbWhsJ1OiXWYAZtZHva3uRWvfDLTe0o9wji8CCfff_spyNbGa1EqMQAzU8TSgsZHHZyZczilaJjXsgkwdrHYtnhNzzELEAqjVUidiCPT2fu982NW88FUu6OLV-YHywILAwdx8LLdR69ManJPsqTJW1tjKuLVKnk4MgCSOSRbFhMOSEYIzSWmW-zWQIRd6Gn2odEDu-GJKhVcxGiy5nXwWuauIW5Hx3EfnwvPUTBI8LDijYJeRSk",
     subEvents: [
       {
-        id: 's1',
-        name: 'Sangeet Ceremony',
+        id: "s1",
+        name: "Sangeet Ceremony",
         vendors: [
-          { id: 'v1', name: 'DJ Beats', category: 'Music', status: 'Booked' },
-          { id: 'v2', name: 'Flower Decor', category: 'Decoration', status: 'Pending' },
+          { id: "v1", name: "DJ Beats", category: "Music", status: "Booked" },
+          {
+            id: "v2",
+            name: "Flower Decor",
+            category: "Decoration",
+            status: "Pending",
+          },
         ],
       },
       {
-        id: 's2',
-        name: 'Mehendi Ceremony',
+        id: "s2",
+        name: "Mehendi Ceremony",
         vendors: [],
       },
     ],
   },
   {
-    id: '2',
-    name: 'Sarah & John Reception',
-    date: '2025-01-20',
-    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCDBTMpF5OGVFMpt0SFd1YYHvT0dbWhsJ1OiXWYAZtZHva3uRWvfDLTe0o9wji8CCfff_spyNbGa1EqMQAzU8TSgsZHHZyZczilaJjXsgkwdrHYtnhNzzELEAqjVUidiCPT2fu982NW88FUu6OLV-YHywILAwdx8LLdR69ManJPsqTJW1tjKuLVKnk4MgCSOSRbFhMOSEYIzSWmW-zWQIRd6Gn2odEDu-GJKhVcxGiy5nXwWuauIW5Hx3EfnwvPUTBI8LDijYJeRSk',
+    id: "2",
+    name: "Sarah & John Reception",
+    date: "2025-01-20",
+    image:
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuCDBTMpF5OGVFMpt0SFd1YYHvT0dbWhsJ1OiXWYAZtZHva3uRWvfDLTe0o9wji8CCfff_spyNbGa1EqMQAzU8TSgsZHHZyZczilaJjXsgkwdrHYtnhNzzELEAqjVUidiCPT2fu982NW88FUu6OLV-YHywILAwdx8LLdR69ManJPsqTJW1tjKuLVKnk4MgCSOSRbFhMOSEYIzSWmW-zWQIRd6Gn2odEDu-GJKhVcxGiy5nXwWuauIW5Hx3EfnwvPUTBI8LDijYJeRSk",
     subEvents: [],
   },
 ];
 
-type ViewMode = 'success' | 'events' | 'subevent';
+type ViewMode = "success" | "events" | "subevent";
 
 export default function EventSuccess() {
   const router = useRouter();
-  const [viewMode, setViewMode] = useState<ViewMode>('success');
-  const [selectedEvent, setSelectedEvent] = useState<typeof MOCK_EVENTS[0] | null>(null);
+  const [viewMode, setViewMode] = useState<ViewMode>("success");
+  const [selectedEvent, setSelectedEvent] = useState<
+    (typeof MOCK_EVENTS)[0] | null
+  >(null);
   const [expandedSubEvents, setExpandedSubEvents] = useState<string[]>([]);
 
   const handleClose = () => {
-    router.replace('/(protected)/(client-tabs)/events' as any);
+    router.replace("/(protected)/(client-tabs)/events" as any);
   };
 
   const handleCreateSubEvent = () => {
-    router.push('/(protected)/(client-tabs)/events/subevent-create' as any);
+    router.push("/(protected)/(client-tabs)/events/subevent-create" as any);
   };
 
   const handleViewMyEvents = () => {
-    setViewMode('events');
+    setViewMode("events");
   };
 
-  const handleEventPress = (event: typeof MOCK_EVENTS[0]) => {
+  const handleEventPress = (event: (typeof MOCK_EVENTS)[0]) => {
     setSelectedEvent(event);
-    setViewMode('subevent');
+    setViewMode("subevent");
   };
 
   const handleBackToEvents = () => {
-    setViewMode('events');
+    setViewMode("events");
     setSelectedEvent(null);
   };
 
   const handleBackToSuccess = () => {
-    setViewMode('success');
+    setViewMode("success");
     setSelectedEvent(null);
     setExpandedSubEvents([]);
   };
 
   const toggleSubEvent = (subEventId: string) => {
-    setExpandedSubEvents(prev =>
+    setExpandedSubEvents((prev) =>
       prev.includes(subEventId)
-        ? prev.filter(id => id !== subEventId)
+        ? prev.filter((id) => id !== subEventId)
         : [...prev, subEventId]
     );
   };
 
   const handleAddVendor = (subEventId: string) => {
     // TODO: Navigate to vendor selection for this sub-event
-    console.log('Add vendor for sub-event:', subEventId);
-    router.push('/(shared)/explore/explore');
+    console.log("Add vendor for sub-event:", subEventId);
+    router.push("/(shared)/explore/explore");
   };
 
-  const handleCopyLink = async (event: typeof MOCK_EVENTS[0]) => {
+  const handleCopyLink = async (event: (typeof MOCK_EVENTS)[0]) => {
     await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    console.log('Link copied:', `wedding.app/events/${event.name.toLowerCase().replace(/ /g, '-')}`);
+    console.log(
+      "Link copied:",
+      `wedding.app/events/${event.name.toLowerCase().replace(/ /g, "-")}`
+    );
   };
 
   const renderSuccessView = () => (
@@ -126,7 +138,9 @@ export default function EventSuccess() {
         <View style={styles.heroCircle}>
           <View style={styles.heroInner}>
             <Image
-              source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCDBTMpF5OGVFMpt0SFd1YYHvT0dbWhsJ1OiXWYAZtZHva3uRWvfDLTe0o9wji8CCfff_spyNbGa1EqMQAzU8TSgsZHHZyZczilaJjXsgkwdrHYtnhNzzELEAqjVUidiCPT2fu982NW88FUu6OLV-YHywILAwdx8LLdR69ManJPsqTJW1tjKuLVKnk4MgCSOSRbFhMOSEYIzSWmW-zWQIRd6Gn2odEDu-GJKhVcxGiy5nXwWuauIW5Hx3EfnwvPUTBI8LDijYJeRSk' }}
+              source={{
+                uri: "https://lh3.googleusercontent.com/aida-public/AB6AXuCDBTMpF5OGVFMpt0SFd1YYHvT0dbWhsJ1OiXWYAZtZHva3uRWvfDLTe0o9wji8CCfff_spyNbGa1EqMQAzU8TSgsZHHZyZczilaJjXsgkwdrHYtnhNzzELEAqjVUidiCPT2fu982NW88FUu6OLV-YHywILAwdx8LLdR69ManJPsqTJW1tjKuLVKnk4MgCSOSRbFhMOSEYIzSWmW-zWQIRd6Gn2odEDu-GJKhVcxGiy5nXwWuauIW5Hx3EfnwvPUTBI8LDijYJeRSk",
+              }}
               style={styles.heroImage}
               resizeMode="cover"
             />
@@ -167,7 +181,9 @@ export default function EventSuccess() {
           </View>
           <View style={styles.optionTextContainer}>
             <Text style={styles.optionTitle}>Create Sub Event</Text>
-            <Text style={styles.optionSubtitle}>Sangeet, Mehendi, Reception</Text>
+            <Text style={styles.optionSubtitle}>
+              Sangeet, Mehendi, Reception
+            </Text>
           </View>
           <Ionicons name="chevron-forward" size={24} color="#D1D5DB" />
         </TouchableOpacity>
@@ -177,7 +193,12 @@ export default function EventSuccess() {
           onPress={handleViewMyEvents}
           activeOpacity={0.8}
         >
-          <View style={[styles.optionIconContainer, { backgroundColor: '#EE2B8C20' }]}>
+          <View
+            style={[
+              styles.optionIconContainer,
+              { backgroundColor: "#EE2B8C20" },
+            ]}
+          >
             <Ionicons name="calendar" size={28} color="#ee2b8c" />
           </View>
           <View style={styles.optionTextContainer}>
@@ -195,7 +216,7 @@ export default function EventSuccess() {
       <Text style={styles.sectionTitle}>My Events</Text>
       <FlatList
         data={MOCK_EVENTS}
-        keyExtractor={item => item.id}
+        keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <TouchableOpacity
             style={styles.eventCard}
@@ -226,7 +247,10 @@ export default function EventSuccess() {
     <View style={styles.content}>
       {/* Event Header */}
       <View style={styles.subEventHeader}>
-        <TouchableOpacity onPress={handleBackToEvents} style={styles.backButton}>
+        <TouchableOpacity
+          onPress={handleBackToEvents}
+          style={styles.backButton}
+        >
           <Ionicons name="arrow-back" size={24} color="#181114" />
         </TouchableOpacity>
         <Text style={styles.subEventTitle} numberOfLines={1}>
@@ -245,8 +269,11 @@ export default function EventSuccess() {
       </TouchableOpacity>
 
       {/* Sub Events List */}
-      <ScrollView style={styles.subEventsList} showsVerticalScrollIndicator={false}>
-        {selectedEvent?.subEvents.map(subEvent => (
+      <ScrollView
+        style={styles.subEventsList}
+        showsVerticalScrollIndicator={false}
+      >
+        {selectedEvent?.subEvents.map((subEvent) => (
           <View key={subEvent.id} style={styles.subEventCard}>
             <TouchableOpacity
               style={styles.subEventHeader}
@@ -256,11 +283,16 @@ export default function EventSuccess() {
               <View style={styles.subEventInfo}>
                 <Text style={styles.subEventName}>{subEvent.name}</Text>
                 <Text style={styles.subEventVendorCount}>
-                  {subEvent.vendors.length} vendor{subEvent.vendors.length !== 1 ? 's' : ''}
+                  {subEvent.vendors.length} vendor
+                  {subEvent.vendors.length !== 1 ? "s" : ""}
                 </Text>
               </View>
               <Ionicons
-                name={expandedSubEvents.includes(subEvent.id) ? "chevron-up" : "chevron-down"}
+                name={
+                  expandedSubEvents.includes(subEvent.id)
+                    ? "chevron-up"
+                    : "chevron-down"
+                }
                 size={20}
                 color="#9CA3AF"
               />
@@ -270,20 +302,28 @@ export default function EventSuccess() {
               <View style={styles.subEventDetails}>
                 {/* Vendors List */}
                 {subEvent.vendors.length > 0 ? (
-                  subEvent.vendors.map(vendor => (
+                  subEvent.vendors.map((vendor) => (
                     <View key={vendor.id} style={styles.vendorItem}>
                       <View style={styles.vendorInfo}>
                         <Ionicons name="person" size={16} color="#6B7280" />
                         <Text style={styles.vendorName}>{vendor.name}</Text>
                       </View>
-                      <View style={[
-                        styles.vendorStatus,
-                        vendor.status === 'Booked' ? styles.statusBooked : styles.statusPending
-                      ]}>
-                        <Text style={[
-                          styles.vendorStatusText,
-                          vendor.status === 'Booked' ? styles.statusBookedText : styles.statusPendingText
-                        ]}>
+                      <View
+                        style={[
+                          styles.vendorStatus,
+                          vendor.status === "Booked"
+                            ? styles.statusBooked
+                            : styles.statusPending,
+                        ]}
+                      >
+                        <Text
+                          style={[
+                            styles.vendorStatusText,
+                            vendor.status === "Booked"
+                              ? styles.statusBookedText
+                              : styles.statusPendingText,
+                          ]}
+                        >
                           {vendor.status}
                         </Text>
                       </View>
@@ -299,7 +339,11 @@ export default function EventSuccess() {
                   onPress={() => handleAddVendor(subEvent.id)}
                   activeOpacity={0.8}
                 >
-                  <Ionicons name="add-circle-outline" size={20} color="#ee2b8c" />
+                  <Ionicons
+                    name="add-circle-outline"
+                    size={20}
+                    color="#ee2b8c"
+                  />
                   <Text style={styles.addVendorText}>Add Vendor</Text>
                 </TouchableOpacity>
               </View>
@@ -324,8 +368,11 @@ export default function EventSuccess() {
     <View style={styles.container}>
       {/* Header / Close Button */}
       <View style={styles.header}>
-        {viewMode !== 'success' ? (
-          <TouchableOpacity onPress={handleBackToSuccess} style={styles.closeButton}>
+        {viewMode !== "success" ? (
+          <TouchableOpacity
+            onPress={handleBackToSuccess}
+            style={styles.closeButton}
+          >
             <Ionicons name="close" size={28} color="#181114" />
           </TouchableOpacity>
         ) : (
@@ -334,18 +381,22 @@ export default function EventSuccess() {
           </TouchableOpacity>
         )}
         <Text style={styles.headerTitle}>
-          {viewMode === 'success' ? 'Success' : viewMode === 'events' ? 'My Events' : 'Sub Events'}
+          {viewMode === "success"
+            ? "Success"
+            : viewMode === "events"
+              ? "My Events"
+              : "Sub Events"}
         </Text>
         <View style={styles.headerSpacer} />
       </View>
 
       <View
         style={styles.scrollView}
-      // showsVerticalScrollIndicator={false}
+        // showsVerticalScrollIndicator={false}
       >
-        {viewMode === 'success' && renderSuccessView()}
-        {viewMode === 'events' && renderEventsView()}
-        {viewMode === 'subevent' && selectedEvent && renderSubEventView()}
+        {viewMode === "success" && renderSuccessView()}
+        {viewMode === "events" && renderEventsView()}
+        {viewMode === "subevent" && selectedEvent && renderSubEventView()}
       </View>
     </View>
   );
@@ -354,32 +405,32 @@ export default function EventSuccess() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f6f7',
+    backgroundColor: "#f8f6f7",
     maxWidth: 480,
-    alignSelf: 'center',
-    width: '100%',
+    alignSelf: "center",
+    width: "100%",
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     paddingHorizontal: 16,
     paddingTop: 60,
     paddingBottom: 8,
-    backgroundColor: 'white',
+    backgroundColor: "white",
   },
   closeButton: {
     width: 48,
     height: 48,
-    alignItems: 'flex-start',
-    justifyContent: 'center',
+    alignItems: "flex-start",
+    justifyContent: "center",
   },
   headerTitle: {
-    fontFamily: 'PlusJakartaSans-Bold',
+    fontFamily: "PlusJakartaSans-Bold",
     fontSize: 18,
-    color: '#181114',
+    color: "#181114",
     flex: 1,
-    textAlign: 'center',
+    textAlign: "center",
     paddingRight: 48,
   },
   headerSpacer: {
@@ -394,45 +445,45 @@ const styles = StyleSheet.create({
     paddingTop: 32,
   },
   heroContainer: {
-    width: '100%',
-    alignItems: 'center',
+    width: "100%",
+    alignItems: "center",
     marginBottom: 32,
   },
   heroCircle: {
     width: 250,
     height: 250,
     borderRadius: 125,
-    backgroundColor: 'rgba(238, 43, 140, 0.1)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    position: 'relative',
+    backgroundColor: "rgba(238, 43, 140, 0.1)",
+    alignItems: "center",
+    justifyContent: "center",
+    position: "relative",
   },
   heroInner: {
     width: 200,
     height: 200,
     borderRadius: 100,
-    backgroundColor: 'white',
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000',
+    backgroundColor: "white",
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 12,
     elevation: 8,
     borderWidth: 4,
-    borderColor: 'white',
-    overflow: 'hidden',
+    borderColor: "white",
+    overflow: "hidden",
   },
   heroImage: {
-    width: '100%',
-    height: '100%',
+    width: "100%",
+    height: "100%",
   },
   floatIcon: {
-    position: 'absolute',
+    position: "absolute",
     padding: 12,
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderRadius: 20,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -451,65 +502,65 @@ const styles = StyleSheet.create({
     right: 15,
   },
   textContent: {
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 32,
   },
   title: {
-    fontFamily: 'PlusJakartaSans-Extrabold',
+    fontFamily: "PlusJakartaSans-Extrabold",
     fontSize: 28,
-    color: '#181114',
-    textAlign: 'center',
+    color: "#181114",
+    textAlign: "center",
     lineHeight: 36,
   },
   subtitle: {
-    fontFamily: 'PlusJakartaSans-Medium',
+    fontFamily: "PlusJakartaSans-Medium",
     fontSize: 16,
-    color: '#635c60',
-    textAlign: 'center',
+    color: "#635c60",
+    textAlign: "center",
     lineHeight: 24,
     marginTop: 16,
     paddingHorizontal: 16,
   },
   optionButtons: {
-    width: '100%',
+    width: "100%",
     gap: 16,
   },
   optionButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 16,
     padding: 16,
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderColor: "#E5E7EB",
   },
   optionIconContainer: {
     width: 56,
     height: 56,
     borderRadius: 16,
-    backgroundColor: '#FAF5FF',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#FAF5FF",
+    alignItems: "center",
+    justifyContent: "center",
   },
   optionTextContainer: {
     flex: 1,
   },
   optionTitle: {
-    fontFamily: 'PlusJakartaSans-Bold',
+    fontFamily: "PlusJakartaSans-Bold",
     fontSize: 16,
-    color: '#181114',
+    color: "#181114",
   },
   optionSubtitle: {
-    fontFamily: 'PlusJakartaSans-Regular',
+    fontFamily: "PlusJakartaSans-Regular",
     fontSize: 13,
-    color: '#6B7280',
+    color: "#6B7280",
     marginTop: 2,
   },
   sectionTitle: {
-    fontFamily: 'PlusJakartaSans-Bold',
+    fontFamily: "PlusJakartaSans-Bold",
     fontSize: 20,
-    color: '#181114',
+    color: "#181114",
     marginBottom: 16,
   },
   eventsList: {
@@ -517,14 +568,14 @@ const styles = StyleSheet.create({
     paddingBottom: 24,
   },
   eventCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 12,
     padding: 12,
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderColor: "#E5E7EB",
   },
   eventImage: {
     width: 64,
@@ -535,104 +586,104 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   eventName: {
-    fontFamily: 'PlusJakartaSans-Bold',
+    fontFamily: "PlusJakartaSans-Bold",
     fontSize: 16,
-    color: '#181114',
+    color: "#181114",
   },
   eventDate: {
-    fontFamily: 'PlusJakartaSans-Regular',
+    fontFamily: "PlusJakartaSans-Regular",
     fontSize: 13,
-    color: '#6B7280',
+    color: "#6B7280",
     marginTop: 2,
   },
   eventSubEvents: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 4,
     marginTop: 4,
   },
   eventSubEventsText: {
-    fontFamily: 'PlusJakartaSans-Regular',
+    fontFamily: "PlusJakartaSans-Regular",
     fontSize: 12,
-    color: '#9CA3AF',
+    color: "#9CA3AF",
   },
   subEventHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 12,
   },
   backButton: {
     width: 40,
     height: 40,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   subEventTitle: {
-    fontFamily: 'PlusJakartaSans-Bold',
+    fontFamily: "PlusJakartaSans-Bold",
     fontSize: 18,
-    color: '#181114',
+    color: "#181114",
     flex: 1,
   },
   addSubEventButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     gap: 8,
     padding: 16,
-    backgroundColor: 'rgba(238, 43, 140, 0.1)',
+    backgroundColor: "rgba(238, 43, 140, 0.1)",
     borderRadius: 16,
     marginBottom: 16,
   },
   addSubEventText: {
-    fontFamily: 'PlusJakartaSans-Bold',
+    fontFamily: "PlusJakartaSans-Bold",
     fontSize: 16,
-    color: '#ee2b8c',
+    color: "#ee2b8c",
   },
   subEventsList: {
     flex: 1,
   },
   subEventCard: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderColor: "#E5E7EB",
     marginBottom: 12,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
   subEventInfo: {
     padding: 16,
   },
   subEventName: {
-    fontFamily: 'PlusJakartaSans-Bold',
+    fontFamily: "PlusJakartaSans-Bold",
     fontSize: 16,
-    color: '#181114',
+    color: "#181114",
   },
   subEventVendorCount: {
-    fontFamily: 'PlusJakartaSans-Regular',
+    fontFamily: "PlusJakartaSans-Regular",
     fontSize: 13,
-    color: '#6B7280',
+    color: "#6B7280",
     marginTop: 2,
   },
   subEventDetails: {
     borderTopWidth: 1,
-    borderTopColor: '#E5E7EB',
+    borderTopColor: "#E5E7EB",
     padding: 16,
   },
   vendorItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     paddingVertical: 8,
   },
   vendorInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 8,
   },
   vendorName: {
-    fontFamily: 'PlusJakartaSans-Regular',
+    fontFamily: "PlusJakartaSans-Regular",
     fontSize: 14,
-    color: '#181114',
+    color: "#181114",
   },
   vendorStatus: {
     paddingHorizontal: 8,
@@ -640,59 +691,59 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   statusBooked: {
-    backgroundColor: '#DCFCE7',
+    backgroundColor: "#DCFCE7",
   },
   statusPending: {
-    backgroundColor: '#FEF3C7',
+    backgroundColor: "#FEF3C7",
   },
   vendorStatusText: {
-    fontFamily: 'PlusJakartaSans-Medium',
+    fontFamily: "PlusJakartaSans-Medium",
     fontSize: 12,
   },
   statusBookedText: {
-    color: '#15803D',
+    color: "#15803D",
   },
   statusPendingText: {
-    color: '#D97706',
+    color: "#D97706",
   },
   noVendorsText: {
-    fontFamily: 'PlusJakartaSans-Regular',
+    fontFamily: "PlusJakartaSans-Regular",
     fontSize: 14,
-    color: '#9CA3AF',
-    textAlign: 'center',
+    color: "#9CA3AF",
+    textAlign: "center",
     paddingVertical: 8,
   },
   addVendorButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     gap: 8,
     paddingVertical: 12,
     marginTop: 8,
     borderWidth: 1,
-    borderColor: '#EE2B8C',
+    borderColor: "#EE2B8C",
     borderRadius: 12,
-    borderStyle: 'dashed',
+    borderStyle: "dashed",
   },
   addVendorText: {
-    fontFamily: 'PlusJakartaSans-Medium',
+    fontFamily: "PlusJakartaSans-Medium",
     fontSize: 14,
-    color: '#ee2b8c',
+    color: "#ee2b8c",
   },
   emptySubEvents: {
-    alignItems: 'center',
+    alignItems: "center",
     paddingVertical: 48,
   },
   emptySubEventsText: {
-    fontFamily: 'PlusJakartaSans-Bold',
+    fontFamily: "PlusJakartaSans-Bold",
     fontSize: 18,
-    color: '#181114',
+    color: "#181114",
     marginTop: 16,
   },
   emptySubEventsSubText: {
-    fontFamily: 'PlusJakartaSans-Regular',
+    fontFamily: "PlusJakartaSans-Regular",
     fontSize: 14,
-    color: '#6B7280',
+    color: "#6B7280",
     marginTop: 4,
   },
 });

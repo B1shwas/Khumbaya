@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React from "react";
+import { View, Text, StyleSheet } from "react-native";
 
 interface ProgressBarProps {
   currentStep: number;
@@ -7,7 +7,11 @@ interface ProgressBarProps {
   stepLabel: string;
 }
 
-export function ProgressBar({ currentStep, totalSteps, stepLabel }: ProgressBarProps) {
+export function ProgressBar({
+  currentStep,
+  totalSteps,
+  stepLabel,
+}: ProgressBarProps) {
   const progressWidth = (currentStep / totalSteps) * 100;
 
   return (
@@ -19,7 +23,9 @@ export function ProgressBar({ currentStep, totalSteps, stepLabel }: ProgressBarP
         </Text>
       </View>
       <View style={styles.progressBarBackground}>
-        <View style={[styles.progressBarFill, { width: `${progressWidth}%` }]} />
+        <View
+          style={[styles.progressBarFill, { width: `${progressWidth}%` }]}
+        />
       </View>
     </View>
   );
@@ -56,8 +62,8 @@ interface FooterButtonsProps {
 export function FooterButtons({
   onBack,
   onNext,
-  nextLabel = 'Next Step',
-  backLabel = 'Back',
+  nextLabel = "Next Step",
+  backLabel = "Back",
   showBack = true,
 }: FooterButtonsProps) {
   return (
@@ -94,63 +100,63 @@ const styles = StyleSheet.create({
     paddingTop: 8,
   },
   progressLabels: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 8,
   },
   progressLabel: {
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: "PlusJakartaSans-SemiBold",
     fontSize: 12,
-    color: '#181114',
-    textTransform: 'uppercase',
+    color: "#181114",
+    textTransform: "uppercase",
     letterSpacing: 0.5,
   },
   progressStep: {
-    fontFamily: 'PlusJakartaSans-Bold',
+    fontFamily: "PlusJakartaSans-Bold",
     fontSize: 12,
-    color: '#ee2b8c',
+    color: "#ee2b8c",
   },
   progressBarBackground: {
     height: 8,
     borderRadius: 4,
-    backgroundColor: 'rgba(238, 43, 140, 0.1)',
-    overflow: 'hidden',
+    backgroundColor: "rgba(238, 43, 140, 0.1)",
+    overflow: "hidden",
   },
   progressBarFill: {
-    height: '100%',
+    height: "100%",
     borderRadius: 4,
-    backgroundColor: '#ee2b8c',
+    backgroundColor: "#ee2b8c",
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     paddingHorizontal: 16,
     paddingTop: 60,
     paddingBottom: 8,
-    backgroundColor: '#f8f6f7',
+    backgroundColor: "#f8f6f7",
   },
   headerButton: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: 'rgba(0,0,0,0.05)',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "rgba(0,0,0,0.05)",
+    alignItems: "center",
+    justifyContent: "center",
   },
   headerTitle: {
-    fontFamily: 'PlusJakartaSans-Bold',
+    fontFamily: "PlusJakartaSans-Bold",
     fontSize: 18,
-    color: '#181114',
+    color: "#181114",
     flex: 1,
-    textAlign: 'center',
+    textAlign: "center",
   },
   headerSpacer: {
     width: 40,
   },
   footer: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 12,
     padding: 16,
     paddingBottom: 32,
@@ -160,42 +166,42 @@ const styles = StyleSheet.create({
     height: 56,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
-    backgroundColor: 'white',
-    alignItems: 'center',
-    justifyContent: 'center',
+    borderColor: "#E5E7EB",
+    backgroundColor: "white",
+    alignItems: "center",
+    justifyContent: "center",
   },
   backButtonText: {
-    fontFamily: 'PlusJakartaSans-Bold',
+    fontFamily: "PlusJakartaSans-Bold",
     fontSize: 16,
-    color: '#6B7280',
+    color: "#6B7280",
   },
   nextButton: {
     flex: 2,
     height: 56,
     borderRadius: 16,
-    backgroundColor: '#ee2b8c',
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#ee2b8c',
+    backgroundColor: "#ee2b8c",
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#ee2b8c",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.25,
     shadowRadius: 8,
     elevation: 4,
   },
   nextButtonText: {
-    fontFamily: 'PlusJakartaSans-Bold',
+    fontFamily: "PlusJakartaSans-Bold",
     fontSize: 16,
-    color: 'white',
+    color: "white",
   },
   section: {
     paddingHorizontal: 16,
     paddingTop: 12,
   },
   sectionTitle: {
-    fontFamily: 'PlusJakartaSans-Bold',
+    fontFamily: "PlusJakartaSans-Bold",
     fontSize: 16,
-    color: '#181114',
+    color: "#181114",
     marginBottom: 12,
   },
 });

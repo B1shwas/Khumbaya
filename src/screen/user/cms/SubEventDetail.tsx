@@ -278,12 +278,12 @@ export default function SubEventDetail() {
 
   const handleActivityToggle = (activity: TemplateActivity) => {
     const existingIndex = activities.findIndex(
-      (a) => a.activity.id === activity.id,
+      (a) => a.activity.id === activity.id
     );
 
     if (existingIndex >= 0) {
       setActivities((prev) =>
-        prev.filter((a) => a.activity.id !== activity.id),
+        prev.filter((a) => a.activity.id !== activity.id)
       );
     } else {
       setActivities((prev) => [...prev, { activity, time: "", budget: "" }]);
@@ -292,13 +292,13 @@ export default function SubEventDetail() {
 
   const handleActivityTimeChange = (activityId: string, time: string) => {
     setActivities((prev) =>
-      prev.map((a) => (a.activity.id === activityId ? { ...a, time } : a)),
+      prev.map((a) => (a.activity.id === activityId ? { ...a, time } : a))
     );
   };
 
   const handleActivityBudgetChange = (activityId: string, budget: string) => {
     setActivities((prev) =>
-      prev.map((a) => (a.activity.id === activityId ? { ...a, budget } : a)),
+      prev.map((a) => (a.activity.id === activityId ? { ...a, budget } : a))
     );
   };
 
@@ -307,7 +307,7 @@ export default function SubEventDetail() {
   };
 
   const getSelectedActivity = (
-    activityId: string,
+    activityId: string
   ): SelectedActivity | undefined => {
     return activities.find((a) => a.activity.id === activityId);
   };
@@ -318,9 +318,7 @@ export default function SubEventDetail() {
 
   const handleToggleVendor = (vendorId: string) => {
     setVendors((prev) =>
-      prev.map((v) =>
-        v.id === vendorId ? { ...v, selected: !v.selected } : v,
-      ),
+      prev.map((v) => (v.id === vendorId ? { ...v, selected: !v.selected } : v))
     );
   };
 
@@ -350,7 +348,7 @@ export default function SubEventDetail() {
 
   const handleToggleGuest = (guestId: string) => {
     setGuests((prev) =>
-      prev.map((g) => (g.id === guestId ? { ...g, invited: !g.invited } : g)),
+      prev.map((g) => (g.id === guestId ? { ...g, invited: !g.invited } : g))
     );
   };
 
@@ -1227,7 +1225,7 @@ export default function SubEventDetail() {
                 onPress={() => {
                   Alert.alert(
                     "Download Template",
-                    "Download sample Excel template",
+                    "Download sample Excel template"
                   );
                 }}
               >

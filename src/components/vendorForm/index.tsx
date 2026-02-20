@@ -30,7 +30,10 @@ const vendorFormSchema = z.object({
   phone: z
     .string()
     .min(1, "Phone number is required")
-    .refine((value) => value.replace(/\D/g, "").length === 10, "Phone must be 10 digits"),
+    .refine(
+      (value) => value.replace(/\D/g, "").length === 10,
+      "Phone must be 10 digits"
+    ),
   password: z.string().min(8, "Min 8 characters"),
   businessType: z.enum(["company", "individual"]).nullable(),
   selectedCategories: z.array(z.string()),
@@ -71,7 +74,8 @@ export default function VendorFormFlow() {
     },
     mode: "onTouched",
   });
-  const { getValues, handleSubmit, register, reset, watch, trigger } = formMethods;
+  const { getValues, handleSubmit, register, reset, watch, trigger } =
+    formMethods;
 
   const fadeAnim = useRef(new Animated.Value(1)).current;
   const progressAnim = useRef(new Animated.Value(20)).current;
@@ -122,13 +126,12 @@ export default function VendorFormFlow() {
         });
       }
       setCurrentStep(nextStep);
-    }else{
+    } else {
       // Final submission logic here
       const finalData = getValues();
       console.log("Submitting data:", finalData);
       // You can replace the above line with your actual submission logic (e.g., API call)
     }
-
   }, [currentStep, fadeAnim, trigger]);
 
   const handleBack = useCallback(() => {
@@ -178,17 +181,13 @@ export default function VendorFormFlow() {
     });
   });
 
-
   // Map of step IDs to components
   const steps: Record<number, React.ReactNode> = {
-    1: (<>
-      <Header handleBack={handleBack} progress={progress} currentStep={1} />
-      <VendorContacts
-        onBack={handleBack}
-        onNext={handleNext}
-      />
-    </>
-
+    1: (
+      <>
+        <Header handleBack={handleBack} progress={progress} currentStep={1} />
+        <VendorContacts onBack={handleBack} onNext={handleNext} />
+      </>
     ),
     2: (
       <>
@@ -200,18 +199,19 @@ export default function VendorFormFlow() {
           onNext={handleNext}
         />
       </>
-
     ),
-    3: (<>
-      <Header handleBack={handleBack} progress={progress} currentStep={3} />
-      <CategorySelection
-        selectedCategories={formValues.selectedCategories}
-        onChange={(categories) => updateFormData({ selectedCategories: categories })}
-        onBack={handleBack}
-        onNext={handleNext}
-      />
-    </>
-
+    3: (
+      <>
+        <Header handleBack={handleBack} progress={progress} currentStep={3} />
+        <CategorySelection
+          selectedCategories={formValues.selectedCategories}
+          onChange={(categories) =>
+            updateFormData({ selectedCategories: categories })
+          }
+          onBack={handleBack}
+          onNext={handleNext}
+        />
+      </>
     ),
     4: (
       <>
@@ -228,7 +228,6 @@ export default function VendorFormFlow() {
           onNext={handleNext}
         />
       </>
-
     ),
     5: (
       <>
@@ -240,7 +239,6 @@ export default function VendorFormFlow() {
           onSubmit={handleSubmitFinal}
         />
       </>
-
     ),
   };
 
@@ -258,7 +256,15 @@ export default function VendorFormFlow() {
 }
 
 // dark: styles removed for nativewind consistency
-function Header({ handleBack, progress, currentStep }: { handleBack: () => void, progress: number, currentStep: number }) {
+function Header({
+  handleBack,
+  progress,
+  currentStep,
+}: {
+  handleBack: () => void;
+  progress: number;
+  currentStep: number;
+}) {
   return (
     <>
       <View className="flex-row items-center px-4 pt-6 pb-2 justify-between">
@@ -271,7 +277,10 @@ function Header({ handleBack, progress, currentStep }: { handleBack: () => void,
           {/* TODO: Add text-light to tailwind config as #181114 */}
           <MaterialIcons name="arrow-back-ios-new" size={24} color="#181114" />
         </TouchableOpacity>
-        <Text className="text-lg font-bold leading-tight tracking-tight flex-1 text-center pr-10 text-white" style={{ color: "#181114" }}>
+        <Text
+          className="text-lg font-bold leading-tight tracking-tight flex-1 text-center pr-10 text-white"
+          style={{ color: "#181114" }}
+        >
           Vendor Onboarding
         </Text>
       </View>
@@ -286,11 +295,17 @@ function Header({ handleBack, progress, currentStep }: { handleBack: () => void,
           <Text className="text-xs font-bold text-primary">{progress}%</Text>
         </View>
         {/* Track background light = #e6dbe0 (not in config) */}
-        <View className="h-2 w-full rounded-full overflow-hidden" style={{ backgroundColor: "#e6dbe0" }}>
+        <View
+          className="h-2 w-full rounded-full overflow-hidden"
+          style={{ backgroundColor: "#e6dbe0" }}
+        >
           {/* Fill primary = #ee2b8c */}
-          <View className="h-full rounded-full bg-primary" style={{ width: `${progress}%` }} />
+          <View
+            className="h-full rounded-full bg-primary"
+            style={{ width: `${progress}%` }}
+          />
         </View>
       </View>
     </>
-  )
+  );
 }

@@ -373,7 +373,7 @@ export default function ServicesAndPricingScreen() {
     try {
       setIsLoading(true);
       const storedServices = await AsyncStorage.getItem(
-        STORAGE_KEYS.SERVICES_PRICING,
+        STORAGE_KEYS.SERVICES_PRICING
       );
       if (storedServices) {
         setServices(JSON.parse(storedServices));
@@ -425,7 +425,7 @@ export default function ServicesAndPricingScreen() {
       // Save services
       await AsyncStorage.setItem(
         STORAGE_KEYS.SERVICES_PRICING,
-        JSON.stringify(services),
+        JSON.stringify(services)
       );
       // Save vendor profile data (type, offerings, specialties)
       const vendorProfileData = {

@@ -112,7 +112,9 @@ const VendorHomeScreen: React.FC = () => {
             </View>
             <View>
               {/* dark:text-gray-400 */}
-              <Text className="text-xs font-medium text-gray-500 ">Welcome back,</Text>
+              <Text className="text-xs font-medium text-gray-500 ">
+                Welcome back,
+              </Text>
               {/* dark:text-white */}
               <Text className="text-[#181114]  text-lg font-bold tracking-tight">
                 Radiant Events
@@ -134,11 +136,18 @@ const VendorHomeScreen: React.FC = () => {
           <View className="flex-row flex-wrap gap-3">
             {/* dark:bg-white/5 */}
             {/* dark:border-white/10 */}
-            <View className="flex-1 min-w-[140px] rounded-xl p-4 bg-white border border-transparent" style={{ elevation: 2 }}>
+            <View
+              className="flex-1 min-w-[140px] rounded-xl p-4 bg-white border border-transparent"
+              style={{ elevation: 2 }}
+            >
               <View className="flex-row items-center gap-2 mb-1">
                 {/* dark:bg-green-500/20 */}
                 <View className="p-1.5 rounded-lg bg-green-50">
-                  <MaterialIcons name="attach-money" size={20} color="#16a34a" />
+                  <MaterialIcons
+                    name="attach-money"
+                    size={20}
+                    color="#16a34a"
+                  />
                 </View>
                 {/* dark:text-gray-400 */}
                 <Text className="text-gray-500 text-xs font-semibold uppercase tracking-wider">
@@ -146,17 +155,28 @@ const VendorHomeScreen: React.FC = () => {
                 </Text>
               </View>
               {/* dark:text-white */}
-              <Text className="text-[#181114] text-2xl font-bold tracking-tight">$4,250</Text>
+              <Text className="text-[#181114] text-2xl font-bold tracking-tight">
+                $4,250
+              </Text>
               {/* dark:text-green-400 */}
-              <Text className="text-xs text-green-600 font-medium">+12% vs last month</Text>
+              <Text className="text-xs text-green-600 font-medium">
+                +12% vs last month
+              </Text>
             </View>
 
             {/* dark:bg-white/5 */}
             {/* dark:border-white/10 */}
-            <View className="flex-1 min-w-[140px] rounded-xl p-4 bg-white border border-transparent" style={{ elevation: 2 }}>
+            <View
+              className="flex-1 min-w-[140px] rounded-xl p-4 bg-white border border-transparent"
+              style={{ elevation: 2 }}
+            >
               <View className="flex-row items-center gap-2 mb-1">
                 <View className="p-1.5 rounded-lg bg-primary/10">
-                  <MaterialIcons name="calendar-month" size={20} color="#ee2b8c" />
+                  <MaterialIcons
+                    name="calendar-month"
+                    size={20}
+                    color="#ee2b8c"
+                  />
                 </View>
                 {/* dark:text-gray-400 */}
                 <Text className="text-gray-500 text-xs font-semibold uppercase tracking-wider">
@@ -164,15 +184,22 @@ const VendorHomeScreen: React.FC = () => {
                 </Text>
               </View>
               {/* dark:text-white */}
-              <Text className="text-[#181114] text-2xl font-bold tracking-tight">8</Text>
+              <Text className="text-[#181114] text-2xl font-bold tracking-tight">
+                8
+              </Text>
               {/* dark:text-gray-500 */}
-              <Text className="text-xs text-gray-400 font-medium">2 pending actions</Text>
+              <Text className="text-xs text-gray-400 font-medium">
+                2 pending actions
+              </Text>
             </View>
           </View>
 
           {/* dark:bg-white/5 */}
           {/* dark:border-white/10 */}
-          <View className="mt-3 w-full rounded-xl p-4 bg-white border border-transparent" style={{ elevation: 2 }}>
+          <View
+            className="mt-3 w-full rounded-xl p-4 bg-white border border-transparent"
+            style={{ elevation: 2 }}
+          >
             <View className="flex-row items-center justify-between">
               <View className="flex-row items-center gap-2">
                 {/* dark:bg-yellow-500/20 */}
@@ -186,7 +213,8 @@ const VendorHomeScreen: React.FC = () => {
               </View>
               {/* dark:text-white */}
               <Text className="text-[#181114] text-lg font-bold tracking-tight">
-                4.9 <Text className="text-sm font-normal text-gray-400">/ 5.0</Text>
+                4.9{" "}
+                <Text className="text-sm font-normal text-gray-400">/ 5.0</Text>
               </Text>
             </View>
           </View>
@@ -195,9 +223,13 @@ const VendorHomeScreen: React.FC = () => {
         <View className="mt-6">
           <View className="flex-row items-center justify-between px-4 pb-3">
             {/* dark:text-white */}
-            <Text className="text-[#181114] text-lg font-bold tracking-tight">New Invites</Text>
+            <Text className="text-[#181114] text-lg font-bold tracking-tight">
+              New Invites
+            </Text>
             <TouchableOpacity activeOpacity={0.7}>
-              <Text className="text-primary text-sm font-semibold">See All</Text>
+              <Text className="text-primary text-sm font-semibold">
+                See All
+              </Text>
             </TouchableOpacity>
           </View>
 
@@ -214,16 +246,27 @@ const VendorHomeScreen: React.FC = () => {
                 // dark:bg-white/5
                 // dark:border-white/10
                 className="rounded-xl bg-white border border-gray-100 overflow-hidden mr-4"
-                style={{ width: cardWidth, elevation: 3, marginRight: index === invites.length - 1 ? 0 : cardSpacing }}
+                style={{
+                  width: cardWidth,
+                  elevation: 3,
+                  marginRight: index === invites.length - 1 ? 0 : cardSpacing,
+                }}
               >
-                <ImageBackground source={{ uri: invite.image }} className="h-36 w-full">
+                <ImageBackground
+                  source={{ uri: invite.image }}
+                  className="h-36 w-full"
+                >
                   <View className="absolute inset-0 bg-black/50" />
                   <View className="absolute bottom-3 left-3 flex-row">
                     <View className="px-2 py-1 rounded-md bg-white/20">
-                      <Text className="text-xs font-medium text-white">{invite.category}</Text>
+                      <Text className="text-xs font-medium text-white">
+                        {invite.category}
+                      </Text>
                     </View>
                     <View className="ml-2 px-2 py-1 rounded-md bg-white/20">
-                      <Text className="text-xs font-medium text-white">{invite.price}</Text>
+                      <Text className="text-xs font-medium text-white">
+                        {invite.price}
+                      </Text>
                     </View>
                   </View>
                 </ImageBackground>
@@ -234,13 +277,23 @@ const VendorHomeScreen: React.FC = () => {
                     {invite.title}
                   </Text>
                   <View className="flex-row items-center gap-1 mt-1">
-                    <MaterialIcons name="calendar-today" size={16} color="#6b7280" />
+                    <MaterialIcons
+                      name="calendar-today"
+                      size={16}
+                      color="#6b7280"
+                    />
                     {/* dark:text-gray-400 */}
                     <Text className="text-gray-500 text-sm">{invite.date}</Text>
                     <Text className="text-gray-400 mx-1">•</Text>
-                    <MaterialIcons name="location-on" size={16} color="#6b7280" />
+                    <MaterialIcons
+                      name="location-on"
+                      size={16}
+                      color="#6b7280"
+                    />
                     {/* dark:text-gray-400 */}
-                    <Text className="text-gray-500 text-sm">{invite.location}</Text>
+                    <Text className="text-gray-500 text-sm">
+                      {invite.location}
+                    </Text>
                   </View>
 
                   <View className="flex-row gap-3 mt-4">
@@ -250,13 +303,17 @@ const VendorHomeScreen: React.FC = () => {
                       className="flex-1 h-10 rounded-lg border border-gray-200 items-center justify-center"
                     >
                       {/* dark:text-white */}
-                      <Text className="text-[#181114] text-sm font-bold">Decline</Text>
+                      <Text className="text-[#181114] text-sm font-bold">
+                        Decline
+                      </Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                       activeOpacity={0.8}
                       className="flex-1 h-10 rounded-lg bg-primary items-center justify-center"
                     >
-                      <Text className="text-white text-sm font-bold">Accept</Text>
+                      <Text className="text-white text-sm font-bold">
+                        Accept
+                      </Text>
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -268,32 +325,56 @@ const VendorHomeScreen: React.FC = () => {
         <View className="mt-2 px-4">
           <View className="flex-row items-center justify-between pb-4 pt-4">
             {/* dark:text-white */}
-            <Text className="text-[#181114] text-lg font-bold">Your Schedule</Text>
+            <Text className="text-[#181114] text-lg font-bold">
+              Your Schedule
+            </Text>
             <TouchableOpacity activeOpacity={0.7}>
-              <Text className="text-primary text-sm font-semibold">View Calendar</Text>
+              <Text className="text-primary text-sm font-semibold">
+                View Calendar
+              </Text>
             </TouchableOpacity>
           </View>
 
           <View className="flex-col gap-3">
             {schedule.map((item) => (
-              <View key={item.id} className={`relative pl-4 border-l-2 ${item.border}`}>
-                <Text className={`${item.labelColor} text-xs font-bold uppercase tracking-wider mb-2`}>
+              <View
+                key={item.id}
+                className={`relative pl-4 border-l-2 ${item.border}`}
+              >
+                <Text
+                  className={`${item.labelColor} text-xs font-bold uppercase tracking-wider mb-2`}
+                >
                   {item.label}
                 </Text>
                 {/* dark:bg-white/5 */}
                 {/* dark:border-white/10 */}
-                <View className="flex-row items-center p-3 bg-white rounded-lg border border-gray-100" style={{ elevation: 2 }}>
-                  <View className={`h-12 w-12 rounded-lg items-center justify-center mr-4 ${item.accent}`}>
-                    <Text className={`text-xs font-bold ${item.text}`}>{item.time}</Text>
+                <View
+                  className="flex-row items-center p-3 bg-white rounded-lg border border-gray-100"
+                  style={{ elevation: 2 }}
+                >
+                  <View
+                    className={`h-12 w-12 rounded-lg items-center justify-center mr-4 ${item.accent}`}
+                  >
+                    <Text className={`text-xs font-bold ${item.text}`}>
+                      {item.time}
+                    </Text>
                   </View>
                   <View className="flex-1">
                     {/* dark:text-white */}
-                    <Text className="font-bold text-[#181114] text-base">{item.title}</Text>
+                    <Text className="font-bold text-[#181114] text-base">
+                      {item.title}
+                    </Text>
                     {/* dark:text-gray-400 */}
-                    <Text className="text-sm text-gray-500">{item.subtitle}</Text>
+                    <Text className="text-sm text-gray-500">
+                      {item.subtitle}
+                    </Text>
                   </View>
                   <TouchableOpacity activeOpacity={0.7} className="p-2">
-                    <MaterialIcons name="chevron-right" size={20} color="#9ca3af" />
+                    <MaterialIcons
+                      name="chevron-right"
+                      size={20}
+                      color="#9ca3af"
+                    />
                   </TouchableOpacity>
                 </View>
               </View>

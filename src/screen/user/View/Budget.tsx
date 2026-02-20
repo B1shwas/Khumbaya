@@ -1,5 +1,12 @@
 import { useState } from "react";
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Image } from "react-native";
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  StyleSheet,
+  Image,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
@@ -15,12 +22,60 @@ interface BudgetItem {
 }
 
 const budgetData: BudgetItem[] = [
-  { id: "1", category: "Venue", icon: "location", estimated: 5000, actual: 5200, isPaid: true, color: "#8B5CF6" },
-  { id: "2", category: "Catering", icon: "restaurant", estimated: 3500, actual: 3800, isPaid: true, color: "#F59E0B" },
-  { id: "3", category: "Photography", icon: "camera", estimated: 1500, actual: 1500, isPaid: false, color: "#EC4899" },
-  { id: "4", category: "Decoration", icon: "color-palette", estimated: 2000, actual: 1800, isPaid: false, color: "#10B981" },
-  { id: "5", category: "Entertainment", icon: "musical-notes", estimated: 1000, actual: 1200, isPaid: false, color: "#6366F1" },
-  { id: "6", category: "Attire", icon: "shirt", estimated: 800, actual: 750, isPaid: true, color: "#14B8A6" },
+  {
+    id: "1",
+    category: "Venue",
+    icon: "location",
+    estimated: 5000,
+    actual: 5200,
+    isPaid: true,
+    color: "#8B5CF6",
+  },
+  {
+    id: "2",
+    category: "Catering",
+    icon: "restaurant",
+    estimated: 3500,
+    actual: 3800,
+    isPaid: true,
+    color: "#F59E0B",
+  },
+  {
+    id: "3",
+    category: "Photography",
+    icon: "camera",
+    estimated: 1500,
+    actual: 1500,
+    isPaid: false,
+    color: "#EC4899",
+  },
+  {
+    id: "4",
+    category: "Decoration",
+    icon: "color-palette",
+    estimated: 2000,
+    actual: 1800,
+    isPaid: false,
+    color: "#10B981",
+  },
+  {
+    id: "5",
+    category: "Entertainment",
+    icon: "musical-notes",
+    estimated: 1000,
+    actual: 1200,
+    isPaid: false,
+    color: "#6366F1",
+  },
+  {
+    id: "6",
+    category: "Attire",
+    icon: "shirt",
+    estimated: 800,
+    actual: 750,
+    isPaid: true,
+    color: "#14B8A6",
+  },
 ];
 
 const getCategoryIcon = (icon: string) => {
@@ -43,50 +98,68 @@ const BudgetItemComponent = ({ item }: { item: BudgetItem }) => {
   return (
     <View style={styles.budgetItemCard}>
       <View style={styles.budgetItemHeader}>
-        <View style={[styles.budgetItemIcon, { backgroundColor: item.color + "20" }]}>
-          <Text style={styles.budgetItemIconText}>{getCategoryIcon(item.icon)}</Text>
+        <View
+          style={[
+            styles.budgetItemIcon,
+            { backgroundColor: item.color + "20" },
+          ]}
+        >
+          <Text style={styles.budgetItemIconText}>
+            {getCategoryIcon(item.icon)}
+          </Text>
         </View>
         <View style={styles.budgetItemInfo}>
           <Text style={styles.budgetItemCategory}>{item.category}</Text>
           <View style={styles.budgetItemProgress}>
             <View style={styles.budgetProgressBar}>
-              <View 
+              <View
                 style={[
-                  styles.budgetProgressFill, 
-                  { 
+                  styles.budgetProgressFill,
+                  {
                     width: `${Math.min(percentUsed, 100)}%`,
-                    backgroundColor: isOverBudget ? "#EF4444" : item.color
-                  }
-                ]} 
+                    backgroundColor: isOverBudget ? "#EF4444" : item.color,
+                  },
+                ]}
               />
             </View>
-            <Text style={[styles.budgetItemPercent, { color: isOverBudget ? "#EF4444" : "#6B7280" }]}>
+            <Text
+              style={[
+                styles.budgetItemPercent,
+                { color: isOverBudget ? "#EF4444" : "#6B7280" },
+              ]}
+            >
               {percentUsed}%
             </Text>
           </View>
         </View>
         <View style={styles.budgetItemAmounts}>
-          <Text style={styles.budgetItemActual}>${item.actual.toLocaleString()}</Text>
+          <Text style={styles.budgetItemActual}>
+            ${item.actual.toLocaleString()}
+          </Text>
           <Text style={styles.budgetItemEstimated}>
             of ${item.estimated.toLocaleString()}
           </Text>
         </View>
       </View>
-      
+
       <View style={styles.budgetItemFooter}>
         <View style={styles.budgetItemStatus}>
-          <View style={[
-            styles.statusDot,
-            { backgroundColor: item.isPaid ? "#10B981" : "#F59E0B" }
-          ]} />
+          <View
+            style={[
+              styles.statusDot,
+              { backgroundColor: item.isPaid ? "#10B981" : "#F59E0B" },
+            ]}
+          />
           <Text style={styles.statusText}>
             {item.isPaid ? "Paid" : "Pending"}
           </Text>
         </View>
-        <Text style={[
-          styles.budgetItemRemaining,
-          { color: isOverBudget ? "#EF4444" : "#10B981" }
-        ]}>
+        <Text
+          style={[
+            styles.budgetItemRemaining,
+            { color: isOverBudget ? "#EF4444" : "#10B981" },
+          ]}
+        >
           {isOverBudget ? "+" : "-"}${Math.abs(remaining).toLocaleString()}
         </Text>
       </View>
@@ -97,14 +170,19 @@ const BudgetItemComponent = ({ item }: { item: BudgetItem }) => {
 export default function BudgetPage() {
   const params = useLocalSearchParams();
   const eventId = params.eventId as string;
-  
+
   // Check if user is invited guest (not owner) - hide budget for them
   const isInvitedGuest = params.isInvited === "true";
   const isOwner = !isInvitedGuest;
 
-  const totalEstimated = budgetData.reduce((sum, item) => sum + item.estimated, 0);
+  const totalEstimated = budgetData.reduce(
+    (sum, item) => sum + item.estimated,
+    0
+  );
   const totalActual = budgetData.reduce((sum, item) => sum + item.actual, 0);
-  const totalPaid = budgetData.filter(item => item.isPaid).reduce((sum, item) => sum + item.actual, 0);
+  const totalPaid = budgetData
+    .filter((item) => item.isPaid)
+    .reduce((sum, item) => sum + item.actual, 0);
   const remaining = totalEstimated - totalActual;
   const percentUsed = Math.round((totalActual / totalEstimated) * 100);
   const isOverBudget = totalActual > totalEstimated;
@@ -131,7 +209,8 @@ export default function BudgetPage() {
           </View>
           <Text style={styles.noAccessTitle}>Budget Not Available</Text>
           <Text style={styles.noAccessSubtitle}>
-            The budget details for this event are only visible to the event organizer.
+            The budget details for this event are only visible to the event
+            organizer.
           </Text>
           <TouchableOpacity
             style={styles.noAccessButton}
@@ -161,8 +240,8 @@ export default function BudgetPage() {
       </View>
 
       {/* Summary Cards */}
-      <ScrollView 
-        style={styles.content} 
+      <ScrollView
+        style={styles.content}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.contentContainer}
       >
@@ -180,14 +259,14 @@ export default function BudgetPage() {
           </Text>
           <View style={styles.mainBudgetProgress}>
             <View style={styles.mainProgressBar}>
-              <View 
+              <View
                 style={[
                   styles.mainProgressFill,
-                  { 
+                  {
                     width: `${Math.min(percentUsed, 100)}%`,
-                    backgroundColor: isOverBudget ? "#EF4444" : "#10B981"
-                  }
-                ]} 
+                    backgroundColor: isOverBudget ? "#EF4444" : "#10B981",
+                  },
+                ]}
               />
             </View>
             <Text style={styles.mainProgressText}>
@@ -209,14 +288,18 @@ export default function BudgetPage() {
             <View style={styles.statIconContainer}>
               <Ionicons name="time" size={24} color="#3B82F6" />
             </View>
-            <Text style={styles.statValue}>${(totalActual - totalPaid).toLocaleString()}</Text>
+            <Text style={styles.statValue}>
+              ${(totalActual - totalPaid).toLocaleString()}
+            </Text>
             <Text style={styles.statLabel}>Pending</Text>
           </View>
           <View style={[styles.statCard, styles.statCardOrange]}>
             <View style={styles.statIconContainer}>
               <Ionicons name="wallet" size={24} color="#F59E0B" />
             </View>
-            <Text style={styles.statValue}>${(totalEstimated - totalActual).toLocaleString()}</Text>
+            <Text style={styles.statValue}>
+              ${(totalEstimated - totalActual).toLocaleString()}
+            </Text>
             <Text style={styles.statLabel}>Remaining</Text>
           </View>
           <View style={[styles.statCard, styles.statCardPurple]}>
@@ -237,7 +320,7 @@ export default function BudgetPage() {
               <Text style={styles.sectionActionText}>Add</Text>
             </TouchableOpacity>
           </View>
-          
+
           {budgetData.map((item) => (
             <BudgetItemComponent key={item.id} item={item} />
           ))}
@@ -248,9 +331,11 @@ export default function BudgetPage() {
       </ScrollView>
 
       {/* Floating Action Button */}
-      <TouchableOpacity 
+      <TouchableOpacity
         style={styles.fab}
-        onPress={() => router.push("/(protected)/(client-stack)/events/[eventId]/budget")}
+        onPress={() =>
+          router.push("/(protected)/(client-stack)/events/[eventId]/budget")
+        }
       >
         <Ionicons name="add" size={28} color="white" />
       </TouchableOpacity>

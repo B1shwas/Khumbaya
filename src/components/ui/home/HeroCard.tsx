@@ -27,7 +27,9 @@ const HeroCard = () => {
 
           <TouchableOpacity
             onPress={() =>
-              router.push("/(protected)/(client-stack)/events/createevent" as RelativePathString)
+              router.push(
+                "/(protected)/(client-stack)/events/createevent" as RelativePathString
+              )
             }
             className="bg-pink-500 mt-3 px-4 py-2 rounded-full self-start flex-row items-center"
           >

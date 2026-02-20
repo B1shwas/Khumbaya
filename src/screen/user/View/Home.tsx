@@ -16,8 +16,10 @@ import { router, type RelativePathString } from "expo-router";
 import { useCallback } from "react";
 import {
   FlatList,
-  StyleSheet, Text, TouchableOpacity,
-  View
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 // ============================================
@@ -81,55 +83,55 @@ export default function HomePage() {
   const navigateToEvents = useCallback(
     () =>
       router.push("/(protected)/(client-tabs)/events" as RelativePathString),
-    [],
+    []
   );
 
   const navigateToVenues = useCallback(
     () => router.push("/(shared)/explore/explore"),
-    [],
+    []
   );
 
   const navigateToHotels = useCallback(
     () => router.push("/hotels" as RelativePathString),
-    [],
+    []
   );
 
   const navigateToVendors = useCallback(
     () => router.push("/(shared)/explore" as RelativePathString),
-    [],
+    []
   );
 
   const navigateToBlog = useCallback(
     () => router.push("/blog" as RelativePathString),
-    [],
+    []
   );
 
   // Render functions for FlatList items
   const renderEventItem = useCallback(
     ({ item }: { item: (typeof EventList)[0] }) => <EventCard {...item} />,
-    [],
+    []
   );
 
   const renderVenueItem = useCallback(
     ({ item }: { item: (typeof VENUES)[0] }) => <VenueCard {...item} />,
-    [],
+    []
   );
 
   const renderHotelItem = useCallback(
     ({ item }: { item: (typeof HOTELS)[0] }) => <HotelCard {...item} />,
-    [],
+    []
   );
 
   const renderCoupleItem = useCallback(
     ({ item }: { item: (typeof COUPLES)[0] }) => <CoupleCard {...item} />,
-    [],
+    []
   );
 
   return (
     <>
       <View style={styles.header} className="px-4">
         <View style={styles.headerContent}>
-           <View>
+          <View>
             <Text style={styles.greeting}>Hi, {user?.name || "Guest"} 👋</Text>
             <Text style={styles.title}>Plan Your Dream Event</Text>
           </View>
@@ -168,7 +170,6 @@ export default function HomePage() {
             <SectionHeader title="Popular Venues" onPress={navigateToVenues} />
             <FlatList
               data={VENUES}
-              
               renderItem={renderVenueItem}
               keyExtractor={(item) => item.id}
               horizontal
@@ -215,7 +216,7 @@ export default function HomePage() {
         style={styles.fab}
         onPress={() =>
           router.push(
-            "/(protected)/(client-stack)/events/createevent" as RelativePathString,
+            "/(protected)/(client-stack)/events/createevent" as RelativePathString
           )
         }
       >
