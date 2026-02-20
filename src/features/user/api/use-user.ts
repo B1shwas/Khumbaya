@@ -1,8 +1,8 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "@/src/api/axios";
-import { ResponseFormat } from "@/src/utils/type/responce";
+import { UserLoginType, UserSignupType } from "@/src/features/user/types";
 import { useAuthStore } from "@/src/store/AuthStore";
-import { UserSignupType, UserLoginType } from "@/src/features/user/types";
+import { ResponseFormat } from "@/src/utils/type/responce";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 interface LoginResponse {
   token: string;
 }
@@ -19,12 +19,28 @@ export function useLogin() {
       return data.data;
     },
     onSuccess: (data) => {
+      useAuthStore.getState().setAuth(data.token, null );
+      queryClient.clear();
+    },
+  });
+}
+export function useSignup() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (credentials: UserSignupType) => {
+      const { data } = await api.post<ResponseFormat<LoginResponse>>(
+        "user/signup",
+        credentials
+      );
+      return data.data;
+    },
+    onSuccess: (data) => {
       useAuthStore.getState().setAuth(data.token, null);
       queryClient.clear();
     },
   });
 }
-
 export function useProfile() {
   const token = useAuthStore((s) => s.token);
   const setAuth = useAuthStore((s) => s.setAuth);
@@ -36,14 +52,14 @@ export function useProfile() {
     gcTime: 30 * 60 * 1000,
 
     queryFn: async () => {
-      const { data } = await api.get<ResponseFormat<any>>("/user/me");
+      const { data } = await api.get<ResponseFormat<any>>("/user/profile");
 
       console.log(data.data);
 
-      setAuth(token, {
-        name: data.data.user_full_name,
-        email: data.data.user_email,
-        id: data.data.user_id,
+      setAuth(token as string, {
+        name: data.data.name,
+        email: data.data.email,
+        id: data.data.id,
       });
 
       return data.data;
