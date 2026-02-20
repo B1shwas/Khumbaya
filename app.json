@@ -1,5 +1,6 @@
 {
   "expo": {
+    "scheme": "khumbaya",
     "extra": {
       "eas": {
         "projectId": "89cf50c5-e048-4872-a1d9-99b9c88509f6"

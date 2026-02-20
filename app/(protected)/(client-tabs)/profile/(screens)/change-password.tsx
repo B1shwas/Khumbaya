@@ -1,3 +1,4 @@
+import CustomHeader from "@/src/components/ui/profile/CustomHeader";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
@@ -148,6 +149,12 @@ export default function ChangePasswordScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
+      <CustomHeader
+        title="Change Password"
+        showSaveButton
+        onSave={handleChangePassword}
+        isLoading={isLoading}
+      />
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         className="flex-1"

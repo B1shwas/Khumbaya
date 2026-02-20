@@ -1,3 +1,4 @@
+import CustomHeader from "@/src/components/ui/profile/CustomHeader";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
@@ -20,20 +21,32 @@ const ToggleItem = ({
   value,
   onToggle,
   icon,
+  danger = false,
 }: {
   title: string;
   subtitle?: string;
   value: boolean;
   onToggle: (value: boolean) => void;
   icon?: string;
+  danger?: boolean;
 }) => (
   <View className="flex-row items-center justify-between py-4 border-b border-gray-50 last:border-0">
     <View className="flex-row items-center flex-1 mr-4">
-      <View className="w-10 h-10 bg-pink-50 rounded-full items-center justify-center mr-3">
-        <MaterialIcons name={icon as any} size={20} color="#ee2b8c" />
+      <View
+        className={`w-10 h-10 rounded-full items-center justify-center mr-3 ${danger ? "bg-red-50" : "bg-pink-50"}`}
+      >
+        <MaterialIcons
+          name={icon as any}
+          size={20}
+          color={danger ? "#ef4444" : "#ee2b8c"}
+        />
       </View>
       <View className="flex-1">
-        <Text className="text-base font-semibold text-gray-900">{title}</Text>
+        <Text
+          className={`text-base font-semibold ${danger ? "text-red-600" : "text-gray-900"}`}
+        >
+          {title}
+        </Text>
         {subtitle && (
           <Text className="text-sm text-gray-500 mt-0.5">{subtitle}</Text>
         )}
@@ -42,7 +55,7 @@ const ToggleItem = ({
     <Switch
       value={value}
       onValueChange={onToggle}
-      trackColor={{ false: "#d1d5db", true: "#ec4899" }}
+      trackColor={{ false: "#d1d5db", true: danger ? "#ef4444" : "#ec4899" }}
       thumbColor="#ffffff"
     />
   </View>
@@ -54,15 +67,15 @@ const ActionItem = ({
   subtitle,
   onPress,
   icon,
-  showArrow = true,
   danger = false,
+  showArrow = true,
 }: {
   title: string;
   subtitle?: string;
   onPress: () => void;
   icon?: string;
-  showArrow?: boolean;
   danger?: boolean;
+  showArrow?: boolean;
 }) => (
   <TouchableOpacity
     onPress={onPress}
@@ -110,62 +123,39 @@ const Card = ({
   </View>
 );
 
-export default function AppSettingsScreen() {
+export default function PrivacySecurityScreen() {
   const router = useRouter();
-  const [appSettings, setAppSettings] = useState({
-    darkMode: false,
-    offlineMode: false,
-    autoSync: true,
-    hapticFeedback: true,
-    showTips: true,
+  const [privacySettings, setPrivacySettings] = useState({
+    showProfilePublic: true,
+    shareDataWithPartners: false,
+    enableTwoFactor: false,
+    allowAnalytics: true,
   });
   const [isLoading, setIsLoading] = useState(false);
 
   const handleToggle = (field: string, value: boolean) => {
-    setAppSettings((prev) => ({
+    setPrivacySettings((prev) => ({
       ...prev,
       [field]: value,
     }));
   };
 
-  const handleClearCache = () => {
-    Alert.alert(
-      "Clear Cache",
-      "This will remove all temporary files and free up storage space.",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Clear",
-          onPress: () => {
-            // Simulate clearing cache
-            setTimeout(() => {
-              Alert.alert("Success", "Cache cleared successfully!");
-            }, 500);
-          },
-        },
-      ],
-    );
+  const handleChangePassword = () => {
+    router.push({ pathname: "/profile/change-password" });
   };
 
-  const handleResetApp = () => {
+  const handleDeleteAccount = () => {
     Alert.alert(
-      "Reset App",
-      "This will reset all app settings to default. Your account data will not be affected.",
+      "Delete Account",
+      "Are you sure you want to delete your account? This action cannot be undone and all your data will be permanently lost.",
       [
         { text: "Cancel", style: "cancel" },
         {
-          text: "Reset",
+          text: "Delete",
           style: "destructive",
           onPress: () => {
-            // Reset to defaults
-            setAppSettings({
-              darkMode: false,
-              offlineMode: false,
-              autoSync: true,
-              hapticFeedback: true,
-              showTips: true,
-            });
-            Alert.alert("Success", "App settings reset to defaults.");
+            // TODO: Implement account deletion
+            Alert.alert("Account Deleted", "Your account has been deleted.");
           },
         },
       ],
@@ -176,12 +166,13 @@ export default function AppSettingsScreen() {
     setIsLoading(true);
     setTimeout(() => {
       setIsLoading(false);
-      Alert.alert("Success", "App settings saved!");
+      Alert.alert("Success", "Privacy settings saved!");
     }, 1000);
   };
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
+      <CustomHeader title="Privacy & Security" />
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         className="flex-1"
@@ -194,92 +185,71 @@ export default function AppSettingsScreen() {
           {/* Header */}
           <View className="mb-6">
             <Text className="text-2xl font-bold text-gray-900 mb-2">
-              App Settings
+              Privacy & Security
             </Text>
             <Text className="text-base text-gray-600 leading-relaxed">
-              Customize your app experience and preferences.
+              Manage your privacy settings and secure your account.
             </Text>
           </View>
 
-          {/* Appearance */}
+          {/* Privacy Settings */}
           <Card className="mb-4">
             <Text className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-3">
-              Appearance
+              Privacy
             </Text>
             <ToggleItem
-              title="Dark Mode"
-              subtitle="Enable dark theme for better night viewing"
-              value={appSettings.darkMode}
-              onToggle={(value) => handleToggle("darkMode", value)}
-              icon="dark-mode"
+              title="Public Profile"
+              subtitle="Allow others to view your profile"
+              value={privacySettings.showProfilePublic}
+              onToggle={(value) => handleToggle("showProfilePublic", value)}
+              icon="public"
+            />
+            <ToggleItem
+              title="Share Data"
+              subtitle="Share data with partners for better recommendations"
+              value={privacySettings.shareDataWithPartners}
+              onToggle={(value) => handleToggle("shareDataWithPartners", value)}
+              icon="share"
+            />
+            <ToggleItem
+              title="Analytics"
+              subtitle="Help improve our services"
+              value={privacySettings.allowAnalytics}
+              onToggle={(value) => handleToggle("allowAnalytics", value)}
+              icon="analytics"
             />
           </Card>
 
-          {/* Performance */}
+          {/* Security Settings */}
           <Card className="mb-4">
             <Text className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-3">
-              Performance
+              Security
             </Text>
             <ToggleItem
-              title="Offline Mode"
-              subtitle="Save data for offline use"
-              value={appSettings.offlineMode}
-              onToggle={(value) => handleToggle("offlineMode", value)}
-              icon="offline-bolt"
+              title="Two-Factor Authentication"
+              subtitle="Add extra security to your account"
+              value={privacySettings.enableTwoFactor}
+              onToggle={(value) => handleToggle("enableTwoFactor", value)}
+              icon="security"
             />
-            <ToggleItem
-              title="Auto Sync"
-              subtitle="Sync data automatically in background"
-              value={appSettings.autoSync}
-              onToggle={(value) => handleToggle("autoSync", value)}
-              icon="sync"
-            />
-          </Card>
-
-          {/* Features */}
-          <Card className="mb-4">
-            <Text className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-3">
-              Features
-            </Text>
-            <ToggleItem
-              title="Haptic Feedback"
-              subtitle="Enable vibration feedback"
-              value={appSettings.hapticFeedback}
-              onToggle={(value) => handleToggle("hapticFeedback", value)}
-              icon="vibration"
-            />
-            <ToggleItem
-              title="Show Tips"
-              subtitle="Display helpful tips and tutorials"
-              value={appSettings.showTips}
-              onToggle={(value) => handleToggle("showTips", value)}
-              icon="lightbulb"
-            />
-          </Card>
-
-          {/* Storage */}
-          <Card className="mb-4">
-            <Text className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-3">
-              Storage
-            </Text>
             <ActionItem
-              title="Clear Cache"
-              subtitle="Free up storage space"
-              onPress={handleClearCache}
-              icon="delete-sweep"
+              title="Change Password"
+              subtitle="Update your password"
+              onPress={handleChangePassword}
+              icon="lock"
             />
           </Card>
 
-          {/* Reset */}
+          {/* Danger Zone */}
           <Card className="mb-4 border-red-100">
             <Text className="text-sm font-bold text-red-500 uppercase tracking-wider mb-3">
-              Reset
+              Danger Zone
             </Text>
             <ActionItem
-              title="Reset to Default"
-              subtitle="Reset all settings to defaults"
-              onPress={handleResetApp}
-              icon="restore"
+              title="Delete Account"
+              subtitle="Permanently delete your account and data"
+              onPress={handleDeleteAccount}
+              icon="delete-forever"
               danger
               showArrow={false}
             />
