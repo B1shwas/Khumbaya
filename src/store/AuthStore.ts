@@ -1,35 +1,67 @@
-// import { create } from "zustand";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SecureStore from 'expo-secure-store';
+import { create } from "zustand";
+import { DEBUG_AUTO_LOGIN, TEST_USER } from "../config/env";
 
-// type User = any;
+type User = {
+  id: string;
+  email: string;
+  name?: string;
+};
 
-// type AuthState = {
-//   token: string | null;
-//   user: User | null;
-//   setAuth: (token: string | null, user?: User | null) => void;
-//   clearAuth: () => void;
-//   isAuthenticated: () => boolean;
-// };
+type AuthState = {
+  token: string | null;
+  user: User | null;
+  isLoading: boolean; // ✅ Add loading state
+  setAuth: (token: string, user: User) => Promise<void>;
+  clearAuth: () => Promise<void>;
+  isAuthenticated: () => boolean;
+  hydrate: () => Promise<void>; // ✅ Manual hydration control
+};
 
-// const getInitialToken = () => {
-//   if (typeof window === "undefined") return null;
-//   return localStorage.getItem("token");
-// };
+export const useAuthStore = create<AuthState>((set, get) => ({
+  token: null,
+  user: null,
+  isLoading: true, // Start loading until hydrated
 
-// export const useAuthStore = create<AuthState>((set, get) => ({
-//   token: getInitialToken(),
-//   user: null,
-//   setAuth: (token, user = null) => {
-//     if (typeof window !== "undefined") {
-//       if (token) localStorage.setItem("token", token);
-//       else localStorage.removeItem("token");
-//     }
-//     set({ token, user });
-//   },
-//   clearAuth: () => {
-//     if (typeof window !== "undefined") localStorage.removeItem("token");
-//     set({ token: null, user: null });
-//   },
-//   isAuthenticated: () => Boolean(get().token),
-// }));
+  hydrate: async () => {
+    try {
+      let [token, userString] = await Promise.all([
+        SecureStore.getItemAsync('token'),
+        AsyncStorage.getItem('user'),
+      ]);
 
-// export default useAuthStore;
+      let user = userString ? JSON.parse(userString) : null;
+
+      // ✅ Development Bypass: If no real data, use test user
+      if (!token && DEBUG_AUTO_LOGIN) {
+        token = TEST_USER.token;
+        user = TEST_USER.user;
+        console.warn("⚠️ [AuthStore] Using Debug Auto-Login");
+      }
+
+      set({ token, user, isLoading: false });
+    } catch (error) {
+      console.error('Auth hydration failed:', error);
+      set({ isLoading: false });
+    }
+  },
+
+  setAuth: async (token, user) => {
+    await Promise.all([
+      SecureStore.setItemAsync('token', token),
+      AsyncStorage.setItem('user', JSON.stringify(user)),
+    ]);
+    set({ token, user });
+  },
+
+  clearAuth: async () => {
+    await Promise.all([
+      SecureStore.deleteItemAsync('token'),
+      AsyncStorage.removeItem('user'),
+    ]);
+    set({ token: null, user: null });
+  },
+
+  isAuthenticated: () => Boolean(get().token),
+}));
