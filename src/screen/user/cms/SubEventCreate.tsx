@@ -2,11 +2,10 @@ import SubEventTemplateCard from "@/src/components/event/SubEventTemplateCard";
 import {
   SUB_EVENT_TEMPLATES,
   SubEventTemplate,
-  TemplateActivity,
 } from "@/src/constants/subeventTemplates";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useState } from "react";
+import { useCallback } from "react";
 import {
   ScrollView,
   StyleSheet,
@@ -14,77 +13,60 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-
-interface SelectedActivity {
-  activity: TemplateActivity;
-  time: string;
-}
-
-interface SelectedSubEvent {
-  template: SubEventTemplate;
-  date: string;
-  theme: string;
-  budget: string;
-  activities: SelectedActivity[];
-}
+import SelectedSubEventCard from "../../../components/subevent/SelectedSubEventCard";
+import { useSubEvents } from "../../../hooks/useSubEvents";
 
 export default function SubEventCreate() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const eventId = params.eventId as string;
 
-  // Selected sub-events state
-  const [selectedSubEvents, setSelectedSubEvents] = useState<
-    SelectedSubEvent[]
-  >([]);
+  // Use the hook for state management
+  const { subEvents, addSubEvent, deleteSubEvent, exists } = useSubEvents();
 
   // ============================================
   // Template Selection Handlers
   // ============================================
 
-  const handleTemplateSelect = (template: SubEventTemplate) => {
-    const existingIndex = selectedSubEvents.findIndex(
-      (s) => s.template.id === template.id
-    );
+  const handleTemplateSelect = useCallback(
+    async (template: SubEventTemplate) => {
+      const existsInState = exists(template.id);
 
-    if (existingIndex >= 0) {
-      // Navigate to edit page
-      router.push({
-        pathname:
-          "/(protected)/(client-stack)/events/[eventId]/subevent-detail",
-        params: {
-          subEventId: template.id,
-          eventId: eventId || "1",
-        },
-      });
-    } else {
-      const newSubEvent: SelectedSubEvent = {
-        template,
-        date: "",
-        theme: "",
-        budget: "",
-        activities: [],
-      };
-      setSelectedSubEvents((prev) => [...prev, newSubEvent]);
+      if (existsInState) {
+        // Navigate to edit page
+        router.push({
+          pathname:
+            "/(protected)/(client-stack)/events/[eventId]/subevent-detail",
+          params: {
+            subEventId: template.id,
+            eventId: eventId || "1",
+          },
+        });
+      } else {
+        // Create new sub-event and navigate to detail page
+        const newSubEvent = {
+          template,
+          date: "",
+          theme: "",
+          budget: "",
+          activities: [],
+        };
 
-      // Navigate to detail page for new sub-event
-      router.push({
-        pathname:
-          "/(protected)/(client-stack)/events/[eventId]/subevent-detail",
-        params: {
-          subEventId: template.id,
-          eventId: eventId || "1",
-          isNew: "true",
-        },
-      });
-    }
-  };
+        await addSubEvent(newSubEvent);
 
-  const handleRemoveSubEvent = (templateId: string) => {
-    setSelectedSubEvents((prev) =>
-      prev.filter((s) => s.template.id !== templateId)
-    );
-  };
+        router.push({
+          pathname:
+            "/(protected)/(client-stack)/events/[eventId]/subevent-detail",
+          params: {
+            subEventId: template.id,
+            eventId: eventId || "1",
+            isNew: "true",
+          },
+        });
+      }
+    },
+    [exists, addSubEvent, router, eventId]
+  );
 
   // ============================================
   // Navigation Handlers
@@ -99,7 +81,7 @@ export default function SubEventCreate() {
   };
 
   const handleSaveAll = () => {
-    console.log("Saving sub-events:", selectedSubEvents);
+    console.log("Saving sub-events:", subEvents);
     router.back();
   };
 
@@ -108,7 +90,29 @@ export default function SubEventCreate() {
   };
 
   const isTemplateSelected = (templateId: string): boolean => {
-    return selectedSubEvents.some((s) => s.template.id === templateId);
+    return exists(templateId);
+  };
+
+  // Handle card press
+  const handleCardPress = (templateId: string) => {
+    router.push({
+      pathname: "/(protected)/(client-stack)/events/[eventId]/subevent-detail",
+      params: {
+        subEventId: templateId,
+        eventId: eventId || "1",
+      },
+    });
+  };
+
+  // Handle edit
+  const handleEdit = (templateId: string) => {
+    router.push({
+      pathname: "/(protected)/(client-stack)/events/[eventId]/subevent-detail",
+      params: {
+        subEventId: templateId,
+        eventId: eventId || "1",
+      },
+    });
   };
 
   // ============================================
@@ -187,98 +191,19 @@ export default function SubEventCreate() {
           </TouchableOpacity>
         </View>
 
-        {/* Selected Sub-Events List */}
-        {selectedSubEvents.length > 0 && (
+        {/* Selected Sub-Events List with Swipe Actions */}
+        {subEvents.length > 0 && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Selected Sub Events</Text>
 
-            {selectedSubEvents.map((subEvent) => (
-              <TouchableOpacity
+            {subEvents.map((subEvent) => (
+              <SelectedSubEventCard
                 key={subEvent.template.id}
-                style={styles.selectedCard}
-                onPress={() =>
-                  router.push({
-                    pathname:
-                      "/(protected)/(client-stack)/events/[eventId]/subevent-detail",
-                    params: {
-                      subEventId: subEvent.template.id,
-                      eventId: eventId || "1",
-                    },
-                  })
-                }
-              >
-                <View style={styles.selectedCardHeader}>
-                  <View style={styles.selectedCardIcon}>
-                    <Ionicons
-                      name={subEvent.template.icon as any}
-                      size={24}
-                      color="#ee2b8c"
-                    />
-                  </View>
-                  <View style={styles.selectedCardInfo}>
-                    <Text style={styles.selectedCardTitle}>
-                      {subEvent.template.name}
-                    </Text>
-                    <Text style={styles.selectedCardSubtitle}>
-                      {subEvent.date || "Tap to set details"}
-                    </Text>
-                  </View>
-                  <View style={styles.selectedCardActions}>
-                    <TouchableOpacity
-                      style={styles.deleteButton}
-                      onPress={(e) => {
-                        e.stopPropagation();
-                        handleRemoveSubEvent(subEvent.template.id);
-                      }}
-                    >
-                      <Ionicons
-                        name="trash-outline"
-                        size={18}
-                        color="#EF4444"
-                      />
-                    </TouchableOpacity>
-                    <Ionicons
-                      name="chevron-forward"
-                      size={16}
-                      color="#9CA3AF"
-                    />
-                  </View>
-                </View>
-
-                {/* Quick Info */}
-                <View style={styles.selectedCardDetails}>
-                  {subEvent.theme && (
-                    <View style={styles.detailItem}>
-                      <Ionicons
-                        name="color-palette-outline"
-                        size={14}
-                        color="#6B7280"
-                      />
-                      <Text style={styles.detailText}>{subEvent.theme}</Text>
-                    </View>
-                  )}
-                  {subEvent.budget && (
-                    <View style={styles.detailItem}>
-                      <Ionicons
-                        name="wallet-outline"
-                        size={14}
-                        color="#6B7280"
-                      />
-                      <Text style={styles.detailText}>{subEvent.budget}</Text>
-                    </View>
-                  )}
-                  <View style={styles.detailItem}>
-                    <Ionicons
-                      name="checkmark-circle-outline"
-                      size={14}
-                      color="#6B7280"
-                    />
-                    <Text style={styles.detailText}>
-                      {subEvent.activities.length} activities
-                    </Text>
-                  </View>
-                </View>
-              </TouchableOpacity>
+                subEvent={subEvent}
+                onPress={() => handleCardPress(subEvent.template.id)}
+                onDelete={() => deleteSubEvent(subEvent.template.id)}
+                onEdit={() => handleEdit(subEvent.template.id)}
+              />
             ))}
           </View>
         )}
@@ -377,69 +302,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: "#6B7280",
     marginTop: 2,
-  },
-  selectedCard: {
-    backgroundColor: "white",
-    borderRadius: 16,
-    marginBottom: 12,
-    borderWidth: 2,
-    borderColor: "#ee2b8c",
-    overflow: "hidden",
-  },
-  selectedCardHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 16,
-    backgroundColor: "#FDF2F8",
-  },
-  selectedCardIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 12,
-    backgroundColor: "white",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  selectedCardInfo: {
-    flex: 1,
-    marginLeft: 12,
-  },
-  selectedCardTitle: {
-    fontFamily: "PlusJakartaSans-Bold",
-    fontSize: 16,
-    color: "#181114",
-  },
-  selectedCardSubtitle: {
-    fontFamily: "PlusJakartaSans-Regular",
-    fontSize: 13,
-    color: "#6B7280",
-    marginTop: 2,
-  },
-  selectedCardActions: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  deleteButton: {
-    padding: 8,
-    backgroundColor: "white",
-    borderRadius: 8,
-  },
-  selectedCardDetails: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    padding: 12,
-    gap: 12,
-  },
-  detailItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-  },
-  detailText: {
-    fontFamily: "PlusJakartaSans-Regular",
-    fontSize: 13,
-    color: "#6B7280",
   },
   bottomSpacing: {
     height: 100,
