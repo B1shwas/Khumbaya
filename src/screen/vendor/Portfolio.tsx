@@ -2,7 +2,13 @@ import { Text } from "@/src/components/ui/Text";
 import { MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import React, { useState } from "react";
-import { Dimensions, Image, ScrollView, TouchableOpacity, View } from "react-native";
+import {
+  Dimensions,
+  Image,
+  ScrollView,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 // Progress value (percent)
@@ -71,9 +77,12 @@ export default function PortfolioScreen() {
             accessibilityRole="button"
           >
             {/* text-light = #181114; dark text is white */}
-            <MaterialIcons name="arrow-back" size={24} color="#181114" /> 
+            <MaterialIcons name="arrow-back" size={24} color="#181114" />
           </TouchableOpacity>
-          <Text className="text-lg font-bold leading-tight tracking-tight flex-1 text-center" style={{ color: "#181114" }}>
+          <Text
+            className="text-lg font-bold leading-tight tracking-tight flex-1 text-center"
+            style={{ color: "#181114" }}
+          >
             Portfolio
           </Text>
           <TouchableOpacity className="px-2 py-1">
@@ -86,32 +95,53 @@ export default function PortfolioScreen() {
         <View className="px-4 pb-2">
           <View className="flex-row justify-between items-center mb-1">
             {/* gray-500 = #6b7280 */}
-            <Text className="text-xs font-medium" style={{ color: "#6b7280" }}>Profile Completion</Text>
+            <Text className="text-xs font-medium" style={{ color: "#6b7280" }}>
+              Profile Completion
+            </Text>
             <Text className="text-xs font-bold text-primary">{PROGRESS}%</Text>
           </View>
           {/* Track: #e6dbe0; dark: white/10 */}
-          <View className="h-1.5 w-full rounded-full overflow-hidden" style={{ backgroundColor: "#e6dbe0" }}>
-            <View className="h-full rounded-full bg-primary" style={{ width: `${PROGRESS}%` }} />
+          <View
+            className="h-1.5 w-full rounded-full overflow-hidden"
+            style={{ backgroundColor: "#e6dbe0" }}
+          >
+            <View
+              className="h-full rounded-full bg-primary"
+              style={{ width: `${PROGRESS}%` }}
+            />
           </View>
         </View>
 
         {/* Header Text */}
         <View className="px-4 pt-6 pb-2">
-          <Text className="text-[28px] font-bold leading-tight tracking-tight mb-2" style={{ color: "#181114" }}>
+          <Text
+            className="text-[28px] font-bold leading-tight tracking-tight mb-2"
+            style={{ color: "#181114" }}
+          >
             Showcase Your Work
           </Text>
           {/* gray-600 = #4b5563 */}
-          <Text className="text-base leading-relaxed" style={{ color: "#4b5563" }}>
-            Add up to 9 photos of your best work. Couples love seeing real examples!
+          <Text
+            className="text-base leading-relaxed"
+            style={{ color: "#4b5563" }}
+          >
+            Add up to 9 photos of your best work. Couples love seeing real
+            examples!
           </Text>
         </View>
 
         {/* Scrollable Content */}
-        <ScrollView className="flex-1 px-4 pb-32" showsVerticalScrollIndicator={false}>
+        <ScrollView
+          className="flex-1 px-4 pb-32"
+          showsVerticalScrollIndicator={false}
+        >
           {/* Main Upload Button */}
           <TouchableOpacity
             className="w-full flex-col items-center justify-center gap-4 rounded-xl border-2 border-dashed py-10 px-6 mt-4"
-            style={{ borderColor: "rgba(238, 43, 140, 0.4)", backgroundColor: "rgba(238, 43, 140, 0.05)" }}
+            style={{
+              borderColor: "rgba(238, 43, 140, 0.4)",
+              backgroundColor: "rgba(238, 43, 140, 0.05)",
+            }}
             activeOpacity={0.8}
             onPress={handleUpload}
           >
@@ -123,18 +153,27 @@ export default function PortfolioScreen() {
               <MaterialIcons name="add-a-photo" size={32} color="#ee2b8c" />
             </View>
             <View className="items-center">
-              <Text className="text-lg font-bold text-primary">Tap to Upload</Text>
+              <Text className="text-lg font-bold text-primary">
+                Tap to Upload
+              </Text>
               {/* gray-500 = #6b7280 */}
-              <Text className="text-sm mt-1" style={{ color: "#6b7280" }}>or browse your gallery</Text>
+              <Text className="text-sm mt-1" style={{ color: "#6b7280" }}>
+                or browse your gallery
+              </Text>
             </View>
           </TouchableOpacity>
 
           {/* Image Grid Section */}
           <View className="mt-6">
             <View className="flex-row items-center justify-between mb-4">
-              <Text className="font-bold text-lg" style={{ color: "#181114" }}>Your Photos</Text>
+              <Text className="font-bold text-lg" style={{ color: "#181114" }}>
+                Your Photos
+              </Text>
               {/* gray-500 = #6b7280 */}
-              <Text className="text-sm font-medium" style={{ color: "#6b7280" }}>
+              <Text
+                className="text-sm font-medium"
+                style={{ color: "#6b7280" }}
+              >
                 {photos.length} of {MAX_PHOTOS}
               </Text>
             </View>
@@ -156,7 +195,10 @@ export default function PortfolioScreen() {
                       }}
                     >
                       {/* gray-300 = #d1d5db */}
-                      <Text className="text-sm font-bold" style={{ color: "#d1d5db" }}>
+                      <Text
+                        className="text-sm font-bold"
+                        style={{ color: "#d1d5db" }}
+                      >
                         {item.slot}
                       </Text>
                     </View>
@@ -168,9 +210,17 @@ export default function PortfolioScreen() {
                   <View
                     key={item.id}
                     className="rounded-lg overflow-hidden shadow-sm"
-                    style={{ width: ITEM_SIZE, height: ITEM_SIZE, backgroundColor: "#f3f4f6" }}
+                    style={{
+                      width: ITEM_SIZE,
+                      height: ITEM_SIZE,
+                      backgroundColor: "#f3f4f6",
+                    }}
                   >
-                    <Image source={{ uri: item.uri }} style={{ width: "100%", height: "100%" }} resizeMode="cover" />
+                    <Image
+                      source={{ uri: item.uri }}
+                      style={{ width: "100%", height: "100%" }}
+                      resizeMode="cover"
+                    />
                     {/* Remove button */}
                     <TouchableOpacity
                       className="absolute top-1 right-1 size-6 items-center justify-center rounded-full"
@@ -185,7 +235,9 @@ export default function PortfolioScreen() {
                         colors={["transparent", "rgba(0,0,0,0.6)"]}
                         className="absolute bottom-0 left-0 right-0 p-2"
                       >
-                        <Text className="text-[10px] font-bold text-white uppercase tracking-wider">Cover</Text>
+                        <Text className="text-[10px] font-bold text-white uppercase tracking-wider">
+                          Cover
+                        </Text>
                       </LinearGradient>
                     )}
                   </View>
@@ -201,7 +253,11 @@ export default function PortfolioScreen() {
         {/* Sticky Footer */}
         <View
           className="absolute bottom-0 left-0 right-0 p-4 pb-8"
-          style={{ backgroundColor: "rgba(255,255,255,0.9)", borderTopWidth: 1, borderTopColor: "#f3f4f6" }}
+          style={{
+            backgroundColor: "rgba(255,255,255,0.9)",
+            borderTopWidth: 1,
+            borderTopColor: "#f3f4f6",
+          }}
         >
           <TouchableOpacity
             className="w-full bg-primary py-4 rounded-xl items-center justify-center shadow-lg"

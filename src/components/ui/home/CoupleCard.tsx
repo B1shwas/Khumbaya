@@ -49,7 +49,7 @@ const CoupleCard = React.memo(
         <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
       </TouchableOpacity>
     );
-  },
+  }
 );
 
 const styles = StyleSheet.create({

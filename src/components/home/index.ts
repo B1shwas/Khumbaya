@@ -8,4 +8,3 @@ export { default as QuickServices } from "./Quickservice";
 export { default as SectionHeader } from "./SectionHeader";
 export { default as VendorCard } from "./VendorCard";
 export { default as VenueCard } from "./VenueCard";
-

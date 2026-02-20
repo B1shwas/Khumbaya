@@ -863,18 +863,18 @@ export const getTemplateById = (id: string): SubEventTemplate | undefined => {
 };
 
 export const getTemplateActivities = (
-  templateId: string,
+  templateId: string
 ): TemplateActivity[] => {
   const template = getTemplateById(templateId);
   return template?.activities || [];
 };
 
 export const getTemplatesByCategory = (
-  category: string,
+  category: string
 ): SubEventTemplate[] => {
   // Return templates that contain activities in the specified category
   return SUB_EVENT_TEMPLATES.filter((template) =>
-    template.activities.some((activity) => activity.category === category),
+    template.activities.some((activity) => activity.category === category)
   );
 };
 

@@ -216,13 +216,13 @@ export default function EventsPage() {
             onPress={() => setActiveTab(tab.value)}
             className={cn(
               "flex-1 py-2 rounded-md items-center",
-              activeTab === tab.value ? "bg-white" : "text-gray-600",
+              activeTab === tab.value ? "bg-white" : "text-gray-600"
             )}
           >
             <Text
               className={cn(
                 "text-sm font-jakarta-semibold p-1",
-                activeTab === tab.value ? "text-primary" : "text-gray-500",
+                activeTab === tab.value ? "text-primary" : "text-gray-500"
               )}
             >
               {tab.label}

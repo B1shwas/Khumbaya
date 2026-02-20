@@ -15,8 +15,6 @@ import {
   View,
 } from "react-native";
 
-
-
 interface SelectedActivity {
   activity: TemplateActivity;
   time: string;
@@ -46,13 +44,14 @@ export default function SubEventCreate() {
 
   const handleTemplateSelect = (template: SubEventTemplate) => {
     const existingIndex = selectedSubEvents.findIndex(
-      (s) => s.template.id === template.id,
+      (s) => s.template.id === template.id
     );
 
     if (existingIndex >= 0) {
       // Navigate to edit page
       router.push({
-        pathname: "/(protected)/(client-stack)/events/[eventId]/subevent-detail",
+        pathname:
+          "/(protected)/(client-stack)/events/[eventId]/subevent-detail",
         params: {
           subEventId: template.id,
           eventId: eventId || "1",
@@ -70,7 +69,8 @@ export default function SubEventCreate() {
 
       // Navigate to detail page for new sub-event
       router.push({
-        pathname: "/(protected)/(client-stack)/events/[eventId]/subevent-detail",
+        pathname:
+          "/(protected)/(client-stack)/events/[eventId]/subevent-detail",
         params: {
           subEventId: template.id,
           eventId: eventId || "1",
@@ -82,7 +82,7 @@ export default function SubEventCreate() {
 
   const handleRemoveSubEvent = (templateId: string) => {
     setSelectedSubEvents((prev) =>
-      prev.filter((s) => s.template.id !== templateId),
+      prev.filter((s) => s.template.id !== templateId)
     );
   };
 
@@ -91,11 +91,11 @@ export default function SubEventCreate() {
   // ============================================
 
   const handleNavigateToCardMaking = () => {
-    router.push("/(protected)/(client-stack)/events/card-making" );
+    router.push("/(protected)/(client-stack)/events/card-making");
   };
 
   const handleNavigateToGuests = () => {
-    router.push("/(protected)/(client-stack)/events/guests" );
+    router.push("/(protected)/(client-stack)/events/guests");
   };
 
   const handleSaveAll = () => {
@@ -198,8 +198,8 @@ export default function SubEventCreate() {
                 style={styles.selectedCard}
                 onPress={() =>
                   router.push({
-                      pathname:
-                        "/(protected)/(client-stack)/events/[eventId]/subevent-detail",
+                    pathname:
+                      "/(protected)/(client-stack)/events/[eventId]/subevent-detail",
                     params: {
                       subEventId: subEvent.template.id,
                       eventId: eventId || "1",

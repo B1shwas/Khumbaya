@@ -8,7 +8,9 @@ export default function EventLayout() {
       <Stack.Screen name="event-estimates" />
       <Stack.Screen name="success" />
       <Stack.Screen name="subevent-detail" />
-      <Stack.Screen name="card-making" />
+      <Stack.Screen name="card-making" /> 
+
+      {/* CMS Routes */}
     </Stack>
   );
 }

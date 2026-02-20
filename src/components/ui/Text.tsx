@@ -19,7 +19,7 @@ export function Text({ variant = "body", className, ...props }: Props) {
         variant === "h2" && "font-jakarta-semi text-xl",
         variant === "body" && "font-jakarta text-base",
         variant === "caption" && "font-jakarta-medium text-sm text-gray-500",
-        className,
+        className
       )}
     />
   );

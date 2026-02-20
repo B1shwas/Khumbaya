@@ -2,6 +2,7 @@ import { Text } from "@/src/components/ui/Text";
 import { MaterialIcons } from "@expo/vector-icons";
 import { Link, useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useLogin } from "@/src/features/user/api/use-user";
 import {
   Animated,
   ImageBackground,
@@ -41,8 +42,9 @@ const COPY = {
 } as const;
 
 export default function LoginPage() {
+  const { mutate: login, isPending } = useLogin();
   const router = useRouter();
-  const { login } = useAuth();
+  // const { login } = useAuth();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
@@ -78,7 +80,7 @@ export default function LoginPage() {
           duration: 1200,
           useNativeDriver: true,
         }),
-      ]),
+      ])
     );
 
     animation.start();
@@ -91,7 +93,7 @@ export default function LoginPage() {
       password.trim().length === 0 ||
       !isValidEmail ||
       !isValidPassword,
-    [username, password, isValidEmail, isValidPassword],
+    [username, password, isValidEmail, isValidPassword]
   );
 
   const handleLogin = useCallback(async () => {
@@ -105,23 +107,19 @@ export default function LoginPage() {
       await new Promise((resolve) => setTimeout(resolve, 1500));
 
       // TODO: Uncomment and configure backend URL when ready
-      // const loginPayload = {
-      //   email: username,
-      //   password: password,
-      // };
-      //
+      const loginPayload = {
+        email: username,
+        password: password,
+      };
+      login(loginPayload, {
+        onSuccess: (data) => {
+          console.log("Login successful:", data);
+          // login function will handle setting auth state and redirecting
+        },
+      });
+
       // try {
-      //   const response = await fetch('https://your-api-domain.com/api/auth/login', {
-      //     method: 'POST',
-      //     headers: {
-      //       'Content-Type': 'application/json',
-      //     },
-      //     body: JSON.stringify(loginPayload),
-      //   });
-      //
-      //   if (!response.ok) {
-      //     throw new Error(`Login failed: ${response.status}`);
-      //   }
+
       //
       //   const result = await response.json();
       //   console.log('Login successful:', result);
@@ -136,12 +134,12 @@ export default function LoginPage() {
       // }
 
       // Set user in AuthContext for client role - AuthContext will handle redirect
-      login({
-        id: "1",
-        email: username,
-        name: username.split("@")[0],
-        role: "client",
-      });
+      // login({
+      //   id: "1",
+      //   email: username,
+      //   name: username.split("@")[0],
+      //   role: "client",
+      // });
 
       // Navigation will be handled by AuthContext's NavigationHandler
     } catch (err) {
@@ -206,8 +204,9 @@ export default function LoginPage() {
                 placeholderTextColor="text-muted-light"
                 autoCapitalize="none"
                 keyboardType="email-address"
-                className={`h-14 rounded-md border bg-white px-4 text-base text-text-light ${emailError ? "border-red-500" : "border-gray-200"
-                  }`}
+                className={`h-14 rounded-md border bg-white px-4 text-base text-text-light ${
+                  emailError ? "border-red-500" : "border-gray-200"
+                }`}
               />
               {emailError && (
                 <Text className="ml-1 mt-1 text-xs text-red-500">
@@ -227,8 +226,9 @@ export default function LoginPage() {
                   placeholder={COPY.passwordPlaceholder}
                   placeholderTextColor="text-muted-light"
                   secureTextEntry={!isPasswordVisible}
-                  className={`h-14 rounded-md border bg-white px-4 text-base text-text-light ${passwordError ? "border-red-500" : "border-gray-200"
-                    }`}
+                  className={`h-14 rounded-md border bg-white px-4 text-base text-text-light ${
+                    passwordError ? "border-red-500" : "border-gray-200"
+                  }`}
                 />
                 <Pressable
                   onPress={() => setIsPasswordVisible((prev) => !prev)}
@@ -255,8 +255,9 @@ export default function LoginPage() {
             <Pressable
               onPress={handleLogin}
               disabled={isLoginDisabled || isLoading}
-              className={`h-14 flex-row items-center justify-center gap-2 rounded-md bg-primary shadow-md shadow-primary/20 ${isLoginDisabled || isLoading ? "opacity-60" : ""
-                }`}
+              className={`h-14 flex-row items-center justify-center gap-2 rounded-md bg-primary shadow-md shadow-primary/20 ${
+                isLoginDisabled || isLoading ? "opacity-60" : ""
+              }`}
               accessibilityRole="button"
               accessibilityLabel="Login"
             >

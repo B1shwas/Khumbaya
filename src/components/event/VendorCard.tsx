@@ -129,7 +129,7 @@ const VendorCard = memo<VendorCardProps>(
         </View>
       </Pressable>
     );
-  },
+  }
 );
 
 export default VendorCard;

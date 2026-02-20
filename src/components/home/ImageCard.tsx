@@ -1,11 +1,5 @@
 import React, { useCallback } from "react";
-import {
-  Image,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { router } from "expo-router";
 
 interface ImageCardProps {
@@ -42,7 +36,7 @@ const ImageCard = React.memo(
         <View style={styles.content}>{children}</View>
       </TouchableOpacity>
     );
-  },
+  }
 );
 
 const styles = StyleSheet.create({

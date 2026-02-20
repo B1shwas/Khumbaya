@@ -20,7 +20,10 @@ export default function GalleryScreen() {
       <ScrollView className="flex-1 p-4" showsVerticalScrollIndicator={false}>
         <View className="flex-row flex-wrap gap-2">
           {photos.map((photo) => (
-            <TouchableOpacity key={photo.id} className="w-[calc(33.33%-6px)] aspect-square rounded-lg overflow-hidden">
+            <TouchableOpacity
+              key={photo.id}
+              className="w-[calc(33.33%-6px)] aspect-square rounded-lg overflow-hidden"
+            >
               <Image
                 source={{ uri: photo.url }}
                 className="w-full h-full"

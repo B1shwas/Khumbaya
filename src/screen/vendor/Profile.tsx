@@ -46,8 +46,7 @@ const REVIEWS = [
     name: "Priya K.",
     time: "2 weeks ago",
     rating: 5,
-    text:
-      "Absolutely stunning photos! The team was so patient during the chaos of the Sangeet. Highly recommend!",
+    text: "Absolutely stunning photos! The team was so patient during the chaos of the Sangeet. Highly recommend!",
     avatar:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuBHurQM4fc1EwxTv_cbG4E2w8x7NOgDCMO2HvVFF5pdMaz05kqyfKwEVM8nLp5CCF3X7UeQJrwn8bORBppaNLkiwc-q0wKQl9ytS6sqJsBEWAIj5eLOmRiYoq6K8Yu6CkIXV36hx7r_fwwY90EkqEk99zqtA2BSdEycfa9TDvfbQj4SCx5T9A20UzJrkLgAoSvka3LwZ92hXKwt1bfJo5y6JU6VKLT1IJi3wIKqzZmcJExAPx0Oni-_rOVZP1zFT4y_FJRh-pP_a0E",
   },
@@ -55,8 +54,7 @@ const REVIEWS = [
     name: "Rahul M.",
     time: "1 month ago",
     rating: 4,
-    text:
-      "Great experience overall. The traditional shots were perfect, though candid shots could be better.",
+    text: "Great experience overall. The traditional shots were perfect, though candid shots could be better.",
     avatar:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuCUGNbh5r0Hd8HhuMwBb-ncGQvlFlt3gDZRlh8w-_7AakSrG5l1xJ8rPNGqf9EUQ9XAfy1pK2-xZTi8E7w_2jvjUQoTcC5GVc5ccnHy-srjuVtWfV2S7RzNZ21WulXyl7_Y4vPusRzhSraU2Xr90vFK-qK9QuAPqKsckn4jf9R-qtI3JdAqCpBFp00zs7LZBuYGOPa_DoQRtUK1L7liutL-P8jcy-6R52TLMPtmvCvCIWhQ7M7P-OghB8ajCSpyjcQR9Kv3g5cL0qw",
   },
@@ -190,7 +188,6 @@ export default function Profile() {
               <Pressable className="h-12 w-12 items-center justify-center rounded-xl border border-gray-200 bg-white">
                 <MaterialIcons name="chat-bubble" size={20} color="#6B7280" />
               </Pressable>
-
             </View>
             <View className="flex-row gap-2">
               <View className="flex-1 aspect-square rounded-xl overflow-hidden shadow-sm">
@@ -232,9 +229,7 @@ export default function Profile() {
                   </View>
                 ) : null}
                 <View className="flex-row justify-between items-start mb-2">
-                  <Text className="font-bold text-[#181114]">
-                    {item.title}
-                  </Text>
+                  <Text className="font-bold text-[#181114]">{item.title}</Text>
                   <Text className="text-primary font-bold text-sm">
                     {item.price}
                   </Text>
@@ -257,7 +252,8 @@ export default function Profile() {
           </View>
         </View>
         <View className="p-6">
-        <Pressable className="flex-1 h-12 items-center justify-center rounded-xl bg-primary"
+          <Pressable
+            className="flex-1 h-12 items-center justify-center rounded-xl bg-primary"
             onPress={async () => {
               try {
                 setLoggingOut(true);
@@ -267,14 +263,11 @@ export default function Profile() {
                 setLoggingOut(false);
                 // TODO: show error feedback
               }
-            }}>
-            <Text className="text-white text-base font-bold">
-              Log Out
-            </Text>
+            }}
+          >
+            <Text className="text-white text-base font-bold">Log Out</Text>
           </Pressable>
-
         </View>
-
 
         <View className="px-4 py-6 bg-white mt-2">
           <View className="flex-row justify-between items-baseline mb-4">
@@ -319,9 +312,7 @@ export default function Profile() {
                         key={`${review.name}-${index}`}
                         name="star"
                         size={14}
-                        color={
-                          index < review.rating ? "#facc15" : "#e5e7eb"
-                        }
+                        color={index < review.rating ? "#facc15" : "#e5e7eb"}
                       />
                     ))}
                   </View>

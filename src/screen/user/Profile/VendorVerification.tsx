@@ -246,7 +246,7 @@ export default function VendorVerificationScreen() {
       };
       await AsyncStorage.setItem(
         STORAGE_KEYS.VERIFICATION,
-        JSON.stringify(data),
+        JSON.stringify(data)
       );
       router.back();
     } catch (error) {

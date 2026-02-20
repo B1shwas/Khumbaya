@@ -1,2 +1,2 @@
 import RSVPPage from "@/src/screen/user/event/rsvp";
-export default RSVPPage ;
+export default RSVPPage;

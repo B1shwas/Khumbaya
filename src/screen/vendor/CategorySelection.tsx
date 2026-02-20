@@ -47,30 +47,49 @@ export default function VendorLoginFlowScreen() {
           >
             {/* text-light = #181114 (commented for reference); dark text is white */}
             {/* TODO: Add text-light to tailwind config as #181114 */}
-            <MaterialIcons name="arrow-back-ios-new" size={24} color="#181114" />
+            <MaterialIcons
+              name="arrow-back-ios-new"
+              size={24}
+              color="#181114"
+            />
           </TouchableOpacity>
-          <Text className="text-lg font-bold leading-tight tracking-tight flex-1 text-center pr-10 text-white dark:text-white" style={{ color: "#181114" }}>
+          <Text
+            className="text-lg font-bold leading-tight tracking-tight flex-1 text-center pr-10 text-white dark:text-white"
+            style={{ color: "#181114" }}
+          >
             Vendor Onboarding
           </Text>
         </View>
 
         {/* Progress Bar */}
-    
 
         {/* Scrollable Content */}
-        <ScrollView className="flex-1 px-6 pb-32" showsVerticalScrollIndicator={false}>
+        <ScrollView
+          className="flex-1 px-6 pb-32"
+          showsVerticalScrollIndicator={false}
+        >
           {/* Headline */}
-          <Text className="text-[28px] font-bold leading-tight pt-2 pb-3 text-white" style={{ color: "#181114" }}>
+          <Text
+            className="text-[28px] font-bold leading-tight pt-2 pb-3 text-white"
+            style={{ color: "#181114" }}
+          >
             What services do you offer?
           </Text>
           {/* Body Text */}
           {/* gray-600 = #4B5563; dark: gray-400 = #9CA3AF */}
-          <Text className="text-base font-normal leading-relaxed" style={{ color: "#4B5563" }}>
-            Choose one or more categories that best describe your business. This helps couples find you easily.
+          <Text
+            className="text-base font-normal leading-relaxed"
+            style={{ color: "#4B5563" }}
+          >
+            Choose one or more categories that best describe your business. This
+            helps couples find you easily.
           </Text>
 
           {/* Categories Grid */}
-          <View className="mt-6 flex-row flex-wrap justify-between" style={{ gap: 16 }}>
+          <View
+            className="mt-6 flex-row flex-wrap justify-between"
+            style={{ gap: 16 }}
+          >
             {CATEGORIES.map((item) => (
               <CategoryCard
                 key={item.key}
@@ -97,7 +116,9 @@ export default function VendorLoginFlowScreen() {
               // TODO: navigate to next onboarding step
             }}
           >
-            <Text className="text-white text-base font-bold leading-tight">Continue</Text>
+            <Text className="text-white text-base font-bold leading-tight">
+              Continue
+            </Text>
             {/* text-sm not available for icons; using size prop */}
             {/* primary = #ee2b8c (button bg) */}
             <MaterialIcons name="arrow-forward" size={18} color="#ffffff" />
@@ -108,12 +129,22 @@ export default function VendorLoginFlowScreen() {
   );
 }
 
-function CategoryCard({ item, selected, onSelect }: { item: Category; selected: boolean; onSelect: () => void }) {
+function CategoryCard({
+  item,
+  selected,
+  onSelect,
+}: {
+  item: Category;
+  selected: boolean;
+  onSelect: () => void;
+}) {
   const isSelected = selected;
   return (
     <TouchableOpacity
       className={`relative rounded-2xl p-5 items-center justify-center shadow-sm ${
-        isSelected ? "border-2 border-primary bg-primary/5" : "border-2 border-transparent bg-white"
+        isSelected
+          ? "border-2 border-primary bg-primary/5"
+          : "border-2 border-transparent bg-white"
       }`}
       style={{ width: CARD_WIDTH }}
       activeOpacity={0.9}
@@ -123,10 +154,18 @@ function CategoryCard({ item, selected, onSelect }: { item: Category; selected: 
       {/* Unselected bg = #fcebf4; selected uses white bg */}
       <View
         className={`items-center justify-center rounded-full`}
-        style={{ width: 48, height: 48, backgroundColor: isSelected ? "#ffffff" : "#fcebf4" }}
+        style={{
+          width: 48,
+          height: 48,
+          backgroundColor: isSelected ? "#ffffff" : "#fcebf4",
+        }}
       >
         {/* text-primary = #ee2b8c; dark text white */}
-        <MaterialIcons name={item.icon} size={28} color={isSelected ? "#ee2b8c" : "#ee2b8c"} />
+        <MaterialIcons
+          name={item.icon}
+          size={28}
+          color={isSelected ? "#ee2b8c" : "#ee2b8c"}
+        />
       </View>
 
       {/* Title */}

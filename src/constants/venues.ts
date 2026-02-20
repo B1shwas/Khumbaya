@@ -1,4 +1,3 @@
-
 const VENUES = [
   {
     id: "1",

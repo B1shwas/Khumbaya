@@ -3,7 +3,7 @@ import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-
+import { useEffect } from "react";
 // Sample analytics data (replace with real data from backend)
 const SAMPLE_ANALYTICS = {
   totalEarnings: "$12,500",
@@ -246,10 +246,42 @@ export default function AnalyticsScreen() {
   const [analytics] = useState(SAMPLE_ANALYTICS);
   const [selectedFilter, setSelectedFilter] = useState("all");
   const [expandedReview, setExpandedReview] = useState<number | null>(null);
+  const [filteredActivities, setFilteredActivities] = useState(
+    analytics.activities
+  );
+
+  useEffect(() => {
+    // Filter activities based on selected time period
+    const filterActivities = () => {
+      let filtered = [...analytics.activities];
+
+      // In real app, filter based on actual dates
+      if (selectedFilter === "monthly") {
+        filtered = analytics.activities.filter((act) =>
+          act.date.includes("month")
+        );
+      } else if (selectedFilter === "weekly") {
+        filtered = analytics.activities.filter((act) =>
+          act.date.includes("week")
+        );
+      } else if (selectedFilter === "daily") {
+        filtered = analytics.activities.filter((act) =>
+          act.date.includes("day")
+        );
+      }
+
+      setFilteredActivities(filtered);
+    };
+
+    filterActivities();
+
+    // TODO: Fetch real analytics data from backend
+    // fetchAnalytics().then(data => setAnalytics(data));
+  }, [selectedFilter]);
 
   // Calculate max earnings for chart scaling
   const maxEarnings = Math.max(
-    ...analytics.monthlyTrend.map((t) => t.earnings),
+    ...analytics.monthlyTrend.map((t) => t.earnings)
   );
 
   return (

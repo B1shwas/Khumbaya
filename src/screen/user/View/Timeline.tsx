@@ -49,7 +49,8 @@ const timelineData: TimelineItem[] = [
     endTime: "10:00 AM",
     title: "Morning Breakfast",
     location: "Garden Pavilion",
-    description: "Start the day with a healthy breakfast spread. Continental and hot options available.",
+    description:
+      "Start the day with a healthy breakfast spread. Continental and hot options available.",
     icon: "restaurant",
     iconColor: "#F59E0B",
     isActive: false,
@@ -65,7 +66,8 @@ const timelineData: TimelineItem[] = [
     endTime: "12:30 PM",
     title: "Mehendi Ceremony",
     location: "The Rose Garden",
-    description: "Traditional henna application with live music and dance performances. Light refreshments served.",
+    description:
+      "Traditional henna application with live music and dance performances. Light refreshments served.",
     icon: "color-palette",
     iconColor: "#EE2B8C",
     isActive: true,
@@ -98,7 +100,8 @@ const timelineData: TimelineItem[] = [
     endTime: "04:30 PM",
     title: "Photo Session",
     location: "Lavender Fields",
-    description: "Family and couple photoshoot session. All family members requested to be present.",
+    description:
+      "Family and couple photoshoot session. All family members requested to be present.",
     icon: "camera",
     iconColor: "#8B5CF6",
     isActive: false,
@@ -114,7 +117,8 @@ const timelineData: TimelineItem[] = [
     endTime: "06:30 PM",
     title: "Wedding Vows",
     location: "Grand Ballroom A",
-    description: "The main ceremony begins. Please be seated by 4:45 PM. Seating arrangements will be provided.",
+    description:
+      "The main ceremony begins. Please be seated by 4:45 PM. Seating arrangements will be provided.",
     icon: "heart",
     iconColor: "#DC2626",
     isActive: false,
@@ -131,7 +135,8 @@ const timelineData: TimelineItem[] = [
     endTime: "11:00 PM",
     title: "Reception Dinner & Party",
     location: "Sunset Terrace",
-    description: "Dinner, drinks, and dancing under the stars. Live band performance and DJ night to follow.",
+    description:
+      "Dinner, drinks, and dancing under the stars. Live band performance and DJ night to follow.",
     icon: "musical-notes",
     iconColor: "#EC4899",
     isActive: false,
@@ -262,7 +267,9 @@ const TimelineItemComponent = ({
                 {item.duration && (
                   <View className="flex-row items-center gap-1 px-2 py-0.5 rounded-full bg-gray-100">
                     <Ionicons name="time-outline" size={12} color="#6B7280" />
-                    <Text className="text-xs text-gray-500">{item.duration}</Text>
+                    <Text className="text-xs text-gray-500">
+                      {item.duration}
+                    </Text>
                   </View>
                 )}
               </View>
@@ -281,7 +288,11 @@ const TimelineItemComponent = ({
                 className="shrink-0 size-12 rounded-xl flex items-center justify-center"
                 style={{ backgroundColor: getIconBgColor() }}
               >
-                <Ionicons name={item.icon as any} size={24} color={item.iconColor} />
+                <Ionicons
+                  name={item.icon as any}
+                  size={24}
+                  color={item.iconColor}
+                />
               </View>
               <View className="flex-1">
                 <Text className="text-lg font-bold text-gray-900 leading-tight">
@@ -312,8 +323,14 @@ const TimelineItemComponent = ({
             {/* Notes */}
             {item.notes && (
               <View className="flex-row items-start gap-2 mt-2 ml-15">
-                <Ionicons name="information-circle-outline" size={14} color="#3B82F6" />
-                <Text className="text-xs text-blue-600 flex-1">{item.notes}</Text>
+                <Ionicons
+                  name="information-circle-outline"
+                  size={14}
+                  color="#3B82F6"
+                />
+                <Text className="text-xs text-blue-600 flex-1">
+                  {item.notes}
+                </Text>
               </View>
             )}
 
@@ -324,7 +341,9 @@ const TimelineItemComponent = ({
                 onPress={() => router.push("/calendar" as RelativePathString)}
               >
                 <Ionicons name="calendar-outline" size={16} color="#6B7280" />
-                <Text className="text-sm font-medium text-gray-600">Calendar</Text>
+                <Text className="text-sm font-medium text-gray-600">
+                  Calendar
+                </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 className="flex-1 flex-row items-center justify-center gap-1.5 py-2 rounded-lg border border-gray-200 active:bg-gray-50"
@@ -336,7 +355,9 @@ const TimelineItemComponent = ({
               {item.hasAction && !item.isPast && (
                 <TouchableOpacity
                   className="flex-1 flex-row items-center justify-center gap-1.5 py-2 rounded-lg bg-primary/10 border border-primary/20 active:bg-primary/20"
-                  onPress={() => router.push("/edit-timeline-item" as RelativePathString)}
+                  onPress={() =>
+                    router.push("/edit-timeline-item" as RelativePathString)
+                  }
                 >
                   <Ionicons name="create-outline" size={16} color="#ee2b8c" />
                   <Text className="text-sm font-medium text-primary">Edit</Text>
@@ -400,7 +421,9 @@ export default function TimelinePage() {
           <Ionicons name="arrow-back" size={24} color="#181114" />
         </TouchableOpacity>
         <View className="flex-col items-center">
-          <Text className="text-lg font-bold text-gray-900">Event Schedule</Text>
+          <Text className="text-lg font-bold text-gray-900">
+            Event Schedule
+          </Text>
           <Text className="text-xs text-gray-500">Anita & Rahul's Wedding</Text>
         </View>
         <TouchableOpacity className="h-10 w-10 items-center justify-center rounded-full active:bg-gray-100">
@@ -425,10 +448,14 @@ export default function TimelinePage() {
       {/* Day Summary */}
       <View className="px-4 py-3">
         <View className="flex-row items-center justify-between mb-2">
-          <Text className="text-lg font-bold text-gray-900">Friday, Oct 24th</Text>
+          <Text className="text-lg font-bold text-gray-900">
+            Friday, Oct 24th
+          </Text>
           <View className="flex-row items-center gap-2 px-3 py-1 rounded-full bg-primary/10">
             <Ionicons name="time-outline" size={14} color="#ee2b8c" />
-            <Text className="text-xs font-semibold text-primary">Day 2 of 3</Text>
+            <Text className="text-xs font-semibold text-primary">
+              Day 2 of 3
+            </Text>
           </View>
         </View>
         <View className="flex-row gap-2">
@@ -489,7 +516,9 @@ export default function TimelinePage() {
             <View className="w-8 h-8 rounded-full bg-gray-100 items-center justify-center mb-2">
               <Ionicons name="checkmark-done" size={20} color="#10B981" />
             </View>
-            <Text className="text-sm text-gray-500">All activities completed!</Text>
+            <Text className="text-sm text-gray-500">
+              All activities completed!
+            </Text>
             <Text className="text-xs text-gray-400 mt-1">
               Day 2 of 3 - The Big Day
             </Text>
@@ -525,9 +554,17 @@ export default function TimelinePage() {
                 { icon: "heart", label: "Ceremony", color: "#DC2626" },
                 { icon: "restaurant", label: "Dining", color: "#F59E0B" },
                 { icon: "camera", label: "Photo", color: "#8B5CF6" },
-                { icon: "musical-notes", label: "Entertainment", color: "#EC4899" },
+                {
+                  icon: "musical-notes",
+                  label: "Entertainment",
+                  color: "#EC4899",
+                },
                 { icon: "gift", label: "Gifts", color: "#10B981" },
-                { icon: "ellipsis-horizontal", label: "Other", color: "#6B7280" },
+                {
+                  icon: "ellipsis-horizontal",
+                  label: "Other",
+                  color: "#6B7280",
+                },
               ].map((option) => (
                 <TouchableOpacity
                   key={option.label}
@@ -538,9 +575,15 @@ export default function TimelinePage() {
                     className="w-10 h-10 rounded-full items-center justify-center"
                     style={{ backgroundColor: `${option.color}20` }}
                   >
-                    <Ionicons name={option.icon as any} size={20} color={option.color} />
+                    <Ionicons
+                      name={option.icon as any}
+                      size={20}
+                      color={option.color}
+                    />
                   </View>
-                  <Text className="text-xs font-medium text-gray-600">{option.label}</Text>
+                  <Text className="text-xs font-medium text-gray-600">
+                    {option.label}
+                  </Text>
                 </TouchableOpacity>
               ))}
             </View>

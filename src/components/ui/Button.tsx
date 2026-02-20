@@ -53,7 +53,7 @@ export function Button({
         variantStyles[variant],
         sizeStyles[size],
         disabled && "opacity-50",
-        className,
+        className
       )}
       activeOpacity={0.8}
       disabled={disabled}
@@ -65,7 +65,7 @@ export function Button({
         className={cn(
           "text-center font-semibold",
           textVariantStyles[variant],
-          textSizeStyles[size],
+          textSizeStyles[size]
         )}
       >
         {children}
