@@ -1,7 +1,6 @@
 import { Text } from "@/src/components/ui/Text";
-import { useAuth } from "@/src/store/AuthContext";
+import { useAuthStore } from "@/src/store/AuthStore";
 import { MaterialIcons } from "@expo/vector-icons";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useState } from "react";
 import {
   Image,
@@ -61,7 +60,7 @@ const REVIEWS = [
 ];
 
 export default function Profile() {
-  const { logout } = useAuth();
+  const { clearAuth: logout } = useAuthStore();
   const [logginOut, setLoggingOut] = useState(false);
   if (logginOut) {
     return (
@@ -257,11 +256,9 @@ export default function Profile() {
             onPress={async () => {
               try {
                 setLoggingOut(true);
-                await AsyncStorage.removeItem("auth_user");
-                logout();
+                await logout();
               } catch (e) {
                 setLoggingOut(false);
-                // TODO: show error feedback
               }
             }}
           >
