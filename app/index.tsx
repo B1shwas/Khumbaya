@@ -1,22 +1,10 @@
-import { useAuth } from "@/src/store/AuthContext";
+import { useAuthStore } from "@/src/store/AuthStore";
 import { Redirect } from "expo-router";
-import { ActivityIndicator, View } from "react-native";
 
 export default function Index() {
-  const { user, isLoading } = useAuth();
+  const { token } = useAuthStore();
 
-  if (isLoading) {
-    return (
-      <View className="flex-1 items-center justify-center">
-        <ActivityIndicator size="large" color="#ee2b8c" />
-      </View>
-    );
-  }
-
-  if (user && !isLoading) {
-    if (user.role === "vendor") {
-      return <Redirect href="/(protected)/(vendor-tabs)/home" />;
-    }
+  if (token) {
     return <Redirect href="/(protected)/(client-tabs)/home" />;
   }
 
