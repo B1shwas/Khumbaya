@@ -1,11 +1,11 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { createEventApi } from "./events.service";
+import { createEventApi } from "../api/events.service";
 export const useCreateEvent = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: createEventApi, 
+    mutationFn: createEventApi,
     onMutate: async (newEvent) => {
       // ... optimistic logic ...
-    }
+    },
   });
 };
