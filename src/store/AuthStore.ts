@@ -4,7 +4,7 @@ import { create } from "zustand";
 import { DEBUG_AUTO_LOGIN, TEST_USER } from "../config/env";
 
 type User = {
-  id: string;
+  id: number;
   email: string;
   name?: string;
 };
@@ -13,7 +13,7 @@ type AuthState = {
   token: string | null;
   user: User | null;
   isLoading: boolean; // ✅ Add loading state
-  setAuth: (token: string, user: User) => Promise<void>;
+  setAuth: (token: string, user: User | null) => Promise<void>;
   clearAuth: () => Promise<void>;
   isAuthenticated: () => boolean;
   hydrate: () => Promise<void>; // ✅ Manual hydration control
