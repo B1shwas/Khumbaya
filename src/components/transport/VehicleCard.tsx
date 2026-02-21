@@ -1,0 +1,268 @@
+import { Ionicons } from "@expo/vector-icons";
+import React from "react";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  TransportVehicle,
+  getVehicleTypeIcon,
+  isVehicleFull,
+} from "../../types/transport";
+
+interface VehicleCardProps {
+  vehicle: TransportVehicle;
+  isSelected: boolean;
+  onSelect: (vehicleId: string) => void;
+  onAssignGuest?: (vehicleId: string) => void;
+  onRemoveGuest?: (vehicleId: string, guestId: string) => void;
+  getGuestName?: (guestId: string) => string;
+}
+
+export const VehicleCard: React.FC<VehicleCardProps> = ({
+  vehicle,
+  isSelected,
+  onSelect,
+  onAssignGuest,
+  onRemoveGuest,
+  getGuestName,
+}) => {
+  const occupancyPercent =
+    ((vehicle.capacity - vehicle.available) / vehicle.capacity) * 100;
+  const isFull = isVehicleFull(vehicle);
+  const assignedGuests = vehicle.assignedGuests || [];
+
+  const getOccupancyColor = () => {
+    if (isFull) return "#EF4444";
+    if (occupancyPercent >= 70) return "#F59E0B";
+    return "#10B981";
+  };
+
+  return (
+    <TouchableOpacity
+      style={[
+        styles.card,
+        isSelected && styles.cardSelected,
+        isFull && styles.cardFull,
+      ]}
+      onPress={() => onSelect(vehicle.id)}
+      activeOpacity={0.8}
+    >
+      <View style={styles.iconContainer}>
+        <Ionicons
+          name={getVehicleTypeIcon(vehicle.type) as any}
+          size={32}
+          color={isFull ? "#9CA3AF" : "#ee2b8c"}
+        />
+      </View>
+
+      <View style={styles.info}>
+        <Text style={[styles.name, isFull && styles.textMuted]}>
+          {vehicle.name}
+        </Text>
+        <Text style={[styles.type, isFull && styles.textMuted]}>
+          {vehicle.type.charAt(0).toUpperCase() + vehicle.type.slice(1)} •{" "}
+          {vehicle.capacity} seats
+        </Text>
+
+        <View style={styles.occupancyContainer}>
+          <View style={styles.occupancyBar}>
+            <View
+              style={[
+                styles.occupancyFill,
+                {
+                  width: `${occupancyPercent}%`,
+                  backgroundColor: getOccupancyColor(),
+                },
+              ]}
+            />
+          </View>
+          <Text style={[styles.occupancyText, { color: getOccupancyColor() }]}>
+            {vehicle.available} / {vehicle.capacity}
+          </Text>
+        </View>
+
+        {/* Assigned Guests Section */}
+        {assignedGuests.length > 0 && (
+          <View style={styles.assignedGuestsContainer}>
+            <Text style={styles.assignedGuestsTitle}>Assigned Guests:</Text>
+            <View style={styles.guestChips}>
+              {assignedGuests.map((guestId) => (
+                <View key={guestId} style={styles.guestChip}>
+                  <Text style={styles.guestChipText}>
+                    {getGuestName ? getGuestName(guestId) : `Guest ${guestId}`}
+                  </Text>
+                  {onRemoveGuest && (
+                    <TouchableOpacity
+                      onPress={() => onRemoveGuest(vehicle.id, guestId)}
+                      hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                    >
+                      <Ionicons name="close-circle" size={16} color="#EF4444" />
+                    </TouchableOpacity>
+                  )}
+                </View>
+              ))}
+            </View>
+          </View>
+        )}
+
+        {/* Add Guest Button */}
+        {onAssignGuest && !isFull && (
+          <TouchableOpacity
+            style={styles.addGuestButton}
+            onPress={() => onAssignGuest(vehicle.id)}
+          >
+            <Ionicons name="person-add" size={16} color="#ee2b8c" />
+            <Text style={styles.addGuestText}>Assign Guest</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+
+      <View style={styles.statusContainer}>
+        {isFull ? (
+          <View style={styles.statusFull}>
+            <Text style={styles.statusText}>FULL</Text>
+          </View>
+        ) : (
+          <Ionicons
+            name={isSelected ? "checkmark-circle" : "add-circle-outline"}
+            size={24}
+            color={isSelected ? "#10B981" : "#9CA3AF"}
+          />
+        )}
+      </View>
+    </TouchableOpacity>
+  );
+};
+
+const styles = StyleSheet.create({
+  card: {
+    backgroundColor: "white",
+    borderRadius: 16,
+    padding: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 12,
+    borderWidth: 2,
+    borderColor: "transparent",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  cardSelected: {
+    borderColor: "#10B981",
+    backgroundColor: "#F0FDF4",
+  },
+  cardFull: {
+    opacity: 0.6,
+  },
+  iconContainer: {
+    width: 56,
+    height: 56,
+    borderRadius: 12,
+    backgroundColor: "#FCE7F3",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 12,
+  },
+  info: {
+    flex: 1,
+  },
+  name: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#1f2937",
+    marginBottom: 2,
+  },
+  type: {
+    fontSize: 12,
+    color: "#6b7280",
+    marginBottom: 8,
+  },
+  textMuted: {
+    color: "#9CA3AF",
+  },
+  occupancyContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  occupancyBar: {
+    flex: 1,
+    height: 6,
+    backgroundColor: "#f3f4f6",
+    borderRadius: 3,
+    overflow: "hidden",
+  },
+  occupancyFill: {
+    height: "100%",
+    borderRadius: 3,
+  },
+  occupancyText: {
+    fontSize: 12,
+    fontWeight: "600",
+    minWidth: 50,
+    textAlign: "right",
+  },
+  statusContainer: {
+    marginLeft: 8,
+  },
+  statusFull: {
+    backgroundColor: "#FEE2E2",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+  statusText: {
+    fontSize: 10,
+    fontWeight: "700",
+    color: "#EF4444",
+  },
+  // Guest assignment styles
+  assignedGuestsContainer: {
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: "#E5E7EB",
+  },
+  assignedGuestsTitle: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: "#6b7280",
+    marginBottom: 8,
+  },
+  guestChips: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 6,
+  },
+  guestChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    backgroundColor: "#FCE7F3",
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  guestChipText: {
+    fontSize: 12,
+    color: "#831843",
+  },
+  addGuestButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    marginTop: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#ee2b8c",
+    borderStyle: "dashed",
+  },
+  addGuestText: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: "#ee2b8c",
+  },
+});

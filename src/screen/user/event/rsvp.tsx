@@ -6,6 +6,7 @@ import {
   Image,
   ScrollView,
   StyleSheet,
+  Switch,
   Text,
   TextInput,
   TouchableOpacity,
@@ -17,12 +18,14 @@ import { SafeAreaView } from "react-native-safe-area-context";
 // Types
 // ============================================
 
-interface RSVPQuestion {
+interface Guest {
   id: string;
-  question: string;
-  type: "choice" | "text" | "multi" | "number";
-  options?: string[];
-  required: boolean;
+  name: string;
+  relationship: string;
+  phone: string;
+  isAdult: boolean;
+  idNumber?: string; // Required only for adults
+  idImage?: string; // ID image URI for adults
 }
 
 interface InvitedEvent {
@@ -34,20 +37,12 @@ interface InvitedEvent {
   venue: string;
   hostName: string;
   imageUrl: string;
-  subEvents?: SubEvent[];
-}
-
-interface SubEvent {
-  id: string;
-  name: string;
-  icon: string;
-  date: string;
-  time: string;
 }
 
 interface RSVPData {
   attending: boolean | null;
-  responses: Record<string, string | string[]>;
+  totalGuests: number;
+  guests: Guest[];
   submitted: boolean;
 }
 
@@ -65,261 +60,163 @@ const invitedEventData: InvitedEvent = {
   hostName: "John Doe",
   imageUrl:
     "https://lh3.googleusercontent.com/aida-public/AB6AXuDSiNZxjryxVvBt_Qvd2BsU8jmuyGXsbWyZqiGyTJOFCn4I4QdwE-xrJUmE938nQ2sYjA0qbPec911z6qe-blSH_epWVfQJy2W2NwU5R-4dwi1k7uUfEgPutKfIV3RpR1EUutrAFt_7SBxXq5yRfR9EkuQCohSjZJpWgX0eNFvBY3F5rZ-xWmmB8Em-xGg1AvxCRQDlpUPXbLlpkcqBsqbQXGIi5tNUNw3p5WrCahAWFPRTkzEE0B8v47AYzYa8b-aEAMvtdko47AM",
-  subEvents: [
-    {
-      id: "se1",
-      name: "Welcome Drinks",
-      icon: "wine",
-      date: "Mar 15, 2024",
-      time: "7:30 PM",
-    },
-    {
-      id: "se2",
-      name: "Dinner",
-      icon: "restaurant",
-      date: "Mar 15, 2024",
-      time: "8:30 PM",
-    },
-    {
-      id: "se3",
-      name: "Cake Cutting",
-      icon: "cake",
-      date: "Mar 15, 2024",
-      time: "10:00 PM",
-    },
-  ],
 };
-
-const rsvpQuestions: RSVPQuestion[] = [
-  {
-    id: "attendance",
-    question: "Will you be attending?",
-    type: "choice",
-    options: ["Yes, I'll be there", "No, I can't make it"],
-    required: true,
-  },
-  {
-    id: "plus_one",
-    question: "Will you be bringing a plus one?",
-    type: "choice",
-    options: ["Yes", "No"],
-    required: false,
-  },
-  {
-    id: "dietary",
-    question: "Do you have any dietary restrictions?",
-    type: "multi",
-    options: [
-      "Vegetarian",
-      "Vegan",
-      "Gluten-free",
-      "Dairy-free",
-      "Nut allergy",
-      "Halal",
-      "Kosher",
-      "None",
-    ],
-    required: false,
-  },
-  {
-    id: "song_request",
-    question: "Any song requests for the party?",
-    type: "text",
-    required: false,
-  },
-  {
-    id: "additional_guests",
-    question: "How many additional guests (excluding plus one)?",
-    type: "number",
-    required: false,
-  },
-];
 
 // ============================================
 // Components
 // ============================================
 
-const QuestionCard = ({
-  question,
-  answer,
-  onAnswer,
-  isSubmitted,
+const GuestForm = ({
+  guest,
+  index,
+  onUpdate,
+  onRemove,
 }: {
-  question: RSVPQuestion;
-  answer: string | string[] | undefined;
-  onAnswer: (value: string | string[]) => void;
-  isSubmitted: boolean;
+  guest: Guest;
+  index: number;
+  onUpdate: (guest: Guest) => void;
+  onRemove: () => void;
 }) => {
-  const [selectedOptions, setSelectedOptions] = useState<string[]>(
-    (answer as string[]) || []
-  );
-
-  const handleOptionPress = (option: string) => {
-    if (question.type === "multi") {
-      const newOptions = selectedOptions.includes(option)
-        ? selectedOptions.filter((o) => o !== option)
-        : [...selectedOptions, option];
-      setSelectedOptions(newOptions);
-      onAnswer(newOptions);
-    } else {
-      onAnswer(option);
-    }
-  };
-
-  const renderQuestion = () => {
-    switch (question.type) {
-      case "choice":
-        return (
-          <View style={styles.optionsContainer}>
-            {question.options?.map((option, index) => (
-              <TouchableOpacity
-                key={index}
-                style={[
-                  styles.optionButton,
-                  answer === option && styles.optionButtonSelected,
-                ]}
-                onPress={() => handleOptionPress(option)}
-                disabled={isSubmitted}
-              >
-                <View
-                  style={[
-                    styles.optionRadio,
-                    answer === option && styles.optionRadioSelected,
-                  ]}
-                >
-                  {answer === option && <View style={styles.optionRadioDot} />}
-                </View>
-                <Text
-                  style={[
-                    styles.optionText,
-                    answer === option && styles.optionTextSelected,
-                  ]}
-                >
-                  {option}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        );
-
-      case "multi":
-        return (
-          <View style={styles.optionsContainer}>
-            {question.options?.map((option, index) => (
-              <TouchableOpacity
-                key={index}
-                style={[
-                  styles.optionButton,
-                  selectedOptions.includes(option) &&
-                    styles.optionButtonSelected,
-                ]}
-                onPress={() => handleOptionPress(option)}
-                disabled={isSubmitted}
-              >
-                <View
-                  style={[
-                    styles.optionCheckbox,
-                    selectedOptions.includes(option) &&
-                      styles.optionCheckboxSelected,
-                  ]}
-                >
-                  {selectedOptions.includes(option) && (
-                    <Ionicons name="checkmark" size={14} color="white" />
-                  )}
-                </View>
-                <Text
-                  style={[
-                    styles.optionText,
-                    selectedOptions.includes(option) &&
-                      styles.optionTextSelected,
-                  ]}
-                >
-                  {option}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        );
-
-      case "text":
-        return (
-          <View style={styles.textInputContainer}>
-            <TextInput
-              style={styles.textInput}
-              placeholder="Enter your answer..."
-              placeholderTextColor="#9CA3AF"
-              value={(answer as string) || ""}
-              onChangeText={(text: string) => onAnswer(text)}
-              editable={!isSubmitted}
-              multiline
-            />
-          </View>
-        );
-
-      case "number":
-        return (
-          <View style={styles.numberInputContainer}>
-            <TouchableOpacity
-              style={styles.numberButton}
-              onPress={() => {
-                const current = parseInt((answer as string) || "0", 10);
-                if (current > 0) onAnswer(String(current - 1));
-              }}
-              disabled={
-                isSubmitted || parseInt((answer as string) || "0", 10) <= 0
-              }
-            >
-              <Ionicons name="remove" size={24} color="#ee2b8c" />
-            </TouchableOpacity>
-            <Text style={styles.numberValue}>{(answer as string) || "0"}</Text>
-            <TouchableOpacity
-              style={styles.numberButton}
-              onPress={() => {
-                const current = parseInt((answer as string) || "0", 10);
-                if (current < 10) onAnswer(String(current + 1));
-              }}
-              disabled={
-                isSubmitted || parseInt((answer as string) || "0", 10) >= 10
-              }
-            >
-              <Ionicons name="add" size={24} color="#ee2b8c" />
-            </TouchableOpacity>
-          </View>
-        );
-
-      default:
-        return null;
-    }
-  };
+  const relationships = [
+    "Self",
+    "Spouse",
+    "Child",
+    "Parent",
+    "Sibling",
+    "Friend",
+    "Colleague",
+    "Other",
+  ];
 
   return (
-    <View style={styles.questionCard}>
-      <View style={styles.questionHeader}>
-        <Text style={styles.questionText}>{question.question}</Text>
-        {question.required && (
-          <View style={styles.requiredBadge}>
-            <Text style={styles.requiredText}>Required</Text>
-          </View>
-        )}
+    <View style={styles.guestCard}>
+      <View style={styles.guestHeader}>
+        <Text style={styles.guestTitle}>Guest {index + 1}</Text>
+        <TouchableOpacity onPress={onRemove} style={styles.removeButton}>
+          <Ionicons name="trash-outline" size={20} color="#EF4444" />
+        </TouchableOpacity>
       </View>
-      {renderQuestion()}
+
+      <View style={styles.inputGroup}>
+        <Text style={styles.inputLabel}>Full Name *</Text>
+        <TextInput
+          style={styles.textInput}
+          placeholder="Enter guest name"
+          placeholderTextColor="#9CA3AF"
+          value={guest.name}
+          onChangeText={(text) => onUpdate({ ...guest, name: text })}
+        />
+      </View>
+
+      <View style={styles.inputGroup}>
+        <Text style={styles.inputLabel}>Relationship *</Text>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          <View style={styles.chipContainer}>
+            {relationships.map((rel) => (
+              <TouchableOpacity
+                key={rel}
+                style={[
+                  styles.chip,
+                  guest.relationship === rel && styles.chipSelected,
+                ]}
+                onPress={() => onUpdate({ ...guest, relationship: rel })}
+              >
+                <Text
+                  style={[
+                    styles.chipText,
+                    guest.relationship === rel && styles.chipTextSelected,
+                  ]}
+                >
+                  {rel}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </ScrollView>
+      </View>
+
+      <View style={styles.inputGroup}>
+        <Text style={styles.inputLabel}>Phone Number *</Text>
+        <TextInput
+          style={styles.textInput}
+          placeholder="Enter phone number"
+          placeholderTextColor="#9CA3AF"
+          value={guest.phone}
+          onChangeText={(text) => onUpdate({ ...guest, phone: text })}
+          keyboardType="phone-pad"
+        />
+      </View>
+
+      <View style={styles.switchRow}>
+        <View style={styles.switchLabelContainer}>
+          <Text style={styles.inputLabel}>Adult (18+)?</Text>
+          <Text style={styles.switchHint}>
+            {guest.isAdult ? "ID required" : "ID not required"}
+          </Text>
+        </View>
+        <Switch
+          value={guest.isAdult}
+          onValueChange={(value) => onUpdate({ ...guest, isAdult: value })}
+          trackColor={{ false: "#E5E7EB", true: "#FCE7F3" }}
+          thumbColor={guest.isAdult ? "#ee2b8c" : "#9CA3AF"}
+        />
+      </View>
+
+      {guest.isAdult && (
+        <>
+          <View style={styles.inputGroup}>
+            <Text style={styles.inputLabel}>ID Number / Passport *</Text>
+            <TextInput
+              style={styles.textInput}
+              placeholder="Enter ID number or passport"
+              placeholderTextColor="#9CA3AF"
+              value={guest.idNumber || ""}
+              onChangeText={(text) => onUpdate({ ...guest, idNumber: text })}
+            />
+          </View>
+
+          <View style={styles.inputGroup}>
+            <Text style={styles.inputLabel}>ID Image</Text>
+            <TouchableOpacity
+              style={styles.imageUploadButton}
+              onPress={() => {
+                Alert.alert(
+                  "Upload ID Image",
+                  "Image picker functionality will be available after installing expo-image-picker. For now, please enter your ID number.",
+                  [{ text: "OK" }]
+                );
+              }}
+            >
+              {guest.idImage ? (
+                <Image
+                  source={{ uri: guest.idImage }}
+                  style={styles.idImagePreview}
+                />
+              ) : (
+                <View style={styles.imageUploadPlaceholder}>
+                  <Ionicons name="camera" size={32} color="#9CA3AF" />
+                  <Text style={styles.imageUploadText}>Upload ID Image</Text>
+                  <Text style={styles.imageUploadHint}>
+                    Tap to select from gallery
+                  </Text>
+                </View>
+              )}
+            </TouchableOpacity>
+            {guest.idImage && (
+              <TouchableOpacity
+                style={styles.removeImageButton}
+                onPress={() => onUpdate({ ...guest, idImage: undefined })}
+              >
+                <Ionicons name="close-circle" size={24} color="#EF4444" />
+                <Text style={styles.removeImageText}>Remove Image</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        </>
+      )}
     </View>
   );
 };
-
-const SubEventCard = ({ subEvent }: { subEvent: SubEvent }) => (
-  <View style={styles.subEventCard}>
-    <View style={styles.subEventIcon}>
-      <Ionicons name={subEvent.icon as any} size={20} color="#ee2b8c" />
-    </View>
-    <View style={styles.subEventInfo}>
-      <Text style={styles.subEventName}>{subEvent.name}</Text>
-      <Text style={styles.subEventTime}>
-        {subEvent.date} • {subEvent.time}
-      </Text>
-    </View>
-  </View>
-);
 
 export default function RSVPPage() {
   const params = useLocalSearchParams();
@@ -327,44 +224,90 @@ export default function RSVPPage() {
 
   const [rsvpData, setRsvpData] = useState<RSVPData>({
     attending: null,
-    responses: {},
+    totalGuests: 0,
+    guests: [],
     submitted: false,
   });
 
   const [currentStep, setCurrentStep] = useState<
-    "decision" | "questions" | "confirmation"
+    "decision" | "guestCount" | "guestDetails" | "confirmation"
   >("decision");
 
   const handleDecision = (attending: boolean) => {
     setRsvpData((prev) => ({ ...prev, attending }));
 
     if (attending) {
-      setCurrentStep("questions");
+      setCurrentStep("guestCount");
     } else {
       setCurrentStep("confirmation");
     }
   };
 
-  const handleAnswer = (questionId: string, value: string | string[]) => {
+  const handleGuestCountSubmit = () => {
+    const count = rsvpData.totalGuests;
+    if (count < 1) {
+      Alert.alert("Error", "Please enter at least 1 guest (yourself)");
+      return;
+    }
+
+    // Create guest entries (starting with self as first guest)
+    const newGuests: Guest[] = Array.from({ length: count }, (_, i) => ({
+      id: `guest-${i + 1}`,
+      name: i === 0 ? "" : "", // First guest is self
+      relationship: i === 0 ? "Self" : "",
+      phone: "",
+      isAdult: true,
+      idNumber: "",
+    }));
+
+    setRsvpData((prev) => ({ ...prev, guests: newGuests }));
+    setCurrentStep("guestDetails");
+  };
+
+  const updateGuest = (index: number, updatedGuest: Guest) => {
     setRsvpData((prev) => ({
       ...prev,
-      responses: { ...prev.responses, [questionId]: value },
+      guests: prev.guests.map((g, i) => (i === index ? updatedGuest : g)),
     }));
   };
 
-  const handleSubmit = () => {
-    // Validate required questions
-    const requiredQuestions = rsvpQuestions.filter((q) => q.required);
-    const missingRequired = requiredQuestions.filter(
-      (q) => !rsvpData.responses[q.id]
-    );
+  const removeGuest = (index: number) => {
+    if (rsvpData.guests.length <= 1) {
+      Alert.alert("Error", "You must include at least yourself");
+      return;
+    }
+    setRsvpData((prev) => ({
+      ...prev,
+      guests: prev.guests.filter((_, i) => i !== index),
+      totalGuests: prev.totalGuests - 1,
+    }));
+  };
 
-    if (missingRequired.length > 0) {
-      Alert.alert(
-        "Missing Information",
-        "Please answer all required questions before submitting.",
-        [{ text: "OK" }]
-      );
+  const validateGuestDetails = (): boolean => {
+    for (let i = 0; i < rsvpData.guests.length; i++) {
+      const guest = rsvpData.guests[i];
+      if (!guest.name.trim()) {
+        Alert.alert("Error", `Please enter name for Guest ${i + 1}`);
+        return false;
+      }
+      if (!guest.relationship) {
+        Alert.alert("Error", `Please select relationship for Guest ${i + 1}`);
+        return false;
+      }
+      if (!guest.phone.trim()) {
+        Alert.alert("Error", `Please enter phone for Guest ${i + 1}`);
+        return false;
+      }
+      if (guest.isAdult && !guest.idNumber?.trim()) {
+        Alert.alert("Error", `Please enter ID for Guest ${i + 1} (adult)`);
+        return false;
+      }
+    }
+    return true;
+  };
+
+  const handleSubmit = () => {
+    if (!validateGuestDetails()) {
       return;
     }
 
@@ -372,18 +315,21 @@ export default function RSVPPage() {
     setCurrentStep("confirmation");
 
     Alert.alert(
-      rsvpData.attending ? "See You There!" : "We're Sorry",
-      rsvpData.attending
-        ? "Your RSVP has been submitted. We look forward to seeing you!"
-        : "Your response has been noted. We'll miss you!",
+      "See You There!",
+      `Your RSVP for ${rsvpData.totalGuests} guest(s) has been submitted.`,
       [{ text: "OK" }]
     );
   };
 
   const getStepIndicator = () => {
-    const steps = ["Decision", "Questions", "Done"];
-    const currentIndex =
-      currentStep === "decision" ? 0 : currentStep === "questions" ? 1 : 2;
+    const steps = ["RSVP", "Guests", "Details", "Done"];
+    const stepMap = {
+      decision: 0,
+      guestCount: 1,
+      guestDetails: 2,
+      confirmation: 3,
+    };
+    const currentIndex = stepMap[currentStep];
 
     return (
       <View style={styles.stepIndicator}>
@@ -449,9 +395,9 @@ export default function RSVPPage() {
 
       {/* Content */}
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+        {/* Step 1: Decision */}
         {currentStep === "decision" && (
           <View style={styles.decisionContainer}>
-            {/* Event Info */}
             <View style={styles.eventCard}>
               <Image
                 source={{ uri: invitedEventData.imageUrl }}
@@ -477,18 +423,6 @@ export default function RSVPPage() {
               </View>
             </View>
 
-            {/* Sub Events */}
-            {invitedEventData.subEvents &&
-              invitedEventData.subEvents.length > 0 && (
-                <View style={styles.subEventsSection}>
-                  <Text style={styles.sectionTitle}>Schedule</Text>
-                  {invitedEventData.subEvents.map((subEvent) => (
-                    <SubEventCard key={subEvent.id} subEvent={subEvent} />
-                  ))}
-                </View>
-              )}
-
-            {/* Decision */}
             <Text style={styles.decisionTitle}>Will you be attending?</Text>
 
             <TouchableOpacity
@@ -533,22 +467,93 @@ export default function RSVPPage() {
           </View>
         )}
 
-        {currentStep === "questions" && (
-          <View style={styles.questionsContainer}>
+        {/* Step 2: Guest Count */}
+        {currentStep === "guestCount" && (
+          <View style={styles.guestCountContainer}>
             <View style={styles.questionsHeader}>
-              <Text style={styles.questionsTitle}>Almost done!</Text>
+              <Text style={styles.questionsTitle}>How many guests?</Text>
               <Text style={styles.questionsSubtitle}>
-                Please answer a few quick questions to help us plan better.
+                Including yourself - how many people will be attending?
               </Text>
             </View>
 
-            {rsvpQuestions.map((question) => (
-              <QuestionCard
-                key={question.id}
-                question={question}
-                answer={rsvpData.responses[question.id]}
-                onAnswer={(value) => handleAnswer(question.id, value)}
-                isSubmitted={rsvpData.submitted}
+            <View style={styles.guestCountCard}>
+              <TouchableOpacity
+                style={styles.countButton}
+                onPress={() =>
+                  setRsvpData((prev) => ({
+                    ...prev,
+                    totalGuests: Math.max(1, prev.totalGuests - 1),
+                  }))
+                }
+                disabled={rsvpData.totalGuests <= 1}
+              >
+                <Ionicons
+                  name="remove"
+                  size={32}
+                  color={rsvpData.totalGuests <= 1 ? "#9CA3AF" : "#ee2b8c"}
+                />
+              </TouchableOpacity>
+
+              <View style={styles.countDisplay}>
+                <Text style={styles.countNumber}>{rsvpData.totalGuests}</Text>
+                <Text style={styles.countLabel}>
+                  {rsvpData.totalGuests === 1 ? "Guest" : "Guests"}
+                </Text>
+              </View>
+
+              <TouchableOpacity
+                style={styles.countButton}
+                onPress={() =>
+                  setRsvpData((prev) => ({
+                    ...prev,
+                    totalGuests: Math.min(10, prev.totalGuests + 1),
+                  }))
+                }
+                disabled={rsvpData.totalGuests >= 10}
+              >
+                <Ionicons
+                  name="add"
+                  size={32}
+                  color={rsvpData.totalGuests >= 10 ? "#9CA3AF" : "#ee2b8c"}
+                />
+              </TouchableOpacity>
+            </View>
+
+            <Text style={styles.guestHint}>Maximum 10 guests allowed</Text>
+
+            <TouchableOpacity
+              style={styles.submitButton}
+              onPress={handleGuestCountSubmit}
+            >
+              <Text style={styles.submitButtonText}>Continue</Text>
+              <Ionicons
+                name="arrow-forward"
+                size={20}
+                color="white"
+                style={{ marginLeft: 8 }}
+              />
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {/* Step 3: Guest Details */}
+        {currentStep === "guestDetails" && (
+          <View style={styles.guestDetailsContainer}>
+            <View style={styles.questionsHeader}>
+              <Text style={styles.questionsTitle}>Guest Details</Text>
+              <Text style={styles.questionsSubtitle}>
+                Please provide details for each guest
+              </Text>
+            </View>
+
+            {rsvpData.guests.map((guest, index) => (
+              <GuestForm
+                key={guest.id}
+                guest={guest}
+                index={index}
+                onUpdate={(updated) => updateGuest(index, updated)}
+                onRemove={() => removeGuest(index)}
               />
             ))}
 
@@ -567,6 +572,7 @@ export default function RSVPPage() {
           </View>
         )}
 
+        {/* Step 4: Confirmation */}
         {currentStep === "confirmation" && (
           <View style={styles.confirmationContainer}>
             <View style={styles.confirmationIcon}>
@@ -585,33 +591,55 @@ export default function RSVPPage() {
 
             <Text style={styles.confirmationMessage}>
               {rsvpData.attending
-                ? `Your RSVP has been submitted. We look forward to seeing you on ${invitedEventData.date}!`
-                : `Your response has been noted. We're sorry you can't make it to ${invitedEventData.title}.`}
+                ? `Your RSVP for ${rsvpData.totalGuests} guest(s) has been submitted.`
+                : `Your response has been noted.`}
             </Text>
 
-            {/* Summary */}
-            {rsvpData.attending &&
-              Object.keys(rsvpData.responses).length > 0 && (
-                <View style={styles.summaryCard}>
-                  <Text style={styles.summaryTitle}>Your Responses</Text>
-                  <View style={styles.summaryContent}>
-                    {rsvpQuestions.slice(0, 3).map((question) => {
-                      const answer = rsvpData.responses[question.id];
-                      if (!answer) return null;
-                      return (
-                        <View key={question.id} style={styles.summaryItem}>
-                          <Text style={styles.summaryQuestion}>
-                            {question.question}
-                          </Text>
-                          <Text style={styles.summaryAnswer}>
-                            {Array.isArray(answer) ? answer.join(", ") : answer}
-                          </Text>
-                        </View>
-                      );
-                    })}
+            {rsvpData.attending && (
+              <>
+                {/* Transportation Section */}
+                <TouchableOpacity
+                  style={styles.optionCard}
+                  onPress={() =>
+                    router.push(
+                      "/(protected)/(client-stack)/events/[eventId]/(guest)/transport" as any
+                    )
+                  }
+                >
+                  <View style={styles.optionIcon}>
+                    <Ionicons name="car" size={24} color="#ee2b8c" />
                   </View>
-                </View>
-              )}
+                  <View style={styles.optionInfo}>
+                    <Text style={styles.optionTitle}>Transportation</Text>
+                    <Text style={styles.optionSubtitle}>
+                      Manage transport for guests
+                    </Text>
+                  </View>
+                  <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
+                </TouchableOpacity>
+
+                {/* Accommodation Section */}
+                <TouchableOpacity
+                  style={styles.optionCard}
+                  onPress={() =>
+                    router.push(
+                      "/(protected)/(client-stack)/events/[eventId]/(guest)/accommodation" as any
+                    )
+                  }
+                >
+                  <View style={styles.optionIcon}>
+                    <Ionicons name="bed" size={24} color="#ee2b8c" />
+                  </View>
+                  <View style={styles.optionInfo}>
+                    <Text style={styles.optionTitle}>Accommodation</Text>
+                    <Text style={styles.optionSubtitle}>
+                      Manage rooms for guests
+                    </Text>
+                  </View>
+                  <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
+                </TouchableOpacity>
+              </>
+            )}
 
             {/* Event Details */}
             <View style={styles.confirmationEventCard}>
@@ -639,15 +667,17 @@ export default function RSVPPage() {
               <Text style={styles.doneButtonText}>Done</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.addToCalendarButton}
-              onPress={() => {
-                Alert.alert("Calendar", "Event added to your calendar!");
-              }}
-            >
-              <Ionicons name="calendar-outline" size={20} color="#ee2b8c" />
-              <Text style={styles.addToCalendarText}>Add to Calendar</Text>
-            </TouchableOpacity>
+            {rsvpData.attending && (
+              <TouchableOpacity
+                style={styles.addToCalendarButton}
+                onPress={() => {
+                  Alert.alert("Calendar", "Event added to your calendar!");
+                }}
+              >
+                <Ionicons name="calendar-outline" size={20} color="#ee2b8c" />
+                <Text style={styles.addToCalendarText}>Add to Calendar</Text>
+              </TouchableOpacity>
+            )}
           </View>
         )}
       </ScrollView>
@@ -670,6 +700,7 @@ const styles = StyleSheet.create({
   },
   headerButton: {
     padding: 8,
+    width: 48,
   },
   headerTitle: {
     fontSize: 18,
@@ -709,7 +740,7 @@ const styles = StyleSheet.create({
     color: "white",
   },
   stepLine: {
-    width: 40,
+    width: 30,
     height: 2,
     backgroundColor: "#f3f4f6",
     marginHorizontal: 4,
@@ -718,9 +749,9 @@ const styles = StyleSheet.create({
     backgroundColor: "#ee2b8c",
   },
   stepLabel: {
-    fontSize: 12,
+    fontSize: 10,
     color: "#9ca3af",
-    marginLeft: 4,
+    marginLeft: 2,
   },
   stepLabelActive: {
     fontWeight: "600",
@@ -771,253 +802,219 @@ const styles = StyleSheet.create({
     color: "#9ca3af",
     marginTop: 8,
   },
-  subEventsSection: {
-    marginBottom: 24,
-  },
-  sectionTitle: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#6b7280",
-    marginBottom: 12,
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
-  },
-  subEventCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "white",
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 8,
-  },
-  subEventIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 10,
-    backgroundColor: "#fceaf4",
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 12,
-  },
-  subEventInfo: {
-    flex: 1,
-  },
-  subEventName: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#1f2937",
-  },
-  subEventTime: {
-    fontSize: 12,
-    color: "#6b7280",
-  },
   decisionTitle: {
     fontSize: 18,
-    fontWeight: "700",
+    fontWeight: "600",
     color: "#1f2937",
-    textAlign: "center",
     marginBottom: 16,
+    textAlign: "center",
   },
   decisionButton: {
     backgroundColor: "white",
     borderRadius: 16,
     padding: 20,
     marginBottom: 12,
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 3,
+    borderWidth: 2,
+    borderColor: "#10B981",
   },
   decisionButtonDecline: {
-    backgroundColor: "#fef2f2",
+    borderColor: "#EF4444",
   },
   decisionIconContainer: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: "#dcfce7",
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: "#ECFDF5",
     alignItems: "center",
     justifyContent: "center",
+    alignSelf: "center",
     marginBottom: 12,
   },
   decisionIconContainerDecline: {
-    backgroundColor: "#fee2e2",
+    backgroundColor: "#FEF2F2",
   },
   decisionButtonTitle: {
     fontSize: 18,
     fontWeight: "700",
-    color: "#1f2937",
+    color: "#10B981",
+    textAlign: "center",
     marginBottom: 4,
   },
   decisionButtonTitleDecline: {
-    color: "#dc2626",
+    color: "#EF4444",
   },
   decisionButtonSubtitle: {
     fontSize: 14,
     color: "#6b7280",
+    textAlign: "center",
   },
   decisionButtonSubtitleDecline: {
     color: "#9ca3af",
   },
-  questionsContainer: {
+  guestCountContainer: {
     padding: 16,
   },
   questionsHeader: {
     marginBottom: 24,
   },
   questionsTitle: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: "700",
     color: "#1f2937",
-    marginBottom: 4,
+    marginBottom: 8,
   },
   questionsSubtitle: {
     fontSize: 14,
     color: "#6b7280",
   },
-  questionCard: {
+  guestCountCard: {
     backgroundColor: "white",
     borderRadius: 16,
-    padding: 16,
-    marginBottom: 16,
-  },
-  questionHeader: {
+    padding: 24,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     marginBottom: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 3,
   },
-  questionText: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#1f2937",
-    flex: 1,
-  },
-  requiredBadge: {
-    backgroundColor: "#fef3c7",
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 4,
-    marginLeft: 8,
-  },
-  requiredText: {
-    fontSize: 10,
-    fontWeight: "600",
-    color: "#d97706",
-  },
-  optionsContainer: {
-    gap: 8,
-  },
-  optionButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 12,
-    borderRadius: 12,
-    borderWidth: 2,
-    borderColor: "#e5e7eb",
-    backgroundColor: "#f9fafb",
-  },
-  optionButtonSelected: {
-    borderColor: "#ee2b8c",
-    backgroundColor: "#fceaf4",
-  },
-  optionRadio: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    borderWidth: 2,
-    borderColor: "#d1d5db",
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 12,
-  },
-  optionRadioSelected: {
-    borderColor: "#ee2b8c",
-  },
-  optionRadioDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: "#ee2b8c",
-  },
-  optionCheckbox: {
-    width: 20,
-    height: 20,
-    borderRadius: 4,
-    borderWidth: 2,
-    borderColor: "#d1d5db",
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 12,
-  },
-  optionCheckboxSelected: {
-    borderColor: "#ee2b8c",
-    backgroundColor: "#ee2b8c",
-  },
-  optionText: {
-    fontSize: 14,
-    color: "#374151",
-    flex: 1,
-  },
-  optionTextSelected: {
-    fontWeight: "600",
-    color: "#1f2937",
-  },
-  textInputContainer: {
-    backgroundColor: "#f9fafb",
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: "#e5e7eb",
-  },
-  textInput: {
-    padding: 12,
-    fontSize: 14,
-    color: "#1f2937",
-    minHeight: 80,
-    textAlignVertical: "top",
-  },
-  numberInputContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 24,
-  },
-  numberButton: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: "#fceaf4",
+  countButton: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: "#FCE7F3",
     alignItems: "center",
     justifyContent: "center",
   },
-  numberValue: {
-    fontSize: 32,
+  countDisplay: {
+    alignItems: "center",
+  },
+  countNumber: {
+    fontSize: 48,
     fontWeight: "700",
     color: "#1f2937",
-    minWidth: 60,
+  },
+  countLabel: {
+    fontSize: 14,
+    color: "#6b7280",
+  },
+  guestHint: {
+    fontSize: 12,
+    color: "#9ca3af",
     textAlign: "center",
+    marginBottom: 24,
   },
   submitButton: {
+    backgroundColor: "#ee2b8c",
+    borderRadius: 12,
+    paddingVertical: 16,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#ee2b8c",
-    borderRadius: 12,
-    padding: 16,
-    marginTop: 8,
   },
   submitButtonText: {
     fontSize: 16,
     fontWeight: "700",
     color: "white",
   },
-  confirmationContainer: {
-    padding: 24,
+  guestDetailsContainer: {
+    padding: 16,
+  },
+  guestCard: {
+    backgroundColor: "white",
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  guestHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
     alignItems: "center",
+    marginBottom: 16,
+  },
+  guestTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#1f2937",
+  },
+  removeButton: {
+    padding: 4,
+  },
+  inputGroup: {
+    marginBottom: 16,
+  },
+  inputLabel: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#374151",
+    marginBottom: 8,
+  },
+  textInput: {
+    backgroundColor: "#f9fafb",
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    fontSize: 14,
+    color: "#1f2937",
+    borderWidth: 1,
+    borderColor: "#e5e7eb",
+  },
+  textArea: {
+    height: 80,
+    textAlignVertical: "top",
+  },
+  chipContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+  },
+  chip: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: "#f3f4f6",
+    borderWidth: 1,
+    borderColor: "#e5e7eb",
+  },
+  chipSelected: {
+    backgroundColor: "#ee2b8c",
+    borderColor: "#ee2b8c",
+  },
+  chipText: {
+    fontSize: 14,
+    color: "#6b7280",
+  },
+  chipTextSelected: {
+    color: "white",
+    fontWeight: "600",
+  },
+  switchRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  switchLabelContainer: {
+    flex: 1,
+  },
+  switchHint: {
+    fontSize: 12,
+    color: "#9ca3af",
+    marginTop: 2,
+  },
+  confirmationContainer: {
+    padding: 16,
   },
   confirmationIcon: {
+    alignItems: "center",
     marginBottom: 16,
   },
   confirmationTitle: {
@@ -1033,64 +1030,105 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginBottom: 24,
   },
-  summaryCard: {
+  optionCard: {
     backgroundColor: "white",
     borderRadius: 16,
     padding: 16,
-    width: "100%",
-    marginBottom: 24,
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
   },
-  summaryTitle: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#6b7280",
-    marginBottom: 12,
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
+  optionIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 12,
+    backgroundColor: "#FCE7F3",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 12,
   },
-  summaryContent: {
-    gap: 12,
+  optionInfo: {
+    flex: 1,
   },
-  summaryItem: {
-    borderBottomWidth: 1,
-    borderBottomColor: "#f3f4f6",
-    paddingBottom: 8,
-  },
-  summaryQuestion: {
-    fontSize: 12,
-    color: "#9ca3af",
-    marginBottom: 2,
-  },
-  summaryAnswer: {
-    fontSize: 14,
+  optionTitle: {
+    fontSize: 16,
     fontWeight: "600",
     color: "#1f2937",
   },
-  confirmationEventCard: {
+  optionSubtitle: {
+    fontSize: 12,
+    color: "#9ca3af",
+    marginTop: 2,
+  },
+  optionExpanded: {
+    backgroundColor: "white",
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 8,
+    marginTop: -8,
+    paddingTop: 24,
+  },
+  optionLabel: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#374151",
+    marginBottom: 8,
+    marginTop: 8,
+  },
+  roomCounter: {
     flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 24,
+    marginBottom: 16,
+  },
+  countButtonSmall: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#FCE7F3",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  roomCount: {
+    fontSize: 24,
+    fontWeight: "700",
+    color: "#1f2937",
+    minWidth: 40,
+    textAlign: "center",
+  },
+  confirmationEventCard: {
     backgroundColor: "white",
     borderRadius: 16,
     overflow: "hidden",
-    width: "100%",
+    marginTop: 16,
     marginBottom: 24,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 3,
   },
   confirmationEventImage: {
-    width: 80,
-    height: 80,
+    width: "100%",
+    height: 120,
   },
   confirmationEventInfo: {
-    flex: 1,
-    padding: 12,
-    justifyContent: "center",
+    padding: 16,
   },
   confirmationEventTitle: {
-    fontSize: 14,
-    fontWeight: "600",
+    fontSize: 18,
+    fontWeight: "700",
     color: "#1f2937",
-    marginBottom: 2,
+    marginBottom: 4,
   },
   confirmationEventDate: {
-    fontSize: 12,
+    fontSize: 14,
     color: "#6b7280",
     marginBottom: 2,
   },
@@ -1101,8 +1139,7 @@ const styles = StyleSheet.create({
   doneButton: {
     backgroundColor: "#ee2b8c",
     borderRadius: 12,
-    padding: 16,
-    width: "100%",
+    paddingVertical: 16,
     alignItems: "center",
     marginBottom: 12,
   },
@@ -1115,12 +1152,57 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    padding: 12,
+    gap: 8,
   },
   addToCalendarText: {
     fontSize: 14,
     fontWeight: "600",
     color: "#ee2b8c",
-    marginLeft: 8,
+  },
+  // Image upload styles
+  imageUploadButton: {
+    borderWidth: 2,
+    borderColor: "#E5E7EB",
+    borderStyle: "dashed",
+    borderRadius: 12,
+    overflow: "hidden",
+    marginTop: 8,
+  },
+  idImagePreview: {
+    width: "100%",
+    height: 150,
+    resizeMode: "cover",
+  },
+  imageUploadPlaceholder: {
+    width: "100%",
+    height: 120,
+    backgroundColor: "#F9FAFB",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 16,
+  },
+  imageUploadText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#374151",
+    marginTop: 8,
+  },
+  imageUploadHint: {
+    fontSize: 12,
+    color: "#9CA3AF",
+    marginTop: 4,
+  },
+  removeImageButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 4,
+    marginTop: 8,
+    padding: 8,
+  },
+  removeImageText: {
+    fontSize: 14,
+    color: "#EF4444",
+    fontWeight: "500",
   },
 });
