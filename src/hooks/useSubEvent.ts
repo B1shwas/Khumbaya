@@ -1,7 +1,8 @@
+import { subEventApi } from "@/src/api/subEventApi";
 import {
-    SUB_EVENT_TEMPLATES,
-    SubEventTemplate,
-    TemplateActivity,
+  SUB_EVENT_TEMPLATES,
+  SubEventTemplate,
+  TemplateActivity,
 } from "@/src/constants/subeventTemplates";
 import { Guest, SelectedActivity, Vendor } from "@/src/types";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -47,15 +48,7 @@ export interface UseSubEventReturn {
   handleUploadExcel: () => Promise<void>;
 
   // Save
-  getSubEventData: () => {
-    template: SubEventTemplate | null;
-    date: string;
-    theme: string;
-    budget: string;
-    activities: SelectedActivity[];
-    vendors: Vendor[];
-    guests: Guest[];
-  };
+  saveSubEvent: () => Promise<void>;
 }
 
 // Helper to get vendor placeholder image based on category
@@ -107,6 +100,16 @@ export const useSubEvent = (subEventId: string): UseSubEventReturn => {
       );
       if (foundTemplate) {
         setTemplate(foundTemplate);
+
+        // Try to load existing sub-event from API
+        const existingSubEvent = await subEventApi.getById(subEventId);
+        if (existingSubEvent) {
+          // Load saved data
+          setDate(existingSubEvent.date || "");
+          setTheme(existingSubEvent.theme || "");
+          setBudget(existingSubEvent.budget || "");
+          setActivities(existingSubEvent.activities || []);
+        }
       }
 
       // Initialize mock vendors with images
@@ -116,7 +119,7 @@ export const useSubEvent = (subEventId: string): UseSubEventReturn => {
           name: "DJ Beats Pro",
           category: "Music",
           rating: 4.8,
-          price: "$$$",
+          price: "$$",
           phone: "+91 98765 12345",
           email: "djbeats@email.com",
           verified: true,
@@ -131,7 +134,7 @@ export const useSubEvent = (subEventId: string): UseSubEventReturn => {
           name: "Flower Decor Studio",
           category: "Decoration",
           rating: 4.9,
-          price: "$$",
+          price: "$",
           phone: "+91 98765 12346",
           email: "flowers@email.com",
           verified: true,
@@ -146,7 +149,7 @@ export const useSubEvent = (subEventId: string): UseSubEventReturn => {
           name: "Catering Kings",
           category: "Food",
           rating: 4.7,
-          price: "$$$",
+          price: "$$",
           phone: "+91 98765 12347",
           email: "catering@email.com",
           verified: true,
@@ -161,7 +164,7 @@ export const useSubEvent = (subEventId: string): UseSubEventReturn => {
           name: "Photo Moments",
           category: "Photography",
           rating: 4.9,
-          price: "$$",
+          price: "$",
           phone: "+91 98765 12348",
           email: "photo@email.com",
           verified: true,
@@ -176,7 +179,7 @@ export const useSubEvent = (subEventId: string): UseSubEventReturn => {
           name: "Lighting Masters",
           category: "Lighting",
           rating: 4.6,
-          price: "$$$",
+          price: "$$",
           phone: "+91 98765 12349",
           email: "lighting@email.com",
           verified: false,
@@ -376,18 +379,23 @@ export const useSubEvent = (subEventId: string): UseSubEventReturn => {
     });
   }, []);
 
-  // Get all data for saving
-  const getSubEventData = useCallback(() => {
-    return {
+  // Save sub-event to API
+  const saveSubEvent = useCallback(async () => {
+    if (!template) return;
+
+    const subEventData = {
       template,
       date,
       theme,
       budget,
       activities,
-      vendors: vendors.filter((v) => v.selected),
-      guests: guests.filter((g) => g.invited),
     };
-  }, [template, date, theme, budget, activities, vendors, guests]);
+
+    // Update in API
+    await subEventApi.update(subEventId, subEventData);
+
+    console.log("Sub-event saved:", subEventData);
+  }, [template, date, theme, budget, activities, subEventId]);
 
   return {
     // State
@@ -429,6 +437,6 @@ export const useSubEvent = (subEventId: string): UseSubEventReturn => {
     handleUploadExcel,
 
     // Save
-    getSubEventData,
+    saveSubEvent,
   };
 };

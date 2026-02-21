@@ -1,7 +1,8 @@
-import { Ionicons } from '@expo/vector-icons';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useState } from 'react';
+import { Ionicons } from "@expo/vector-icons";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useState } from "react";
 import {
+  ActivityIndicator,
   Alert,
   FlatList,
   Image,
@@ -12,12 +13,11 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-  ActivityIndicator,
-} from 'react-native';
+} from "react-native";
 
-import { useSubEvent } from '@/src/hooks/useSubEvent';
-import { GuestItem, ActivityItem } from '@/src/components/subevent';
-import { Guest, Vendor } from '@/src/types';
+import { ActivityItem, GuestItem } from "@/src/components/subevent";
+import { useSubEvent } from "@/src/hooks/useSubEvent";
+import { Vendor } from "@/src/types";
 
 // ============================================
 // Helper Functions
@@ -25,18 +25,18 @@ import { Guest, Vendor } from '@/src/types';
 
 const getCategoryColor = (category: string): string => {
   const colors: Record<string, string> = {
-    Music: '#8B5CF6',
-    Decoration: '#10B981',
-    Food: '#F59E0B',
-    Photography: '#EC4899',
-    Lighting: '#6366F1',
-    Video: '#14B8A6',
-    Catering: '#EF4444',
-    Florist: '#F97316',
-    Makeup: '#D946EF',
-    DJ: '#06B6D4',
+    Music: "#8B5CF6",
+    Decoration: "#10B981",
+    Food: "#F59E0B",
+    Photography: "#EC4899",
+    Lighting: "#6366F1",
+    Video: "#14B8A6",
+    Catering: "#EF4444",
+    Florist: "#F97316",
+    Makeup: "#D946EF",
+    DJ: "#06B6D4",
   };
-  return colors[category] || '#6B7280';
+  return colors[category] || "#6B7280";
 };
 
 // ============================================
@@ -47,7 +47,7 @@ export default function SubEventDetail() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const subEventId = params.subEventId as string;
-  
+
   // Use the hook
   const {
     template,
@@ -75,7 +75,7 @@ export default function SubEventDetail() {
     handleAddGuest,
     handleDeleteGuest,
     handleUploadExcel,
-    getSubEventData,
+    saveSubEvent,
   } = useSubEvent(subEventId);
 
   // Modal states
@@ -87,16 +87,23 @@ export default function SubEventDetail() {
   const [selectedVendor, setSelectedVendor] = useState<Vendor | null>(null);
 
   // New guest form
-  const [newGuestName, setNewGuestName] = useState('');
-  const [newGuestPhone, setNewGuestPhone] = useState('');
-  const [newGuestEmail, setNewGuestEmail] = useState('');
-  const [newGuestRelation, setNewGuestRelation] = useState('');
+  const [newGuestName, setNewGuestName] = useState("");
+  const [newGuestPhone, setNewGuestPhone] = useState("");
+  const [newGuestEmail, setNewGuestEmail] = useState("");
+  const [newGuestRelation, setNewGuestRelation] = useState("");
 
   // Excel import simulation
-  const [excelFileName, setExcelFileName] = useState('');
+  const [excelFileName, setExcelFileName] = useState("");
   const [isUploading, setIsUploading] = useState(false);
 
-  const relations = ['Family', 'Friend', 'Colleague', 'Neighbor', 'Relative', 'Other'];
+  const relations = [
+    "Family",
+    "Friend",
+    "Colleague",
+    "Neighbor",
+    "Relative",
+    "Other",
+  ];
 
   // ============================================
   // Vendor Handlers
@@ -118,7 +125,7 @@ export default function SubEventDetail() {
 
   const submitAddGuest = () => {
     if (!newGuestName.trim()) {
-      Alert.alert('Error', 'Please enter guest name');
+      Alert.alert("Error", "Please enter guest name");
       return;
     }
 
@@ -126,14 +133,14 @@ export default function SubEventDetail() {
       name: newGuestName.trim(),
       phone: newGuestPhone.trim(),
       email: newGuestEmail.trim(),
-      relation: newGuestRelation || 'Other',
+      relation: newGuestRelation || "Other",
     });
 
     // Reset form
-    setNewGuestName('');
-    setNewGuestPhone('');
-    setNewGuestEmail('');
-    setNewGuestRelation('');
+    setNewGuestName("");
+    setNewGuestPhone("");
+    setNewGuestEmail("");
+    setNewGuestRelation("");
     setShowAddGuestModal(false);
   };
 
@@ -141,7 +148,7 @@ export default function SubEventDetail() {
     setIsUploading(true);
     handleUploadExcel().finally(() => {
       setIsUploading(false);
-      setExcelFileName('guest_list.xlsx');
+      setExcelFileName("guest_list.xlsx");
       setShowExcelModal(false);
     });
   };
@@ -150,9 +157,8 @@ export default function SubEventDetail() {
   // Navigation Handlers
   // ============================================
 
-  const handleSave = () => {
-    const data = getSubEventData();
-    console.log('Saving sub-event:', data);
+  const handleSave = async () => {
+    await saveSubEvent();
     router.back();
   };
 
@@ -185,7 +191,10 @@ export default function SubEventDetail() {
         </TouchableOpacity>
       </View>
 
-      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={styles.scrollView}
+        showsVerticalScrollIndicator={false}
+      >
         {/* Date & Theme & Budget Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Event Details</Text>
@@ -260,7 +269,11 @@ export default function SubEventDetail() {
                         onPress={() => handleToggleVendor(vendor.id)}
                         style={styles.selectedVendorRemove}
                       >
-                        <Ionicons name="close-circle" size={18} color="#EF4444" />
+                        <Ionicons
+                          name="close-circle"
+                          size={18}
+                          color="#EF4444"
+                        />
                       </TouchableOpacity>
                     </View>
                   ))}
@@ -288,7 +301,10 @@ export default function SubEventDetail() {
                   <View
                     style={[
                       styles.vendorCategoryBadge,
-                      { backgroundColor: getCategoryColor(vendor.category) + '20' },
+                      {
+                        backgroundColor:
+                          getCategoryColor(vendor.category) + "20",
+                      },
                     ]}
                   >
                     <Text
@@ -317,12 +333,20 @@ export default function SubEventDetail() {
                     {vendor.name}
                   </Text>
                   <View style={styles.vendorRatingRow}>
-                    <Ionicons name="star" size={14} color="#F59E0B" fill="#F59E0B" />
+                    <Ionicons
+                      name="star"
+                      size={14}
+                      color="#F59E0B"
+                      fill="#F59E0B"
+                    />
                     <Text style={styles.vendorRatingText}>{vendor.rating}</Text>
                     <Text style={styles.vendorReviewsText}>
                       ({vendor.reviews} reviews)
                     </Text>
-                    <Text style={styles.vendorPriceText}> • {vendor.price}</Text>
+                    <Text style={styles.vendorPriceText}>
+                      {" "}
+                      • {vendor.price}
+                    </Text>
                   </View>
                   <Text style={styles.vendorExperience}>
                     {vendor.yearsExperience}+ years experience
@@ -339,9 +363,13 @@ export default function SubEventDetail() {
                       }}
                     >
                       <Ionicons
-                        name={vendor.selected ? 'checkmark-circle' : 'add-circle-outline'}
+                        name={
+                          vendor.selected
+                            ? "checkmark-circle"
+                            : "add-circle-outline"
+                        }
                         size={20}
-                        color={vendor.selected ? 'white' : '#ee2b8c'}
+                        color={vendor.selected ? "white" : "#ee2b8c"}
                       />
                       <Text
                         style={[
@@ -349,7 +377,7 @@ export default function SubEventDetail() {
                           vendor.selected && styles.vendorSelectTextSelected,
                         ]}
                       >
-                        {vendor.selected ? 'Assigned' : 'Assign'}
+                        {vendor.selected ? "Assigned" : "Assign"}
                       </Text>
                     </TouchableOpacity>
                     <TouchableOpacity
@@ -461,7 +489,11 @@ export default function SubEventDetail() {
                 style={styles.modalActionButton}
                 onPress={() => setShowExcelModal(true)}
               >
-                <Ionicons name="document-text-outline" size={20} color="#10B981" />
+                <Ionicons
+                  name="document-text-outline"
+                  size={20}
+                  color="#10B981"
+                />
                 <Text style={styles.modalActionText}>Upload Excel</Text>
               </TouchableOpacity>
             </View>
@@ -525,7 +557,12 @@ export default function SubEventDetail() {
                   </Text>
 
                   <View style={styles.vendorDetailRatingRow}>
-                    <Ionicons name="star" size={16} color="#F59E0B" fill="#F59E0B" />
+                    <Ionicons
+                      name="star"
+                      size={16}
+                      color="#F59E0B"
+                      fill="#F59E0B"
+                    />
                     <Text style={styles.vendorDetailRatingText}>
                       {selectedVendor.rating}
                     </Text>
@@ -533,14 +570,18 @@ export default function SubEventDetail() {
                       ({selectedVendor.reviews} reviews)
                     </Text>
                     <Text style={styles.vendorDetailPriceText}>
-                      {' '}
+                      {" "}
                       • {selectedVendor.price}
                     </Text>
                   </View>
 
                   {selectedVendor.verified && (
                     <View style={styles.vendorDetailVerified}>
-                      <Ionicons name="checkmark-circle" size={16} color="#10B981" />
+                      <Ionicons
+                        name="checkmark-circle"
+                        size={16}
+                        color="#10B981"
+                      />
                       <Text style={styles.vendorDetailVerifiedText}>
                         Verified Vendor
                       </Text>
@@ -558,7 +599,8 @@ export default function SubEventDetail() {
                   <TouchableOpacity
                     style={[
                       styles.vendorDetailAssignButton,
-                      selectedVendor.selected && styles.vendorDetailAssignButtonSelected,
+                      selectedVendor.selected &&
+                        styles.vendorDetailAssignButtonSelected,
                     ]}
                     onPress={() => {
                       handleToggleVendor(selectedVendor.id);
@@ -570,14 +612,14 @@ export default function SubEventDetail() {
                     <Ionicons
                       name={
                         selectedVendor.selected
-                          ? 'checkmark-circle'
-                          : 'add-circle-outline'
+                          ? "checkmark-circle"
+                          : "add-circle-outline"
                       }
                       size={20}
                       color="white"
                     />
                     <Text style={styles.vendorDetailAssignButtonText}>
-                      {selectedVendor.selected ? 'Assigned' : 'Assign to Event'}
+                      {selectedVendor.selected ? "Assigned" : "Assign to Event"}
                     </Text>
                   </TouchableOpacity>
 
@@ -587,14 +629,18 @@ export default function SubEventDetail() {
                       onPress={() => handleCallVendor(selectedVendor)}
                     >
                       <Ionicons name="call-outline" size={20} color="#ee2b8c" />
-                      <Text style={styles.vendorDetailContactButtonText}>Call</Text>
+                      <Text style={styles.vendorDetailContactButtonText}>
+                        Call
+                      </Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                       style={styles.vendorDetailContactButton}
                       onPress={() => handleEmailVendor(selectedVendor)}
                     >
                       <Ionicons name="mail-outline" size={20} color="#ee2b8c" />
-                      <Text style={styles.vendorDetailContactButtonText}>Email</Text>
+                      <Text style={styles.vendorDetailContactButtonText}>
+                        Email
+                      </Text>
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -615,7 +661,9 @@ export default function SubEventDetail() {
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Contact Vendor</Text>
-              <TouchableOpacity onPress={() => setShowVendorContactModal(false)}>
+              <TouchableOpacity
+                onPress={() => setShowVendorContactModal(false)}
+              >
                 <Ionicons name="close" size={24} color="#181114" />
               </TouchableOpacity>
             </View>
@@ -707,14 +755,15 @@ export default function SubEventDetail() {
                     key={relation}
                     style={[
                       styles.relationChip,
-                      newGuestRelation === relation && styles.relationChipSelected,
+                      newGuestRelation === relation &&
+                        styles.relationChipSelected,
                     ]}
                     onPress={() => setNewGuestRelation(relation)}
                   >
                     <Text
                       style={[
                         styles.relationChipText,
-                        newGuestRelation === relation && { color: 'white' },
+                        newGuestRelation === relation && { color: "white" },
                       ]}
                     >
                       {relation}
@@ -762,12 +811,12 @@ export default function SubEventDetail() {
                   color="#ee2b8c"
                 />
                 <Text style={styles.uploadTitle}>
-                  {excelFileName || 'Upload Guest List'}
+                  {excelFileName || "Upload Guest List"}
                 </Text>
                 <Text style={styles.uploadSubtitle}>
                   {isUploading
-                    ? 'Uploading...'
-                    : 'Supported formats: .xlsx, .csv'}
+                    ? "Uploading..."
+                    : "Supported formats: .xlsx, .csv"}
                 </Text>
               </TouchableOpacity>
 
@@ -777,8 +826,8 @@ export default function SubEventDetail() {
                 style={styles.downloadButton}
                 onPress={() => {
                   Alert.alert(
-                    'Download Template',
-                    'Download sample Excel template'
+                    "Download Template",
+                    "Download sample Excel template"
                   );
                 }}
               >
@@ -802,121 +851,121 @@ export default function SubEventDetail() {
 const styles = StyleSheet.create({
   loadingContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#f8f6f7',
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#f8f6f7",
   },
   container: {
     flex: 1,
-    backgroundColor: '#f8f6f7',
+    backgroundColor: "#f8f6f7",
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: 'white',
+    backgroundColor: "white",
   },
   backButton: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   headerTitle: {
-    fontFamily: 'PlusJakartaSans-Bold',
+    fontFamily: "PlusJakartaSans-Bold",
     fontSize: 18,
-    color: '#181114',
+    color: "#181114",
   },
   saveButton: {
     paddingHorizontal: 16,
     paddingVertical: 8,
-    backgroundColor: '#ee2b8c',
+    backgroundColor: "#ee2b8c",
     borderRadius: 8,
   },
   saveButtonText: {
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: "PlusJakartaSans-SemiBold",
     fontSize: 14,
-    color: 'white',
+    color: "white",
   },
   scrollView: {
     flex: 1,
     paddingHorizontal: 16,
   },
   section: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderRadius: 16,
     padding: 16,
     marginTop: 16,
     marginBottom: 8,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
     shadowRadius: 8,
     elevation: 3,
   },
   sectionTitle: {
-    fontFamily: 'PlusJakartaSans-Bold',
+    fontFamily: "PlusJakartaSans-Bold",
     fontSize: 16,
-    color: '#181114',
+    color: "#181114",
     marginBottom: 4,
   },
   sectionSubtitle: {
-    fontFamily: 'PlusJakartaSans-Regular',
+    fontFamily: "PlusJakartaSans-Regular",
     fontSize: 12,
-    color: '#6B7280',
+    color: "#6B7280",
     marginBottom: 12,
   },
   sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     marginBottom: 12,
   },
   inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#f9fafb',
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#f9fafb",
     borderRadius: 12,
     paddingHorizontal: 16,
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: '#f3f4f6',
+    borderColor: "#f3f4f6",
   },
   textInput: {
     flex: 1,
     paddingVertical: 14,
     paddingHorizontal: 12,
-    fontFamily: 'PlusJakartaSans-Regular',
+    fontFamily: "PlusJakartaSans-Regular",
     fontSize: 14,
-    color: '#181114',
+    color: "#181114",
   },
   // Vendor Section Styles
   selectedVendorsSummary: {
-    backgroundColor: '#f9fafb',
+    backgroundColor: "#f9fafb",
     borderRadius: 12,
     padding: 12,
     marginBottom: 16,
   },
   selectedVendorsTitle: {
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: "PlusJakartaSans-SemiBold",
     fontSize: 14,
-    color: '#6B7280',
+    color: "#6B7280",
     marginBottom: 8,
   },
   selectedVendorsList: {
     gap: 8,
   },
   selectedVendorChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'white',
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "white",
     borderRadius: 20,
     padding: 4,
     paddingRight: 8,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 4,
@@ -929,9 +978,9 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   selectedVendorName: {
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: "PlusJakartaSans-SemiBold",
     fontSize: 12,
-    color: '#181114',
+    color: "#181114",
     maxWidth: 80,
   },
   selectedVendorRemove: {
@@ -941,26 +990,26 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   vendorCard: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderRadius: 16,
-    overflow: 'hidden',
+    overflow: "hidden",
     borderWidth: 2,
-    borderColor: 'transparent',
+    borderColor: "transparent",
   },
   vendorCardSelected: {
-    borderColor: '#10B981',
-    backgroundColor: '#f0fdf4',
+    borderColor: "#10B981",
+    backgroundColor: "#f0fdf4",
   },
   vendorImageContainer: {
-    position: 'relative',
+    position: "relative",
     height: 120,
   },
   vendorImage: {
-    width: '100%',
-    height: '100%',
+    width: "100%",
+    height: "100%",
   },
   vendorCategoryBadge: {
-    position: 'absolute',
+    position: "absolute",
     top: 8,
     left: 8,
     paddingHorizontal: 10,
@@ -968,11 +1017,11 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   vendorCategoryText: {
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: "PlusJakartaSans-SemiBold",
     fontSize: 11,
   },
   verifiedBadge: {
-    position: 'absolute',
+    position: "absolute",
     top: 8,
     right: 8,
   },
@@ -980,71 +1029,71 @@ const styles = StyleSheet.create({
     padding: 12,
   },
   vendorName: {
-    fontFamily: 'PlusJakartaSans-Bold',
+    fontFamily: "PlusJakartaSans-Bold",
     fontSize: 16,
-    color: '#181114',
+    color: "#181114",
     marginBottom: 4,
   },
   vendorRatingRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 4,
   },
   vendorRatingText: {
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: "PlusJakartaSans-SemiBold",
     fontSize: 12,
-    color: '#181114',
+    color: "#181114",
     marginLeft: 4,
   },
   vendorReviewsText: {
-    fontFamily: 'PlusJakartaSans-Regular',
+    fontFamily: "PlusJakartaSans-Regular",
     fontSize: 11,
-    color: '#6B7280',
+    color: "#6B7280",
     marginLeft: 2,
   },
   vendorPriceText: {
-    fontFamily: 'PlusJakartaSans-Regular',
+    fontFamily: "PlusJakartaSans-Regular",
     fontSize: 11,
-    color: '#6B7280',
+    color: "#6B7280",
   },
   vendorExperience: {
-    fontFamily: 'PlusJakartaSans-Regular',
+    fontFamily: "PlusJakartaSans-Regular",
     fontSize: 11,
-    color: '#6B7280',
+    color: "#6B7280",
     marginBottom: 12,
   },
   vendorActions: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 8,
   },
   vendorSelectButton: {
     flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#fceaf4',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#fceaf4",
     borderRadius: 10,
     paddingVertical: 10,
     gap: 4,
   },
   vendorSelectButtonSelected: {
-    backgroundColor: '#10B981',
+    backgroundColor: "#10B981",
   },
   vendorSelectText: {
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: "PlusJakartaSans-SemiBold",
     fontSize: 12,
-    color: '#ee2b8c',
+    color: "#ee2b8c",
   },
   vendorSelectTextSelected: {
-    color: 'white',
+    color: "white",
   },
   vendorContactButton: {
     width: 42,
     height: 42,
     borderRadius: 10,
-    backgroundColor: '#fceaf4',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#fceaf4",
+    alignItems: "center",
+    justifyContent: "center",
   },
   // Activities Section
   activitiesList: {
@@ -1052,38 +1101,38 @@ const styles = StyleSheet.create({
   },
   // Guest Section
   addGuestButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#ee2b8c',
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#ee2b8c",
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 10,
     gap: 4,
   },
   addGuestButtonText: {
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: "PlusJakartaSans-SemiBold",
     fontSize: 13,
-    color: 'white',
+    color: "white",
   },
   guestStats: {
-    flexDirection: 'row',
-    backgroundColor: '#f9fafb',
+    flexDirection: "row",
+    backgroundColor: "#f9fafb",
     borderRadius: 12,
     padding: 16,
   },
   guestStat: {
     flex: 1,
-    alignItems: 'center',
+    alignItems: "center",
   },
   guestStatNumber: {
-    fontFamily: 'PlusJakartaSans-Bold',
+    fontFamily: "PlusJakartaSans-Bold",
     fontSize: 20,
-    color: '#181114',
+    color: "#181114",
   },
   guestStatLabel: {
-    fontFamily: 'PlusJakartaSans-Regular',
+    fontFamily: "PlusJakartaSans-Regular",
     fontSize: 11,
-    color: '#6B7280',
+    color: "#6B7280",
   },
   bottomSpacing: {
     height: 100,
@@ -1091,48 +1140,48 @@ const styles = StyleSheet.create({
   // Modal Styles
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-end',
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "flex-end",
   },
   modalContent: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     paddingBottom: 32,
-    maxHeight: '85%',
+    maxHeight: "85%",
   },
   modalHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#f3f4f6',
+    borderBottomColor: "#f3f4f6",
   },
   modalTitle: {
-    fontFamily: 'PlusJakartaSans-Bold',
+    fontFamily: "PlusJakartaSans-Bold",
     fontSize: 18,
-    color: '#181114',
+    color: "#181114",
   },
   modalActions: {
-    flexDirection: 'row',
+    flexDirection: "row",
     padding: 16,
     gap: 12,
   },
   modalActionButton: {
     flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#f9fafb',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#f9fafb",
     borderRadius: 12,
     padding: 14,
     gap: 8,
   },
   modalActionText: {
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: "PlusJakartaSans-SemiBold",
     fontSize: 13,
-    color: '#181114',
+    color: "#181114",
   },
   guestList: {
     paddingHorizontal: 16,
@@ -1142,20 +1191,20 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   formInput: {
-    backgroundColor: '#f9fafb',
+    backgroundColor: "#f9fafb",
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 14,
-    fontFamily: 'PlusJakartaSans-Regular',
+    fontFamily: "PlusJakartaSans-Regular",
     fontSize: 14,
-    color: '#181114',
+    color: "#181114",
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: '#f3f4f6',
+    borderColor: "#f3f4f6",
   },
   relationContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexDirection: "row",
+    flexWrap: "wrap",
     gap: 8,
     marginBottom: 16,
   },
@@ -1163,98 +1212,98 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 20,
-    backgroundColor: '#f9fafb',
+    backgroundColor: "#f9fafb",
     borderWidth: 1,
-    borderColor: '#e5e7eb',
+    borderColor: "#e5e7eb",
   },
   relationChipSelected: {
-    backgroundColor: '#ee2b8c',
-    borderColor: '#ee2b8c',
+    backgroundColor: "#ee2b8c",
+    borderColor: "#ee2b8c",
   },
   relationChipText: {
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: "PlusJakartaSans-SemiBold",
     fontSize: 12,
-    color: '#6B7280',
+    color: "#6B7280",
   },
   addButton: {
-    backgroundColor: '#ee2b8c',
+    backgroundColor: "#ee2b8c",
     borderRadius: 12,
     paddingVertical: 14,
-    alignItems: 'center',
+    alignItems: "center",
   },
   addButtonText: {
-    fontFamily: 'PlusJakartaSans-Bold',
+    fontFamily: "PlusJakartaSans-Bold",
     fontSize: 16,
-    color: 'white',
+    color: "white",
   },
   // Upload Styles
   uploadContainer: {
     padding: 24,
-    alignItems: 'center',
+    alignItems: "center",
   },
   uploadButton: {
-    backgroundColor: '#f9fafb',
+    backgroundColor: "#f9fafb",
     borderRadius: 16,
     padding: 32,
-    alignItems: 'center',
+    alignItems: "center",
     borderWidth: 2,
-    borderColor: '#e5e7eb',
-    borderStyle: 'dashed',
-    width: '100%',
+    borderColor: "#e5e7eb",
+    borderStyle: "dashed",
+    width: "100%",
   },
   uploadTitle: {
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: "PlusJakartaSans-SemiBold",
     fontSize: 16,
-    color: '#181114',
+    color: "#181114",
     marginTop: 12,
   },
   uploadSubtitle: {
-    fontFamily: 'PlusJakartaSans-Regular',
+    fontFamily: "PlusJakartaSans-Regular",
     fontSize: 12,
-    color: '#6B7280',
+    color: "#6B7280",
     marginTop: 4,
   },
   orText: {
-    fontFamily: 'PlusJakartaSans-Regular',
+    fontFamily: "PlusJakartaSans-Regular",
     fontSize: 14,
-    color: '#9ca3af',
+    color: "#9ca3af",
     marginVertical: 16,
   },
   downloadButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 8,
   },
   downloadButtonText: {
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: "PlusJakartaSans-SemiBold",
     fontSize: 14,
-    color: '#10B981',
+    color: "#10B981",
   },
   // Vendor Detail Modal
   vendorDetailModalContent: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
-    height: '85%',
+    height: "85%",
   },
   vendorDetailHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#f3f4f6',
+    borderBottomColor: "#f3f4f6",
   },
   vendorDetailTitle: {
-    fontFamily: 'PlusJakartaSans-Bold',
+    fontFamily: "PlusJakartaSans-Bold",
     fontSize: 18,
-    color: '#181114',
+    color: "#181114",
   },
   vendorDetailContent: {
     flex: 1,
   },
   vendorDetailImage: {
-    width: '100%',
+    width: "100%",
     height: 200,
   },
   vendorDetailInfo: {
@@ -1264,109 +1313,109 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 8,
-    alignSelf: 'flex-start',
+    alignSelf: "flex-start",
     marginBottom: 8,
   },
   vendorDetailCategoryText: {
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: "PlusJakartaSans-SemiBold",
     fontSize: 11,
   },
   vendorDetailName: {
-    fontFamily: 'PlusJakartaSans-Bold',
+    fontFamily: "PlusJakartaSans-Bold",
     fontSize: 22,
-    color: '#181114',
+    color: "#181114",
     marginBottom: 8,
   },
   vendorDetailRatingRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 8,
   },
   vendorDetailRatingText: {
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: "PlusJakartaSans-SemiBold",
     fontSize: 14,
-    color: '#181114',
+    color: "#181114",
     marginLeft: 4,
   },
   vendorDetailReviewsText: {
-    fontFamily: 'PlusJakartaSans-Regular',
+    fontFamily: "PlusJakartaSans-Regular",
     fontSize: 12,
-    color: '#6B7280',
+    color: "#6B7280",
     marginLeft: 4,
   },
   vendorDetailPriceText: {
-    fontFamily: 'PlusJakartaSans-Regular',
+    fontFamily: "PlusJakartaSans-Regular",
     fontSize: 12,
-    color: '#6B7280',
+    color: "#6B7280",
   },
   vendorDetailVerified: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 4,
     marginBottom: 8,
   },
   vendorDetailVerifiedText: {
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: "PlusJakartaSans-SemiBold",
     fontSize: 12,
-    color: '#10B981',
+    color: "#10B981",
   },
   vendorDetailExperience: {
-    fontFamily: 'PlusJakartaSans-Regular',
+    fontFamily: "PlusJakartaSans-Regular",
     fontSize: 13,
-    color: '#6B7280',
+    color: "#6B7280",
     marginBottom: 12,
   },
   vendorDetailDescription: {
-    fontFamily: 'PlusJakartaSans-Regular',
+    fontFamily: "PlusJakartaSans-Regular",
     fontSize: 14,
-    color: '#181114',
+    color: "#181114",
     lineHeight: 20,
     marginBottom: 16,
   },
   vendorDetailAssignButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#ee2b8c',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#ee2b8c",
     borderRadius: 12,
     paddingVertical: 14,
     gap: 8,
     marginBottom: 16,
   },
   vendorDetailAssignButtonSelected: {
-    backgroundColor: '#10B981',
+    backgroundColor: "#10B981",
   },
   vendorDetailAssignButtonText: {
-    fontFamily: 'PlusJakartaSans-Bold',
+    fontFamily: "PlusJakartaSans-Bold",
     fontSize: 16,
-    color: 'white',
+    color: "white",
   },
   vendorDetailContactButtons: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 12,
   },
   vendorDetailContactButton: {
     flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#fceaf4',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#fceaf4",
     borderRadius: 12,
     paddingVertical: 12,
     gap: 6,
   },
   vendorDetailContactButtonText: {
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: "PlusJakartaSans-SemiBold",
     fontSize: 14,
-    color: '#ee2b8c',
+    color: "#ee2b8c",
   },
   // Contact Modal
   contactContent: {
     padding: 24,
-    alignItems: 'center',
+    alignItems: "center",
   },
   contactVendorInfo: {
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 24,
   },
   contactVendorImage: {
@@ -1376,30 +1425,30 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   contactVendorName: {
-    fontFamily: 'PlusJakartaSans-Bold',
+    fontFamily: "PlusJakartaSans-Bold",
     fontSize: 18,
-    color: '#181114',
+    color: "#181114",
     marginBottom: 4,
   },
   contactVendorCategory: {
-    fontFamily: 'PlusJakartaSans-Regular',
+    fontFamily: "PlusJakartaSans-Regular",
     fontSize: 14,
-    color: '#6B7280',
+    color: "#6B7280",
   },
   contactButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#ee2b8c',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#ee2b8c",
     borderRadius: 12,
     paddingVertical: 14,
-    width: '100%',
+    width: "100%",
     gap: 8,
     marginBottom: 12,
   },
   contactButtonText: {
-    fontFamily: 'PlusJakartaSans-Bold',
+    fontFamily: "PlusJakartaSans-Bold",
     fontSize: 16,
-    color: 'white',
+    color: "white",
   },
 });

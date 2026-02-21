@@ -42,9 +42,9 @@ const COPY = {
 } as const;
 
 export default function LoginPage() {
-  const { mutate: login, isPending } = useLogin();
+  // const { mutate: login, isPending } = useLogin();
   const router = useRouter();
-  // const { login } = useAuth();
+  const { login } = useAuth();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
@@ -111,12 +111,12 @@ export default function LoginPage() {
         email: username,
         password: password,
       };
-      login(loginPayload, {
-        onSuccess: (data) => {
-          console.log("Login successful:", data);
-          // login function will handle setting auth state and redirecting
-        },
-      });
+      // login(loginPayload, {
+      //   onSuccess: (data) => {
+      //     console.log("Login successful:", data);
+      //     // login function will handle setting auth state and redirecting
+      //   },
+      // });
 
       // try {
 
@@ -134,12 +134,12 @@ export default function LoginPage() {
       // }
 
       // Set user in AuthContext for client role - AuthContext will handle redirect
-      // login({
-      //   id: "1",
-      //   email: username,
-      //   name: username.split("@")[0],
-      //   role: "client",
-      // });
+      login({
+        id: "1",
+        email: username,
+        name: username.split("@")[0],
+        role: "client",
+      });
 
       // Navigation will be handled by AuthContext's NavigationHandler
     } catch (err) {
