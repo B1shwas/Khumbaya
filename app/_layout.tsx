@@ -4,8 +4,10 @@ import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import { StatusBar } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "react-native-reanimated";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+
 import "./global.css";
 
 SplashScreen.preventAutoHideAsync();
@@ -53,13 +55,15 @@ export default function RootLayout() {
   }
 
   return (
-    <AuthProvider>
-      <SafeAreaProvider>
-        <StatusBar barStyle="dark-content" backgroundColor={"#ffffff"} />
-        <SafeAreaView className="flex-1  " edges={["top", "bottom"]}>
-          <RootNavigation />
-        </SafeAreaView>
-      </SafeAreaProvider>
-    </AuthProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <AuthProvider>
+        <SafeAreaProvider>
+          <StatusBar barStyle="dark-content" backgroundColor={"#ffffff"} />
+          <SafeAreaView className="flex-1  " edges={["top", "bottom"]}>
+            <RootNavigation />
+          </SafeAreaView>
+        </SafeAreaProvider>
+      </AuthProvider>
+    </GestureHandlerRootView>
   );
 }
