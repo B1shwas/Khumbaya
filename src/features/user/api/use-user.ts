@@ -1,10 +1,18 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "@/src/api/axios";
-import { ResponseFormat } from "@/src/utils/type/responce";
+import { UserLoginType, UserSignupType } from "@/src/features/user/types";
 import { useAuthStore } from "@/src/store/AuthStore";
-import { UserSignupType, UserLoginType } from "@/src/features/user/types";
+import { ResponseFormat } from "@/src/utils/type/responce";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { createUserApi, getUserProfile } from "./user.service";
+
 interface LoginResponse {
+  id:number
   token: string;
+  user: {
+    name: string;
+    email: string;
+  
+  };
 }
 
 export function useLogin() {
@@ -18,13 +26,26 @@ export function useLogin() {
       );
       return data.data;
     },
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       useAuthStore.getState().setAuth(data.token, null);
-      queryClient.clear();
+      queryClient.invalidateQueries(); // clear all queries to ensure fresh data after login
     },
   });
 }
+export function useSignup() {
+  const queryClient = useQueryClient();
 
+  return useMutation({
+    mutationFn: async (credentials: UserSignupType) => {
+      const data  = await createUserApi(credentials);
+      return data;
+    },
+    onSuccess: async (data) => {
+      useAuthStore.getState().setAuth(data.token, null);
+      queryClient.invalidateQueries();
+    },
+  });
+}
 export function useProfile() {
   const token = useAuthStore((s) => s.token);
   const setAuth = useAuthStore((s) => s.setAuth);
@@ -36,17 +57,14 @@ export function useProfile() {
     gcTime: 30 * 60 * 1000,
 
     queryFn: async () => {
-      const { data } = await api.get<ResponseFormat<any>>("/user/me");
-
-      console.log(data.data);
-
-      setAuth(token, {
-        name: data.data.user_full_name,
-        email: data.data.user_email,
-        id: data.data.user_id,
+      const data = await getUserProfile();
+      setAuth(token as string, {
+        name: data.name,
+        email: data.email,
+        id: data.id,
       });
 
-      return data.data;
+      return data;
     },
   });
 }

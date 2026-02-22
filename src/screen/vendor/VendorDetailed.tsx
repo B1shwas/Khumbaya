@@ -1,6 +1,5 @@
 import { Text } from "@/src/components/ui/Text";
 import { ONBOARDING_VENDORS } from "@/src/constants/vendors";
-import { useAuth } from "@/src/store/AuthContext";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import {
@@ -64,7 +63,7 @@ export default function VendorDetailed({
 }: {
   vendorId: string | string[];
 }) {
-  const { logout } = useAuth();
+
   const router = useRouter();
 
   // Find the vendor data based on the vendorId from route params

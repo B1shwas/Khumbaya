@@ -1,6 +1,7 @@
-import { AuthProvider, useAuth } from "@/src/store/AuthContext";
+import { useAuthStore } from "@/src/store/AuthStore";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useFonts } from "expo-font";
-import { Stack } from "expo-router";
+import { Stack, useRouter, useSegments } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import { StatusBar } from "react-native";
@@ -10,10 +11,28 @@ import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
 import "./global.css";
 
+const queryClient = new QueryClient();
+
 SplashScreen.preventAutoHideAsync();
 
 function RootNavigation() {
-  const { user, isLoading } = useAuth();
+  const { token, isLoading } = useAuthStore();
+  const segments = useSegments();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (isLoading) return;
+
+    const inAuthGroup = segments[0] === "(onboarding)";
+
+    if (token && inAuthGroup) {
+      // If we have a token and are in onboarding, move to protected
+      router.replace("/(protected)/(client-tabs)/home");
+    } else if (!token && !inAuthGroup) {
+      // If we have no token and are NOT in onboarding, move to onboarding
+      router.replace("/(onboarding)");
+    }
+  }, [token, isLoading, segments]);
 
   if (isLoading) {
     return null;
@@ -26,7 +45,7 @@ function RootNavigation() {
         animation: "slide_from_right",
       }}
     >
-      {user ? (
+      {token ? (
         <Stack.Screen name="(protected)" />
       ) : (
         <Stack.Screen name="(onboarding)" />
@@ -46,24 +65,24 @@ export default function RootLayout() {
 
   useEffect(() => {
     if (fontsLoaded) {
-      SplashScreen.hideAsync();
+      useAuthStore.getState().hydrate().then(() => {
+        SplashScreen.hideAsync();
+      });
     }
   }, [fontsLoaded]);
 
-  if (!fontsLoaded) {
+  if (!fontsLoaded && !useAuthStore.getState().isLoading) {
     return null;
   }
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <AuthProvider>
-        <SafeAreaProvider>
-          <StatusBar barStyle="dark-content" backgroundColor={"#ffffff"} />
-          <SafeAreaView className="flex-1  " edges={["top", "bottom"]}>
-            <RootNavigation />
-          </SafeAreaView>
-        </SafeAreaProvider>
-      </AuthProvider>
-    </GestureHandlerRootView>
+    <QueryClientProvider client={queryClient}>
+      <SafeAreaProvider>
+        <StatusBar barStyle="dark-content" backgroundColor={"#ffffff"} />
+        <SafeAreaView className="flex-1  " edges={["top", "bottom"]}>
+          <RootNavigation />
+        </SafeAreaView>
+      </SafeAreaProvider>
+    </QueryClientProvider>
   );
 }
