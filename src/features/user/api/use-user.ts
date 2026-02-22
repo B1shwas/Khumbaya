@@ -3,8 +3,16 @@ import { UserLoginType, UserSignupType } from "@/src/features/user/types";
 import { useAuthStore } from "@/src/store/AuthStore";
 import { ResponseFormat } from "@/src/utils/type/responce";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { createUserApi, getUserProfile } from "./user.service";
+
 interface LoginResponse {
+  id:number
   token: string;
+  user: {
+    name: string;
+    email: string;
+  
+  };
 }
 
 export function useLogin() {
@@ -18,9 +26,9 @@ export function useLogin() {
       );
       return data.data;
     },
-    onSuccess: (data) => {
-      useAuthStore.getState().setAuth(data.token, null );
-      queryClient.clear();
+    onSuccess: async (data) => {
+      useAuthStore.getState().setAuth(data.token, null);
+      queryClient.invalidateQueries(); // clear all queries to ensure fresh data after login
     },
   });
 }
@@ -29,15 +37,12 @@ export function useSignup() {
 
   return useMutation({
     mutationFn: async (credentials: UserSignupType) => {
-      const { data } = await api.post<ResponseFormat<LoginResponse>>(
-        "user/signup",
-        credentials
-      );
-      return data.data;
+      const data  = await createUserApi(credentials);
+      return data;
     },
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       useAuthStore.getState().setAuth(data.token, null);
-      queryClient.clear();
+      queryClient.invalidateQueries();
     },
   });
 }
@@ -52,17 +57,14 @@ export function useProfile() {
     gcTime: 30 * 60 * 1000,
 
     queryFn: async () => {
-      const { data } = await api.get<ResponseFormat<any>>("/user/profile");
-
-      console.log(data.data);
-
+      const data = await getUserProfile();
       setAuth(token as string, {
-        name: data.data.name,
-        email: data.data.email,
-        id: data.data.id,
+        name: data.name,
+        email: data.email,
+        id: data.id,
       });
 
-      return data.data;
+      return data;
     },
   });
 }
