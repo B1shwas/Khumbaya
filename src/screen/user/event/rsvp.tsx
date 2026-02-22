@@ -6,17 +6,12 @@ import {
   Image,
   ScrollView,
   StyleSheet,
-  Switch,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-
-// ============================================
-// Types
-// ============================================
 
 interface Guest {
   id: string;
@@ -46,10 +41,6 @@ interface RSVPData {
   submitted: boolean;
 }
 
-// ============================================
-// Mock Data
-// ============================================
-
 const invitedEventData: InvitedEvent = {
   id: "5",
   title: "Friend's Birthday Bash",
@@ -62,10 +53,6 @@ const invitedEventData: InvitedEvent = {
     "https://lh3.googleusercontent.com/aida-public/AB6AXuDSiNZxjryxVvBt_Qvd2BsU8jmuyGXsbWyZqiGyTJOFCn4I4QdwE-xrJUmE938nQ2sYjA0qbPec911z6qe-blSH_epWVfQJy2W2NwU5R-4dwi1k7uUfEgPutKfIV3RpR1EUutrAFt_7SBxXq5yRfR9EkuQCohSjZJpWgX0eNFvBY3F5rZ-xWmmB8Em-xGg1AvxCRQDlpUPXbLlpkcqBsqbQXGIi5tNUNw3p5WrCahAWFPRTkzEE0B8v47AYzYa8b-aEAMvtdko47AM",
 };
 
-// ============================================
-// Components
-// ============================================
-
 const GuestForm = ({
   guest,
   index,
@@ -77,24 +64,22 @@ const GuestForm = ({
   onUpdate: (guest: Guest) => void;
   onRemove: () => void;
 }) => {
-  const relationships = [
-    "Self",
-    "Spouse",
-    "Child",
-    "Parent",
-    "Sibling",
-    "Friend",
-    "Colleague",
-    "Other",
-  ];
+  const isSelf = index === 0;
+  const relationships = isSelf
+    ? ["Self"]
+    : ["Spouse", "Child", "Parent", "Sibling", "Friend", "Colleague", "Other"];
 
   return (
     <View style={styles.guestCard}>
       <View style={styles.guestHeader}>
-        <Text style={styles.guestTitle}>Guest {index + 1}</Text>
-        <TouchableOpacity onPress={onRemove} style={styles.removeButton}>
-          <Ionicons name="trash-outline" size={20} color="#EF4444" />
-        </TouchableOpacity>
+        <Text style={styles.guestTitle}>
+          {isSelf ? "Your Details" : `Guest ${index + 1}`}
+        </Text>
+        {!isSelf && (
+          <TouchableOpacity onPress={onRemove} style={styles.removeButton}>
+            <Ionicons name="trash-outline" size={20} color="#EF4444" />
+          </TouchableOpacity>
+        )}
       </View>
 
       <View style={styles.inputGroup}>
@@ -108,32 +93,34 @@ const GuestForm = ({
         />
       </View>
 
-      <View style={styles.inputGroup}>
-        <Text style={styles.inputLabel}>Relationship *</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          <View style={styles.chipContainer}>
-            {relationships.map((rel) => (
-              <TouchableOpacity
-                key={rel}
-                style={[
-                  styles.chip,
-                  guest.relationship === rel && styles.chipSelected,
-                ]}
-                onPress={() => onUpdate({ ...guest, relationship: rel })}
-              >
-                <Text
+      {!isSelf && (
+        <View style={styles.inputGroup}>
+          <Text style={styles.inputLabel}>Relationship *</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <View style={styles.chipContainer}>
+              {relationships.map((rel) => (
+                <TouchableOpacity
+                  key={rel}
                   style={[
-                    styles.chipText,
-                    guest.relationship === rel && styles.chipTextSelected,
+                    styles.chip,
+                    guest.relationship === rel && styles.chipSelected,
                   ]}
+                  onPress={() => onUpdate({ ...guest, relationship: rel })}
                 >
-                  {rel}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </ScrollView>
-      </View>
+                  <Text
+                    style={[
+                      styles.chipText,
+                      guest.relationship === rel && styles.chipTextSelected,
+                    ]}
+                  >
+                    {rel}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </ScrollView>
+        </View>
+      )}
 
       <View style={styles.inputGroup}>
         <Text style={styles.inputLabel}>Phone Number *</Text>
@@ -146,74 +133,6 @@ const GuestForm = ({
           keyboardType="phone-pad"
         />
       </View>
-
-      <View style={styles.switchRow}>
-        <View style={styles.switchLabelContainer}>
-          <Text style={styles.inputLabel}>Adult (18+)?</Text>
-          <Text style={styles.switchHint}>
-            {guest.isAdult ? "ID required" : "ID not required"}
-          </Text>
-        </View>
-        <Switch
-          value={guest.isAdult}
-          onValueChange={(value) => onUpdate({ ...guest, isAdult: value })}
-          trackColor={{ false: "#E5E7EB", true: "#FCE7F3" }}
-          thumbColor={guest.isAdult ? "#ee2b8c" : "#9CA3AF"}
-        />
-      </View>
-
-      {guest.isAdult && (
-        <>
-          <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>ID Number / Passport *</Text>
-            <TextInput
-              style={styles.textInput}
-              placeholder="Enter ID number or passport"
-              placeholderTextColor="#9CA3AF"
-              value={guest.idNumber || ""}
-              onChangeText={(text) => onUpdate({ ...guest, idNumber: text })}
-            />
-          </View>
-
-          <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>ID Image</Text>
-            <TouchableOpacity
-              style={styles.imageUploadButton}
-              onPress={() => {
-                Alert.alert(
-                  "Upload ID Image",
-                  "Image picker functionality will be available after installing expo-image-picker. For now, please enter your ID number.",
-                  [{ text: "OK" }]
-                );
-              }}
-            >
-              {guest.idImage ? (
-                <Image
-                  source={{ uri: guest.idImage }}
-                  style={styles.idImagePreview}
-                />
-              ) : (
-                <View style={styles.imageUploadPlaceholder}>
-                  <Ionicons name="camera" size={32} color="#9CA3AF" />
-                  <Text style={styles.imageUploadText}>Upload ID Image</Text>
-                  <Text style={styles.imageUploadHint}>
-                    Tap to select from gallery
-                  </Text>
-                </View>
-              )}
-            </TouchableOpacity>
-            {guest.idImage && (
-              <TouchableOpacity
-                style={styles.removeImageButton}
-                onPress={() => onUpdate({ ...guest, idImage: undefined })}
-              >
-                <Ionicons name="close-circle" size={24} color="#EF4444" />
-                <Text style={styles.removeImageText}>Remove Image</Text>
-              </TouchableOpacity>
-            )}
-          </View>
-        </>
-      )}
     </View>
   );
 };
@@ -286,20 +205,25 @@ export default function RSVPPage() {
   const validateGuestDetails = (): boolean => {
     for (let i = 0; i < rsvpData.guests.length; i++) {
       const guest = rsvpData.guests[i];
+      const isSelf = i === 0;
+
       if (!guest.name.trim()) {
-        Alert.alert("Error", `Please enter name for Guest ${i + 1}`);
+        Alert.alert(
+          "Error",
+          `Please enter ${isSelf ? "your name" : "name for Guest " + (i + 1)}`
+        );
         return false;
       }
-      if (!guest.relationship) {
+      // Skip relationship check for self (first guest)
+      if (!isSelf && !guest.relationship) {
         Alert.alert("Error", `Please select relationship for Guest ${i + 1}`);
         return false;
       }
       if (!guest.phone.trim()) {
-        Alert.alert("Error", `Please enter phone for Guest ${i + 1}`);
-        return false;
-      }
-      if (guest.isAdult && !guest.idNumber?.trim()) {
-        Alert.alert("Error", `Please enter ID for Guest ${i + 1} (adult)`);
+        Alert.alert(
+          "Error",
+          `Please enter ${isSelf ? "your phone" : "phone for Guest " + (i + 1)}`
+        );
         return false;
       }
     }
@@ -662,7 +586,9 @@ export default function RSVPPage() {
 
             <TouchableOpacity
               style={styles.doneButton}
-              onPress={() => router.push("/events" as any)}
+              onPress={() =>
+                router.push("/(protected)/(client-tabs)/events" as any)
+              }
             >
               <Text style={styles.doneButtonText}>Done</Text>
             </TouchableOpacity>
