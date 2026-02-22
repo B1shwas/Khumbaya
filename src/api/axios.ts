@@ -16,6 +16,7 @@ api.interceptors.request.use(
   async (config: InternalAxiosRequestConfig) => {
     // const token = Get the token from the auth stooree (if you have one)
     const token = useAuthStore.getState().token; // Dummy token for now
+    console.log(token);
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -50,7 +51,6 @@ api.interceptors.response.use(
     // Example: Refresh token logic
     if (error.response?.status === 401) {
       //       TODO: implement refresh token & retry
-      ;
       //       remove from the store as well
       useAuthStore.getState().clearAuth();
     }

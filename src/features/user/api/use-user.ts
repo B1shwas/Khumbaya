@@ -6,12 +6,11 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createUserApi, getUserProfile } from "./user.service";
 
 interface LoginResponse {
-  id:number
+  id: number;
   token: string;
   user: {
     name: string;
     email: string;
-  
   };
 }
 
@@ -37,7 +36,7 @@ export function useSignup() {
 
   return useMutation({
     mutationFn: async (credentials: UserSignupType) => {
-      const data  = await createUserApi(credentials);
+      const data = await createUserApi(credentials);
       return data;
     },
     onSuccess: async (data) => {
@@ -52,14 +51,14 @@ export function useProfile() {
 
   return useQuery({
     queryKey: ["profile"],
-    enabled: !!token,
     staleTime: 5 * 60 * 1000,
     gcTime: 30 * 60 * 1000,
 
     queryFn: async () => {
       const data = await getUserProfile();
+      console.log(data);
       setAuth(token as string, {
-        name: data.name,
+        name: data.username,
         email: data.email,
         id: data.id,
       });
