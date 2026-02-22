@@ -1,5 +1,5 @@
 import { Text } from "@/src/components/ui/Text";
-import { useAuth } from "@/src/store/AuthContext";
+import { useAuthStore } from "@/src/store/AuthStore";
 import { MaterialIcons } from "@expo/vector-icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -54,7 +54,7 @@ const TOTAL_STEPS = 5;
 // dark: styles removed for nativewind consistency
 export default function VendorFormFlow() {
   const [currentStep, setCurrentStep] = useState(1);
-  const { login } = useAuth();
+  const { setAuth } = useAuthStore();
   const formMethods = useForm<VendorFormValues>({
     resolver: zodResolver(vendorFormSchema),
     defaultValues: {
@@ -173,11 +173,10 @@ export default function VendorFormFlow() {
   const handleSubmitFinal = handleSubmit(async (finalData) => {
     console.log("Submitting data:", finalData);
     await AsyncStorage.setItem("vendorData", JSON.stringify(finalData));
-    login({
+    setAuth("demo-vendor-token", {
       id: `vendor-${Date.now()}`,
       email: finalData.email,
       name: finalData.fullName,
-      role: "vendor",
     });
   });
 

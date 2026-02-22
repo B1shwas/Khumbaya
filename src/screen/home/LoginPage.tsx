@@ -1,8 +1,8 @@
 import { Text } from "@/src/components/ui/Text";
+import { useLogin } from "@/src/features/user/api/use-user";
 import { MaterialIcons } from "@expo/vector-icons";
 import { Link, useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useLogin } from "@/src/features/user/api/use-user";
 import {
   Animated,
   ImageBackground,
@@ -14,7 +14,6 @@ import {
   View,
 } from "react-native";
 
-import { useAuth } from "@/src/store/AuthContext";
 
 const HERO_IMAGE = {
   uri: "https://lh3.googleusercontent.com/aida-public/AB6AXuCN-FEoQhxG6lP-FQVMe1qUei4T3CxXoHkTHsDyNDxSO_IFRDxGIht5dykZ-3DWt2lTQjhV-KLi5ZFosSjyhDNvvSjWAIJ-Rj_-DCV0Lay0B3xe5CiGhhud3kOCrq8ldLXDGfXq9m4ugIBdM8hiHIJkvBfNupxmLg2F9QRVLPclUHCdercJ4mxzdCGPNtzNhEPNcp2BAWODZQu6lJ7We5CmVKBxfHnDhgj8LVVuHJ2dznCSaFIKkzlmhXCI2q2ANN9IH7wGVenBmGA",
@@ -42,14 +41,12 @@ const COPY = {
 } as const;
 
 export default function LoginPage() {
-  // const { mutate: login, isPending } = useLogin();
+  const { mutate: login, isPending, error: mutationError } = useLogin();
   const router = useRouter();
-  const { login } = useAuth();
+  // const { login } = useAuth();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   // Validation
 
@@ -97,57 +94,19 @@ export default function LoginPage() {
   );
 
   const handleLogin = useCallback(async () => {
-    if (isLoginDisabled || isLoading) return;
+    if (isLoginDisabled || isPending) return;
 
-    setIsLoading(true);
-    setError(null);
+    const loginPayload = {
+      email: username,
+      password: password,
+    };
 
-    try {
-      // Simulated API call - replace with actual auth logic
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
-      // TODO: Uncomment and configure backend URL when ready
-      const loginPayload = {
-        email: username,
-        password: password,
-      };
-      // login(loginPayload, {
-      //   onSuccess: (data) => {
-      //     console.log("Login successful:", data);
-      //     // login function will handle setting auth state and redirecting
-      //   },
-      // });
-
-      // try {
-
-      //
-      //   const result = await response.json();
-      //   console.log('Login successful:', result);
-      //
-      //   // If backend returns token and user data
-      //   // const { token, user } = result;
-      //   // login({ ...user, token });
-      // } catch (apiError) {
-      //   setError("Invalid credentials. Please try again.");
-      //   setIsLoading(false);
-      //   return;
-      // }
-
-      // Set user in AuthContext for client role - AuthContext will handle redirect
-      login({
-        id: "1",
-        email: username,
-        name: username.split("@")[0],
-        role: "client",
-      });
-
-      // Navigation will be handled by AuthContext's NavigationHandler
-    } catch (err) {
-      setError("Invalid credentials. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
-  }, [router, isLoginDisabled, isLoading, login]);
+    login(loginPayload, {
+      onSuccess: (data) => {
+        console.log("Login successful:", data)
+      },
+    });
+  }, [isLoginDisabled, isPending, login, username, password]);
 
   return (
     <KeyboardAvoidingView
@@ -204,9 +163,8 @@ export default function LoginPage() {
                 placeholderTextColor="text-muted-light"
                 autoCapitalize="none"
                 keyboardType="email-address"
-                className={`h-14 rounded-md border bg-white px-4 text-base text-text-light ${
-                  emailError ? "border-red-500" : "border-gray-200"
-                }`}
+                className={`h-14 rounded-md border bg-white px-4 text-base text-text-light ${emailError ? "border-red-500" : "border-gray-200"
+                  }`}
               />
               {emailError && (
                 <Text className="ml-1 mt-1 text-xs text-red-500">
@@ -226,9 +184,8 @@ export default function LoginPage() {
                   placeholder={COPY.passwordPlaceholder}
                   placeholderTextColor="text-muted-light"
                   secureTextEntry={!isPasswordVisible}
-                  className={`h-14 rounded-md border bg-white px-4 text-base text-text-light ${
-                    passwordError ? "border-red-500" : "border-gray-200"
-                  }`}
+                  className={`h-14 rounded-md border bg-white px-4 text-base text-text-light ${passwordError ? "border-red-500" : "border-gray-200"
+                    }`}
                 />
                 <Pressable
                   onPress={() => setIsPasswordVisible((prev) => !prev)}
@@ -254,14 +211,13 @@ export default function LoginPage() {
 
             <Pressable
               onPress={handleLogin}
-              disabled={isLoginDisabled || isLoading}
-              className={`h-14 flex-row items-center justify-center gap-2 rounded-md bg-primary shadow-md shadow-primary/20 ${
-                isLoginDisabled || isLoading ? "opacity-60" : ""
-              }`}
+              disabled={isLoginDisabled || isPending}
+              className={`h-14 flex-row items-center justify-center gap-2 rounded-md bg-primary shadow-md shadow-primary/20 ${isLoginDisabled || isPending ? "opacity-60" : ""
+                }`}
               accessibilityRole="button"
               accessibilityLabel="Login"
             >
-              {isLoading ? (
+              {isPending ? (
                 <Animated.View className="h-5 w-5 items-center justify-center rounded-full border-2 border-white border-t-transparent" />
               ) : (
                 <>
@@ -271,10 +227,10 @@ export default function LoginPage() {
               )}
             </Pressable>
 
-            {error && (
+            {mutationError && (
               <View className="rounded-lg bg-red-50 p-3">
                 <Text className="text-center text-sm text-red-600">
-                  {error}
+                  {mutationError.message || "Invalid credentials. Please try again."}
                 </Text>
               </View>
             )}

@@ -5,7 +5,9 @@ export const useCreateEvent = () => {
   return useMutation({
     mutationFn: createEventApi,
     onMutate: async (newEvent) => {
-      // ... optimistic logic ...
+     await queryClient.cancelQueries({ queryKey: ['events'] });
+     const previousPost = queryClient.getQueryData(['events']);
+
     },
   });
 };

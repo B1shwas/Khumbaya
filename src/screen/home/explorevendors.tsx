@@ -3,7 +3,7 @@ import { FloatLoginBanner } from "@/src/components/onboarding/FloatLoginBanner";
 import { HeaderExploreVendor } from "@/src/components/onboarding/HeaderExploreVendor";
 import { VendorCard } from "@/src/components/onboarding/VendorCard";
 import { ONBOARDING_VENDORS } from "@/src/constants/vendors";
-import { useAuth } from "@/src/store/AuthContext";
+import { useAuthStore } from "@/src/store/AuthStore";
 import { useState } from "react";
 import { ScrollView, View } from "react-native";
 
@@ -18,7 +18,7 @@ const CATEGORIES = [
 
 export default function ExploreVendors() {
   const [activeCategory, setActiveCategory] = useState("All");
-  const { user } = useAuth();
+  const { user } = useAuthStore();
 
   return (
     <View className="flex-1 bg-gray-50 px-4">

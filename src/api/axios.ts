@@ -3,6 +3,7 @@ import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
 
 // Create axios instance
 import { API_BASE_URL } from "../config/env";
+import { useAuthStore } from "../store/AuthStore";
 export const api = axios.create({
   baseURL: API_BASE_URL,
   timeout: 10000,
@@ -14,7 +15,7 @@ export const api = axios.create({
 api.interceptors.request.use(
   async (config: InternalAxiosRequestConfig) => {
     // const token = Get the token from the auth stooree (if you have one)
-    const token = "temp"; // Dummy token for now
+    const token = useAuthStore.getState().token; // Dummy token for now
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -49,9 +50,9 @@ api.interceptors.response.use(
     // Example: Refresh token logic
     if (error.response?.status === 401) {
       //       TODO: implement refresh token & retry
-      //       AsyncStorage.removeItem("token");
-      //       AsyncStorage.removeItem("user");
+      ;
       //       remove from the store as well
+      useAuthStore.getState().clearAuth();
     }
 
     return Promise.reject(error);

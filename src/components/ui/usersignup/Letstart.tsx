@@ -1,6 +1,6 @@
 import { Button } from "@/src/components/ui/Button";
 import { Text } from "@/src/components/ui/Text";
-import { useAuth } from "@/src/store/AuthContext";
+import { useAuthStore } from "@/src/store/AuthStore";
 import { MaterialIcons } from "@expo/vector-icons";
 import { Link, useRouter } from "expo-router";
 import { useState } from "react";
@@ -35,7 +35,7 @@ export default function Letstart({
     Record<string, string>
   >({});
   const router = useRouter();
-  const { login } = useAuth();
+  const { setAuth } = useAuthStore();
 
   // Validation functions
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -66,48 +66,12 @@ export default function Letstart({
 
   const handleSignUp = () => {
     if (!validateForm()) return;
-
-    // Login and navigate to home - AuthContext will handle redirect
-    login({
+    setAuth("demo-token", {
       id: `client-${Date.now()}`,
-      email: data.email || "demo@khumbaya.app",
-      name: data.fullName || "Demo Client",
-      role: "client",
+      email: data.email,
+      name: data.fullName,
     });
 
-    // TODO: Uncomment and configure backend URL when ready
-    // const signupPayload = {
-    //   fullName: data.fullName,
-    //   email: data.email,
-    //   phone: data.phone,
-    //   password: data.password,
-    // };
-    //
-    // try {
-    //   const response = await fetch('https://your-api-domain.com/api/auth/signup', {
-    //     method: 'POST',
-    //     headers: {
-    //       'Content-Type': 'application/json',
-    //     },
-    //     body: JSON.stringify(signupPayload),
-    //   });
-    //
-    //   if (!response.ok) {
-    //     throw new Error(`Signup failed: ${response.status}`);
-    //   }
-    //
-    //   const result = await response.json();
-    //   console.log('Signup successful:', result);
-    //
-    //   // If backend returns token, use it for authentication
-    //   // const { token, user } = result;
-    //   // login({ ...user, token });
-    // } catch (error) {
-    //   console.error('Signup error:', error);
-    //   // Handle error - show toast/alert to user
-    // }
-
-    // Navigation will be handled by AuthContext's NavigationHandler
   };
 
   return (
@@ -144,9 +108,8 @@ export default function Letstart({
             }}
             placeholder="Jane Doe"
             placeholderTextColor="#896175"
-            className={`h-14 rounded-xl border bg-white px-4 text-base text-text-light ${
-              validationErrors.fullName ? "border-red-500" : "border-border"
-            }`}
+            className={`h-14 rounded-xl border bg-white px-4 text-base text-text-light ${validationErrors.fullName ? "border-red-500" : "border-border"
+              }`}
           />
           {validationErrors.fullName && (
             <Text className="text-xs text-red-500">
@@ -171,9 +134,8 @@ export default function Letstart({
             placeholderTextColor="#896175"
             keyboardType="email-address"
             autoCapitalize="none"
-            className={`h-14 rounded-xl border bg-white px-4 text-base text-text-light ${
-              validationErrors.email ? "border-red-500" : "border-border"
-            }`}
+            className={`h-14 rounded-xl border bg-white px-4 text-base text-text-light ${validationErrors.email ? "border-red-500" : "border-border"
+              }`}
           />
           {validationErrors.email && (
             <Text className="text-xs text-red-500">
@@ -201,9 +163,8 @@ export default function Letstart({
             Password
           </Text>
           <View
-            className={`flex-row items-center rounded-xl border bg-white px-4 ${
-              validationErrors.password ? "border-red-500" : "border-border"
-            }`}
+            className={`flex-row items-center rounded-xl border bg-white px-4 ${validationErrors.password ? "border-red-500" : "border-border"
+              }`}
           >
             <TextInput
               value={data.password}

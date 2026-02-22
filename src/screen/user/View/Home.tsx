@@ -10,7 +10,7 @@ import {
 
 import EventList from "@/src/constants/event";
 import VENUES from "@/src/constants/venues";
-import { useAuth } from "@/src/store/AuthContext";
+import { useAuthStore } from "@/src/store/AuthStore";
 import { Ionicons } from "@expo/vector-icons";
 import { router, type RelativePathString } from "expo-router";
 import { useCallback } from "react";
@@ -77,7 +77,7 @@ const COUPLES = [
 // ============================================
 
 export default function HomePage() {
-  const { user } = useAuth();
+  const { user } = useAuthStore();
 
   // Navigation handlers wrapped in useCallback
   const navigateToEvents = useCallback(
