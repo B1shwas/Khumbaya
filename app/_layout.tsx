@@ -3,12 +3,13 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useFonts } from "expo-font";
 import { Stack, useRouter, useSegments } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { StatusBar } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "react-native-reanimated";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
+import { useProfile } from "@/src/features/user/api/use-user";
 import "./global.css";
 
 const queryClient = new QueryClient();
@@ -16,23 +17,28 @@ const queryClient = new QueryClient();
 SplashScreen.preventAutoHideAsync();
 
 function RootNavigation() {
-  const { token, isLoading } = useAuthStore();
+  const { token } = useAuthStore();
   const segments = useSegments();
   const router = useRouter();
+  const { error, isLoading } = useProfile();
+
+  // Keep a ref so the effect can read the latest segments
+  // without segments itself being a dependency (prevents infinite loop)
+  const segmentsRef = useRef(segments);
+  segmentsRef.current = segments;
 
   useEffect(() => {
     if (isLoading) return;
 
-    const inAuthGroup = segments[0] === "(onboarding)";
+    const inAuthGroup = segmentsRef.current[0] === "(onboarding)";
 
-    if (token && inAuthGroup) {
-      // If we have a token and are in onboarding, move to protected
+    if (inAuthGroup && !error) {
       router.replace("/(protected)/(client-tabs)/home");
-    } else if (!token && !inAuthGroup) {
-      // If we have no token and are NOT in onboarding, move to onboarding
+    } else if (!!error && !inAuthGroup) {
+      // No valid token / profile error — send back to onboarding
       router.replace("/(onboarding)");
     }
-  }, [token, isLoading, segments]);
+  }, [token, isLoading, error]);
 
   if (isLoading) {
     return null;
@@ -65,13 +71,16 @@ export default function RootLayout() {
 
   useEffect(() => {
     if (fontsLoaded) {
-      useAuthStore.getState().hydrate().then(() => {
-        SplashScreen.hideAsync();
-      });
+      useAuthStore
+        .getState()
+        .hydrate()
+        .then(() => {
+          SplashScreen.hideAsync();
+        });
     }
   }, [fontsLoaded]);
 
-  if (!fontsLoaded && !useAuthStore.getState().isLoading) {
+  if (!fontsLoaded && useAuthStore.getState().isLoading) {
     return null;
   }
 

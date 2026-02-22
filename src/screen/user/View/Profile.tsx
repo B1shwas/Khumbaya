@@ -55,6 +55,7 @@ export default function ProfileScreen() {
       console.error("Error checking vendor status:", error);
     }
   };
+  const { clearAuth: logout, user } = useAuthStore();
 
   const handleLogout = () => {
     Alert.alert(
@@ -80,6 +81,8 @@ export default function ProfileScreen() {
         {/* PROFILE */}
         <View className="items-center mt-6 mb-2 bg-white py-6">
           <View className="bg-white p-1 rounded-full !bg-primary">
+        <View className="items-center mt-6 mb-6 bg-white py-6">
+          <View className="p-1 rounded-full !bg-primary">
             <Image
               source={{
                 uri: "https://lh3.googleusercontent.com/aida-public/AB6AXuD8QYwLdrh7xjte39mVYvDpi053GDi8rf6uQT5uRehpkzgSaSUO1bU-gjQR3vC5rz0trs8aPuTJQ-NF-7EWhF0dW0Sncg_Vhq_mo8NftERtP4ZVATWyqgiFk4YEYtjMq-kH0vubWOCRAWN0iY_YzSfmg5zLdv55nlQE84xdxw-TTt-IVuBhKoAuBzCQypf1qEhxeHZNxVPFpTjsCytpO95l4FHsaMS3HtpB0dJJssJtnyKpr-sBd50Vrtk2mkFa_ESaiscwocjW8do",
@@ -94,7 +97,7 @@ export default function ProfileScreen() {
           </Pressable>
 
           <Text className="text-2xl font-bold mt-4 text-gray-900">
-            Sarah Mitchell
+            {user?.name}
           </Text>
 
           <Text className="text-gray-500 text-sm">Premium Member</Text>
