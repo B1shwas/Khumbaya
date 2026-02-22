@@ -2,9 +2,16 @@ import { useAuthStore } from "@/src/store/AuthStore";
 import { MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { Link } from "expo-router";
-import { useState } from "react";
-import { Image, Pressable, ScrollView, Text, View } from "react-native";
+import { useEffect, useState } from "react";
+import { Alert, Image, Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+// Storage keys
+const STORAGE_KEYS = {
+  BUSINESS_INFO: "business_info",
+  VENDOR_SETUP_COMPLETE: "vendor_setup_complete",
+};
 
 type ToggleButtonProps = {
   title: string;
@@ -15,14 +22,49 @@ type ToggleButtonProps = {
 type RowProps = {
   icon: keyof typeof MaterialIcons.glyphMap;
   title: string;
+  subtitle?: string;
+  badge?: string;
+  badgeColor?: string;
 };
 
 export default function ProfileScreen() {
   const [tab, setTab] = useState<"account" | "info">("account");
   const { clearAuth: logout } = useAuthStore();
+  
+  // Vendor setup status
+  const [isVendorSetupComplete, setIsVendorSetupComplete] = useState(false);
+  const [vendorType, setVendorType] = useState("");
+  const [businessName, setBusinessName] = useState("");
+  const [ownerName, setOwnerName] = useState("");
+
+  useEffect(() => {
+    checkVendorSetupStatus();
+  }, []);
+
+  const checkVendorSetupStatus = async () => {
+    try {
+      const storedInfo = await AsyncStorage.getItem(STORAGE_KEYS.BUSINESS_INFO);
+      if (storedInfo) {
+        const data = JSON.parse(storedInfo);
+        setIsVendorSetupComplete(data.setupComplete || false);
+        setVendorType(data.vendorType || "");
+        setBusinessName(data.businessName || "");
+        setOwnerName(data.ownerName || "");
+      }
+    } catch (error) {
+      console.error("Error checking vendor status:", error);
+    }
+  };
 
   const handleLogout = () => {
-    logout();
+    Alert.alert(
+      "Log Out",
+      "Are you sure you want to log out?",
+      [
+        { text: "Cancel", style: "cancel" },
+        { text: "Log Out", style: "destructive", onPress: logout },
+      ]
+    );
   };
 
   return (
@@ -36,7 +78,7 @@ export default function ProfileScreen() {
         </View>
 
         {/* PROFILE */}
-        <View className="items-center mt-6 mb-6 bg-white py-6">
+        <View className="items-center mt-6 mb-2 bg-white py-6">
           <View className="bg-white p-1 rounded-full !bg-primary">
             <Image
               source={{
@@ -58,8 +100,43 @@ export default function ProfileScreen() {
           <Text className="text-gray-500 text-sm">Premium Member</Text>
         </View>
 
+        {/* SET UP BUSINESS BUTTON - After text, below premium member */}
+        {!isVendorSetupComplete && (
+          <View className="px-6 pb-4 bg-white">
+            <Link href="/profile/business-information" asChild>
+              <Pressable className="bg-gradient-to-r from-pink-500 to-pink-600 rounded-xl p-4 shadow-lg shadow-pink-200 active:scale-[0.98]">
+                <View className="flex-row items-center justify-center gap-2">
+                  <MaterialIcons name="storefront" size={20} color="dark" />
+                  <Text className="text-dark font-bold text-base">Set Up Business</Text>
+                </View>
+              </Pressable>
+            </Link>
+          </View>
+        )}
+
+        {/* Vendor Status Badge - Show when setup is complete */}
+        {isVendorSetupComplete && (
+          <View className="px-6 pb-4 bg-white">
+            <View className="bg-green-50 rounded-xl p-3 border border-green-100">
+              <View className="flex-row items-center justify-between">
+                <View className="flex-row items-center gap-2">
+                  <MaterialIcons name="verified" size={18} color="#22c55e" />
+                  <Text className="text-green-800 font-semibold text-sm">
+                    {businessName || "Vendor Active"}
+                  </Text>
+                </View>
+                <Link href="/profile/business-information" asChild>
+                  <Pressable className="bg-green-500 px-3 py-1 rounded-full">
+                    <Text className="text-white text-xs font-semibold">View</Text>
+                  </Pressable>
+                </Link>
+              </View>
+            </View>
+          </View>
+        )}
+
         {/* GLASS TOGGLE */}
-        <View className="mx-6 mt-8 bg-white rounded-2xl p-1 flex-row shadow-sm">
+        <View className="mx-6 mt-4 bg-white rounded-2xl p-1 flex-row shadow-sm">
           <ToggleButton
             title=" Business"
             active={tab === "account"}
@@ -73,7 +150,15 @@ export default function ProfileScreen() {
         </View>
 
         {/* CONTENT */}
-        {tab === "account" ? <Account /> : <Info />}
+        {tab === "account" ? (
+          <Account 
+            isVendorSetupComplete={isVendorSetupComplete} 
+            vendorType={vendorType}
+            businessName={businessName}
+          />
+        ) : (
+          <Info />
+        )}
 
         {/* LOGOUT */}
         <Pressable className="mx-6 mt-10 mb-20" onPress={handleLogout}>
@@ -119,7 +204,7 @@ const ToggleButton = ({ title, active, onPress }: ToggleButtonProps) => {
 
 /* ---------- Row ---------- */
 
-const Row = ({ icon, title, href }: RowProps & { href: string }) => (
+const Row = ({ icon, title, href, subtitle, badge, badgeColor }: RowProps & { href: string }) => (
   <Link href={href as any} asChild>
     <Pressable className="flex-row items-center justify-between bg-white p-4 rounded-2xl mb-3 shadow-sm active:scale-[0.98]">
       <View className="flex-row items-center gap-3">
@@ -130,41 +215,131 @@ const Row = ({ icon, title, href }: RowProps & { href: string }) => (
           <MaterialIcons name={icon} size={20} color="#ec4899" />
         </LinearGradient>
 
-        <Text className="font-semibold text-gray-900">{title}</Text>
+        <View>
+          <Text className="font-semibold text-gray-900">{title}</Text>
+          {subtitle && <Text className="text-xs text-gray-500">{subtitle}</Text>}
+        </View>
       </View>
 
-      <MaterialIcons name="chevron-right" size={22} color="#9ca3af" />
+      <View className="flex-row items-center gap-2">
+        {badge && (
+          <View className={`px-2 py-1 rounded-full ${badgeColor || "bg-green-100"}`}>
+            <Text className={`text-xs font-semibold ${badgeColor ? "text-white" : "text-green-700"}`}>
+              {badge}
+            </Text>
+          </View>
+        )}
+        <MaterialIcons name="chevron-right" size={22} color="#9ca3af" />
+      </View>
     </Pressable>
   </Link>
 );
 
 /* ---------- Sections ---------- */
 
-const Account = () => (
-  <View className="mx-6 mt-8">
-    <Text className="text-xs font-bold text-gray-400 mb-4 uppercase tracking-wider">
-      BUSINESS
-    </Text>
+const Account = ({ 
+  isVendorSetupComplete, 
+  vendorType, 
+  businessName 
+}: { 
+  isVendorSetupComplete: boolean;
+  vendorType: string;
+  businessName: string;
+}) => {
+  // Get vendor type display name
+  const getVendorTypeDisplay = () => {
+    const types: Record<string, string> = {
+      venue: "Venue",
+      photographer: "Photographer",
+      caterer: "Caterer",
+      decorator: "Decorator",
+      makeup: "Makeup Artist",
+      dj: "DJ / Music",
+      planner: "Planner",
+      transport: "Transport",
+    };
+    return types[vendorType] || "Vendor";
+  };
 
-    <Row icon="analytics" title="Analytics" href="/profile/analytics" />
-    <Row
-      icon="business"
-      title="Business Information"
-      href="/profile/business-information"
-    />
-    <Row
-      icon="sell"
-      title="Services & Pricing"
-      href="/profile/services-pricing"
-    />
-    <Row icon="photo-library" title="Portfolio" href="/profile/portfolio" />
-    <Row
-      icon="verified"
-      title="Vendor Verification"
-      href="/profile/vendor-verification"
-    />
-  </View>
-);
+  return (
+    <View className="mx-6 mt-8">
+      <Text className="text-xs font-bold text-gray-400 mb-4 uppercase tracking-wider">
+        BUSINESS
+      </Text>
+
+      <Row 
+        icon="analytics" 
+        title="Analytics" 
+        href="/profile/analytics"
+        subtitle="View your performance"
+      />
+      
+      <Row
+        icon="business"
+        title="Business Information"
+        href="/profile/business-information"
+        subtitle={isVendorSetupComplete ? businessName : "Complete your profile"}
+        badge={isVendorSetupComplete ? "Active" : "Required"}
+        badgeColor={isVendorSetupComplete ? "bg-green-100" : "bg-yellow-100"}
+      />
+      
+      <Row
+        icon="sell"
+        title="Services & Pricing"
+        href="/profile/services-pricing"
+        subtitle="Manage your packages"
+      />
+      
+      <Row 
+        icon="photo-library" 
+        title="Portfolio" 
+        href="/profile/portfolio"
+        subtitle="Showcase your work"
+      />
+      
+      <Row
+        icon="verified"
+        title="Vendor Verification"
+        href="/profile/vendor-verification"
+        subtitle={isVendorSetupComplete ? "Verified" : "Get verified"}
+        badge={isVendorSetupComplete ? "✓" : "Pending"}
+        badgeColor={isVendorSetupComplete ? "bg-green-100" : "bg-gray-100"}
+      />
+      
+      {/* Quick Actions for Vendors */}
+      {isVendorSetupComplete && (
+        <>
+          <Text className="text-xs font-bold text-gray-400 mb-4 uppercase tracking-wider mt-6">
+            QUICK ACTIONS
+          </Text>
+          
+          <Row
+            icon="calendar-month"
+            title="Availability"
+            href="/profile/availability"
+            subtitle="Manage your calendar"
+          />
+          
+          <Row
+            icon="chat"
+            title="Messages"
+            href="/profile/messages"
+            subtitle="View inquiries"
+            badge="3 new"
+            badgeColor="bg-pink-100"
+          />
+          
+          <Row
+            icon="receipt-long"
+            title="Bookings"
+            href="/profile/bookings"
+            subtitle="Manage reservations"
+          />
+        </>
+      )}
+    </View>
+  );
+};
 
 const Info = () => (
   <View className="mx-6 mt-8">
@@ -184,5 +359,12 @@ const Info = () => (
       href="/profile/privacy-security"
     />
     <Row icon="settings" title="App Settings" href="/profile/app-settings" />
+    
+    <Text className="text-xs font-bold text-gray-400 mb-4 uppercase tracking-wider mt-6">
+      SUPPORT
+    </Text>
+    
+    <Row icon="help" title="Help & FAQ" href="/profile/help" />
+    <Row icon="info" title="About" href="/profile/about" />
   </View>
 );

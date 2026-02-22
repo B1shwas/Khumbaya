@@ -1,2 +1,2 @@
-import VendorComparison from "@/src/screen/vendor/VendorComparison";
+import VendorComparison from "@/src/screen/vendorProfile/VendorComparison";
 export default VendorComparison;

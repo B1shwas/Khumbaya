@@ -77,12 +77,14 @@ export default function RootLayout() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <SafeAreaProvider>
-        <StatusBar barStyle="dark-content" backgroundColor={"#ffffff"} />
-        <SafeAreaView className="flex-1  " edges={["top", "bottom"]}>
-          <RootNavigation />
-        </SafeAreaView>
-      </SafeAreaProvider>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <SafeAreaProvider>
+          <StatusBar barStyle="dark-content" backgroundColor={"#ffffff"} />
+          <SafeAreaView className="flex-1  " edges={["top", "bottom"]}>
+            <RootNavigation />
+          </SafeAreaView>
+        </SafeAreaProvider>
+      </GestureHandlerRootView>
     </QueryClientProvider>
   );
 }

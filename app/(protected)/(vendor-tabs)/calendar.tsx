@@ -1,3 +1,3 @@
-import VendorCalendarScreen from "@/src/screen/vendor/VendorCalnder";
+import VendorCalendarScreen from "@/src/screen/vendorProfile/VendorCalnder";
 
 export default VendorCalendarScreen;

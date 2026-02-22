@@ -1,4 +1,4 @@
-import BookingReqModal from "@/src/screen/vendor/BookingReq";
+import BookingReqModal from "@/src/screen/vendorProfile/BookingReq";
 import { useLocalSearchParams } from "expo-router";
 
 export default function EnquiryFormScreen() {

@@ -1,2 +1,2 @@
-import VendorDetailed from "@/src/screen/vendor/VendorDetailed";
+import VendorDetailed from "@/src/screen/vendorProfile/VendorDetailed";
 export default VendorDetailed;

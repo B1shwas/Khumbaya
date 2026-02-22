@@ -1,3 +1,3 @@
-import Profile from "@/src/screen/vendor/Profile";
+import Profile from "@/src/screen/vendorProfile/Profile";
 
 export default Profile;

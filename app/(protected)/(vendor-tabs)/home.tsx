@@ -1,2 +1,2 @@
-import VendorHomeScreen from "@/src/screen/vendor/vendorHome";
+import VendorHomeScreen from "@/src/screen/vendorProfile/vendorHome";
 export default VendorHomeScreen;

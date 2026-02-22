@@ -1,3 +1,3 @@
-import EventVendorsScreen from "@/src/screen/vendor/EventvendorScreen";
+import EventVendorsScreen from "@/src/screen/vendorProfile/EventvendorScreen";
 
 export default EventVendorsScreen;
