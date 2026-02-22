@@ -1,12 +1,8 @@
-import {
-  SUB_EVENT_TEMPLATES,
-  SubEventTemplate,
-  TemplateActivity,
-} from "@/src/constants/subeventTemplates";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
+  ActivityIndicator,
   Alert,
   FlatList,
   Image,
@@ -19,55 +15,68 @@ import {
   View,
 } from "react-native";
 
+import { ActivityItem, GuestItem } from "@/src/components/subevent";
+import { useSubEvent } from "@/src/hooks/useSubEvent";
+import { Vendor } from "@/src/types";
+
 // ============================================
-// Types
+// Helper Functions
 // ============================================
 
-interface SelectedActivity {
-  activity: TemplateActivity;
-  time: string;
-  budget: string;
-}
+const getCategoryColor = (category: string): string => {
+  const colors: Record<string, string> = {
+    Music: "#8B5CF6",
+    Decoration: "#10B981",
+    Food: "#F59E0B",
+    Photography: "#EC4899",
+    Lighting: "#6366F1",
+    Video: "#14B8A6",
+    Catering: "#EF4444",
+    Florist: "#F97316",
+    Makeup: "#D946EF",
+    DJ: "#06B6D4",
+  };
+  return colors[category] || "#6B7280";
+};
 
-interface Guest {
-  id: string;
-  name: string;
-  phone: string;
-  email: string;
-  relation: string;
-  invited: boolean;
-}
-
-interface Vendor {
-  id: string;
-  name: string;
-  category: string;
-  rating: number;
-  price: string;
-  phone?: string;
-  email?: string;
-  selected?: boolean;
-  imageUrl?: string;
-  verified?: boolean;
-  reviews?: number;
-  yearsExperience?: number;
-  description?: string;
-}
+// ============================================
+// Main Component
+// ============================================
 
 export default function SubEventDetail() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const subEventId = params.subEventId as string;
-  const eventId = params.eventId as string;
-  const isNew = params.isNew === "true";
 
-  const [template, setTemplate] = useState<SubEventTemplate | null>(null);
-  const [date, setDate] = useState("");
-  const [theme, setTheme] = useState("");
-  const [budget, setBudget] = useState("");
-  const [activities, setActivities] = useState<SelectedActivity[]>([]);
-  const [guests, setGuests] = useState<Guest[]>([]);
-  const [vendors, setVendors] = useState<Vendor[]>([]);
+  // Use the hook
+  const {
+    template,
+    date,
+    theme,
+    budget,
+    activities,
+    guests,
+    vendors,
+    isLoading,
+    selectedVendorsCount,
+    invitedGuestsCount,
+    setDate,
+    setTheme,
+    setBudget,
+    handleActivityToggle,
+    handleActivityTimeChange,
+    handleActivityBudgetChange,
+    isActivitySelected,
+    getSelectedActivity,
+    handleToggleVendor,
+    handleCallVendor,
+    handleEmailVendor,
+    handleToggleGuest,
+    handleAddGuest,
+    handleDeleteGuest,
+    handleUploadExcel,
+    saveSubEvent,
+  } = useSubEvent(subEventId);
 
   // Modal states
   const [showGuestModal, setShowGuestModal] = useState(false);
@@ -96,231 +105,9 @@ export default function SubEventDetail() {
     "Other",
   ];
 
-  // Vendor category colors
-  const getCategoryColor = (category: string): string => {
-    const colors: Record<string, string> = {
-      Music: "#8B5CF6",
-      Decoration: "#10B981",
-      Food: "#F59E0B",
-      Photography: "#EC4899",
-      Lighting: "#6366F1",
-      Video: "#14B8A6",
-      Catering: "#EF4444",
-      Florist: "#F97316",
-      Makeup: "#D946EF",
-      DJ: "#06B6D4",
-    };
-    return colors[category] || "#6B7280";
-  };
-
-  // Get vendor placeholder image based on category
-  const getVendorPlaceholderImage = (category: string): string => {
-    const images: Record<string, string> = {
-      Music:
-        "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=200&h=200&fit=crop",
-      Decoration:
-        "https://images.unsplash.com/photo-1519225421980-715cb0202128?w=200&h=200&fit=crop",
-      Food: "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=200&h=200&fit=crop",
-      Photography:
-        "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=200&h=200&fit=crop",
-      Lighting:
-        "https://images.unsplash.com/photo-1504701954957-2010ec3bcec1?w=200&h=200&fit=crop",
-      Video:
-        "https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?w=200&h=200&fit=crop",
-      Catering:
-        "https://images.unsplash.com/photo-1555244162-803834f70033?w=200&h=200&fit=crop",
-      Florist:
-        "https://images.unsplash.com/photo-1487530811176-3780de880c2d?w=200&h=200&fit=crop",
-      Makeup:
-        "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=200&h=200&fit=crop",
-      DJ: "https://images.unsplash.com/photo-1571266028243-3716002dbc84?w=200&h=200&fit=crop",
-    };
-    return (
-      images[category] ||
-      "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=200&h=200&fit=crop"
-    );
-  };
-
-  useEffect(() => {
-    // Load template data
-    const foundTemplate = SUB_EVENT_TEMPLATES.find((t) => t.id === subEventId);
-    if (foundTemplate) {
-      setTemplate(foundTemplate);
-    }
-
-    // Initialize mock vendors with images
-    setVendors([
-      {
-        id: "v1",
-        name: "DJ Beats Pro",
-        category: "Music",
-        rating: 4.8,
-        price: "$$$",
-        phone: "+91 98765 12345",
-        email: "djbeats@email.com",
-        verified: true,
-        reviews: 124,
-        yearsExperience: 8,
-        description:
-          "Professional DJ services for weddings and parties with state-of-the-art equipment.",
-        imageUrl: getVendorPlaceholderImage("Music"),
-      },
-      {
-        id: "v2",
-        name: "Flower Decor Studio",
-        category: "Decoration",
-        rating: 4.9,
-        price: "$$",
-        phone: "+91 98765 12346",
-        email: "flowers@email.com",
-        verified: true,
-        reviews: 89,
-        yearsExperience: 12,
-        description:
-          "Exquisite floral arrangements and venue decoration for all occasions.",
-        imageUrl: getVendorPlaceholderImage("Decoration"),
-      },
-      {
-        id: "v3",
-        name: "Catering Kings",
-        category: "Food",
-        rating: 4.7,
-        price: "$$$",
-        phone: "+91 98765 12347",
-        email: "catering@email.com",
-        verified: true,
-        reviews: 156,
-        yearsExperience: 15,
-        description:
-          "Multi-cuisine catering with live cooking stations and bar service.",
-        imageUrl: getVendorPlaceholderImage("Food"),
-      },
-      {
-        id: "v4",
-        name: "Photo Moments",
-        category: "Photography",
-        rating: 4.9,
-        price: "$$",
-        phone: "+91 98765 12348",
-        email: "photo@email.com",
-        verified: true,
-        reviews: 203,
-        yearsExperience: 10,
-        description:
-          "Capturing your precious moments with cinematic photography and albums.",
-        imageUrl: getVendorPlaceholderImage("Photography"),
-      },
-      {
-        id: "v5",
-        name: "Lighting Masters",
-        category: "Lighting",
-        rating: 4.6,
-        price: "$$$",
-        phone: "+91 98765 12349",
-        email: "lighting@email.com",
-        verified: false,
-        reviews: 45,
-        yearsExperience: 5,
-        description:
-          "Transform your venue with stunning LED lighting, dance floors, and special effects.",
-        imageUrl: getVendorPlaceholderImage("Lighting"),
-      },
-    ]);
-
-    // Initialize mock guests
-    setGuests([
-      {
-        id: "1",
-        name: "Priya Sharma",
-        phone: "+91 98765 43210",
-        email: "priya@email.com",
-        relation: "Friend",
-        invited: false,
-      },
-      {
-        id: "2",
-        name: "Rahul Kapoor",
-        phone: "+91 98765 43211",
-        email: "rahul@email.com",
-        relation: "Family",
-        invited: false,
-      },
-      {
-        id: "3",
-        name: "Sarah Jenkins",
-        phone: "+1 555-123-4567",
-        email: "sarah@email.com",
-        relation: "Friend",
-        invited: false,
-      },
-      {
-        id: "4",
-        name: "Mike Ross",
-        phone: "+1 555-234-5678",
-        email: "mike@email.com",
-        relation: "Colleague",
-        invited: false,
-      },
-      {
-        id: "5",
-        name: "Amara Singh",
-        phone: "+91 98765 43212",
-        email: "amara@email.com",
-        relation: "Family",
-        invited: false,
-      },
-    ]);
-  }, [subEventId]);
-
-  // ============================================
-  // Activity Handlers
-  // ============================================
-
-  const handleActivityToggle = (activity: TemplateActivity) => {
-    const existingIndex = activities.findIndex(
-      (a) => a.activity.id === activity.id
-    );
-
-    if (existingIndex >= 0) {
-      setActivities((prev) =>
-        prev.filter((a) => a.activity.id !== activity.id)
-      );
-    } else {
-      setActivities((prev) => [...prev, { activity, time: "", budget: "" }]);
-    }
-  };
-
-  const handleActivityTimeChange = (activityId: string, time: string) => {
-    setActivities((prev) =>
-      prev.map((a) => (a.activity.id === activityId ? { ...a, time } : a))
-    );
-  };
-
-  const handleActivityBudgetChange = (activityId: string, budget: string) => {
-    setActivities((prev) =>
-      prev.map((a) => (a.activity.id === activityId ? { ...a, budget } : a))
-    );
-  };
-
-  const isActivitySelected = (activityId: string): boolean => {
-    return activities.some((a) => a.activity.id === activityId);
-  };
-
-  const getSelectedActivity = (
-    activityId: string
-  ): SelectedActivity | undefined => {
-    return activities.find((a) => a.activity.id === activityId);
-  };
-
   // ============================================
   // Vendor Handlers
   // ============================================
-
-  const handleToggleVendor = (vendorId: string) => {
-    setVendors((prev) =>
-      prev.map((v) => (v.id === vendorId ? { ...v, selected: !v.selected } : v))
-    );
-  };
 
   const handleShowVendorDetail = (vendor: Vendor) => {
     setSelectedVendor(vendor);
@@ -332,42 +119,22 @@ export default function SubEventDetail() {
     setShowVendorContactModal(true);
   };
 
-  const handleCallVendor = (vendor: Vendor) => {
-    Alert.alert("Call", `Calling ${vendor.name} at ${vendor.phone}`);
-  };
-
-  const handleEmailVendor = (vendor: Vendor) => {
-    Alert.alert("Email", `Emailing ${vendor.name} at ${vendor.email}`);
-  };
-
-  const selectedVendorsCount = vendors.filter((v) => v.selected).length;
-
   // ============================================
   // Guest Handlers
   // ============================================
 
-  const handleToggleGuest = (guestId: string) => {
-    setGuests((prev) =>
-      prev.map((g) => (g.id === guestId ? { ...g, invited: !g.invited } : g))
-    );
-  };
-
-  const handleAddGuest = () => {
+  const submitAddGuest = () => {
     if (!newGuestName.trim()) {
       Alert.alert("Error", "Please enter guest name");
       return;
     }
 
-    const newGuest: Guest = {
-      id: Date.now().toString(),
+    handleAddGuest({
       name: newGuestName.trim(),
       phone: newGuestPhone.trim(),
       email: newGuestEmail.trim(),
       relation: newGuestRelation || "Other",
-      invited: true,
-    };
-
-    setGuests((prev) => [...prev, newGuest]);
+    });
 
     // Reset form
     setNewGuestName("");
@@ -377,69 +144,21 @@ export default function SubEventDetail() {
     setShowAddGuestModal(false);
   };
 
-  const handleDeleteGuest = (guestId: string) => {
-    setGuests((prev) => prev.filter((g) => g.id !== guestId));
-  };
-
-  const handleUploadExcel = () => {
-    // Simulate Excel upload
+  const submitUploadExcel = () => {
     setIsUploading(true);
-
-    setTimeout(() => {
+    handleUploadExcel().finally(() => {
       setIsUploading(false);
       setExcelFileName("guest_list.xlsx");
-
-      // Add mock guests from Excel
-      const excelGuests: Guest[] = [
-        {
-          id: "excel1",
-          name: "Amit Patel",
-          phone: "+91 98765 44444",
-          email: "amit@email.com",
-          relation: "Family",
-          invited: true,
-        },
-        {
-          id: "excel2",
-          name: "Neha Gupta",
-          phone: "+91 98765 55555",
-          email: "neha@email.com",
-          relation: "Friend",
-          invited: true,
-        },
-        {
-          id: "excel3",
-          name: "Vikram Singh",
-          phone: "+91 98765 66666",
-          email: "vikram@email.com",
-          relation: "Colleague",
-          invited: true,
-        },
-      ];
-
-      setGuests((prev) => [...prev, ...excelGuests]);
-
-      Alert.alert("Success", "Guests imported successfully!");
       setShowExcelModal(false);
-    }, 2000);
+    });
   };
-
-  const invitedGuestsCount = guests.filter((g) => g.invited).length;
 
   // ============================================
   // Navigation Handlers
   // ============================================
 
-  const handleSave = () => {
-    console.log("Saving sub-event:", {
-      template,
-      date,
-      theme,
-      budget,
-      activities,
-      vendors: vendors.filter((v) => v.selected),
-      invitedGuests: guests.filter((g) => g.invited),
-    });
+  const handleSave = async () => {
+    await saveSubEvent();
     router.back();
   };
 
@@ -451,10 +170,10 @@ export default function SubEventDetail() {
   // Render
   // ============================================
 
-  if (!template) {
+  if (isLoading || !template) {
     return (
-      <View style={styles.container}>
-        <Text>Loading...</Text>
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#ee2b8c" />
       </View>
     );
   }
@@ -515,7 +234,7 @@ export default function SubEventDetail() {
           </View>
         </View>
 
-        {/* Vendors Section - Enhanced with Images */}
+        {/* Vendors Section */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <View>
@@ -562,7 +281,7 @@ export default function SubEventDetail() {
             </View>
           )}
 
-          {/* Vendor Cards with Images */}
+          {/* Vendor Cards */}
           <View style={styles.vendorGrid}>
             {vendors.map((vendor) => (
               <TouchableOpacity
@@ -574,7 +293,6 @@ export default function SubEventDetail() {
                 onPress={() => handleShowVendorDetail(vendor)}
                 activeOpacity={0.8}
               >
-                {/* Vendor Image */}
                 <View style={styles.vendorImageContainer}>
                   <Image
                     source={{ uri: vendor.imageUrl }}
@@ -592,9 +310,7 @@ export default function SubEventDetail() {
                     <Text
                       style={[
                         styles.vendorCategoryText,
-                        {
-                          color: getCategoryColor(vendor.category),
-                        },
+                        { color: getCategoryColor(vendor.category) },
                       ]}
                     >
                       {vendor.category}
@@ -616,7 +332,6 @@ export default function SubEventDetail() {
                   <Text style={styles.vendorName} numberOfLines={1}>
                     {vendor.name}
                   </Text>
-
                   <View style={styles.vendorRatingRow}>
                     <Ionicons
                       name="star"
@@ -628,16 +343,14 @@ export default function SubEventDetail() {
                     <Text style={styles.vendorReviewsText}>
                       ({vendor.reviews} reviews)
                     </Text>
-                    <Text
-                      style={styles.vendorPriceText}
-                    >{` • ${vendor.price}`}</Text>
+                    <Text style={styles.vendorPriceText}>
+                      {" "}
+                      • {vendor.price}
+                    </Text>
                   </View>
-
                   <Text style={styles.vendorExperience}>
                     {vendor.yearsExperience}+ years experience
                   </Text>
-
-                  {/* Action Buttons */}
                   <View style={styles.vendorActions}>
                     <TouchableOpacity
                       style={[
@@ -683,7 +396,7 @@ export default function SubEventDetail() {
           </View>
         </View>
 
-        {/* Activities Section */}
+        {/* Activities Section - Using Reusable Component */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>
             Activities ({activities.length} selected)
@@ -693,85 +406,18 @@ export default function SubEventDetail() {
           </Text>
 
           <View style={styles.activitiesList}>
-            {template.activities.map((activity, index) => {
-              const selected = isActivitySelected(activity.id);
-              const selectedData = getSelectedActivity(activity.id);
-
-              return (
-                <TouchableOpacity
-                  key={activity.id}
-                  style={[
-                    styles.activityItem,
-                    selected && styles.activityItemSelected,
-                  ]}
-                  onPress={() => handleActivityToggle(activity)}
-                >
-                  <View style={styles.activityHeader}>
-                    <View
-                      style={[
-                        styles.activityCheckbox,
-                        selected && styles.activityCheckboxSelected,
-                      ]}
-                    >
-                      {selected && (
-                        <Ionicons name="checkmark" size={14} color="white" />
-                      )}
-                    </View>
-                    <View style={styles.activityInfo}>
-                      <Text
-                        style={[
-                          styles.activityTitle,
-                          selected && styles.activityTitleSelected,
-                        ]}
-                      >
-                        {index + 1}. {activity.title}
-                      </Text>
-                      <Text style={styles.activityDescription}>
-                        {activity.description}
-                      </Text>
-                    </View>
-                  </View>
-
-                  {selected && (
-                    <View style={styles.activityInputsContainer}>
-                      <View style={styles.activityInputRow}>
-                        <Ionicons
-                          name="time-outline"
-                          size={16}
-                          color="#6B7280"
-                        />
-                        <TextInput
-                          style={styles.activityInput}
-                          placeholder="Time (e.g., 2:00 PM)"
-                          placeholderTextColor="#9CA3AF"
-                          value={selectedData?.time || ""}
-                          onChangeText={(text) =>
-                            handleActivityTimeChange(activity.id, text)
-                          }
-                        />
-                      </View>
-                      <View style={styles.activityInputRow}>
-                        <Ionicons
-                          name="wallet-outline"
-                          size={16}
-                          color="#6B7280"
-                        />
-                        <TextInput
-                          style={styles.activityInput}
-                          placeholder="Budget (e.g., $500)"
-                          placeholderTextColor="#9CA3AF"
-                          value={selectedData?.budget || ""}
-                          onChangeText={(text) =>
-                            handleActivityBudgetChange(activity.id, text)
-                          }
-                          keyboardType="numeric"
-                        />
-                      </View>
-                    </View>
-                  )}
-                </TouchableOpacity>
-              );
-            })}
+            {template.activities.map((activity, index) => (
+              <ActivityItem
+                key={activity.id}
+                activity={activity}
+                index={index}
+                isSelected={isActivitySelected(activity.id)}
+                selectedData={getSelectedActivity(activity.id)}
+                onToggle={handleActivityToggle}
+                onTimeChange={handleActivityTimeChange}
+                onBudgetChange={handleActivityBudgetChange}
+              />
+            ))}
           </View>
         </View>
 
@@ -793,7 +439,6 @@ export default function SubEventDetail() {
             </TouchableOpacity>
           </View>
 
-          {/* Quick Guest Stats */}
           <View style={styles.guestStats}>
             <View style={styles.guestStat}>
               <Text style={styles.guestStatNumber}>{guests.length}</Text>
@@ -831,7 +476,6 @@ export default function SubEventDetail() {
               </TouchableOpacity>
             </View>
 
-            {/* Quick Actions */}
             <View style={styles.modalActions}>
               <TouchableOpacity
                 style={styles.modalActionButton}
@@ -854,52 +498,15 @@ export default function SubEventDetail() {
               </TouchableOpacity>
             </View>
 
-            {/* Guest List */}
             <FlatList
               data={guests}
               keyExtractor={(item) => item.id}
               renderItem={({ item }) => (
-                <View
-                  style={[
-                    styles.guestItem,
-                    item.invited && styles.guestItemInvited,
-                  ]}
-                >
-                  <TouchableOpacity
-                    style={styles.guestToggle}
-                    onPress={() => handleToggleGuest(item.id)}
-                  >
-                    <View
-                      style={[
-                        styles.inviteCheckbox,
-                        item.invited && styles.inviteCheckboxSelected,
-                      ]}
-                    >
-                      {item.invited && (
-                        <Ionicons name="checkmark" size={14} color="white" />
-                      )}
-                    </View>
-                    <Text
-                      style={[
-                        styles.guestName,
-                        item.invited && styles.guestNameInvited,
-                      ]}
-                    >
-                      {item.name}
-                    </Text>
-                  </TouchableOpacity>
-
-                  <Text style={styles.guestRelation} numberOfLines={1}>
-                    {item.relation}
-                  </Text>
-
-                  <TouchableOpacity
-                    onPress={() => handleDeleteGuest(item.id)}
-                    style={styles.deleteButton}
-                  >
-                    <Ionicons name="trash-outline" size={18} color="#EF4444" />
-                  </TouchableOpacity>
-                </View>
+                <GuestItem
+                  guest={item}
+                  onToggleInvite={handleToggleGuest}
+                  onDelete={handleDeleteGuest}
+                />
               )}
               style={styles.guestList}
             />
@@ -938,9 +545,7 @@ export default function SubEventDetail() {
                     <Text
                       style={[
                         styles.vendorDetailCategoryText,
-                        {
-                          color: getCategoryColor(selectedVendor.category),
-                        },
+                        { color: getCategoryColor(selectedVendor.category) },
                       ]}
                     >
                       {selectedVendor.category}
@@ -964,9 +569,10 @@ export default function SubEventDetail() {
                     <Text style={styles.vendorDetailReviewsText}>
                       ({selectedVendor.reviews} reviews)
                     </Text>
-                    <Text
-                      style={styles.vendorDetailPriceText}
-                    >{` • ${selectedVendor.price}`}</Text>
+                    <Text style={styles.vendorDetailPriceText}>
+                      {" "}
+                      • {selectedVendor.price}
+                    </Text>
                   </View>
 
                   {selectedVendor.verified && (
@@ -990,7 +596,6 @@ export default function SubEventDetail() {
                     {selectedVendor.description}
                   </Text>
 
-                  {/* Assign Button */}
                   <TouchableOpacity
                     style={[
                       styles.vendorDetailAssignButton,
@@ -1018,7 +623,6 @@ export default function SubEventDetail() {
                     </Text>
                   </TouchableOpacity>
 
-                  {/* Contact Buttons */}
                   <View style={styles.vendorDetailContactButtons}>
                     <TouchableOpacity
                       style={styles.vendorDetailContactButton}
@@ -1159,9 +763,7 @@ export default function SubEventDetail() {
                     <Text
                       style={[
                         styles.relationChipText,
-                        newGuestRelation === relation && {
-                          color: "white",
-                        },
+                        newGuestRelation === relation && { color: "white" },
                       ]}
                     >
                       {relation}
@@ -1172,7 +774,7 @@ export default function SubEventDetail() {
 
               <TouchableOpacity
                 style={styles.addButton}
-                onPress={handleAddGuest}
+                onPress={submitAddGuest}
               >
                 <Text style={styles.addButtonText}>Add Guest</Text>
               </TouchableOpacity>
@@ -1200,7 +802,7 @@ export default function SubEventDetail() {
             <View style={styles.uploadContainer}>
               <TouchableOpacity
                 style={styles.uploadButton}
-                onPress={handleUploadExcel}
+                onPress={submitUploadExcel}
                 disabled={isUploading}
               >
                 <Ionicons
@@ -1242,7 +844,17 @@ export default function SubEventDetail() {
   );
 }
 
+// ============================================
+// Styles
+// ============================================
+
 const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#f8f6f7",
+  },
   container: {
     flex: 1,
     backgroundColor: "#f8f6f7",
@@ -1487,77 +1099,6 @@ const styles = StyleSheet.create({
   activitiesList: {
     gap: 8,
   },
-  activityItem: {
-    backgroundColor: "#f9fafb",
-    borderRadius: 12,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: "transparent",
-  },
-  activityItemSelected: {
-    backgroundColor: "#fceaf4",
-    borderColor: "#ee2b8c",
-  },
-  activityHeader: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-  },
-  activityCheckbox: {
-    width: 22,
-    height: 22,
-    borderRadius: 6,
-    borderWidth: 2,
-    borderColor: "#d1d5db",
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 12,
-    marginTop: 2,
-  },
-  activityCheckboxSelected: {
-    backgroundColor: "#ee2b8c",
-    borderColor: "#ee2b8c",
-  },
-  activityInfo: {
-    flex: 1,
-  },
-  activityTitle: {
-    fontFamily: "PlusJakartaSans-SemiBold",
-    fontSize: 14,
-    color: "#181114",
-  },
-  activityTitleSelected: {
-    color: "#ee2b8c",
-  },
-  activityDescription: {
-    fontFamily: "PlusJakartaSans-Regular",
-    fontSize: 12,
-    color: "#6B7280",
-    marginTop: 2,
-  },
-  activityInputsContainer: {
-    marginTop: 12,
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: "#e5e7eb",
-  },
-  activityInputRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "white",
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    marginBottom: 8,
-    borderWidth: 1,
-    borderColor: "#e5e7eb",
-  },
-  activityInput: {
-    flex: 1,
-    paddingVertical: 10,
-    paddingHorizontal: 8,
-    fontFamily: "PlusJakartaSans-Regular",
-    fontSize: 13,
-    color: "#181114",
-  },
   // Guest Section
   addGuestButton: {
     flexDirection: "row",
@@ -1644,54 +1185,6 @@ const styles = StyleSheet.create({
   },
   guestList: {
     paddingHorizontal: 16,
-  },
-  guestItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#f9fafb",
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 8,
-  },
-  guestItemInvited: {
-    backgroundColor: "#f0fdf4",
-  },
-  guestToggle: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  inviteCheckbox: {
-    width: 22,
-    height: 22,
-    borderRadius: 6,
-    borderWidth: 2,
-    borderColor: "#d1d5db",
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 10,
-  },
-  inviteCheckboxSelected: {
-    backgroundColor: "#10B981",
-    borderColor: "#10B981",
-  },
-  guestName: {
-    fontFamily: "PlusJakartaSans-SemiBold",
-    fontSize: 14,
-    color: "#181114",
-  },
-  guestNameInvited: {
-    color: "#10B981",
-  },
-  guestRelation: {
-    fontFamily: "PlusJakartaSans-Regular",
-    fontSize: 12,
-    color: "#6B7280",
-    marginRight: 12,
-    maxWidth: 80,
-  },
-  deleteButton: {
-    padding: 4,
   },
   // Form Styles
   formContainer: {
