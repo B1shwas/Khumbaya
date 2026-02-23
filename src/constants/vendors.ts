@@ -19,7 +19,7 @@ export const REQUESTS = [
   },
 ];
 
-export const EVENTS = [
+export const VENDOR_EVENTS = [
   {
     id: "1",
     month: "Oct",

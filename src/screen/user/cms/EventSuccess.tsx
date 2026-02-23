@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { MOCK_EVENTS_WITH_SUBEVENTS } from "@/src/constants/event";
 import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
 import { useState } from "react";
@@ -32,52 +33,13 @@ import {
 //    - Book vendors for the event/sub-event
 // ============================================
 
-// Mock data for events
-const MOCK_EVENTS = [
-  {
-    id: "1",
-    name: "Emma & James Wedding",
-    date: "2024-12-15",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuCDBTMpF5OGVFMpt0SFd1YYHvT0dbWhsJ1OiXWYAZtZHva3uRWvfDLTe0o9wji8CCfff_spyNbGa1EqMQAzU8TSgsZHHZyZczilaJjXsgkwdrHYtnhNzzELEAqjVUidiCPT2fu982NW88FUu6OLV-YHywILAwdx8LLdR69ManJPsqTJW1tjKuLVKnk4MgCSOSRbFhMOSEYIzSWmW-zWQIRd6Gn2odEDu-GJKhVcxGiy5nXwWuauIW5Hx3EfnwvPUTBI8LDijYJeRSk",
-    subEvents: [
-      {
-        id: "s1",
-        name: "Sangeet Ceremony",
-        vendors: [
-          { id: "v1", name: "DJ Beats", category: "Music", status: "Booked" },
-          {
-            id: "v2",
-            name: "Flower Decor",
-            category: "Decoration",
-            status: "Pending",
-          },
-        ],
-      },
-      {
-        id: "s2",
-        name: "Mehendi Ceremony",
-        vendors: [],
-      },
-    ],
-  },
-  {
-    id: "2",
-    name: "Sarah & John Reception",
-    date: "2025-01-20",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuCDBTMpF5OGVFMpt0SFd1YYHvT0dbWhsJ1OiXWYAZtZHva3uRWvfDLTe0o9wji8CCfff_spyNbGa1EqMQAzU8TSgsZHHZyZczilaJjXsgkwdrHYtnhNzzELEAqjVUidiCPT2fu982NW88FUu6OLV-YHywILAwdx8LLdR69ManJPsqTJW1tjKuLVKnk4MgCSOSRbFhMOSEYIzSWmW-zWQIRd6Gn2odEDu-GJKhVcxGiy5nXwWuauIW5Hx3EfnwvPUTBI8LDijYJeRSk",
-    subEvents: [],
-  },
-];
-
 type ViewMode = "success" | "events" | "subevent";
 
 export default function EventSuccess() {
   const router = useRouter();
   const [viewMode, setViewMode] = useState<ViewMode>("success");
   const [selectedEvent, setSelectedEvent] = useState<
-    (typeof MOCK_EVENTS)[0] | null
+    (typeof MOCK_EVENTS_WITH_SUBEVENTS)[0] | null
   >(null);
   const [expandedSubEvents, setExpandedSubEvents] = useState<string[]>([]);
 
@@ -93,7 +55,7 @@ export default function EventSuccess() {
     setViewMode("events");
   };
 
-  const handleEventPress = (event: (typeof MOCK_EVENTS)[0]) => {
+  const handleEventPress = (event: (typeof MOCK_EVENTS_WITH_SUBEVENTS)[0]) => {
     setSelectedEvent(event);
     setViewMode("subevent");
   };
@@ -123,11 +85,13 @@ export default function EventSuccess() {
     router.push("/(shared)/explore/explore");
   };
 
-  const handleCopyLink = async (event: (typeof MOCK_EVENTS)[0]) => {
+  const handleCopyLink = async (
+    event: (typeof MOCK_EVENTS_WITH_SUBEVENTS)[0]
+  ) => {
     await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     console.log(
       "Link copied:",
-      `wedding.app/events/${event.name.toLowerCase().replace(/ /g, "-")}`
+      `wedding.app/events/${event.title.toLowerCase().replace(/ /g, "-")}`
     );
   };
 
@@ -215,8 +179,8 @@ export default function EventSuccess() {
     <View style={styles.content}>
       <Text style={styles.sectionTitle}>My Events</Text>
       <FlatList
-        data={MOCK_EVENTS}
-        keyExtractor={(item) => item.id}
+        data={MOCK_EVENTS_WITH_SUBEVENTS}
+        keyExtractor={(item) => item.id.toString()} //temp fix
         renderItem={({ item }) => (
           <TouchableOpacity
             style={styles.eventCard}
@@ -225,7 +189,7 @@ export default function EventSuccess() {
           >
             <Image source={{ uri: item.image }} style={styles.eventImage} />
             <View style={styles.eventInfo}>
-              <Text style={styles.eventName}>{item.name}</Text>
+              <Text style={styles.eventName}>{item.title}</Text>
               <Text style={styles.eventDate}>{item.date}</Text>
               <View style={styles.eventSubEvents}>
                 <Ionicons name="layers" size={14} color="#9CA3AF" />
@@ -254,7 +218,7 @@ export default function EventSuccess() {
           <Ionicons name="arrow-back" size={24} color="#181114" />
         </TouchableOpacity>
         <Text style={styles.subEventTitle} numberOfLines={1}>
-          {selectedEvent?.name}
+          {selectedEvent?.title}
         </Text>
       </View>
 
@@ -281,7 +245,7 @@ export default function EventSuccess() {
               activeOpacity={0.8}
             >
               <View style={styles.subEventInfo}>
-                <Text style={styles.subEventName}>{subEvent.name}</Text>
+                <Text style={styles.subEventName}>{subEvent.title}</Text>
                 <Text style={styles.subEventVendorCount}>
                   {subEvent.vendors.length} vendor
                   {subEvent.vendors.length !== 1 ? "s" : ""}
@@ -306,7 +270,7 @@ export default function EventSuccess() {
                     <View key={vendor.id} style={styles.vendorItem}>
                       <View style={styles.vendorInfo}>
                         <Ionicons name="person" size={16} color="#6B7280" />
-                        <Text style={styles.vendorName}>{vendor.name}</Text>
+                        <Text style={styles.vendorName}>{vendor.title}</Text>
                       </View>
                       <View
                         style={[

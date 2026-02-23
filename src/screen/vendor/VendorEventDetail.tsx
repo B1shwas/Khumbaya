@@ -26,7 +26,7 @@ interface TimelineItem {
 const tabs = ["Timeline", "Tasks", "Info", "Chat"] as const;
 type TabKey = (typeof tabs)[number];
 
-const timelineItems: TimelineItem[] = [
+const Task_timelineItems: TimelineItem[] = [
   {
     id: "1",
     title: "Vendor Load-in",
@@ -73,7 +73,7 @@ export default function VendorEventDetailScreen() {
   const { eventId } = useLocalSearchParams<{ eventId?: string }>();
   const [activeTab, setActiveTab] = useState<TabKey>("Timeline");
 
-  const visibleTimeline = useMemo(() => timelineItems, []);
+  const visibleTimeline = useMemo(() => Task_timelineItems, []);
 
   return (
     <SafeAreaView className="flex-1 bg-background-light">

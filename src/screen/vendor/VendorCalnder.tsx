@@ -1,5 +1,6 @@
 import { useColorScheme } from "nativewind";
 import React, { useState } from "react";
+import { todayEvents } from "@/src/constants/event";
 import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -154,29 +155,6 @@ const VendorCalendarScreen: React.FC = () => {
   };
 
   const calendarDays = generateCalendarDays();
-  const todayEvents = [
-    {
-      category: "Work",
-      categoryColor: "#135bec",
-      title: "Meeting with Design Team",
-      time: "10:00 AM - 11:30 AM",
-      attendees: ["1", "2"],
-    },
-    {
-      category: "Health",
-      categoryColor: "#10b981",
-      title: "Gym Session",
-      time: "5:00 PM - 6:00 PM",
-      location: "City Fitness Center",
-    },
-    {
-      category: "Social",
-      categoryColor: "#f59e0b",
-      title: "Dinner with Friends",
-      time: "8:00 PM - 10:00 PM",
-      location: "Downtown Italian",
-    },
-  ];
 
   const goToPreviousMonth = () => {
     if (currentMonth === 0) {
