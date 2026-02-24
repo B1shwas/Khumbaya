@@ -1,5 +1,5 @@
 import NavigateComponent from "@/src/components/event/NavigateComponent";
-import { eventsData } from "@/src/constants/event";
+import { useGetEventWithRole } from "@/src/features/events/hooks/use-event";
 import { Ionicons } from "@expo/vector-icons";
 import {
   router,
@@ -8,6 +8,7 @@ import {
 } from "expo-router";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import EventDetailHero from "./EventDetailHero";
+import { Event } from "@/src/constants/event";
 
 const EventDetail = ({
   isInvitedGuest = false,
@@ -16,10 +17,10 @@ const EventDetail = ({
 }) => {
   const { eventId } = useLocalSearchParams<{ eventId: string }>();
 
-  const found = eventsData.find((e) => String(e.id) === String(eventId));
-
+const { data: found } = useGetEventWithRole();
+const foundEvent = found?.find((e:Event) => String(e.id) === String(eventId));
   // Fallback shape so UI never crashes even if event not found
-  const event = found ?? {
+  const event = foundEvent ?? {
     id: eventId ?? "0",
     title: "Event Details",
     date: "—",

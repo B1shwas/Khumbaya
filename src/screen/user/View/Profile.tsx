@@ -173,11 +173,7 @@ const Info = () => (
     </Text>
 
     <Row icon="person" title="Edit Profile" href="/profile/edit-profile" />
-    <Row
-      icon="notifications"
-      title="Notifications"
-      href="/profile/notifications"
-    />
+    <Row icon="group" title="Family Members" href="/profile/family-members" />
     <Row
       icon="lock"
       title="Privacy & Security"

@@ -1,13 +1,56 @@
 {
   "expo": {
     "scheme": "khumbaya",
+    "name": "khumbaya",
+    "slug": "khumbaya",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/home.png",
+
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true
+    },  "web": {
+      "output": "static",
+      "favicon": "./assets/images/home.png",
+      "bundler": "metro"
+    },
     "extra": {
       "eas": {
-        "projectId": "89cf50c5-e048-4872-a1d9-99b9c88509f6"
+        "projectId": "4bf86eea-d845-4d70-af1c-4ad27fad7b16"
       }
+    }, "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/screen.png",
+          "imageWidth": 200,
+          "contentFit": "cover",
+          "backgroundColor": "#E6F4FE",
+          "dark": {
+            "backgroundColor": "#000000"
+          }
+        }
+      ]
+    ],  
+     "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
     },
     "android": {
-      "package": "com.reedm3nkey.khumbaya"
+         "adaptiveIcon": {
+        "backgroundColor": "#E6F4FE",
+        "foregroundImage": "./assets/images/screen.png",
+        "backgroundImage": "./assets/images/screen.png",
+        "monochromeImage": "./assets/images/screen.png"
+      },
+      "edgeToEdgeEnabled": true,
+      "predictiveBackGestureEnabled": false,
+      "package": "com.aaditya_lamichhane_event.khumbaya"
     }
   }
 }
+
+

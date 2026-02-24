@@ -8,8 +8,11 @@ interface RoomCardProps {
   isSelected: boolean;
   onSelect: (roomId: string) => void;
   onAssignGuest?: (roomId: string) => void;
+  onAssignMember?: (roomId: string) => void;
   onRemoveGuest?: (roomId: string, guestId: string) => void;
+  onRemoveMember?: (roomId: string, memberId: string) => void;
   getGuestName?: (guestId: string) => string;
+  getMemberName?: (memberId: string) => string;
 }
 
 export const RoomCard: React.FC<RoomCardProps> = ({
@@ -17,8 +20,11 @@ export const RoomCard: React.FC<RoomCardProps> = ({
   isSelected,
   onSelect,
   onAssignGuest,
+  onAssignMember,
   onRemoveGuest,
+  onRemoveMember,
   getGuestName,
+  getMemberName,
 }) => {
   const occupancyPercent =
     ((room.capacity - room.available) / room.capacity) * 100;
@@ -97,19 +103,31 @@ export const RoomCard: React.FC<RoomCardProps> = ({
           </Text>
         </View>
 
-        {/* Assigned Guests Section */}
+        {/* Assigned Guests/Family Section */}
         {assignedGuests.length > 0 && (
           <View style={styles.assignedGuestsContainer}>
-            <Text style={styles.assignedGuestsTitle}>Assigned Guests:</Text>
+            <Text style={styles.assignedGuestsTitle}>
+              {onAssignMember ? "Assigned Members:" : "Assigned Guests:"}
+            </Text>
             <View style={styles.guestChips}>
               {assignedGuests.map((guestId) => (
                 <View key={guestId} style={styles.guestChip}>
                   <Text style={styles.guestChipText}>
-                    {getGuestName ? getGuestName(guestId) : `Guest ${guestId}`}
+                    {getMemberName
+                      ? getMemberName(guestId)
+                      : getGuestName
+                        ? getGuestName(guestId)
+                        : `Guest ${guestId}`}
                   </Text>
-                  {onRemoveGuest && (
+                  {(onRemoveMember || onRemoveGuest) && (
                     <TouchableOpacity
-                      onPress={() => onRemoveGuest(room.id, guestId)}
+                      onPress={() => {
+                        if (onRemoveMember) {
+                          onRemoveMember(room.id, guestId);
+                        } else if (onRemoveGuest) {
+                          onRemoveGuest(room.id, guestId);
+                        }
+                      }}
                       hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                     >
                       <Ionicons name="close-circle" size={16} color="#EF4444" />
@@ -121,14 +139,22 @@ export const RoomCard: React.FC<RoomCardProps> = ({
           </View>
         )}
 
-        {/* Add Guest Button */}
-        {onAssignGuest && !isFull && (
+        {/* Add Guest/Member Button */}
+        {(onAssignGuest || onAssignMember) && !isFull && (
           <TouchableOpacity
             style={styles.addGuestButton}
-            onPress={() => onAssignGuest(room.id)}
+            onPress={() => {
+              if (onAssignMember) {
+                onAssignMember(room.id);
+              } else if (onAssignGuest) {
+                onAssignGuest(room.id);
+              }
+            }}
           >
             <Ionicons name="person-add" size={16} color="#ee2b8c" />
-            <Text style={styles.addGuestText}>Assign Guest</Text>
+            <Text style={styles.addGuestText}>
+              {onAssignMember ? "Assign Member" : "Assign Guest"}
+            </Text>
           </TouchableOpacity>
         )}
       </View>

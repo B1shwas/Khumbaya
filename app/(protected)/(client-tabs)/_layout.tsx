@@ -6,7 +6,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 // Routes where tab bar should be hidden (inner screens)
 const TAB_BAR_HIDDEN_ROUTES = [
   "/profile/edit-profile",
-  "/profile/notifications",
+  "/profile/family-members",
   "/profile/app-settings",
   "/profile/change-password",
   "/profile/privacy-security",

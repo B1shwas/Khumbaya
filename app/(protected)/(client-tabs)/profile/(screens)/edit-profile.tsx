@@ -1,12 +1,17 @@
-import CustomHeader from "@/src/components/ui/profile/CustomHeader";
 import { MaterialIcons } from "@expo/vector-icons";
+import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import {
+  ActivityIndicator,
   Alert,
+  Animated,
+  Image,
   KeyboardAvoidingView,
   Platform,
+  Pressable,
   ScrollView,
+  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
@@ -14,246 +19,734 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-// Reusable InputField Component (DRY)
-const InputField = ({
-  label,
-  value,
-  onChangeText,
-  placeholder,
-  icon,
-  multiline = false,
-  required = false,
-  error,
-  keyboardType = "default",
-  autoCapitalize = "sentences",
-}: {
-  label: string;
-  value: string;
-  onChangeText: (text: string) => void;
-  placeholder: string;
-  icon?: string;
-  multiline?: boolean;
-  required?: boolean;
-  error?: string;
-  keyboardType?: "default" | "email-address" | "phone-pad";
-  autoCapitalize?: "none" | "sentences" | "words" | "characters";
-}) => (
-  <View className="mb-5">
-    <View className="flex-row items-center mb-2">
-      <Text className="text-sm font-semibold text-gray-800">{label}</Text>
-      {required && <Text className="text-red-500 ml-1">*</Text>}
-    </View>
-    <View className="relative">
-      {icon && (
-        <View
-          className={`absolute ${multiline ? "top-4 left-4" : "left-4"} z-10`}
-        >
-          <MaterialIcons
-            name={icon as any}
-            size={20}
-            color={error ? "#ef4444" : "#9ca3af"}
-          />
-        </View>
-      )}
-      <TextInput
-        value={value}
-        onChangeText={onChangeText}
-        placeholder={placeholder}
-        placeholderTextColor="#9ca3af"
-        multiline={multiline}
-        keyboardType={keyboardType}
-        autoCapitalize={autoCapitalize}
-        className={`w-full bg-white rounded-xl shadow-sm border ${error ? "border-red-300" : "border-gray-100"} 
-          ${multiline ? "p-4 min-h-[100px] text-top" : "h-14"} 
-          ${icon ? (multiline ? "pl-12 pr-4" : "pl-12 pr-4") : "px-4"}
-          text-gray-800 text-base`}
-        style={multiline ? { textAlignVertical: "top" } : {}}
+// ─── Theme ────────────────────────────────────────────────────────────────────
+const PRIMARY = "#ec4899";
+
+// ─── Constants ────────────────────────────────────────────────────────────────
+const FOOD_OPTIONS = [
+  { label: "Vegetarian", icon: "eco" },
+  { label: "Non-Veg", icon: "set-meal" },
+  { label: "Vegan", icon: "grass" },
+  { label: "No Prefe", icon: "restaurant" },
+] as const;
+
+const IDENTITY_OPTIONS = [
+  "Passport",
+  "Driving License",
+  "Aadhaar Card",
+  "Voter ID",
+  "National ID",
+  "Other",
+] as const;
+
+const BIO_MAX = 500;
+const BIO_MIN = 20;
+
+// ─── Types ────────────────────────────────────────────────────────────────────
+interface ProfileForm {
+  name: string;
+  email: string;
+  phone: string;
+  bio: string;
+  foodPreference: string;
+  identity: string;
+  idProof: string;
+  dateOfBirth: string;
+  idImage: string;
+  avatarImage: string;
+}
+
+type FormErrors = Partial<Record<keyof ProfileForm, string>>;
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+const getInitials = (name: string) =>
+  name
+    .split(" ")
+    .filter(Boolean)
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2) || "?";
+
+// ─── Components ──────────────────────────────────────────────────────────────
+
+const ProgressBar = ({ step, total }: { step: number; total: number }) => (
+  <View style={styles.progressBar}>
+    {Array.from({ length: total }).map((_, i) => (
+      <View
+        key={i}
+        style={[
+          styles.progressDot,
+          i < step && styles.progressDotActive,
+        ]}
       />
-    </View>
-    {error && <Text className="text-red-500 text-sm mt-1">{error}</Text>}
+    ))}
   </View>
 );
 
-// Reusable Card Component (DRY)
-const Card = ({
-  children,
-  className = "",
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) => (
-  <View
-    className={`bg-white rounded-2xl p-5 shadow-sm border border-gray-100 ${className}`}
-  >
-    {children}
+const AvatarPicker = ({ name, avatarUri, onPick }: { name: string; avatarUri: string; onPick: () => void }) => {
+  const scale = new Animated.Value(1);
+
+  const onPressIn = () =>
+    Animated.spring(scale, { toValue: 0.94, useNativeDriver: true }).start();
+  const onPressOut = () =>
+    Animated.spring(scale, { toValue: 1, useNativeDriver: true }).start();
+
+  return (
+    <View style={styles.avatarContainer}>
+      <Pressable onPress={onPick} onPressIn={onPressIn} onPressOut={onPressOut}>
+        <Animated.View style={{ transform: [{ scale }] }}>
+          <View style={styles.avatar}>
+            {avatarUri ? (
+              <Image source={{ uri: avatarUri }} style={styles.avatarImage} />
+            ) : (
+              <Text style={styles.avatarInitials}>{getInitials(name)}</Text>
+            )}
+          </View>
+          <View style={styles.cameraButton}>
+            <MaterialIcons name="camera-alt" size={14} color="#fff" />
+          </View>
+        </Animated.View>
+      </Pressable>
+      <Text style={styles.avatarHint}>Tap to upload photo</Text>
+    </View>
+  );
+};
+
+const ValidationSummary = ({ count }: { count: number }) =>
+  count > 0 ? (
+    <View style={styles.validationCard}>
+      <MaterialIcons name="error-outline" size={18} color="#ef4444" />
+      <View style={styles.validationInfo}>
+        <Text style={styles.validationTitle}>
+          {count} issue{count > 1 ? "s" : ""} to fix
+        </Text>
+        <Text style={styles.validationText}>
+          Check the highlighted fields below before continuing.
+        </Text>
+      </View>
+    </View>
+  ) : null;
+
+const SectionLabel = ({ title, subtitle }: { title: string; subtitle?: string }) => (
+  <View style={styles.sectionLabel}>
+    <Text style={styles.sectionTitle}>{title}</Text>
+    {subtitle && <Text style={styles.sectionSubtitle}>{subtitle}</Text>}
   </View>
 );
+
+// ─── Main Screen ──────────────────────────────────────────────────────────────
 
 export default function EditProfileScreen() {
   const router = useRouter();
-  const [formData, setFormData] = useState({
+  const scrollRef = useRef<ScrollView>(null);
+
+  const [form, setForm] = useState<ProfileForm>({
     name: "Sarah Mitchell",
     email: "sarah.mitchell@example.com",
     phone: "+1 234 567 8900",
     bio: "Professional wedding planner with 5+ years of experience creating unforgettable events.",
+    foodPreference: "Vegetarian",
+    identity: "Passport",
+    idProof: "AB1234567",
+    dateOfBirth: "15/06/1985",
+    idImage: "",
+    avatarImage: "",
   });
-  const [errors, setErrors] = useState<{ [key: string]: string }>({});
-  const [isLoading, setIsLoading] = useState(false);
 
-  const handleInputChange = (field: string, value: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
-    if (errors[field]) {
-      setErrors((prev) => ({ ...prev, [field]: "" }));
+  const [errors, setErrors] = useState<FormErrors>({});
+  const [saveState, setSaveState] = useState<"idle" | "saving" | "saved">("idle");
+
+  const set = (field: keyof ProfileForm, value: string) => {
+    setForm((prev) => ({ ...prev, [field]: value }));
+    setErrors((prev) => ({ ...prev, [field]: undefined }));
+  };
+
+  const validate = (): boolean => {
+    const e: FormErrors = {};
+    if (!form.name.trim()) e.name = "Full name is required";
+    if (!form.email.trim()) e.email = "Email address is required";
+    else if (!/\S+@\S+\.\S+/.test(form.email)) e.email = "Enter a valid email address";
+    if (!form.phone.trim()) e.phone = "Phone number is required";
+    if (!form.bio.trim()) e.bio = "Bio is required";
+    else if (form.bio.length < BIO_MIN) e.bio = `Please write at least ${BIO_MIN} characters`;
+    if (!form.identity) e.identity = "Please select an ID type";
+    if (!form.idImage) e.idImage = "Please upload your government ID";
+    setErrors(e);
+    if (Object.keys(e).length > 0) scrollRef.current?.scrollTo({ y: 0, animated: true });
+    return Object.keys(e).length === 0;
+  };
+
+  const handleSave = async () => {
+    if (!validate()) return;
+    setSaveState("saving");
+    try {
+      await new Promise((res) => setTimeout(res, 1200));
+      setSaveState("saved");
+      setTimeout(() => router.back(), 600);
+    } catch {
+      setSaveState("idle");
+      Alert.alert("Save Failed", "Please check your connection and try again.");
     }
   };
 
-  const validateForm = () => {
-    const newErrors: { [key: string]: string } = {};
-
-    if (!formData.name.trim()) {
-      newErrors.name = "Name is required";
+  const pickAvatar = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert("Permission Required", "Please allow access to your photo library.");
+      return;
     }
-
-    if (!formData.email.trim()) {
-      newErrors.email = "Email is required";
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = "Please enter a valid email";
-    }
-
-    if (!formData.phone.trim()) {
-      newErrors.phone = "Phone number is required";
-    }
-
-    if (!formData.bio.trim()) {
-      newErrors.bio = "Bio is required";
-    } else if (formData.bio.length < 20) {
-      newErrors.bio = "Please write at least 20 characters";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.85,
+    });
+    if (!result.canceled && result.assets[0]) set("avatarImage", result.assets[0].uri);
   };
 
-  const handleSave = () => {
-    if (!validateForm()) return;
-
-    setIsLoading(true);
-
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
-      Alert.alert("Success", "Profile updated successfully!");
-    }, 1000);
+  const pickIdImage = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert("Permission Required", "Please allow access to your photo library.");
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 0.8,
+    });
+    if (!result.canceled && result.assets[0]) set("idImage", result.assets[0].uri);
   };
+
+  const isSaving = saveState === "saving";
+  const errorCount = Object.keys(errors).length;
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
-      <CustomHeader
-        title="Edit Profile"
-        showSaveButton
-        onSave={handleSave}
-        isLoading={isLoading}
-      />
+    <SafeAreaView style={styles.container}>
+      {/* Header */}
+      <View style={styles.header}>
+        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+          <MaterialIcons name="arrow-back-ios-new" size={18} color="#374151" />
+        </TouchableOpacity>
+        <View style={styles.headerCenter}>
+          <ProgressBar step={1} total={4} />
+          <Text style={styles.stepText}>1 of 4</Text>
+        </View>
+        <View style={styles.headerRight} />
+      </View>
+
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        className="flex-1"
+        style={styles.content}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
       >
         <ScrollView
-          className="flex-1 px-4 pt-6 pb-10"
+          ref={scrollRef}
+          style={styles.scrollView}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
+          contentContainerStyle={styles.scrollContent}
         >
-          {/* Header */}
-          <View className="mb-6">
-            <Text className="text-2xl font-bold text-gray-900 mb-2">
-              Your Profile
-            </Text>
-            <Text className="text-base text-gray-600 leading-relaxed">
-              Update your personal information and how you appear to others.
+          {/* Header Section */}
+          <View style={styles.headerSection}>
+            <Text style={styles.headerTitle}>Let's get started.</Text>
+            <Text style={styles.headerSubtitle}>
+              Welcome to Khumbaya. Fill in your details for a seamless check-in.
             </Text>
           </View>
 
-          {/* Profile Form */}
-          <Card className="mb-4">
-            <InputField
-              label="Full Name"
-              value={formData.name}
-              onChangeText={(text) => handleInputChange("name", text)}
-              placeholder="Enter your full name"
-              icon="person"
-              required
-              error={errors.name}
-            />
+          {/* Validation Summary */}
+          <ValidationSummary count={errorCount} />
 
-            <InputField
-              label="Email Address"
-              value={formData.email}
-              onChangeText={(text) => handleInputChange("email", text)}
-              placeholder="Enter your email"
-              icon="email"
-              required
-              error={errors.email}
+          {/* Avatar */}
+          <AvatarPicker name={form.name} avatarUri={form.avatarImage} onPick={pickAvatar} />
+
+          {/* Personal Details */}
+          <SectionLabel title="Personal Details" />
+          
+          <View style={styles.inputGroup}>
+            <Text style={styles.inputLabel}>Full Name *</Text>
+            <TextInput
+              style={[styles.textInput, errors.name && styles.textInputError]}
+              placeholder="Enter your legal name"
+              placeholderTextColor="#9CA3AF"
+              value={form.name}
+              onChangeText={(v) => set("name", v)}
+            />
+            {errors.name && <Text style={styles.errorText}>{errors.name}</Text>}
+          </View>
+
+          <View style={styles.inputGroup}>
+            <Text style={styles.inputLabel}>Date of Birth</Text>
+            <TextInput
+              style={styles.textInput}
+              placeholder="DD/MM/YYYY"
+              placeholderTextColor="#9CA3AF"
+              value={form.dateOfBirth}
+              onChangeText={(v) => set("dateOfBirth", v)}
+            />
+          </View>
+
+          <View style={styles.inputGroup}>
+            <Text style={styles.inputLabel}>Phone Number *</Text>
+            <TextInput
+              style={[styles.textInput, errors.phone && styles.textInputError]}
+              placeholder="+977 98XXXXXXXX"
+              placeholderTextColor="#9CA3AF"
+              value={form.phone}
+              onChangeText={(v) => set("phone", v)}
+              keyboardType="phone-pad"
+            />
+            {errors.phone && <Text style={styles.errorText}>{errors.phone}</Text>}
+          </View>
+
+          <View style={styles.inputGroup}>
+            <Text style={styles.inputLabel}>Email Address *</Text>
+            <TextInput
+              style={[styles.textInput, errors.email && styles.textInputError]}
+              placeholder="name@example.com"
+              placeholderTextColor="#9CA3AF"
+              value={form.email}
+              onChangeText={(v) => set("email", v)}
               keyboardType="email-address"
               autoCapitalize="none"
             />
+            {errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
+          </View>
 
-            <InputField
-              label="Phone Number"
-              value={formData.phone}
-              onChangeText={(text) => handleInputChange("phone", text)}
-              placeholder="Enter your phone number"
-              icon="phone"
-              required
-              error={errors.phone}
-              keyboardType="phone-pad"
-            />
-
-            <InputField
-              label="Bio"
-              value={formData.bio}
-              onChangeText={(text) => handleInputChange("bio", text)}
-              placeholder="Tell others about yourself..."
-              icon="description"
-              multiline
-              required
-              error={errors.bio}
-            />
-
-            <View className="flex-row justify-between mt-2">
-              <Text className="text-xs text-gray-400">
-                Minimum 20 characters
-              </Text>
-              <Text
-                className={`text-xs ${formData.bio.length >= 20 ? "text-green-500" : "text-gray-400"}`}
-              >
-                {formData.bio.length}/500
-              </Text>
+          {/* Stay Preferences */}
+          <SectionLabel title="Stay Preferences" />
+          
+          <View style={styles.inputGroup}>
+            <Text style={styles.inputLabel}>Food Preference</Text>
+            <View style={styles.chipContainer}>
+              {FOOD_OPTIONS.map((opt) => {
+                const active = form.foodPreference === opt.label;
+                return (
+                  <TouchableOpacity
+                    key={opt.label}
+                    style={[styles.chip, active && styles.chipSelected]}
+                    onPress={() => set("foodPreference", opt.label)}
+                  >
+                  
+                    <Text style={[styles.chipText, active && styles.chipTextSelected]}>
+                      {opt.label}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
             </View>
-          </Card>
+          </View>
 
-          {/* Save Button */}
-          <TouchableOpacity
-            onPress={handleSave}
-            disabled={isLoading}
-            className={`w-full h-14 bg-pink-500 rounded-xl flex-row items-center justify-center shadow-lg shadow-pink-200 
-              ${isLoading ? "opacity-70" : ""}`}
-            activeOpacity={0.9}
-          >
-            <MaterialIcons
-              name="save"
-              size={20}
-              color="#ffffff"
-              className="mr-2"
+          {/* Identity Verification */}
+          <SectionLabel 
+            title="Identity Verification" 
+            subtitle="Required for check-in. Your ID is encrypted and never shared." 
+          />
+          
+          <View style={styles.inputGroup}>
+            <Text style={styles.inputLabel}>ID Type *</Text>
+            <View style={styles.chipContainerWrap}>
+              {IDENTITY_OPTIONS.map((opt) => {
+                const active = form.identity === opt;
+                return (
+                  <TouchableOpacity
+                    key={opt}
+                    style={[styles.chip, active && styles.chipSelected]}
+                    onPress={() => set("identity", opt)}
+                  >
+                    <Text style={[styles.chipText, active && styles.chipTextSelected]}>
+                      {opt}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+            {errors.identity && <Text style={styles.errorText}>{errors.identity}</Text>}
+          </View>
+
+          <View style={styles.inputGroup}>
+            <Text style={styles.inputLabel}>ID Number</Text>
+            <TextInput
+              style={styles.textInput}
+              placeholder="e.g. AB1234567"
+              placeholderTextColor="#9CA3AF"
+              value={form.idProof}
+              onChangeText={(v) => set("idProof", v)}
+              autoCapitalize="characters"
             />
-            <Text className="text-white font-bold text-lg">
-              {isLoading ? "Saving..." : "Save Changes"}
+          </View>
+
+          <View style={styles.inputGroup}>
+            <Text style={styles.inputLabel}>Government ID *</Text>
+            <TouchableOpacity style={styles.imageUpload} onPress={pickIdImage}>
+              {form.idImage ? (
+                <Image source={{ uri: form.idImage }} style={styles.idImagePreview} />
+              ) : (
+                <View style={styles.imageUploadPlaceholder}>
+                  <MaterialIcons name="upload-file" size={32} color={PRIMARY} />
+                  <Text style={styles.uploadText}>Upload Government ID</Text>
+                  <Text style={styles.uploadHint}>Passport, Aadhaar, Driving Licence</Text>
+                </View>
+              )}
+            </TouchableOpacity>
+            {errors.idImage && <Text style={styles.errorText}>{errors.idImage}</Text>}
+          </View>
+
+          {/* About You */}
+          <SectionLabel title="About You" />
+          
+          <View style={styles.inputGroup}>
+            <Text style={styles.inputLabel}>Bio *</Text>
+            <TextInput
+              style={[styles.textInput, styles.textArea, errors.bio && styles.textInputError]}
+              placeholder="Tell others about yourself, your profession, your interests…"
+              placeholderTextColor="#9CA3AF"
+              value={form.bio}
+              onChangeText={(v) => { if (v.length <= BIO_MAX) set("bio", v); }}
+              multiline
+              maxLength={BIO_MAX}
+            />
+            <Text style={[
+              styles.charCount,
+              form.bio.length >= BIO_MIN ? styles.charCountDone : styles.charCountPending
+            ]}>
+              {form.bio.length}/{BIO_MAX}
+              {form.bio.length < BIO_MIN ? ` (${BIO_MIN - form.bio.length} more to go)` : " ✓"}
             </Text>
+            {errors.bio && <Text style={styles.errorText}>{errors.bio}</Text>}
+          </View>
+
+          {/* CTA Button */}
+          <TouchableOpacity
+            style={styles.submitButton}
+            onPress={handleSave}
+            disabled={isSaving}
+            activeOpacity={0.85}
+          >
+            {isSaving ? (
+              <>
+                <ActivityIndicator size="small" color="#fff" />
+                <Text style={styles.submitButtonText}>Saving…</Text>
+              </>
+            ) : saveState === "saved" ? (
+              <>
+                <MaterialIcons name="check-circle" size={20} color="#fff" />
+                <Text style={styles.submitButtonText}>Saved!</Text>
+              </>
+            ) : (
+              <>
+                <Text style={styles.submitButtonText}>Update</Text>
+                <MaterialIcons name="arrow-forward" size={20} color="#fff" />
+              </>
+            )}
           </TouchableOpacity>
+
+          <Text style={styles.privacyText}>
+            By continuing you agree to our{" "}
+            <Text style={styles.privacyLink}>Privacy Policy</Text>. Your data is encrypted.
+          </Text>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#f8f6f7",
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: "white",
+    borderBottomWidth: 1,
+    borderBottomColor: "#f3f4f6",
+  },
+  backButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#f3f4f6",
+  },
+  headerCenter: {
+    flex: 1,
+    alignItems: "center",
+  },
+  progressBar: {
+    flexDirection: "row",
+    gap: 6,
+  },
+  progressDot: {
+    width: 24,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: "#e5e7eb",
+  },
+  progressDotActive: {
+    backgroundColor: PRIMARY,
+  },
+  stepText: {
+    fontSize: 12,
+    color: "#9ca3af",
+    marginTop: 4,
+  },
+  headerRight: {
+    width: 36,
+  },
+  content: {
+    flex: 1,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingHorizontal: 16,
+    paddingTop: 20,
+    paddingBottom: 40,
+  },
+  headerSection: {
+    marginBottom: 20,
+  },
+  headerTitle: {
+    fontSize: 28,
+    fontWeight: "700",
+    color: "#1f2937",
+    marginBottom: 4,
+  },
+  headerSubtitle: {
+    fontSize: 14,
+    color: "#6b7280",
+    lineHeight: 22,
+  },
+  validationCard: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    backgroundColor: "#FEF2F2",
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 16,
+    gap: 12,
+  },
+  validationInfo: {
+    flex: 1,
+  },
+  validationTitle: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#b91c1c",
+    marginBottom: 2,
+  },
+  validationText: {
+    fontSize: 12,
+    color: "#dc2626",
+  },
+  avatarContainer: {
+    alignItems: "center",
+    marginBottom: 24,
+  },
+  avatar: {
+    width: 96,
+    height: 96,
+    borderRadius: 48,
+    backgroundColor: PRIMARY + "20",
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: PRIMARY,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 12,
+    elevation: 6,
+  },
+  avatarImage: {
+    width: 96,
+    height: 96,
+    borderRadius: 48,
+  },
+  avatarInitials: {
+    fontSize: 36,
+    fontWeight: "700",
+    color: PRIMARY,
+  },
+  cameraButton: {
+    position: "absolute",
+    bottom: 0,
+    right: 0,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: PRIMARY,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 2,
+    borderColor: "white",
+  },
+  avatarHint: {
+    fontSize: 12,
+    color: "#9ca3af",
+    marginTop: 8,
+  },
+  sectionLabel: {
+    marginTop: 20,
+    marginBottom: 12,
+  },
+  sectionTitle: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: "#6b7280",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+  sectionSubtitle: {
+    fontSize: 12,
+    color: "#9ca3af",
+    marginTop: 4,
+    lineHeight: 18,
+  },
+  inputGroup: {
+    marginBottom: 16,
+  },
+  inputLabel: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#374151",
+    marginBottom: 8,
+  },
+  textInput: {
+    backgroundColor: "white",
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    fontSize: 14,
+    color: "#1f2937",
+    borderWidth: 1,
+    borderColor: "#e5e7eb",
+  },
+  textInputError: {
+    borderColor: "#ef4444",
+  },
+  textArea: {
+    height: 100,
+    textAlignVertical: "top",
+    paddingTop: 14,
+  },
+  errorText: {
+    fontSize: 12,
+    color: "#ef4444",
+    marginTop: 4,
+  },
+  charCount: {
+    fontSize: 12,
+    textAlign: "right",
+    marginTop: 4,
+  },
+  charCountDone: {
+    color: "#10b981",
+  },
+  charCountPending: {
+    color: "#9ca3af",
+  },
+  chipContainer: {
+    flexDirection: "row",
+    gap: 8,
+  },
+  chipContainerWrap: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+  },
+  chip: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    paddingVertical: 12,
+    borderRadius: 12,
+    backgroundColor: "white",
+    borderWidth: 1,
+    borderColor: "#e5e7eb",
+    minWidth: 80,
+  },
+  chipSelected: {
+    backgroundColor: PRIMARY,
+    borderColor: PRIMARY,
+  },
+  chipText: {
+    fontSize: 12,
+    color: "#6b7280",
+    fontWeight: "500",
+  },
+  chipTextSelected: {
+    color: "white",
+  },
+  imageUpload: {
+    borderRadius: 12,
+    overflow: "hidden",
+    borderWidth: 2,
+    borderStyle: "dashed",
+    borderColor: "#e5e7eb",
+  },
+  idImagePreview: {
+    width: "100%",
+    height: 150,
+    resizeMode: "cover",
+  },
+  imageUploadPlaceholder: {
+    width: "100%",
+    height: 120,
+    backgroundColor: "#f9fafb",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 16,
+  },
+  uploadText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#374151",
+    marginTop: 8,
+  },
+  uploadHint: {
+    fontSize: 12,
+    color: "#9ca3af",
+    marginTop: 4,
+  },
+  submitButton: {
+    backgroundColor: PRIMARY,
+    borderRadius: 12,
+    paddingVertical: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    marginTop: 24,
+    marginBottom: 16,
+    shadowColor: PRIMARY,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 6,
+  },
+  submitButtonText: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "white",
+  },
+  privacyText: {
+    fontSize: 12,
+    color: "#9ca3af",
+    textAlign: "center",
+    lineHeight: 18,
+  },
+  privacyLink: {
+    color: "#374151",
+    fontWeight: "600",
+  },
+});
