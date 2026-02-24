@@ -333,19 +333,10 @@ const ServiceCard = ({
   onEdit: () => void;
   onDelete: () => void;
 }) => (
-  <View
-    className="flex-row items-start p-4 mb-3 bg-white rounded-xl border border-gray-100"
-    style={{
-      shadowColor: "#000",
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.05,
-      shadowRadius: 8,
-      elevation: 2,
-    }}
-  >
+  <Card className="flex-row items-start p-4 mb-3">
     <View
       className="w-9 h-9 rounded-lg items-center justify-center mr-3"
-      style={{ backgroundColor: `${accentColor}20` }}
+      style={{ backgroundColor: "#ec489920" }}
     >
       <Text className="text-lg">✦</Text>
     </View>
@@ -357,7 +348,7 @@ const ServiceCard = ({
         {service.badge && (
           <View
             className="px-2 py-0.5 rounded"
-            style={{ backgroundColor: accentColor }}
+            style={{ backgroundColor: "#ec4899" }}
           >
             <Text className="text-[9px] font-bold text-white tracking-wider">
               {service.badge}
@@ -366,7 +357,7 @@ const ServiceCard = ({
         )}
       </View>
       <View className="flex-row items-center gap-3 mb-1">
-        <Text className="text-lg font-semibold" style={{ color: accentColor }}>
+        <Text className="text-lg font-semibold" style={{ color: "#ec4899" }}>
           {service.price}
         </Text>
         {service.duration && (
@@ -389,7 +380,7 @@ const ServiceCard = ({
     <View className="flex-row gap-2">
       <TouchableOpacity
         onPress={onEdit}
-        className="px-3 py-2 rounded-lg bg-blue-50"
+        className="px-3 py-2 rounded-lg bg-pink-50"
       >
         <Text className="text-xs font-semibold text-pink-600">Edit</Text>
       </TouchableOpacity>
@@ -400,7 +391,7 @@ const ServiceCard = ({
         <MaterialIcons name="close" size={16} color="#dc2626" />
       </TouchableOpacity>
     </View>
-  </View>
+  </Card>
 );
 
 // Service Form Component
