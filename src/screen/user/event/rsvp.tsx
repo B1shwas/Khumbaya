@@ -86,7 +86,7 @@ const GuestForm = ({
       </View>
 
       <View style={styles.inputGroup}>
-        <Text style={styles.inputLabel}>Full Name *</Text>
+        <Text style={styles.inputLabel}>Full Name (Self)*</Text>
         <TextInput
           style={styles.textInput}
           placeholder="Enter guest name"
@@ -155,47 +155,31 @@ const GuestForm = ({
         />
       </View>
 
-      {/* For adults (18+): DOB and Height */}
-      {guest.age !== undefined && guest.age <= 18 && (
-        <>
-          <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>Date of Birth *</Text>
-            <TextInput
-              style={styles.textInput}
-              placeholder="YYYY-MM-DD"
-              placeholderTextColor="#9CA3AF"
-              value={guest.dob || ""}
-              onChangeText={(text) => onUpdate({ ...guest, dob: text })}
-            />
-            <Text style={styles.inputHint}>
-              Enter date in YYYY-MM-DD format
-            </Text>
-          </View>
-
-          <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>Height (cm) *</Text>
-            <TextInput
-              style={styles.textInput}
-              placeholder="Enter height in cm"
-              placeholderTextColor="#9CA3AF"
-              value={guest.height || ""}
-              onChangeText={(text) => onUpdate({ ...guest, height: text })}
-              keyboardType="numeric"
-            />
-          </View>
-        </>
-      )}
-
-      {/* For minors (under 18): Government ID upload */}
-      {guest.age !== undefined && guest.age >18 && (
+      {/* For adults (18+): Government ID/NID upload */}
+      {guest.age !== undefined && guest.age >= 18 && (
         <View style={styles.inputGroup}>
-          <Text style={styles.inputLabel}>Government ID *</Text>
+          <Text style={styles.inputLabel}>NID / Government ID *</Text>
           <ImageUpload
             value={guest.idImage || ""}
             onChange={(uri: string) => onUpdate({ ...guest, idImage: uri })}
-            placeholder="Upload Government ID"
+            placeholder="Upload NID / Government ID"
             hint="Passport, Aadhaar, Driving Licence"
           />
+        </View>
+      )}
+
+      {/* For minors (under 18): DOB field */}
+      {guest.age !== undefined && guest.age < 18 && (
+        <View style={styles.inputGroup}>
+          <Text style={styles.inputLabel}>Date of Birth *</Text>
+          <TextInput
+            style={styles.textInput}
+            placeholder="YYYY-MM-DD"
+            placeholderTextColor="#9CA3AF"
+            value={guest.dob || ""}
+            onChangeText={(text) => onUpdate({ ...guest, dob: text })}
+          />
+          <Text style={styles.inputHint}>Enter date in YYYY-MM-DD format</Text>
         </View>
       )}
     </View>
@@ -301,8 +285,18 @@ export default function RSVPPage() {
         );
         return false;
       }
-      // For adults (18+): require DOB and Height
+      // For adults (18+): require NID / Government ID
       if (guest.age >= 18) {
+        if (!guest.idImage) {
+          Alert.alert(
+            "Error",
+            `Please upload NID / Government ID for ${isSelf ? "yourself" : "Guest " + (i + 1)}`
+          );
+          return false;
+        }
+      }
+      // For minors (under 18): require DOB
+      if (guest.age < 18) {
         if (!guest.dob || !guest.dob.trim()) {
           Alert.alert(
             "Error",
@@ -316,23 +310,6 @@ export default function RSVPPage() {
           Alert.alert(
             "Error",
             `Please enter a valid date in YYYY-MM-DD format for ${isSelf ? "yourself" : "Guest " + (i + 1)}`
-          );
-          return false;
-        }
-        if (!guest.height || !guest.height.trim()) {
-          Alert.alert(
-            "Error",
-            `Please enter height for ${isSelf ? "yourself" : "Guest " + (i + 1)}`
-          );
-          return false;
-        }
-      }
-      // For minors (under 18): require Government ID
-      if (guest.age < 18) {
-        if (!guest.idImage) {
-          Alert.alert(
-            "Error",
-            `Please upload Government ID for ${isSelf ? "yourself" : "Guest " + (i + 1)}`
           );
           return false;
         }
@@ -711,8 +688,8 @@ export default function RSVPPage() {
                   Alert.alert("Calendar", "Event added to your calendar!");
                 }}
               >
-                <Ionicons name="calendar-outline" size={20} color="#ee2b8c" />
-                <Text style={styles.addToCalendarText}>Add to Calendar</Text>
+                {/* <Ionicons name="calendar-outline" size={20} color="#ee2b8c" />
+                <Text style={styles.addToCalendarText}>Add to Calendar</Text> */}
               </TouchableOpacity>
             )}
           </View>
