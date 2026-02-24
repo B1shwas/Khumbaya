@@ -1,8 +1,7 @@
 export const API_BASE_URL =
   process.env.REACT_APP_API_BASE_URL || "https://events.khumbaya.com/api";
 export const TEMPTOKEN =
-  process.env.TEMPTOKEN ||
- "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6InVzZXIiLCJlbWFpbCI6ImxhbWljaGhhbmVAZ21haWwuY29tIiwiaWF0IjoxNzcxODI0MzU0LCJleHAiOjE3NzQ0MTYzNTR9.f_NQJATZ6iJJxImro95CrH_YM0B0bHxBL38-3sqfKI4";
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6InVzZXIiLCJlbWFpbCI6ImxhbWljaGhhbmVAZ21haWwuY29tIiwiaWF0IjoxNzcxODY4OTc2LCJleHAiOjE3NzQ0NjA5NzZ9.vmZRszGlIkO2rGYMo1I4W0ifuEwZUxOeEeduLesaDWg";
 export const DEBUG_AUTO_LOGIN = __DEV__ && true;
 
 export const TEST_USER = {

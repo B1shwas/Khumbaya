@@ -14,7 +14,7 @@ export interface EVENT {
   title: string;
   description: string;
   date: string;
-  location: string;
+location: string;
   imageUrl:string;
   // Other field are optional and can be added as needed
 }
@@ -25,9 +25,9 @@ export const createEventApi = async (data: CREATEEVENT) => {
 };
 
 export const getEventsApi = async () => {
-  const response = await api.get("/events");
-  console.log(response.data);
-  return response.data;
+  const response = await api.get("/event");
+  console.log(`This is the response of the event get api ${response.data.data.items}`);
+  return response.data.data.items;
 }
 
 export const updateEventApi = async (id: number, data: Partial<CREATEEVENT>) => {

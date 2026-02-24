@@ -48,11 +48,13 @@ export function useSignup() {
 export function useProfile() {
   const token = useAuthStore((s) => s.token);
   const setAuth = useAuthStore((s) => s.setAuth);
+  const isLoading = useAuthStore((s) => s.isLoading);
 
   return useQuery({
     queryKey: ["profile"],
     staleTime: 5 * 60 * 1000,
     gcTime: 30 * 60 * 1000,
+    enabled: !isLoading && !!token,
 
     queryFn: async () => {
       const data = await getUserProfile();
