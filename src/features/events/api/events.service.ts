@@ -2,43 +2,67 @@ import api from "@/src/api/axios";
 
 export interface CREATEEVENT {
   title: string;
-  description: string;
-  date: string;
-  location: string;
-  imageUrl:string; // will update this to have the object which will be handled in the bacend but for now we will use te string like it is now 
+  description?: string;
+  type?: string;
+  startDate?: string;
+  date?: string;
+  endDate?: string;
+  budget?: number;
+  theme?: string;
+  parentId?: number;
+  location?: string;
+  role?: string;
+  imageUrl?: string;
 }
 
 
 export interface EVENT {
   id: number;
   title: string;
-  description: string;
-  date: string;
-location: string;
-  imageUrl:string;
-  // Other field are optional and can be added as needed
+  description?: string;
+  type?: string;
+  startDate?: string;
+  date?: string;
+  endDate?: string;
+  budget?: number;
+  theme?: string;
+  parentId?: number;
+  location?: string;
+  role?: string;
+  status?: string;
+  organizer?: number;
+  createdAt?: string;
+  updatedAt?: string;
+  imageUrl?: string;
+  eventMembershipId?: number;
 }
 
 export const createEventApi = async (data: CREATEEVENT) => {
-  const response = await api.post("/events", data);
+  const response = await api.post("/event", data);
   return response.data;
 };
 
 export const getEventsApi = async () => {
   const response = await api.get("/event");
-  console.log(`This is the response of the event get api ${response.data.data.items}`);
-  return response.data.data.items;
+  const payload = response.data?.data;
+
+  if (Array.isArray(payload?.items)) {
+    return payload.items;
+  }
+
+
+  return [];
 }
 
 export const updateEventApi = async (id: number, data: Partial<CREATEEVENT>) => {
-  const response = await api.patch(`/events/${id}`, data);
+  const response = await api.patch(`/event/${id}`, data);
   return response.data;
 };
 export const deleteEventApi = async (id: number) => {
-  const response = await api.delete(`/events/${id}`);
+  const response = await api.delete(`/event/${id}`);
   return response.data;
 };
 export const getEventGuest = async (id:number)=>{
-  const response = await api.get(`/events/${id}/guests`);
+  const response = await api.get(`/event/${id}/guests`);
   return response.data;
 }

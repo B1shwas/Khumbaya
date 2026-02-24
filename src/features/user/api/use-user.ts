@@ -58,7 +58,7 @@ export function useProfile() {
 
     queryFn: async () => {
       const data = await getUserProfile();
-      console.log(data);
+     
       setAuth(token as string, {
         name: data.username,
         email: data.email,

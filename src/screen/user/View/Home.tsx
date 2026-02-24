@@ -10,6 +10,7 @@ import {
 
 import EventList from "@/src/constants/event";
 import VENUES from "@/src/constants/venues";
+import { useProfile } from "@/src/features/user/api/use-user";
 import { useAuthStore } from "@/src/store/AuthStore";
 import { Ionicons } from "@expo/vector-icons";
 import { router, type RelativePathString } from "expo-router";
@@ -78,6 +79,10 @@ const COUPLES = [
 
 export default function HomePage() {
   const { user } = useAuthStore();
+  
+  // Fetch and hydrate full user profile when home loads
+  // This runs only in protected screens, doesn't block routing
+  useProfile();
 
   // Navigation handlers wrapped in useCallback
   const navigateToEvents = useCallback(

@@ -1,4 +1,5 @@
 import { useAuthStore } from "@/src/store/AuthStore";
+import { useRouter } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { Link } from "expo-router";
@@ -20,9 +21,11 @@ type RowProps = {
 export default function ProfileScreen() {
   const [tab, setTab] = useState<"account" | "info">("account");
   const { clearAuth: logout, user } = useAuthStore();
+  const router = useRouter();
 
   const handleLogout = () => {
     logout();
+    router.replace("/(onboarding)");
   };
 
   return (

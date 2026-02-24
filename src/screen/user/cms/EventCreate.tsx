@@ -1,7 +1,10 @@
+import { CREATEEVENT } from "@/src/features/events/api/events.service";
+import { useCreateEvent } from "@/src/features/events/hooks/use-event";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
+  Alert,
   Image,
   KeyboardAvoidingView,
   Platform,
@@ -12,9 +15,7 @@ import {
   View,
 } from "react-native";
 import {
-  useAnimatedStyle,
   useSharedValue,
-  withTiming,
 } from "react-native-reanimated";
 
 interface EventFormData {
@@ -33,6 +34,14 @@ const EVENT_TYPES: EventType[] = [
   "Nikkah",
   "Other",
 ];
+
+const EVENT_TYPE_TO_BACKEND: Record<EventType, string> = {
+  Wedding: "WEDDING",
+  Engagement: "ENGAGEMENT",
+  Reception: "RECEPTION",
+  Nikkah: "NIKKAH",
+  Other: "OTHER",
+};
 
 // Calendar helper functions
 const getDaysInMonth = (year: number, month: number): number => {
@@ -60,6 +69,7 @@ const MONTHS = [
 
 export default function EventCreate() {
   const router = useRouter();
+  const { mutate: createEvent, isPending: isCreatingEvent } = useCreateEvent();
 
   // Form state
   const [formData, setFormData] = useState<EventFormData>({
@@ -73,22 +83,55 @@ export default function EventCreate() {
   const [currentMonth, setCurrentMonth] = useState(5); // June 2024
   const [currentYear, setCurrentYear] = useState(2024);
   const [selectedDate, setSelectedDate] = useState(new Date(2024, 5, 16));
-
   // Animation values
   const scale = useSharedValue(1);
 
   const handleNextStep = async () => {
-    // TODO: Backend Integration
-    // 1. Validate all form fields
-    // 2. Create event via API: POST /api/events
-    // 3. If cover image selected, upload: POST /api/events/{id}/cover
-    // 4. Handle loading state during API call
-    // 5. Navigate to next step on success
+    //validaton in the event creation in this
+    if (!formData.name.trim()) {
+      Alert.alert("Missing event name", "Please enter your event name.");
+      return;
+    }
 
-    console.log("Form data ready for API submission:", formData);
+    if (!formData.date) {
+      Alert.alert("Missing event date", "Please select your event date.");
+      return;
+    }
 
-    // Navigate to location step
-    router.push("/(protected)/(client-tabs)/events");
+    const selectedDate = formData.date;
+    const startDate = new Date(selectedDate);
+    startDate.setHours(10, 0, 0, 0);
+    const endDate = new Date(selectedDate);
+    endDate.setHours(22, 0, 0, 0);
+
+    const payload: CREATEEVENT = {
+      title: formData.name.trim(),
+      description: `${formData.eventType} event`,
+      type: EVENT_TYPE_TO_BACKEND[formData.eventType as EventType],
+      startDate: startDate.toISOString(),
+      endDate: endDate.toISOString(),
+      date: selectedDate.toDateString(),
+      budget: 0,
+      theme: "Classic",
+      parentId: 1,
+      role: "Organizer",
+      location: "TBD",
+      imageUrl:
+        formData.coverImage ??
+        "https://images.unsplash.com/photo-1519741497674-611481863552?w=1200&q=80",
+    };
+
+    createEvent(payload, {
+      onSuccess: () => {
+        router.push("/(protected)/(client-tabs)/events");
+      },
+      onError: () => {
+        Alert.alert(
+          "Event creation failed",
+          "Please check your details and try again."
+        );
+      },
+    });
   };
 
   const handleBack = () => {
@@ -131,12 +174,6 @@ export default function EventCreate() {
     // TODO: Backend Integration - Image picker
     console.log("Open image picker for cover image");
   };
-
-  const animatedButtonStyle = useAnimatedStyle(() => {
-    return {
-      transform: [{ scale: withTiming(scale.value, { duration: 150 }) }],
-    };
-  });
 
   const renderCalendarDays = () => {
     const daysInMonth = getDaysInMonth(currentYear, currentMonth);
@@ -366,6 +403,7 @@ export default function EventCreate() {
             onPress={handleNextStep}
             className="w-full bg-[#ee2b8c] flex-row items-center justify-center gap-2 py-4 rounded-2xl shadow-lg shadow-[#ee2b8c]/25"
             activeOpacity={0.8}
+            disabled={isCreatingEvent}
             onPressIn={() => {
               scale.value = 0.98;
             }}
@@ -374,7 +412,7 @@ export default function EventCreate() {
             }}
           >
             <Text className="font-plusjakartasans-bold text-base text-white">
-              Create Event
+              {isCreatingEvent ? "Creating..." : "Create Event"}
             </Text>
             {/* <Ionicons name="arrow-forward" size={20} color="white" /> */}
           </TouchableOpacity>

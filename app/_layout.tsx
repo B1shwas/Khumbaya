@@ -8,8 +8,6 @@ import { StatusBar } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "react-native-reanimated";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
-
-import { useProfile } from "@/src/features/user/api/use-user";
 import "./global.css";
 
 const queryClient = new QueryClient();
@@ -17,10 +15,9 @@ const queryClient = new QueryClient();
 SplashScreen.preventAutoHideAsync();
 
 function RootNavigation() {
-  const { token } = useAuthStore();
+  const { token, isLoading } = useAuthStore();
   const segments = useSegments();
   const router = useRouter();
-  const { error, isLoading } = useProfile();
 
   // Keep a ref so the effect can read the latest segments
   // without segments itself being a dependency (prevents infinite loop)
@@ -28,17 +25,21 @@ function RootNavigation() {
   segmentsRef.current = segments;
 
   useEffect(() => {
+    // Wait until auth hydration is complete
     if (isLoading) return;
 
     const inAuthGroup = segmentsRef.current[0] === "(onboarding)";
 
-    if (inAuthGroup && !error) {
+    // Route based purely on token presence (source of truth)
+    if (token && inAuthGroup) {
+      // Has token, but in onboarding → redirect to protected
       router.replace("/(protected)/(client-tabs)/home");
-    } else if (!!error && !inAuthGroup) {
-      // No valid token / profile error — send back to onboarding
+    } else if (!token && !inAuthGroup) {
+      // No token, but NOT in onboarding → redirect to onboarding
       router.replace("/(onboarding)");
     }
-  }, [token, isLoading, error]);
+    // Otherwise, we're in the correct group already
+  }, [token, isLoading]);
 
   if (isLoading) {
     return null;
@@ -76,6 +77,7 @@ export default function RootLayout() {
         .hydrate()
         .then(() => {
           SplashScreen.hideAsync();
+          //function call
         });
     }
   }, [fontsLoaded]);

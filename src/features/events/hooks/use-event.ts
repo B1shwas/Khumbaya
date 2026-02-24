@@ -11,9 +11,19 @@ export const useCreateEvent = () => {
     mutationFn: createEventApi,
     onMutate: async (newEvent) => {
       await queryClient.cancelQueries({ queryKey: ["events"] });
-      const previousPost = queryClient.getQueryData(["events"]);
-      queryClient.setQueryData(["events"], (old: any) => [...old, newEvent]);
-      return { previousPost };
+      const previousEvents = queryClient.getQueryData(["events"]);
+      queryClient.setQueryData(["events"], (old: any[] | undefined) =>
+        Array.isArray(old) ? [...old, newEvent] : [newEvent]
+      );
+      return { previousEvents };
+    },
+    onError: (_error, _newEvent, context) => {
+      if (context?.previousEvents) {
+        queryClient.setQueryData(["events"], context.previousEvents);
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["events"] });
     },
   });
 };
@@ -26,5 +36,3 @@ export const useGetEventWithRole = () => {
     gcTime: 30 * 60 * 1000,
   });
 };
-  
-
