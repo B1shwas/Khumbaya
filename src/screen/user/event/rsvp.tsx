@@ -86,7 +86,7 @@ const GuestForm = ({
       </View>
 
       <View style={styles.inputGroup}>
-        <Text style={styles.inputLabel}>Full Name *</Text>
+        <Text style={styles.inputLabel}>Full Name (Self)*</Text>
         <TextInput
           style={styles.textInput}
           placeholder="Enter guest name"
@@ -745,8 +745,8 @@ export default function RSVPPage() {
                   Alert.alert("Calendar", "Event added to your calendar!");
                 }}
               >
-                <Ionicons name="calendar-outline" size={20} color="#ee2b8c" />
-                <Text style={styles.addToCalendarText}>Add to Calendar</Text>
+                {/* <Ionicons name="calendar-outline" size={20} color="#ee2b8c" />
+                <Text style={styles.addToCalendarText}>Add to Calendar</Text> */}
               </TouchableOpacity>
             )}
           </View>
@@ -1027,6 +1027,11 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#374151",
     marginBottom: 8,
+  },
+  inputHint: {
+    fontSize: 12,
+    color: "#9CA3AF",
+    marginTop: 4,
   },
   textInput: {
     backgroundColor: "#f9fafb",

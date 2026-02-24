@@ -553,7 +553,11 @@ export default function FamilyMembersScreen() {
       return;
     }
 
+<<<<<<< HEAD
     // Create initial member slots - first member is self from user profile
+=======
+    // Create initial member slots
+>>>>>>> profile/update
     const initialMembers: FamilyMember[] = Array.from(
       { length: totalMembers },
       (_, i) => ({
@@ -1429,3 +1433,6 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
 });
+function updateField(arg0: string, uri: string) {
+  throw new Error("Function not implemented.");
+}
