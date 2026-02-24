@@ -1,3 +1,4 @@
+import { useAuthStore } from "@/src/store/AuthStore";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
@@ -36,6 +37,10 @@ interface FamilyMember {
   relation: string;
   foodPreference: string;
   idImage: string;
+  isAdult: boolean;
+  dob?: string;
+  height?: string;
+  idNumber?: string;
 }
 
 interface MemberForm {
@@ -45,6 +50,10 @@ interface MemberForm {
   relation: string;
   foodPreference: string;
   idImage: string;
+  isAdult: boolean;
+  dob?: string;
+  height?: string;
+  idNumber?: string;
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -70,9 +79,15 @@ const avatarColor = (id: string) => {
 
 // ─── Step Indicator ─────────────────────────────────────────────────────────
 
-const StepIndicator = ({ currentStep, totalSteps }: { currentStep: number; totalSteps: number }) => {
+const StepIndicator = ({
+  currentStep,
+  totalSteps,
+}: {
+  currentStep: number;
+  totalSteps: number;
+}) => {
   const steps = ["Family", "Members", "Done"];
-  
+
   return (
     <View style={styles.stepIndicator}>
       {steps.map((step, index) => (
@@ -90,7 +105,7 @@ const StepIndicator = ({ currentStep, totalSteps }: { currentStep: number; total
               <Text
                 style={[
                   styles.stepNumber,
-                  (index <= currentStep) && styles.stepNumberActive,
+                  index <= currentStep && styles.stepNumberActive,
                 ]}
               >
                 {index + 1}
@@ -132,14 +147,20 @@ const MemberFormModal = ({
   onSave: (form: MemberForm) => void;
   initial?: MemberForm;
 }) => {
-  const [form, setForm] = useState<MemberForm>(initial ?? {
-    name: "",
-    phone: "",
-    email: "",
-    relation: "",
-    foodPreference: "",
-    idImage: "",
-  });
+  const [form, setForm] = useState<MemberForm>(
+    initial ?? {
+      name: "",
+      phone: "",
+      email: "",
+      relation: "",
+      foodPreference: "",
+      idImage: "",
+      isAdult: true,
+      dob: "",
+      height: "",
+      idNumber: "",
+    }
+  );
   const [errors, setErrors] = useState<Partial<MemberForm>>({});
 
   const updateField = (field: keyof MemberForm, value: string) => {
@@ -150,7 +171,10 @@ const MemberFormModal = ({
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== "granted") {
-      Alert.alert("Permission Required", "Please allow access to your photo library.");
+      Alert.alert(
+        "Permission Required",
+        "Please allow access to your photo library."
+      );
       return;
     }
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -169,6 +193,22 @@ const MemberFormModal = ({
     if (!form.name.trim()) e.name = "Name is required";
     if (!form.relation.trim()) e.relation = "Relation is required";
     if (!form.foodPreference) e.foodPreference = "Food preference is required";
+
+    // Phone validation
+    if (form.phone.trim()) {
+      const phoneRegex = /^[0-9]{7,15}$/;
+      if (!phoneRegex.test(form.phone.trim())) {
+        e.phone = "Invalid phone number";
+      }
+    }
+
+    // Validate adult-specific fields
+    if (form.isAdult) {
+      if (!form.dob?.trim()) e.dob = "Date of birth is required";
+      if (!form.height?.trim()) e.height = "Height is required";
+      if (!form.idNumber?.trim()) e.idNumber = "ID number is required";
+    }
+
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -196,8 +236,8 @@ const MemberFormModal = ({
           <View style={styles.modalCloseButton} />
         </View>
 
-        <ScrollView 
-          style={styles.modalContent} 
+        <ScrollView
+          style={styles.modalContent}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
@@ -216,13 +256,16 @@ const MemberFormModal = ({
           <View style={styles.inputGroup}>
             <Text style={styles.inputLabel}>Phone Number</Text>
             <TextInput
-              style={styles.textInput}
+              style={[styles.textInput, errors.phone && styles.textInputError]}
               placeholder="+977 98XXXXXXXX"
               placeholderTextColor="#9CA3AF"
               value={form.phone}
               onChangeText={(v) => updateField("phone", v)}
               keyboardType="phone-pad"
             />
+            {errors.phone && (
+              <Text style={styles.errorText}>{errors.phone}</Text>
+            )}
           </View>
 
           <View style={styles.inputGroup}>
@@ -241,13 +284,18 @@ const MemberFormModal = ({
           <View style={styles.inputGroup}>
             <Text style={styles.inputLabel}>Relation *</Text>
             <TextInput
-              style={[styles.textInput, errors.relation && styles.textInputError]}
+              style={[
+                styles.textInput,
+                errors.relation && styles.textInputError,
+              ]}
               placeholder="e.g. Spouse, Child, Parent, Friend..."
               placeholderTextColor="#9CA3AF"
               value={form.relation}
               onChangeText={(v) => updateField("relation", v)}
             />
-            {errors.relation && <Text style={styles.errorText}>{errors.relation}</Text>}
+            {errors.relation && (
+              <Text style={styles.errorText}>{errors.relation}</Text>
+            )}
           </View>
 
           <View style={styles.inputGroup}>
@@ -261,26 +309,149 @@ const MemberFormModal = ({
                     style={[styles.chip, active && styles.chipSelected]}
                     onPress={() => updateField("foodPreference", opt.value)}
                   >
-                    <Text style={[styles.chipText, active && styles.chipTextSelected]}>
+                    <Text
+                      style={[
+                        styles.chipText,
+                        active && styles.chipTextSelected,
+                      ]}
+                    >
                       {opt.label}
                     </Text>
                   </TouchableOpacity>
                 );
               })}
             </View>
-            {errors.foodPreference && <Text style={styles.errorText}>{errors.foodPreference}</Text>}
+            {errors.foodPreference && (
+              <Text style={styles.errorText}>{errors.foodPreference}</Text>
+            )}
           </View>
+
+          {/* Age Verification */}
+          <View style={styles.inputGroup}>
+            <Text style={styles.inputLabel}>Is this member 18 or older?</Text>
+            <View style={styles.chipContainer}>
+              <TouchableOpacity
+                style={[styles.chip, form.isAdult && styles.chipSelected]}
+                onPress={() =>
+                  setForm((prev) => ({
+                    ...prev,
+                    isAdult: true,
+                    dob: "",
+                    height: "",
+                    idNumber: "",
+                  }))
+                }
+              >
+                <Text
+                  style={[
+                    styles.chipText,
+                    form.isAdult && styles.chipTextSelected,
+                  ]}
+                >
+                  Yes (18+)
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.chip, !form.isAdult && styles.chipSelected]}
+                onPress={() =>
+                  setForm((prev) => ({
+                    ...prev,
+                    isAdult: false,
+                    dob: undefined,
+                    height: undefined,
+                    idNumber: undefined,
+                  }))
+                }
+              >
+                <Text
+                  style={[
+                    styles.chipText,
+                    !form.isAdult && styles.chipTextSelected,
+                  ]}
+                >
+                  No (Under 18)
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* Adult-specific fields */}
+          {form.isAdult && (
+            <>
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Date of Birth *</Text>
+                <TextInput
+                  style={[
+                    styles.textInput,
+                    errors.dob && styles.textInputError,
+                  ]}
+                  placeholder="e.g. 15/06/1995"
+                  placeholderTextColor="#9CA3AF"
+                  value={form.dob || ""}
+                  onChangeText={(v) => updateField("dob", v)}
+                />
+                {errors.dob && (
+                  <Text style={styles.errorText}>{errors.dob}</Text>
+                )}
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Height (cm) *</Text>
+                <TextInput
+                  style={[
+                    styles.textInput,
+                    errors.height && styles.textInputError,
+                  ]}
+                  placeholder="e.g. 175"
+                  placeholderTextColor="#9CA3AF"
+                  value={form.height || ""}
+                  onChangeText={(v) => updateField("height", v)}
+                  keyboardType="numeric"
+                />
+                {errors.height && (
+                  <Text style={styles.errorText}>{errors.height}</Text>
+                )}
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>
+                  ID Number (Passport/License) *
+                </Text>
+                <TextInput
+                  style={[
+                    styles.textInput,
+                    errors.idNumber && styles.textInputError,
+                  ]}
+                  placeholder="Enter ID number"
+                  placeholderTextColor="#9CA3AF"
+                  value={form.idNumber || ""}
+                  onChangeText={(v) => updateField("idNumber", v)}
+                />
+                {errors.idNumber && (
+                  <Text style={styles.errorText}>{errors.idNumber}</Text>
+                )}
+              </View>
+            </>
+          )}
 
           <View style={styles.inputGroup}>
             <Text style={styles.inputLabel}>Government ID</Text>
-            <TouchableOpacity style={styles.imageUploadButton} onPress={pickImage}>
+            <TouchableOpacity
+              style={styles.imageUploadButton}
+              onPress={pickImage}
+            >
               {form.idImage ? (
-                <Image source={{ uri: form.idImage }} style={styles.idImagePreview} />
+                <Image
+                  source={{ uri: form.idImage }}
+                  style={styles.idImagePreview}
+                />
               ) : (
                 <View style={styles.imageUploadPlaceholder}>
                   <Ionicons name="camera-outline" size={32} color="#9CA3AF" />
                   <Text style={styles.imageUploadText}>Upload ID Proof</Text>
-                  <Text style={styles.imageUploadHint}>Passport, Aadhaar, Driving Licence</Text>
+                  <Text style={styles.imageUploadHint}>
+                    Passport, Aadhaar, Driving Licence
+                  </Text>
                 </View>
               )}
             </TouchableOpacity>
@@ -288,7 +459,12 @@ const MemberFormModal = ({
 
           <TouchableOpacity style={styles.submitButton} onPress={handleSave}>
             <Text style={styles.submitButtonText}>Save Member</Text>
-            <Ionicons name="checkmark" size={20} color="white" style={{ marginLeft: 8 }} />
+            <Ionicons
+              name="checkmark"
+              size={20}
+              color="white"
+              style={{ marginLeft: 8 }}
+            />
           </TouchableOpacity>
         </ScrollView>
       </SafeAreaView>
@@ -299,11 +475,13 @@ const MemberFormModal = ({
 // ─── Main Screen ──────────────────────────────────────────────────────────────
 
 export default function FamilyMembersScreen() {
+  // Get logged-in user from auth store
+  const user = useAuthStore((state) => state.user);
   const [step, setStep] = useState<1 | 2>(1);
   const [familyName, setFamilyName] = useState("");
   const [totalMembers, setTotalMembers] = useState(2);
   const [members, setMembers] = useState<FamilyMember[]>([]);
-  
+
   const [modalVisible, setModalVisible] = useState(false);
   const [editingMemberId, setEditingMemberId] = useState<string | null>(null);
 
@@ -343,6 +521,18 @@ export default function FamilyMembersScreen() {
   };
 
   const handleDelete = (id: string) => {
+    // Find the index of this member
+    const index = members.findIndex((m) => m.id === id);
+
+    // Cannot delete self (first member)
+    if (index === 0) {
+      Alert.alert(
+        "Cannot Remove",
+        "You cannot remove yourself from the family"
+      );
+      return;
+    }
+
     Alert.alert("Remove Member", "Remove this person from your family?", [
       { text: "Cancel", style: "cancel" },
       {
@@ -362,21 +552,25 @@ export default function FamilyMembersScreen() {
       Alert.alert("Required", "Please specify at least 1 family member");
       return;
     }
-    
-    // Create initial member slots
+
+    // Create initial member slots - first member is self from user profile
     const initialMembers: FamilyMember[] = Array.from(
       { length: totalMembers },
       (_, i) => ({
         id: `m${i + 1}`,
-        name: "",
-        phone: "",
-        email: "",
+        name: i === 0 && user?.name ? user.name : "", // Use logged-in user name
+        phone: i === 0 && user?.name ? "" : "", // Phone would need separate profile fetch
+        email: i === 0 && user?.email ? user.email : "", // Use logged-in user email
         relation: i === 0 ? "Self" : "",
         foodPreference: "",
         idImage: "",
+        isAdult: true,
+        dob: "",
+        height: "",
+        idNumber: "",
       })
     );
-    
+
     setMembers(initialMembers);
     setStep(2);
   };
@@ -385,7 +579,7 @@ export default function FamilyMembersScreen() {
     const incompleteMembers = members.filter(
       (m) => !m.name.trim() || !m.foodPreference
     );
-    
+
     if (incompleteMembers.length > 0) {
       Alert.alert(
         "Incomplete Members",
@@ -393,13 +587,15 @@ export default function FamilyMembersScreen() {
       );
       return;
     }
-    
+
     router.push("/profile/family-accommodation");
   };
 
   const adults = members.filter((m) => m.relation !== "Child").length;
   const kids = members.filter((m) => m.relation === "Child").length;
-  const completedMembers = members.filter((m) => m.name.trim() && m.foodPreference).length;
+  const completedMembers = members.filter(
+    (m) => m.name.trim() && m.foodPreference
+  ).length;
 
   // ─── STEP 1: CREATE FAMILY ────────────────────────────────────────────────
 
@@ -407,7 +603,10 @@ export default function FamilyMembersScreen() {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
-          <TouchableOpacity style={styles.headerButton} onPress={() => router.back()}>
+          <TouchableOpacity
+            style={styles.headerButton}
+            onPress={() => router.back()}
+          >
             <Ionicons name="arrow-back" size={24} color="#374151" />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Family Setup</Text>
@@ -429,7 +628,12 @@ export default function FamilyMembersScreen() {
             <View style={styles.inputGroup}>
               <Text style={styles.inputLabel}>Family Name *</Text>
               <View style={styles.inputWithIcon}>
-                <Ionicons name="person" size={20} color={PRIMARY} style={{ marginRight: 12 }} />
+                <Ionicons
+                  name="person"
+                  size={20}
+                  color={PRIMARY}
+                  style={{ marginRight: 12 }}
+                />
                 <TextInput
                   style={styles.textInput}
                   placeholder="e.g. Smith Family"
@@ -464,7 +668,9 @@ export default function FamilyMembersScreen() {
 
                 <TouchableOpacity
                   style={styles.countButton}
-                  onPress={() => setTotalMembers(Math.min(10, totalMembers + 1))}
+                  onPress={() =>
+                    setTotalMembers(Math.min(10, totalMembers + 1))
+                  }
                   disabled={totalMembers >= 10}
                 >
                   <Ionicons
@@ -517,16 +723,25 @@ export default function FamilyMembersScreen() {
             <View style={styles.infoCard}>
               <Ionicons name="information-circle" size={20} color="#3B82F6" />
               <Text style={styles.infoText}>
-                You'll add details for each family member next. The first member will be marked as "Self".
+                You'll add details for each family member next. The first member
+                will be marked as "Self".
               </Text>
             </View>
           </View>
         </ScrollView>
 
         <View style={styles.bottomBar}>
-          <TouchableOpacity style={styles.submitButton} onPress={handleCreateFamily}>
+          <TouchableOpacity
+            style={styles.submitButton}
+            onPress={handleCreateFamily}
+          >
             <Text style={styles.submitButtonText}>Continue</Text>
-            <Ionicons name="arrow-forward" size={20} color="white" style={{ marginLeft: 8 }} />
+            <Ionicons
+              name="arrow-forward"
+              size={20}
+              color="white"
+              style={{ marginLeft: 8 }}
+            />
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -538,7 +753,10 @@ export default function FamilyMembersScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity style={styles.headerButton} onPress={() => setStep(1)}>
+        <TouchableOpacity
+          style={styles.headerButton}
+          onPress={() => setStep(1)}
+        >
           <Ionicons name="arrow-back" size={24} color="#374151" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>{familyName || "Family"} Members</Text>
@@ -556,7 +774,8 @@ export default function FamilyMembersScreen() {
           <View style={styles.summaryInfo}>
             <Text style={styles.summaryLabel}>Family Members</Text>
             <Text style={styles.summaryValue}>
-              {adults} Adult{adults !== 1 ? "s" : ""} · {kids} Kid{kids !== 1 ? "s" : ""}
+              {adults} Adult{adults !== 1 ? "s" : ""} · {kids} Kid
+              {kids !== 1 ? "s" : ""}
             </Text>
           </View>
           <View style={styles.summaryIcon}>
@@ -572,7 +791,7 @@ export default function FamilyMembersScreen() {
         {members.map((member, index) => {
           const isCompleted = !!(member.name.trim() && member.foodPreference);
           const colors = avatarColor(member.id);
-          
+
           return (
             <TouchableOpacity
               key={member.id}
@@ -582,10 +801,23 @@ export default function FamilyMembersScreen() {
               <View style={styles.guestHeader}>
                 <View style={styles.guestTitleRow}>
                   {member.idImage ? (
-                    <Image source={{ uri: member.idImage }} style={styles.memberAvatarImage} />
+                    <Image
+                      source={{ uri: member.idImage }}
+                      style={styles.memberAvatarImage}
+                    />
                   ) : (
-                    <View style={[styles.memberAvatar, { backgroundColor: colors.bg }]}>
-                      <Text style={[styles.memberAvatarText, { color: colors.text }]}>
+                    <View
+                      style={[
+                        styles.memberAvatar,
+                        { backgroundColor: colors.bg },
+                      ]}
+                    >
+                      <Text
+                        style={[
+                          styles.memberAvatarText,
+                          { color: colors.text },
+                        ]}
+                      >
                         {getInitials(member.name || "?")}
                       </Text>
                     </View>
@@ -598,20 +830,26 @@ export default function FamilyMembersScreen() {
                       <View
                         style={[
                           styles.memberBadge,
-                          isCompleted ? styles.memberBadgeDone : styles.memberBadgePending,
+                          isCompleted
+                            ? styles.memberBadgeDone
+                            : styles.memberBadgePending,
                         ]}
                       >
                         <Text
                           style={[
                             styles.memberBadgeText,
-                            isCompleted ? styles.memberBadgeTextDone : styles.memberBadgeTextPending,
+                            isCompleted
+                              ? styles.memberBadgeTextDone
+                              : styles.memberBadgeTextPending,
                           ]}
                         >
                           {isCompleted ? "✓ Done" : "Pending"}
                         </Text>
                       </View>
                       {member.relation && (
-                        <Text style={styles.memberRelation}>{member.relation}</Text>
+                        <Text style={styles.memberRelation}>
+                          {member.relation}
+                        </Text>
                       )}
                     </View>
                   </View>

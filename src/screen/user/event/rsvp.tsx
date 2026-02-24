@@ -1,3 +1,4 @@
+import { useAuthStore } from "@/src/store/AuthStore";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
@@ -21,6 +22,8 @@ interface Guest {
   isAdult: boolean;
   idNumber?: string; // Required only for adults
   idImage?: string; // ID image URI for adults
+  height?: string; // Required for adults (18+)
+  dob?: string; // Date of birth for adults (18+)
 }
 
 interface InvitedEvent {
@@ -133,6 +136,100 @@ const GuestForm = ({
           keyboardType="phone-pad"
         />
       </View>
+
+      {/* Adult toggle - ask age first */}
+      <View style={styles.inputGroup}>
+        <Text style={styles.inputLabel}>Is this guest 18 or older?</Text>
+        <View style={styles.chipContainer}>
+          <TouchableOpacity
+            style={[styles.chip, guest.isAdult && styles.chipSelected]}
+            onPress={() => onUpdate({ ...guest, isAdult: true })}
+          >
+            <Text
+              style={[
+                styles.chipText,
+                guest.isAdult && styles.chipTextSelected,
+              ]}
+            >
+              Yes (18+)
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.chip, !guest.isAdult && styles.chipSelected]}
+            onPress={() =>
+              onUpdate({
+                ...guest,
+                isAdult: false,
+                idNumber: undefined,
+                idImage: undefined,
+                height: undefined,
+                dob: undefined,
+              })
+            }
+          >
+            <Text
+              style={[
+                styles.chipText,
+                !guest.isAdult && styles.chipTextSelected,
+              ]}
+            >
+              No (Under 18)
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      {/* Fields for adults (18+) */}
+      {guest.isAdult && (
+        <>
+          <View style={styles.inputGroup}>
+            <Text style={styles.inputLabel}>Date of Birth *</Text>
+            <TextInput
+              style={styles.textInput}
+              placeholder="e.g., 15/06/1995"
+              placeholderTextColor="#9CA3AF"
+              value={guest.dob || ""}
+              onChangeText={(text) => onUpdate({ ...guest, dob: text })}
+            />
+          </View>
+
+          <View style={styles.inputGroup}>
+            <Text style={styles.inputLabel}>Height (cm) *</Text>
+            <TextInput
+              style={styles.textInput}
+              placeholder="e.g., 175"
+              placeholderTextColor="#9CA3AF"
+              value={guest.height || ""}
+              onChangeText={(text) => onUpdate({ ...guest, height: text })}
+              keyboardType="numeric"
+            />
+          </View>
+
+          <View style={styles.inputGroup}>
+            <Text style={styles.inputLabel}>
+              ID Number (Passport/License) *
+            </Text>
+            <TextInput
+              style={styles.textInput}
+              placeholder="Enter ID number"
+              placeholderTextColor="#9CA3AF"
+              value={guest.idNumber || ""}
+              onChangeText={(text) => onUpdate({ ...guest, idNumber: text })}
+            />
+          </View>
+
+          <View style={styles.inputGroup}>
+            <Text style={styles.inputLabel}>ID Image URI (optional)</Text>
+            <TextInput
+              style={styles.textInput}
+              placeholder="Enter ID image URL or upload"
+              placeholderTextColor="#9CA3AF"
+              value={guest.idImage || ""}
+              onChangeText={(text) => onUpdate({ ...guest, idImage: text })}
+            />
+          </View>
+        </>
+      )}
     </View>
   );
 };
@@ -141,9 +238,12 @@ export default function RSVPPage() {
   const params = useLocalSearchParams();
   const eventId = params.eventId as string;
 
+  // Get logged-in user from auth store
+  const user = useAuthStore((state) => state.user);
+
   const [rsvpData, setRsvpData] = useState<RSVPData>({
     attending: null,
-    totalGuests: 0,
+    totalGuests: 1,
     guests: [],
     submitted: false,
   });
@@ -172,11 +272,14 @@ export default function RSVPPage() {
     // Create guest entries (starting with self as first guest)
     const newGuests: Guest[] = Array.from({ length: count }, (_, i) => ({
       id: `guest-${i + 1}`,
-      name: i === 0 ? "" : "", // First guest is self
+      name: i === 0 && user?.name ? user.name : "", // First guest is self - use auth store
       relationship: i === 0 ? "Self" : "",
-      phone: "",
+      phone: i === 0 && user?.name ? "" : "", // Would need profile fetch for phone
       isAdult: true,
       idNumber: "",
+      idImage: "",
+      height: "",
+      dob: "",
     }));
 
     setRsvpData((prev) => ({ ...prev, guests: newGuests }));
@@ -191,6 +294,11 @@ export default function RSVPPage() {
   };
 
   const removeGuest = (index: number) => {
+    // Cannot remove self (first guest)
+    if (index === 0) {
+      Alert.alert("Error", "You cannot remove yourself from the RSVP");
+      return;
+    }
     if (rsvpData.guests.length <= 1) {
       Alert.alert("Error", "You must include at least yourself");
       return;
@@ -225,6 +333,39 @@ export default function RSVPPage() {
           `Please enter ${isSelf ? "your phone" : "phone for Guest " + (i + 1)}`
         );
         return false;
+      }
+      // Basic phone validation
+      const phoneRegex = /^[0-9]{7,15}$/;
+      if (!phoneRegex.test(guest.phone.trim())) {
+        Alert.alert(
+          "Invalid Phone",
+          `Please enter a valid phone number for ${isSelf ? "yourself" : "Guest " + (i + 1)}`
+        );
+        return false;
+      }
+      // Validate adult-specific fields
+      if (guest.isAdult) {
+        if (!guest.dob?.trim()) {
+          Alert.alert(
+            "Error",
+            `Please enter date of birth for ${isSelf ? "yourself" : "Guest " + (i + 1)}`
+          );
+          return false;
+        }
+        if (!guest.height?.trim()) {
+          Alert.alert(
+            "Error",
+            `Please enter height for ${isSelf ? "yourself" : "Guest " + (i + 1)}`
+          );
+          return false;
+        }
+        if (!guest.idNumber?.trim()) {
+          Alert.alert(
+            "Error",
+            `Please enter ID number for ${isSelf ? "yourself" : "Guest " + (i + 1)}`
+          );
+          return false;
+        }
       }
     }
     return true;
@@ -525,9 +666,11 @@ export default function RSVPPage() {
                 <TouchableOpacity
                   style={styles.optionCard}
                   onPress={() =>
-                    router.push(
-                      "/(protected)/(client-stack)/events/[eventId]/(guest)/transport" as any
-                    )
+                    router.push({
+                      pathname:
+                        "/(protected)/(client-stack)/events/[eventId]/(guest)/transport",
+                      params: { eventId },
+                    })
                   }
                 >
                   <View style={styles.optionIcon}>
@@ -546,9 +689,11 @@ export default function RSVPPage() {
                 <TouchableOpacity
                   style={styles.optionCard}
                   onPress={() =>
-                    router.push(
-                      "/(protected)/(client-stack)/events/[eventId]/(guest)/accommodation" as any
-                    )
+                    router.push({
+                      pathname:
+                        "/(protected)/(client-stack)/events/[eventId]/(guest)/accommodation",
+                      params: { eventId },
+                    })
                   }
                 >
                   <View style={styles.optionIcon}>
