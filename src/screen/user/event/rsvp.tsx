@@ -156,7 +156,7 @@ const GuestForm = ({
       </View>
 
       {/* For adults (18+): DOB and Height */}
-      {guest.age !== undefined && guest.age >= 18 && (
+      {guest.age !== undefined && guest.age <= 18 && (
         <>
           <View style={styles.inputGroup}>
             <Text style={styles.inputLabel}>Date of Birth *</Text>
@@ -187,7 +187,7 @@ const GuestForm = ({
       )}
 
       {/* For minors (under 18): Government ID upload */}
-      {guest.age !== undefined && guest.age < 18 && (
+      {guest.age !== undefined && guest.age >18 && (
         <View style={styles.inputGroup}>
           <Text style={styles.inputLabel}>Government ID *</Text>
           <ImageUpload
