@@ -1,3 +1,4 @@
+import ImageUpload from "@/src/components/ui/ImageUpload";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
@@ -18,9 +19,11 @@ interface Guest {
   name: string;
   relationship: string;
   phone: string;
-  isAdult: boolean;
-  idNumber?: string; // Required only for adults
-  idImage?: string; // ID image URI for adults
+  age?: number; // Age of the guest
+  dob?: string; // Date of birth (for adults 18+)
+  height?: string; // Height (for adults 18+)
+  idNumber?: string;
+  idImage?: string; // Government ID (for minors under 18)
 }
 
 interface InvitedEvent {
@@ -133,6 +136,68 @@ const GuestForm = ({
           keyboardType="phone-pad"
         />
       </View>
+
+      {/* Age - Ask first to determine what fields to show */}
+      <View style={styles.inputGroup}>
+        <Text style={styles.inputLabel}>Age *</Text>
+        <TextInput
+          style={styles.textInput}
+          placeholder="Enter age"
+          placeholderTextColor="#9CA3AF"
+          value={guest.age?.toString() || ""}
+          onChangeText={(text) => {
+            const ageNum = parseInt(text, 10);
+            if (!isNaN(ageNum) || text === "") {
+              onUpdate({ ...guest, age: isNaN(ageNum) ? undefined : ageNum });
+            }
+          }}
+          keyboardType="numeric"
+        />
+      </View>
+
+      {/* For adults (18+): DOB and Height */}
+      {guest.age !== undefined && guest.age >= 18 && (
+        <>
+          <View style={styles.inputGroup}>
+            <Text style={styles.inputLabel}>Date of Birth *</Text>
+            <TextInput
+              style={styles.textInput}
+              placeholder="YYYY-MM-DD"
+              placeholderTextColor="#9CA3AF"
+              value={guest.dob || ""}
+              onChangeText={(text) => onUpdate({ ...guest, dob: text })}
+            />
+            <Text style={styles.inputHint}>
+              Enter date in YYYY-MM-DD format
+            </Text>
+          </View>
+
+          <View style={styles.inputGroup}>
+            <Text style={styles.inputLabel}>Height (cm) *</Text>
+            <TextInput
+              style={styles.textInput}
+              placeholder="Enter height in cm"
+              placeholderTextColor="#9CA3AF"
+              value={guest.height || ""}
+              onChangeText={(text) => onUpdate({ ...guest, height: text })}
+              keyboardType="numeric"
+            />
+          </View>
+        </>
+      )}
+
+      {/* For minors (under 18): Government ID upload */}
+      {guest.age !== undefined && guest.age < 18 && (
+        <View style={styles.inputGroup}>
+          <Text style={styles.inputLabel}>Government ID *</Text>
+          <ImageUpload
+            value={guest.idImage || ""}
+            onChange={(uri: string) => onUpdate({ ...guest, idImage: uri })}
+            placeholder="Upload Government ID"
+            hint="Passport, Aadhaar, Driving Licence"
+          />
+        </View>
+      )}
     </View>
   );
 };
@@ -175,8 +240,10 @@ export default function RSVPPage() {
       name: i === 0 ? "" : "", // First guest is self
       relationship: i === 0 ? "Self" : "",
       phone: "",
-      isAdult: true,
-      idNumber: "",
+      age: undefined,
+      dob: "",
+      height: "",
+      idImage: "",
     }));
 
     setRsvpData((prev) => ({ ...prev, guests: newGuests }));
@@ -225,6 +292,50 @@ export default function RSVPPage() {
           `Please enter ${isSelf ? "your phone" : "phone for Guest " + (i + 1)}`
         );
         return false;
+      }
+      // Validate age is required
+      if (guest.age === undefined) {
+        Alert.alert(
+          "Error",
+          `Please enter age for ${isSelf ? "yourself" : "Guest " + (i + 1)}`
+        );
+        return false;
+      }
+      // For adults (18+): require DOB and Height
+      if (guest.age >= 18) {
+        if (!guest.dob || !guest.dob.trim()) {
+          Alert.alert(
+            "Error",
+            `Please enter date of birth for ${isSelf ? "yourself" : "Guest " + (i + 1)}`
+          );
+          return false;
+        }
+        // Validate date format (YYYY-MM-DD)
+        const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+        if (!dateRegex.test(guest.dob)) {
+          Alert.alert(
+            "Error",
+            `Please enter a valid date in YYYY-MM-DD format for ${isSelf ? "yourself" : "Guest " + (i + 1)}`
+          );
+          return false;
+        }
+        if (!guest.height || !guest.height.trim()) {
+          Alert.alert(
+            "Error",
+            `Please enter height for ${isSelf ? "yourself" : "Guest " + (i + 1)}`
+          );
+          return false;
+        }
+      }
+      // For minors (under 18): require Government ID
+      if (guest.age < 18) {
+        if (!guest.idImage) {
+          Alert.alert(
+            "Error",
+            `Please upload Government ID for ${isSelf ? "yourself" : "Guest " + (i + 1)}`
+          );
+          return false;
+        }
       }
     }
     return true;
@@ -882,6 +993,11 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#374151",
     marginBottom: 8,
+  },
+  inputHint: {
+    fontSize: 12,
+    color: "#9CA3AF",
+    marginTop: 4,
   },
   textInput: {
     backgroundColor: "#f9fafb",
