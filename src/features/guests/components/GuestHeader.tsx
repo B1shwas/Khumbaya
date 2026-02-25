@@ -32,7 +32,7 @@ export default function GuestHeader({
           marginBottom: 16,
         }}
       >
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 25 }} >
           <TouchableOpacity
             style={{
               padding: 8,
@@ -45,12 +45,9 @@ export default function GuestHeader({
           >
             <Ionicons name="chevron-back" size={24} color="#6B7280" />
           </TouchableOpacity>
-          <View>
-            <Text style={{ fontSize: 24, fontWeight: "700", color: "#111827" }}>
+          <View >
+            <Text style={{ fontSize: 20, fontWeight: "700", color: "#111827" }}>
               Guest Management
-            </Text>
-            <Text style={{ fontSize: 14, color: "#6B7280" }}>
-              {totalGuests} guests total
             </Text>
           </View>
         </View>
@@ -83,7 +80,7 @@ export default function GuestHeader({
               }}
               onPress={onAddPress}
             >
-              <Ionicons name="person-add" size={22} color="#fff" />
+              <Ionicons name="person-add" size={18} color="#fff" />
             </TouchableOpacity>
           )}
         </View>
@@ -223,6 +220,6 @@ export default function GuestHeader({
           </Text>
         </View>
       </View>
-    </View>
+    </View >
   );
 }
