@@ -1,13 +1,13 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
 import {
-    Modal,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Modal,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -24,8 +24,8 @@ const FOOD_OPTIONS = [
 
 export interface MemberFormData {
   name: string;
-  phone: string;
-  email: string;
+  phone?: string;
+  email?: string;
   relation: string;
   foodPreference: string;
   idImage: string;
@@ -83,7 +83,7 @@ export default function MemberFormModal({
     if (!form.foodPreference) e.foodPreference = "Food preference is required";
 
     // Phone validation
-    if (form.phone.trim()) {
+    if (form.phone?.trim()) {
       const phoneRegex = /^[0-9]{7,15}$/;
       if (!phoneRegex.test(form.phone.trim())) {
         e.phone = "Invalid phone number";

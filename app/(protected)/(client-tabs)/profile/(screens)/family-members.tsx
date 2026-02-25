@@ -1,8 +1,9 @@
 import { useAuthStore } from "@/src/store/AuthStore";
+import { useFamilyStore, type FamilyMember } from "@/src/store/familyStore";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Alert,
   Image,
@@ -29,28 +30,14 @@ const FOOD_OPTIONS = [
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-interface FamilyMember {
-  id: string;
-  name: string;
-  phone: string;
-  email: string;
-  relation: string;
-  foodPreference: string;
-  idImage: string;
-  isAdult: boolean;
-  dob?: string;
-  height?: string;
-  idNumber?: string;
-}
-
 interface MemberForm {
   name: string;
-  phone: string;
-  email: string;
+  phone?: string;
+  email?: string;
   relation: string;
-  foodPreference: string;
-  idImage: string;
-  isAdult: boolean;
+  foodPreference?: string;
+  idImage?: string;
+  isAdult?: boolean;
   dob?: string;
   height?: string;
   idNumber?: string;
@@ -195,18 +182,22 @@ const MemberFormModal = ({
     if (!form.foodPreference) e.foodPreference = "Food preference is required";
 
     // Phone validation
-    if (form.phone.trim()) {
+    if (form.phone?.trim()) {
       const phoneRegex = /^[0-9]{7,15}$/;
       if (!phoneRegex.test(form.phone.trim())) {
         e.phone = "Invalid phone number";
       }
     }
 
-    // Validate adult-specific fields
+    // Validate age-specific fields
     if (form.isAdult) {
+      // Adults (18+) need ID/Government docs
+      if (!form.idNumber?.trim()) e.idNumber = "ID number is required";
+      if (!form.idImage?.trim()) e.idImage = "ID image is required";
+    } else {
+      // Children (<18) need DOB and height
       if (!form.dob?.trim()) e.dob = "Date of birth is required";
       if (!form.height?.trim()) e.height = "Height is required";
-      if (!form.idNumber?.trim()) e.idNumber = "ID number is required";
     }
 
     setErrors(e);
@@ -375,44 +366,10 @@ const MemberFormModal = ({
             </View>
           </View>
 
-          {/* Adult-specific fields */}
-          {form.isAdult && (
+          {/* Age-specific fields */}
+          {form.isAdult ? (
+            // Adults (18+) - show ID fields
             <>
-              <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Date of Birth *</Text>
-                <TextInput
-                  style={[
-                    styles.textInput,
-                    errors.dob && styles.textInputError,
-                  ]}
-                  placeholder="e.g. 15/06/1995"
-                  placeholderTextColor="#9CA3AF"
-                  value={form.dob || ""}
-                  onChangeText={(v) => updateField("dob", v)}
-                />
-                {errors.dob && (
-                  <Text style={styles.errorText}>{errors.dob}</Text>
-                )}
-              </View>
-
-              <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Height (cm) *</Text>
-                <TextInput
-                  style={[
-                    styles.textInput,
-                    errors.height && styles.textInputError,
-                  ]}
-                  placeholder="e.g. 175"
-                  placeholderTextColor="#9CA3AF"
-                  value={form.height || ""}
-                  onChangeText={(v) => updateField("height", v)}
-                  keyboardType="numeric"
-                />
-                {errors.height && (
-                  <Text style={styles.errorText}>{errors.height}</Text>
-                )}
-              </View>
-
               <View style={styles.inputGroup}>
                 <Text style={styles.inputLabel}>
                   ID Number (Passport/License) *
@@ -431,31 +388,75 @@ const MemberFormModal = ({
                   <Text style={styles.errorText}>{errors.idNumber}</Text>
                 )}
               </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Government ID Image *</Text>
+                <TouchableOpacity
+                  style={styles.imageUploadButton}
+                  onPress={pickImage}
+                >
+                  {form.idImage ? (
+                    <Image
+                      source={{ uri: form.idImage }}
+                      style={styles.idImagePreview}
+                    />
+                  ) : (
+                    <View style={styles.imageUploadPlaceholder}>
+                      <Ionicons
+                        name="camera-outline"
+                        size={32}
+                        color="#9CA3AF"
+                      />
+                      <Text style={styles.imageUploadText}>
+                        Upload ID Document
+                      </Text>
+                    </View>
+                  )}
+                </TouchableOpacity>
+                {errors.idImage && (
+                  <Text style={styles.errorText}>{errors.idImage}</Text>
+                )}
+              </View>
+            </>
+          ) : (
+            // Children (<18) - show DOB and Height
+            <>
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Date of Birth *</Text>
+                <TextInput
+                  style={[
+                    styles.textInput,
+                    errors.dob && styles.textInputError,
+                  ]}
+                  placeholder="e.g. 15/06/2010"
+                  placeholderTextColor="#9CA3AF"
+                  value={form.dob || ""}
+                  onChangeText={(v) => updateField("dob", v)}
+                />
+                {errors.dob && (
+                  <Text style={styles.errorText}>{errors.dob}</Text>
+                )}
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Height (cm) *</Text>
+                <TextInput
+                  style={[
+                    styles.textInput,
+                    errors.height && styles.textInputError,
+                  ]}
+                  placeholder="e.g. 120"
+                  placeholderTextColor="#9CA3AF"
+                  value={form.height || ""}
+                  onChangeText={(v) => updateField("height", v)}
+                  keyboardType="numeric"
+                />
+                {errors.height && (
+                  <Text style={styles.errorText}>{errors.height}</Text>
+                )}
+              </View>
             </>
           )}
-
-          <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>Government ID</Text>
-            <TouchableOpacity
-              style={styles.imageUploadButton}
-              onPress={pickImage}
-            >
-              {form.idImage ? (
-                <Image
-                  source={{ uri: form.idImage }}
-                  style={styles.idImagePreview}
-                />
-              ) : (
-                <View style={styles.imageUploadPlaceholder}>
-                  <Ionicons name="camera-outline" size={32} color="#9CA3AF" />
-                  <Text style={styles.imageUploadText}>Upload ID Proof</Text>
-                  <Text style={styles.imageUploadHint}>
-                    Passport, Aadhaar, Driving Licence
-                  </Text>
-                </View>
-              )}
-            </TouchableOpacity>
-          </View>
 
           <TouchableOpacity style={styles.submitButton} onPress={handleSave}>
             <Text style={styles.submitButtonText}>Save Member</Text>
@@ -477,10 +478,30 @@ const MemberFormModal = ({
 export default function FamilyMembersScreen() {
   // Get logged-in user from auth store
   const user = useAuthStore((state) => state.user);
+  const fetchUserProfile = useAuthStore((state) => state.fetchUserProfile);
+
+  // Get family data from store
+  const familyName = useFamilyStore((state) => state.familyName);
+  const setFamilyName = useFamilyStore((state) => state.setFamilyName);
+  const members = useFamilyStore((state) => state.members);
+  const setMembersDirect = useFamilyStore((state) => state.setMembersDirect);
+  const updateMember = useFamilyStore((state) => state.updateMember);
+  const removeMember = useFamilyStore((state) => state.removeMember);
+  const loadFamily = useFamilyStore((state) => state.loadFamily);
+
   const [step, setStep] = useState<1 | 2>(1);
-  const [familyName, setFamilyName] = useState("");
   const [totalMembers, setTotalMembers] = useState(2);
-  const [members, setMembers] = useState<FamilyMember[]>([]);
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  // Fetch user profile and load family on mount
+  useEffect(() => {
+    const init = async () => {
+      await fetchUserProfile();
+      await loadFamily();
+      setIsInitialized(true);
+    };
+    init();
+  }, []);
 
   const [modalVisible, setModalVisible] = useState(false);
   const [editingMemberId, setEditingMemberId] = useState<string | null>(null);
@@ -496,6 +517,14 @@ export default function FamilyMembersScreen() {
   };
 
   const openEdit = (id: string) => {
+    // Cannot edit self - it's auto-filled from profile
+    if (id === "self") {
+      Alert.alert(
+        "Cannot Edit",
+        "Your profile details come from your account profile. Please edit your profile instead."
+      );
+      return;
+    }
     setEditingMemberId(id);
     setModalVisible(true);
   };
@@ -507,25 +536,42 @@ export default function FamilyMembersScreen() {
 
   const handleSaveMember = (form: MemberForm) => {
     if (editingMemberId) {
-      setMembers((prev) =>
-        prev.map((m) => (m.id === editingMemberId ? { ...m, ...form } : m))
-      );
+      // Update existing member - convert MemberForm to Partial<FamilyMember>
+      updateMember(editingMemberId, {
+        name: form.name,
+        phone: form.phone,
+        email: form.email,
+        relation: form.relation,
+        foodPreference: form.foodPreference,
+        idImage: form.idImage,
+        isAdult: form.isAdult ?? true,
+        dob: form.dob,
+        height: form.height,
+        idNumber: form.idNumber,
+      });
     } else {
+      // Add new member - convert MemberForm to FamilyMember
       const newMember: FamilyMember = {
         id: `m${Date.now()}`,
-        ...form,
+        name: form.name,
+        phone: form.phone,
+        email: form.email,
+        relation: form.relation,
+        foodPreference: form.foodPreference,
+        idImage: form.idImage,
+        isAdult: form.isAdult ?? true,
+        dob: form.dob,
+        height: form.height,
+        idNumber: form.idNumber,
       };
-      setMembers((prev) => [...prev, newMember]);
+      setMembersDirect((prev) => [...prev, newMember]);
     }
     closeModal();
   };
 
   const handleDelete = (id: string) => {
-    // Find the index of this member
-    const index = members.findIndex((m) => m.id === id);
-
-    // Cannot delete self (first member)
-    if (index === 0) {
+    // Cannot delete self
+    if (id === "self") {
       Alert.alert(
         "Cannot Remove",
         "You cannot remove yourself from the family"
@@ -538,7 +584,7 @@ export default function FamilyMembersScreen() {
       {
         text: "Remove",
         style: "destructive",
-        onPress: () => setMembers((prev) => prev.filter((m) => m.id !== id)),
+        onPress: () => removeMember(id),
       },
     ]);
   };
@@ -553,15 +599,30 @@ export default function FamilyMembersScreen() {
       return;
     }
 
-    // Create initial member slots - first member is self from user profile
-    const initialMembers: FamilyMember[] = Array.from(
-      { length: totalMembers },
+    // Self member injected from user profile when family is created
+    const selfMember: FamilyMember = {
+      id: "self",
+      name: user?.username || user?.name || "",
+      email: user?.email || "",
+      phone: user?.phone || "",
+      relation: "Self",
+      foodPreference: user?.foodPreference || user?.food_preference || "",
+      idImage: user?.idImage || user?.id_image || "",
+      isAdult: true,
+      dob: user?.dateOfBirth || user?.date_of_birth || "",
+      height: "",
+      idNumber: "",
+    };
+
+    // Create additional member slots (totalMembers - 1 because self is included)
+    const additionalMembers: FamilyMember[] = Array.from(
+      { length: Math.max(0, totalMembers - 1) },
       (_, i) => ({
         id: `m${i + 1}`,
-        name: i === 0 && user?.name ? user.name : "", // Use logged-in user name
-        phone: i === 0 && user?.name ? "" : "", // Phone would need separate profile fetch
-        email: i === 0 && user?.email ? user.email : "", // Use logged-in user email
-        relation: i === 0 ? "Self" : "",
+        name: "",
+        phone: "",
+        email: "",
+        relation: "",
         foodPreference: "",
         idImage: "",
         isAdult: true,
@@ -571,7 +632,10 @@ export default function FamilyMembersScreen() {
       })
     );
 
-    setMembers(initialMembers);
+    // Combine self + additional members
+    const initialMembers: FamilyMember[] = [selfMember, ...additionalMembers];
+
+    setMembersDirect(initialMembers);
     setStep(2);
   };
 
@@ -901,7 +965,22 @@ export default function FamilyMembersScreen() {
         visible={modalVisible}
         onClose={closeModal}
         onSave={handleSaveMember}
-        initial={getEditingMember() || undefined}
+        initial={
+          getEditingMember()
+            ? {
+                name: getEditingMember()!.name,
+                phone: getEditingMember()!.phone,
+                email: getEditingMember()!.email,
+                relation: getEditingMember()!.relation,
+                foodPreference: getEditingMember()!.foodPreference,
+                idImage: getEditingMember()!.idImage,
+                isAdult: getEditingMember()!.isAdult ?? true,
+                dob: getEditingMember()!.dob,
+                height: getEditingMember()!.height,
+                idNumber: getEditingMember()!.idNumber,
+              }
+            : undefined
+        }
       />
     </SafeAreaView>
   );

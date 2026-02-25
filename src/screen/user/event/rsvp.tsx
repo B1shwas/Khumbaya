@@ -269,17 +269,36 @@ export default function RSVPPage() {
       return;
     }
 
+    // Get user data from auth store for self (first guest)
+    const userData = user || {
+      username: "",
+      name: "",
+      email: "",
+      phone: "",
+      dateOfBirth: "",
+      date_of_birth: "",
+      idNumber: "",
+      idImage: "",
+      id_image: "",
+    };
+    const userName = userData.username || userData.name || "";
+    const userPhone = userData.phone || "";
+    const userDOB = userData.dateOfBirth || userData.date_of_birth || "";
+
     // Create guest entries (starting with self as first guest)
     const newGuests: Guest[] = Array.from({ length: count }, (_, i) => ({
       id: `guest-${i + 1}`,
-      name: i === 0 && user?.name ? user.name : "", // First guest is self - use auth store
+      name: i === 0 && userName ? userName : "", // First guest is self - use auth store
       relationship: i === 0 ? "Self" : "",
-      phone: i === 0 && user?.name ? "" : "", // Would need profile fetch for phone
+      phone: i === 0 && userPhone ? userPhone : "", // Pre-fill phone for self
       isAdult: true,
-      idNumber: "",
-      idImage: "",
+      idNumber: i === 0 && userData.idNumber ? userData.idNumber : "",
+      idImage:
+        i === 0 && (userData.idImage || userData.id_image)
+          ? userData.idImage || userData.id_image
+          : "",
       height: "",
-      dob: "",
+      dob: i === 0 && userDOB ? userDOB : "", // Pre-fill DOB for self
     }));
 
     setRsvpData((prev) => ({ ...prev, guests: newGuests }));
