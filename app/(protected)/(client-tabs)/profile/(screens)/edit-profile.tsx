@@ -1,5 +1,5 @@
-import { api } from "@axios";
-import ImageUpload from "@components/ui/ImageUpload";
+import ImageUpload from "@/src/components/ui/ImageUpload";
+import { useAuthStore } from "@/src/store/AuthStore";
 import { MaterialIcons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
@@ -156,6 +156,10 @@ export default function EditProfileScreen() {
   const scrollRef = useRef<ScrollView>(null);
   const [loading, setLoading] = useState(true);
 
+  // ✅ Get user from AuthStore (no API call needed!)
+  const user = useAuthStore((state) => state.user);
+  const updateUser = useAuthStore((state) => state.updateUser);
+
   const [form, setForm] = useState<ProfileForm>({
     name: "",
     email: "",
@@ -169,45 +173,29 @@ export default function EditProfileScreen() {
     avatarImage: "",
   });
 
-  // Fetching user data from the server and pre-filling the form
+  // ✅ Hydrate form from AuthStore (no network call needed)
   useEffect(() => {
-    const loadProfile = async () => {
-      try {
-        setLoading(true);
-        const res = await api.get("/user/me");
-
-        console.log("USER 👉", res.data);
-
-        const user = res.data.data;
-
-        setForm((prev) => ({
-          ...prev,
-          name: user.username || user.name || "",
-          email: user.email || "",
-          phone: user.phone || "",
-          bio: user.bio || "",
-          foodPreference: user.foodPreference || user.food_preference || "",
-          identity: user.identity || user.idType || "",
-          idProof: user.idProof || user.id_proof || user.idNumber || "",
-          dateOfBirth: user.dateOfBirth || user.date_of_birth || "",
-          idImage: user.idImage || user.id_image || user.governmentId || "",
-          avatarImage:
-            user.photo ||
-            user.avatarImage ||
-            user.avatar ||
-            user.profilePicture ||
-            "",
-        }));
-      } catch (err) {
-        console.log("Axios error:", err);
-        Alert.alert("Error", "Failed to load profile data. Please try again.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadProfile();
-  }, []);
+    if (user) {
+      setForm({
+        name: user.username || user.name || "",
+        email: user.email || "",
+        phone: user.phone || "",
+        bio: user.bio || "",
+        foodPreference: user.foodPreference || user.food_preference || "",
+        identity: user.identity || user.idType || "",
+        idProof: user.idProof || user.id_proof || user.idNumber || "",
+        dateOfBirth: user.dateOfBirth || user.date_of_birth || "",
+        idImage: user.idImage || user.id_image || user.governmentId || "",
+        avatarImage:
+          user.photo ||
+          user.avatarImage ||
+          user.avatar ||
+          user.profilePicture ||
+          "",
+      });
+    }
+    setLoading(false);
+  }, [user]);
 
   const [errors, setErrors] = useState<FormErrors>({});
   const [saveState, setSaveState] = useState<"idle" | "saving" | "saved">(
@@ -237,11 +225,33 @@ export default function EditProfileScreen() {
     return Object.keys(e).length === 0;
   };
 
+  // ✅ Save updates to AuthStore when user hits Update
   const handleSave = async () => {
     if (!validate()) return;
     setSaveState("saving");
     try {
-      await new Promise((res) => setTimeout(res, 1200));
+      // Optional: send to API
+      // const res = await api.put("/user/update", form);
+
+      // Simulate network delay
+      await new Promise((res) => setTimeout(res, 800));
+
+      // ✅ Update AuthStore instantly - user sees changes everywhere!
+      updateUser({
+        username: form.name,
+        name: form.name,
+        email: form.email,
+        phone: form.phone,
+        bio: form.bio,
+        foodPreference: form.foodPreference,
+        identity: form.identity,
+        idProof: form.idProof,
+        dateOfBirth: form.dateOfBirth,
+        idImage: form.idImage,
+        photo: form.avatarImage,
+        avatarImage: form.avatarImage,
+      });
+
       setSaveState("saved");
       setTimeout(() => router.back(), 600);
     } catch {
