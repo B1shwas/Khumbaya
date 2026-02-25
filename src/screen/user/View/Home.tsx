@@ -14,7 +14,7 @@ import { useProfile } from "@/src/features/user/api/use-user";
 import { useAuthStore } from "@/src/store/AuthStore";
 import { Ionicons } from "@expo/vector-icons";
 import { router, type RelativePathString } from "expo-router";
-import { useCallback } from "react";
+import React, { useCallback } from "react";
 import {
   FlatList,
   StyleSheet,
@@ -137,7 +137,9 @@ export default function HomePage() {
       <View style={styles.header} className="px-4">
         <View style={styles.headerContent}>
           <View>
-            <Text style={styles.greeting}>Hi, {user?.name || "Guest"} 👋</Text>
+            <Text style={styles.greeting}>
+              Hi, {user?.username || user?.name || "Guest"} 👋
+            </Text>
             <Text style={styles.title}>Plan Your Dream Event</Text>
           </View>
           <TouchableOpacity style={styles.notificationBtn}>

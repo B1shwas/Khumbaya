@@ -4,9 +4,11 @@
     "strict": true,
     "jsx": "react-jsx",
     "paths": {
-      "@/*": [
-        "./*"
-      ]
+      "@/*": ["./*"],
+      "@/src/*": ["./src/*"],
+      "@axios": ["./src/api/axios"],
+      "@components/*": ["./src/components/*"],
+      "@/store/*": ["./src/store/*"]
     }
   },
   "include": [

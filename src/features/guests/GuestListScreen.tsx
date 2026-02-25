@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useState } from "react";
 import {
   ActivityIndicator,
@@ -20,67 +21,67 @@ import { useGuests, type Guest } from "./hooks/useGuests";
 
 // Sample data - In production, this would come from the API
 const SAMPLE_GUESTS: Guest[] = [
-  {
-    id: "1",
-    name: "Priya Sharma",
-    initials: "PS",
-    avatar: "https://example.com/avatar1.jpg",
-    relation: "Friend",
-    phone: "+91 98765 43210",
-    dietaryRestrictions: ["Vegetarian"],
-    hasPlusOne: true,
-    plusOneName: "Amit",
-    status: "Going",
-    category: "Groom's Colleague",
-    source: "manual",
-    createdAt: "2024-01-15",
-  },
-  {
-    id: "2",
-    name: "Rahul Kapoor",
-    initials: "RK",
-    relation: "Family",
-    phone: "+91 98765 43211",
-    hasPlusOne: false,
-    status: "Going",
-    category: "Bride's Family",
-    source: "manual",
-    createdAt: "2024-01-10",
-  },
-  {
-    id: "3",
-    name: "Sarah Jenkins",
-    initials: "SJ",
-    relation: "Friend",
-    phone: "+91 98765 43212",
-    hasPlusOne: true,
-    status: "Pending",
-    category: "Groom's Friend",
-    source: "excel",
-    createdAt: "2024-01-08",
-  },
-  {
-    id: "4",
-    name: "Mike Johnson",
-    initials: "MJ",
-    relation: "Colleague",
-    phone: "+91 98765 43213",
-    dietaryRestrictions: ["Vegan", "Gluten-Free"],
-    hasPlusOne: false,
-    status: "Not Going",
-    category: "Work",
-    source: "manual",
-    createdAt: "2024-01-05",
-  },
-  {
-    id: "5",
-    name: "Emily Davis",
-    initials: "ED",
-    relation: "Neighbor",
-    hasPlusOne: false,
-    status: "Not Invited",
-    source: "contact",
-  },
+  // {
+  //   id: "1",
+  //   name: "Priya Sharma",
+  //   initials: "PS",
+  //   avatar: "https://example.com/avatar1.jpg",
+  //   relation: "Friend",
+  //   phone: "+91 98765 43210",
+  //   dietaryRestrictions: ["Vegetarian"],
+  //   hasPlusOne: true,
+  //   plusOneName: "Amit",
+  //   status: "Going",
+  //   category: "Groom's Colleague",
+  //   source: "manual",
+  //   createdAt: "2024-01-15",
+  // },
+  // {
+  //   id: "2",
+  //   name: "Rahul Kapoor",
+  //   initials: "RK",
+  //   relation: "Family",
+  //   phone: "+91 98765 43211",
+  //   hasPlusOne: false,
+  //   status: "Going",
+  //   category: "Bride's Family",
+  //   source: "manual",
+  //   createdAt: "2024-01-10",
+  // },
+  // {
+  //   id: "3",
+  //   name: "Sarah Jenkins",
+  //   initials: "SJ",
+  //   relation: "Friend",
+  //   phone: "+91 98765 43212",
+  //   hasPlusOne: true,
+  //   status: "Pending",
+  //   category: "Groom's Friend",
+  //   source: "excel",
+  //   createdAt: "2024-01-08",
+  // },
+  // {
+  //   id: "4",
+  //   name: "Mike Johnson",
+  //   initials: "MJ",
+  //   relation: "Colleague",
+  //   phone: "+91 98765 43213",
+  //   dietaryRestrictions: ["Vegan", "Gluten-Free"],
+  //   hasPlusOne: false,
+  //   status: "Not Going",
+  //   category: "Work",
+  //   source: "manual",
+  //   createdAt: "2024-01-05",
+  // },
+  // {
+  //   id: "5",
+  //   name: "Emily Davis",
+  //   initials: "ED",
+  //   relation: "Neighbor",
+  //   hasPlusOne: false,
+  //   status: "Not Invited",
+  //   source: "contact",
+  // },
   {
     id: "6",
     name: "John Smith",
@@ -94,17 +95,17 @@ const SAMPLE_GUESTS: Guest[] = [
     source: "manual",
     createdAt: "2024-01-12",
   },
-  {
-    id: "7",
-    name: "Lisa Anderson",
-    initials: "LA",
-    relation: "Friend",
-    phone: "+91 98765 43215",
-    hasPlusOne: false,
-    status: "Pending",
-    source: "excel",
-    createdAt: "2024-01-14",
-  },
+  // {
+  //   id: "7",
+  //   name: "Lisa Anderson",
+  //   initials: "LA",
+  //   relation: "Friend",
+  //   phone: "+91 98765 43215",
+  //   hasPlusOne: false,
+  //   status: "Pending",
+  //   source: "excel",
+  //   createdAt: "2024-01-14",
+  // },
   {
     id: "8",
     name: "David Wilson",
@@ -119,6 +120,10 @@ const SAMPLE_GUESTS: Guest[] = [
 ];
 
 export default function GuestListScreen() {
+  const router = useRouter();
+  const params = useLocalSearchParams();
+  const eventId = params.eventId as string | undefined;
+
   const {
     filteredGuests,
     searchQuery,
@@ -175,23 +180,23 @@ export default function GuestListScreen() {
     [sendInvite]
   );
 
-  const handleDeleteGuest = useCallback(
-    (id: string, name: string) => {
-      Alert.alert(
-        "Delete Guest",
-        `Are you sure you want to remove ${name} from the guest list?`,
-        [
-          { text: "Cancel", style: "cancel" },
-          {
-            text: "Delete",
-            style: "destructive",
-            onPress: () => deleteGuest(id),
-          },
-        ]
-      );
-    },
-    [deleteGuest]
-  );
+  // const handleDeleteGuest = useCallback(
+  //   (id: string, name: string) => {
+  //     Alert.alert(
+  //       "Delete Guest",
+  //       `Are you sure you want to remove ${name} from the guest list?`,
+  //       [
+  //         { text: "Cancel", style: "cancel" },
+  //         {
+  //           text: "Delete",
+  //           style: "destructive",
+  //           onPress: () => deleteGuest(id),
+  //         },
+  //       ]
+  //     );
+  //   },
+  //   [deleteGuest]
+  // );
 
   const handleAddGuest = useCallback(() => {
     if (!newGuestName.trim()) {
@@ -235,53 +240,6 @@ export default function GuestListScreen() {
           hasPlusOne: false,
           status: "Not Invited",
           category: "Groom's Friend",
-          source: "excel",
-        },
-        {
-          id: "import-2",
-          name: "Neha Singh",
-          initials: "NS",
-          relation: "Family",
-          phone: "+91 98000 00002",
-          hasPlusOne: true,
-          plusOneName: "Raj",
-          status: "Not Invited",
-          category: "Bride's Family",
-          source: "excel",
-        },
-        {
-          id: "import-3",
-          name: "Raj Malhotra",
-          initials: "RM",
-          relation: "Colleague",
-          phone: "+91 98000 00003",
-          hasPlusOne: false,
-          status: "Not Invited",
-          category: "Work",
-          dietaryRestrictions: ["Vegetarian"],
-          source: "excel",
-        },
-        {
-          id: "import-4",
-          name: "Priya Reddy",
-          initials: "PR",
-          relation: "Friend",
-          phone: "+91 98000 00004",
-          hasPlusOne: true,
-          plusOneName: "Karthik",
-          status: "Not Invited",
-          category: "Bride's Friend",
-          source: "excel",
-        },
-        {
-          id: "import-5",
-          name: "Vikram Joshi",
-          initials: "VJ",
-          relation: "Neighbor",
-          phone: "+91 98000 00005",
-          hasPlusOne: false,
-          status: "Not Invited",
-          category: "Neighbor",
           source: "excel",
         },
       ];
@@ -330,15 +288,27 @@ export default function GuestListScreen() {
     setImportedFileName("");
   }, []);
 
+  // ✅ Navigate to guest details
+  const handleGuestPress = useCallback(
+    (guest: Guest) => {
+      router.push({
+        pathname: "/events/[eventId]/(organizer)/guest-details",
+        params: { eventId, guest: JSON.stringify(guest) },
+      });
+    },
+    [router]
+  );
+
   const renderGuest = useCallback(
     ({ item }: { item: Guest }) => (
       <GuestCard
         guest={item}
+        onPress={() => handleGuestPress(item)}
         onSendInvite={() => handleSendInvite(item.id)}
-        onDelete={() => handleDeleteGuest(item.id, item.name)}
+        // onDelete={() => handleDeleteGuest(item.id, item.name)}
       />
     ),
-    [handleSendInvite, handleDeleteGuest]
+    [handleSendInvite, handleGuestPress]
   );
 
   const ListEmptyComponent = useCallback(
@@ -411,6 +381,11 @@ export default function GuestListScreen() {
             tintColor="#EE2B8C"
           />
         }
+        // Performance optimizations
+        initialNumToRender={10}
+        maxToRenderPerBatch={10}
+        windowSize={5}
+        removeClippedSubviews={true}
       />
 
       {/* Floating Action Buttons */}

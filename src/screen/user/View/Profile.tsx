@@ -1,10 +1,12 @@
+import AvatarPicker from "@/src/components/ui/AvatarPicker";
 import { useAuthStore } from "@/src/store/AuthStore";
 import { useRouter } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
+import * as ImagePicker from "expo-image-picker";
 import { LinearGradient } from "expo-linear-gradient";
 import { Link } from "expo-router";
 import { useState } from "react";
-import { Image, Pressable, ScrollView, Text, View } from "react-native";
+import { Alert, Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 type ToggleButtonProps = {
@@ -28,6 +30,35 @@ export default function ProfileScreen() {
     router.replace("/(onboarding)");
   };
 
+  const handlePickAvatar = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert(
+        "Permission Required",
+        "Please allow access to your photo library."
+      );
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
+    });
+
+    if (!result.canceled && result.assets[0]) {
+      updateUser({
+        avatarImage: result.assets[0].uri,
+        photo: result.assets[0].uri,
+      });
+    }
+  };
+
+  // Get avatar from user
+  const avatarUri =
+    user?.avatarImage || user?.photo || user?.avatar || user?.profilePicture;
+
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
       <ScrollView showsVerticalScrollIndicator={false}>
@@ -40,25 +71,20 @@ export default function ProfileScreen() {
 
         {/* PROFILE */}
         <View className="items-center mt-6 mb-6 bg-white py-6">
-          <View className="p-1 rounded-full !bg-primary">
-            <Image
-              source={{
-                uri: "https://lh3.googleusercontent.com/aida-public/AB6AXuD8QYwLdrh7xjte39mVYvDpi053GDi8rf6uQT5uRehpkzgSaSUO1bU-gjQR3vC5rz0trs8aPuTJQ-NF-7EWhF0dW0Sncg_Vhq_mo8NftERtP4ZVATWyqgiFk4YEYtjMq-kH0vubWOCRAWN0iY_YzSfmg5zLdv55nlQE84xdxw-TTt-IVuBhKoAuBzCQypf1qEhxeHZNxVPFpTjsCytpO95l4FHsaMS3HtpB0dJJssJtnyKpr-sBd50Vrtk2mkFa_ESaiscwocjW8do",
-              }}
-              className="w-32 h-32 rounded-full"
-            />
-          </View>
-
-          {/* camera */}
-          <Pressable className="absolute bottom-[85px] right-[150px] bg-pink-500 p-2 rounded-full shadow-lg">
-            <MaterialIcons name="photo-camera" size={18} color="white" />
-          </Pressable>
+          <AvatarPicker
+            name={user?.name || user?.username || "User"}
+            avatarUri={avatarUri}
+            onPick={handlePickAvatar}
+            size="large"
+            showEditButton={true}
+            showName={false}
+          />
 
           <Text className="text-2xl font-bold mt-4 text-gray-900">
-            {user?.name}
+            {user?.name || user?.username || "User"}
           </Text>
 
-          <Text className="text-gray-500 text-sm">Premium Member</Text>
+          <Text className="text-gray-500 text-sm">{user?.email}</Text>
         </View>
 
         {/* GLASS TOGGLE */}
