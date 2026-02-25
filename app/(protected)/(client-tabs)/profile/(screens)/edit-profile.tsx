@@ -1,4 +1,5 @@
 import api from "@/src/api/axios";
+import AvatarPicker from "@/src/components/ui/AvatarPicker";
 import ImageUpload from "@/src/components/ui/ImageUpload";
 import { useAuthStore } from "@/src/store/AuthStore";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -9,17 +10,14 @@ import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
-  Animated,
-  Image,
   KeyboardAvoidingView,
   Platform,
-  Pressable,
   ScrollView,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -84,43 +82,6 @@ const ProgressBar = ({ step, total }: { step: number; total: number }) => (
     ))}
   </View>
 );
-
-const AvatarPicker = ({
-  name,
-  avatarUri,
-  onPick,
-}: {
-  name: string;
-  avatarUri: string;
-  onPick: () => void;
-}) => {
-  const scale = new Animated.Value(1);
-
-  const onPressIn = () =>
-    Animated.spring(scale, { toValue: 0.94, useNativeDriver: true }).start();
-  const onPressOut = () =>
-    Animated.spring(scale, { toValue: 1, useNativeDriver: true }).start();
-
-  return (
-    <View style={styles.avatarContainer}>
-      <Pressable onPress={onPick} onPressIn={onPressIn} onPressOut={onPressOut}>
-        <Animated.View style={{ transform: [{ scale }] }}>
-          <View style={styles.avatar}>
-            {avatarUri ? (
-              <Image source={{ uri: avatarUri }} style={styles.avatarImage} />
-            ) : (
-              <Text style={styles.avatarInitials}>{getInitials(name)}</Text>
-            )}
-          </View>
-          <View style={styles.cameraButton}>
-            <MaterialIcons name="camera-alt" size={14} color="#fff" />
-          </View>
-        </Animated.View>
-      </Pressable>
-      <Text style={styles.avatarHint}>Tap to upload photo</Text>
-    </View>
-  );
-};
 
 const ValidationSummary = ({ count }: { count: number }) =>
   count > 0 ? (
