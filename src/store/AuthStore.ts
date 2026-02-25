@@ -130,9 +130,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       const userData = await response.json();
       console.log("✅ [AuthStore] Fetched user profile:", userData);
 
+      // Extract the actual user data from the response (API wraps data in { data: ... })
+      const actualUserData = userData.data || userData;
+      console.log("✅ [AuthStore] User data extracted:", actualUserData);
+
       // Update local storage and state
-      await AsyncStorage.setItem("user", JSON.stringify(userData));
-      set({ user: userData, isProfileLoading: false });
+      await AsyncStorage.setItem("user", JSON.stringify(actualUserData));
+      set({ user: actualUserData, isProfileLoading: false });
     } catch (error) {
       console.error("❌ [AuthStore] Error fetching user profile:", error);
       set({ isProfileLoading: false });

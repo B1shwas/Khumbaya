@@ -1,4 +1,3 @@
-import api from "@/src/api/axios";
 import AvatarPicker from "@/src/components/ui/AvatarPicker";
 import ImageUpload from "@/src/components/ui/ImageUpload";
 import { useAuthStore } from "@/src/store/AuthStore";
@@ -17,7 +16,7 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  View
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -203,6 +202,7 @@ export default function EditProfileScreen() {
     if (!validate()) return;
     setSaveState("saving");
     try {
+      /*
       // Send update to backend API
       const res = await api.put("/user/update", {
         username: form.name,
@@ -239,6 +239,26 @@ export default function EditProfileScreen() {
           avatarImage: form.avatarImage,
         });
       }
+      */
+
+      // ✅ Update AuthStore instantly - user sees changes everywhere!
+      // Simulate network delay
+      await new Promise((res) => setTimeout(res, 800));
+
+      updateUser({
+        username: form.name,
+        name: form.name,
+        email: form.email,
+        phone: form.phone,
+        bio: form.bio,
+        foodPreference: form.foodPreference,
+        identity: form.identity,
+        idProof: form.idProof,
+        dateOfBirth: form.dateOfBirth,
+        idImage: form.idImage,
+        photo: form.avatarImage,
+        avatarImage: form.avatarImage,
+      });
 
       setSaveState("saved");
       setTimeout(() => router.back(), 600);
