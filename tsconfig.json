@@ -4,14 +4,10 @@
     "strict": true,
     "jsx": "react-jsx",
     "paths": {
-      "@/*": [
-        "./*"
-      ]
+      "@/*": ["./*"],
+      "@axios": ["./src/api/axios"],
+      "@components/*": ["./src/components/*"]
     }
   },
-  "include": [
-    "**/*.ts",
-    "**/*.tsx",
-    "nativewind-env.d.ts"
-  ]
+  "include": ["**/*.ts", "**/*.tsx", "nativewind-env.d.ts"]
 }
