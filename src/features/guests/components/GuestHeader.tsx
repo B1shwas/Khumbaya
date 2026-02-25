@@ -47,7 +47,7 @@ export default function GuestHeader({
           </TouchableOpacity>
           <View>
             <Text style={{ fontSize: 24, fontWeight: "700", color: "#111827" }}>
-              Guest List
+              Guest Management
             </Text>
             <Text style={{ fontSize: 14, color: "#6B7280" }}>
               {totalGuests} guests total

@@ -8,7 +8,6 @@ import {
   VenueCard,
 } from "@/src/components/home";
 
-import EventList from "@/src/constants/event";
 import VENUES from "@/src/constants/venues";
 import { useProfile } from "@/src/features/user/api/use-user";
 import { useAuthStore } from "@/src/store/AuthStore";
@@ -112,10 +111,6 @@ export default function HomePage() {
   );
 
   // Render functions for FlatList items
-  const renderEventItem = useCallback(
-    ({ item }: { item: (typeof EventList)[0] }) => <EventCard {...item} />,
-    []
-  );
 
   const renderVenueItem = useCallback(
     ({ item }: { item: (typeof VENUES)[0] }) => <VenueCard {...item} />,
@@ -164,14 +159,14 @@ export default function HomePage() {
 
             {/* Your Events Section */}
             <SectionHeader title="Your Events" />
-            <FlatList
+            {/* <FlatList
               data={EventList}
               renderItem={renderEventItem}
               keyExtractor={(item) => item.id}
               horizontal
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={styles.horizontalList}
-            />
+            /> */}
 
             {/* Popular Venues Section */}
             <SectionHeader title="Popular Venues" onPress={navigateToVenues} />
