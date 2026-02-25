@@ -1,3 +1,4 @@
+import api from "@/src/api/axios";
 import ImageUpload from "@/src/components/ui/ImageUpload";
 import { useAuthStore } from "@/src/store/AuthStore";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -159,6 +160,13 @@ export default function EditProfileScreen() {
   // ✅ Get user from AuthStore (no API call needed!)
   const user = useAuthStore((state) => state.user);
   const updateUser = useAuthStore((state) => state.updateUser);
+  const fetchUserProfile = useAuthStore((state) => state.fetchUserProfile);
+  const isProfileLoading = useAuthStore((state) => state.isProfileLoading);
+
+  // ✅ Fetch fresh user data from backend when component mounts
+  useEffect(() => {
+    fetchUserProfile();
+  }, []);
 
   const [form, setForm] = useState<ProfileForm>({
     name: "",
@@ -175,7 +183,8 @@ export default function EditProfileScreen() {
 
   // ✅ Hydrate form from AuthStore (no network call needed)
   useEffect(() => {
-    if (user) {
+    // Wait for profile to finish loading before setting form data
+    if (!isProfileLoading && user) {
       setForm({
         name: user.username || user.name || "",
         email: user.email || "",
@@ -193,9 +202,12 @@ export default function EditProfileScreen() {
           user.profilePicture ||
           "",
       });
+      setLoading(false);
+    } else if (!isProfileLoading && !user) {
+      // No user and not loading - still show form
+      setLoading(false);
     }
-    setLoading(false);
-  }, [user]);
+  }, [user, isProfileLoading]);
 
   const [errors, setErrors] = useState<FormErrors>({});
   const [saveState, setSaveState] = useState<"idle" | "saving" | "saved">(
@@ -230,14 +242,8 @@ export default function EditProfileScreen() {
     if (!validate()) return;
     setSaveState("saving");
     try {
-      // Optional: send to API
-      // const res = await api.put("/user/update", form);
-
-      // Simulate network delay
-      await new Promise((res) => setTimeout(res, 800));
-
-      // ✅ Update AuthStore instantly - user sees changes everywhere!
-      updateUser({
+      // Send update to backend API
+      const res = await api.put("/user/update", {
         username: form.name,
         name: form.name,
         email: form.email,
@@ -252,9 +258,31 @@ export default function EditProfileScreen() {
         avatarImage: form.avatarImage,
       });
 
+      // Update AuthStore with the response from server
+      if (res.data) {
+        updateUser(res.data);
+      } else {
+        // Fallback: update with local form data
+        updateUser({
+          username: form.name,
+          name: form.name,
+          email: form.email,
+          phone: form.phone,
+          bio: form.bio,
+          foodPreference: form.foodPreference,
+          identity: form.identity,
+          idProof: form.idProof,
+          dateOfBirth: form.dateOfBirth,
+          idImage: form.idImage,
+          photo: form.avatarImage,
+          avatarImage: form.avatarImage,
+        });
+      }
+
       setSaveState("saved");
       setTimeout(() => router.back(), 600);
-    } catch {
+    } catch (error) {
+      console.error("Error saving profile:", error);
       setSaveState("idle");
       Alert.alert("Save Failed", "Please check your connection and try again.");
     }
@@ -282,12 +310,17 @@ export default function EditProfileScreen() {
   const isSaving = saveState === "saving";
   const errorCount = Object.keys(errors).length;
 
-  if (loading) {
+  // Show loading while either local loading or fetching profile from backend
+  if (loading || isProfileLoading) {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={PRIMARY} />
-          <Text style={styles.loadingText}>Loading profile...</Text>
+          <Text style={styles.loadingText}>
+            {isProfileLoading
+              ? "Fetching latest profile..."
+              : "Loading profile..."}
+          </Text>
         </View>
       </SafeAreaView>
     );

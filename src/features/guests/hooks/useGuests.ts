@@ -12,8 +12,19 @@ export type CategoryType =
   | "Other";
 export type InvitationStatus = "All" | "Invited" | "Not Invited";
 export type SortOption = "name" | "recent" | "status";
+export type Gender = "Male" | "Female" | "Other" | "Prefer not to say";
+
+export interface FamilyMember {
+  id: string;
+  name: string;
+  relation: string;
+  age?: number;
+  dietaryRestrictions?: string[];
+  mealPreference?: string;
+}
 
 export interface Guest {
+  // Basic Info
   id: string;
   name: string;
   initials: string;
@@ -21,14 +32,42 @@ export interface Guest {
   relation?: string;
   phone?: string;
   email?: string;
-  dietaryRestrictions?: string[];
-  hasPlusOne: boolean;
-  plusOneName?: string;
+
+  // Extended Info (from RSVP)
+  gender?: Gender;
+  address?: string;
+  location?: string;
+  dateOfBirth?: string;
+
+  // Family Info (for confirmed guests)
+  familyMembers?: FamilyMember[];
+
+  // Status & Category
   status: GuestStatus;
   category?: string;
   invitedAt?: string;
-  source: "manual" | "excel" | "contact";
+  source: "manual" | "excel" | "contact" | "rsvp";
   createdAt?: string;
+
+  // RSVP Details
+  totalGuests?: number;
+  dietaryRestrictions?: string[];
+  mealPreference?: string;
+  hasPlusOne: boolean;
+  plusOneName?: string;
+
+  // Event Details
+  arrivalDate?: string;
+  arrivalLocation?: string;
+  departureDate?: string;
+  departureLocation?: string;
+
+  // Accommodation & Gifts
+  roomAllocation?: string;
+  roomType?: string;
+  giftStatus?: "Pending" | "Received" | "Not Applicable";
+  giftAmount?: number;
+  giftMessage?: string;
 }
 
 interface UseGuestsReturn {

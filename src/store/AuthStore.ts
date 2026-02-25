@@ -1,7 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as SecureStore from "expo-secure-store";
 import { create } from "zustand";
-import { DEBUG_AUTO_LOGIN, TEST_USER } from "../config/env";
+import { API_BASE_URL, DEBUG_AUTO_LOGIN, TEST_USER } from "../config/env";
 
 export type User = {
   id: number;
@@ -38,6 +38,7 @@ type AuthState = {
   clearAuth: () => Promise<void>;
   isAuthenticated: () => boolean;
   hydrate: () => Promise<void>;
+  fetchUserProfile: () => Promise<void>;
 };
 
 export const useAuthStore = create<AuthState>((set, get) => ({
@@ -103,4 +104,38 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   isAuthenticated: () => Boolean(get().token),
+
+  fetchUserProfile: async () => {
+    const { token } = get();
+    if (!token) {
+      console.warn("⚠️ [AuthStore] No token found, cannot fetch profile");
+      return;
+    }
+
+    set({ isProfileLoading: true });
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/user/me`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch user profile: ${response.status}`);
+      }
+
+      const userData = await response.json();
+      console.log("✅ [AuthStore] Fetched user profile:", userData);
+
+      // Update local storage and state
+      await AsyncStorage.setItem("user", JSON.stringify(userData));
+      set({ user: userData, isProfileLoading: false });
+    } catch (error) {
+      console.error("❌ [AuthStore] Error fetching user profile:", error);
+      set({ isProfileLoading: false });
+    }
+  },
 }));
