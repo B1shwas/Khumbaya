@@ -1,9 +1,9 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as SecureStore from "expo-secure-store";
 import { create } from "zustand";
-// import { DEBUG_AUTO_LOGIN, TEST_USER } from "../config/env";
-// import { getUserProfile } from "../features/user/api/user.service";
 import { API_BASE_URL, DEBUG_AUTO_LOGIN, TEST_USER } from "../config/env";
+import { getUserProfile } from "../features/user/api/user.service";
+// import { API_BASE_URL, DEBUG_AUTO_LOGIN, TEST_USER } from "../config/env";
 
 export type User = {
   id: number;
@@ -69,22 +69,25 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         try {
           // Temporarily set token so axios interceptor can use it
           set({ token, user, isLoading: true });
-          
+
           // Validate token by fetching user profile
           const profileData = await getUserProfile();
-          
+
           // Token is valid! Update with full profile data
           user = {
             id: profileData.id,
             email: profileData.email,
             name: profileData.username,
           };
-          
+
           set({ token, user, isLoading: false });
           console.log("✅ Token validated successfully");
         } catch (validationError) {
           // Token is invalid or expired → clear auth
-          console.warn("❌ Token validation failed, clearing auth:", validationError);
+          console.warn(
+            "❌ Token validation failed, clearing auth:",
+            validationError
+          );
           await SecureStore.deleteItemAsync("token");
           await AsyncStorage.removeItem("user");
           set({ token: null, user: null, isLoading: false });
