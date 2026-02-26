@@ -1,5 +1,5 @@
-import { Event_WITH_ROLE ,  } from "@/src/components/home/EventCardTab";
-import { EventTab , Event } from "@/src/constants/event";
+import { Event_WITH_ROLE, } from "@/src/components/home/EventCardTab";
+import { EventTab, Event } from "@/src/constants/event";
 import { useGetEventWithRole } from "@/src/features/events/hooks/use-event";
 import { cn } from "@/src/utils/cn";
 import { Ionicons } from "@expo/vector-icons";
@@ -31,11 +31,12 @@ export default function EventsPage() {
     { label: "Invited", value: "invited" },
     { label: "Completed", value: "completed" },
   ];
+  //TODO: Fetch the invitd when the invited
 
   // const filteredEvents = (eventsData as Event[]).filter(
   //   (event) => event.status === activeTab
   // );
-  const filteredEvents = eventsData ;  
+  const filteredEvents = eventsData;
 
   const emptyMessage: Record<EventTab, string> = {
     upcoming: "Create your first event to get started",
@@ -109,7 +110,7 @@ export default function EventsPage() {
             </Text>
           </View>
         ) : filteredEvents.length > 0 ? (
-          filteredEvents.map((event:Event) => (
+          filteredEvents.map((event: Event) => (
             <Event_WITH_ROLE
               key={event.id}
               event={event}
