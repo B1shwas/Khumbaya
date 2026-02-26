@@ -1,7 +1,9 @@
+import { DatePicker } from '@/components/nativewindui/DatePicker';
 import { CREATEEVENT } from "@/src/features/events/api/events.service";
 import { useCreateEvent } from "@/src/features/events/hooks/use-event";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+
 import React, { useState } from "react";
 import {
   Alert,
@@ -341,57 +343,17 @@ export default function EventCreate() {
             </View>
           </View>
 
-          {/* Date Picker */}
-          <View className="px-4 pt-3">
-            <Text className="font-plusjakartasans-bold text-base text-[#181114] mb-3">
-              When is the big day?
-            </Text>
-            <View className="bg-white rounded-2xl border border-gray-200 p-4">
-              {/* Calendar Header */}
-              <View className="flex-row justify-between items-center mb-4">
-                <Text className="font-plusjakartasans-bold text-lg text-[#181114]">
-                  {MONTHS[currentMonth]} {currentYear}
-                </Text>
-                <View className="flex-row gap-2">
-                  <TouchableOpacity
-                    onPress={() => handleMonthChange("prev")}
-                    className="p-1"
-                  >
-                    <Ionicons name="chevron-back" size={24} color="#ee2b8c" />
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    onPress={() => handleMonthChange("next")}
-                    className="p-1"
-                  >
-                    <Ionicons
-                      name="chevron-forward"
-                      size={24}
-                      color="#ee2b8c"
-                    />
-                  </TouchableOpacity>
-                </View>
-              </View>
-
-              {/* Day of Week Headers */}
-              <View className="flex-row mb-2 justify-around">
-                {["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"].map(
-                  (day) => (
-                    <Text
-                      key={day}
-                      className="font-plusjakartasans-bold text-xs text-gray-400 text-center w-10"
-                    >
-                      {day}
-                    </Text>
-                  )
-                )}
-              </View>
-
-              {/* Calendar Grid */}
-              <View className="flex-row flex-wrap justify-start">
-                {renderCalendarDays()}
-              </View>
-            </View>
+                  
+          <View className='mt-7'>
+            <DatePicker
+              value={selectedDate}
+              mode="datetime"
+              onChange={(ev:any) => {
+                  setSelectedDate(new Date(ev.nativeEvent.timestamp));
+              }}
+              />
           </View>
+
 
           {/* Bottom spacing for footer */}
           <View className="h-[100px]" />

@@ -29,7 +29,7 @@ export default function NavigateComponent({
       >
         {icon && <Ionicons name={icon as any} size={20} color="white" />}
       </View>
-      <Text className="font-semibold text-sm text-gray-900">{name}</Text>
+      <Text className="font-semibold text-xs text-gray-900">{name}</Text>
     </TouchableOpacity>
   );
 }

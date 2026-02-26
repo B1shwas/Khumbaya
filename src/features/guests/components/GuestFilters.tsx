@@ -25,7 +25,7 @@ const categories: CategoryType[] = [
   "Friend",
   "Colleague",
   "Relative",
-  "Neighbor",
+  
 ];
 
 const tabs: RSVPStatus[] = ["All", "Confirmed", "Pending", "Not Invited"];
@@ -117,7 +117,7 @@ export default function GuestFilters({
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        style={{ marginBottom: 12 }}
+        style={{ marginBottom: 12, marginTop: 4 }}
         contentContainerStyle={{ gap: 8 }}
       >
         {categories.map((cat) => (
@@ -153,7 +153,7 @@ export default function GuestFilters({
       </ScrollView>
 
       {/* Sort Options */}
-      <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+      {/* <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
         <Ionicons name="swap-vertical" size={16} color="#6B7280" />
         <ScrollView
           horizontal
@@ -183,7 +183,7 @@ export default function GuestFilters({
             </TouchableOpacity>
           ))}
         </ScrollView>
-      </View>
+      </View> */}
     </View>
   );
 }

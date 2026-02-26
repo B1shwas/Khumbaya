@@ -1,4 +1,5 @@
 import NavigateComponent from "@/src/components/event/NavigateComponent";
+import { Event } from "@/src/constants/event";
 import { useGetEventWithRole } from "@/src/features/events/hooks/use-event";
 import { Ionicons } from "@expo/vector-icons";
 import {
@@ -8,7 +9,6 @@ import {
 } from "expo-router";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import EventDetailHero from "./EventDetailHero";
-import { Event } from "@/src/constants/event";
 
 const EventDetail = ({
   isInvitedGuest = false,
@@ -50,7 +50,7 @@ const foundEvent = found?.find((e:Event) => String(e.id) === String(eventId));
     },
     {
       id: "guests",
-      name: "Guest List",
+      name: "Guest Management",
       icon: "people",
       color: "#8B5CF6",
       route: `./guests`,

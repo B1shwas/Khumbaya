@@ -17,6 +17,7 @@ import {
 import GuestCard from "./components/GuestCard";
 import GuestFilters from "./components/GuestFilters";
 import GuestHeader from "./components/GuestHeader";
+// import { SAMPLE_GUESTS } from "@/src/constants/Guest";
 import { useGuests, type Guest } from "./hooks/useGuests";
 
 // Sample data - In production, this would come from the API
@@ -343,7 +344,7 @@ export default function GuestListScreen() {
   );
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#F9FAFB" }}>
+    <View>
       {/* Header */}
       <GuestHeader
         totalGuests={stats.totalGuests}
@@ -874,6 +875,6 @@ export default function GuestListScreen() {
           </View>
         </View>
       </Modal>
-    </SafeAreaView>
+    </View>
   );
 }

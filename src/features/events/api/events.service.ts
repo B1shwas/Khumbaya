@@ -49,11 +49,18 @@ export const getEventsApi = async () => {
   if (Array.isArray(payload?.items)) {
     return payload.items;
   }
-
-
   return [];
 }
 
+export const getInvitedEvent =async()=>{
+  const response = await api.get("/invitation");
+  const payload = response.data?.data;
+  if (Array.isArray(payload?.items)) {
+    return payload.items;
+  }
+  return [];
+
+}
 export const updateEventApi = async (id: number, data: Partial<CREATEEVENT>) => {
   const response = await api.patch(`/event/${id}`, data);
   return response.data;
