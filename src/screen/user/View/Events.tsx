@@ -1,6 +1,9 @@
-import { Event_WITH_ROLE, } from "@/src/components/home/EventCardTab";
-import { EventTab, Event } from "@/src/constants/event";
-import { useGetEventWithRole } from "@/src/features/events/hooks/use-event";
+import { Event_WITH_ROLE } from "@/src/components/home/EventCardTab";
+import { Event, EventTab } from "@/src/constants/event";
+import {
+  useGetEventWithRole,
+  useGetInvitedEvents,
+} from "@/src/features/events/hooks/use-event";
 import { cn } from "@/src/utils/cn";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -21,22 +24,59 @@ export default function EventsPage() {
   const router = useRouter();
   const {
     data: eventsData = [],
-    isLoading,
-    isError,
-    refetch,
+    isLoading: isEventsLoading,
+    isError: isEventsError,
+    refetch: refetchEvents,
   } = useGetEventWithRole();
+  const {
+    data: invitedEventsData = [],
+    isLoading: isInvitedLoading,
+    isError: isInvitedError,
+    refetch: refetchInvited,
+  } = useGetInvitedEvents();
 
   const tabs: { label: string; value: EventTab }[] = [
     { label: "Upcoming", value: "upcoming" },
     { label: "Invited", value: "invited" },
     { label: "Completed", value: "completed" },
   ];
-  //TODO: Fetch the invitd when the invited
+  const getEventStatus = (event: Event): EventTab => {
+    if (
+      event.status === "upcoming" ||
+      event.status === "invited" ||
+      event.status === "completed"
+    ) {
+      return event.status;
+    }
 
-  // const filteredEvents = (eventsData as Event[]).filter(
-  //   (event) => event.status === activeTab
-  // );
-  const filteredEvents = eventsData;
+    const eventWithDates = event as Event & {
+      startDate?: string;
+      endDate?: string;
+    };
+
+    const endDate = eventWithDates.endDate
+      ? new Date(eventWithDates.endDate)
+      : undefined;
+
+    if (endDate && !Number.isNaN(endDate.getTime()) && endDate < new Date()) {
+      return "completed";
+    }
+
+    return "upcoming";
+  };
+
+  const filteredEvents =
+    activeTab === "invited"
+      ? (invitedEventsData as Event[]).filter(
+          (event) => getEventStatus(event) === "invited"
+        )
+      : (eventsData as Event[]).filter(
+          (event) => getEventStatus(event) === activeTab
+        );
+
+  const isLoading =
+    activeTab === "invited" ? isInvitedLoading : isEventsLoading;
+  const isError = activeTab === "invited" ? isInvitedError : isEventsError;
 
   const emptyMessage: Record<EventTab, string> = {
     upcoming: "Create your first event to get started",
@@ -46,7 +86,7 @@ export default function EventsPage() {
 
   const onRefresh = async () => {
     setRefreshing(true);
-    await refetch();
+    await Promise.all([refetchEvents(), refetchInvited()]);
     setRefreshing(false);
   };
 

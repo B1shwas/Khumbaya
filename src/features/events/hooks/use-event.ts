@@ -1,8 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  acceptRsvpInvitationApi,
   createEventApi,
   getEventsApi,
-  getEventGuest,
+  getInvitedEvent,
 } from "../api/events.service";
 
 export const useCreateEvent = () => {
@@ -34,5 +35,26 @@ export const useGetEventWithRole = () => {
     queryFn: getEventsApi,
     staleTime: 5 * 60 * 1000,
     gcTime: 30 * 60 * 1000,
+  });
+};
+
+export const useGetInvitedEvents = () => {
+  return useQuery({
+    queryKey: ["rsvp-invitations"],
+    queryFn: getInvitedEvent,
+    staleTime: 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+  });
+};
+
+export const useAcceptRsvpInvitation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: acceptRsvpInvitationApi,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["rsvp-invitations"] });
+      queryClient.invalidateQueries({ queryKey: ["events"] });
+    },
   });
 };

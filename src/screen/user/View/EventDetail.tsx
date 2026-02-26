@@ -17,8 +17,10 @@ const EventDetail = ({
 }) => {
   const { eventId } = useLocalSearchParams<{ eventId: string }>();
 
-const { data: found } = useGetEventWithRole();
-const foundEvent = found?.find((e:Event) => String(e.id) === String(eventId));
+  const { data: found } = useGetEventWithRole();
+  const foundEvent = found?.find(
+    (e: Event) => String(e.id) === String(eventId)
+  );
   // Fallback shape so UI never crashes even if event not found
   const event = foundEvent ?? {
     id: eventId ?? "0",

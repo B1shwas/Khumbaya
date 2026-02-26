@@ -1,13 +1,14 @@
 import Card from "@/src/components/ui/Card";
-import { Event, EventRole, eventsData, EventTab } from "@/src/constants/event";
+import { Event, EventRole } from "@/src/constants/event";
+import { useAcceptRsvpInvitation } from "@/src/features/events/hooks/use-event";
 
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 
 import {
+  Alert,
   Image,
   Pressable,
-
   Text,
   TouchableOpacity,
   View,
@@ -43,6 +44,8 @@ export const Event_WITH_ROLE = ({
   asGuest?: boolean;
 }) => {
   const router = useRouter();
+  const { mutate: acceptRsvpInvitation, isPending: isAcceptingInvitation } =
+    useAcceptRsvpInvitation();
   const { wrapperClass, textClass } = roleConfig[event.role];
   return (
     <Card className="my-2">
@@ -143,11 +146,28 @@ export const Event_WITH_ROLE = ({
             <View className="flex-row gap-2">
               <TouchableOpacity
                 className="bg-primary px-3 py-1.5 rounded-full"
-                onPress={() =>
-                  router.push(
-                    `/(protected)/(client-stack)/events/${event.id}/rsvp`
-                  )
-                }
+                onPress={() => {
+                  if (!event.invitationId) {
+                    Alert.alert(
+                      "Missing invitation",
+                      "Invitation ID not found for this RSVP."
+                    );
+                    return;
+                  }
+
+                  acceptRsvpInvitation(event.invitationId, {
+                    onSuccess: () => {
+                      Alert.alert("Success", "RSVP accepted successfully.");
+                    },
+                    onError: () => {
+                      Alert.alert(
+                        "Error",
+                        "Failed to accept RSVP. Please try again."
+                      );
+                    },
+                  });
+                }}
+                disabled={isAcceptingInvitation}
               >
                 <Text className="font-jakarta-semibold text-xs text-white">
                   Going

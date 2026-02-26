@@ -1,5 +1,6 @@
 export interface Event {
   id: string;
+  invitationId?: number;
   title: string;
   date: string;
   time: string;
