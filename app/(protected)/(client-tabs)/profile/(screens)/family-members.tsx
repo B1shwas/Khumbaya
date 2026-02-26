@@ -1,5 +1,4 @@
 import { api } from "@/src/api/axios";
-import { useAuthStore } from "@/src/store/AuthStore";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
@@ -26,6 +25,13 @@ const FOOD_OPTIONS = [
 ] as const;
 
 // ─── Types ────────────────────────────────────────────────────────────────────
+interface User {
+  id: number;
+  email: string;
+  username: string;
+  familyId: number | null;
+}
+
 interface Family {
   id: number;
   familyName: string;
@@ -50,6 +56,10 @@ interface MemberForm {
 }
 
 // ─── API Functions ───────────────────────────────────────────────────────────
+const getUserProfile = async () => {
+  const response = await api.get("/user/me");
+  return response.data.data || response.data;
+};
 const createFamily = async (familyName: string): Promise<Family> => {
   const response = await api.post("/family", { familyName });
   return response.data.data || response.data;
@@ -90,6 +100,11 @@ const deleteMember = async (
 
 const getMembers = async (familyId: number): Promise<FamilyMember[]> => {
   const response = await api.get(`/family/${familyId}/member`);
+  return response.data.data || response.data;
+};
+
+const getFamily = async (familyId: number): Promise<Family> => {
+  const response = await api.get(`/family/${familyId}`);
   return response.data.data || response.data;
 };
 
@@ -350,8 +365,6 @@ const MemberFormModal = ({
 
 // ─── Main Screen ──────────────────────────────────────────────────────────────
 export default function FamilyMembersScreen() {
-  const user = useAuthStore((state) => state.user);
-
   // UI State
   const [step, setStep] = useState<1 | 2>(1);
   const [familyName, setFamilyName] = useState("");
@@ -365,13 +378,44 @@ export default function FamilyMembersScreen() {
 
   // API State
   const [familyId, setFamilyId] = useState<number | null>(null);
+  const [userData, setUserData] = useState<User | null>(null);
   const [loading, setLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState("");
 
-  // ─── Load existing family if user has one ────────────────────────────────
+  // ─── Load existing family on mount ────────────────────────────────────────────
   useEffect(() => {
-    // TODO: Implement proper family loading - need backend endpoint to get user's family
-  }, [user]);
+    const loadUserAndFamily = async () => {
+      setLoading(true);
+      try {
+        // Get user profile which includes familyId
+        const userProfile = await getUserProfile();
+        setUserData(userProfile);
+        console.log("User data:", userData);
+
+        // If user has a family, load it
+        if (userProfile && userProfile.familyId) {
+          setFamilyId(userProfile.familyId);
+
+          // Get family details
+          const family = await getFamily(userProfile.familyId);
+          setFamilyName(family.familyName);
+
+          // Get family members
+          const membersData = await getMembers(userProfile.familyId);
+          setMembers(membersData);
+
+          // Go to step 2 to show members
+          setStep(2);
+        }
+      } catch (err) {
+        console.log("Failed to load user/family:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadUserAndFamily();
+  }, []);
 
   // ─── Modal Helpers ────────────────────────────────────────────────
   const getEditingMember = () =>
@@ -492,8 +536,8 @@ export default function FamilyMembersScreen() {
 
       // Add self as first member
       const self = await addMember(familyResponse.id, {
-        email: user?.email || "",
-        name: user?.username || "",
+        email: userData?.email || "",
+        name: userData?.username || "",
         relation: "Self",
         foodPreference: "",
       });
