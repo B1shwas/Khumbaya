@@ -4,12 +4,10 @@ import { useGetEventWithRole } from "@/src/features/events/hooks/use-event";
 import { Redirect, useLocalSearchParams } from "expo-router";
 export default function EventRoleRedirect() {
   const { eventId } = useLocalSearchParams();
-    const { data: eventsData = [] } = useGetEventWithRole();
-    
-  const event = eventsData.find((e:Event) => String(e.id) === String(eventId));
-  const role = event?.role ||"Organizer"; // Default to Organizer if role is not found
-  console.log("Events Data:", event);
-  console.log("Event:", eventId, "Role:", role);
+  const { data: eventsData = [] } = useGetEventWithRole();
+
+  const event = eventsData.find((e: Event) => String(e.id) === String(eventId));
+  const role = event?.role || "Organizer"; // Default to Organizer if role is not found
 
   if (!eventsData || !role) {
     return <Redirect href="/(protected)/(client-tabs)/events" />;

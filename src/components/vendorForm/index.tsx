@@ -129,7 +129,7 @@ export default function VendorFormFlow() {
     } else {
       // Final submission logic here
       const finalData = getValues();
-      console.log("Submitting data:", finalData);
+
       // You can replace the above line with your actual submission logic (e.g., API call)
     }
   }, [currentStep, fadeAnim, trigger]);
@@ -171,7 +171,6 @@ export default function VendorFormFlow() {
   const formValues = watch();
 
   const handleSubmitFinal = handleSubmit(async (finalData) => {
-    console.log("Submitting data:", finalData);
     await AsyncStorage.setItem("vendorData", JSON.stringify(finalData));
     setAuth("demo-vendor-token", {
       id: `vendor-${Date.now()}`,

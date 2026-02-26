@@ -17,7 +17,6 @@ export async function fetchGuests(eventId: string): Promise<Guest[]> {
   // const response = await fetch(`${API_BASE_URL}/events/${eventId}/guests`);
   // return response.json();
 
-  console.log(`Fetching guests for event: ${eventId}`);
   return [];
 }
 
@@ -36,7 +35,6 @@ export async function addGuest(
   // });
   // return response.json();
 
-  console.log(`Adding guest to event: ${eventId}`, guest);
   return { ...guest, id: Date.now().toString() } as Guest;
 }
 
@@ -55,7 +53,6 @@ export async function updateGuest(
   // });
   // return response.json();
 
-  console.log(`Updating guest: ${guestId}`, updates);
   return {} as Guest;
 }
 

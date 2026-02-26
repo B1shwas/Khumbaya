@@ -222,9 +222,6 @@ export default function FamilyAccommodation() {
   };
 
   const handleSave = () => {
-    console.log("Saving family accommodation:", {
-      rooms,
-    });
     Alert.alert("Saved!", "Family accommodation details saved successfully!");
     router.back();
   };

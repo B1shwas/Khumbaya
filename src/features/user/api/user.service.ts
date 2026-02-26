@@ -13,10 +13,10 @@ export const updateUserApi = async (data: any) => {
   const response = await api.patch("/user", data);
   return response.data;
 };
-export const getUserProfile = async() => {
-  const response = await api.get("/user/me" );
-  return response.data;
-}
+export const getUserProfile = async () => {
+  const response = await api.get("/user/me");
+  return response.data.data;
+};
 export const getUserBuisnessApi = async () => {
   const response = await api.get("/user/business");
   return response.data;
