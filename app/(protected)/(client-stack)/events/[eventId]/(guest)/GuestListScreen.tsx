@@ -1,3 +1,7 @@
+import GuestCard from "@/src/components/guest/GuestCard";
+import GuestFilters from "@/src/components/guest/GuestFilters";
+import GuestHeader from "@/src/components/guest/GuestHeader";
+import { useGuests, type Guest } from "@/src/features/guests/hooks/useGuests";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useState } from "react";
@@ -14,10 +18,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import GuestCard from "./components/GuestCard";
-import GuestFilters from "./components/GuestFilters";
-import GuestHeader from "./components/GuestHeader";
-import { useGuests, type Guest } from "./hooks/useGuests";
 
 // Sample data - In production, this would come from the API
 const SAMPLE_GUESTS: Guest[] = [
@@ -135,6 +135,8 @@ export default function GuestListScreen() {
     sortBy,
     setSortBy,
     sendInvite,
+    sendFamilyInvite,
+    updateFamilyMemberRSVP,
     deleteGuest,
     refreshGuests,
     stats,
@@ -178,6 +180,27 @@ export default function GuestListScreen() {
       );
     },
     [sendInvite]
+  );
+
+  // Handle sending invitations to family members
+  const handleSendFamilyInvite = useCallback(
+    (guestId: string, familyMemberIds: string[]) => {
+      Alert.alert(
+        "Send Family Invitations",
+        `Send invitations to ${familyMemberIds.length} family member(s)?`,
+        [
+          { text: "Cancel", style: "cancel" },
+          {
+            text: "Send",
+            onPress: () => {
+              sendFamilyInvite(guestId, familyMemberIds);
+              Alert.alert("Success", "Family invitations sent successfully!");
+            },
+          },
+        ]
+      );
+    },
+    [sendFamilyInvite]
   );
 
   // const handleDeleteGuest = useCallback(
@@ -291,12 +314,13 @@ export default function GuestListScreen() {
   // ✅ Navigate to guest details
   const handleGuestPress = useCallback(
     (guest: Guest) => {
+      if (!eventId) return;
       router.push({
-        pathname: "/events/[eventId]/(organizer)/guest-details",
+        pathname: "/events/[eventId]/guest-details",
         params: { eventId, guest: JSON.stringify(guest) },
       });
     },
-    [router]
+    [router, eventId]
   );
 
   const renderGuest = useCallback(
@@ -305,10 +329,13 @@ export default function GuestListScreen() {
         guest={item}
         onPress={() => handleGuestPress(item)}
         onSendInvite={() => handleSendInvite(item.id)}
+        onSendFamilyInvite={(familyMemberIds) =>
+          handleSendFamilyInvite(item.id, familyMemberIds)
+        }
         // onDelete={() => handleDeleteGuest(item.id, item.name)}
       />
     ),
-    [handleSendInvite, handleGuestPress]
+    [handleSendInvite, handleGuestPress, handleSendFamilyInvite]
   );
 
   const ListEmptyComponent = useCallback(

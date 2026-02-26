@@ -6,6 +6,7 @@
     "paths": {
       "@/*": ["./*"],
       "@/src/*": ["./src/*"],
+      "@/app/*": ["./app/*"],
       "@axios": ["./src/api/axios"],
       "@components/*": ["./src/components/*"],
       "@/store/*": ["./src/store/*"]

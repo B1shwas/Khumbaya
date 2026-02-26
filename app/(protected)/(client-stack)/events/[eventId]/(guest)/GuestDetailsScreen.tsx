@@ -3,7 +3,10 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
 import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { FamilyMember, Guest } from "./hooks/useGuests";
+import {
+  FamilyMember,
+  Guest,
+} from "../../../../../../src/features/guests/hooks/useGuests";
 
 interface GuestDetailsScreenProps {
   guest?: Guest;
@@ -39,7 +42,14 @@ const InfoCard = ({ title, items }: InfoCardProps) => (
   </View>
 );
 
-const FamilyMemberCard = ({ member }: { member: FamilyMember }) => {
+interface FamilyMemberCardProps {
+  member: FamilyMember;
+  onUpdateRSVP?: (
+    rsvpStatus: "Going" | "Pending" | "Not Going" | "Not Invited"
+  ) => void;
+}
+
+const FamilyMemberCard = ({ member, onUpdateRSVP }: FamilyMemberCardProps) => {
   const getInitials = (name: string) => {
     return name
       .split(" ")
@@ -47,6 +57,19 @@ const FamilyMemberCard = ({ member }: { member: FamilyMember }) => {
       .join("")
       .toUpperCase()
       .slice(0, 2);
+  };
+
+  const getStatusColor = (status?: string) => {
+    switch (status) {
+      case "Going":
+        return "bg-green-100 text-green-700";
+      case "Pending":
+        return "bg-yellow-100 text-yellow-700";
+      case "Not Going":
+        return "bg-red-100 text-red-700";
+      default:
+        return "bg-gray-100 text-gray-500";
+    }
   };
 
   return (
@@ -57,15 +80,69 @@ const FamilyMemberCard = ({ member }: { member: FamilyMember }) => {
         </Text>
       </View>
       <View className="flex-1">
-        <Text className="text-base font-semibold text-gray-900">
-          {member.name}
-        </Text>
-        <Text className="text-sm text-gray-500">{member.relation}</Text>
+        <View className="flex-row items-center justify-between">
+          <View>
+            <Text className="text-base font-semibold text-gray-900">
+              {member.name}
+            </Text>
+            <Text className="text-sm text-gray-500">{member.relation}</Text>
+          </View>
+          {/* RSVP Status Badge */}
+          {member.rsvpStatus && member.rsvpStatus !== "Not Invited" ? (
+            <View
+              className={`px-2 py-1 rounded-full ${getStatusColor(member.rsvpStatus)}`}
+            >
+              <Text className="text-xs font-medium">{member.rsvpStatus}</Text>
+            </View>
+          ) : (
+            onUpdateRSVP && (
+              <TouchableOpacity
+                className="px-3 py-1 rounded-full bg-indigo-100"
+                onPress={() => onUpdateRSVP("Pending")}
+              >
+                <Text className="text-xs font-medium text-indigo-700">
+                  Invite
+                </Text>
+              </TouchableOpacity>
+            )
+          )}
+        </View>
         {member.mealPreference && (
           <Text className="text-xs text-green-600 mt-0.5">
             Meal: {member.mealPreference}
           </Text>
         )}
+        {member.dietaryRestrictions &&
+          member.dietaryRestrictions.length > 0 && (
+            <Text className="text-xs text-orange-600 mt-0.5">
+              Dietary: {member.dietaryRestrictions.join(", ")}
+            </Text>
+          )}
+        {/* RSVP Action Buttons */}
+        {onUpdateRSVP &&
+          member.rsvpStatus &&
+          member.rsvpStatus !== "Not Invited" && (
+            <View className="flex-row gap-2 mt-2">
+              <TouchableOpacity
+                className="px-2 py-1 rounded bg-green-500"
+                onPress={() => onUpdateRSVP("Going")}
+              >
+                <Text className="text-xs text-white font-medium">Going</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                className="px-2 py-1 rounded bg-yellow-500"
+                onPress={() => onUpdateRSVP("Pending")}
+              >
+                <Text className="text-xs text-white font-medium">Pending</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                className="px-2 py-1 rounded bg-red-500"
+                onPress={() => onUpdateRSVP("Not Going")}
+              >
+                <Text className="text-xs text-white font-medium">Can't Go</Text>
+              </TouchableOpacity>
+            </View>
+          )}
       </View>
     </View>
   );
@@ -103,15 +180,35 @@ const CollapsibleSection = ({
   );
 };
 
-
 export default function GuestDetailsScreen({
   guest: propGuest,
 }: GuestDetailsScreenProps) {
   const router = useRouter();
   const params = useLocalSearchParams();
 
-  const guest =
+  const initialGuest =
     propGuest || (params.guest ? JSON.parse(params.guest as string) : null);
+
+  // Local state to track guest updates
+  const [guest, setGuest] = useState<Guest | null>(initialGuest);
+
+  // Update family member RSVP status
+  const handleFamilyMemberRSVP = (
+    familyMemberId: string,
+    rsvpStatus: "Going" | "Pending" | "Not Going" | "Not Invited"
+  ) => {
+    if (!guest || !guest.familyMembers) return;
+
+    setGuest((prev) => {
+      if (!prev) return null;
+      return {
+        ...prev,
+        familyMembers: prev.familyMembers?.map((member) =>
+          member.id === familyMemberId ? { ...member, rsvpStatus } : member
+        ),
+      };
+    });
+  };
 
   // Helper functions
   const getStatusColor = (status: string) => {
@@ -197,8 +294,7 @@ export default function GuestDetailsScreen({
   }
 
   const statusStyle = getStatusColor(guest.status);
-  const showFamilyMembers =
-    guest.status === "Going" || guest.status === "Confirmed";
+  const showFamilyMembers = guest.status === "Going";
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
@@ -250,7 +346,6 @@ export default function GuestDetailsScreen({
             <Text className="text-sm text-gray-500 mt-1">{guest.category}</Text>
           )}
         </View>
-
         {/* Contact Information */}
         <InfoCard
           title="Contact Information"
@@ -281,7 +376,6 @@ export default function GuestDetailsScreen({
             },
           ]}
         />
-
         {/* RSVP & Event Details */}
         <InfoCard
           title="RSVP & Event Details"
@@ -325,7 +419,6 @@ export default function GuestDetailsScreen({
             },
           ]}
         />
-
         {/* Travel Details - Collapsible */}
         <CollapsibleSection title="✈️ Travel Details">
           <InfoCard
@@ -365,7 +458,6 @@ export default function GuestDetailsScreen({
             ]}
           />
         </CollapsibleSection>
-
         {/* Accommodation - Collapsible */}
         <CollapsibleSection title="🏨 Accommodation">
           <InfoCard
@@ -381,7 +473,6 @@ export default function GuestDetailsScreen({
             ]}
           />
         </CollapsibleSection>
-
         Gift Information - Collapsible
         <CollapsibleSection title="🎁 Gift Information">
           <InfoCard
@@ -427,7 +518,6 @@ export default function GuestDetailsScreen({
             ]}
           />
         </CollapsibleSection>
-
         {/* Family Members - Only show for confirmed guests */}
         {showFamilyMembers &&
           guest.familyMembers &&
@@ -436,11 +526,16 @@ export default function GuestDetailsScreen({
               title={`👨‍👩‍👧‍👦 Family Members (${guest.familyMembers.length})`}
             >
               {guest.familyMembers.map((member: FamilyMember) => (
-                <FamilyMemberCard key={member.id} member={member} />
+                <FamilyMemberCard
+                  key={member.id}
+                  member={member}
+                  onUpdateRSVP={(rsvpStatus) =>
+                    handleFamilyMemberRSVP(member.id, rsvpStatus)
+                  }
+                />
               ))}
             </CollapsibleSection>
           )}
-
         {/* Additional Info */}
         <InfoCard
           title="Additional Info"
@@ -491,7 +586,6 @@ export default function GuestDetailsScreen({
               : []),
           ]}
         />
-
         <View className="h-8" />
       </ScrollView>
     </SafeAreaView>

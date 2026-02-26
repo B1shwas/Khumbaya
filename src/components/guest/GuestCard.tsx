@@ -1,11 +1,12 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Image, Text, TouchableOpacity, View } from "react-native";
-import type { Guest } from "../hooks/useGuests";
+import type { Guest } from "../../features/guests/hooks/useGuests";
 
 interface GuestCardProps {
   guest: Guest;
   onPress?: () => void;
   onSendInvite?: () => void;
+  onSendFamilyInvite?: (familyMemberIds: string[]) => void;
   onDelete?: () => void;
 }
 
@@ -13,6 +14,7 @@ export default function GuestCard({
   guest,
   onPress,
   onSendInvite,
+  onSendFamilyInvite,
   onDelete,
 }: GuestCardProps) {
   const getStatusColor = () => {
@@ -181,6 +183,79 @@ export default function GuestCard({
         </View>
       )}
 
+      {/* Family Members */}
+      {guest.familyMembers && guest.familyMembers.length > 0 && (
+        <View
+          style={{
+            marginTop: 12,
+            paddingTop: 12,
+            borderTopWidth: 1,
+            borderTopColor: "#F3F4F6",
+          }}
+        >
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 4,
+              marginBottom: 8,
+            }}
+          >
+            <Ionicons name="people" size={14} color="#6B7280" />
+            <Text style={{ fontSize: 12, color: "#6B7280", fontWeight: "500" }}>
+              Family Members ({guest.familyMembers.length})
+            </Text>
+          </View>
+          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 6 }}>
+            {guest.familyMembers.slice(0, 3).map((member) => (
+              <View
+                key={member.id}
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: 4,
+                  paddingHorizontal: 8,
+                  paddingVertical: 4,
+                  borderRadius: 8,
+                  backgroundColor:
+                    member.rsvpStatus === "Going"
+                      ? "rgba(16, 185, 129, 0.1)"
+                      : member.rsvpStatus === "Pending"
+                        ? "rgba(245, 158, 11, 0.1)"
+                        : member.rsvpStatus === "Not Going"
+                          ? "rgba(239, 68, 68, 0.1)"
+                          : "#F3F4F6",
+                }}
+              >
+                <Text style={{ fontSize: 11, color: "#111827" }}>
+                  {member.name}
+                </Text>
+                {member.rsvpStatus && member.rsvpStatus !== "Not Invited" && (
+                  <Text
+                    style={{
+                      fontSize: 9,
+                      color:
+                        member.rsvpStatus === "Going"
+                          ? "#10B981"
+                          : member.rsvpStatus === "Pending"
+                            ? "#F59E0B"
+                            : "#EF4444",
+                    }}
+                  >
+                    •{member.rsvpStatus}
+                  </Text>
+                )}
+              </View>
+            ))}
+            {guest.familyMembers.length > 3 && (
+              <Text style={{ fontSize: 11, color: "#6B7280" }}>
+                +{guest.familyMembers.length - 3} more
+              </Text>
+            )}
+          </View>
+        </View>
+      )}
+
       {/* Actions */}
       <View style={{ flexDirection: "row", gap: 8, marginTop: 12 }}>
         {guest.status === "Not Invited" && onSendInvite && (
@@ -203,6 +278,42 @@ export default function GuestCard({
             </Text>
           </TouchableOpacity>
         )}
+
+        {/* Family Invite Button */}
+        {guest.familyMembers &&
+          guest.familyMembers.length > 0 &&
+          guest.status !== "Not Invited" &&
+          onSendFamilyInvite && (
+            <TouchableOpacity
+              style={{
+                flex: 1,
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 4,
+                paddingVertical: 10,
+                borderRadius: 10,
+                backgroundColor: "#6366F1",
+              }}
+              onPress={() => {
+                // Default: invite all family members who haven't been invited yet
+                const uninvolvedFamily =
+                  guest.familyMembers
+                    ?.filter(
+                      (m) => !guest.invitedFamilyMemberIds?.includes(m.id)
+                    )
+                    .map((m) => m.id) || [];
+                if (uninvolvedFamily.length > 0) {
+                  onSendFamilyInvite(uninvolvedFamily);
+                }
+              }}
+            >
+              <Ionicons name="people" size={16} color="#fff" />
+              <Text style={{ color: "#fff", fontWeight: "600", fontSize: 14 }}>
+                Invite Family
+              </Text>
+            </TouchableOpacity>
+          )}
 
         {onDelete && (
           <TouchableOpacity

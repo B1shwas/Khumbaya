@@ -1,12 +1,16 @@
 import { Ionicons } from "@expo/vector-icons";
 import {
-    ScrollView,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
-import type { CategoryType, RSVPStatus, SortOption } from "../hooks/useGuests";
+import type {
+  CategoryType,
+  RSVPStatus,
+  SortOption,
+} from "../../features/guests/hooks/useGuests";
 
 interface GuestFiltersProps {
   searchQuery: string;

@@ -1,3 +1,3 @@
-import GuestDetailsScreen from "@/src/features/guests/GuestDetailsScreen";
+import GuestDetailsScreen from "@/app/(protected)/(client-stack)/events/[eventId]/(guest)/GuestDetailsScreen";
 
 export default GuestDetailsScreen;

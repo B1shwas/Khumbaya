@@ -19,6 +19,7 @@ export interface FamilyMember {
   name: string;
   relation: string;
   age?: number;
+  rsvpStatus?: "Going" | "Pending" | "Not Going" | "Not Invited";
   dietaryRestrictions?: string[];
   mealPreference?: string;
 }
@@ -41,6 +42,7 @@ export interface Guest {
 
   // Family Info (for confirmed guests)
   familyMembers?: FamilyMember[];
+  invitedFamilyMemberIds?: string[]; // Track which family members were invited
 
   // Status & Category
   status: GuestStatus;
@@ -89,6 +91,12 @@ interface UseGuestsReturn {
   updateGuest: (id: string, updates: Partial<Guest>) => void;
   deleteGuest: (id: string) => void;
   sendInvite: (id: string) => void;
+  sendFamilyInvite: (guestId: string, familyMemberIds: string[]) => void;
+  updateFamilyMemberRSVP: (
+    guestId: string,
+    familyMemberId: string,
+    rsvpStatus: "Going" | "Pending" | "Not Going" | "Not Invited"
+  ) => void;
   refreshGuests: () => void;
   // Stats
   stats: {
@@ -217,6 +225,68 @@ export function useGuests(initialGuests: Guest[]): UseGuestsReturn {
     );
   }, []);
 
+  // Send invitation to specific family members
+  const sendFamilyInvite = useCallback(
+    (guestId: string, familyMemberIds: string[]) => {
+      setGuests((prev) =>
+        prev.map((g) => {
+          if (g.id !== guestId) return g;
+
+          // Update invitedFamilyMemberIds
+          const existingInvitedIds = g.invitedFamilyMemberIds || [];
+          const newInvitedIds = [
+            ...new Set([...existingInvitedIds, ...familyMemberIds]),
+          ];
+
+          // Update family members' RSVP status
+          const updatedFamilyMembers = g.familyMembers?.map((member) => {
+            if (familyMemberIds.includes(member.id)) {
+              return { ...member, rsvpStatus: "Pending" as const };
+            }
+            return member;
+          });
+
+          return {
+            ...g,
+            invitedFamilyMemberIds: newInvitedIds,
+            familyMembers: updatedFamilyMembers,
+            status: "Pending" as GuestStatus,
+            invitedAt: g.invitedAt || new Date().toISOString(),
+          };
+        })
+      );
+    },
+    []
+  );
+
+  // Update family member RSVP status
+  const updateFamilyMemberRSVP = useCallback(
+    (
+      guestId: string,
+      familyMemberId: string,
+      rsvpStatus: "Going" | "Pending" | "Not Going" | "Not Invited"
+    ) => {
+      setGuests((prev) =>
+        prev.map((g) => {
+          if (g.id !== guestId) return g;
+
+          const updatedFamilyMembers = g.familyMembers?.map((member) => {
+            if (member.id === familyMemberId) {
+              return { ...member, rsvpStatus };
+            }
+            return member;
+          });
+
+          return {
+            ...g,
+            familyMembers: updatedFamilyMembers,
+          };
+        })
+      );
+    },
+    []
+  );
+
   const refreshGuests = useCallback(() => {
     setRefreshing(true);
     // Simulate API refresh - in real app, fetch from API
@@ -240,6 +310,8 @@ export function useGuests(initialGuests: Guest[]): UseGuestsReturn {
     updateGuest,
     deleteGuest,
     sendInvite,
+    sendFamilyInvite,
+    updateFamilyMemberRSVP,
     refreshGuests,
     stats,
   };

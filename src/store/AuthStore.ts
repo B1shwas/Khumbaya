@@ -75,9 +75,25 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
           // Token is valid! Update with full profile data
           user = {
+            ...user,
             id: profileData.id,
             email: profileData.email,
-            name: profileData.username,
+            name: profileData.name || profileData.username,
+            username: profileData.username,
+            phone: profileData.phone,
+            avatar: profileData.avatar || profileData.photo,
+            photo: profileData.photo,
+            avatarImage: profileData.avatarImage,
+            profilePicture: profileData.profilePicture,
+            bio: profileData.bio,
+            foodPreference:
+              profileData.foodPreference || profileData.food_preference,
+            identity: profileData.identity,
+            idType: profileData.idType || profileData.id_type,
+            idProof: profileData.idProof || profileData.id_proof,
+            idNumber: profileData.idNumber || profileData.id_number,
+            dateOfBirth: profileData.dateOfBirth || profileData.date_of_birth,
+            idImage: profileData.idImage || profileData.id_image,
           };
 
           set({ token, user, isLoading: false });
