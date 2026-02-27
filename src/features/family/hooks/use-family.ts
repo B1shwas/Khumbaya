@@ -18,7 +18,7 @@ export const useCreateFamily = () => {
   return useMutation({
     mutationFn: createFamilyApi,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["family"] });
+      queryClient.invalidateQueries({ queryKey: ["family-user"] });
     },
   });
 };
@@ -33,11 +33,10 @@ export const useGetFamilyById = (familyId?: number) => {
   });
 };
 
-export const useGetFamilyByUserId = (userId?: number) => {
+export const useGetFamilyByUserId = () => {
   return useQuery({
-    queryKey: ["family-user", userId],
-    queryFn: () => getFamilyByUserIdApi(userId as number),
-    enabled: typeof userId === "number",
+    queryKey: ["family-user"],
+    queryFn: getFamilyByUserIdApi,
     staleTime: 5 * 60 * 1000,
     gcTime: 30 * 60 * 1000,
   });

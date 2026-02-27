@@ -92,7 +92,7 @@ export const deleteFamilyMemberApi = async (
   return response.data;
 };
 
-export const getFamilyByUserIdApi = async (userId: number) => {
-  const response = await api.get(`/family/user/${userId}`);
+export const getFamilyByUserIdApi = async () => {
+  const response = await api.get(`/family`);
   return response.data;
 };
