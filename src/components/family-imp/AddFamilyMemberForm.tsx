@@ -93,7 +93,9 @@ export default function AddFamilyMemberForm({
           />
         )}
       />
-      {errors.name && <Text className="text-xs text-red-500 mb-2">{errors.name.message}</Text>}
+      {errors.name && (
+        <Text className="text-xs text-red-500 mb-2">{errors.name.message}</Text>
+      )}
 
       <Controller
         control={control}
@@ -117,7 +119,11 @@ export default function AddFamilyMemberForm({
           />
         )}
       />
-      {errors.email && <Text className="text-xs text-red-500 mb-2">{errors.email.message}</Text>}
+      {errors.email && (
+        <Text className="text-xs text-red-500 mb-2">
+          {errors.email.message}
+        </Text>
+      )}
 
       <Controller
         control={control}
@@ -134,7 +140,9 @@ export default function AddFamilyMemberForm({
         )}
       />
       {errors.relation && (
-        <Text className="text-xs text-red-500 mb-2">{errors.relation.message}</Text>
+        <Text className="text-xs text-red-500 mb-2">
+          {errors.relation.message}
+        </Text>
       )}
 
       <Controller
@@ -152,7 +160,9 @@ export default function AddFamilyMemberForm({
           />
         )}
       />
-      {errors.dob && <Text className="text-xs text-red-500 mb-2">{errors.dob.message}</Text>}
+      {errors.dob && (
+        <Text className="text-xs text-red-500 mb-2">{errors.dob.message}</Text>
+      )}
 
       <TouchableOpacity
         className="bg-pink-500 rounded-xl py-4 flex-row items-center justify-center mt-2"

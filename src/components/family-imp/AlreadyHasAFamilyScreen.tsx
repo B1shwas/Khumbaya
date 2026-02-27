@@ -1,9 +1,9 @@
 import { FamilyMember } from "@/src/features/family/api/family.service";
 import { useGetFamilyMembers } from "@/src/features/family/hooks/use-family";
 import { ScrollView, View } from "react-native";
+import { Text } from "../ui/Text";
 import AddFamilyMemberForm from "./AddFamilyMemberForm";
 import FamilyMembersCardList from "./FamilyMembersCardList";
-import { Text } from "../ui/Text";
 
 type AlreadyHasAFamilyScreenProps = {
   id: number;
@@ -12,7 +12,11 @@ type AlreadyHasAFamilyScreenProps = {
 export default function AlreadyHasAFamilyScreen({
   id,
 }: AlreadyHasAFamilyScreenProps) {
-  const { data: members = [], isLoading, error } = useGetFamilyMembers(id) as {
+  const {
+    data: members = [],
+    isLoading,
+    error,
+  } = useGetFamilyMembers(id) as {
     data: FamilyMember[];
     isLoading: boolean;
     error: unknown;

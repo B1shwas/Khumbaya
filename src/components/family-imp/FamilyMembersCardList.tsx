@@ -12,7 +12,9 @@ export default function FamilyMembersCardList({
   if (members.length === 0) {
     return (
       <View className="bg-white rounded-xl p-4 mb-3 border border-gray-200">
-        <Text className="text-sm text-gray-600">No family members found yet.</Text>
+        <Text className="text-sm text-gray-600">
+          No family members found yet.
+        </Text>
       </View>
     );
   }
