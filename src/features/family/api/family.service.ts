@@ -23,7 +23,7 @@ export interface FamilyMember {
   familyId: number;
   relation: string;
   dob: string;
-  name: string;
+  username: string;
   email: string;
   createdAt?: string;
   updatedAt?: string;

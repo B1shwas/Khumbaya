@@ -16,11 +16,63 @@ type AddFamilyMemberFormProps = {
   familyId: number;
 };
 
+type FieldProps = {
+  label: string;
+  name: keyof AddFamilyMemberFormValues;
+  placeholder: string;
+  control: any;
+  error?: string;
+  rules?: Record<string, any>;
+  keyboardType?: "default" | "email-address";
+  autoCapitalize?: "none" | "sentences";
+};
+
 const toIsoDate = (rawDate: string) => {
   const parsed = new Date(rawDate);
   if (Number.isNaN(parsed.getTime())) return null;
   return parsed.toISOString();
 };
+
+function FormField({
+  label,
+  name,
+  placeholder,
+  control,
+  error,
+  rules,
+  keyboardType = "default",
+  autoCapitalize = "sentences",
+}: FieldProps) {
+  const inputBaseClass =
+    "w-full bg-background rounded-sm px-4 py-3 text-sm text-text-primary border";
+
+  return (
+    <View className="mb-3">
+      <Text className="text-xs font-jakarta-bold uppercase tracking-wide text-text-tertiary mb-1.5 ml-1">
+        {label}
+      </Text>
+      <Controller
+        control={control}
+        name={name}
+        rules={rules}
+        render={({ field: { value, onChange } }) => (
+          <TextInput
+            className={`${inputBaseClass} ${error ? "border-red-500" : "border-border"}`}
+            placeholder={placeholder}
+            placeholderTextColor="#9CA3AF"
+            value={value}
+            onChangeText={onChange}
+            keyboardType={keyboardType}
+            autoCapitalize={autoCapitalize}
+          />
+        )}
+      />
+      {error ? (
+        <Text className="text-xs text-red-500 mt-1 ml-1">{error}</Text>
+      ) : null}
+    </View>
+  );
+}
 
 export default function AddFamilyMemberForm({
   familyId,
@@ -74,32 +126,57 @@ export default function AddFamilyMemberForm({
   };
 
   return (
-    <View className="bg-white rounded-xl p-4 mt-3 mb-6 border border-gray-200">
-      <Text className="text-base font-semibold text-gray-800 mb-3">
-        Add Member
-      </Text>
+    <View className="bg-primary/5 border-2 border-dashed border-primary/30 rounded-xl p-5 mt-3 mb-6">
+      <View className="flex-row items-center justify-center gap-2 mb-4">
+        <Ionicons
+          name="person-add-outline"
+          size={18}
+          className="text-primary"
+        />
+        <Text className="text-base font-jakarta-bold text-primary">
+          Add New Member
+        </Text>
+      </View>
 
-      <Controller
-        control={control}
+      <FormField
+        label="Full Name"
         name="name"
-        rules={{ required: "Name is required" }}
-        render={({ field: { value, onChange } }) => (
-          <TextInput
-            className={`rounded-xl px-4 py-3.5 border mb-2 text-gray-800 ${errors.name ? "border-red-500" : "border-gray-200"}`}
-            placeholder="Full name"
-            placeholderTextColor="#9CA3AF"
-            value={value}
-            onChangeText={onChange}
-          />
-        )}
-      />
-      {errors.name && (
-        <Text className="text-xs text-red-500 mb-2">{errors.name.message}</Text>
-      )}
-
-      <Controller
+        placeholder="Enter name"
         control={control}
+        rules={{ required: "Name is required" }}
+        error={errors.name?.message}
+      />
+
+      <View className="flex-row gap-3">
+        <View className="flex-1">
+          <FormField
+            label="DOB"
+            name="dob"
+            placeholder="YYYY-MM-DD"
+            control={control}
+            rules={{ required: "DOB is required" }}
+            error={errors.dob?.message}
+            autoCapitalize="none"
+          />
+        </View>
+
+        <View className="flex-1">
+          <FormField
+            label="Relation"
+            name="relation"
+            placeholder="Spouse"
+            control={control}
+            rules={{ required: "Relation is required" }}
+            error={errors.relation?.message}
+          />
+        </View>
+      </View>
+
+      <FormField
+        label="Email Address"
         name="email"
+        placeholder="example@mail.com"
+        control={control}
         rules={{
           required: "Email is required",
           pattern: {
@@ -107,70 +184,18 @@ export default function AddFamilyMemberForm({
             message: "Invalid email address",
           },
         }}
-        render={({ field: { value, onChange } }) => (
-          <TextInput
-            className={`rounded-xl px-4 py-3.5 border mb-2 text-gray-800 ${errors.email ? "border-red-500" : "border-gray-200"}`}
-            placeholder="Email"
-            placeholderTextColor="#9CA3AF"
-            value={value}
-            onChangeText={onChange}
-            keyboardType="email-address"
-            autoCapitalize="none"
-          />
-        )}
+        error={errors.email?.message}
+        keyboardType="email-address"
+        autoCapitalize="none"
       />
-      {errors.email && (
-        <Text className="text-xs text-red-500 mb-2">
-          {errors.email.message}
-        </Text>
-      )}
-
-      <Controller
-        control={control}
-        name="relation"
-        rules={{ required: "Relation is required" }}
-        render={({ field: { value, onChange } }) => (
-          <TextInput
-            className={`rounded-xl px-4 py-3.5 border mb-2 text-gray-800 ${errors.relation ? "border-red-500" : "border-gray-200"}`}
-            placeholder="Relation (e.g. wife)"
-            placeholderTextColor="#9CA3AF"
-            value={value}
-            onChangeText={onChange}
-          />
-        )}
-      />
-      {errors.relation && (
-        <Text className="text-xs text-red-500 mb-2">
-          {errors.relation.message}
-        </Text>
-      )}
-
-      <Controller
-        control={control}
-        name="dob"
-        rules={{ required: "DOB is required" }}
-        render={({ field: { value, onChange } }) => (
-          <TextInput
-            className={`rounded-xl px-4 py-3.5 border mb-2 text-gray-800 ${errors.dob ? "border-red-500" : "border-gray-200"}`}
-            placeholder="DOB (YYYY-MM-DD)"
-            placeholderTextColor="#9CA3AF"
-            value={value}
-            onChangeText={onChange}
-            autoCapitalize="none"
-          />
-        )}
-      />
-      {errors.dob && (
-        <Text className="text-xs text-red-500 mb-2">{errors.dob.message}</Text>
-      )}
 
       <TouchableOpacity
-        className="bg-pink-500 rounded-xl py-4 flex-row items-center justify-center mt-2"
+        className="w-full bg-primary rounded-lg py-3.5 flex-row items-center justify-center mt-1"
         onPress={handleSubmit(onSubmit)}
         disabled={isPending}
       >
-        <Text className="text-white text-base font-semibold">
-          {isPending ? "Adding..." : "Add Member"}
+        <Text className="text-white text-sm font-jakarta-bold">
+          {isPending ? "Saving..." : "Save & Add Member"}
         </Text>
         {!isPending && (
           <Ionicons
