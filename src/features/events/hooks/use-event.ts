@@ -32,7 +32,7 @@ export const useCreateEvent = () => {
 export const useGetEventWithRole = () => {
   return useQuery({
     queryKey: ["events"],
-    queryFn: getEventsApi,
+    queryFn: () => getEventsApi(),
     staleTime: 5 * 60 * 1000,
     gcTime: 30 * 60 * 1000,
   });

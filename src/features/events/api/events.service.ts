@@ -58,6 +58,11 @@ interface InvitationItem {
   event: InvitationEventRecord;
 }
 
+interface GetEventsParams {
+  page?: number;
+  limit?: number;
+}
+
 const formatDate = (dateValue?: string) => {
   if (!dateValue) return "—";
 
@@ -117,8 +122,13 @@ export const createEventApi = async (data: CREATEEVENT) => {
   return response.data;
 };
 
-export const getEventsApi = async () => {
-  const response = await api.get("/event");
+export const getEventsApi = async ({
+  page = 1,
+  limit = 20,
+}: GetEventsParams = {}) => {
+  const response = await api.get("/event", {
+    params: { page, limit },
+  });
   const payload = response.data?.data;
 
   if (Array.isArray(payload?.items)) {
