@@ -32,6 +32,11 @@ const roleConfig: Record<
   },
 };
 
+const defaultRoleStyle = {
+  wrapperClass: "bg-gray-100 px-2 py-1 rounded-full",
+  textClass: "text-xs font-medium text-gray-700",
+};
+
 export const Event_WITH_ROLE = ({
   event,
   onPress,
@@ -46,7 +51,10 @@ export const Event_WITH_ROLE = ({
   const router = useRouter();
   const { mutate: acceptRsvpInvitation, isPending: isAcceptingInvitation } =
     useAcceptRsvpInvitation();
-  const { wrapperClass, textClass } = roleConfig[event.role];
+  const roleStyle = roleConfig[event.role as EventRole] ?? defaultRoleStyle;
+  const roleLabel = event.role ?? "Unknown";
+  const { wrapperClass, textClass } = roleStyle;
+
   return (
     <Card className="my-2">
       <Pressable
@@ -77,7 +85,7 @@ export const Event_WITH_ROLE = ({
               {event.title}
             </Text>
             <View className={wrapperClass}>
-              <Text className={textClass}>{event.role}</Text>
+              <Text className={textClass}>{roleLabel}</Text>
             </View>
           </View>
           <View>
