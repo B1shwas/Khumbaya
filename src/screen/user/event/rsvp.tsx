@@ -1,12 +1,12 @@
+import { api } from "@/src/api/axios";
 import { useAuthStore } from "@/src/store/AuthStore";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Alert,
   Image,
   ScrollView,
-  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
@@ -20,10 +20,10 @@ interface Guest {
   relationship: string;
   phone: string;
   isAdult: boolean;
-  idNumber?: string; // Required only for adults
-  idImage?: string; // ID image URI for adults
-  height?: string; // Required for adults (18+)
-  dob?: string; // Date of birth for adults (18+)
+  idNumber?: string;
+  idImage?: string;
+  height?: string;
+  dob?: string;
 }
 
 interface InvitedEvent {
@@ -43,6 +43,38 @@ interface RSVPData {
   guests: Guest[];
   submitted: boolean;
 }
+
+interface FamilyMember {
+  id?: number;
+  familyId: number;
+  relation: string;
+  username: string;
+  email: string;
+  foodPreference: string;
+  dob: string | null;
+  hasAccount?: boolean;
+  rsvpStatus?: "pending" | "attending" | "not-attending";
+}
+
+const getUserProfile = async () => {
+  try {
+    const response = await api.get("/user/me");
+    return response.data.data || response.data;
+  } catch (error) {
+    console.error("Error fetching user profile:", error);
+    return null;
+  }
+};
+
+const getFamilyMembers = async (familyId: number): Promise<FamilyMember[]> => {
+  try {
+    const response = await api.get(`/family/${familyId}/member`);
+    return response.data.data || response.data;
+  } catch (error) {
+    console.error("Error fetching family members:", error);
+    return [];
+  }
+};
 
 const invitedEventData: InvitedEvent = {
   id: "5",
@@ -73,22 +105,24 @@ const GuestForm = ({
     : ["Spouse", "Child", "Parent", "Sibling", "Friend", "Colleague", "Other"];
 
   return (
-    <View style={styles.guestCard}>
-      <View style={styles.guestHeader}>
-        <Text style={styles.guestTitle}>
+    <View className="bg-white rounded-2xl p-4 mb-4 shadow-sm">
+      <View className="flex-row justify-between items-center mb-4">
+        <Text className="text-base font-bold text-gray-800">
           {isSelf ? "Your Details" : `Guest ${index + 1}`}
         </Text>
         {!isSelf && (
-          <TouchableOpacity onPress={onRemove} style={styles.removeButton}>
+          <TouchableOpacity onPress={onRemove} className="p-1">
             <Ionicons name="trash-outline" size={20} color="#EF4444" />
           </TouchableOpacity>
         )}
       </View>
 
-      <View style={styles.inputGroup}>
-        <Text style={styles.inputLabel}>Full Name (Self)*</Text>
+      <View className="mb-4">
+        <Text className="text-sm font-semibold text-gray-700 mb-2">
+          Full Name (Self)*
+        </Text>
         <TextInput
-          style={styles.textInput}
+          className="bg-gray-50 rounded-xl px-4 py-3.5 text-sm text-gray-800 border border-gray-200"
           placeholder="Enter guest name"
           placeholderTextColor="#9CA3AF"
           value={guest.name}
@@ -97,24 +131,28 @@ const GuestForm = ({
       </View>
 
       {!isSelf && (
-        <View style={styles.inputGroup}>
-          <Text style={styles.inputLabel}>Relationship *</Text>
+        <View className="mb-4">
+          <Text className="text-sm font-semibold text-gray-700 mb-2">
+            Relationship *
+          </Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            <View style={styles.chipContainer}>
+            <View className="flex-row flex-wrap gap-2">
               {relationships.map((rel) => (
                 <TouchableOpacity
                   key={rel}
-                  style={[
-                    styles.chip,
-                    guest.relationship === rel && styles.chipSelected,
-                  ]}
+                  className={`px-4 py-2 rounded-full ${
+                    guest.relationship === rel
+                      ? "bg-pink-600 border-pink-600"
+                      : "bg-gray-100 border-gray-200"
+                  } border`}
                   onPress={() => onUpdate({ ...guest, relationship: rel })}
                 >
                   <Text
-                    style={[
-                      styles.chipText,
-                      guest.relationship === rel && styles.chipTextSelected,
-                    ]}
+                    className={`text-sm ${
+                      guest.relationship === rel
+                        ? "text-white font-semibold"
+                        : "text-gray-500"
+                    }`}
                   >
                     {rel}
                   </Text>
@@ -125,10 +163,12 @@ const GuestForm = ({
         </View>
       )}
 
-      <View style={styles.inputGroup}>
-        <Text style={styles.inputLabel}>Phone Number *</Text>
+      <View className="mb-4">
+        <Text className="text-sm font-semibold text-gray-700 mb-2">
+          Phone Number *
+        </Text>
         <TextInput
-          style={styles.textInput}
+          className="bg-gray-50 rounded-xl px-4 py-3.5 text-sm text-gray-800 border border-gray-200"
           placeholder="Enter phone number"
           placeholderTextColor="#9CA3AF"
           value={guest.phone}
@@ -137,25 +177,31 @@ const GuestForm = ({
         />
       </View>
 
-      {/* Adult toggle - ask age first */}
-      <View style={styles.inputGroup}>
-        <Text style={styles.inputLabel}>Is this guest 18 or older?</Text>
-        <View style={styles.chipContainer}>
+      <View className="mb-4">
+        <Text className="text-sm font-semibold text-gray-700 mb-2">
+          Is this guest 18 or older?
+        </Text>
+        <View className="flex-row flex-wrap gap-2">
           <TouchableOpacity
-            style={[styles.chip, guest.isAdult && styles.chipSelected]}
+            className={`px-4 py-2 rounded-full ${
+              guest.isAdult
+                ? "bg-pink-600 border-pink-600"
+                : "bg-gray-100 border-gray-200"
+            } border`}
             onPress={() => onUpdate({ ...guest, isAdult: true })}
           >
             <Text
-              style={[
-                styles.chipText,
-                guest.isAdult && styles.chipTextSelected,
-              ]}
+              className={`text-sm ${guest.isAdult ? "text-white font-semibold" : "text-gray-500"}`}
             >
               Yes (18+)
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.chip, !guest.isAdult && styles.chipSelected]}
+            className={`px-4 py-2 rounded-full ${
+              !guest.isAdult
+                ? "bg-pink-600 border-pink-600"
+                : "bg-gray-100 border-gray-200"
+            } border`}
             onPress={() =>
               onUpdate({
                 ...guest,
@@ -168,10 +214,7 @@ const GuestForm = ({
             }
           >
             <Text
-              style={[
-                styles.chipText,
-                !guest.isAdult && styles.chipTextSelected,
-              ]}
+              className={`text-sm ${!guest.isAdult ? "text-white font-semibold" : "text-gray-500"}`}
             >
               No (Under 18)
             </Text>
@@ -179,13 +222,14 @@ const GuestForm = ({
         </View>
       </View>
 
-      {/* Fields for adults (18+) */}
       {guest.isAdult && (
         <>
-          <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>Date of Birth *</Text>
+          <View className="mb-4">
+            <Text className="text-sm font-semibold text-gray-700 mb-2">
+              Date of Birth *
+            </Text>
             <TextInput
-              style={styles.textInput}
+              className="bg-gray-50 rounded-xl px-4 py-3.5 text-sm text-gray-800 border border-gray-200"
               placeholder="e.g., 15/06/1995"
               placeholderTextColor="#9CA3AF"
               value={guest.dob || ""}
@@ -193,10 +237,12 @@ const GuestForm = ({
             />
           </View>
 
-          <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>Height (cm) *</Text>
+          <View className="mb-4">
+            <Text className="text-sm font-semibold text-gray-700 mb-2">
+              Height (cm) *
+            </Text>
             <TextInput
-              style={styles.textInput}
+              className="bg-gray-50 rounded-xl px-4 py-3.5 text-sm text-gray-800 border border-gray-200"
               placeholder="e.g., 175"
               placeholderTextColor="#9CA3AF"
               value={guest.height || ""}
@@ -205,12 +251,12 @@ const GuestForm = ({
             />
           </View>
 
-          <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>
+          <View className="mb-4">
+            <Text className="text-sm font-semibold text-gray-700 mb-2">
               ID Number (Passport/License) *
             </Text>
             <TextInput
-              style={styles.textInput}
+              className="bg-gray-50 rounded-xl px-4 py-3.5 text-sm text-gray-800 border border-gray-200"
               placeholder="Enter ID number"
               placeholderTextColor="#9CA3AF"
               value={guest.idNumber || ""}
@@ -218,10 +264,12 @@ const GuestForm = ({
             />
           </View>
 
-          <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>ID Image URI (optional)</Text>
+          <View className="mb-4">
+            <Text className="text-sm font-semibold text-gray-700 mb-2">
+              ID Image URI (optional)
+            </Text>
             <TextInput
-              style={styles.textInput}
+              className="bg-gray-50 rounded-xl px-4 py-3.5 text-sm text-gray-800 border border-gray-200"
               placeholder="Enter ID image URL or upload"
               placeholderTextColor="#9CA3AF"
               value={guest.idImage || ""}
@@ -238,8 +286,11 @@ export default function RSVPPage() {
   const params = useLocalSearchParams();
   const eventId = params.eventId as string;
 
-  // Get logged-in user from auth store
   const user = useAuthStore((state) => state.user);
+
+  const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([]);
+  const [familyLoading, setFamilyLoading] = useState(false);
+  const [hasFamily, setHasFamily] = useState(false);
 
   const [rsvpData, setRsvpData] = useState<RSVPData>({
     attending: null,
@@ -252,10 +303,112 @@ export default function RSVPPage() {
     "decision" | "guestCount" | "guestDetails" | "confirmation"
   >("decision");
 
+  const nonAccountFamilyMembers = useMemo(
+    () => familyMembers.filter((m) => !m.hasAccount),
+    [familyMembers]
+  );
+
+  const accountFamilyMembers = useMemo(
+    () => familyMembers.filter((m) => m.hasAccount),
+    [familyMembers]
+  );
+
+  const [selectedFamilyMembers, setSelectedFamilyMembers] = useState<number[]>(
+    []
+  );
+
+  const toggleFamilyMember = (memberId: number) => {
+    setSelectedFamilyMembers((prev) => {
+      if (prev.includes(memberId)) {
+        return prev.filter((id) => id !== memberId);
+      }
+      return [...prev, memberId];
+    });
+  };
+
+  const generateGuestList = (totalGuests: number): Guest[] => {
+    const selfGuest: Guest = {
+      id: "guest-self",
+      name: user?.name || "",
+      relationship: "Self",
+      phone: "",
+      isAdult: true,
+      idNumber: "",
+      idImage: "",
+      height: "",
+      dob: "",
+    };
+
+    const selectedMembers = nonAccountFamilyMembers.filter((m) =>
+      selectedFamilyMembers.includes(m.id as number)
+    );
+    const familyGuests: Guest[] = selectedMembers.map((m, i) => ({
+      id: `guest-member-${m.id || i}`,
+      name: m.username || "",
+      relationship: m.relation || "Family",
+      phone: "",
+      isAdult: true,
+      idNumber: "",
+      idImage: "",
+      height: "",
+      dob: m.dob || "",
+    }));
+
+    const extraGuestCount = Math.max(0, totalGuests - 1 - familyGuests.length);
+    const extraGuests: Guest[] = Array.from(
+      { length: extraGuestCount },
+      (_, i) => ({
+        id: `guest-extra-${i + 1}`,
+        name: "",
+        relationship: "",
+        phone: "",
+        isAdult: true,
+        idNumber: "",
+        idImage: "",
+        height: "",
+        dob: "",
+      })
+    );
+
+    return [selfGuest, ...familyGuests, ...extraGuests];
+  };
+
+  const fetchFamilyMembers = async () => {
+    setFamilyLoading(true);
+    try {
+      const userProfile = await getUserProfile();
+      if (userProfile && userProfile.familyId) {
+        setHasFamily(true);
+        const members = await getFamilyMembers(userProfile.familyId);
+        const otherMembers = members.filter(
+          (m: FamilyMember) => m.email !== user?.email
+        );
+        setFamilyMembers(otherMembers);
+
+        const membersWithoutAccounts = otherMembers.filter(
+          (m: FamilyMember) => !m.hasAccount
+        );
+        setSelectedFamilyMembers(
+          membersWithoutAccounts.map((m) => m.id as number)
+        );
+
+        setRsvpData((prev) => ({
+          ...prev,
+          totalGuests: 1 + membersWithoutAccounts.length,
+        }));
+      }
+    } catch (error) {
+      console.error("Error fetching family:", error);
+    } finally {
+      setFamilyLoading(false);
+    }
+  };
+
   const handleDecision = (attending: boolean) => {
     setRsvpData((prev) => ({ ...prev, attending }));
 
     if (attending) {
+      fetchFamilyMembers();
       setCurrentStep("guestCount");
     } else {
       setCurrentStep("confirmation");
@@ -269,19 +422,7 @@ export default function RSVPPage() {
       return;
     }
 
-    // Create guest entries (starting with self as first guest)
-    const newGuests: Guest[] = Array.from({ length: count }, (_, i) => ({
-      id: `guest-${i + 1}`,
-      name: i === 0 && user?.name ? user.name : "", // First guest is self - use auth store
-      relationship: i === 0 ? "Self" : "",
-      phone: i === 0 && user?.name ? "" : "", // Would need profile fetch for phone
-      isAdult: true,
-      idNumber: "",
-      idImage: "",
-      height: "",
-      dob: "",
-    }));
-
+    const newGuests = generateGuestList(count);
     setRsvpData((prev) => ({ ...prev, guests: newGuests }));
     setCurrentStep("guestDetails");
   };
@@ -294,7 +435,6 @@ export default function RSVPPage() {
   };
 
   const removeGuest = (index: number) => {
-    // Cannot remove self (first guest)
     if (index === 0) {
       Alert.alert("Error", "You cannot remove yourself from the RSVP");
       return;
@@ -318,11 +458,10 @@ export default function RSVPPage() {
       if (!guest.name.trim()) {
         Alert.alert(
           "Error",
-          `Please enter ${isSelf ? "your name" : "name for Guest " + (i + 1)}`
+          `Please enter ${isSelf ? "your name" : `name for Guest ${i + 1}`}`
         );
         return false;
       }
-      // Skip relationship check for self (first guest)
       if (!isSelf && !guest.relationship) {
         Alert.alert("Error", `Please select relationship for Guest ${i + 1}`);
         return false;
@@ -330,39 +469,37 @@ export default function RSVPPage() {
       if (!guest.phone.trim()) {
         Alert.alert(
           "Error",
-          `Please enter ${isSelf ? "your phone" : "phone for Guest " + (i + 1)}`
+          `Please enter ${isSelf ? "your phone" : `phone for Guest ${i + 1}`}`
         );
         return false;
       }
-      // Basic phone validation
       const phoneRegex = /^[0-9]{7,15}$/;
       if (!phoneRegex.test(guest.phone.trim())) {
         Alert.alert(
           "Invalid Phone",
-          `Please enter a valid phone number for ${isSelf ? "yourself" : "Guest " + (i + 1)}`
+          `Please enter a valid phone number for ${isSelf ? "yourself" : `Guest ${i + 1}`}`
         );
         return false;
       }
-      // Validate adult-specific fields
       if (guest.isAdult) {
         if (!guest.dob?.trim()) {
           Alert.alert(
             "Error",
-            `Please enter date of birth for ${isSelf ? "yourself" : "Guest " + (i + 1)}`
+            `Please enter date of birth for ${isSelf ? "yourself" : `Guest ${i + 1}`}`
           );
           return false;
         }
         if (!guest.height?.trim()) {
           Alert.alert(
             "Error",
-            `Please enter height for ${isSelf ? "yourself" : "Guest " + (i + 1)}`
+            `Please enter height for ${isSelf ? "yourself" : `Guest ${i + 1}`}`
           );
           return false;
         }
         if (!guest.idNumber?.trim()) {
           Alert.alert(
             "Error",
-            `Please enter ID number for ${isSelf ? "yourself" : "Guest " + (i + 1)}`
+            `Please enter ID number for ${isSelf ? "yourself" : `Guest ${i + 1}`}`
           );
           return false;
         }
@@ -397,42 +534,40 @@ export default function RSVPPage() {
     const currentIndex = stepMap[currentStep];
 
     return (
-      <View style={styles.stepIndicator}>
+      <View className="flex-row justify-center items-center py-4 bg-white border-b border-gray-100">
         {steps.map((step, index) => (
-          <View key={step} style={styles.stepItem}>
+          <View key={step} className="flex-row items-center">
             <View
-              style={[
-                styles.stepCircle,
-                index <= currentIndex && styles.stepCircleActive,
-              ]}
+              className={`w-7 h-7 rounded-full ${
+                index <= currentIndex ? "bg-pink-600" : "bg-gray-100"
+              } items-center justify-center`}
             >
               {index < currentIndex ? (
                 <Ionicons name="checkmark" size={16} color="white" />
               ) : (
                 <Text
-                  style={[
-                    styles.stepNumber,
-                    index <= currentIndex && styles.stepNumberActive,
-                  ]}
+                  className={`text-xs font-semibold ${
+                    index <= currentIndex ? "text-white" : "text-gray-400"
+                  }`}
                 >
                   {index + 1}
                 </Text>
               )}
             </View>
             <Text
-              style={[
-                styles.stepLabel,
-                index <= currentIndex && styles.stepLabelActive,
-              ]}
+              className={`text-[10px] ${
+                index <= currentIndex
+                  ? "font-semibold text-gray-800"
+                  : "text-gray-400"
+              } ml-0.5`}
             >
               {step}
             </Text>
             {index < steps.length - 1 && (
               <View
-                style={[
-                  styles.stepLine,
-                  index < currentIndex && styles.stepLineActive,
-                ]}
+                className={`w-[30px] h-0.5 ${
+                  index < currentIndex ? "bg-pink-600" : "bg-gray-100"
+                } mx-1`}
               />
             )}
           </View>
@@ -442,109 +577,97 @@ export default function RSVPPage() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.headerButton}
-          onPress={() => router.back()}
-        >
+    <SafeAreaView className="flex-1 bg-gray-50">
+      <View className="flex-row items-center justify-between px-4 py-3 bg-white">
+        <TouchableOpacity className="p-2 w-12" onPress={() => router.back()}>
           <Ionicons name="close" size={24} color="#374151" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>RSVP</Text>
-        <View style={styles.headerButton} />
+        <Text className="text-lg font-bold text-gray-800">RSVP</Text>
+        <View className="w-12" />
       </View>
 
-      {/* Step Indicator */}
       {getStepIndicator()}
 
-      {/* Content */}
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        {/* Step 1: Decision */}
+      <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
         {currentStep === "decision" && (
-          <View style={styles.decisionContainer}>
-            <View style={styles.eventCard}>
+          <View className="p-4">
+            <View className="bg-white rounded-2xl overflow-hidden mb-6 shadow-sm">
               <Image
                 source={{ uri: invitedEventData.imageUrl }}
-                style={styles.eventImage}
+                className="w-full h-40"
               />
-              <View style={styles.eventInfo}>
-                <Text style={styles.eventTitle}>{invitedEventData.title}</Text>
-                <View style={styles.eventDetailRow}>
+              <View className="p-4">
+                <Text className="text-xl font-bold text-gray-800 mb-2">
+                  {invitedEventData.title}
+                </Text>
+                <View className="flex-row items-center gap-2 mb-1">
                   <Ionicons name="calendar-outline" size={16} color="#6B7280" />
-                  <Text style={styles.eventDetailText}>
+                  <Text className="text-sm text-gray-500">
                     {invitedEventData.date} • {invitedEventData.time}
                   </Text>
                 </View>
-                <View style={styles.eventDetailRow}>
+                <View className="flex-row items-center gap-2 mb-1">
                   <Ionicons name="location-outline" size={16} color="#6B7280" />
-                  <Text style={styles.eventDetailText}>
+                  <Text className="text-sm text-gray-500">
                     {invitedEventData.location}
                   </Text>
                 </View>
-                <Text style={styles.hostedBy}>
+                <Text className="text-xs text-gray-400 mt-2">
                   Hosted by {invitedEventData.hostName}
                 </Text>
               </View>
             </View>
 
-            <Text style={styles.decisionTitle}>Will you be attending?</Text>
+            <Text className="text-lg font-semibold text-gray-800 mb-4 text-center">
+              Will you be attending?
+            </Text>
 
             <TouchableOpacity
-              style={styles.decisionButton}
+              className="bg-white rounded-2xl p-5 mb-3 border-2 border-emerald-500"
               onPress={() => handleDecision(true)}
             >
-              <View style={styles.decisionIconContainer}>
+              <View className="w-16 h-16 rounded-full bg-emerald-50 items-center justify-center self-center mb-3">
                 <Ionicons name="checkmark-circle" size={48} color="#10B981" />
               </View>
-              <Text style={styles.decisionButtonTitle}>
+              <Text className="text-lg font-bold text-emerald-600 text-center mb-1">
                 Yes, I'll be there!
               </Text>
-              <Text style={styles.decisionButtonSubtitle}>
+              <Text className="text-sm text-gray-500 text-center">
                 I'd love to celebrate with you
               </Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[styles.decisionButton, styles.decisionButtonDecline]}
+              className="bg-white rounded-2xl p-5 mb-3 border-2 border-red-500"
               onPress={() => handleDecision(false)}
             >
-              <View
-                style={[
-                  styles.decisionIconContainer,
-                  styles.decisionIconContainerDecline,
-                ]}
-              >
+              <View className="w-16 h-16 rounded-full bg-red-50 items-center justify-center self-center mb-3">
                 <Ionicons name="close-circle" size={48} color="#EF4444" />
               </View>
-              <Text
-                style={[
-                  styles.decisionButtonTitle,
-                  styles.decisionButtonTitleDecline,
-                ]}
-              >
+              <Text className="text-lg font-bold text-red-600 text-center mb-1">
                 No, I can't make it
               </Text>
-              <Text style={styles.decisionButtonSubtitleDecline}>
+              <Text className="text-sm text-gray-400 text-center">
                 Unfortunately, I won't be able to attend
               </Text>
             </TouchableOpacity>
           </View>
         )}
 
-        {/* Step 2: Guest Count */}
         {currentStep === "guestCount" && (
-          <View style={styles.guestCountContainer}>
-            <View style={styles.questionsHeader}>
-              <Text style={styles.questionsTitle}>How many guests?</Text>
-              <Text style={styles.questionsSubtitle}>
+          <View className="p-4">
+            <View className="mb-6">
+              <Text className="text-xl font-bold text-gray-800 mb-2">
+                How many guests?
+              </Text>
+              <Text className="text-sm text-gray-500">
                 Including yourself - how many people will be attending?
               </Text>
             </View>
 
-            <View style={styles.guestCountCard}>
+            <View className="bg-white rounded-2xl p-6 flex-row items-center justify-between mb-3 shadow-sm">
               <TouchableOpacity
-                style={styles.countButton}
+                className="w-14 h-14 rounded-full bg-pink-100 items-center justify-center"
                 onPress={() =>
                   setRsvpData((prev) => ({
                     ...prev,
@@ -560,54 +683,203 @@ export default function RSVPPage() {
                 />
               </TouchableOpacity>
 
-              <View style={styles.countDisplay}>
-                <Text style={styles.countNumber}>{rsvpData.totalGuests}</Text>
-                <Text style={styles.countLabel}>
+              <View className="items-center">
+                <Text className="text-5xl font-bold text-gray-800">
+                  {rsvpData.totalGuests}
+                </Text>
+                <Text className="text-sm text-gray-500">
                   {rsvpData.totalGuests === 1 ? "Guest" : "Guests"}
                 </Text>
+                {hasFamily && nonAccountFamilyMembers.length > 0 && (
+                  <Text className="text-xs text-pink-500 mt-1">
+                    ({selectedFamilyMembers.length} family member
+                    {selectedFamilyMembers.length > 1 ? "s" : ""} selected)
+                  </Text>
+                )}
               </View>
 
               <TouchableOpacity
-                style={styles.countButton}
+                className="w-14 h-14 rounded-full bg-pink-100 items-center justify-center"
                 onPress={() =>
                   setRsvpData((prev) => ({
                     ...prev,
-                    totalGuests: Math.min(10, prev.totalGuests + 1),
+                    totalGuests: Math.min(
+                      10 + selectedFamilyMembers.length,
+                      prev.totalGuests + 1
+                    ),
                   }))
                 }
-                disabled={rsvpData.totalGuests >= 10}
+                disabled={
+                  rsvpData.totalGuests >= 10 + selectedFamilyMembers.length
+                }
               >
                 <Ionicons
                   name="add"
                   size={32}
-                  color={rsvpData.totalGuests >= 10 ? "#9CA3AF" : "#ee2b8c"}
+                  color={
+                    rsvpData.totalGuests >= 10 + selectedFamilyMembers.length
+                      ? "#9CA3AF"
+                      : "#ee2b8c"
+                  }
                 />
               </TouchableOpacity>
             </View>
 
-            <Text style={styles.guestHint}>Maximum 10 guests allowed</Text>
+            <Text className="text-xs text-gray-400 text-center mb-6">
+              Maximum {10 + selectedFamilyMembers.length} guests allowed
+              {hasFamily && nonAccountFamilyMembers.length > 0
+                ? ` (${selectedFamilyMembers.length} of ${nonAccountFamilyMembers.length} family selected)`
+                : ""}
+            </Text>
+
+            {hasFamily && (
+              <View className="bg-gray-50 rounded-2xl p-4 mb-6">
+                <Text className="text-base font-semibold text-gray-800 mb-3">
+                  Your Family Members
+                </Text>
+                {familyLoading ? (
+                  <Text className="text-sm text-gray-500 text-center p-4">
+                    Loading family members...
+                  </Text>
+                ) : familyMembers.length > 0 ? (
+                  <>
+                    {accountFamilyMembers.length > 0 && (
+                      <View className="mb-3">
+                        <Text className="text-sm font-medium text-gray-500 mb-2">
+                          Will respond individually:
+                        </Text>
+                        {accountFamilyMembers.map((member, index) => (
+                          <View
+                            key={index}
+                            className="bg-white rounded-xl p-3 mb-2 flex-row items-center justify-between border border-gray-200"
+                          >
+                            <View className="flex-1">
+                              <Text className="text-base font-semibold text-gray-800">
+                                {member.username}
+                              </Text>
+                              <Text className="text-sm text-gray-500">
+                                {member.relation}
+                              </Text>
+                            </View>
+                            <View className="flex-row items-center gap-1">
+                              <Ionicons
+                                name={
+                                  member.rsvpStatus === "attending"
+                                    ? "checkmark-circle"
+                                    : member.rsvpStatus === "not-attending"
+                                      ? "close-circle"
+                                      : "time-outline"
+                                }
+                                size={20}
+                                color={
+                                  member.rsvpStatus === "attending"
+                                    ? "#10B981"
+                                    : member.rsvpStatus === "not-attending"
+                                      ? "#EF4444"
+                                      : "#F59E0B"
+                                }
+                              />
+                              <Text
+                                className={`text-sm font-medium ${
+                                  member.rsvpStatus === "attending"
+                                    ? "text-emerald-500"
+                                    : member.rsvpStatus === "not-attending"
+                                      ? "text-red-500"
+                                      : "text-amber-500"
+                                }`}
+                              >
+                                {member.rsvpStatus === "attending"
+                                  ? "Attending"
+                                  : member.rsvpStatus === "not-attending"
+                                    ? "Not Attending"
+                                    : "Pending"}
+                              </Text>
+                            </View>
+                          </View>
+                        ))}
+                      </View>
+                    )}
+
+                    {nonAccountFamilyMembers.length > 0 && (
+                      <View className="mb-3">
+                        <Text className="text-sm font-medium text-gray-500 mb-2">
+                          Tap to add family members:
+                        </Text>
+                        <View className="flex-row flex-wrap gap-2">
+                          {nonAccountFamilyMembers.map((member) => {
+                            const isSelected = selectedFamilyMembers.includes(
+                              member.id as number
+                            );
+                            return (
+                              <TouchableOpacity
+                                key={member.id}
+                                className={`flex-row items-center gap-1.5 rounded-full px-3 py-2 border ${
+                                  isSelected
+                                    ? "bg-pink-500 border-pink-500"
+                                    : "bg-white border-pink-500"
+                                }`}
+                                onPress={() =>
+                                  toggleFamilyMember(member.id as number)
+                                }
+                              >
+                                <Ionicons
+                                  name={
+                                    isSelected
+                                      ? "checkmark-circle"
+                                      : "add-circle-outline"
+                                  }
+                                  size={18}
+                                  color={isSelected ? "white" : "#ec4899"}
+                                />
+                                <Text
+                                  className={`text-sm font-medium ${
+                                    isSelected ? "text-white" : "text-pink-500"
+                                  }`}
+                                >
+                                  {member.username} ({member.relation})
+                                </Text>
+                              </TouchableOpacity>
+                            );
+                          })}
+                        </View>
+                        <Text className="text-xs text-gray-400 italic mt-1">
+                          {selectedFamilyMembers.length} of{" "}
+                          {nonAccountFamilyMembers.length} family members
+                          selected
+                        </Text>
+                      </View>
+                    )}
+                  </>
+                ) : (
+                  <Text className="text-sm text-gray-400 text-center p-2">
+                    No other family members found
+                  </Text>
+                )}
+              </View>
+            )}
 
             <TouchableOpacity
-              style={styles.submitButton}
+              className="bg-pink-600 rounded-xl py-4 flex-row items-center justify-center"
               onPress={handleGuestCountSubmit}
             >
-              <Text style={styles.submitButtonText}>Continue</Text>
+              <Text className="text-base font-bold text-white">Continue</Text>
               <Ionicons
                 name="arrow-forward"
                 size={20}
                 color="white"
-                style={{ marginLeft: 8 }}
+                className="ml-2"
               />
             </TouchableOpacity>
           </View>
         )}
 
-        {/* Step 3: Guest Details */}
         {currentStep === "guestDetails" && (
-          <View style={styles.guestDetailsContainer}>
-            <View style={styles.questionsHeader}>
-              <Text style={styles.questionsTitle}>Guest Details</Text>
-              <Text style={styles.questionsSubtitle}>
+          <View className="p-4">
+            <View className="mb-6">
+              <Text className="text-xl font-bold text-gray-800 mb-2">
+                Guest Details
+              </Text>
+              <Text className="text-sm text-gray-500">
                 Please provide details for each guest
               </Text>
             </View>
@@ -623,24 +895,20 @@ export default function RSVPPage() {
             ))}
 
             <TouchableOpacity
-              style={styles.submitButton}
+              className="bg-pink-600 rounded-xl py-4 flex-row items-center justify-center"
               onPress={handleSubmit}
             >
-              <Text style={styles.submitButtonText}>Submit RSVP</Text>
-              <Ionicons
-                name="send"
-                size={20}
-                color="white"
-                style={{ marginLeft: 8 }}
-              />
+              <Text className="text-base font-bold text-white">
+                Submit RSVP
+              </Text>
+              <Ionicons name="send" size={20} color="white" className="ml-2" />
             </TouchableOpacity>
           </View>
         )}
 
-        {/* Step 4: Confirmation */}
         {currentStep === "confirmation" && (
-          <View style={styles.confirmationContainer}>
-            <View style={styles.confirmationIcon}>
+          <View className="p-4">
+            <View className="items-center mb-4">
               {rsvpData.attending ? (
                 <Ionicons name="checkmark-circle" size={80} color="#10B981" />
               ) : (
@@ -648,23 +916,22 @@ export default function RSVPPage() {
               )}
             </View>
 
-            <Text style={styles.confirmationTitle}>
+            <Text className="text-2xl font-bold text-gray-800 text-center mb-2">
               {rsvpData.attending
                 ? "See You There! 🎉"
                 : "We're Sorry to See You Go 💔"}
             </Text>
 
-            <Text style={styles.confirmationMessage}>
+            <Text className="text-sm text-gray-500 text-center mb-6">
               {rsvpData.attending
                 ? `Your RSVP for ${rsvpData.totalGuests} guest(s) has been submitted.`
-                : `Your response has been noted.`}
+                : "Your response has been noted."}
             </Text>
 
             {rsvpData.attending && (
               <>
-                {/* Transportation Section */}
                 <TouchableOpacity
-                  style={styles.optionCard}
+                  className="bg-white rounded-2xl p-4 flex-row items-center mb-2 shadow-sm"
                   onPress={() =>
                     router.push({
                       pathname:
@@ -673,21 +940,22 @@ export default function RSVPPage() {
                     })
                   }
                 >
-                  <View style={styles.optionIcon}>
+                  <View className="w-12 h-12 rounded-xl bg-pink-100 items-center justify-center mr-3">
                     <Ionicons name="car" size={24} color="#ee2b8c" />
                   </View>
-                  <View style={styles.optionInfo}>
-                    <Text style={styles.optionTitle}>Transportation</Text>
-                    <Text style={styles.optionSubtitle}>
+                  <View className="flex-1">
+                    <Text className="text-base font-semibold text-gray-800">
+                      Transportation
+                    </Text>
+                    <Text className="text-xs text-gray-400 mt-0.5">
                       Manage transport for guests
                     </Text>
                   </View>
                   <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
                 </TouchableOpacity>
 
-                {/* Accommodation Section */}
                 <TouchableOpacity
-                  style={styles.optionCard}
+                  className="bg-white rounded-2xl p-4 flex-row items-center mb-2 shadow-sm"
                   onPress={() =>
                     router.push({
                       pathname:
@@ -696,12 +964,14 @@ export default function RSVPPage() {
                     })
                   }
                 >
-                  <View style={styles.optionIcon}>
+                  <View className="w-12 h-12 rounded-xl bg-pink-100 items-center justify-center mr-3">
                     <Ionicons name="bed" size={24} color="#ee2b8c" />
                   </View>
-                  <View style={styles.optionInfo}>
-                    <Text style={styles.optionTitle}>Accommodation</Text>
-                    <Text style={styles.optionSubtitle}>
+                  <View className="flex-1">
+                    <Text className="text-base font-semibold text-gray-800">
+                      Accommodation
+                    </Text>
+                    <Text className="text-xs text-gray-400 mt-0.5">
                       Manage rooms for guests
                     </Text>
                   </View>
@@ -710,575 +980,35 @@ export default function RSVPPage() {
               </>
             )}
 
-            {/* Event Details */}
-            <View style={styles.confirmationEventCard}>
+            <View className="bg-white rounded-2xl overflow-hidden mt-4 mb-6 shadow-sm">
               <Image
                 source={{ uri: invitedEventData.imageUrl }}
-                style={styles.confirmationEventImage}
+                className="w-full h-30"
               />
-              <View style={styles.confirmationEventInfo}>
-                <Text style={styles.confirmationEventTitle}>
+              <View className="p-4">
+                <Text className="text-lg font-bold text-gray-800 mb-1">
                   {invitedEventData.title}
                 </Text>
-                <Text style={styles.confirmationEventDate}>
+                <Text className="text-sm text-gray-500 mb-0.5">
                   {invitedEventData.date} • {invitedEventData.time}
                 </Text>
-                <Text style={styles.confirmationEventLocation}>
+                <Text className="text-xs text-gray-400">
                   {invitedEventData.location}
                 </Text>
               </View>
             </View>
 
             <TouchableOpacity
-              style={styles.doneButton}
+              className="bg-pink-600 rounded-xl py-4 items-center mb-3"
               onPress={() =>
                 router.push("/(protected)/(client-tabs)/events" as any)
               }
             >
-              <Text style={styles.doneButtonText}>Done</Text>
+              <Text className="text-base font-bold text-white">Done</Text>
             </TouchableOpacity>
-
-            {rsvpData.attending && (
-              <TouchableOpacity
-                style={styles.addToCalendarButton}
-                onPress={() => {
-                  Alert.alert("Calendar", "Event added to your calendar!");
-                }}
-              >
-                {/* <Ionicons name="calendar-outline" size={20} color="#ee2b8c" />
-                <Text style={styles.addToCalendarText}>Add to Calendar</Text> */}
-              </TouchableOpacity>
-            )}
           </View>
         )}
       </ScrollView>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#f9fafb",
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: "white",
-  },
-  headerButton: {
-    padding: 8,
-    width: 48,
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#1f2937",
-  },
-  stepIndicator: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    paddingVertical: 16,
-    backgroundColor: "white",
-    borderBottomWidth: 1,
-    borderBottomColor: "#f3f4f6",
-  },
-  stepItem: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  stepCircle: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: "#f3f4f6",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  stepCircleActive: {
-    backgroundColor: "#ee2b8c",
-  },
-  stepNumber: {
-    fontSize: 12,
-    fontWeight: "600",
-    color: "#9ca3af",
-  },
-  stepNumberActive: {
-    color: "white",
-  },
-  stepLine: {
-    width: 30,
-    height: 2,
-    backgroundColor: "#f3f4f6",
-    marginHorizontal: 4,
-  },
-  stepLineActive: {
-    backgroundColor: "#ee2b8c",
-  },
-  stepLabel: {
-    fontSize: 10,
-    color: "#9ca3af",
-    marginLeft: 2,
-  },
-  stepLabelActive: {
-    fontWeight: "600",
-    color: "#1f2937",
-  },
-  content: {
-    flex: 1,
-  },
-  decisionContainer: {
-    padding: 16,
-  },
-  eventCard: {
-    backgroundColor: "white",
-    borderRadius: 16,
-    overflow: "hidden",
-    marginBottom: 24,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  eventImage: {
-    width: "100%",
-    height: 160,
-  },
-  eventInfo: {
-    padding: 16,
-  },
-  eventTitle: {
-    fontSize: 20,
-    fontWeight: "700",
-    color: "#1f2937",
-    marginBottom: 8,
-  },
-  eventDetailRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    marginBottom: 4,
-  },
-  eventDetailText: {
-    fontSize: 14,
-    color: "#6b7280",
-  },
-  hostedBy: {
-    fontSize: 12,
-    color: "#9ca3af",
-    marginTop: 8,
-  },
-  decisionTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#1f2937",
-    marginBottom: 16,
-    textAlign: "center",
-  },
-  decisionButton: {
-    backgroundColor: "white",
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 12,
-    borderWidth: 2,
-    borderColor: "#10B981",
-  },
-  decisionButtonDecline: {
-    borderColor: "#EF4444",
-  },
-  decisionIconContainer: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: "#ECFDF5",
-    alignItems: "center",
-    justifyContent: "center",
-    alignSelf: "center",
-    marginBottom: 12,
-  },
-  decisionIconContainerDecline: {
-    backgroundColor: "#FEF2F2",
-  },
-  decisionButtonTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#10B981",
-    textAlign: "center",
-    marginBottom: 4,
-  },
-  decisionButtonTitleDecline: {
-    color: "#EF4444",
-  },
-  decisionButtonSubtitle: {
-    fontSize: 14,
-    color: "#6b7280",
-    textAlign: "center",
-  },
-  decisionButtonSubtitleDecline: {
-    color: "#9ca3af",
-  },
-  guestCountContainer: {
-    padding: 16,
-  },
-  questionsHeader: {
-    marginBottom: 24,
-  },
-  questionsTitle: {
-    fontSize: 20,
-    fontWeight: "700",
-    color: "#1f2937",
-    marginBottom: 8,
-  },
-  questionsSubtitle: {
-    fontSize: 14,
-    color: "#6b7280",
-  },
-  guestCountCard: {
-    backgroundColor: "white",
-    borderRadius: 16,
-    padding: 24,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 12,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  countButton: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: "#FCE7F3",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  countDisplay: {
-    alignItems: "center",
-  },
-  countNumber: {
-    fontSize: 48,
-    fontWeight: "700",
-    color: "#1f2937",
-  },
-  countLabel: {
-    fontSize: 14,
-    color: "#6b7280",
-  },
-  guestHint: {
-    fontSize: 12,
-    color: "#9ca3af",
-    textAlign: "center",
-    marginBottom: 24,
-  },
-  submitButton: {
-    backgroundColor: "#ee2b8c",
-    borderRadius: 12,
-    paddingVertical: 16,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  submitButtonText: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "white",
-  },
-  guestDetailsContainer: {
-    padding: 16,
-  },
-  guestCard: {
-    backgroundColor: "white",
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  guestHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 16,
-  },
-  guestTitle: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#1f2937",
-  },
-  removeButton: {
-    padding: 4,
-  },
-  inputGroup: {
-    marginBottom: 16,
-  },
-  inputLabel: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#374151",
-    marginBottom: 8,
-  },
-  inputHint: {
-    fontSize: 12,
-    color: "#9CA3AF",
-    marginTop: 4,
-  },
-  textInput: {
-    backgroundColor: "#f9fafb",
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    fontSize: 14,
-    color: "#1f2937",
-    borderWidth: 1,
-    borderColor: "#e5e7eb",
-  },
-  textArea: {
-    height: 80,
-    textAlignVertical: "top",
-  },
-  chipContainer: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
-  },
-  chip: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    backgroundColor: "#f3f4f6",
-    borderWidth: 1,
-    borderColor: "#e5e7eb",
-  },
-  chipSelected: {
-    backgroundColor: "#ee2b8c",
-    borderColor: "#ee2b8c",
-  },
-  chipText: {
-    fontSize: 14,
-    color: "#6b7280",
-  },
-  chipTextSelected: {
-    color: "white",
-    fontWeight: "600",
-  },
-  switchRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 16,
-  },
-  switchLabelContainer: {
-    flex: 1,
-  },
-  switchHint: {
-    fontSize: 12,
-    color: "#9ca3af",
-    marginTop: 2,
-  },
-  confirmationContainer: {
-    padding: 16,
-  },
-  confirmationIcon: {
-    alignItems: "center",
-    marginBottom: 16,
-  },
-  confirmationTitle: {
-    fontSize: 24,
-    fontWeight: "700",
-    color: "#1f2937",
-    textAlign: "center",
-    marginBottom: 8,
-  },
-  confirmationMessage: {
-    fontSize: 14,
-    color: "#6b7280",
-    textAlign: "center",
-    marginBottom: 24,
-  },
-  optionCard: {
-    backgroundColor: "white",
-    borderRadius: 16,
-    padding: 16,
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 8,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  optionIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 12,
-    backgroundColor: "#FCE7F3",
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 12,
-  },
-  optionInfo: {
-    flex: 1,
-  },
-  optionTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#1f2937",
-  },
-  optionSubtitle: {
-    fontSize: 12,
-    color: "#9ca3af",
-    marginTop: 2,
-  },
-  optionExpanded: {
-    backgroundColor: "white",
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 8,
-    marginTop: -8,
-    paddingTop: 24,
-  },
-  optionLabel: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#374151",
-    marginBottom: 8,
-    marginTop: 8,
-  },
-  roomCounter: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 24,
-    marginBottom: 16,
-  },
-  countButtonSmall: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "#FCE7F3",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  roomCount: {
-    fontSize: 24,
-    fontWeight: "700",
-    color: "#1f2937",
-    minWidth: 40,
-    textAlign: "center",
-  },
-  confirmationEventCard: {
-    backgroundColor: "white",
-    borderRadius: 16,
-    overflow: "hidden",
-    marginTop: 16,
-    marginBottom: 24,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  confirmationEventImage: {
-    width: "100%",
-    height: 120,
-  },
-  confirmationEventInfo: {
-    padding: 16,
-  },
-  confirmationEventTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#1f2937",
-    marginBottom: 4,
-  },
-  confirmationEventDate: {
-    fontSize: 14,
-    color: "#6b7280",
-    marginBottom: 2,
-  },
-  confirmationEventLocation: {
-    fontSize: 12,
-    color: "#9ca3af",
-  },
-  doneButton: {
-    backgroundColor: "#ee2b8c",
-    borderRadius: 12,
-    paddingVertical: 16,
-    alignItems: "center",
-    marginBottom: 12,
-  },
-  doneButtonText: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "white",
-  },
-  addToCalendarButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-  },
-  addToCalendarText: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#ee2b8c",
-  },
-  // Image upload styles
-  imageUploadButton: {
-    borderWidth: 2,
-    borderColor: "#E5E7EB",
-    borderStyle: "dashed",
-    borderRadius: 12,
-    overflow: "hidden",
-    marginTop: 8,
-  },
-  idImagePreview: {
-    width: "100%",
-    height: 150,
-    resizeMode: "cover",
-  },
-  imageUploadPlaceholder: {
-    width: "100%",
-    height: 120,
-    backgroundColor: "#F9FAFB",
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 16,
-  },
-  imageUploadText: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#374151",
-    marginTop: 8,
-  },
-  imageUploadHint: {
-    fontSize: 12,
-    color: "#9CA3AF",
-    marginTop: 4,
-  },
-  removeImageButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 4,
-    marginTop: 8,
-    padding: 8,
-  },
-  removeImageText: {
-    fontSize: 14,
-    color: "#EF4444",
-    fontWeight: "500",
-  },
-});

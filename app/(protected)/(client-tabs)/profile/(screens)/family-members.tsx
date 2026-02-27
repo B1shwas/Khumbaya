@@ -109,13 +109,17 @@ const getFamily = async (familyId: number): Promise<Family> => {
 };
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
-const getInitials = (name: string) =>
-  name
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2) || "?";
+const getInitials = (name: string | undefined | null) => {
+  if (!name) return "?";
+  return (
+    name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2) || "?"
+  );
+};
 
 const avatarColor = (index: number) => {
   const colors = [
@@ -433,13 +437,30 @@ export default function FamilyMembersScreen() {
     setEditingMemberIndex(null);
   };
 
+  // Food options
+  const FOOD_OPTIONS = [
+    { label: "Veg", value: "Vegetarian" },
+    { label: "Non-Veg", value: "Non-Vegetarian" },
+    { label: "Vegan", value: "Vegan" },
+    { label: "Jain", value: "Jain" },
+  ] as const;
+
   // ─── Member Handlers ────────────────────────────────────────────────
   const handleSaveMember = async (form: MemberForm) => {
+    // 1️⃣ Validate food preference
+    if (!FOOD_OPTIONS.some((opt) => opt.value === form.foodPreference)) {
+      Alert.alert("Error", "Please select a valid food preference");
+      return;
+    }
+
+    // 2️⃣ Validate other fields
+    if (!form.name.trim() || !form.relation.trim() || !form.email.trim()) {
+      Alert.alert("Error", "Please fill all required fields");
+      return;
+    }
+
     if (!familyId) {
-      Alert.alert(
-        "Error",
-        "No family selected. Please create or select a family first."
-      );
+      Alert.alert("Error", "No family found. Please create a family first.");
       return;
     }
 
@@ -447,37 +468,41 @@ export default function FamilyMembersScreen() {
       editingMemberIndex !== null ? members[editingMemberIndex] : null;
     const isExisting = member?.id !== undefined;
 
-    setLoading(true);
-    setLoadingMessage(isExisting ? "Updating member..." : "Adding member...");
-
     try {
       if (isExisting && member?.id) {
-        const updatedMember = await updateMember(familyId, member.id, {
-          name: form.name,
-          relation: form.relation,
-          foodPreference: form.foodPreference,
-        });
+        // Update existing member
+        const updatedMember = await api.patch(
+          `/family/${familyId}/member/${member.id}`,
+          {
+            name: form.name,
+            relation: form.relation,
+            foodPreference: form.foodPreference,
+          }
+        );
         setMembers((prev) =>
           prev.map((m, i) =>
-            i === editingMemberIndex ? { ...m, ...updatedMember } : m
+            i === editingMemberIndex ? { ...m, ...updatedMember.data } : m
           )
         );
+        Alert.alert("Success", "Member updated successfully!");
       } else {
-        const newMember = await addMember(familyId, {
+        // Add new member
+        const newMember = await api.post(`/family/${familyId}/member`, {
           email: form.email,
           name: form.name,
           relation: form.relation,
           foodPreference: form.foodPreference,
         });
-        setMembers((prev) => [...prev, newMember]);
+        setMembers((prev) => [...prev, newMember.data]);
+        Alert.alert("Success", "Member added successfully!");
       }
       closeModal();
-    } catch (err: any) {
-      const message = err.response?.data?.message || "Failed to save member";
-      Alert.alert("Error", message);
-    } finally {
-      setLoading(false);
-      setLoadingMessage("");
+    } catch (error: any) {
+      console.error("Save member error:", error);
+      Alert.alert(
+        "Error",
+        error?.response?.data?.message || "Something went wrong"
+      );
     }
   };
 
@@ -520,58 +545,56 @@ export default function FamilyMembersScreen() {
     ]);
   };
 
-  // ─── Family Creation ────────────────────────────────────────────────
+  // Handle creating a new family
   const handleCreateFamily = async () => {
     if (!familyName.trim()) {
-      Alert.alert("Required", "Please enter your family name");
+      Alert.alert("Error", "Please enter a family name");
       return;
     }
 
-    setLoading(true);
-    setLoadingMessage("Creating family...");
+    // Check if user already has a family
+    if (userData?.familyId) {
+      Alert.alert(
+        "Family Exists",
+        "You already have a family. You cannot create another one."
+      );
+      return;
+    }
 
     try {
-      const familyResponse = await createFamily(familyName);
-      setFamilyId(familyResponse.id);
+      // 1️⃣ Create family
+      const familyResponse = await api.post("/family", {
+        familyName: familyName,
+      });
+      
+      // API returns { data: { id, familyName, ... }, message }
+      // Axios unwraps to familyResponse.data = { id, familyName, ... }
+      const newFamilyId = familyResponse.data.id || familyResponse.data.data?.id;
+      
+      if (!newFamilyId) {
+        throw new Error("Failed to get family ID from response");
+      }
 
-      // Add self as first member
-      const self = await addMember(familyResponse.id, {
+      setFamilyId(newFamilyId);
+
+      // 2️⃣ Add self as a member (default foodPreference to a valid option)
+      const self = await api.post(`/family/${newFamilyId}/member`, {
         email: userData?.email || "",
         name: userData?.username || "",
         relation: "Self",
-        foodPreference: "",
+        foodPreference: "Vegetarian", // default valid value
       });
-      setMembers([self]);
-      setStep(2);
-    } catch (err: any) {
-      const errorData = err.response?.data;
-      const errorMessage = errorData?.message || "";
 
-      if (errorMessage.includes("already has a family")) {
-        // User already has a family - try to get familyId from error response
-        const existingFamilyId = errorData?.familyId;
+      // 3️⃣ Update local state
+      setMembers([self.data]); // start with self as first member
 
-        if (existingFamilyId) {
-          setFamilyId(existingFamilyId);
-          try {
-            const membersData = await getMembers(existingFamilyId);
-            setMembers(membersData);
-          } catch (memberErr) {
-            console.log("Failed to load members:", memberErr);
-          }
-        }
-
-        Alert.alert(
-          "Family Exists",
-          "You already have a family. You can add more members.",
-          [{ text: "OK", onPress: () => setStep(2) }]
-        );
-      } else {
-        Alert.alert("Error", errorMessage || "Failed to create family");
-      }
-    } finally {
-      setLoading(false);
-      setLoadingMessage("");
+      Alert.alert("Success", "Family created successfully!");
+    } catch (error: any) {
+      console.error("Family creation error:", error);
+      Alert.alert(
+        "Error",
+        error?.response?.data?.message || "Something went wrong"
+      );
     }
   };
 
