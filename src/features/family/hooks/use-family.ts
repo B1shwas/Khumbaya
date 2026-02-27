@@ -6,6 +6,7 @@ import {
   deleteFamilyMemberApi,
   FamilyMemberPayload,
   getFamilyByIdApi,
+  getFamilyByUserIdApi,
   getFamilyMembersApi,
   updateFamilyApi,
   updateFamilyMemberApi,
@@ -27,6 +28,16 @@ export const useGetFamilyById = (familyId?: number) => {
     queryKey: ["family", familyId],
     queryFn: () => getFamilyByIdApi(familyId as number),
     enabled: typeof familyId === "number",
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+  });
+};
+
+export const useGetFamilyByUserId = (userId?: number) => {
+  return useQuery({
+    queryKey: ["family-user", userId],
+    queryFn: () => getFamilyByUserIdApi(userId as number),
+    enabled: typeof userId === "number",
     staleTime: 5 * 60 * 1000,
     gcTime: 30 * 60 * 1000,
   });

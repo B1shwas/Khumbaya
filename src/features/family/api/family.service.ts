@@ -91,3 +91,8 @@ export const deleteFamilyMemberApi = async (
   const response = await api.delete(`/family/${familyId}/member/${memberId}`);
   return response.data;
 };
+
+export const getFamilyByUserIdApi = async (userId: number) => {
+  const response = await api.get(`/family/user/${userId}`);
+  return response.data;
+};
