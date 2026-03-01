@@ -1,0 +1,58 @@
+import EventScheduleSection from "@/src/components/user/EventScheduleSection";
+import RSVPSection from "@/src/components/user/RSVPSection";
+import VenuesSection from "@/src/components/user/VenuesSection";
+import { eventsData } from "@/src/constants/event";
+import { useLocalSearchParams } from "expo-router";
+import { ScrollView, View } from "react-native";
+import EventDetailHero from "./EventDetailHero";
+
+const GuestEventDetails = () => {
+  const { eventId } = useLocalSearchParams<{ eventId: string }>();
+  const event = eventsData.find((e) => String(e.id) === String(eventId));
+
+  return (
+    <ScrollView
+      className="flex-1 bg-gray-50"
+      showsVerticalScrollIndicator={false}
+    >
+      <EventDetailHero
+        imageUrl={event?.imageUrl}
+        title={event?.title}
+        date={event?.date}
+        location={event?.location}
+        status={event?.status}
+      />
+
+      {/* RSVP Section */}
+      <View className="mt-6">
+        <RSVPSection
+          status="Going"
+          deadline="July 15th"
+          dietary="Vegetarian Meal"
+          onEdit={() => console.log("Edit dietary")}
+          onModify={() => console.log("Modify RSVP")}
+          onDecline={() => console.log("Decline RSVP")}
+        />
+      </View>
+
+      {/* Event Schedule */}
+      <View className="mt-6">
+        <EventScheduleSection
+          onViewFull={() => console.log("View full schedule")}
+        />
+      </View>
+
+      {/* Venues */}
+      <View className="mt-6">
+        <VenuesSection
+          onGetDirections={(venue) =>
+            console.log("Get directions to", venue.name)
+          }
+          onUber={(venue) => console.log("Book Uber to", venue.name)}
+        />
+      </View>
+    </ScrollView>
+  );
+};
+
+export default GuestEventDetails;
