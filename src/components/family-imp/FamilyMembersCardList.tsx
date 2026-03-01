@@ -24,9 +24,9 @@ export default function FamilyMembersCardList({
 
   return (
     <>
-      {members.map((member) => (
+      {members.map((member, index) => (
         <View
-          key={member.id}
+          key={index}
           className="bg-white rounded-2xl p-4 mb-3 border border-gray-200 flex-row items-center gap-6"
         >
           <Image
