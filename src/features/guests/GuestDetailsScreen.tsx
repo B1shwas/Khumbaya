@@ -1,20 +1,108 @@
-import {
-  Avatar,
-  Badge,
-  Card,
-  Collapsible,
-  ListItem,
-  Section,
-} from "@/src/components/ui/guest-profile";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { useState } from "react";
+import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { FamilyMember, Guest } from "./hooks/useGuests";
 
 interface GuestDetailsScreenProps {
   guest?: Guest;
 }
+
+interface InfoItem {
+  label: string;
+  value: string;
+  icon: React.ReactNode;
+}
+
+interface InfoCardProps {
+  title: string;
+  items: InfoItem[];
+}
+
+const InfoCard = ({ title, items }: InfoCardProps) => (
+  <View className="bg-white mb-4 px-4 py-4 rounded-xl shadow-sm">
+    <Text className="text-base font-semibold text-gray-900 mb-4">{title}</Text>
+    {items.map((item, idx) => (
+      <View key={idx} className="flex-row items-start mb-4 last:mb-0">
+        <View className="w-9 h-9 rounded-full bg-gray-100 items-center justify-center mr-3">
+          {item.icon}
+        </View>
+        <View className="flex-1">
+          <Text className="text-xs text-gray-500 mb-0.5">{item.label}</Text>
+          <Text className="text-base font-medium text-gray-900">
+            {item.value}
+          </Text>
+        </View>
+      </View>
+    ))}
+  </View>
+);
+
+const FamilyMemberCard = ({ member }: { member: FamilyMember }) => {
+  const getInitials = (name: string) => {
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
+  return (
+    <View className="flex-row items-center bg-gray-50 rounded-xl p-3 mb-2">
+      <View className="w-11 h-11 rounded-full bg-pink-600 items-center justify-center mr-3">
+        <Text className="text-white font-semibold text-base">
+          {getInitials(member.name)}
+        </Text>
+      </View>
+      <View className="flex-1">
+        <Text className="text-base font-semibold text-gray-900">
+          {member.name}
+        </Text>
+        <Text className="text-sm text-gray-500">{member.relation}</Text>
+        {member.mealPreference && (
+          <Text className="text-xs text-green-600 mt-0.5">
+            Meal: {member.mealPreference}
+          </Text>
+        )}
+      </View>
+    </View>
+  );
+};
+
+interface CollapsibleSectionProps {
+  title: string;
+  children: React.ReactNode;
+  defaultExpanded?: boolean;
+}
+
+const CollapsibleSection = ({
+  title,
+  children,
+  defaultExpanded = true,
+}: CollapsibleSectionProps) => {
+  const [collapsed, setCollapsed] = useState(!defaultExpanded);
+
+  return (
+    <View className="mb-4 bg-white rounded-xl shadow-sm">
+      <TouchableOpacity
+        className="px-4 py-3 flex-row justify-between items-center"
+        onPress={() => setCollapsed(!collapsed)}
+        activeOpacity={0.7}
+      >
+        <Text className="font-semibold text-gray-900">{title}</Text>
+        <Ionicons
+          name={collapsed ? "chevron-down" : "chevron-up"}
+          size={20}
+          color="#6B7280"
+        />
+      </TouchableOpacity>
+      {!collapsed && <View className="px-4 pb-4">{children}</View>}
+    </View>
+  );
+};
+
 
 export default function GuestDetailsScreen({
   guest: propGuest,
@@ -26,16 +114,37 @@ export default function GuestDetailsScreen({
     propGuest || (params.guest ? JSON.parse(params.guest as string) : null);
 
   // Helper functions
-  const getStatusType = (status: string): "success" | "warning" | "default" => {
+  const getStatusColor = (status: string) => {
     switch (status) {
       case "Going":
       case "Confirmed":
-        return "success";
+        return {
+          bg: "bg-green-100",
+          text: "text-green-700",
+          border: "border-green-200",
+        };
       case "Pending":
-        return "warning";
+        return {
+          bg: "bg-yellow-100",
+          text: "text-yellow-700",
+          border: "border-yellow-200",
+        };
       default:
-        return "default";
+        return {
+          bg: "bg-gray-100",
+          text: "text-gray-700",
+          border: "border-gray-200",
+        };
     }
+  };
+
+  const getInitials = (name: string) => {
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
   };
 
   const formatDate = (date?: string) => {
@@ -87,7 +196,7 @@ export default function GuestDetailsScreen({
     );
   }
 
-  const statusType = getStatusType(guest.status);
+  const statusStyle = getStatusColor(guest.status);
   const showFamilyMembers =
     guest.status === "Going" || guest.status === "Confirmed";
 
@@ -109,253 +218,279 @@ export default function GuestDetailsScreen({
 
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
         {/* Guest Profile Card */}
-        <Card className="items-center py-6 mb-4">
-          <Avatar
-            name={guest.name}
-            uri={guest.avatar}
-            size={80}
-            className="mb-3"
-          />
-
+        <View className="bg-white items-center py-6 px-4 mb-4 shadow-sm">
+          <View className="mb-3">
+            {guest.avatar ? (
+              <Image
+                source={{ uri: guest.avatar }}
+                className="w-20 h-20 rounded-full"
+              />
+            ) : (
+              <View className="w-20 h-20 rounded-full bg-pink-600 items-center justify-center shadow-md">
+                <Text className="text-white text-2xl font-semibold">
+                  {getInitials(guest.name)}
+                </Text>
+              </View>
+            )}
+          </View>
           <Text className="text-xl font-bold text-gray-900 mb-2">
             {guest.name}
           </Text>
 
-          <Badge label={guest.status} type={statusType} className="mb-1" />
+          {/* Status Badge with shadow */}
+          <View
+            className={`px-4 py-1.5 rounded-full ${statusStyle.bg} border ${statusStyle.border} mb-1 shadow-sm`}
+          >
+            <Text className={`text-sm font-semibold ${statusStyle.text}`}>
+              {guest.status}
+            </Text>
+          </View>
 
           {guest.category && (
             <Text className="text-sm text-gray-500 mt-1">{guest.category}</Text>
           )}
-        </Card>
+        </View>
 
         {/* Contact Information */}
-        <Section title="Contact Information">
-          <Card>
-            <ListItem
-              label="Phone"
-              value={guest.phone || "Not provided"}
-              icon={<Ionicons name="call-outline" size={20} color="#6B7280" />}
-            />
-            <ListItem
-              label="Email"
-              value={guest.email || "Not provided"}
-              icon={<Ionicons name="mail-outline" size={20} color="#6B7280" />}
-            />
-            <ListItem
-              label="Address / Location"
-              value={guest.address || guest.location || "Not provided"}
-              icon={
+        <InfoCard
+          title="Contact Information"
+          items={[
+            {
+              label: "Phone",
+              value: guest.phone || "Not provided",
+              icon: <Ionicons name="call-outline" size={20} color="#6B7280" />,
+            },
+            {
+              label: "Email",
+              value: guest.email || "Not provided",
+              icon: <Ionicons name="mail-outline" size={20} color="#6B7280" />,
+            },
+            {
+              label: "Address / Location",
+              value: guest.address || guest.location || "Not provided",
+              icon: (
                 <Ionicons name="location-outline" size={20} color="#6B7280" />
-              }
-            />
-            <ListItem
-              label="Gender"
-              value={guest.gender || "Not specified"}
-              icon={
+              ),
+            },
+            {
+              label: "Gender",
+              value: guest.gender || "Not specified",
+              icon: (
                 <Ionicons name="person-outline" size={20} color="#6B7280" />
-              }
-            />
-          </Card>
-        </Section>
+              ),
+            },
+          ]}
+        />
 
         {/* RSVP & Event Details */}
-        <Section title="RSVP & Event Details">
-          <Card>
-            <ListItem
-              label="Total Guests"
-              value={String(guest.totalGuests || 1)}
-              icon={
+        <InfoCard
+          title="RSVP & Event Details"
+          items={[
+            {
+              label: "Total Guests",
+              value: String(guest.totalGuests || 1),
+              icon: (
                 <Ionicons name="people-outline" size={20} color="#6B7280" />
-              }
-            />
-            {guest.hasPlusOne && guest.plusOneName && (
-              <ListItem
-                label="Plus One"
-                value={guest.plusOneName}
-                icon={
-                  <Ionicons
-                    name="person-add-outline"
-                    size={20}
-                    color="#6B7280"
-                  />
-                }
-              />
-            )}
-            <ListItem
-              label="Meal Preference"
-              value={
+              ),
+            },
+            ...(guest.hasPlusOne && guest.plusOneName
+              ? [
+                  {
+                    label: "Plus One",
+                    value: guest.plusOneName,
+                    icon: (
+                      <Ionicons
+                        name="person-add-outline"
+                        size={20}
+                        color="#6B7280"
+                      />
+                    ),
+                  },
+                ]
+              : []),
+            {
+              label: "Meal Preference",
+              value:
                 guest.mealPreference ||
                 guest.dietaryRestrictions?.join(", ") ||
-                "Not specified"
-              }
-              icon={
+                "Not specified",
+              icon: (
                 <Ionicons name="restaurant-outline" size={20} color="#6B7280" />
-              }
-            />
-            <ListItem
-              label="Relation"
-              value={guest.relation || "Not specified"}
-              icon={<Ionicons name="heart-outline" size={20} color="#6B7280" />}
-            />
-          </Card>
-        </Section>
+              ),
+            },
+            {
+              label: "Relation",
+              value: guest.relation || "Not specified",
+              icon: <Ionicons name="heart-outline" size={20} color="#6B7280" />,
+            },
+          ]}
+        />
 
         {/* Travel Details - Collapsible */}
-        <Collapsible title="✈️ Travel Details" defaultExpanded>
-          <Card>
-            <ListItem
-              label="Arrival Date"
-              value={formatDate(guest.arrivalDate)}
-              icon={
-                <Ionicons name="airplane-outline" size={20} color="#6B7280" />
-              }
-            />
-            <ListItem
-              label="Arrival Location"
-              value={guest.arrivalLocation || "Not specified"}
-              icon={
-                <Ionicons name="location-outline" size={20} color="#6B7280" />
-              }
-            />
-            <ListItem
-              label="Departure Date"
-              value={formatDate(guest.departureDate)}
-              icon={
-                <Ionicons
-                  name="airplane"
-                  size={20}
-                  color="#6B7280"
-                  style={{ transform: [{ rotate: "180deg" }] }}
-                />
-              }
-            />
-            <ListItem
-              label="Departure Location"
-              value={guest.departureLocation || "Not specified"}
-              icon={<Ionicons name="map-outline" size={20} color="#6B7280" />}
-            />
-          </Card>
-        </Collapsible>
-
-        {/* Accommodation - Collapsible */}
-        <Collapsible title="🏨 Accommodation" defaultExpanded>
-          <Card>
-            <ListItem
-              label="Room Allocation"
-              value={
-                guest.roomAllocation
-                  ? `${guest.roomType || "Standard"} - ${guest.roomAllocation}`
-                  : "Not allocated"
-              }
-              icon={<Ionicons name="bed-outline" size={20} color="#6B7280" />}
-            />
-          </Card>
-        </Collapsible>
-
-        {/* Gift Information - Collapsible */}
-        <Collapsible title="🎁 Gift Information" defaultExpanded>
-          <Card>
-            <ListItem
-              label="Gift Status"
-              value={guest.giftStatus || "Pending"}
-              icon={<Ionicons name="gift-outline" size={20} color="#6B7280" />}
-            />
-            {guest.giftAmount && (
-              <ListItem
-                label="Gift Amount"
-                value={formatCurrency(guest.giftAmount)}
-                icon={
-                  <Ionicons name="cash-outline" size={20} color="#6B7280" />
-                }
-              />
-            )}
-            {guest.giftMessage && (
-              <ListItem
-                label="Gift Message"
-                value={guest.giftMessage}
-                icon={
+        <CollapsibleSection title="✈️ Travel Details">
+          <InfoCard
+            title=""
+            items={[
+              {
+                label: "Arrival Date",
+                value: formatDate(guest.arrivalDate),
+                icon: (
+                  <Ionicons name="airplane-outline" size={20} color="#6B7280" />
+                ),
+              },
+              {
+                label: "Arrival Location",
+                value: guest.arrivalLocation || "Not specified",
+                icon: (
+                  <Ionicons name="location-outline" size={20} color="#6B7280" />
+                ),
+              },
+              {
+                label: "Departure Date",
+                value: formatDate(guest.departureDate),
+                icon: (
                   <Ionicons
-                    name="chatbubble-outline"
+                    name="airplane"
                     size={20}
                     color="#6B7280"
+                    style={{ transform: [{ rotate: "180deg" }] }}
                   />
-                }
-              />
-            )}
-          </Card>
-        </Collapsible>
+                ),
+              },
+              {
+                label: "Departure Location",
+                value: guest.departureLocation || "Not specified",
+                icon: <Ionicons name="map-outline" size={20} color="#6B7280" />,
+              },
+            ]}
+          />
+        </CollapsibleSection>
+
+        {/* Accommodation - Collapsible */}
+        <CollapsibleSection title="🏨 Accommodation">
+          <InfoCard
+            title=""
+            items={[
+              {
+                label: "Room Allocation",
+                value: guest.roomAllocation
+                  ? `${guest.roomType || "Standard"} - ${guest.roomAllocation}`
+                  : "Not allocated",
+                icon: <Ionicons name="bed-outline" size={20} color="#6B7280" />,
+              },
+            ]}
+          />
+        </CollapsibleSection>
+
+        Gift Information - Collapsible
+        <CollapsibleSection title="🎁 Gift Information">
+          <InfoCard
+            title=""
+            items={[
+              {
+                label: "Gift Status",
+                value: guest.giftStatus || "Pending",
+                icon: (
+                  <Ionicons name="gift-outline" size={20} color="#6B7280" />
+                ),
+              },
+              ...(guest.giftAmount
+                ? [
+                    {
+                      label: "Gift Amount",
+                      value: formatCurrency(guest.giftAmount),
+                      icon: (
+                        <Ionicons
+                          name="cash-outline"
+                          size={20}
+                          color="#6B7280"
+                        />
+                      ),
+                    },
+                  ]
+                : []),
+              ...(guest.giftMessage
+                ? [
+                    {
+                      label: "Gift Message",
+                      value: guest.giftMessage,
+                      icon: (
+                        <Ionicons
+                          name="chatbubble-outline"
+                          size={20}
+                          color="#6B7280"
+                        />
+                      ),
+                    },
+                  ]
+                : []),
+            ]}
+          />
+        </CollapsibleSection>
 
         {/* Family Members - Only show for confirmed guests */}
         {showFamilyMembers &&
           guest.familyMembers &&
           guest.familyMembers.length > 0 && (
-            <Collapsible
+            <CollapsibleSection
               title={`👨‍👩‍👧‍👦 Family Members (${guest.familyMembers.length})`}
-              defaultExpanded
             >
               {guest.familyMembers.map((member: FamilyMember) => (
-                <Card key={member.id} className="flex-row items-center mb-2">
-                  <Avatar name={member.name} size={44} className="mr-3" />
-                  <View className="flex-1">
-                    <Text className="text-base font-semibold text-gray-900">
-                      {member.name}
-                    </Text>
-                    <Text className="text-sm text-gray-500">
-                      {member.relation}
-                    </Text>
-                    {member.mealPreference && (
-                      <Text className="text-xs text-green-600 mt-0.5">
-                        Meal: {member.mealPreference}
-                      </Text>
-                    )}
-                  </View>
-                </Card>
+                <FamilyMemberCard key={member.id} member={member} />
               ))}
-            </Collapsible>
+            </CollapsibleSection>
           )}
 
         {/* Additional Info */}
-        <Section title="Additional Info">
-          <Card>
-            <ListItem
-              label="Source"
-              value={
+        <InfoCard
+          title="Additional Info"
+          items={[
+            {
+              label: "Source",
+              value:
                 guest.source === "rsvp"
                   ? "RSVP Form"
                   : guest.source === "manual"
                     ? "Manual Entry"
                     : guest.source === "excel"
                       ? "Excel Import"
-                      : "Contact Import"
-              }
-              icon={
+                      : "Contact Import",
+              icon: (
                 <Ionicons
                   name="document-text-outline"
                   size={20}
                   color="#6B7280"
                 />
-              }
-            />
-            {guest.invitedAt && (
-              <ListItem
-                label="Invited At"
-                value={formatDate(guest.invitedAt)}
-                icon={
-                  <Ionicons name="send-outline" size={20} color="#6B7280" />
-                }
-              />
-            )}
-            {guest.createdAt && (
-              <ListItem
-                label="Added On"
-                value={formatDate(guest.createdAt)}
-                icon={
-                  <Ionicons name="calendar-outline" size={20} color="#6B7280" />
-                }
-              />
-            )}
-          </Card>
-        </Section>
+              ),
+            },
+            ...(guest.invitedAt
+              ? [
+                  {
+                    label: "Invited At",
+                    value: formatDate(guest.invitedAt),
+                    icon: (
+                      <Ionicons name="send-outline" size={20} color="#6B7280" />
+                    ),
+                  },
+                ]
+              : []),
+            ...(guest.createdAt
+              ? [
+                  {
+                    label: "Added On",
+                    value: formatDate(guest.createdAt),
+                    icon: (
+                      <Ionicons
+                        name="calendar-outline"
+                        size={20}
+                        color="#6B7280"
+                      />
+                    ),
+                  },
+                ]
+              : []),
+          ]}
+        />
 
         <View className="h-8" />
       </ScrollView>
