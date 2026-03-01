@@ -91,7 +91,7 @@ export default function RootLayout() {
       <GestureHandlerRootView style={{ flex: 1 }}>
         <SafeAreaProvider>
           <StatusBar barStyle="dark-content" backgroundColor={"#ffffff"} />
-          <SafeAreaView className="flex-1  " edges={["top", "bottom"]}>
+          <SafeAreaView className="flex-1  " edges={["bottom"]}>
             <RootNavigation />
           </SafeAreaView>
         </SafeAreaProvider>

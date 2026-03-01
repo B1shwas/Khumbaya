@@ -126,7 +126,7 @@ export default function AddFamilyMemberForm({
   };
 
   return (
-    <View className="bg-primary/5 border-2 border-dashed border-primary/30 rounded-xl p-5 mt-3 mb-6">
+    <View className="bg-primary/5 border-2 border-dashed border-primary/30 rounded-xl p-5 mt-6 ">
       <View className="flex-row items-center justify-center gap-2 mb-4">
         <Ionicons
           name="person-add-outline"
