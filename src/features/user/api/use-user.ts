@@ -40,6 +40,7 @@ export function useSignup() {
       return data;
     },
     onSuccess: async (data) => {
+      
       useAuthStore.getState().setAuth(data.token, null);
       queryClient.invalidateQueries();
     },

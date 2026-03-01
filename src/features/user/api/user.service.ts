@@ -2,7 +2,7 @@ import api from "@/src/api/axios";
 
 export const createUserApi = async (data: any) => {
   const response = await api.post("/user", data);
-  return response.data;
+  return response.data.data;
 };
 export const getUserApi = async () => {
   const response = await api.get("/user");

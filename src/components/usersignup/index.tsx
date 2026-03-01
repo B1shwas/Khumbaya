@@ -1,30 +1,12 @@
 import { Text } from "@/src/components/ui/Text";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { useState } from "react";
 import { TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Letstart from "./Letstart";
-
-export type SignupFormData = {
-  username: string;
-  email: string;
-  phone: string;
-  password: string;
-};
+import SignupDashboard from "./SignupDashboard";
 
 export default function UserSignupFlow() {
   const router = useRouter();
-  const [formData, setFormData] = useState<SignupFormData>({
-    username: "",
-    email: "",
-    phone: "",
-    password: "",
-  });
-
-  const updateFormData = (updates: Partial<SignupFormData>) => {
-    setFormData((prev) => ({ ...prev, ...updates }));
-  };
 
   const handleBack = () => {
     router.back();
@@ -53,7 +35,7 @@ export default function UserSignupFlow() {
       </View>
 
       <View className="flex-1">
-        <Letstart data={formData} onChange={updateFormData} />
+        <SignupDashboard />
       </View>
     </SafeAreaView>
   );
