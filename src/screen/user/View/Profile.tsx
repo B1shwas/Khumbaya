@@ -1,13 +1,11 @@
 import AvatarPicker from "@/src/components/ui/AvatarPicker";
 import { useAuthStore } from "@/src/store/AuthStore";
-import { useRouter } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { LinearGradient } from "expo-linear-gradient";
-import { Link } from "expo-router";
+import { Link, useRouter } from "expo-router";
 import { useState } from "react";
 import { Alert, Pressable, ScrollView, Text, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 type ToggleButtonProps = {
   title: string;
@@ -22,7 +20,7 @@ type RowProps = {
 
 export default function ProfileScreen() {
   const [tab, setTab] = useState<"account" | "info">("account");
-  const { clearAuth: logout, user } = useAuthStore();
+  const { clearAuth: logout, user, updateUser } = useAuthStore();
   const router = useRouter();
 
   const handleLogout = () => {
@@ -60,15 +58,8 @@ export default function ProfileScreen() {
     user?.avatarImage || user?.photo || user?.avatar || user?.profilePicture;
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
+    <View className="bg-white">
       <ScrollView showsVerticalScrollIndicator={false}>
-        {/* HEADER */}
-        <View className="flex-row justify-between items-center px-6 py-4 bg-white">
-          <MaterialIcons name="arrow-back-ios" size={20} color="#1f2937" />
-          <Text className="text-lg font-bold text-gray-900">Profile</Text>
-          <MaterialIcons name="more-horiz" size={24} color="#1f2937" />
-        </View>
-
         {/* PROFILE */}
         <View className="items-center mt-6 mb-6 bg-white py-6">
           <AvatarPicker
@@ -111,7 +102,7 @@ export default function ProfileScreen() {
           </View>
         </Pressable>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 

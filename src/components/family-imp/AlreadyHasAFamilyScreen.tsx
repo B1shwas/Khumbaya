@@ -33,13 +33,13 @@ export default function AlreadyHasAFamilyScreen({
         flex: 1,
         paddingHorizontal: 16,
         paddingTop: 12,
-        paddingBottom: 50,
+        paddingBottom: 35,
       }}
       keyboardShouldPersistTaps="handled"
       showsVerticalScrollIndicator={false}
       enableOnAndroid={true}
       enableAutomaticScroll={true}
-      extraScrollHeight={180}
+      extraScrollHeight={100}
       scrollEnabled={false}
     >
       <View className="flex-row justify-between items-center px-2 mb-2">

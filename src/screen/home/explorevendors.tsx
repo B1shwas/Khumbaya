@@ -6,6 +6,7 @@ import { ONBOARDING_VENDORS } from "@/src/constants/vendors";
 import { useAuthStore } from "@/src/store/AuthStore";
 import { useState } from "react";
 import { ScrollView, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const CATEGORIES = [
   "All",
@@ -21,7 +22,7 @@ export default function ExploreVendors() {
   const { user } = useAuthStore();
 
   return (
-    <View className="flex-1 bg-gray-50 px-4">
+    <SafeAreaView className="flex-1 bg-gray-50 px-4">
       <HeaderExploreVendor />
       <View className="py-3">
         <ScrollView
@@ -52,6 +53,6 @@ export default function ExploreVendors() {
       </ScrollView>
 
       {!user && <FloatLoginBanner />}
-    </View>
+    </SafeAreaView>
   );
 }

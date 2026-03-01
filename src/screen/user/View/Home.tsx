@@ -1,8 +1,5 @@
 import {
-  CoupleCard,
-  EventCard,
   HeroCard,
-  HotelCard,
   QuickServices,
   SectionHeader,
   VenueCard,
@@ -13,7 +10,7 @@ import { useProfile } from "@/src/features/user/api/use-user";
 import { useAuthStore } from "@/src/store/AuthStore";
 import { Ionicons } from "@expo/vector-icons";
 import { router, type RelativePathString } from "expo-router";
-import React, { useCallback } from "react";
+import { useCallback } from "react";
 import {
   FlatList,
   StyleSheet,
@@ -21,6 +18,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 // ============================================
 // STATIC DATA (Moved outside component)
@@ -78,58 +76,22 @@ const COUPLES = [
 
 export default function HomePage() {
   const { user } = useAuthStore();
-  
-  // Fetch and hydrate full user profile when home loads
-  // This runs only in protected screens, doesn't block routing
-  useProfile();
 
-  // Navigation handlers wrapped in useCallback
-  const navigateToEvents = useCallback(
-    () =>
-      router.push("/(protected)/(client-tabs)/events" as RelativePathString),
-    []
-  );
+  useProfile();
 
   const navigateToVenues = useCallback(
     () => router.push("/(shared)/explore/explore"),
     []
   );
 
-  const navigateToHotels = useCallback(
-    () => router.push("/hotels" as RelativePathString),
-    []
-  );
-
-  const navigateToVendors = useCallback(
-    () => router.push("/(shared)/explore" as RelativePathString),
-    []
-  );
-
-  const navigateToBlog = useCallback(
-    () => router.push("/blog" as RelativePathString),
-    []
-  );
-
-  // Render functions for FlatList items
-
   const renderVenueItem = useCallback(
     ({ item }: { item: (typeof VENUES)[0] }) => <VenueCard {...item} />,
     []
   );
 
-  const renderHotelItem = useCallback(
-    ({ item }: { item: (typeof HOTELS)[0] }) => <HotelCard {...item} />,
-    []
-  );
-
-  const renderCoupleItem = useCallback(
-    ({ item }: { item: (typeof COUPLES)[0] }) => <CoupleCard {...item} />,
-    []
-  );
-
   return (
     <>
-      <View style={styles.header} className="px-4">
+      <SafeAreaView style={styles.header} className="px-4">
         <View style={styles.headerContent}>
           <View>
             <Text style={styles.greeting}>
@@ -141,7 +103,7 @@ export default function HomePage() {
             <Ionicons name="notifications-outline" size={24} color="#1f2937" />
           </TouchableOpacity>
         </View>
-      </View>
+      </SafeAreaView>
 
       <FlatList
         data={[]} // Empty data for scroll, we render sections manually
@@ -179,35 +141,6 @@ export default function HomePage() {
               contentContainerStyle={styles.horizontalList}
             />
 
-            {/* Nearby Hotels Section
-            <SectionHeader title="Nearby Hotels" onPress={navigateToHotels} />
-            <FlatList
-              data={HOTELS}
-              renderItem={renderHotelItem}
-              keyExtractor={(item) => item.id}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.horizontalList}
-            /> */}
-
-            {/* Wedding Stories Section */}
-            {/* <SectionHeader title="Wedding Stories" /> */}
-            {/* <FlatList
-              data={COUPLES}
-              renderItem={renderCoupleItem}
-              keyExtractor={(item) => item.id}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.horizontalList}
-            /> */}
-
-            {/* Articles & Tips Section */}
-            {/* <SectionHeader title="Articles & Tips" onPress={navigateToBlog} />
-            {ARTICLES.map((article) => (
-              <ArticleCard key={article.id} {...article} />
-            ))} */}
-
-            {/* Bottom Spacer */}
             <View style={styles.bottomSpacer} />
           </>
         }

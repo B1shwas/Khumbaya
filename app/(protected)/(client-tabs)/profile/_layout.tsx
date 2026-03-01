@@ -4,26 +4,28 @@ export default function ProfileLayout() {
   return (
     <Stack
       screenOptions={{
-        headerShown: false,
+        headerShown: true,
       }}
     >
       {/* Main Profile Screen - shows header and tab bar */}
       <Stack.Screen
         name="index"
         options={{
-          headerShown: false,
-          title: "Profile",
+          headerShown: true,
+
           headerTitle: "My Profile",
           animation: "fade",
+          headerTitleAlign: "center",
         }}
       />
 
       {/* Inner screens - no header, no tab bar (handled by parent tabs layout) */}
       <Stack.Screen
-        name="(screens)"
+        name="family-members"
         options={{
-          headerShown: false,
+          headerShown: true,
           animation: "slide_from_right",
+          headerTitle: "Family Members",
         }}
       />
     </Stack>
