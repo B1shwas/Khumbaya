@@ -1,4 +1,4 @@
-import Card from "@/src/components/ui/Card";
+import Card from "@/src/components/ui/guest-profile/Card";
 import { Event, EventRole } from "@/src/constants/event";
 import { useAcceptRsvpInvitation } from "@/src/features/events/hooks/use-event";
 

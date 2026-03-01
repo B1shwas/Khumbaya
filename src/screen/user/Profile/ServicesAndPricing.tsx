@@ -1,5 +1,5 @@
 import { Button } from "@/src/components/ui/Button";
-import Card from "@/src/components/ui/Card";
+import Card from "@/src/components/ui/guest-profile/Card";
 import { Text } from "@/src/components/ui/Text";
 import { MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";

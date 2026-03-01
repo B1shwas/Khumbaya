@@ -1,4 +1,4 @@
-import Card from "@/src/components/ui/Card";
+import Card from "@/src/components/ui/guest-profile/Card";
 import { Pressable, Text, View } from "react-native";
 
 interface ScheduleItem {

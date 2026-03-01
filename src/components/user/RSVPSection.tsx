@@ -1,4 +1,4 @@
-import Card from "@/src/components/ui/Card";
+import Card from "@/src/components/ui/guest-profile/Card";
 import { Ionicons } from "@expo/vector-icons";
 import { Pressable, Text, View } from "react-native";
 
