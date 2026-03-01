@@ -2,13 +2,15 @@ import { useLocalSearchParams } from "expo-router";
 import { useCallback, useMemo, useState } from "react";
 import {
   Alert,
+  FlatList,
   Modal,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
-import { useInviteGuest } from "./api/use-guests";
+import { useGetInvitationsForEvent, useInviteGuest } from "./api/use-guests";
+import GuestCard from "./components/GuestCard";
 
 export default function GuestListScreen() {
   const params = useLocalSearchParams();
@@ -20,8 +22,9 @@ export default function GuestListScreen() {
   }, [params.eventId]);
 
   const inviteGuestMutation = useInviteGuest();
+  const { data: invitations, isLoading } = useGetInvitationsForEvent(eventId);
 
-  const [showAddModal, setShowAddModal] = useState(true);
+  const [showAddModal, setShowAddModal] = useState(false);
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -90,10 +93,10 @@ export default function GuestListScreen() {
   }, [eventId, fullName, email, phone, relation, inviteGuestMutation, closeModal]);
 
   return (
-    <View style={{ flex: 1, padding: 24, justifyContent: "center", backgroundColor: "#fff" }}>
+    <View style={{ flex: 1, padding: 24, backgroundColor: "#fff" }}>
       <Text style={{ fontSize: 22, fontWeight: "700", marginBottom: 8 }}>Guests</Text>
       <Text style={{ fontSize: 14, color: "#6B7280", marginBottom: 20 }}>
-        Add guest is enabled for now.
+        Manage your event invitations.
       </Text>
 
       <TouchableOpacity
@@ -102,11 +105,29 @@ export default function GuestListScreen() {
           borderRadius: 12,
           backgroundColor: "#EE2B8C",
           alignItems: "center",
+          marginBottom: 20,
         }}
         onPress={() => setShowAddModal(true)}
       >
         <Text style={{ fontSize: 16, fontWeight: "600", color: "#fff" }}>Add Guest</Text>
       </TouchableOpacity>
+
+      {isLoading ? (
+        <Text>Loading invitations...</Text>
+      ) : (
+        <FlatList
+          data={invitations}
+          keyExtractor={(item: any) => (item.user?.id || Math.random()).toString()}
+          renderItem={({ item }: { item: any }) => <GuestCard guest={item} />}
+          contentContainerStyle={{ paddingBottom: 20 }}
+          showsVerticalScrollIndicator={false}
+          ListEmptyComponent={
+            <Text style={{ textAlign: "center", color: "#6B7280", marginTop: 20 }}>
+              No guests invited yet.
+            </Text>
+          }
+        />
+      )}
 
       <Modal
         visible={showAddModal}

@@ -6,8 +6,8 @@ import { TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Letstart from "./Letstart";
 
-type SignupFormData = {
-  fullName: string;
+export type SignupFormData = {
+  username: string;
   email: string;
   phone: string;
   password: string;
@@ -16,7 +16,7 @@ type SignupFormData = {
 export default function UserSignupFlow() {
   const router = useRouter();
   const [formData, setFormData] = useState<SignupFormData>({
-    fullName: "",
+    username: "",
     email: "",
     phone: "",
     password: "",

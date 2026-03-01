@@ -18,15 +18,15 @@ const roleConfig: Record<
   EventRole,
   { wrapperClass: string; textClass: string }
 > = {
-  Organizer: {
+  "Organizer": {
     wrapperClass: "bg-purple-100 px-2 py-1 rounded-full",
     textClass: "text-xs font-medium text-purple-700",
   },
-  Vendor: {
+  "Vendor": {
     wrapperClass: "bg-blue-100 px-2 py-1 rounded-full",
     textClass: "text-xs font-medium text-blue-700",
   },
-  Guest: {
+  "Guest": {
     wrapperClass: "bg-green-100 px-2 py-1 rounded-full",
     textClass: "text-xs font-medium text-green-700",
   },

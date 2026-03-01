@@ -132,7 +132,15 @@ export const getEventsApi = async ({
   const payload = response.data?.data;
 
   if (Array.isArray(payload?.items)) {
-    return payload.items;
+    return payload.items.map((item: any, index: number) => {
+      // Merge properties from the indexed key (e.g., payload["0"]) if it exists
+      const extraData = payload[index.toString()] || {};
+      return {
+        ...extraData, // Take properties from indexed key first as it seems more complete
+        ...item, // Then overwrite with item properties if any
+        role: item.role || extraData.role || "Guest", // Ensure role is explicitly set
+      };
+    });
   }
   return [];
 };

@@ -1,6 +1,5 @@
 import { Button } from "@/src/components/ui/Button";
 import { Text } from "@/src/components/ui/Text";
-import { useAuthStore } from "@/src/store/AuthStore";
 import { MaterialIcons } from "@expo/vector-icons";
 import { Link, useRouter } from "expo-router";
 import { useState } from "react";
@@ -11,17 +10,12 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-
-type LetstartData = {
-  fullName: string;
-  email: string;
-  phone: string;
-  password: string;
-};
+import { useSignup } from "@/src/features/user/api/use-user"
+import { SignupFormData } from ".";
 
 type LetstartProps = {
-  data: LetstartData;
-  onChange: (updates: Partial<LetstartData>) => void;
+  data: SignupFormData;
+  onChange: (updates: Partial<SignupFormData>) => void;
   // onNext: () => void;
 };
 
@@ -35,7 +29,7 @@ export default function Letstart({
     Record<string, string>
   >({});
   const router = useRouter();
-  const { setAuth } = useAuthStore();
+  const { mutate: signup, isPending, error: mutateError } = useSignup()
 
   // Validation functions
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -43,8 +37,8 @@ export default function Letstart({
   const validateForm = () => {
     const errors: Record<string, string> = {};
 
-    if (!data.fullName.trim()) {
-      errors.fullName = "Full name is required";
+    if (!data.username.trim()) {
+      errors.name = "Full name is required";
     }
     if (!data.email.trim()) {
       errors.email = "Email is required";
@@ -68,20 +62,13 @@ export default function Letstart({
     if (!validateForm()) return;
 
     // Login and navigate to home - AuthContext will handle redirect
-    setAuth("demo-vendor-token", {
-      id: `vendor-${Date.now()}`,
-      email: data.email,
-      name: data.fullName,
-    });
 
     // TODO: Uncomment and configure backend URL when ready
-    // const signupPayload = {
-    //   fullName: data.fullName,
-    //   email: data.email,
-    //   phone: data.phone,
-    //   password: data.password,
-    // };
-    //
+    signup(data, {
+      onSuccess: (signupResponce) => {
+        console.log(signupResponce);
+      }
+    })
     // try {
     //   const response = await fetch('https://your-api-domain.com/api/auth/signup', {
     //     method: 'POST',
@@ -134,9 +121,9 @@ export default function Letstart({
             User Name
           </Text>
           <TextInput
-            value={data.fullName}
+            value={data.username}
             onChangeText={(value) => {
-              onChange({ fullName: value });
+              onChange({ username: value });
               if (validationErrors.fullName) {
                 setValidationErrors((prev) => ({ ...prev, fullName: "" }));
               }
