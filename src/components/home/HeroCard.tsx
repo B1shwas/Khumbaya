@@ -21,8 +21,7 @@ const HeroCard = () => {
           </Text>
 
           <Text className="text-white/90 mt-1">
-            Start organizing your wedding or cultural event today with our new
-            AI tools.
+            Start organizing your wedding or cultural event today 
           </Text>
 
           <TouchableOpacity
