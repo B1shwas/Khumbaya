@@ -66,28 +66,21 @@ export default function EventCreate() {
 
   const handleDateChange = (event: DateTimePickerEvent, pickedDate?: Date) => {
     if (event.type === "dismissed" || !pickedDate) return;
-
     const next = new Date(selectedDateTime);
     next.setFullYear(
       pickedDate.getFullYear(),
       pickedDate.getMonth(),
       pickedDate.getDate()
     );
-    updateSelectedDateTime(next);
-  };
-
-  const handleTimeChange = (event: DateTimePickerEvent, pickedTime?: Date) => {
-    if (event.type === "dismissed" || !pickedTime) return;
-
-    const next = new Date(selectedDateTime);
     next.setHours(
-      pickedTime.getHours(),
-      pickedTime.getMinutes(),
-      pickedTime.getSeconds(),
+      pickedDate.getHours(),
+      pickedDate.getMinutes(),
+      pickedDate.getSeconds(),
       0
-    );
+    )
     updateSelectedDateTime(next);
   };
+
 
   const handleSubmit = async () => {
     //validaton in the event creation in this
@@ -105,7 +98,7 @@ export default function EventCreate() {
       title: formData.name.trim(),
       description: `${formData.eventType} event`,
       type: EVENT_TYPE_TO_BACKEND[formData.eventType as EventType],
-      startDateTime: formData.startdateTime,
+      startDateTime: selectedDateTime,
       endDateTime: new Date(),
       budget: 0,
       theme: "Classic",
@@ -246,16 +239,9 @@ export default function EventCreate() {
           <View className="mt-7">
             <DatePicker
               value={selectedDateTime}
-              mode="date"
+              mode="datetime"
               onChange={handleDateChange}
               materialDateLabel="Event date"
-            />
-
-            <DatePicker
-              value={selectedDateTime}
-              mode="time"
-              onChange={handleTimeChange}
-              materialTimeLabel="Event time"
             />
           </View>
 

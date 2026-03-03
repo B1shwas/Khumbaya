@@ -122,7 +122,7 @@ export const createEventApi = async (data: CREATEEVENT) => {
   return response.data;
 };
 
-export const getEventsApi = async ({
+export const getUpcomingEventsApi = async ({
   page = 1,
   limit = 20,
 }: GetEventsParams = {}) => {
@@ -163,6 +163,20 @@ export const getInvitedEvent = async () => {
   return [] as Event[];
 };
 
+export const getCompletedEventsApi = async ({
+  page = 1,
+  limit = 20,
+}: GetEventsParams = {}) => {
+  const events = await getUpcomingEventsApi({ page, limit });
+
+  return events.filter((event: Event) => {
+    if (event.status === "completed") return true;
+
+    const endDate = event.endDateTime ? new Date(event.endDateTime) : undefined;
+    return !!endDate && !Number.isNaN(endDate.getTime()) && endDate < new Date();
+  });
+};
+
 export const acceptRsvpInvitationApi = async (invitationId: number) => {
   const response = await api.post(`/rsvp/accept/${invitationId}`);
   return response.data;
@@ -182,3 +196,5 @@ export const getEventGuest = async (id: number) => {
   const response = await api.get(`/event/${id}/guests`);
   return response.data;
 };
+export const getUserInvitedEvents = async () => { }
+
