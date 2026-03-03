@@ -1,8 +1,8 @@
-import { DatePicker } from '@/components/nativewindui/DatePicker';
+import { DatePicker } from "@/components/nativewindui/DatePicker";
 import { CREATEEVENT } from "@/src/features/events/api/events.service";
 import { useCreateEvent } from "@/src/features/events/hooks/use-event";
 import { Ionicons } from "@expo/vector-icons";
-import { DateTimePickerEvent } from '@react-native-community/datetimepicker';
+import { DateTimePickerEvent } from "@react-native-community/datetimepicker";
 import { useRouter } from "expo-router";
 
 import { useState } from "react";
@@ -17,9 +17,8 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import {
-  useSharedValue,
-} from "react-native-reanimated";
+import { useSharedValue } from "react-native-reanimated";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 interface EventFormData {
   name: string;
@@ -50,9 +49,7 @@ export default function EventCreate() {
   const router = useRouter();
   const { mutate: createEvent, isPending: isCreatingEvent } = useCreateEvent();
 
-  const [selectedDateTime, setSelectedDateTime] = useState<Date>(  // make the date in the thing  
-    new Date()
-  );
+  const [selectedDateTime, setSelectedDateTime] = useState<Date>(new Date()); // make the date in the thing
   const [formData, setFormData] = useState<EventFormData>({
     name: "Aisha & Omar's Wedding",
     eventType: "Wedding" as EventType,
@@ -67,10 +64,7 @@ export default function EventCreate() {
     setFormData((prev) => ({ ...prev, date: nextDateTime }));
   };
 
-  const handleDateChange = (
-    event: DateTimePickerEvent,
-    pickedDate?: Date
-  ) => {
+  const handleDateChange = (event: DateTimePickerEvent, pickedDate?: Date) => {
     if (event.type === "dismissed" || !pickedDate) return;
 
     const next = new Date(selectedDateTime);
@@ -82,10 +76,7 @@ export default function EventCreate() {
     updateSelectedDateTime(next);
   };
 
-  const handleTimeChange = (
-    event: DateTimePickerEvent,
-    pickedTime?: Date
-  ) => {
+  const handleTimeChange = (event: DateTimePickerEvent, pickedTime?: Date) => {
     if (event.type === "dismissed" || !pickedTime) return;
 
     const next = new Date(selectedDateTime);
@@ -110,7 +101,6 @@ export default function EventCreate() {
       return;
     }
 
-
     const payload: CREATEEVENT = {
       title: formData.name.trim(),
       description: `${formData.eventType} event`,
@@ -127,7 +117,9 @@ export default function EventCreate() {
         "https://images.unsplash.com/photo-1519741497674-611481863552?w=1200&q=80",
     };
 
-    console.log(`This is the payload in the on success in the backend ${payload.startDateTime}`);
+    console.log(
+      `This is the payload in the on success in the backend ${payload.startDateTime}`
+    );
     createEvent(payload, {
       onSuccess: () => {
         router.push("/(protected)/(client-tabs)/events");
@@ -153,13 +145,12 @@ export default function EventCreate() {
     setFormData((prev) => ({ ...prev, eventType: type }));
   };
 
-
   const handleCoverPress = () => {
     // TODO: Backend Integration - Image picker
     console.log("Open image picker for cover image");
   };
   return (
-    <View className="flex-1 bg-[#f8f6f7]">
+    <SafeAreaView className="flex-1 bg-[#f8f6f7]">
       <KeyboardAvoidingView
         className="flex-1 max-w-[480px] self-center w-full"
         behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -252,7 +243,6 @@ export default function EventCreate() {
             </View>
           </View>
 
-
           <View className="mt-7">
             <DatePicker
               value={selectedDateTime}
@@ -268,7 +258,6 @@ export default function EventCreate() {
               materialTimeLabel="Event time"
             />
           </View>
-
 
           {/* Bottom spacing for footer */}
           <View className="h-[100px]" />
@@ -295,6 +284,6 @@ export default function EventCreate() {
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
-    </View>
+    </SafeAreaView>
   );
 }

@@ -1,7 +1,168 @@
+import EventHighlightTimeline from "@/src/components/event/EventHighlightTimeline";
+import FamilyRsvpCard from "@/src/components/event/FamilyRsvpCard";
+import ServiceGrid from "@/src/components/event/ServiceGrid";
 import { Text } from "@/src/components/ui/Text";
+import { EventHighlight, EventService } from "@/src/types";
+import { Ionicons } from "@expo/vector-icons";
+import { router, useLocalSearchParams } from "expo-router";
+import {
+  Image,
+  Pressable,
+  ScrollView,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-const GuestEventDetails = () => {
-  return <Text>Hello</Text>;
-};
+const DEFAULT_HIGHLIGHTS: EventHighlight[] = [
+  {
+    id: "1",
+    title: "Welcome Brunch",
+    dateLabel: "Oct 24  •  11:00 AM  •  Poolside Deck",
+    icon: "sparkles-outline",
+  },
+  {
+    id: "2",
+    title: "Sangeet Night",
+    dateLabel: "Oct 25  •  7:00 PM  •  Ballroom",
+    icon: "musical-notes-outline",
+  },
+  {
+    id: "3",
+    title: "Main Ceremony",
+    dateLabel: "Oct 26  •  6:00 PM  •  Royal Gardens",
+    icon: "heart",
+    isFinal: true,
+  },
+];
 
-export default GuestEventDetails;
+const DEFAULT_SERVICES: EventService[] = [
+  { id: "lodging", label: "Lodging", icon: "bed-outline" },
+  { id: "transport", label: "Transport", icon: "car-outline" },
+  { id: "meals", label: "Meals", icon: "restaurant-outline" },
+];
+
+const Section = ({
+  title,
+  action,
+  onAction,
+  children,
+}: {
+  title: string;
+  action?: string;
+  onAction?: () => void;
+  children: React.ReactNode;
+}) => (
+  <View className="px-5 py-5">
+    <View className="flex-row items-center justify-between">
+      <Text variant="h2" className=" text-xl">
+        {title}
+      </Text>
+      {action && onAction && (
+        <TouchableOpacity onPress={onAction} activeOpacity={0.7}>
+          <Text variant="caption" className="text-primary">
+            {action}
+          </Text>
+        </TouchableOpacity>
+      )}
+    </View>
+    {children}
+  </View>
+);
+
+export default function GuestEventDetails() {
+  const params = useLocalSearchParams<{
+    eventId: string;
+    title?: string;
+    dateRange?: string;
+    venue?: string;
+    location?: string;
+    imageUrl?: string;
+    familyName?: string;
+  }>();
+
+  const title = params.title ?? "Event Details";
+  const dateRange = params.dateRange ?? "Oct 24 - Oct 27, 2026";
+  const venue = params.venue ?? "Grand Palace";
+  const location = params.location ?? "Kahtmandu";
+  const imageUrl = params.imageUrl;
+  const familyName = params.familyName ?? "Rahul Family";
+
+  return (
+    <SafeAreaView className="flex-1 bg-background-light" edges={["top"]}>
+      <View className="flex-row items-center px-4 py-3 border-b border-slate-100 bg-white">
+        <Pressable
+          className="w-10 h-10 items-center justify-center rounded-xl absolute left-4 z-10"
+          onPress={() => router.back()}
+          accessibilityRole="button"
+          accessibilityLabel="Go back"
+        >
+          <Ionicons name="arrow-back" size={22} color="#1e293b" />
+        </Pressable>
+
+        <Text variant="h1" className="flex-1 text-center text-lg">
+          Event Details
+        </Text>
+      </View>
+
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerClassName="pb-10"
+      >
+        <View className="items-center pt-6 pb-2 px-5">
+          <View className="w-32 h-32 rounded-full overflow-hidden border-4 border-pink-100">
+            {imageUrl ? (
+              <Image
+                source={{ uri: imageUrl }}
+                className="w-full h-full"
+                resizeMode="cover"
+              />
+            ) : (
+              <View className="w-full h-full bg-pink-50" />
+            )}
+          </View>
+
+          <Text variant="h1" className="text-center mt-4 text-lg">
+            {title}
+          </Text>
+
+          <View className="flex-row items-center gap-1.5 mt-2">
+            <Ionicons name="calendar-outline" size={14} color="#ee2b8c" />
+            <Text variant="caption" className="text-primary">
+              {dateRange}
+            </Text>
+          </View>
+
+          <View className="flex-row items-center gap-1.5 mt-1">
+            <Ionicons name="location-outline" size={14} color="#6b7280" />
+            <Text variant="caption">
+              {venue}
+              {location ? `, ${location}` : ""}
+            </Text>
+          </View>
+        </View>
+
+        <Section
+          title="Event Highlights"
+          action="View Full Itinerary"
+          onAction={() => {}}
+        >
+          <EventHighlightTimeline highlights={DEFAULT_HIGHLIGHTS} />
+        </Section>
+
+        <Section title="Services Offered">
+          <ServiceGrid services={DEFAULT_SERVICES} />
+        </Section>
+
+        <View className="px-5 py-5">
+          <FamilyRsvpCard
+            familyName={familyName}
+            members={[]}
+            confirmedCount={5}
+            onManage={() => {}}
+          />
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  );
+}

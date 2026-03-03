@@ -1,17 +1,14 @@
-import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams } from "expo-router";
 import { useCallback, useMemo, useState } from "react";
 import {
   Alert,
   FlatList,
   Modal,
-  ScrollView,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { useGetInvitationsForEvent, useInviteGuest } from "./api/use-guests";
 import GuestCard from "./components/GuestCard";
 
@@ -96,134 +93,174 @@ export default function GuestListScreen() {
   }, [eventId, fullName, email, phone, relation, inviteGuestMutation, closeModal]);
 
   return (
-    <SafeAreaView className="flex-1 bg-background-light">
-      <View className="flex-1 px-4">
-<<<<<<< HEAD
-        <Text className="text-[22px] font-bold text-gray-900 mb-2">Guests</Text>
-        <Text className="text-sm text-gray-500 mb-5">
-=======
-        <Text style={{ fontSize: 22, fontWeight: "700", marginBottom: 8 }}>Guests</Text>
-        <Text style={{ fontSize: 14, color: "#6B7280", marginBottom: 20 }}>
->>>>>>> 0cf33ec (Updating in the guest list screen page)
-          Manage your event invitations.
-        </Text>
+    <View style={{ flex: 1, padding: 24, backgroundColor: "#fff" }}>
+      <Text style={{ fontSize: 22, fontWeight: "700", marginBottom: 8 }}>Guests</Text>
+      <Text style={{ fontSize: 14, color: "#6B7280", marginBottom: 20 }}>
+        Manage your event invitations.
+      </Text>
 
-        <TouchableOpacity
-<<<<<<< HEAD
-          className="bg-primary py-3.5 rounded-xl items-center mb-5"
-          onPress={() => setShowAddModal(true)}
-        >
-          <Text className="text-base font-semibold text-white">Add Guest</Text>
-=======
+      <TouchableOpacity
+        style={{
+          paddingVertical: 14,
+          borderRadius: 12,
+          backgroundColor: "#EE2B8C",
+          alignItems: "center",
+          marginBottom: 20,
+        }}
+        onPress={() => setShowAddModal(true)}
+      >
+        <Text style={{ fontSize: 16, fontWeight: "600", color: "#fff" }}>Add Guest</Text>
+      </TouchableOpacity>
+
+      {isLoading ? (
+        <Text>Loading invitations...</Text>
+      ) : (
+        <FlatList
+          data={invitations}
+          keyExtractor={(item: any) => (item.user?.id || Math.random()).toString()}
+          renderItem={({ item }: { item: any }) => <GuestCard guest={item} />}
+          contentContainerStyle={{ paddingBottom: 20 }}
+          showsVerticalScrollIndicator={false}
+          ListEmptyComponent={
+            <Text style={{ textAlign: "center", color: "#6B7280", marginTop: 20 }}>
+              No guests invited yet.
+            </Text>
+          }
+        />
+      )}
+
+      <Modal
+        visible={showAddModal}
+        transparent
+        animationType="slide"
+        onRequestClose={closeModal}
+      >
+        <View
           style={{
-            paddingVertical: 14,
-            borderRadius: 12,
-            backgroundColor: "#EE2B8C",
-            alignItems: "center",
-            marginBottom: 20,
+            flex: 1,
+            justifyContent: "flex-end",
+            backgroundColor: "rgba(0,0,0,0.5)",
           }}
-          onPress={() => setShowAddModal(true)}
         >
-          <Text style={{ fontSize: 16, fontWeight: "600", color: "#fff" }}>Add Guest</Text>
->>>>>>> 0cf33ec (Updating in the guest list screen page)
-        </TouchableOpacity>
+          <View
+            style={{
+              backgroundColor: "#fff",
+              borderTopLeftRadius: 24,
+              borderTopRightRadius: 24,
+              padding: 24,
+              paddingBottom: 32,
+            }}
+          >
+            <Text style={{ fontSize: 20, fontWeight: "700", marginBottom: 20 }}>
+              Add New Guest
+            </Text>
 
-        {isLoading ? (
-          <Text>Loading invitations...</Text>
-        ) : (
-          <FlatList
-            data={invitations}
-            keyExtractor={(item: any) => (item.user?.id || Math.random()).toString()}
-            renderItem={({ item }: { item: any }) => <GuestCard guest={item} />}
-            contentContainerStyle={{ paddingBottom: 20 }}
-            showsVerticalScrollIndicator={false}
-            ListEmptyComponent={
-<<<<<<< HEAD
-              <Text className="text-center text-gray-500 mt-5">
-=======
-              <Text style={{ textAlign: "center", color: "#6B7280", marginTop: 20 }}>
->>>>>>> 0cf33ec (Updating in the guest list screen page)
-                No guests invited yet.
-              </Text>
-            }
-          />
-        )}
-
-        <Modal
-          visible={showAddModal}
-          animationType="slide"
-          presentationStyle="pageSheet"
-          onRequestClose={closeModal}
-        >
-          <SafeAreaView className="flex-1 bg-white">
-            <View className="flex-row items-center justify-between px-4 py-3 border-b border-gray-100">
-              <TouchableOpacity onPress={closeModal} className="p-2">
-                <Ionicons name="close" size={24} color="#374151" />
-              </TouchableOpacity>
-              <Text className="text-lg font-bold text-gray-900">Add New Guest</Text>
-              <View className="w-10" />
-            </View>
-
-            <ScrollView className="flex-1 px-4 py-6" keyboardShouldPersistTaps="handled">
-              <View className="gap-4">
-                <View>
-                  <Text className="text-sm font-medium text-gray-700 mb-1.5">Name *</Text>
-                  <TextInput
-                    value={fullName}
-                    onChangeText={setFullName}
-                    placeholder="Enter guest name"
-                    className="bg-gray-100 p-3.5 rounded-xl text-sm"
-                  />
-                </View>
-
-                <View>
-                  <Text className="text-sm font-medium text-gray-700 mb-1.5">Email *</Text>
-                  <TextInput
-                    value={email}
-                    onChangeText={setEmail}
-                    placeholder="Enter email"
-                    keyboardType="email-address"
-                    autoCapitalize="none"
-                    className="bg-gray-100 p-3.5 rounded-xl text-sm"
-                  />
-                </View>
-
-                <View>
-                  <Text className="text-sm font-medium text-gray-700 mb-1.5">Phone *</Text>
-                  <TextInput
-                    value={phone}
-                    onChangeText={setPhone}
-                    placeholder="Enter phone number"
-                    keyboardType="phone-pad"
-                    className="bg-gray-100 p-3.5 rounded-xl text-sm"
-                  />
-                </View>
-
-                <View>
-                  <Text className="text-sm font-medium text-gray-700 mb-1.5">Relation</Text>
-                  <TextInput
-                    value={relation}
-                    onChangeText={setRelation}
-                    placeholder="e.g., Family, Friend"
-                    className="bg-gray-100 p-3.5 rounded-xl text-sm"
-                  />
-                </View>
+            <View style={{ gap: 16 }}>
+              <View>
+                <Text style={{ fontSize: 14, fontWeight: "500", color: "#374151", marginBottom: 6 }}>
+                  Name *
+                </Text>
+                <TextInput
+                  value={fullName}
+                  onChangeText={setFullName}
+                  placeholder="Enter guest name"
+                  style={{
+                    backgroundColor: "#F3F4F6",
+                    padding: 14,
+                    borderRadius: 12,
+                    fontSize: 14,
+                  }}
+                />
               </View>
 
+              <View>
+                <Text style={{ fontSize: 14, fontWeight: "500", color: "#374151", marginBottom: 6 }}>
+                  Email *
+                </Text>
+                <TextInput
+                  value={email}
+                  onChangeText={setEmail}
+                  placeholder="Enter email"
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  style={{
+                    backgroundColor: "#F3F4F6",
+                    padding: 14,
+                    borderRadius: 12,
+                    fontSize: 14,
+                  }}
+                />
+              </View>
+
+              <View>
+                <Text style={{ fontSize: 14, fontWeight: "500", color: "#374151", marginBottom: 6 }}>
+                  Phone *
+                </Text>
+                <TextInput
+                  value={phone}
+                  onChangeText={setPhone}
+                  placeholder="Enter phone number"
+                  keyboardType="phone-pad"
+                  style={{
+                    backgroundColor: "#F3F4F6",
+                    padding: 14,
+                    borderRadius: 12,
+                    fontSize: 14,
+                  }}
+                />
+              </View>
+
+              <View>
+                <Text style={{ fontSize: 14, fontWeight: "500", color: "#374151", marginBottom: 6 }}>
+                  Relation
+                </Text>
+                <TextInput
+                  value={relation}
+                  onChangeText={setRelation}
+                  placeholder="e.g., Family, Friend"
+                  style={{
+                    backgroundColor: "#F3F4F6",
+                    padding: 14,
+                    borderRadius: 12,
+                    fontSize: 14,
+                  }}
+                />
+              </View>
+            </View>
+
+            <View style={{ flexDirection: "row", gap: 12, marginTop: 24 }}>
               <TouchableOpacity
-                className={`mt-8 py-3.5 rounded-xl items-center ${inviteGuestMutation.isPending ? "bg-pink-300" : "bg-primary"
-                  }`}
+                style={{
+                  flex: 1,
+                  paddingVertical: 14,
+                  borderRadius: 12,
+                  backgroundColor: "#F3F4F6",
+                  alignItems: "center",
+                }}
+                onPress={closeModal}
+              >
+                <Text style={{ fontSize: 16, fontWeight: "600", color: "#4B5563" }}>Cancel</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={{
+                  flex: 1,
+                  paddingVertical: 14,
+                  borderRadius: 12,
+                  backgroundColor: inviteGuestMutation.isPending ? "#F9A8D4" : "#EE2B8C",
+                  alignItems: "center",
+                }}
                 disabled={inviteGuestMutation.isPending}
                 onPress={handleAddGuest}
               >
-                <Text className="text-base font-semibold text-white">
+                <Text style={{ fontSize: 16, fontWeight: "600", color: "#fff" }}>
                   {inviteGuestMutation.isPending ? "Adding..." : "Add Guest"}
                 </Text>
               </TouchableOpacity>
-            </ScrollView>
-          </SafeAreaView>
-        </Modal>
-      </View>
-    </SafeAreaView>
+            </View>
+          </View>
+        </View>
+      </Modal>
+    </View>
   );
 }
