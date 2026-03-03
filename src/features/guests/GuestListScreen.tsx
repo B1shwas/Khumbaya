@@ -1,5 +1,5 @@
 import { useLocalSearchParams } from "expo-router";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useState } from "react";
 import {
   Alert,
   FlatList,
@@ -16,7 +16,9 @@ export default function GuestListScreen() {
   const params = useLocalSearchParams();
 
   const eventId = useMemo(() => {
-    const raw = Array.isArray(params.eventId) ? params.eventId[0] : params.eventId;
+    const raw = Array.isArray(params.eventId)
+      ? params.eventId[0]
+      : params.eventId;
     const parsed = raw ? Number(raw) : NaN;
     return Number.isFinite(parsed) ? parsed : null;
   }, [params.eventId]);
@@ -90,11 +92,21 @@ export default function GuestListScreen() {
         "Failed to add guest. Please try again.";
       Alert.alert("Error", message);
     }
-  }, [eventId, fullName, email, phone, relation, inviteGuestMutation, closeModal]);
+  }, [
+    eventId,
+    fullName,
+    email,
+    phone,
+    relation,
+    inviteGuestMutation,
+    closeModal,
+  ]);
 
   return (
     <View style={{ flex: 1, padding: 24, backgroundColor: "#fff" }}>
-      <Text style={{ fontSize: 22, fontWeight: "700", marginBottom: 8 }}>Guests</Text>
+      <Text style={{ fontSize: 22, fontWeight: "700", marginBottom: 8 }}>
+        Guests
+      </Text>
       <Text style={{ fontSize: 14, color: "#6B7280", marginBottom: 20 }}>
         Manage your event invitations.
       </Text>
@@ -109,7 +121,9 @@ export default function GuestListScreen() {
         }}
         onPress={() => setShowAddModal(true)}
       >
-        <Text style={{ fontSize: 16, fontWeight: "600", color: "#fff" }}>Add Guest</Text>
+        <Text style={{ fontSize: 16, fontWeight: "600", color: "#fff" }}>
+          Add Guest
+        </Text>
       </TouchableOpacity>
 
       {isLoading ? (
@@ -117,12 +131,16 @@ export default function GuestListScreen() {
       ) : (
         <FlatList
           data={invitations}
-          keyExtractor={(item: any) => (item.user?.id || Math.random()).toString()}
+          keyExtractor={(item: any) =>
+            (item.user?.id || Math.random()).toString()
+          }
           renderItem={({ item }: { item: any }) => <GuestCard guest={item} />}
           contentContainerStyle={{ paddingBottom: 20 }}
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={
-            <Text style={{ textAlign: "center", color: "#6B7280", marginTop: 20 }}>
+            <Text
+              style={{ textAlign: "center", color: "#6B7280", marginTop: 20 }}
+            >
               No guests invited yet.
             </Text>
           }
@@ -157,7 +175,14 @@ export default function GuestListScreen() {
 
             <View style={{ gap: 16 }}>
               <View>
-                <Text style={{ fontSize: 14, fontWeight: "500", color: "#374151", marginBottom: 6 }}>
+                <Text
+                  style={{
+                    fontSize: 14,
+                    fontWeight: "500",
+                    color: "#374151",
+                    marginBottom: 6,
+                  }}
+                >
                   Name *
                 </Text>
                 <TextInput
@@ -174,7 +199,14 @@ export default function GuestListScreen() {
               </View>
 
               <View>
-                <Text style={{ fontSize: 14, fontWeight: "500", color: "#374151", marginBottom: 6 }}>
+                <Text
+                  style={{
+                    fontSize: 14,
+                    fontWeight: "500",
+                    color: "#374151",
+                    marginBottom: 6,
+                  }}
+                >
                   Email *
                 </Text>
                 <TextInput
@@ -193,7 +225,14 @@ export default function GuestListScreen() {
               </View>
 
               <View>
-                <Text style={{ fontSize: 14, fontWeight: "500", color: "#374151", marginBottom: 6 }}>
+                <Text
+                  style={{
+                    fontSize: 14,
+                    fontWeight: "500",
+                    color: "#374151",
+                    marginBottom: 6,
+                  }}
+                >
                   Phone *
                 </Text>
                 <TextInput
@@ -211,7 +250,14 @@ export default function GuestListScreen() {
               </View>
 
               <View>
-                <Text style={{ fontSize: 14, fontWeight: "500", color: "#374151", marginBottom: 6 }}>
+                <Text
+                  style={{
+                    fontSize: 14,
+                    fontWeight: "500",
+                    color: "#374151",
+                    marginBottom: 6,
+                  }}
+                >
                   Relation
                 </Text>
                 <TextInput
@@ -239,7 +285,11 @@ export default function GuestListScreen() {
                 }}
                 onPress={closeModal}
               >
-                <Text style={{ fontSize: 16, fontWeight: "600", color: "#4B5563" }}>Cancel</Text>
+                <Text
+                  style={{ fontSize: 16, fontWeight: "600", color: "#4B5563" }}
+                >
+                  Cancel
+                </Text>
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -247,13 +297,17 @@ export default function GuestListScreen() {
                   flex: 1,
                   paddingVertical: 14,
                   borderRadius: 12,
-                  backgroundColor: inviteGuestMutation.isPending ? "#F9A8D4" : "#EE2B8C",
+                  backgroundColor: inviteGuestMutation.isPending
+                    ? "#F9A8D4"
+                    : "#EE2B8C",
                   alignItems: "center",
                 }}
                 disabled={inviteGuestMutation.isPending}
                 onPress={handleAddGuest}
               >
-                <Text style={{ fontSize: 16, fontWeight: "600", color: "#fff" }}>
+                <Text
+                  style={{ fontSize: 16, fontWeight: "600", color: "#fff" }}
+                >
                   {inviteGuestMutation.isPending ? "Adding..." : "Add Guest"}
                 </Text>
               </TouchableOpacity>

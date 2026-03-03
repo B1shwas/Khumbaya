@@ -3,10 +3,9 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
 import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { FamilyMember, Guest } from "./hooks/useGuests";
 
 interface GuestDetailsScreenProps {
-  guest?: Guest;
+  guest?: any;
 }
 
 interface InfoItem {
@@ -39,7 +38,7 @@ const InfoCard = ({ title, items }: InfoCardProps) => (
   </View>
 );
 
-const FamilyMemberCard = ({ member }: { member: FamilyMember }) => {
+const FamilyMemberCard = ({ member }: { member: any }) => {
   const getInitials = (name: string) => {
     return name
       .split(" ")
@@ -102,7 +101,6 @@ const CollapsibleSection = ({
     </View>
   );
 };
-
 
 export default function GuestDetailsScreen({
   guest: propGuest,
@@ -250,7 +248,6 @@ export default function GuestDetailsScreen({
             <Text className="text-sm text-gray-500 mt-1">{guest.category}</Text>
           )}
         </View>
-
         {/* Contact Information */}
         <InfoCard
           title="Contact Information"
@@ -281,7 +278,6 @@ export default function GuestDetailsScreen({
             },
           ]}
         />
-
         {/* RSVP & Event Details */}
         <InfoCard
           title="RSVP & Event Details"
@@ -325,7 +321,6 @@ export default function GuestDetailsScreen({
             },
           ]}
         />
-
         {/* Travel Details - Collapsible */}
         <CollapsibleSection title="✈️ Travel Details">
           <InfoCard
@@ -365,7 +360,6 @@ export default function GuestDetailsScreen({
             ]}
           />
         </CollapsibleSection>
-
         {/* Accommodation - Collapsible */}
         <CollapsibleSection title="🏨 Accommodation">
           <InfoCard
@@ -381,7 +375,6 @@ export default function GuestDetailsScreen({
             ]}
           />
         </CollapsibleSection>
-
         Gift Information - Collapsible
         <CollapsibleSection title="🎁 Gift Information">
           <InfoCard
@@ -427,7 +420,6 @@ export default function GuestDetailsScreen({
             ]}
           />
         </CollapsibleSection>
-
         {/* Family Members - Only show for confirmed guests */}
         {showFamilyMembers &&
           guest.familyMembers &&
@@ -440,7 +432,6 @@ export default function GuestDetailsScreen({
               ))}
             </CollapsibleSection>
           )}
-
         {/* Additional Info */}
         <InfoCard
           title="Additional Info"
@@ -491,7 +482,6 @@ export default function GuestDetailsScreen({
               : []),
           ]}
         />
-
         <View className="h-8" />
       </ScrollView>
     </SafeAreaView>
