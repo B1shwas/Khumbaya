@@ -98,16 +98,34 @@ export default function GuestListScreen() {
   return (
     <SafeAreaView className="flex-1 bg-background-light">
       <View className="flex-1 px-4">
+<<<<<<< HEAD
         <Text className="text-[22px] font-bold text-gray-900 mb-2">Guests</Text>
         <Text className="text-sm text-gray-500 mb-5">
+=======
+        <Text style={{ fontSize: 22, fontWeight: "700", marginBottom: 8 }}>Guests</Text>
+        <Text style={{ fontSize: 14, color: "#6B7280", marginBottom: 20 }}>
+>>>>>>> 0cf33ec (Updating in the guest list screen page)
           Manage your event invitations.
         </Text>
 
         <TouchableOpacity
+<<<<<<< HEAD
           className="bg-primary py-3.5 rounded-xl items-center mb-5"
           onPress={() => setShowAddModal(true)}
         >
           <Text className="text-base font-semibold text-white">Add Guest</Text>
+=======
+          style={{
+            paddingVertical: 14,
+            borderRadius: 12,
+            backgroundColor: "#EE2B8C",
+            alignItems: "center",
+            marginBottom: 20,
+          }}
+          onPress={() => setShowAddModal(true)}
+        >
+          <Text style={{ fontSize: 16, fontWeight: "600", color: "#fff" }}>Add Guest</Text>
+>>>>>>> 0cf33ec (Updating in the guest list screen page)
         </TouchableOpacity>
 
         {isLoading ? (
@@ -120,7 +138,11 @@ export default function GuestListScreen() {
             contentContainerStyle={{ paddingBottom: 20 }}
             showsVerticalScrollIndicator={false}
             ListEmptyComponent={
+<<<<<<< HEAD
               <Text className="text-center text-gray-500 mt-5">
+=======
+              <Text style={{ textAlign: "center", color: "#6B7280", marginTop: 20 }}>
+>>>>>>> 0cf33ec (Updating in the guest list screen page)
                 No guests invited yet.
               </Text>
             }
