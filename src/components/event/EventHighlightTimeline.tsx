@@ -1,8 +1,7 @@
 import { EventHighlight } from "@/src/types";
 import { Ionicons } from "@expo/vector-icons";
-import React from "react";
-import { Text, View } from "react-native";
-
+import { View } from "react-native";
+import { Text } from "../ui/Text";
 interface Props {
   highlights: EventHighlight[];
 }
@@ -14,8 +13,7 @@ const HighlightRow = ({
   item: EventHighlight;
   isLast: boolean;
 }) => (
-  <View className="flex-row gap-3">
-    {/* Timeline axis */}
+  <View className="flex-row gap-3 mt-4">
     <View className="items-center pt-1">
       <View
         className={`items-center justify-center w-8 h-8 rounded-full ${
@@ -35,7 +33,7 @@ const HighlightRow = ({
 
     {/* Content */}
     <View className={isLast ? "flex-1 pb-1" : "flex-1 pb-5"}>
-      <Text className="text-base font-semibold text-gray-900">
+      <Text variant="h2" className="text-base">
         {item.title}
       </Text>
       <Text className="text-sm text-gray-500 mt-0.5">{item.dateLabel}</Text>
@@ -43,7 +41,7 @@ const HighlightRow = ({
   </View>
 );
 
-const EventHighlightTimeline = React.memo(({ highlights }: Props) => (
+const EventHighlightTimeline = ({ highlights }: Props) => (
   <View>
     {highlights.map((item, index) => (
       <HighlightRow
@@ -53,6 +51,6 @@ const EventHighlightTimeline = React.memo(({ highlights }: Props) => (
       />
     ))}
   </View>
-));
+);
 
 export default EventHighlightTimeline;
