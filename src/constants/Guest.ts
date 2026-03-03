@@ -1,6 +1,5 @@
 // Sample data - In production, this would come from the API
 
-import { useGuests, type Guest } from "@/src/features/guests/hooks/useGuests";
 export const SAMPLE_GUESTS: Guest[] = [
   {
     id: "1",
