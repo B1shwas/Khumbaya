@@ -47,7 +47,7 @@ const EVENT_TYPE_TO_BACKEND: Record<EventType, string> = {
 
 export default function EventCreate() {
   const router = useRouter();
-  const { mutate: createEvent, isPending: isCreatingEvent } = useCreateEvent();
+  const { mutateAsync: createEvent, isPending: isCreatingEvent } = useCreateEvent();
 
   const [selectedDateTime, setSelectedDateTime] = useState<Date>(new Date()); // make the date in the thing
   const [formData, setFormData] = useState<EventFormData>({
@@ -113,17 +113,15 @@ export default function EventCreate() {
     console.log(
       `This is the payload in the on success in the backend ${payload.startDateTime}`
     );
-    createEvent(payload, {
-      onSuccess: () => {
-        router.push("/(protected)/(client-tabs)/events");
-      },
-      onError: () => {
-        Alert.alert(
-          "Event creation failed",
-          "Please check your details and try again."
-        );
-      },
-    });
+    try {
+      await createEvent(payload);
+      router.push("/(protected)/(client-tabs)/events");
+    } catch {
+      Alert.alert(
+        "Event creation failed",
+        "Please check your details and try again."
+      );
+    }
   };
 
   const handleBack = () => {

@@ -1,17 +1,16 @@
 import Card from "@/src/components/ui/Card";
-import { EventRole } from "@/src/constants/event";
-import { Event } from "@/src/constants/event";
+import { Event, EventRole } from "@/src/constants/event";
 import { usegetUpcomingEvents } from "@/src/features/events/hooks/use-event";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
-  Image,
-  Pressable,
-  RefreshControl,
-  ScrollView,
-  Text,
-  View,
+    Image,
+    Pressable,
+    RefreshControl,
+    ScrollView,
+    Text,
+    View,
 } from "react-native";
 
 interface UpcomingEventsTabProps {
@@ -95,10 +94,7 @@ const UpcomingEventItem = ({
   );
 };
 
-export const UpcomingEventsTab = ({ isActive }: UpcomingEventsTabProps) => {
-  if (!isActive) {
-    return null;
-  }
+export const UpcomingEventsTab = ({ isActive }: UpcomingEventsTabProps ) => {
   const router = useRouter();
   const [refreshing, setRefreshing] = useState(false);
   const {

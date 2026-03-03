@@ -2,6 +2,7 @@ import { Event } from "@/src/constants/event";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   acceptRsvpInvitationApi,
+  CREATEEVENT,
   createEventApi,
   getCompletedEventsApi,
   getInvitedEvent,
@@ -12,21 +13,78 @@ export const useCreateEvent = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: createEventApi,
-    onMutate: async (newEvent) => {
-      await queryClient.cancelQueries({ queryKey: ["events"] });
-      const previousEvents = queryClient.getQueryData(["events"]);
-      queryClient.setQueryData(["events"], (old: any[] | undefined) =>
-        Array.isArray(old) ? [...old, newEvent] : [newEvent]
+    onMutate: async (newEvent: CREATEEVENT) => {
+      await Promise.all([
+        queryClient.cancelQueries({ queryKey: ["events/upcoming"] }),
+        queryClient.cancelQueries({ queryKey: ["events/with-role"] }),
+      ]);
+
+      const previousUpcomingEvents = queryClient.getQueryData<Event[]>([
+        "events/upcoming",
+      ]);
+      const previousEventsWithRole = queryClient.getQueryData<Event[]>([
+        "events/with-role",
+      ]);
+
+      const startDate = newEvent.startDateTime
+        ? new Date(newEvent.startDateTime)
+        : new Date();
+      const endDate = newEvent.endDateTime
+        ? new Date(newEvent.endDateTime)
+        : startDate;
+
+      const optimisticEvent: Event = {
+        id: `temp-${Date.now()}`,
+        title: newEvent.title ?? "Untitled Event",
+        startDateTime: startDate.toISOString(),
+        endDateTime: endDate.toISOString(),
+        location: newEvent.location ?? "TBD",
+        venue: newEvent.location ?? "TBD",
+        imageUrl: newEvent.imageUrl ?? "",
+        role: "Organizer",
+        status: "upcoming",
+        date: startDate.toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+        }),
+        time: startDate.toLocaleTimeString("en-US", {
+          hour: "numeric",
+          minute: "2-digit",
+        }),
+      };
+
+      queryClient.setQueryData<Event[]>(["events/upcoming"], (old) =>
+        Array.isArray(old) ? [optimisticEvent, ...old] : [optimisticEvent]
       );
-      return { previousEvents };
+
+      queryClient.setQueryData<Event[]>(["events/with-role"], (old) =>
+        Array.isArray(old) ? [optimisticEvent, ...old] : [optimisticEvent]
+      );
+
+      return { previousUpcomingEvents, previousEventsWithRole };
     },
     onError: (_error, _newEvent, context) => {
-      if (context?.previousEvents) {
-        queryClient.setQueryData(["events"], context.previousEvents);
+      if (context?.previousUpcomingEvents) {
+        queryClient.setQueryData(
+          ["events/upcoming"],
+          context.previousUpcomingEvents
+        );
+      }
+
+      if (context?.previousEventsWithRole) {
+        queryClient.setQueryData(
+          ["events/with-role"],
+          context.previousEventsWithRole
+        );
       }
     },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["events"] });
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["events/upcoming"] }),
+        queryClient.invalidateQueries({ queryKey: ["events/completed"] }),
+        queryClient.invalidateQueries({ queryKey: ["events/with-role"] }),
+      ]);
     },
   });
 };
@@ -94,7 +152,8 @@ export const useAcceptRsvpInvitation = () => {
     mutationFn: acceptRsvpInvitationApi,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["rsvp-invitations"] });
-      queryClient.invalidateQueries({ queryKey: ["events"] });
+      queryClient.invalidateQueries({ queryKey: ["events/upcoming"] });
+      queryClient.invalidateQueries({ queryKey: ["events/completed"] });
       queryClient.invalidateQueries({ queryKey: ["events/with-role"] });
     },
   });
