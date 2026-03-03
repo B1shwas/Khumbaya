@@ -2,7 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { Text, TouchableOpacity, View } from "react-native";
 
 const SERVICES = [
-  { icon: "checkmark-done", label: "Checklist", color: "#10b981" },
+  { icon: "checkmark", label: "Checklist", color: "#10b981" },
   { icon: "wallet", label: "Budget", color: "#3b82f6" },
   { icon: "people", label: "Guest List", color: "#8b5cf6" },
   { icon: "time", label: "Timeline", color: "#f59e0b" },
@@ -19,7 +19,7 @@ const QuickServices = () => {
         {SERVICES.map((service, index) => (
           <TouchableOpacity
             key={index}
-            className="bg-white w-[48%] mb-4 p-4 rounded-2xl flex-row items-center"
+            className="bg-white w-[48%] mb-4 p-4 rounded-md flex-row items-center"
             style={{
               shadowColor: "#000",
               shadowOpacity: 0.05,
