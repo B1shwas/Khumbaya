@@ -22,7 +22,7 @@ const EventDetail = ({
     (e: Event) => String(e.id) === String(eventId)
   );
   // Fallback shape so UI never crashes even if event not found
-  const event = foundEvent ?? {
+  const event = foundEvent ?? ({
     id: eventId ?? "0",
     title: "Event Details",
     date: "—",
@@ -32,6 +32,8 @@ const EventDetail = ({
     role: "Organizer" as const,
     status: "upcoming" as const,
     time: "",
+    startDateTime: "",
+    endDateTime: "",
     days: 0,
     hours: 0,
     minutes: 0,
@@ -40,7 +42,7 @@ const EventDetail = ({
     tasks: { pending: 0 },
     vendors: { booked: 0, pending: 0 },
     nextTask: "",
-  };
+  } as Event);
 
   const manageActions = [
     {

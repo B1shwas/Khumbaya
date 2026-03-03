@@ -49,13 +49,8 @@ export default function EventsPage() {
       return event.status;
     }
 
-    const eventWithDates = event as Event & {
-      startDate?: string;
-      endDate?: string;
-    };
-
-    const endDate = eventWithDates.endDate
-      ? new Date(eventWithDates.endDate)
+    const endDate = event.endDateTime
+      ? new Date(event.endDateTime)
       : undefined;
 
     if (endDate && !Number.isNaN(endDate.getTime()) && endDate < new Date()) {
@@ -68,15 +63,16 @@ export default function EventsPage() {
   const filteredEvents =
     activeTab === "invited"
       ? (invitedEventsData as Event[]).filter(
-          (event) => getEventStatus(event) === "invited"
-        )
+        (event) => getEventStatus(event) === "invited"
+      )
       : (eventsData as Event[]).filter(
-          (event) => getEventStatus(event) === activeTab
-        );
+        (event) => getEventStatus(event) === activeTab
+      );
 
   const isLoading =
     activeTab === "invited" ? isInvitedLoading : isEventsLoading;
   const isError = activeTab === "invited" ? isInvitedError : isEventsError;
+
 
   const emptyMessage: Record<EventTab, string> = {
     upcoming: "Create your first event to get started",

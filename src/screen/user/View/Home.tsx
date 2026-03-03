@@ -91,9 +91,9 @@ export default function HomePage() {
 
   return (
     <>
-      <SafeAreaView style={styles.header} className="px-4">
-        <View style={styles.headerContent}>
-          <View>
+      <SafeAreaView style={styles.header} className="px-4    border-b-3 border-black">
+        <View className="flex-row items-center justify-between ">
+          <View >
             <Text style={styles.greeting}>
               Hi, {user?.username || user?.name || "Guest"} 👋
             </Text>
@@ -120,7 +120,7 @@ export default function HomePage() {
             <QuickServices />
 
             {/* Your Events Section */}
-            <SectionHeader title="Your Events" />
+            {/* <SectionHeader title="Your Events" /> */}
             {/* <FlatList
               data={EventList}
               renderItem={renderEventItem}
@@ -133,6 +133,7 @@ export default function HomePage() {
             {/* Popular Venues Section */}
             <SectionHeader title="Popular Venues" onPress={navigateToVenues} />
             <FlatList
+              className="rounded-md mt-4"
               data={VENUES}
               renderItem={renderVenueItem}
               keyExtractor={(item) => item.id}
@@ -167,8 +168,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#f8f6f7",
   },
   header: {
-    paddingHorizontal: 16,
-    paddingVertical: 16,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
     backgroundColor: "white",
   },
   headerContent: {

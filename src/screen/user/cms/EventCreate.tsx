@@ -2,9 +2,10 @@ import { DatePicker } from '@/components/nativewindui/DatePicker';
 import { CREATEEVENT } from "@/src/features/events/api/events.service";
 import { useCreateEvent } from "@/src/features/events/hooks/use-event";
 import { Ionicons } from "@expo/vector-icons";
+import { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { useRouter } from "expo-router";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   Alert,
   Image,
@@ -23,7 +24,7 @@ import {
 interface EventFormData {
   name: string;
   eventType: string;
-  date: Date | null;
+  startdateTime: Date | undefined;
   coverImage: string | null;
 }
 
@@ -45,74 +46,77 @@ const EVENT_TYPE_TO_BACKEND: Record<EventType, string> = {
   Other: "OTHER",
 };
 
-// Calendar helper functions
-const getDaysInMonth = (year: number, month: number): number => {
-  return new Date(year, month + 1, 0).getDate();
-};
-
-const getFirstDayOfMonth = (year: number, month: number): number => {
-  return new Date(year, month, 1).getDay();
-};
-
-const MONTHS = [
-  "January",
-  "February",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December",
-];
-
 export default function EventCreate() {
   const router = useRouter();
   const { mutate: createEvent, isPending: isCreatingEvent } = useCreateEvent();
 
-  // Form state
+  const [selectedDateTime, setSelectedDateTime] = useState<Date>(  // make the date in the thing  
+    new Date()
+  );
   const [formData, setFormData] = useState<EventFormData>({
     name: "Aisha & Omar's Wedding",
     eventType: "Wedding" as EventType,
-    date: new Date(2024, 5, 16), // June 16, 2024
-    coverImage: null,
+    startdateTime: selectedDateTime, // June 16, 2024
+    coverImage: null, // handle the image uplaoding logic
   });
 
-  // Calendar state
-  const [currentMonth, setCurrentMonth] = useState(5); // June 2024
-  const [currentYear, setCurrentYear] = useState(2024);
-  const [selectedDate, setSelectedDate] = useState(new Date(2024, 5, 16));
-  // Animation values
   const scale = useSharedValue(1);
 
-  const handleNextStep = async () => {
+  const updateSelectedDateTime = (nextDateTime: Date) => {
+    setSelectedDateTime(nextDateTime);
+    setFormData((prev) => ({ ...prev, date: nextDateTime }));
+  };
+
+  const handleDateChange = (
+    event: DateTimePickerEvent,
+    pickedDate?: Date
+  ) => {
+    if (event.type === "dismissed" || !pickedDate) return;
+
+    const next = new Date(selectedDateTime);
+    next.setFullYear(
+      pickedDate.getFullYear(),
+      pickedDate.getMonth(),
+      pickedDate.getDate()
+    );
+    updateSelectedDateTime(next);
+  };
+
+  const handleTimeChange = (
+    event: DateTimePickerEvent,
+    pickedTime?: Date
+  ) => {
+    if (event.type === "dismissed" || !pickedTime) return;
+
+    const next = new Date(selectedDateTime);
+    next.setHours(
+      pickedTime.getHours(),
+      pickedTime.getMinutes(),
+      pickedTime.getSeconds(),
+      0
+    );
+    updateSelectedDateTime(next);
+  };
+
+  const handleSubmit = async () => {
     //validaton in the event creation in this
     if (!formData.name.trim()) {
       Alert.alert("Missing event name", "Please enter your event name.");
       return;
     }
 
-    if (!formData.date) {
+    if (!formData.startdateTime) {
       Alert.alert("Missing event date", "Please select your event date.");
       return;
     }
 
-    const selectedDate = formData.date;
-    const startDate = new Date(selectedDate);
-    startDate.setHours(10, 0, 0, 0);
-    const endDate = new Date(selectedDate);
-    endDate.setHours(22, 0, 0, 0);
 
     const payload: CREATEEVENT = {
       title: formData.name.trim(),
       description: `${formData.eventType} event`,
       type: EVENT_TYPE_TO_BACKEND[formData.eventType as EventType],
-      startDate: startDate.toISOString(),
-      endDate: endDate.toISOString(),
-      date: selectedDate.toDateString(),
+      startDateTime: formData.startdateTime,
+      endDateTime: new Date(),
       budget: 0,
       theme: "Classic",
       parentId: 1,
@@ -123,6 +127,7 @@ export default function EventCreate() {
         "https://images.unsplash.com/photo-1519741497674-611481863552?w=1200&q=80",
     };
 
+    console.log(`This is the payload in the on success in the backend ${payload.startDateTime}`);
     createEvent(payload, {
       onSuccess: () => {
         router.push("/(protected)/(client-tabs)/events");
@@ -148,107 +153,11 @@ export default function EventCreate() {
     setFormData((prev) => ({ ...prev, eventType: type }));
   };
 
-  const handleDateSelect = (day: number) => {
-    const newDate = new Date(currentYear, currentMonth, day);
-    setSelectedDate(newDate);
-    setFormData((prev) => ({ ...prev, date: newDate }));
-  };
-
-  const handleMonthChange = (direction: "prev" | "next") => {
-    if (direction === "prev") {
-      if (currentMonth === 0) {
-        setCurrentMonth(11);
-        setCurrentYear((prev) => prev - 1);
-      } else {
-        setCurrentMonth((prev) => prev - 1);
-      }
-    } else {
-      if (currentMonth === 11) {
-        setCurrentMonth(0);
-        setCurrentYear((prev) => prev + 1);
-      } else {
-        setCurrentMonth((prev) => prev + 1);
-      }
-    }
-  };
 
   const handleCoverPress = () => {
     // TODO: Backend Integration - Image picker
     console.log("Open image picker for cover image");
   };
-
-  const renderCalendarDays = () => {
-    const daysInMonth = getDaysInMonth(currentYear, currentMonth);
-    const firstDay = getFirstDayOfMonth(currentYear, currentMonth);
-    const days: React.ReactNode[] = [];
-
-    // Previous month padding
-    const prevMonthDays =
-      currentMonth === 0
-        ? getDaysInMonth(currentYear - 1, 11)
-        : getDaysInMonth(currentYear, currentMonth - 1);
-
-    for (let i = firstDay - 1; i >= 0; i--) {
-      days.push(
-        <Text
-          key={`prev-${i}`}
-          className="w-10 text-center leading-10 text-sm font-medium text-gray-300"
-        >
-          {prevMonthDays - i}
-        </Text>
-      );
-    }
-
-    // Current month days
-    for (let day = 1; day <= daysInMonth; day++) {
-      const isSelected =
-        selectedDate.getDate() === day &&
-        selectedDate.getMonth() === currentMonth &&
-        selectedDate.getFullYear() === currentYear;
-
-      const isToday =
-        new Date().getDate() === day &&
-        new Date().getMonth() === currentMonth &&
-        new Date().getFullYear() === currentYear;
-
-      const dayContainerClass = isSelected
-        ? "w-10 h-10 items-center justify-center rounded-full bg-primary shadow-lg shadow-primary/30"
-        : "w-10 h-10 items-center justify-center rounded-full";
-
-      const dayTextClass = isSelected
-        ? "text-sm font-semibold text-white"
-        : isToday
-          ? "text-sm font-semibold text-primary"
-          : "text-sm font-medium text-gray-900";
-
-      days.push(
-        <TouchableOpacity
-          key={`current-${day}`}
-          onPress={() => handleDateSelect(day)}
-          className={dayContainerClass}
-        >
-          <Text className={dayTextClass}>{day}</Text>
-        </TouchableOpacity>
-      );
-    }
-
-    // Next month padding
-    const totalCells = firstDay + daysInMonth;
-    const remainingCells = 42 - totalCells;
-    for (let i = 1; i <= remainingCells; i++) {
-      days.push(
-        <Text
-          key={`next-${i}`}
-          className="w-10 text-center leading-10 text-sm font-medium text-gray-300"
-        >
-          {i}
-        </Text>
-      );
-    }
-
-    return days;
-  };
-
   return (
     <View className="flex-1 bg-[#f8f6f7]">
       <KeyboardAvoidingView
@@ -273,7 +182,7 @@ export default function EventCreate() {
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
-          {/* Cover Image Upload */}
+          {/* Cover Image Upload , make the image uploading in the application*/}
           <View className="px-4 pt-3">
             <TouchableOpacity
               onPress={handleCoverPress}
@@ -343,15 +252,21 @@ export default function EventCreate() {
             </View>
           </View>
 
-                  
-          <View className='mt-7'>
+
+          <View className="mt-7">
             <DatePicker
-              value={selectedDate}
-              mode="datetime"
-              onChange={(ev:any) => {
-                  setSelectedDate(new Date(ev.nativeEvent.timestamp));
-              }}
-              />
+              value={selectedDateTime}
+              mode="date"
+              onChange={handleDateChange}
+              materialDateLabel="Event date"
+            />
+
+            <DatePicker
+              value={selectedDateTime}
+              mode="time"
+              onChange={handleTimeChange}
+              materialTimeLabel="Event time"
+            />
           </View>
 
 
@@ -362,7 +277,7 @@ export default function EventCreate() {
         {/* Sticky Footer */}
         <View className="absolute bottom-0 left-0 right-0 p-6 pb-8  max-w-[480px] self-center w-full">
           <TouchableOpacity
-            onPress={handleNextStep}
+            onPress={handleSubmit}
             className="w-full bg-[#ee2b8c] flex-row items-center justify-center gap-2 py-4 rounded-2xl shadow-lg shadow-[#ee2b8c]/25"
             activeOpacity={0.8}
             disabled={isCreatingEvent}

@@ -1,5 +1,4 @@
 import { Image, Text, TouchableOpacity, View } from "react-native";
-
 interface GuestCardProps {
   guest: {
     user: {
@@ -17,8 +16,10 @@ interface GuestCardProps {
 }
 
 export default function GuestCard({ guest, onPress }: GuestCardProps) {
+  const displayStatus = (guest.status || guest.rsvp_status || "Pending").trim();
+
   const getStatusColor = () => {
-    switch (guest.status?.toLowerCase()) {
+    switch (displayStatus.toLowerCase()) {
       case "accepted":
       case "going":
         return "#10B981";
@@ -33,7 +34,7 @@ export default function GuestCard({ guest, onPress }: GuestCardProps) {
   };
 
   const getStatusBgColor = () => {
-    switch (guest.status?.toLowerCase()) {
+    switch (displayStatus.toLowerCase()) {
       case "accepted":
       case "going":
         return "rgba(16, 185, 129, 0.1)";
@@ -56,82 +57,67 @@ export default function GuestCard({ guest, onPress }: GuestCardProps) {
       .slice(0, 2)
     : "GU";
 
+  const displayName = guest.user.username?.trim() || guest.user.email || "Guest";
+  const relation = guest.user.relation?.trim();
+  const phone = guest.user.phone?.trim();
+
   return (
-    <TouchableOpacity
-      style={{
-        backgroundColor: "#fff",
-        borderRadius: 16,
-        padding: 16,
-        marginBottom: 12,
-        borderWidth: 1,
-        borderColor: "#E5E7EB",
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.05,
-        shadowRadius: 8,
-      }}
-      onPress={onPress}
-      activeOpacity={0.7}
-    >
-      <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
-        {/* Avatar */}
-        {guest.user.photo ? (
-          <Image
-            source={{ uri: guest.user.photo }}
-            style={{ width: 48, height: 48, borderRadius: 24 }}
-          />
-        ) : (
+    <View className="mb-3 rounded-2xl bg-white">
+      <TouchableOpacity
+        onPress={onPress}
+        disabled={!onPress}
+        activeOpacity={onPress ? 0.7 : 1}
+        className="rounded-2xl"
+      >
+        <View className="min-h-[86px] flex-row items-center gap-3 px-4 py-3">
+          {guest.user.photo ? (
+            <Image
+              source={{ uri: guest.user.photo }}
+              className="h-12 w-12 rounded-full"
+            />
+          ) : (
+            <View className="h-12 w-12 items-center justify-center rounded-full bg-[#EE2B8C]">
+              <Text className="text-base font-semibold text-white">{initials}</Text>
+            </View>
+          )}
+
+          <View className="flex-1">
+            <Text numberOfLines={1} className="text-base font-semibold text-gray-900">
+              {displayName}
+            </Text>
+
+            {relation ? (
+              <Text numberOfLines={1} className="mt-0.5 text-xs text-gray-500">
+                {relation}
+              </Text>
+            ) : null}
+
+            {phone ? (
+              <Text numberOfLines={1} className="mt-0.5 text-xs text-gray-500">
+                {phone}
+              </Text>
+            ) : null}
+          </View>
+
           <View
             style={{
-              width: 48,
-              height: 48,
-              borderRadius: 24,
-              backgroundColor: "#EE2B8C",
-              alignItems: "center",
-              justifyContent: "center",
+              paddingHorizontal: 10,
+              paddingVertical: 4,
+              borderRadius: 12,
+              backgroundColor: getStatusBgColor(),
+              maxWidth: 120,
             }}
           >
-            <Text style={{ color: "#fff", fontWeight: "600", fontSize: 16 }}>
-              {initials}
+            <Text
+              numberOfLines={1}
+              className="text-xs font-semibold"
+              style={{ color: getStatusColor() }}
+            >
+              {displayStatus}
             </Text>
           </View>
-        )}
-
-        {/* Info */}
-        <View style={{ flex: 1 }}>
-          <Text style={{ fontSize: 16, fontWeight: "600", color: "#111827" }}>
-            {guest.user.username}
-          </Text>
-
-          {guest.user.relation && guest.user.relation.trim() !== "" && (
-            <Text style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}>
-              {guest.user.relation.trim()}
-            </Text>
-          )}
-
-          {guest.user.phone && (
-            <Text style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}>
-              {guest.user.phone}
-            </Text>
-          )}
         </View>
-
-        {/* Status Badge */}
-        <View
-          style={{
-            paddingHorizontal: 10,
-            paddingVertical: 4,
-            borderRadius: 12,
-            backgroundColor: getStatusBgColor(),
-          }}
-        >
-          <Text
-            style={{ fontSize: 12, fontWeight: "600", color: getStatusColor() }}
-          >
-            {guest.status || "Pending"}
-          </Text>
-        </View>
-      </View>
-    </TouchableOpacity>
+      </TouchableOpacity>
+    </View>
   );
 }

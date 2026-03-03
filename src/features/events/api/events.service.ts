@@ -5,9 +5,8 @@ export interface CREATEEVENT {
   title: string;
   description?: string;
   type?: string;
-  startDate?: string;
-  date?: string;
-  endDate?: string;
+  startDateTime?: Date;
+  endDateTime?: Date;
   budget?: number;
   theme?: string;
   parentId?: number;
@@ -21,9 +20,8 @@ export interface EVENT {
   title: string;
   description?: string;
   type?: string;
-  startDate?: string;
-  date?: string;
-  endDate?: string;
+  startDateTime?: string;
+  endDateTime?: string;
   budget?: number;
   theme?: string;
   parentId?: number;
@@ -107,6 +105,8 @@ const mapInvitationToEvent = (item: InvitationItem): Event => {
     id: String(item.event.id ?? item.invitation.eventId ?? item.invitation.id),
     invitationId: item.invitation.id,
     title: item.event.title ?? "Untitled Event",
+    startDateTime: item.event.startDate ?? "",
+    endDateTime: item.event.endDate ?? "",
     date: formatDate(item.event.startDate),
     time: formatTime(item.event.startDate, item.event.startTime),
     location: item.event.location ?? "Location TBA",
@@ -135,11 +135,20 @@ export const getEventsApi = async ({
     return payload.items.map((item: any, index: number) => {
       // Merge properties from the indexed key (e.g., payload["0"]) if it exists
       const extraData = payload[index.toString()] || {};
-      return {
+      const mergedItem = {
         ...extraData, // Take properties from indexed key first as it seems more complete
         ...item, // Then overwrite with item properties if any
-        role: item.role || extraData.role || "Guest", // Ensure role is explicitly set
       };
+
+      const startDateTime = mergedItem.startDateTime || mergedItem.startDate;
+
+      return {
+        ...mergedItem,
+        id: String(mergedItem.id),
+        date: formatDate(startDateTime),
+        time: formatTime(startDateTime),
+        role: mergedItem.role || "Guest", // Ensure role is explicitly set
+      } as Event;
     });
   }
   return [];

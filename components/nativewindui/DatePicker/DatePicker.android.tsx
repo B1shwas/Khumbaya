@@ -1,11 +1,10 @@
 import DateTimePicker, { DateTimePickerAndroid, DateTimePickerEvent } from '@react-native-community/datetimepicker';
+
 import * as React from 'react';
 import { Text, View } from 'react-native';
 
 import { Button } from "@/src/components/ui/Button";
 import { cn } from '@/src/utils/cn';
-import Card from '@/src/components/ui/Card';
-
 export function DatePicker(
   props: Omit<React.ComponentProps<typeof DateTimePicker>, 'onChange'> & {
     mode: 'date' | 'time' | 'datetime';
@@ -54,7 +53,7 @@ export function DatePicker(
           <Text className={cn('text-xs font-medium text-muted-foreground tracking-wide uppercase pl-1 text-center ', props.materialTimeLabelClassName)}>
             {props.materialTimeLabel ?? 'Time'}
           </Text>
-         
+
 
           <Button
             variant="outline"
@@ -66,7 +65,7 @@ export function DatePicker(
               }).format(props.value)}
             </Text>
           </Button>
-         
+
         </View>
       )}
 

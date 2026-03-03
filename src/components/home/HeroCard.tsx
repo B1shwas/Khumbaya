@@ -9,11 +9,11 @@ const HeroCard = () => {
         source={{
           uri: "https://images.unsplash.com/photo-1519741497674-611481863552?w=800&q=80",
         }}
-        imageStyle={{ borderRadius: 20 }}
-        className="h-48 justify-end overflow-hidden"
+     
+        className="h-48 justify-end overflow-hidden rounded-md "
       >
         {/* Dark overlay */}
-        <View className="absolute inset-0 bg-black/40 rounded-2xl" />
+        <View className="absolute inset-0 bg-black/40 rounded-md " />
 
         <View className="p-4">
           <Text className="text-white text-xl font-bold">
@@ -30,7 +30,7 @@ const HeroCard = () => {
                 "/(protected)/(client-stack)/events/createevent" as RelativePathString
               )
             }
-            className="bg-pink-500 mt-3 px-4 py-2 rounded-full self-start flex-row items-center"
+            className="bg-pink-500 mt-3 px-4 py-2 rounded-md h-[35%] self-start flex-row items-center"
           >
             <Ionicons name="add" size={18} color="white" />
             <Text className="text-white ml-2 font-semibold">
