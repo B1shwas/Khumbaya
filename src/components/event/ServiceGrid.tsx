@@ -21,7 +21,7 @@ const ServiceChip = ({ service }: { service: EventService }) => (
 );
 
 const ServiceGrid = React.memo(({ services }: Props) => (
-  <View className="flex-row gap-3">
+  <View className="flex-row gap-3 my-4">
     {services.map((s) => (
       <ServiceChip key={s.id} service={s} />
     ))}

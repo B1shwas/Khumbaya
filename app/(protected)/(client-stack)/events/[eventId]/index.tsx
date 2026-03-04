@@ -1,15 +1,24 @@
-// import { eventsData } from "@/src/constants/event";
 import { Event } from "@/src/constants/event";
 import { useGetEventWithRole } from "@/src/features/events/hooks/use-event";
 import { Redirect, useLocalSearchParams } from "expo-router";
+import { ActivityIndicator, View } from "react-native";
+
 export default function EventRoleRedirect() {
   const { eventId } = useLocalSearchParams();
-  const { data: eventsData = [] } = useGetEventWithRole();
+  const { data: eventsData = [], isLoading } = useGetEventWithRole();
+
+  if (isLoading) {
+    return (
+      <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+        <ActivityIndicator size="large" color="#ee2b8c" />
+      </View>
+    );
+  }
 
   const event = eventsData.find((e: Event) => String(e.id) === String(eventId));
-  const role = event?.role || "Organizer"; // Default to Organizer if role is not found
+  const role = event?.role;
 
-  if (!eventsData || !role) {
+  if (!role) {
     return <Redirect href="/(protected)/(client-tabs)/events" />;
   }
 
@@ -28,7 +37,6 @@ export default function EventRoleRedirect() {
       );
     case "Guest":
       return (
-        // Route group syntax in href navigates to (guest)/index.tsx
         <Redirect
           href={`/(protected)/(client-stack)/events/${eventId}/(guest)/`}
         />

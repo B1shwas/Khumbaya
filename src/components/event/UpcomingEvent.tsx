@@ -1,98 +1,14 @@
-import Card from "@/src/components/ui/Card";
-import { Event, EventRole } from "@/src/constants/event";
+import { Event } from "@/src/constants/event";
 import { usegetUpcomingEvents } from "@/src/features/events/hooks/use-event";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import {
-  Image,
-  Pressable,
-  RefreshControl,
-  ScrollView,
-  Text,
-  View,
-} from "react-native";
+import { RefreshControl, ScrollView, Text, View } from "react-native";
+import { Event_WITH_ROLE } from "./EventwithRole";
 
 interface UpcomingEventsTabProps {
   isActive: boolean;
 }
-
-const roleConfig: Record<
-  EventRole,
-  { wrapperClass: string; textClass: string }
-> = {
-  Organizer: {
-    wrapperClass: "bg-purple-100 px-2 py-1 rounded-full",
-    textClass: "text-xs font-medium text-purple-700",
-  },
-  Vendor: {
-    wrapperClass: "bg-blue-100 px-2 py-1 rounded-full",
-    textClass: "text-xs font-medium text-blue-700",
-  },
-  Guest: {
-    wrapperClass: "bg-green-100 px-2 py-1 rounded-full",
-    textClass: "text-xs font-medium text-green-700",
-  },
-};
-
-const defaultRoleStyle = {
-  wrapperClass: "bg-gray-100 px-2 py-1 rounded-full",
-  textClass: "text-xs font-medium text-gray-700",
-};
-const UpcomingEventItem = ({
-  event,
-  onPress,
-}: {
-  event: Event;
-  onPress: () => void;
-}) => {
-
-  const roleStyle = roleConfig[event.role as EventRole] ?? defaultRoleStyle;
-  const roleLabel = event.role ?? "Unknown";
-  const { wrapperClass, textClass } = roleStyle;
-  return (
-    <Card className="my-2">
-      <Pressable
-        className="flex-row p-3 rounded-md overflow-hidden"
-        onPress={onPress}
-      >
-        <View className="w-20 h-20 rounded-lg overflow-hidden">
-          <Image source={{ uri: event.imageUrl }} className="w-full h-full" />
-        </View>
-        <View className="flex-1 ml-3 justify-between">
-          <View className="flex-row justify-between items-start">
-            <Text
-              className="font-jakarta-bold  text-text-light  text-nowrap flex-1 mr-2"
-              numberOfLines={2}
-            >
-              {event.title}
-            </Text>
-            <View className={wrapperClass}>
-              <Text className={textClass}>{roleLabel}</Text>
-            </View>
-          </View>
-          <View>
-            <View className="flex-row items-center mt-2">
-              <Ionicons name="location" size={14} color="#6B7280" />
-              <Text
-                className="font-jakarta text-[13px] text-text-tertiary ml-1"
-                numberOfLines={1}
-              >
-                {event.location}
-              </Text>
-            </View>
-            <View className="flex-row items-center mt-1">
-              <Ionicons name="calendar" size={14} color={"#ee2b8c"} />
-              <Text className="font-jakarta-semibold text-[13px] text-primary ml-1">
-                {event.date} • {event.time}
-              </Text>
-            </View>
-          </View>
-        </View>
-      </Pressable>
-    </Card>
-  );
-};
 
 export const UpcomingEventsTab = ({ isActive }: UpcomingEventsTabProps) => {
   const router = useRouter();
@@ -118,11 +34,9 @@ export const UpcomingEventsTab = ({ isActive }: UpcomingEventsTabProps) => {
   };
   useEffect(() => {
     setMounted(true);
-  })
+  });
   if (!isActive && !mounted) {
-    return <>
-      Loading
-    </>;
+    return <>Loading</>;
   }
   return (
     <ScrollView
@@ -147,12 +61,11 @@ export const UpcomingEventsTab = ({ isActive }: UpcomingEventsTabProps) => {
         </View>
       ) : events.length > 0 ? (
         events.map((event) => (
-          <UpcomingEventItem
+          <Event_WITH_ROLE
             key={event.id}
             event={event}
-            onPress={() => {
-              router.push(`/(protected)/(client-stack)/events/${event.id}`);
-            }}
+            onPress={() => {}}
+            asGuest={event.role === "Guest"}
           />
         ))
       ) : (

@@ -4,14 +4,8 @@ import ServiceGrid from "@/src/components/event/ServiceGrid";
 import { Text } from "@/src/components/ui/Text";
 import { EventHighlight, EventService } from "@/src/types";
 import { Ionicons } from "@expo/vector-icons";
-import { router, useLocalSearchParams } from "expo-router";
-import {
-  Image,
-  Pressable,
-  ScrollView,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { useLocalSearchParams } from "expo-router";
+import { Image, ScrollView, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const DEFAULT_HIGHLIGHTS: EventHighlight[] = [
@@ -90,26 +84,11 @@ export default function GuestEventDetails() {
 
   return (
     <SafeAreaView className="flex-1 bg-background-light" edges={["top"]}>
-      <View className="flex-row items-center px-4 py-3 border-b border-slate-100 bg-white">
-        <Pressable
-          className="w-10 h-10 items-center justify-center rounded-xl absolute left-4 z-10"
-          onPress={() => router.back()}
-          accessibilityRole="button"
-          accessibilityLabel="Go back"
-        >
-          <Ionicons name="arrow-back" size={22} color="#1e293b" />
-        </Pressable>
-
-        <Text variant="h1" className="flex-1 text-center text-lg">
-          Event Details
-        </Text>
-      </View>
-
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerClassName="pb-10"
       >
-        <View className="items-center pt-6 pb-2 px-5">
+        <View className="items-center  pb-2 px-5">
           <View className="w-32 h-32 rounded-full overflow-hidden border-4 border-pink-100">
             {imageUrl ? (
               <Image
