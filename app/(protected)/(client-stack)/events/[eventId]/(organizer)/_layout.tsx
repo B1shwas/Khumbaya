@@ -3,15 +3,23 @@ import { Stack } from "expo-router";
 export default function OrganizerEventDetailLayout() {
   return (
     <Stack
-      screenOptions={{ headerShown: false, animation: "slide_from_right" }}
+      screenOptions={{
+        animation: "slide_from_right",
+        headerShown: true,
+        headerTitleAlign: "center",
+        headerTitleStyle: {
+          fontFamily: "PlusJakartaSans-Bold",
+          fontSize: 18,
+        },
+      }}
     >
-      <Stack.Screen name="index" />
-      <Stack.Screen name="budget" />
-      <Stack.Screen name="gallery" />
-      <Stack.Screen name="guests" />
-      <Stack.Screen name="addguest" />
-      <Stack.Screen name="timeline" />
-      <Stack.Screen name="vendor" />
+      <Stack.Screen name="index" options={{ title: "Event Details" }} />
+      <Stack.Screen name="budget" options={{ title: "Budget" }} />
+      <Stack.Screen name="gallery" options={{ title: "Gallery" }} />
+      <Stack.Screen name="guests" options={{ title: "Guest Management" }} />
+      <Stack.Screen name="addguest" options={{ title: "Add Guest" }} />
+      <Stack.Screen name="timeline" options={{ title: "Timeline" }} />
+      <Stack.Screen name="vendor" options={{ title: "Vendors" }} />
     </Stack>
   );
 }

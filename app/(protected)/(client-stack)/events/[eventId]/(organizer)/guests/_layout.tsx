@@ -3,11 +3,18 @@ import { Stack } from "expo-router";
 export default function EventGuestManagementLayout() {
   return (
     <Stack
-      screenOptions={{ headerShown: false, animation: "slide_from_right" }}
+      screenOptions={{
+        animation: "slide_from_right",
+        headerShown: true,
+        headerTitleAlign: "center",
+        headerTitleStyle: {
+          fontFamily: "PlusJakartaSans-Bold",
+          fontSize: 18,
+        },
+      }}
     >
-        <Stack.Screen name="index" />
-        <Stack.Screen name="[id]" />
-
+      <Stack.Screen name="index" options={{ title: "Guest Management" }} />
+      <Stack.Screen name="[id]" options={{ title: "Guest Details" }} />
     </Stack>
   );
 }
