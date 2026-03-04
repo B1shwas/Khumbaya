@@ -1,104 +1,135 @@
-import { useLocalSearchParams } from "expo-router";
+import { cn } from "@/src/utils/cn";
+import { MaterialIcons } from "@expo/vector-icons";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useMemo, useState } from "react";
 import {
-  Alert,
   FlatList,
-  Modal,
+  Pressable,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
-import { useGetInvitationsForEvent, useInviteGuest } from "./api/use-guests";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useGetInvitationsForEvent } from "./api/use-guests";
 import GuestCard from "./components/GuestCard";
 
+type GuestFilterTab = "all" | "accepted" | "pending";
+
+
 export default function GuestListScreen() {
+  const router = useRouter();
   const params = useLocalSearchParams();
 
+
+  const onPress = (guestId: number) => {
+    router.push(`/(protected)/(client-stack)/events/${eventId}/(organizer)/guests/${guestId}/guest-details`);
+  }
   const eventId = useMemo(() => {
     const raw = Array.isArray(params.eventId) ? params.eventId[0] : params.eventId;
     const parsed = raw ? Number(raw) : NaN;
     return Number.isFinite(parsed) ? parsed : null;
   }, [params.eventId]);
 
-  const inviteGuestMutation = useInviteGuest();
   const { data: invitations, isLoading } = useGetInvitationsForEvent(eventId);
 
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [fullName, setFullName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [relation, setRelation] = useState("");
+  const [activeTab, setActiveTab] = useState<GuestFilterTab>("all");
+  const openAddGuestScreen = useCallback(() => {
+    if (!eventId) return;
+    router.push(`/(protected)/(client-stack)/events/${eventId}/(organizer)/addguest`);
+  }, [eventId, router]);
 
-  const resetForm = useCallback(() => {
-    setFullName("");
-    setEmail("");
-    setPhone("");
-    setRelation("");
-  }, []);
+  const tabs: { label: string; value: GuestFilterTab }[] = [
+    { label: "All", value: "all" },
+    { label: "Accepted", value: "accepted" },
+    { label: "Pending", value: "pending" },
+  ];
 
-  const closeModal = useCallback(() => {
-    setShowAddModal(false);
-    resetForm();
-  }, [resetForm]);
+  const filteredInvitations = useMemo(() => {
+    if (!invitations) return [];
 
-  const handleAddGuest = useCallback(async () => {
-    if (!eventId) {
-      Alert.alert("Error", "Invalid event id");
-      return;
-    }
+    return invitations.filter((invitation: any) => {
+      const normalizedStatus = String(
+        invitation?.status ?? invitation?.rsvp_status ?? ""
+      )
+        .trim()
+        .toLowerCase();
 
-    if (!fullName.trim()) {
-      Alert.alert("Error", "Please enter a guest name");
-      return;
-    }
+      switch (activeTab) {
+        case "pending":
+          return normalizedStatus === "pending";
+        case "accepted":
+          return normalizedStatus === "accepted";
+        case "all":
+        default:
+          return true;
+      }
+    });
+  }, [invitations, activeTab]);
 
-    if (!email.trim()) {
-      Alert.alert("Error", "Please enter a guest email");
-      return;
-    }
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email.trim())) {
-      Alert.alert("Error", "Please enter a valid email");
-      return;
-    }
-
-    if (!phone.trim()) {
-      Alert.alert("Error", "Please enter a phone number");
-      return;
-    }
-
-    try {
-      await inviteGuestMutation.mutateAsync({
-        eventId,
-        payload: {
-          fullName: fullName.trim(),
-          email: email.trim(),
-          phone: phone.trim(),
-          eventId,
-          isFamily: relation.trim().toLowerCase().includes("family"),
-        },
-      });
-
-      Alert.alert("Success", "Guest added successfully!");
-      closeModal();
-    } catch (error: any) {
-      const message =
-        error?.response?.data?.message ||
-        error?.message ||
-        "Failed to add guest. Please try again.";
-      Alert.alert("Error", message);
-    }
-  }, [eventId, fullName, email, phone, relation, inviteGuestMutation, closeModal]);
 
   return (
-    <View style={{ flex: 1, padding: 24, backgroundColor: "#fff" }}>
-      <Text style={{ fontSize: 22, fontWeight: "700", marginBottom: 8 }}>Guests</Text>
-      <Text style={{ fontSize: 14, color: "#6B7280", marginBottom: 20 }}>
-        Manage your event invitations.
-      </Text>
+    <SafeAreaView className="p-4">
+      <View className="sticky top-0 z-20 flex-row items-center justify-between px-4 py-3 bg-background-light/95  backdrop-blur-md">
 
+        {/* Back Button */}
+        <TouchableOpacity
+          activeOpacity={0.7}
+          className="h-10 w-10 shrink-0 items-center justify-center rounded-full active:bg-black/5 "
+        >
+          <MaterialIcons name="arrow-back" size={24} className="text-slate-900 dark:text-white" />
+        </TouchableOpacity>
+
+        {/* Center Title */}
+        <View className="flex-col items-center">
+          <Text className="text-lg font-bold leading-tight tracking-tight text-slate-900">
+            Guest Management
+          </Text>
+          {/* <Text className="text-xs font-medium text-primary ">
+          {invitations ? `${invitations.length} Guests` : "Loading..."}
+        </Text> */}
+        </View>
+
+        {/* More Button */}
+        <TouchableOpacity
+          activeOpacity={0.7}
+          className="h-10 w-10 shrink-0 items-center justify-center rounded-full active:bg-black/5 dark:active:bg-white/10"
+        >
+          <MaterialIcons name="more-horiz" size={24} className="text-slate-900 dark:text-white" />
+        </TouchableOpacity>
+
+      </View>
+
+      <View className="flex-row p-1 mb-4 gap-2 bg-background-tertiary !rounded-md">
+        {tabs.map((tab) => (
+          <Pressable
+            key={tab.value}
+            onPress={() => setActiveTab(tab.value)}
+            className={cn(
+              "flex-1 py-2 rounded-md items-center",
+              activeTab === tab.value ? "bg-white" : "text-gray-600"
+            )}
+          >
+            <Text
+              className={cn(
+                "text-sm font-jakarta-semibold p-1",
+                activeTab === tab.value ? "text-primary" : "text-gray-500"
+              )}
+            >
+              {tab.label}
+            </Text>
+          </Pressable>
+        ))}
+      </View>
+      <View className="h-14 my-2 bg-white rounded-md ">
+        <TextInput
+          className="flex-1 h-full px-3 text-base text-gray-900 "
+          placeholder="Search for the friend"
+          placeholderTextColor="#9CA3AF"
+        // value={searchQuery}
+        // onChangeText={setSearchQuery}
+        />
+      </View>
       <TouchableOpacity
         style={{
           paddingVertical: 14,
@@ -107,7 +138,7 @@ export default function GuestListScreen() {
           alignItems: "center",
           marginBottom: 20,
         }}
-        onPress={() => setShowAddModal(true)}
+        onPress={openAddGuestScreen}
       >
         <Text style={{ fontSize: 16, fontWeight: "600", color: "#fff" }}>Add Guest</Text>
       </TouchableOpacity>
@@ -116,151 +147,22 @@ export default function GuestListScreen() {
         <Text>Loading invitations...</Text>
       ) : (
         <FlatList
-          data={invitations}
-          keyExtractor={(item: any) => (item.user?.id || Math.random()).toString()}
-          renderItem={({ item }: { item: any }) => <GuestCard guest={item} />}
+          data={filteredInvitations}
+          keyExtractor={(item: any, index: number) =>
+            item?.user?.id ? String(item.user.id) : `guest-${index}`
+          }
+          renderItem={({ item }: { item: any }) => <GuestCard guest={item} onPress={() => onPress(item.id)} />}
           contentContainerStyle={{ paddingBottom: 20 }}
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={
             <Text style={{ textAlign: "center", color: "#6B7280", marginTop: 20 }}>
-              No guests invited yet.
+              {invitations?.length
+                ? `No ${activeTab === "all" ? "" : activeTab} guests found.`
+                : "No guests invited yet."}
             </Text>
           }
         />
       )}
-
-      <Modal
-        visible={showAddModal}
-        transparent
-        animationType="slide"
-        onRequestClose={closeModal}
-      >
-        <View
-          style={{
-            flex: 1,
-            justifyContent: "flex-end",
-            backgroundColor: "rgba(0,0,0,0.5)",
-          }}
-        >
-          <View
-            style={{
-              backgroundColor: "#fff",
-              borderTopLeftRadius: 24,
-              borderTopRightRadius: 24,
-              padding: 24,
-              paddingBottom: 32,
-            }}
-          >
-            <Text style={{ fontSize: 20, fontWeight: "700", marginBottom: 20 }}>
-              Add New Guest
-            </Text>
-
-            <View style={{ gap: 16 }}>
-              <View>
-                <Text style={{ fontSize: 14, fontWeight: "500", color: "#374151", marginBottom: 6 }}>
-                  Name *
-                </Text>
-                <TextInput
-                  value={fullName}
-                  onChangeText={setFullName}
-                  placeholder="Enter guest name"
-                  style={{
-                    backgroundColor: "#F3F4F6",
-                    padding: 14,
-                    borderRadius: 12,
-                    fontSize: 14,
-                  }}
-                />
-              </View>
-
-              <View>
-                <Text style={{ fontSize: 14, fontWeight: "500", color: "#374151", marginBottom: 6 }}>
-                  Email *
-                </Text>
-                <TextInput
-                  value={email}
-                  onChangeText={setEmail}
-                  placeholder="Enter email"
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  style={{
-                    backgroundColor: "#F3F4F6",
-                    padding: 14,
-                    borderRadius: 12,
-                    fontSize: 14,
-                  }}
-                />
-              </View>
-
-              <View>
-                <Text style={{ fontSize: 14, fontWeight: "500", color: "#374151", marginBottom: 6 }}>
-                  Phone *
-                </Text>
-                <TextInput
-                  value={phone}
-                  onChangeText={setPhone}
-                  placeholder="Enter phone number"
-                  keyboardType="phone-pad"
-                  style={{
-                    backgroundColor: "#F3F4F6",
-                    padding: 14,
-                    borderRadius: 12,
-                    fontSize: 14,
-                  }}
-                />
-              </View>
-
-              <View>
-                <Text style={{ fontSize: 14, fontWeight: "500", color: "#374151", marginBottom: 6 }}>
-                  Relation
-                </Text>
-                <TextInput
-                  value={relation}
-                  onChangeText={setRelation}
-                  placeholder="e.g., Family, Friend"
-                  style={{
-                    backgroundColor: "#F3F4F6",
-                    padding: 14,
-                    borderRadius: 12,
-                    fontSize: 14,
-                  }}
-                />
-              </View>
-            </View>
-
-            <View style={{ flexDirection: "row", gap: 12, marginTop: 24 }}>
-              <TouchableOpacity
-                style={{
-                  flex: 1,
-                  paddingVertical: 14,
-                  borderRadius: 12,
-                  backgroundColor: "#F3F4F6",
-                  alignItems: "center",
-                }}
-                onPress={closeModal}
-              >
-                <Text style={{ fontSize: 16, fontWeight: "600", color: "#4B5563" }}>Cancel</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={{
-                  flex: 1,
-                  paddingVertical: 14,
-                  borderRadius: 12,
-                  backgroundColor: inviteGuestMutation.isPending ? "#F9A8D4" : "#EE2B8C",
-                  alignItems: "center",
-                }}
-                disabled={inviteGuestMutation.isPending}
-                onPress={handleAddGuest}
-              >
-                <Text style={{ fontSize: 16, fontWeight: "600", color: "#fff" }}>
-                  {inviteGuestMutation.isPending ? "Adding..." : "Add Guest"}
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
-    </View>
+    </SafeAreaView>
   );
 }

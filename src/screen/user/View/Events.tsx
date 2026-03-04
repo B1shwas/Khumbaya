@@ -69,28 +69,28 @@ export default function EventsPage() {
         ))}
       </View>
 
-      
+
       {/* Event List */}
       {activeTab === "upcoming" && (
         <View className="flex-1">
-          <UpcomingEventsTab isActive={true} />
+          <UpcomingEventsTab isActive={activeTab === "upcoming"} />
         </View>
       )}
       {activeTab === "invited" && (
         <View className="flex-1">
-          <InvitedEventsTab isActive={true} />
+          <InvitedEventsTab isActive={activeTab === "invited"} />
         </View>
       )}
       {activeTab === "completed" && (
         <View className="flex-1">
-          <CompletedEventsTab isActive={true} />
+          <CompletedEventsTab isActive={activeTab === "completed"} />
         </View>
       )}
       {/* Floating Action Button */}
       <TouchableOpacity
         onPress={() => {
           router.push("/(protected)/(client-stack)/events/create");
-      }}
+        }}
         className="absolute bottom-6 right-6 w-14 h-14 bg-primary rounded-full items-center justify-center shadow-lg"
       >
         <Ionicons name="add" size={28} color="white" />

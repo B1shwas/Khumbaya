@@ -15,7 +15,7 @@ interface GuestCardProps {
   onPress?: () => void;
 }
 
-export default function GuestCard({ guest, onPress }: GuestCardProps) {
+export default function GuestCard({ guest, onPress }: GuestCardProps ) {
   const displayStatus = (guest.status || guest.rsvp_status || "Pending").trim();
 
   const getStatusColor = () => {

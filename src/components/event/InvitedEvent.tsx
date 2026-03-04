@@ -1,7 +1,7 @@
 import { Event } from "@/src/constants/event";
 import { useGetInvitedEvents } from "@/src/features/events/hooks/use-event";
 import { Ionicons } from "@expo/vector-icons";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { RefreshControl, ScrollView, Text, View } from "react-native";
 import { Event_WITH_ROLE } from "./EventwithRole";
 
@@ -11,10 +11,8 @@ interface InvitedEventsTabProps {
 
 export const InvitedEventsTab = ({ isActive }: InvitedEventsTabProps) => {
   //hydration and unwanted call from the top parent component 
-  if (!isActive) {
-    return null;
-  }
   const [refreshing, setRefreshing] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const {
     data: invitedEventsData = [],
     isLoading,
@@ -31,7 +29,10 @@ export const InvitedEventsTab = ({ isActive }: InvitedEventsTabProps) => {
     await refetch();
     setRefreshing(false);
   };
-
+  useEffect(() => setMounted(true));
+  if (!isActive && !mounted) {
+    return null;
+  }
   return (
     <ScrollView
       className="flex-1 px-4"

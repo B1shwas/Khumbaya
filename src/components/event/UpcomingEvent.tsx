@@ -3,14 +3,14 @@ import { Event, EventRole } from "@/src/constants/event";
 import { usegetUpcomingEvents } from "@/src/features/events/hooks/use-event";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
-    Image,
-    Pressable,
-    RefreshControl,
-    ScrollView,
-    Text,
-    View,
+  Image,
+  Pressable,
+  RefreshControl,
+  ScrollView,
+  Text,
+  View,
 } from "react-native";
 
 interface UpcomingEventsTabProps {
@@ -94,9 +94,10 @@ const UpcomingEventItem = ({
   );
 };
 
-export const UpcomingEventsTab = ({ isActive }: UpcomingEventsTabProps ) => {
+export const UpcomingEventsTab = ({ isActive }: UpcomingEventsTabProps) => {
   const router = useRouter();
   const [refreshing, setRefreshing] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const {
     data: eventsData = [],
     isLoading,
@@ -115,7 +116,14 @@ export const UpcomingEventsTab = ({ isActive }: UpcomingEventsTabProps ) => {
     await refetch();
     setRefreshing(false);
   };
-
+  useEffect(() => {
+    setMounted(true);
+  })
+  if (!isActive && !mounted) {
+    return <>
+      Loading
+    </>;
+  }
   return (
     <ScrollView
       className="flex-1 px-4"

@@ -1,9 +1,9 @@
+import { FamilyMember } from "@/src/types";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
 import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-
 interface GuestDetailsScreenProps {
   guest?: any;
 }

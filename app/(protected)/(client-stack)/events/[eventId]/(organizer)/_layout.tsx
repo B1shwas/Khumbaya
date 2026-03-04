@@ -9,6 +9,7 @@ export default function OrganizerEventDetailLayout() {
       <Stack.Screen name="budget" />
       <Stack.Screen name="gallery" />
       <Stack.Screen name="guests" />
+      <Stack.Screen name="addguest" />
       <Stack.Screen name="timeline" />
       <Stack.Screen name="vendor" />
     </Stack>
