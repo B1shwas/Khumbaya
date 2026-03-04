@@ -650,63 +650,11 @@ export default function TimelinePage() {
   );
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#F9FAFB" }}>
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: "#F9FAFB" }}
+      edges={["bottom"]}
+    >
       <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
-        {/* Header */}
-        <View
-          style={{ paddingHorizontal: 16, paddingTop: 16, paddingBottom: 12 }}
-        >
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
-            <View
-              style={{ flexDirection: "row", alignItems: "center", gap: 12 }}
-            >
-              <TouchableOpacity
-                style={{
-                  padding: 8,
-                  borderRadius: 12,
-                  backgroundColor: "#fff",
-                  borderWidth: 1,
-                  borderColor: "#E5E7EB",
-                }}
-                onPress={() => router.back()}
-              >
-                <Ionicons name="chevron-back" size={24} color="#6B7280" />
-              </TouchableOpacity>
-              <View>
-                <Text
-                  style={{ fontSize: 24, fontWeight: "700", color: "#111827" }}
-                >
-                  Timeline
-                </Text>
-                <Text style={{ fontSize: 14, color: "#6B7280", marginTop: 2 }}>
-                  {activeDay?.dayName}, {activeDay?.date}
-                </Text>
-              </View>
-            </View>
-            <TouchableOpacity
-              style={{
-                padding: 8,
-                borderRadius: 12,
-                backgroundColor: "#fff",
-                borderWidth: 1,
-                borderColor: "#E5E7EB",
-              }}
-            >
-              <Ionicons
-                name="notifications-outline"
-                size={24}
-                color="#6B7280"
-              />
-            </TouchableOpacity>
-          </View>
-        </View>
-
         {/* Day Tabs */}
         <View style={{ paddingHorizontal: 16, paddingBottom: 16 }}>
           <ScrollView

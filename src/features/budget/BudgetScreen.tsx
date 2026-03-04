@@ -2,13 +2,13 @@ import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useState } from "react";
 import {
-    Alert,
-    FlatList,
-    RefreshControl,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View
+  Alert,
+  FlatList,
+  RefreshControl,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import BudgetCard from "./components/BudgetCard";
@@ -49,19 +49,7 @@ export default function BudgetScreen() {
   // If user is invited guest, show no access
   if (isInvitedGuest) {
     return (
-      <SafeAreaView style={styles.container}>
-        {/* Header */}
-        <View style={styles.header}>
-          <TouchableOpacity
-            style={styles.headerButton}
-            onPress={() => router.back()}
-          >
-            <Ionicons name="arrow-back" size={24} color="#374151" />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Budget</Text>
-          <View style={styles.headerButton} />
-        </View>
-
+      <SafeAreaView style={styles.container} edges={["bottom"]}>
         {/* No Access */}
         <View style={styles.noAccessContainer}>
           <View style={styles.noAccessIcon}>
@@ -127,21 +115,7 @@ export default function BudgetScreen() {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.headerButton}
-          onPress={() => router.back()}
-        >
-          <Ionicons name="arrow-back" size={24} color="#374151" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Budget</Text>
-        <TouchableOpacity style={styles.headerButton}>
-          <Ionicons name="filter" size={24} color="#374151" />
-        </TouchableOpacity>
-      </View>
-
+    <SafeAreaView style={styles.container} edges={["bottom"]}>
       {/* Budget List */}
       <FlatList
         data={budgetItems}

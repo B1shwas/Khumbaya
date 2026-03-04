@@ -201,24 +201,7 @@ export default function EventVendorsPage() {
   ).length;
 
   return (
-    <SafeAreaView style={styles.container}>
-      {/* Top App Bar */}
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <Ionicons name="arrow-back" size={24} color="#181114" />
-        </TouchableOpacity>
-        <View style={styles.headerCenter}>
-          <Text style={styles.headerTitle}>Vendors</Text>
-          <Text style={styles.headerSubtitle}>Sarah & Mike's Wedding</Text>
-        </View>
-        <TouchableOpacity style={styles.headerButton}>
-          <Ionicons name="search" size={24} color="#181114" />
-        </TouchableOpacity>
-      </View>
-
+    <SafeAreaView style={styles.container} edges={["bottom"]}>
       {/* Stats Row */}
       <View style={styles.statsRow}>
         <View style={styles.statCard}>
