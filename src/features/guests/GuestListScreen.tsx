@@ -22,8 +22,11 @@ export default function GuestListScreen() {
   const params = useLocalSearchParams();
 
 
-  const onPress = (guestId: number) => {
-    router.push(`/(protected)/(client-stack)/events/${eventId}/(organizer)/guests/${guestId}/guest-details`);
+  const onPress = (guest: any) => {
+    router.push({
+      pathname: `/(protected)/(client-stack)/events/${eventId}/(organizer)/guests/${guest.id}/guest-details`,
+      params: { guest: JSON.stringify(guest) }
+    });
   }
   const eventId = useMemo(() => {
     const raw = Array.isArray(params.eventId) ? params.eventId[0] : params.eventId;
@@ -151,7 +154,7 @@ export default function GuestListScreen() {
           keyExtractor={(item: any, index: number) =>
             item?.user?.id ? String(item.user.id) : `guest-${index}`
           }
-          renderItem={({ item }: { item: any }) => <GuestCard guest={item} onPress={() => onPress(item.id)} />}
+          renderItem={({ item }: { item: any }) => <GuestCard guest={item} onPress={() => onPress(item)} />}
           contentContainerStyle={{ paddingBottom: 20 }}
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={

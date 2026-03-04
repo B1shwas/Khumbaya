@@ -1,3 +1,3 @@
-import GuestDetailsScreen from "@/src/features/guests/GuestDetailsScreen";
+import ViewGuestDetail from "@/src/screen/user/event/guest/viewguestdetail";
 
-export default GuestDetailsScreen;
+export default ViewGuestDetail;
