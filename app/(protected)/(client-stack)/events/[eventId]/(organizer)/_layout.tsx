@@ -1,4 +1,12 @@
-import { Stack } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
+import { router, Stack } from "expo-router";
+import { TouchableOpacity } from "react-native";
+
+const headerBackButton = () => (
+  <TouchableOpacity onPress={() => router.back()} style={{ paddingRight: 8 }}>
+    <Ionicons name="arrow-back" size={24} color="#111827" />
+  </TouchableOpacity>
+);
 
 export default function OrganizerEventDetailLayout() {
   return (
@@ -11,6 +19,7 @@ export default function OrganizerEventDetailLayout() {
           fontFamily: "PlusJakartaSans-Bold",
           fontSize: 18,
         },
+        headerLeft: headerBackButton,
       }}
     >
       <Stack.Screen name="index" options={{ title: "Event Details" }} />
