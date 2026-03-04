@@ -45,7 +45,7 @@ const EventDetailHero = ({
       <View className="relative w-full h-[38vh] min-h-[300px] rounded-full ">
         <Image
           source={{ uri: event.imageUrl }}
-          className="absolute inset-0 w-full h-full rounded-3xl "
+          className="absolute inset-0 w-full h-full "
           resizeMode="cover"
         />
         {/* Dark overlay gradient */}
@@ -78,10 +78,6 @@ const EventDetailHero = ({
 
         <View className="absolute bottom-10 left-0 w-full px-6 z-10 mb-4">
           <View className="flex-col gap-1 items-center justify-center">
-            <Text className="px-4 py-2 bg-primary/90 text-white text-sm font-bold rounded mb-2 tracking-wide text-center">
-              {event.status}
-            </Text>
-
             <Text className="text-3xl font-extrabold text-white leading-tight tracking-tight text-center">
               {event.title}
             </Text>
@@ -96,39 +92,6 @@ const EventDetailHero = ({
                 {event.location}
               </Text>
             </View>
-          </View>
-        </View>
-      </View>
-
-      <View className="px-4 -mt-10 z-20">
-        <View className="bg-background-light rounded-2xl shadow-sm shadow-black p-5 flex-row justify-between items-center border border-gray-100">
-          <View className="flex-col items-center flex-1">
-            <Text className="text-2xl font-black text-primary">
-              {event.days}
-            </Text>
-            <Text className="text-xs text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wider">
-              Days
-            </Text>
-          </View>
-          {/* dark:bg-gray-700 */}
-          <View className="h-8 w-[1px] bg-gray-200 " />
-          <View className="flex-col items-center flex-1">
-            <Text className="text-2xl font-black text-primary">
-              {String(event.hours).padStart(2, "0")}
-            </Text>
-            <Text className="text-xs text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wider">
-              Hrs
-            </Text>
-          </View>
-          {/* dark:bg-gray-700 removed */}
-          <View className="h-8 w-[1px] bg-gray-200" />
-          <View className="flex-col items-center flex-1">
-            <Text className="text-2xl font-black text-primary">
-              {String(event.minutes).padStart(2, "0")}
-            </Text>
-            <Text className="text-xs text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wider">
-              Mins
-            </Text>
           </View>
         </View>
       </View>

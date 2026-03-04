@@ -60,9 +60,7 @@ export const Event_WITH_ROLE = ({
         className="flex-row p-3 rounded-md overflow-hidden"
         onPress={() => {
           if (isRequest && asGuest) {
-            router.push(
-              `/(protected)/(client-stack)/events/${event.id}/(guest)/rsvp`
-            );
+            router.push(`/(protected)/(client-stack)/events/${event.id}/(guest)`);
           } else if (isRequest && !asGuest) {
             router.push(
               `/(protected)/(client-stack)/events/${event.id}/(vendor)/`
