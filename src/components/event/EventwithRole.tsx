@@ -1,17 +1,9 @@
 import Card from "@/src/components/ui/Card";
 import { Event, EventRole } from "@/src/constants/event";
-import { useAcceptRsvpInvitation } from "@/src/features/events/hooks/use-event";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 
-import {
-  Alert,
-  Image,
-  Pressable,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Image, Pressable, Text, TouchableOpacity, View } from "react-native";
 
 const roleConfig: Record<
   EventRole,
@@ -48,8 +40,6 @@ export const Event_WITH_ROLE = ({
   asGuest?: boolean;
 }) => {
   const router = useRouter();
-  const { mutate: acceptRsvpInvitation, isPending: isAcceptingInvitation } =
-    useAcceptRsvpInvitation();
   const roleStyle = roleConfig[event.role as EventRole] ?? defaultRoleStyle;
   const roleLabel = event.role ?? "Unknown";
   const { wrapperClass, textClass } = roleStyle;
@@ -61,7 +51,7 @@ export const Event_WITH_ROLE = ({
         onPress={() => {
           if (isRequest && asGuest) {
             router.push(
-              `/(protected)/(client-stack)/events/${event.id}/(guest)/rsvp`
+              `/(protected)/(client-stack)/events/${event.id}/(guest)`
             );
           } else if (isRequest && !asGuest) {
             router.push(
@@ -141,51 +131,13 @@ export const Event_WITH_ROLE = ({
       )}
       {isRequest && asGuest && (
         <View className="border-t border-border mx-3 mt-1 pt-3 pb-2">
-          <View className="flex-row items-center justify-between">
-            <View className="flex-row items-center gap-2">
-              <View className="bg-pink-50 p-1.5 rounded-full">
-                <Ionicons name="mail-outline" size={14} color="#ee2b8c" />
-              </View>
-              <Text className="font-jakarta-semibold text-xs text-primary">
-                You're invited — RSVP now
-              </Text>
+          <View className="flex-row items-center gap-2">
+            <View className="bg-pink-50 p-1.5 rounded-full">
+              <Ionicons name="mail-outline" size={14} color="#ee2b8c" />
             </View>
-            <View className="flex-row gap-2">
-              <TouchableOpacity
-                className="bg-primary px-3 py-1.5 rounded-full"
-                onPress={() => {
-                  if (!event.invitationId) {
-                    Alert.alert(
-                      "Missing invitation",
-                      "Invitation ID not found for this RSVP."
-                    );
-                    return;
-                  }
-
-                  acceptRsvpInvitation(event.invitationId, {
-                    onSuccess: () => {
-                      Alert.alert("Success", "RSVP accepted successfully.");
-                    },
-                    onError: () => {
-                      Alert.alert(
-                        "Error",
-                        "Failed to accept RSVP. Please try again."
-                      );
-                    },
-                  });
-                }}
-                disabled={isAcceptingInvitation}
-              >
-                <Text className="font-jakarta-semibold text-xs text-white">
-                  Going
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity className="border border-border px-3 py-1.5 rounded-full">
-                <Text className="font-jakarta-semibold text-xs text-text-secondary">
-                  Decline
-                </Text>
-              </TouchableOpacity>
-            </View>
+            <Text className="font-jakarta-semibold text-xs text-primary">
+              You're invited — tap to RSVP
+            </Text>
           </View>
         </View>
       )}

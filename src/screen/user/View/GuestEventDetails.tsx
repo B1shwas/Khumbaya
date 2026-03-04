@@ -4,7 +4,7 @@ import ServiceGrid from "@/src/components/event/ServiceGrid";
 import { Text } from "@/src/components/ui/Text";
 import { EventHighlight, EventService } from "@/src/types";
 import { Ionicons } from "@expo/vector-icons";
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { Image, ScrollView, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -65,6 +65,7 @@ const Section = ({
 );
 
 export default function GuestEventDetails() {
+  const router = useRouter();
   const params = useLocalSearchParams<{
     eventId: string;
     title?: string;
@@ -74,6 +75,11 @@ export default function GuestEventDetails() {
     imageUrl?: string;
     familyName?: string;
   }>();
+
+  // TODO: replace with real family membership check from API / store
+  const isFamily = true;
+  // TODO: replace with real RSVP status from API / store
+  const hasRsvped = false;
 
   const title = params.title ?? "Event Details";
   const dateRange = params.dateRange ?? "Oct 24 - Oct 27, 2026";
@@ -134,12 +140,50 @@ export default function GuestEventDetails() {
         </Section>
 
         <View className="px-5 py-5">
-          <FamilyRsvpCard
-            familyName={familyName}
-            members={[]}
-            confirmedCount={5}
-            onManage={() => {}}
-          />
+          {isFamily ? (
+            <FamilyRsvpCard
+              familyName={familyName}
+              members={[]}
+              confirmedCount={5}
+              onManage={() =>
+                router.push(
+                  `/(protected)/(client-stack)/events/${params.eventId}/(guest)/family-rsvp`
+                )
+              }
+            />
+          ) : (
+            <View className="bg-white rounded-xl p-5 border border-slate-100 shadow-sm gap-3">
+              <View className="flex-row items-center gap-2">
+                <Ionicons
+                  name={hasRsvped ? "checkmark-circle" : "mail-outline"}
+                  size={20}
+                  color={hasRsvped ? "#16a34a" : "#ee2b8c"}
+                />
+                <Text className="text-lg font-bold text-slate-900">
+                  {hasRsvped ? "Your RSVP" : "RSVP to this Event"}
+                </Text>
+              </View>
+              <Text className="text-sm text-slate-500">
+                {hasRsvped
+                  ? "You have already responded. You can update your RSVP anytime."
+                  : "Let the host know if you'll be attending and share your travel details."}
+              </Text>
+              <TouchableOpacity
+                className="w-full py-3 mt-1 rounded-lg items-center justify-center"
+                style={{ backgroundColor: "#ee2b8c" }}
+                activeOpacity={0.85}
+                onPress={() =>
+                  router.push(
+                    `/(protected)/(client-stack)/events/${params.eventId}/(guest)/rsvp`
+                  )
+                }
+              >
+                <Text className="text-white font-bold text-base">
+                  {hasRsvped ? "Manage Your RSVP" : "Complete Your RSVP"}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
       </ScrollView>
     </SafeAreaView>
