@@ -1,18 +1,15 @@
 import AvatarPicker from "@/src/components/ui/AvatarPicker";
-import ImageUpload from "@/src/components/ui/ImageUpload";
+import { useUpdateUserMe } from "@/src/features/user/api/use-user";
 import { useAuthStore } from "@/src/store/AuthStore";
-import { MaterialIcons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
-
 import {
   ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
@@ -20,110 +17,37 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-// ─── Theme ────────────────────────────────────────────────────────────────────
-const PRIMARY = "#ec4899";
-
-// ─── Constants ────────────────────────────────────────────────────────────────
 const FOOD_OPTIONS = [
-  { label: "Vegetarian", icon: "eco" },
-  { label: "Non-Veg", icon: "set-meal" },
-  { label: "Vegan", icon: "grass" },
-  { label: "No Prefe", icon: "restaurant" },
-] as const;
-
-const IDENTITY_OPTIONS = [
-  "Passport",
-  "Driving License",
-  "Aadhaar Card",
-  "Voter ID",
-  "National ID",
-  "Other",
+  "Vegetarian",
+  "Non-Veg",
+  "Vegan",
+  "No Preference",
 ] as const;
 
 const BIO_MAX = 500;
-const BIO_MIN = 20;
 
-// ─── Types ────────────────────────────────────────────────────────────────────
 interface ProfileForm {
   name: string;
   email: string;
   phone: string;
   bio: string;
   foodPreference: string;
-  identity: string;
-  idProof: string;
-  dateOfBirth: string;
-  idImage: string;
   avatarImage: string;
 }
 
 type FormErrors = Partial<Record<keyof ProfileForm, string>>;
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-const getInitials = (name: string) =>
-  name
-    .split(" ")
-    .filter(Boolean)
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2) || "?";
-
-// ─── Components ──────────────────────────────────────────────────────────────
-
-const ProgressBar = ({ step, total }: { step: number; total: number }) => (
-  <View style={styles.progressBar}>
-    {Array.from({ length: total }).map((_, i) => (
-      <View
-        key={i}
-        style={[styles.progressDot, i < step && styles.progressDotActive]}
-      />
-    ))}
-  </View>
-);
-
-const ValidationSummary = ({ count }: { count: number }) =>
-  count > 0 ? (
-    <View style={styles.validationCard}>
-      <MaterialIcons name="error-outline" size={18} color="#ef4444" />
-      <View style={styles.validationInfo}>
-        <Text style={styles.validationTitle}>
-          {count} issue{count > 1 ? "s" : ""} to fix
-        </Text>
-        <Text style={styles.validationText}>
-          Check the highlighted fields below before continuing.
-        </Text>
-      </View>
-    </View>
-  ) : null;
-
-const SectionLabel = ({
-  title,
-  subtitle,
-}: {
-  title: string;
-  subtitle?: string;
-}) => (
-  <View style={styles.sectionLabel}>
-    <Text style={styles.sectionTitle}>{title}</Text>
-    {subtitle && <Text style={styles.sectionSubtitle}>{subtitle}</Text>}
-  </View>
-);
-
-// ─── Main Screen ──────────────────────────────────────────────────────────────
 
 export default function EditProfileScreen() {
   const router = useRouter();
   const scrollRef = useRef<ScrollView>(null);
   const [loading, setLoading] = useState(true);
 
-  // ✅ Get user from AuthStore (no API call needed!)
   const user = useAuthStore((state) => state.user);
   const updateUser = useAuthStore((state) => state.updateUser);
   const fetchUserProfile = useAuthStore((state) => state.fetchUserProfile);
   const isProfileLoading = useAuthStore((state) => state.isProfileLoading);
+  const updateUserMeMutation = useUpdateUserMe();
 
-  // ✅ Fetch fresh user data from backend when component mounts
   useEffect(() => {
     fetchUserProfile();
   }, []);
@@ -134,16 +58,10 @@ export default function EditProfileScreen() {
     phone: "",
     bio: "",
     foodPreference: "",
-    identity: "",
-    idProof: "",
-    dateOfBirth: "",
-    idImage: "",
     avatarImage: "",
   });
 
-  // ✅ Hydrate form from AuthStore (no network call needed)
   useEffect(() => {
-    // Wait for profile to finish loading before setting form data
     if (!isProfileLoading && user) {
       setForm({
         name: user.username || user.name || "",
@@ -151,20 +69,10 @@ export default function EditProfileScreen() {
         phone: user.phone || "",
         bio: user.bio || "",
         foodPreference: user.foodPreference || user.food_preference || "",
-        identity: user.identity || user.idType || "",
-        idProof: user.idProof || user.id_proof || user.idNumber || "",
-        dateOfBirth: user.dateOfBirth || user.date_of_birth || "",
-        idImage: user.idImage || user.id_image || user.governmentId || "",
-        avatarImage:
-          user.photo ||
-          user.avatarImage ||
-          user.avatar ||
-          user.profilePicture ||
-          "",
+        avatarImage: user.photo || user.avatarImage || user.avatar || "",
       });
       setLoading(false);
     } else if (!isProfileLoading && !user) {
-      // No user and not loading - still show form
       setLoading(false);
     }
   }, [user, isProfileLoading]);
@@ -181,83 +89,40 @@ export default function EditProfileScreen() {
 
   const validate = (): boolean => {
     const e: FormErrors = {};
-    if (!form.name.trim()) e.name = "Full name is required";
     if (!form.email.trim()) e.email = "Email address is required";
     else if (!/\S+@\S+\.\S+/.test(form.email))
       e.email = "Enter a valid email address";
-    if (!form.phone.trim()) e.phone = "Phone number is required";
-    if (!form.bio.trim()) e.bio = "Bio is required";
-    else if (form.bio.length < BIO_MIN)
-      e.bio = `Please write at least ${BIO_MIN} characters`;
-    if (!form.identity) e.identity = "Please select an ID type";
-    if (!form.idImage) e.idImage = "Please upload your government ID";
     setErrors(e);
     if (Object.keys(e).length > 0)
       scrollRef.current?.scrollTo({ y: 0, animated: true });
     return Object.keys(e).length === 0;
   };
 
-  // ✅ Save updates to AuthStore when user hits Update
   const handleSave = async () => {
     if (!validate()) return;
     setSaveState("saving");
     try {
-      /*
-      // Send update to backend API
-      const res = await api.put("/user/update", {
-        username: form.name,
-        name: form.name,
-        email: form.email,
-        phone: form.phone,
-        bio: form.bio,
-        foodPreference: form.foodPreference,
-        identity: form.identity,
-        idProof: form.idProof,
-        dateOfBirth: form.dateOfBirth,
-        idImage: form.idImage,
-        photo: form.avatarImage,
-        avatarImage: form.avatarImage,
-      });
+      const payload = {
+        username: form.name.trim() || undefined,
+        email: form.email.trim() || undefined,
+        phone: form.phone.trim() || undefined,
+        bio: form.bio.trim() || undefined,
+        foodPreference: form.foodPreference.trim() || undefined,
+        photo: form.avatarImage || undefined,
+      };
 
-      // Update AuthStore with the response from server
-      if (res.data) {
-        updateUser(res.data);
-      } else {
-        // Fallback: update with local form data
-        updateUser({
-          username: form.name,
-          name: form.name,
-          email: form.email,
-          phone: form.phone,
-          bio: form.bio,
-          foodPreference: form.foodPreference,
-          identity: form.identity,
-          idProof: form.idProof,
-          dateOfBirth: form.dateOfBirth,
-          idImage: form.idImage,
-          photo: form.avatarImage,
-          avatarImage: form.avatarImage,
-        });
-      }
-      */
-
-      // ✅ Update AuthStore instantly - user sees changes everywhere!
-      // Simulate network delay
-      await new Promise((res) => setTimeout(res, 800));
+      const updatedUser = await updateUserMeMutation.mutateAsync(payload);
 
       updateUser({
-        username: form.name,
-        name: form.name,
-        email: form.email,
-        phone: form.phone,
-        bio: form.bio,
-        foodPreference: form.foodPreference,
-        identity: form.identity,
-        idProof: form.idProof,
-        dateOfBirth: form.dateOfBirth,
-        idImage: form.idImage,
-        photo: form.avatarImage,
-        avatarImage: form.avatarImage,
+        ...(updatedUser ?? {}),
+        username: updatedUser?.username ?? payload.username,
+        name: updatedUser?.name ?? payload.username,
+        email: updatedUser?.email ?? payload.email,
+        phone: updatedUser?.phone ?? payload.phone,
+        bio: updatedUser?.bio ?? payload.bio,
+        foodPreference: updatedUser?.foodPreference ?? payload.foodPreference,
+        photo: updatedUser?.photo ?? payload.photo,
+        avatarImage: updatedUser?.avatarImage ?? payload.photo,
       });
 
       setSaveState("saved");
@@ -289,64 +154,36 @@ export default function EditProfileScreen() {
   };
 
   const isSaving = saveState === "saving";
-  const errorCount = Object.keys(errors).length;
 
-  // Show loading while either local loading or fetching profile from backend
   if (loading || isProfileLoading) {
     return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={PRIMARY} />
-          <Text style={styles.loadingText}>
-            {isProfileLoading
-              ? "Fetching latest profile..."
-              : "Loading profile..."}
-          </Text>
-        </View>
-      </SafeAreaView>
+      <View className="flex-1 items-center justify-center bg-[#f8f6f7]">
+        <ActivityIndicator size="large" color="#ec4899" />
+        <Text className="mt-3 text-base text-gray-500">
+          {isProfileLoading
+            ? "Fetching latest profile..."
+            : "Loading profile..."}
+        </Text>
+      </View>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <MaterialIcons name="arrow-back-ios-new" size={18} color="#374151" />
-        </TouchableOpacity>
-        <View style={styles.headerCenter}>
-          <ProgressBar step={1} total={2} />
-          <Text style={styles.stepText}></Text>
-        </View>
-        <View style={styles.headerRight} />
-      </View>
-
+    <SafeAreaView className="flex-1 bg-[#f8f6f7]" edges={["bottom"]}>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={styles.content}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
+        className="flex-1"
       >
         <ScrollView
           ref={scrollRef}
-          style={styles.scrollView}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
-          contentContainerStyle={styles.scrollContent}
+          contentContainerStyle={{
+            paddingHorizontal: 16,
+            paddingTop: 20,
+            paddingBottom: 40,
+          }}
         >
-          {/* Header Section */}
-          <View style={styles.headerSection}>
-            <Text style={styles.headerTitle}>Let's get started.</Text>
-            <Text style={styles.headerSubtitle}>
-              Fill in your details for a seamless check-in.
-            </Text>
-          </View>
-
-          {/* Validation Summary */}
-          <ValidationSummary count={errorCount} />
-
           {/* Avatar */}
           <AvatarPicker
             name={form.name}
@@ -355,50 +192,31 @@ export default function EditProfileScreen() {
           />
 
           {/* Personal Details */}
-          <SectionLabel title="Personal Details" />
+          <View className="mt-5 mb-3">
+            <Text className="text-xs font-semibold text-gray-500 uppercase tracking-widest">
+              Personal Details
+            </Text>
+          </View>
 
-          <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>Full Name *</Text>
+          <View className="mb-4">
+            <Text className="text-sm font-semibold text-gray-700 mb-2">
+              Full Name
+            </Text>
             <TextInput
-              style={[styles.textInput, errors.name && styles.textInputError]}
+              className="bg-white rounded-xl px-4 py-3.5 text-sm text-gray-900 border border-gray-200"
               placeholder="Enter your legal name"
               placeholderTextColor="#9CA3AF"
               value={form.name}
               onChangeText={(v) => set("name", v)}
             />
-            {errors.name && <Text style={styles.errorText}>{errors.name}</Text>}
           </View>
 
-          <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>Date of Birth</Text>
+          <View className="mb-4">
+            <Text className="text-sm font-semibold text-gray-700 mb-2">
+              Email Address <Text className="text-pink-500">*</Text>
+            </Text>
             <TextInput
-              style={styles.textInput}
-              placeholder="DD/MM/YYYY"
-              placeholderTextColor="#9CA3AF"
-              value={form.dateOfBirth}
-              onChangeText={(v) => set("dateOfBirth", v)}
-            />
-          </View>
-
-          <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>Phone Number *</Text>
-            <TextInput
-              style={[styles.textInput, errors.phone && styles.textInputError]}
-              placeholder="+977 98XXXXXXXX"
-              placeholderTextColor="#9CA3AF"
-              value={form.phone}
-              onChangeText={(v) => set("phone", v)}
-              keyboardType="phone-pad"
-            />
-            {errors.phone && (
-              <Text style={styles.errorText}>{errors.phone}</Text>
-            )}
-          </View>
-
-          <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>Email Address *</Text>
-            <TextInput
-              style={[styles.textInput, errors.email && styles.textInputError]}
+              className={`bg-white rounded-xl px-4 py-3.5 text-sm text-gray-900 border ${errors.email ? "border-red-500" : "border-gray-200"}`}
               placeholder="name@example.com"
               placeholderTextColor="#9CA3AF"
               value={form.email}
@@ -407,60 +225,50 @@ export default function EditProfileScreen() {
               autoCapitalize="none"
             />
             {errors.email && (
-              <Text style={styles.errorText}>{errors.email}</Text>
+              <Text className="text-xs text-red-500 mt-1">{errors.email}</Text>
             )}
           </View>
 
-          {/* Stay Preferences */}
-          <SectionLabel title="Stay Preferences" />
-
-          <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>Food Preference</Text>
-            <View style={styles.chipContainer}>
-              {FOOD_OPTIONS.map((opt) => {
-                const active = form.foodPreference === opt.label;
-                return (
-                  <TouchableOpacity
-                    key={opt.label}
-                    style={[styles.chip, active && styles.chipSelected]}
-                    onPress={() => set("foodPreference", opt.label)}
-                  >
-                    <Text
-                      style={[
-                        styles.chipText,
-                        active && styles.chipTextSelected,
-                      ]}
-                    >
-                      {opt.label}
-                    </Text>
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
+          <View className="mb-4">
+            <Text className="text-sm font-semibold text-gray-700 mb-2">
+              Phone Number
+            </Text>
+            <TextInput
+              className="bg-white rounded-xl px-4 py-3.5 text-sm text-gray-900 border border-gray-200"
+              placeholder="+977 98XXXXXXXX"
+              placeholderTextColor="#9CA3AF"
+              value={form.phone}
+              onChangeText={(v) => set("phone", v)}
+              keyboardType="phone-pad"
+            />
           </View>
 
-          {/* Identity Verification */}
-          <SectionLabel
-            title="Identity Verification"
-            subtitle="Required for check-in. Your ID is encrypted and never shared."
-          />
+          {/* Stay Preferences */}
+          <View className="mt-5 mb-3">
+            <Text className="text-xs font-semibold text-gray-500 uppercase tracking-widest">
+              Stay Preferences
+            </Text>
+          </View>
 
-          <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>ID Type *</Text>
-            <View style={styles.chipContainerWrap}>
-              {IDENTITY_OPTIONS.map((opt) => {
-                const active = form.identity === opt;
+          <View className="mb-4">
+            <Text className="text-sm font-semibold text-gray-700 mb-2">
+              Food Preference
+            </Text>
+            <View className="flex-row gap-2 flex-wrap">
+              {FOOD_OPTIONS.map((opt) => {
+                const active = form.foodPreference === opt;
                 return (
                   <TouchableOpacity
                     key={opt}
-                    style={[styles.chip, active && styles.chipSelected]}
-                    onPress={() => set("identity", opt)}
+                    className={`flex-1 min-w-[80px] items-center justify-center py-3 rounded-xl border ${
+                      active
+                        ? "bg-pink-500 border-pink-500"
+                        : "bg-white border-gray-200"
+                    }`}
+                    onPress={() => set("foodPreference", opt)}
                   >
                     <Text
-                      style={[
-                        styles.chipText,
-                        active && styles.chipTextSelected,
-                      ]}
+                      className={`text-xs font-medium ${active ? "text-white" : "text-gray-500"}`}
                     >
                       {opt}
                     </Text>
@@ -468,45 +276,22 @@ export default function EditProfileScreen() {
                 );
               })}
             </View>
-            {errors.identity && (
-              <Text style={styles.errorText}>{errors.identity}</Text>
-            )}
-          </View>
-
-          <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>ID Number</Text>
-            <TextInput
-              style={styles.textInput}
-              placeholder="e.g. AB1234567"
-              placeholderTextColor="#9CA3AF"
-              value={form.idProof}
-              onChangeText={(v) => set("idProof", v)}
-              autoCapitalize="characters"
-            />
-          </View>
-
-          <View style={styles.inputGroup}>
-            <ImageUpload
-              value={form.idImage}
-              onChange={(uri) => set("idImage", uri)}
-              label="Government ID *"
-              placeholder="Upload Government ID"
-              hint="Passport, Aadhaar, Driving Licence"
-              error={errors.idImage}
-            />
           </View>
 
           {/* About You */}
-          <SectionLabel title="About You" />
+          <View className="mt-5 mb-3">
+            <Text className="text-xs font-semibold text-gray-500 uppercase tracking-widest">
+              About You
+            </Text>
+          </View>
 
-          <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>Bio *</Text>
+          <View className="mb-4">
+            <Text className="text-sm font-semibold text-gray-700 mb-2">
+              Bio
+            </Text>
             <TextInput
-              style={[
-                styles.textInput,
-                styles.textArea,
-                errors.bio && styles.textInputError,
-              ]}
+              className="bg-white rounded-xl px-4 py-3.5 text-sm text-gray-900 border border-gray-200 h-24"
+              style={{ textAlignVertical: "top" }}
               placeholder="Tell others about yourself, your profession, your interests…"
               placeholderTextColor="#9CA3AF"
               value={form.bio}
@@ -516,25 +301,14 @@ export default function EditProfileScreen() {
               multiline
               maxLength={BIO_MAX}
             />
-            <Text
-              style={[
-                styles.charCount,
-                form.bio.length >= BIO_MIN
-                  ? styles.charCountDone
-                  : styles.charCountPending,
-              ]}
-            >
+            <Text className="text-xs text-right mt-1 text-gray-400">
               {form.bio.length}/{BIO_MAX}
-              {form.bio.length < BIO_MIN
-                ? ` (${BIO_MIN - form.bio.length} more to go)`
-                : " ✓"}
             </Text>
-            {errors.bio && <Text style={styles.errorText}>{errors.bio}</Text>}
           </View>
 
-          {/* CTA Button */}
+          {/* Save Button */}
           <TouchableOpacity
-            style={styles.submitButton}
+            className="bg-pink-500 rounded-xl py-4 flex-row items-center justify-center gap-2 mt-6 mb-4"
             onPress={handleSave}
             disabled={isSaving}
             activeOpacity={0.85}
@@ -542,336 +316,18 @@ export default function EditProfileScreen() {
             {isSaving ? (
               <>
                 <ActivityIndicator size="small" color="#fff" />
-                <Text style={styles.submitButtonText}>Saving…</Text>
+                <Text className="text-base font-bold text-white">Saving…</Text>
               </>
             ) : saveState === "saved" ? (
-              <>
-                <MaterialIcons name="check-circle" size={20} color="#fff" />
-                <Text style={styles.submitButtonText}>Saved!</Text>
-              </>
+              <Text className="text-base font-bold text-white">Saved!</Text>
             ) : (
-              <>
-                <Text style={styles.submitButtonText}>Update</Text>
-                <MaterialIcons name="arrow-forward" size={20} color="#fff" />
-              </>
+              <Text className="text-base font-bold text-white">
+                Update Profile
+              </Text>
             )}
           </TouchableOpacity>
-
-          <Text style={styles.privacyText}>
-            By continuing you agree to our{" "}
-            <Text style={styles.privacyLink}>Privacy Policy</Text>. Your data is
-            encrypted.
-          </Text>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#f8f6f7",
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#f8f6f7",
-  },
-  loadingText: {
-    marginTop: 12,
-    fontSize: 16,
-    color: "#6b7280",
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: "white",
-    borderBottomWidth: 1,
-    borderBottomColor: "#f3f4f6",
-  },
-  backButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#f3f4f6",
-  },
-  headerCenter: {
-    flex: 1,
-    alignItems: "center",
-  },
-  progressBar: {
-    flexDirection: "row",
-    gap: 6,
-  },
-  progressDot: {
-    width: 24,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: "#e5e7eb",
-  },
-  progressDotActive: {
-    backgroundColor: PRIMARY,
-  },
-  stepText: {
-    fontSize: 12,
-    color: "#9ca3af",
-    marginTop: 4,
-  },
-  headerRight: {
-    width: 36,
-  },
-  content: {
-    flex: 1,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingHorizontal: 16,
-    paddingTop: 20,
-    paddingBottom: 40,
-  },
-  headerSection: {
-    marginBottom: 20,
-  },
-  headerTitle: {
-    fontSize: 28,
-    fontWeight: "700",
-    color: "#1f2937",
-    marginBottom: 4,
-  },
-  headerSubtitle: {
-    fontSize: 14,
-    color: "#6b7280",
-    lineHeight: 22,
-  },
-  validationCard: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    backgroundColor: "#FEF2F2",
-    borderRadius: 12,
-    padding: 14,
-    marginBottom: 16,
-    gap: 12,
-  },
-  validationInfo: {
-    flex: 1,
-  },
-  validationTitle: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#b91c1c",
-    marginBottom: 2,
-  },
-  validationText: {
-    fontSize: 12,
-    color: "#dc2626",
-  },
-  avatarContainer: {
-    alignItems: "center",
-    marginBottom: 24,
-  },
-  avatar: {
-    width: 96,
-    height: 96,
-    borderRadius: 48,
-    backgroundColor: PRIMARY + "20",
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: PRIMARY,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 12,
-    elevation: 6,
-  },
-  avatarImage: {
-    width: 96,
-    height: 96,
-    borderRadius: 48,
-  },
-  avatarInitials: {
-    fontSize: 36,
-    fontWeight: "700",
-    color: PRIMARY,
-  },
-  cameraButton: {
-    position: "absolute",
-    bottom: 0,
-    right: 0,
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: PRIMARY,
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 2,
-    borderColor: "white",
-  },
-  avatarHint: {
-    fontSize: 12,
-    color: "#9ca3af",
-    marginTop: 8,
-  },
-  sectionLabel: {
-    marginTop: 20,
-    marginBottom: 12,
-  },
-  sectionTitle: {
-    fontSize: 12,
-    fontWeight: "600",
-    color: "#6b7280",
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
-  },
-  sectionSubtitle: {
-    fontSize: 12,
-    color: "#9ca3af",
-    marginTop: 4,
-    lineHeight: 18,
-  },
-  inputGroup: {
-    marginBottom: 16,
-  },
-  inputLabel: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#374151",
-    marginBottom: 8,
-  },
-  textInput: {
-    backgroundColor: "white",
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    fontSize: 14,
-    color: "#1f2937",
-    borderWidth: 1,
-    borderColor: "#e5e7eb",
-  },
-  textInputError: {
-    borderColor: "#ef4444",
-  },
-  textArea: {
-    height: 100,
-    textAlignVertical: "top",
-    paddingTop: 14,
-  },
-  errorText: {
-    fontSize: 12,
-    color: "#ef4444",
-    marginTop: 4,
-  },
-  charCount: {
-    fontSize: 12,
-    textAlign: "right",
-    marginTop: 4,
-  },
-  charCountDone: {
-    color: "#10b981",
-  },
-  charCountPending: {
-    color: "#9ca3af",
-  },
-  chipContainer: {
-    flexDirection: "row",
-    gap: 8,
-  },
-  chipContainerWrap: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
-  },
-  chip: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 6,
-    paddingVertical: 12,
-    borderRadius: 12,
-    backgroundColor: "white",
-    borderWidth: 1,
-    borderColor: "#e5e7eb",
-    minWidth: 80,
-  },
-  chipSelected: {
-    backgroundColor: PRIMARY,
-    borderColor: PRIMARY,
-  },
-  chipText: {
-    fontSize: 12,
-    color: "#6b7280",
-    fontWeight: "500",
-  },
-  chipTextSelected: {
-    color: "white",
-  },
-  imageUpload: {
-    borderRadius: 12,
-    overflow: "hidden",
-    borderWidth: 2,
-    borderStyle: "dashed",
-    borderColor: "#e5e7eb",
-  },
-  idImagePreview: {
-    width: "100%",
-    height: 150,
-    resizeMode: "cover",
-  },
-  imageUploadPlaceholder: {
-    width: "100%",
-    height: 120,
-    backgroundColor: "#f9fafb",
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 16,
-  },
-  uploadText: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#374151",
-    marginTop: 8,
-  },
-  uploadHint: {
-    fontSize: 12,
-    color: "#9ca3af",
-    marginTop: 4,
-  },
-  submitButton: {
-    backgroundColor: PRIMARY,
-    borderRadius: 12,
-    paddingVertical: 16,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    marginTop: 24,
-    marginBottom: 16,
-    shadowColor: PRIMARY,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 12,
-    elevation: 6,
-  },
-  submitButtonText: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "white",
-  },
-  privacyText: {
-    fontSize: 12,
-    color: "#9ca3af",
-    textAlign: "center",
-    lineHeight: 18,
-  },
-  privacyLink: {
-    color: "#374151",
-    fontWeight: "600",
-  },
-});

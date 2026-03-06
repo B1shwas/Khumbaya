@@ -3,7 +3,12 @@ import { UserLoginType, UserSignupType } from "@/src/features/user/types";
 import { useAuthStore } from "@/src/store/AuthStore";
 import { ResponseFormat } from "@/src/utils/type/responce";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createUserApi, getUserProfile } from "./user.service";
+import {
+  createUserApi,
+  getUserProfile,
+  updateUserMeApi,
+  type UpdateUserMePayload,
+} from "./user.service";
 
 interface LoginResponse {
   id: number;
@@ -40,7 +45,6 @@ export function useSignup() {
       return data;
     },
     onSuccess: async (data) => {
-      
       useAuthStore.getState().setAuth(data.token, null);
       queryClient.invalidateQueries();
     },
@@ -67,6 +71,20 @@ export function useProfile() {
       });
 
       return data;
+    },
+  });
+}
+
+export function useUpdateUserMe() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (payload: UpdateUserMePayload) => {
+      const data = await updateUserMeApi(payload);
+      return data;
+    },
+    onSuccess: async () => {
+      queryClient.invalidateQueries({ queryKey: ["profile"] });
     },
   });
 }
