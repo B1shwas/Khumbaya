@@ -1,4 +1,3 @@
-import { Event } from "@/src/constants/event";
 import { useGetInvitedEvents } from "@/src/features/events/hooks/use-event";
 import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
@@ -20,9 +19,7 @@ export const InvitedEventsTab = ({ isActive }: InvitedEventsTabProps) => {
     refetch,
   } = useGetInvitedEvents();
 
-  const invitedEvents = (invitedEventsData as Event[]).filter(
-    (event) => event.status === "invited"
-  );
+  
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -54,8 +51,8 @@ export const InvitedEventsTab = ({ isActive }: InvitedEventsTabProps) => {
             Failed to load invitations
           </Text>
         </View>
-      ) : invitedEvents.length > 0 ? (
-        invitedEvents.map((event) => (
+      ) : invitedEventsData.length > 0 ? (
+        invitedEventsData.map((event:any) => (
           <Event_WITH_ROLE
             key={event.id}
             event={event}

@@ -1,8 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  getEventResponses,
   getEventGuest,
   getInvitation,
   inviteGuest,
+  setResponce,
+  type EventResponseItem,
   type InviteGuestPayload,
 } from "./service";
 
@@ -22,6 +25,16 @@ export const useGetInvitationsForEvent = (eventId: number | null) => {
   });
 };
 
+export const useGetEventResponses = (eventId: number | null) => {
+  return useQuery<EventResponseItem[]>({
+    queryKey: ["event-responses", eventId],
+    queryFn: () => getEventResponses(eventId!),
+    enabled: !!eventId,
+    staleTime: 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+  });
+};
+
 export const useInviteGuest = () => {
   const queryClient = useQueryClient();
 
@@ -33,6 +46,29 @@ export const useInviteGuest = () => {
       eventId: number;
       payload: InviteGuestPayload;
     }) => inviteGuest(eventId, payload),
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ["event-invitations", variables.eventId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["event-guests", variables.eventId],
+      });
+      queryClient.invalidateQueries({ queryKey: ["events"] });
+    },
+  });
+};
+
+export const useSetResponse = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      eventId,
+      payload,
+    }: {
+      eventId: number;
+      payload: any;
+    }) => setResponce(eventId, payload),
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({
         queryKey: ["event-invitations", variables.eventId],

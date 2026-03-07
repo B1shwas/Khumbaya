@@ -32,28 +32,28 @@ export interface EVENT {
   createdAt?: string;
   updatedAt?: string;
   imageUrl?: string;
-  eventMembershipId?: number;
-}
-
-interface InvitationRecord {
-  id: number;
-  eventId: number;
-  status?: string;
 }
 
 interface InvitationEventRecord {
-  id: number;
   title?: string;
+  startDateTime?: string;
   startDate?: string;
   startTime?: string | null;
+  endDateTime?: string;
   endDate?: string;
   location?: string;
+  venue?: string | null;
   imageUrl?: string;
 }
 
 interface InvitationItem {
-  invitation: InvitationRecord;
-  event: InvitationEventRecord;
+  id: number;
+  eventId?: number;
+  invitationId?: number;
+  invitation_status?: string;
+  status?: string;
+  role?: string;
+  event_detail?: InvitationEventRecord;
 }
 
 interface GetEventsParams {
@@ -87,36 +87,6 @@ const formatTime = (dateValue?: string, fallbackTime?: string | null) => {
   });
 };
 
-const mapInvitationToEvent = (item: InvitationItem): Event => {
-  const invitationStatus = (item.invitation.status ?? "").toLowerCase();
-  const now = Date.now();
-  const endDateTime = item.event.endDate
-    ? new Date(item.event.endDate).getTime()
-    : undefined;
-
-  const status =
-    invitationStatus === "pending"
-      ? "invited"
-      : typeof endDateTime === "number" && endDateTime < now
-        ? "completed"
-        : "upcoming";
-
-  return {
-    id: String(item.event.id ?? item.invitation.eventId ?? item.invitation.id),
-    invitationId: item.invitation.id,
-    title: item.event.title ?? "Untitled Event",
-    startDateTime: item.event.startDate ?? "",
-    endDateTime: item.event.endDate ?? "",
-    date: formatDate(item.event.startDate),
-    time: formatTime(item.event.startDate, item.event.startTime),
-    location: item.event.location ?? "Location TBA",
-    venue: item.event.location ?? "Location TBA",
-    imageUrl: item.event.imageUrl ?? "",
-    role: "Guest",
-    status,
-  };
-};
-
 export const createEventApi = async (data: CREATEEVENT) => {
   const response = await api.post("/event", data);
   return response.data;
@@ -147,7 +117,7 @@ export const getUpcomingEventsApi = async ({
         id: String(mergedItem.id),
         date: formatDate(startDateTime),
         time: formatTime(startDateTime),
-        role: mergedItem.role || "Guest", // Ensure role is explicitly set
+        role: mergedItem.role , // Ensure role is explicitly set
       } as Event;
     });
   }
@@ -158,7 +128,32 @@ export const getInvitedEvent = async () => {
   const response = await api.get("/rsvp/invitations");
   const payload = response.data?.data;
   if (Array.isArray(payload?.items)) {
-    return payload.items.map(mapInvitationToEvent);
+    return payload.items.map((item: InvitationItem) => {
+      const detail = item.event_detail ?? {};
+      const startDateTime = detail.startDateTime ||"";
+      const endDateTime = detail.endDateTime  || "";
+      const invitationStatus = (
+        item.invitation_status ?? item.status ?? ""
+      ).toLowerCase();
+      const normalizedRole =
+        item.role === "Vendor" || item.role === "Organizer" || item.role === "Guest"
+          ? item.role
+          : "Guest";
+
+      return {
+        id: String(item.eventId ?? item.id),
+        invitationId: item.invitationId ?? item.id,
+        title: detail.title ?? "Untitled Event",
+        startDateTime,
+        endDateTime,
+        time: formatTime(startDateTime, detail.startTime),
+        location: detail.location ?? "Location TBA",
+        venue: detail.venue ?? detail.location ?? "Location TBA",
+        imageUrl: detail.imageUrl ?? "",
+        role: normalizedRole,
+        status: (invitationStatus || "pending"),
+      } as Event;
+    });
   }
   return [] as Event[];
 };
@@ -181,6 +176,7 @@ export const acceptRsvpInvitationApi = async (invitationId: number) => {
   const response = await api.post(`/rsvp/accept/${invitationId}`);
   return response.data;
 };
+
 export const updateEventApi = async (
   id: number,
   data: Partial<CREATEEVENT>

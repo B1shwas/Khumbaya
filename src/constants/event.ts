@@ -9,7 +9,7 @@ export interface Event {
   imageUrl: string;
   role: EventRole;
   status: EventTab;
-  date: string;
+
   time: string;
 }
 

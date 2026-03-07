@@ -2,9 +2,12 @@ import EventHighlightTimeline from "@/src/components/event/EventHighlightTimelin
 import FamilyRsvpCard from "@/src/components/event/FamilyRsvpCard";
 import ServiceGrid from "@/src/components/event/ServiceGrid";
 import { Text } from "@/src/components/ui/Text";
+import { useGetEventResponses } from "@/src/features/guests/api/use-guests";
+import { useAuthStore } from "@/src/store/AuthStore";
 import { EventHighlight, EventService } from "@/src/types";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { useMemo } from "react";
 import { Image, ScrollView, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -66,6 +69,7 @@ const Section = ({
 
 export default function GuestEventDetails() {
   const router = useRouter();
+  const user = useAuthStore((state) => state.user);
   const params = useLocalSearchParams<{
     eventId: string;
     title?: string;
@@ -76,17 +80,42 @@ export default function GuestEventDetails() {
     familyName?: string;
   }>();
 
-  // TODO: replace with real family membership check from API / store
-  const isFamily = true;
-  // TODO: replace with real RSVP status from API / store
-  const hasRsvped = false;
+  const parsedEventId = Number(params.eventId);
+  const eventId = Number.isFinite(parsedEventId) ? parsedEventId : null;
+  const {
+    data: eventResponses = [],
+    isLoading: isResponsesLoading,
+  } = useGetEventResponses(eventId);
+
+  const totalMembers = eventResponses.length;
+  const confirmedCount = eventResponses.filter((item) => !!item.event_guest).length;
+  const isFamily = totalMembers > 1;
+
+  const hasRsvped = useMemo(() => {
+    if (!user?.id) return false;
+    return eventResponses.some(
+      (item) => item.user_detail.id === user.id && item.event_guest !== null
+    );
+  }, [eventResponses, user?.id]);
+
+  const familyMembers = useMemo(
+    () =>
+      eventResponses.map((item, index) => ({
+        id: `${item.user_detail.id}-${index}`,
+        name: item.user_detail.username,
+        avatarUrl: item.user_detail.photo ?? undefined,
+      })),
+    [eventResponses]
+  );
 
   const title = params.title ?? "Event Details";
   const dateRange = params.dateRange ?? "Oct 24 - Oct 27, 2026";
   const venue = params.venue ?? "Grand Palace";
   const location = params.location ?? "Kahtmandu";
   const imageUrl = params.imageUrl;
-  const familyName = params.familyName ?? "Rahul Family";
+  const familyName =
+    params.familyName ??
+    (familyMembers.length > 0 ? `${familyMembers[0].name} Family` : "Family RSVP");
 
   return (
     <SafeAreaView className="flex-1 bg-background-light" edges={["top"]}>
@@ -140,11 +169,17 @@ export default function GuestEventDetails() {
         </Section>
 
         <View className="px-5 py-5">
+          {isResponsesLoading && (
+            <View className="bg-white rounded-xl p-4 border border-slate-100 shadow-sm mb-4">
+              <Text className="text-sm text-slate-500">Loading RSVP responses...</Text>
+            </View>
+          )}
+
           {isFamily ? (
             <FamilyRsvpCard
               familyName={familyName}
-              members={[]}
-              confirmedCount={5}
+              members={familyMembers}
+              confirmedCount={confirmedCount}
               onManage={() =>
                 router.push(
                   `/(protected)/(client-stack)/events/${params.eventId}/(guest)/family-rsvp`
