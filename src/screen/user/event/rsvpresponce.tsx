@@ -1,10 +1,13 @@
 import { DatePicker } from "@/components/nativewindui/DatePicker";
+import { useSetInvitationResponce } from "@/src/features/guests/api/use-guests";
+import { useAuthStore } from "@/src/store/AuthStore";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { DateTimePickerEvent } from "@react-native-community/datetimepicker";
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { CheckSquare, Square } from "lucide-react-native";
-import { useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
+  Alert,
   Pressable,
   ScrollView,
   Switch,
@@ -32,7 +35,17 @@ const Icon = ({
 );
 
 /** Inner form fields — safe to embed inside a parent ScrollView */
-export const RSVPFormContent = ({ memberId }: { memberId?: string } = {}) => {
+export const RSVPFormContent = ({
+  memberId,
+  eventId,
+}: {
+  memberId?: string;
+  eventId: number | null;
+}) => {
+  const router = useRouter();
+  const currentUser = useAuthStore((state) => state.user);
+  const setInvitationResponceMutation = useSetInvitationResponce();
+
   const [attendance, setAttendance] = useState("yes");
   const [accommodation, setAccommodation] = useState(false);
   const [arrivalPickup, setArrivalPickup] = useState(false);
@@ -40,6 +53,77 @@ export const RSVPFormContent = ({ memberId }: { memberId?: string } = {}) => {
   const [notes, setNotes] = useState("");
   const [arrivalDateTime, setArrivalDateTime] = useState(new Date());
   const [departureDateTime, setDepartureDateTime] = useState(new Date());
+
+  const targetUserId = useMemo(() => {
+    const memberIdAsNumber = memberId ? Number(memberId) : NaN;
+    if (Number.isFinite(memberIdAsNumber)) {
+      return memberIdAsNumber;
+    }
+
+    const currentUserId = Number(currentUser?.id);
+    if (Number.isFinite(currentUserId)) {
+      return currentUserId;
+    }
+
+    return null;
+  }, [currentUser?.id, memberId]);
+
+  const mappedAttendance = useMemo<"attending" | "declined" | "pending">(() => {
+    if (attendance === "yes") return "attending";
+    if (attendance === "no") return "declined";
+    return "pending";
+  }, [attendance]);
+
+  const onSaveRsvp = useCallback(async () => {
+    if (!eventId) {
+      Alert.alert("Error", "Invalid event id.");
+      return;
+    }
+
+    if (!targetUserId) {
+      Alert.alert("Error", "Could not determine which user to RSVP for.");
+      return;
+    }
+
+    try {
+      await setInvitationResponceMutation.mutateAsync({
+        eventId,
+        payload: {
+          userid: targetUserId,
+          status: mappedAttendance,
+          notes: notes.trim() ? notes.trim() : null,
+          arrival_date_time: arrivalDateTime.toISOString(),
+          departure_date_time: departureDateTime.toISOString(),
+          isAccomodation: accommodation,
+          traveling: {
+            arrivalPickup,
+            departureDrop,
+          },
+        },
+      });
+
+      Alert.alert("Success", "RSVP saved successfully.");
+      router.back();
+    } catch (error: any) {
+      const message =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Failed to save RSVP. Please try again.";
+      Alert.alert("Error", message);
+    }
+  }, [
+    accommodation,
+    arrivalDateTime,
+    arrivalPickup,
+    departureDateTime,
+    departureDrop,
+    eventId,
+    mappedAttendance,
+    notes,
+    router,
+    setInvitationResponceMutation,
+    targetUserId,
+  ]);
 
   const makeDateHandler =
     (setter: (d: Date) => void) =>
@@ -199,8 +283,12 @@ export const RSVPFormContent = ({ memberId }: { memberId?: string } = {}) => {
         className="w-full py-4 rounded-md items-center justify-center mb-4"
         style={{ backgroundColor: PRIMARY }}
         activeOpacity={0.9}
+        onPress={onSaveRsvp}
+        disabled={setInvitationResponceMutation.isPending}
       >
-        <Text className="text-white font-bold text-base">Save RSVP</Text>
+        <Text className="text-white font-bold text-base">
+          {setInvitationResponceMutation.isPending ? "Saving RSVP..." : "Save RSVP"}
+        </Text>
       </TouchableOpacity>
     </View>
   );
@@ -209,7 +297,15 @@ export const RSVPFormContent = ({ memberId }: { memberId?: string } = {}) => {
 /** Standalone full-page RSVP form (used at the /rsvp route) */
 const RSVPForm = () => {
   // memberId is present when filling RSVP on behalf of a family member
-  const { memberId } = useLocalSearchParams<{ memberId?: string }>();
+  const { memberId, eventId: eventIdParam } = useLocalSearchParams<{
+    memberId?: string;
+    eventId?: string;
+  }>();
+
+  const eventId = useMemo(() => {
+    const parsedEventId = eventIdParam ? Number(eventIdParam) : NaN;
+    return Number.isFinite(parsedEventId) ? parsedEventId : null;
+  }, [eventIdParam]);
 
   return (
     <View className="flex-1 max-w-md mx-auto w-full">
@@ -230,7 +326,7 @@ const RSVPForm = () => {
             </Text>
           </View>
         )}
-        <RSVPFormContent memberId={memberId} />
+        <RSVPFormContent memberId={memberId} eventId={eventId} />
       </ScrollView>
     </View>
   );

@@ -4,8 +4,9 @@ import {
   getEventGuest,
   getInvitation,
   inviteGuest,
-  setResponce,
+  setInvitationResponce,
   type EventResponseItem,
+  type InvitationResponcePayload,
   type InviteGuestPayload,
 } from "./service";
 
@@ -58,7 +59,7 @@ export const useInviteGuest = () => {
   });
 };
 
-export const useSetResponse = () => {
+export const useSetInvitationResponce = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -67,8 +68,8 @@ export const useSetResponse = () => {
       payload,
     }: {
       eventId: number;
-      payload: any;
-    }) => setResponce(eventId, payload),
+      payload: InvitationResponcePayload;
+    }) => setInvitationResponce(eventId, payload),
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({
         queryKey: ["event-invitations", variables.eventId],
@@ -76,7 +77,13 @@ export const useSetResponse = () => {
       queryClient.invalidateQueries({
         queryKey: ["event-guests", variables.eventId],
       });
+      queryClient.invalidateQueries({
+        queryKey: ["event-responses", variables.eventId],
+      });
       queryClient.invalidateQueries({ queryKey: ["events"] });
     },
   });
 };
+
+// Backward-compatible alias for existing imports/usages.
+export const useSetResponse = useSetInvitationResponce;
