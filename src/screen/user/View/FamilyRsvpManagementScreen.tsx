@@ -46,12 +46,18 @@ interface FamilyMemberResponse {
 
 interface MemberRsvp {
   id: string;
+  familyId: number;
   name: string;
   avatarUrl?: string;
   status: RSVPStatus;
   dateRange?: string;
   roomNeeded?: string;
   notes?: string;
+  // raw values for pre-filling the edit form
+  rawStatus: string | null;
+  rawArrival: string | null;
+  rawDeparture: string | null;
+  rawAccommodation: boolean | null;
 }
 
 function deriveStatus(event_guest: EventGuest | null): RSVPStatus {
@@ -76,6 +82,7 @@ function mapToMemberRsvp(item: FamilyMemberResponse): MemberRsvp {
   const status = deriveStatus(item.event_guest);
   return {
     id: item.user_detail.id.toString(),
+    familyId: item.user_detail.familyId,
     name: item.user_detail.username,
     avatarUrl: item.user_detail.photo ?? undefined,
     status,
@@ -92,6 +99,10 @@ function mapToMemberRsvp(item: FamilyMemberResponse): MemberRsvp {
           : "No"
         : undefined,
     notes: item.event_guest?.notes ?? undefined,
+    rawStatus: item.event_guest?.status ?? null,
+    rawArrival: item.event_guest?.arrival_date_time ?? null,
+    rawDeparture: item.event_guest?.departure_date_time ?? null,
+    rawAccommodation: item.event_guest?.isAccomodation ?? null,
   };
 }
 
@@ -223,7 +234,7 @@ export default function FamilyRsvpManagementScreen() {
   const { eventId } = useLocalSearchParams<{ eventId: string }>();
 
   const { data: eventResponses, isLoading } = useEventResponseWithUser(
-    eventId as any
+    Number(eventId)
   );
 
   const members: MemberRsvp[] = (eventResponses?.responses ?? []).map(
@@ -256,7 +267,7 @@ export default function FamilyRsvpManagementScreen() {
             member={member}
             onPressRsvp={() =>
               router.push(
-                `/(protected)/(client-stack)/events/${eventId}/(guest)/rsvp?memberId=${member.id}`
+                `/(protected)/(client-stack)/events/${eventId}/(guest)/rsvp?userId=${member.id}&familyId=${member.familyId}&memberName=${encodeURIComponent(member.name)}&rawStatus=${member.rawStatus ?? ""}&rawArrival=${encodeURIComponent(member.rawArrival ?? "")}&rawDeparture=${encodeURIComponent(member.rawDeparture ?? "")}&rawAccommodation=${member.rawAccommodation ?? ""}&rawNotes=${encodeURIComponent(member.notes ?? "")}`
               )
             }
           />

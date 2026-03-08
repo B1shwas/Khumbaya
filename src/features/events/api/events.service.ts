@@ -251,6 +251,7 @@ export interface RsvpResponsePayload {
   departure_date_time?: string | null;
   isAccomodation?: string;
   role?: string;
+  status?: string;
   familyId?: number;
 }
 
