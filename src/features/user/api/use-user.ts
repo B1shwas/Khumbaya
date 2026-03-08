@@ -88,3 +88,16 @@ export function useUpdateUserMe() {
     },
   });
 }
+
+export function useChangePassword() {
+  return useMutation({
+    mutationFn: async (data: {
+      currentPassword: string;
+      newPassword: string;
+      confimPassword: string;
+    }) => {
+      const response = await api.patch("/user", data);
+      return response.data;
+    },
+  });
+}

@@ -10,39 +10,37 @@ import {
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import EventDetailHero from "./EventDetailHero";
 
-const EventDetail = ({
-  isInvitedGuest = false,
-}: {
-  isInvitedGuest?: boolean;
-}) => {
+const EventDetail = () => {
   const { eventId } = useLocalSearchParams<{ eventId: string }>();
 
   const { data: found } = useGetEventWithRole();
   const foundEvent = found?.find(
     (e: Event) => String(e.id) === String(eventId)
   );
-  // Fallback shape so UI never crashes even if event not found
-  const event = foundEvent ?? ({
-    id: eventId ?? "0",
-    title: "Event Details",
-    date: "—",
-    location: "—",
-    venue: "—",
-    imageUrl: "",
-    role: "Organizer" as const,
-    status: "upcoming" as const,
-    time: "",
-    startDateTime: "",
-    endDateTime: "",
-    days: 0,
-    hours: 0,
-    minutes: 0,
-    guests: { confirmed: 0, total: 0 },
-    budget: { spent: 0, total: 0 },
-    tasks: { pending: 0 },
-    vendors: { booked: 0, pending: 0 },
-    nextTask: "",
-  } as Event);
+
+  const event =
+    foundEvent ??
+    ({
+      id: eventId ?? "0",
+      title: "Event Details",
+      date: "—",
+      location: "—",
+      venue: "—",
+      imageUrl: "",
+      role: "Organizer" as const,
+      status: "upcoming" as const,
+      time: "",
+      startDateTime: "",
+      endDateTime: "",
+      days: 0,
+      hours: 0,
+      minutes: 0,
+      guests: { confirmed: 0, total: 0 },
+      budget: { spent: 0, total: 0 },
+      tasks: { pending: 0 },
+      vendors: { booked: 0, pending: 0 },
+      nextTask: "",
+    } as Event);
 
   const manageActions = [
     {
@@ -221,19 +219,6 @@ const EventDetail = ({
           </TouchableOpacity>
         </View>
       </View>
-
-      {/* Invited Guest Notice */}
-      {isInvitedGuest && (
-        <View className="mx-4 mb-4 p-4 bg-blue-50 rounded-xl border border-blue-100">
-          <View className="flex-row items-center gap-6">
-            <Ionicons name="information-circle" size={20} color="#3B82F6" />
-            <Text className="text-sm text-blue-700 flex-shrink">
-              You're viewing this event as a guest. Some features like budget
-              management are only available to the event organizer.
-            </Text>
-          </View>
-        </View>
-      )}
 
       {/* Bottom spacer */}
       <View className="h-24" />

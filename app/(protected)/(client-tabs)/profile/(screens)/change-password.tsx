@@ -1,7 +1,7 @@
-import CustomHeader from "@/src/components/ui/profile/CustomHeader";
+import { useChangePassword } from "@/src/features/user/api/use-user";
 import { MaterialIcons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
 import { useState } from "react";
+import { Controller, useForm } from "react-hook-form";
 import {
   Alert,
   KeyboardAvoidingView,
@@ -19,6 +19,7 @@ const PasswordInput = ({
   label,
   value,
   onChangeText,
+  onBlur,
   placeholder,
   showPassword,
   onTogglePassword,
@@ -27,6 +28,7 @@ const PasswordInput = ({
   label: string;
   value: string;
   onChangeText: (text: string) => void;
+  onBlur?: () => void;
   placeholder: string;
   showPassword: boolean;
   onTogglePassword: () => void;
@@ -40,10 +42,11 @@ const PasswordInput = ({
       <TextInput
         value={value}
         onChangeText={onChangeText}
+        onBlur={onBlur}
         placeholder={placeholder}
         placeholderTextColor="#9ca3af"
         secureTextEntry={!showPassword}
-        className={`w-full bg-white rounded-xl shadow-sm border ${error ? "border-red-300" : "border-gray-100"} h-14 px-4 pr-12 text-gray-800 text-base`}
+        className={`w-full bg-gray-200 rounded-md shadow-sm border ${error ? "border-red-300" : "border-gray-100"} h-14 px-4 pr-12 text-gray-800 text-base`}
       />
       <TouchableOpacity
         className="absolute right-4 top-1/2 -translate-y-1/2"
@@ -60,27 +63,59 @@ const PasswordInput = ({
   </View>
 );
 
-// Reusable Card Component (DRY)
-const Card = ({
-  children,
-  className = "",
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) => (
-  <View
-    className={`bg-white rounded-2xl p-5 shadow-sm border border-gray-100 ${className}`}
-  >
-    {children}
-  </View>
-);
+type ChangePasswordFormValues = {
+  currentPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+};
+
+const getApiErrorMessage = (error: unknown): string | null => {
+  if (!error || typeof error !== "object") {
+    return null;
+  }
+
+  const maybeError = error as {
+    response?: {
+      data?: {
+        message?: string | string[];
+      };
+    };
+    message?: string;
+  };
+
+  const message = maybeError.response?.data?.message;
+  if (Array.isArray(message) && message.length > 0) {
+    return message[0];
+  }
+  if (typeof message === "string" && message.trim()) {
+    return message;
+  }
+  if (typeof maybeError.message === "string" && maybeError.message.trim()) {
+    return maybeError.message;
+  }
+
+  return null;
+};
 
 export default function ChangePasswordScreen() {
-  const router = useRouter();
-  const [formData, setFormData] = useState({
-    currentPassword: "",
-    newPassword: "",
-    confirmPassword: "",
+  const {
+    mutate: changePassword,
+    isPending,
+    error: mutationError,
+  } = useChangePassword();
+
+  const {
+    control,
+    handleSubmit,
+    reset,
+    getValues,
+    formState: { errors, isSubmitting },
+  } = useForm<ChangePasswordFormValues>({
+    defaultValues: {
+      currentPassword: "",
+      newPassword: "",
+      confirmPassword: "",
+    },
   });
 
   const [showPassword, setShowPassword] = useState({
@@ -89,19 +124,6 @@ export default function ChangePasswordScreen() {
     confirm: false,
   });
 
-  const [errors, setErrors] = useState<{ [key: string]: string }>({});
-  const [isLoading, setIsLoading] = useState(false);
-
-  const handleInputChange = (field: string, value: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
-    if (errors[field]) {
-      setErrors((prev) => ({ ...prev, [field]: "" }));
-    }
-  };
-
   const handleTogglePassword = (field: "current" | "new" | "confirm") => {
     setShowPassword((prev) => ({
       ...prev,
@@ -109,52 +131,30 @@ export default function ChangePasswordScreen() {
     }));
   };
 
-  const validateForm = () => {
-    const newErrors: { [key: string]: string } = {};
+  const apiErrorMessage =
+    getApiErrorMessage(mutationError) ||
+    "Invalid credentials. Please verify your current password and try again.";
 
-    if (!formData.currentPassword) {
-      newErrors.currentPassword = "Current password is required";
-    }
-
-    if (!formData.newPassword) {
-      newErrors.newPassword = "New password is required";
-    } else if (formData.newPassword.length < 8) {
-      newErrors.newPassword = "Password must be at least 8 characters";
-    }
-
-    if (!formData.confirmPassword) {
-      newErrors.confirmPassword = "Please confirm your password";
-    } else if (formData.newPassword !== formData.confirmPassword) {
-      newErrors.confirmPassword = "Passwords do not match";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+  const onSubmit = (data: ChangePasswordFormValues) => {
+    changePassword(
+      {
+        currentPassword: data.currentPassword,
+        newPassword: data.newPassword,
+        confimPassword: data.confirmPassword,
+      },
+      {
+        onSuccess: () => {
+          Alert.alert("Success", "Password changed successfully!");
+          reset();
+        },
+      }
+    );
   };
 
-  const handleChangePassword = () => {
-    if (!validateForm()) return;
-
-    setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-      Alert.alert("Success", "Password changed successfully!");
-      setFormData({
-        currentPassword: "",
-        newPassword: "",
-        confirmPassword: "",
-      });
-    }, 1500);
-  };
+  const isLoading = isPending || isSubmitting;
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
-      <CustomHeader
-        title="Change Password"
-        showSaveButton
-        onSave={handleChangePassword}
-        isLoading={isLoading}
-      />
+    <SafeAreaView className="flex-1 bg-gray-50" edges={["bottom"]}>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         className="flex-1"
@@ -175,62 +175,94 @@ export default function ChangePasswordScreen() {
           </View>
 
           {/* Password Form */}
-          <Card className="mb-4">
-            <PasswordInput
-              label="Current Password"
-              value={formData.currentPassword}
-              onChangeText={(text) =>
-                handleInputChange("currentPassword", text)
-              }
-              placeholder="Enter current password"
-              showPassword={showPassword.current}
-              onTogglePassword={() => handleTogglePassword("current")}
-              error={errors.currentPassword}
+          <View className="mb-4 p-5">
+            <Controller
+              control={control}
+              name="currentPassword"
+              rules={{
+                required: "Current password is required",
+                minLength: {
+                  value: 5,
+                  message: "Password must be at least 5 characters",
+                },
+              }}
+              render={({ field: { onChange, onBlur, value } }) => (
+                <PasswordInput
+                  label="Current Password"
+                  value={value}
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  placeholder="Enter current password"
+                  showPassword={showPassword.current}
+                  onTogglePassword={() => handleTogglePassword("current")}
+                  error={errors.currentPassword?.message}
+                />
+              )}
             />
 
-            <PasswordInput
-              label="New Password"
-              value={formData.newPassword}
-              onChangeText={(text) => handleInputChange("newPassword", text)}
-              placeholder="Enter new password"
-              showPassword={showPassword.new}
-              onTogglePassword={() => handleTogglePassword("new")}
-              error={errors.newPassword}
+            <Controller
+              control={control}
+              name="newPassword"
+              rules={{
+                required: "New password is required",
+                minLength: {
+                  value: 5,
+                  message: "Password must be at least 5 characters",
+                },
+              }}
+              render={({ field: { onChange, onBlur, value } }) => (
+                <PasswordInput
+                  label="New Password"
+                  value={value}
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  placeholder="Enter new password"
+                  showPassword={showPassword.new}
+                  onTogglePassword={() => handleTogglePassword("new")}
+                  error={errors.newPassword?.message}
+                />
+              )}
             />
 
-            <PasswordInput
-              label="Confirm New Password"
-              value={formData.confirmPassword}
-              onChangeText={(text) =>
-                handleInputChange("confirmPassword", text)
-              }
-              placeholder="Confirm new password"
-              showPassword={showPassword.confirm}
-              onTogglePassword={() => handleTogglePassword("confirm")}
-              error={errors.confirmPassword}
+            <Controller
+              control={control}
+              name="confirmPassword"
+              rules={{
+                required: "Please confirm your password",
+                minLength: {
+                  value: 5,
+                  message: "Password must be at least 5 characters",
+                },
+                validate: (value) =>
+                  value === getValues("newPassword") ||
+                  "Passwords do not match",
+              }}
+              render={({ field: { onChange, onBlur, value } }) => (
+                <PasswordInput
+                  label="Confirm New Password"
+                  value={value}
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  placeholder="Confirm new password"
+                  showPassword={showPassword.confirm}
+                  onTogglePassword={() => handleTogglePassword("confirm")}
+                  error={errors.confirmPassword?.message}
+                />
+              )}
             />
-          </Card>
 
-          {/* Tips */}
-          <View className="bg-amber-50 rounded-xl p-4 border border-amber-100 mb-6">
-            <View className="flex-row items-start gap-3">
-              <MaterialIcons name="lightbulb" size={24} color="#f59e0b" />
-              <View className="flex-1">
-                <Text className="text-sm font-semibold text-amber-800 mb-1">
-                  Password Tips
-                </Text>
-                <Text className="text-xs text-amber-700 leading-relaxed">
-                  • Use at least 8 characters{"\n"}• Mix uppercase and lowercase
-                  letters{"\n"}• Include numbers and special characters{"\n"}•
-                  Avoid using personal information
+            {mutationError && (
+              <View className="rounded-lg bg-red-50 p-3 mt-1">
+                <Text className="text-sm text-red-600 text-center">
+                  {apiErrorMessage}
                 </Text>
               </View>
-            </View>
+            )}
           </View>
 
           {/* Change Password Button */}
           <TouchableOpacity
-            onPress={handleChangePassword}
+            onPress={handleSubmit(onSubmit)}
             disabled={isLoading}
             className={`w-full h-14 bg-pink-500 rounded-xl flex-row items-center justify-center shadow-lg shadow-pink-200 
               ${isLoading ? "opacity-70" : ""}`}

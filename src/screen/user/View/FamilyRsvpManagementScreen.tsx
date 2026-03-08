@@ -1,11 +1,48 @@
 import Card from "@/src/components/ui/Card";
 import { Text } from "@/src/components/ui/Text";
+import { useEventResponseWithUser } from "@/src/features/events/hooks/use-event";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { Image, ScrollView, TouchableOpacity, View } from "react-native";
+import {
+  ActivityIndicator,
+  Image,
+  ScrollView,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 type RSVPStatus = "attending" | "declined" | "pending";
+
+interface EventGuest {
+  id: number;
+  userId: number;
+  eventId: number;
+  familyId: number;
+  status: string | null;
+  arrival_date_time: string | null;
+  departure_date_time: string | null;
+  isAccomodation: boolean | null;
+  notes: string | null;
+  role: string | null;
+  invited_by: number;
+  joined_at: string;
+}
+
+interface UserDetail {
+  id: number;
+  username: string;
+  email: string;
+  phone: string;
+  photo: string | null;
+  familyId: number;
+  relation: string | null;
+}
+
+interface FamilyMemberResponse {
+  event_guest: EventGuest | null;
+  user_detail: UserDetail;
+}
 
 interface MemberRsvp {
   id: string;
@@ -14,40 +51,49 @@ interface MemberRsvp {
   status: RSVPStatus;
   dateRange?: string;
   roomNeeded?: string;
-  transport?: string;
+  notes?: string;
 }
 
-// TODO: replace with real data from API / store
-const MOCK_MEMBERS: MemberRsvp[] = [
-  {
-    id: "1",
-    name: "Priya Sharma",
-    status: "attending",
-    dateRange: "Jul 12 - Jul 15",
-    roomNeeded: "Yes",
-    transport: "Arranged",
-  },
-  {
-    id: "2",
-    name: "Rahul Sharma",
-    status: "attending",
-    dateRange: "Jul 12 - Jul 15",
-    roomNeeded: "Yes",
-    transport: "Self",
-  },
-  {
-    id: "3",
-    name: "Ananya Sharma",
-    status: "pending",
-  },
-  {
-    id: "4",
-    name: "Aarav Sharma",
-    status: "attending",
-    dateRange: "Jul 12 - Jul 15",
-    roomNeeded: "Shared",
-  },
-];
+function deriveStatus(event_guest: EventGuest | null): RSVPStatus {
+  if (!event_guest) return "pending";
+  if (event_guest.status === "rejected") return "declined";
+  return "attending";
+}
+
+function formatDateRange(
+  arrival: string | null,
+  departure: string | null
+): string | undefined {
+  if (!arrival && !departure) return undefined;
+  const fmt = (d: string) =>
+    new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  if (arrival && departure) return `${fmt(arrival)} – ${fmt(departure)}`;
+  if (arrival) return `From ${fmt(arrival)}`;
+  return `Until ${fmt(departure!)}`;
+}
+
+function mapToMemberRsvp(item: FamilyMemberResponse): MemberRsvp {
+  const status = deriveStatus(item.event_guest);
+  return {
+    id: item.user_detail.id.toString(),
+    name: item.user_detail.username,
+    avatarUrl: item.user_detail.photo ?? undefined,
+    status,
+    dateRange: item.event_guest
+      ? formatDateRange(
+          item.event_guest.arrival_date_time,
+          item.event_guest.departure_date_time
+        )
+      : undefined,
+    roomNeeded:
+      item.event_guest?.isAccomodation != null
+        ? item.event_guest.isAccomodation
+          ? "Yes"
+          : "No"
+        : undefined,
+    notes: item.event_guest?.notes ?? undefined,
+  };
+}
 
 const statusConfig: Record<
   RSVPStatus,
@@ -132,14 +178,15 @@ const MemberCard = ({
                   </Text>
                 </View>
               )}
-              {member.transport && (
+              {member.notes && (
                 <View className="flex-row items-center gap-2">
-                  <Ionicons name="car-outline" size={13} color="#64748b" />
-                  <Text className="text-sm text-slate-500">
-                    Transport:{" "}
-                    <Text className="text-slate-800 font-semibold">
-                      {member.transport}
-                    </Text>
+                  <Ionicons
+                    name="chatbubble-outline"
+                    size={13}
+                    color="#64748b"
+                  />
+                  <Text className="text-sm text-slate-500" numberOfLines={2}>
+                    {member.notes}
                   </Text>
                 </View>
               )}
@@ -175,6 +222,25 @@ export default function FamilyRsvpManagementScreen() {
   const router = useRouter();
   const { eventId } = useLocalSearchParams<{ eventId: string }>();
 
+  const { data: eventResponses, isLoading } = useEventResponseWithUser(
+    eventId as any
+  );
+
+  const members: MemberRsvp[] = (eventResponses?.responses ?? []).map(
+    (item: FamilyMemberResponse) => mapToMemberRsvp(item)
+  );
+
+  if (isLoading) {
+    return (
+      <SafeAreaView
+        className="flex-1 bg-background-light items-center justify-center"
+        edges={["bottom"]}
+      >
+        <ActivityIndicator size="large" color="#ee2b8c" />
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView className="flex-1 bg-background-light" edges={["bottom"]}>
       <ScrollView
@@ -184,7 +250,7 @@ export default function FamilyRsvpManagementScreen() {
         <Text className="text-xs font-semibold uppercase tracking-widest text-slate-400 px-1 mb-1">
           Family Members
         </Text>
-        {MOCK_MEMBERS.map((member) => (
+        {members.map((member) => (
           <MemberCard
             key={member.id}
             member={member}

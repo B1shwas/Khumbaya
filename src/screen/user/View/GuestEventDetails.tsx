@@ -2,10 +2,20 @@ import EventHighlightTimeline from "@/src/components/event/EventHighlightTimelin
 import FamilyRsvpCard from "@/src/components/event/FamilyRsvpCard";
 import ServiceGrid from "@/src/components/event/ServiceGrid";
 import { Text } from "@/src/components/ui/Text";
+import {
+  useEventById,
+  useEventResponseWithUser,
+} from "@/src/features/events/hooks/use-event";
 import { EventHighlight, EventService } from "@/src/types";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { Image, ScrollView, TouchableOpacity, View } from "react-native";
+import {
+  ActivityIndicator,
+  Image,
+  ScrollView,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const DEFAULT_HIGHLIGHTS: EventHighlight[] = [
@@ -66,27 +76,31 @@ const Section = ({
 
 export default function GuestEventDetails() {
   const router = useRouter();
-  const params = useLocalSearchParams<{
-    eventId: string;
-    title?: string;
-    dateRange?: string;
-    venue?: string;
-    location?: string;
-    imageUrl?: string;
-    familyName?: string;
-  }>();
 
-  // TODO: replace with real family membership check from API / store
-  const isFamily = true;
-  // TODO: replace with real RSVP status from API / store
+  const { eventId } = useLocalSearchParams();
+
+  const { data: eventDetails, isLoading } = useEventById(eventId as any);
+  const { data: eventResponse, isLoading: responseLoading } =
+    useEventResponseWithUser(eventId as any);
+
+  const isFamily = eventResponse?.isFamily ?? false;
+
   const hasRsvped = false;
 
-  const title = params.title ?? "Event Details";
-  const dateRange = params.dateRange ?? "Oct 24 - Oct 27, 2026";
-  const venue = params.venue ?? "Grand Palace";
-  const location = params.location ?? "Kahtmandu";
-  const imageUrl = params.imageUrl;
-  const familyName = params.familyName ?? "Rahul Family";
+  const imageUrl = eventDetails?.imageUrl ?? "";
+
+  const familyName = "Family";
+
+  if (isLoading || responseLoading) {
+    return (
+      <SafeAreaView
+        className="flex-1 bg-background-light items-center justify-center"
+        edges={["top"]}
+      >
+        <ActivityIndicator size="large" color="#ee2b8c" />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView className="flex-1 bg-background-light" edges={["top"]}>
@@ -108,22 +122,19 @@ export default function GuestEventDetails() {
           </View>
 
           <Text variant="h1" className="text-center mt-4 text-lg">
-            {title}
+            {eventDetails?.title}
           </Text>
 
           <View className="flex-row items-center gap-1.5 mt-2">
             <Ionicons name="calendar-outline" size={14} color="#ee2b8c" />
             <Text variant="caption" className="text-primary">
-              {dateRange}
+              {eventDetails?.date}
             </Text>
           </View>
 
           <View className="flex-row items-center gap-1.5 mt-1">
             <Ionicons name="location-outline" size={14} color="#6b7280" />
-            <Text variant="caption">
-              {venue}
-              {location ? `, ${location}` : ""}
-            </Text>
+            <Text variant="caption">{eventDetails?.location}</Text>
           </View>
         </View>
 
@@ -147,7 +158,7 @@ export default function GuestEventDetails() {
               confirmedCount={5}
               onManage={() =>
                 router.push(
-                  `/(protected)/(client-stack)/events/${params.eventId}/(guest)/family-rsvp`
+                  `/(protected)/(client-stack)/events/${eventId}/(guest)/family-rsvp`
                 )
               }
             />
@@ -174,7 +185,7 @@ export default function GuestEventDetails() {
                 activeOpacity={0.85}
                 onPress={() =>
                   router.push(
-                    `/(protected)/(client-stack)/events/${params.eventId}/(guest)/rsvp`
+                    `/(protected)/(client-stack)/events/${eventId}/(guest)/rsvp`
                   )
                 }
               >

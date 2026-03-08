@@ -5,8 +5,12 @@ import {
   CREATEEVENT,
   createEventApi,
   getCompletedEventsApi,
+  getEventById,
   getInvitedEvent,
+  getResponsesWithUser,
   getUpcomingEventsApi,
+  RsvpResponsePayload,
+  submitRsvpResponseApi,
 } from "../api/events.service";
 
 export const useCreateEvent = () => {
@@ -89,12 +93,13 @@ export const useCreateEvent = () => {
   });
 };
 
-
 interface EventQueryOptions {
   enabled?: boolean;
 }
 
-export const usegetUpcomingEvents = ({ enabled = true }: EventQueryOptions = {}) => {
+export const usegetUpcomingEvents = ({
+  enabled = true,
+}: EventQueryOptions = {}) => {
   return useQuery({
     queryKey: ["events/upcoming"],
     queryFn: () => getUpcomingEventsApi(),
@@ -104,7 +109,9 @@ export const usegetUpcomingEvents = ({ enabled = true }: EventQueryOptions = {})
   });
 };
 
-export const useGetInvitedEvents = ({ enabled = true }: EventQueryOptions = {}) => {
+export const useGetInvitedEvents = ({
+  enabled = true,
+}: EventQueryOptions = {}) => {
   return useQuery({
     queryKey: ["rsvp-invitations"],
     queryFn: getInvitedEvent,
@@ -113,7 +120,9 @@ export const useGetInvitedEvents = ({ enabled = true }: EventQueryOptions = {}) 
     gcTime: 10 * 60 * 1000,
   });
 };
-export const useGetCompletedEvents = ({ enabled = true }: EventQueryOptions = {}) => {
+export const useGetCompletedEvents = ({
+  enabled = true,
+}: EventQueryOptions = {}) => {
   return useQuery({
     queryKey: ["events/completed"],
     queryFn: () => getCompletedEventsApi(),
@@ -123,22 +132,16 @@ export const useGetCompletedEvents = ({ enabled = true }: EventQueryOptions = {}
   });
 };
 
-export const useGetEventWithRole = ({ enabled = true }: EventQueryOptions = {}) => {
+export const useGetEventWithRole = ({
+  enabled = true,
+}: EventQueryOptions = {}) => {
   return useQuery({
     queryKey: ["events/with-role"],
     enabled,
     queryFn: async () => {
-      const [upcomingEvents, invitedEvents] = await Promise.all([
-        getUpcomingEventsApi(),
-        getInvitedEvent(),
-      ]);
+      const upcomingEvents = await getUpcomingEventsApi();
 
-      const deduped = new Map<string, Event>();
-      [...upcomingEvents, ...invitedEvents].forEach((event) => {
-        deduped.set(String(event.id), event as Event);
-      });
-
-      return Array.from(deduped.values());
+      return upcomingEvents;
     },
     staleTime: 60 * 1000,
     gcTime: 10 * 60 * 1000,
@@ -155,6 +158,38 @@ export const useAcceptRsvpInvitation = () => {
       queryClient.invalidateQueries({ queryKey: ["events/upcoming"] });
       queryClient.invalidateQueries({ queryKey: ["events/completed"] });
       queryClient.invalidateQueries({ queryKey: ["events/with-role"] });
+    },
+  });
+};
+
+export const useEventById = (eventId: number) => {
+  return useQuery({
+    queryKey: ["event", eventId],
+    queryFn: async () => {
+      const events = await getEventById(eventId);
+      return events;
+    },
+  });
+};
+
+export const useEventResponseWithUser = (eventId: number) => {
+  return useQuery({
+    queryKey: ["event-responses", eventId],
+    queryFn: async () => {
+      const responses = await getResponsesWithUser(eventId);
+      return responses;
+    },
+  });
+};
+
+export const useSubmitRsvpResponse = (eventId: number) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: RsvpResponsePayload) =>
+      submitRsvpResponseApi(eventId, payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["event-responses", eventId] });
+      queryClient.invalidateQueries({ queryKey: ["rsvp-invitations"] });
     },
   });
 };

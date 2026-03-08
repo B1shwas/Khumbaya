@@ -100,7 +100,10 @@ const mapInvitationToEvent = (item: InvitationItem): Event => {
   const invitation = item.invitation ?? {};
 
   const invitationStatus = (
-    item.invitation_status ?? item.status ?? invitation.status ?? ""
+    item.invitation_status ??
+    item.status ??
+    invitation.status ??
+    ""
   ).toLowerCase();
 
   const startDateTime = detail.startDateTime ?? detail.startDate ?? "";
@@ -119,7 +122,11 @@ const mapInvitationToEvent = (item: InvitationItem): Event => {
         : "upcoming";
 
   const resolvedEventId =
-    detail.eventId ?? detail.id ?? invitation.eventId ?? item.id ?? invitation.id;
+    detail.eventId ??
+    detail.id ??
+    invitation.eventId ??
+    item.id ??
+    invitation.id;
   const resolvedInvitationId = item.id ?? invitation.id;
 
   return {
@@ -202,7 +209,9 @@ export const getCompletedEventsApi = async ({
     if (event.status === "completed") return true;
 
     const endDate = event.endDateTime ? new Date(event.endDateTime) : undefined;
-    return !!endDate && !Number.isNaN(endDate.getTime()) && endDate < new Date();
+    return (
+      !!endDate && !Number.isNaN(endDate.getTime()) && endDate < new Date()
+    );
   });
 };
 
@@ -225,5 +234,30 @@ export const getEventGuest = async (id: number) => {
   const response = await api.get(`/event/${id}/guests`);
   return response.data;
 };
-export const getUserInvitedEvents = async () => { }
+export const getEventById = async (id: number) => {
+  const response = await api.get(`/event/${id}`);
+  return response.data.data;
+};
 
+export const getResponsesWithUser = async (eventId: number) => {
+  const response = await api.get(`invitation/event-responses/${eventId}`);
+  return response.data.data;
+};
+
+export interface RsvpResponsePayload {
+  userId: string;
+  notes?: string;
+  arrival_date_time?: string | null;
+  departure_date_time?: string | null;
+  isAccomodation?: string;
+  role?: string;
+  familyId?: number;
+}
+
+export const submitRsvpResponseApi = async (
+  eventId: number,
+  payload: RsvpResponsePayload
+) => {
+  const response = await api.post(`invitation/responce/${eventId}`, payload);
+  return response.data;
+};

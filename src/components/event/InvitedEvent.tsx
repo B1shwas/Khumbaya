@@ -10,7 +10,6 @@ interface InvitedEventsTabProps {
 }
 
 export const InvitedEventsTab = ({ isActive }: InvitedEventsTabProps) => {
-  //hydration and unwanted call from the top parent component 
   const [refreshing, setRefreshing] = useState(false);
   const [mounted, setMounted] = useState(false);
   const {
@@ -19,6 +18,8 @@ export const InvitedEventsTab = ({ isActive }: InvitedEventsTabProps) => {
     isError,
     refetch,
   } = useGetInvitedEvents();
+
+  console.log("😘", invitedEventsData);
 
   const invitedEvents = (invitedEventsData as Event[]).filter(
     (event) => event.status === "invited"
@@ -59,7 +60,7 @@ export const InvitedEventsTab = ({ isActive }: InvitedEventsTabProps) => {
           <Event_WITH_ROLE
             key={event.id}
             event={event}
-            onPress={() => { }}
+            onPress={() => {}}
             isRequest
             asGuest={event.role === "Guest"}
           />

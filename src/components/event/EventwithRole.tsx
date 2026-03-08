@@ -44,6 +44,8 @@ export const Event_WITH_ROLE = ({
   const roleLabel = event.role ?? "Unknown";
   const { wrapperClass, textClass } = roleStyle;
 
+  console.log(event.id);
+
   return (
     <Card className="my-2">
       <Pressable

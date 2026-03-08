@@ -47,3 +47,12 @@ export const updateUserMeApi = async (data: UpdateUserMePayload) => {
   const response = await api.patch("/user/me", payload);
   return response.data.data ?? response.data;
 };
+
+export const changePassword = async (data: {
+  currentPassword: string;
+  newPassword: string;
+  confimPassword: string;
+}) => {
+  const response = await api.patch("/user", data);
+  return response.data;
+};
