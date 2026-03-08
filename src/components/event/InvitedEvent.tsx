@@ -13,17 +13,13 @@ export const InvitedEventsTab = ({ isActive }: InvitedEventsTabProps) => {
   const [refreshing, setRefreshing] = useState(false);
   const [mounted, setMounted] = useState(false);
   const {
-    data: invitedEventsData = [],
+    data: invitedEvents = [],
     isLoading,
     isError,
     refetch,
   } = useGetInvitedEvents();
 
-  console.log("😘", invitedEventsData);
 
-  const invitedEvents = (invitedEventsData as Event[]).filter(
-    (event) => event.status === "invited"
-  );
 
   const onRefresh = async () => {
     setRefreshing(true);

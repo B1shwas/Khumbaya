@@ -83,6 +83,10 @@ export default function GuestEventDetails() {
   const { data: eventResponse, isLoading: responseLoading } =
     useEventResponseWithUser(eventId as any);
 
+  console.log("⚽️", eventId);
+  console.log("⚽️", eventDetails);
+  console.log("⚽️", eventResponse);
+
   const isFamily = eventResponse?.isFamily ?? false;
 
   const hasRsvped = false;
