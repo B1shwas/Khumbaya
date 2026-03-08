@@ -36,24 +36,32 @@ export interface EVENT {
 }
 
 interface InvitationRecord {
-  id: number;
-  eventId: number;
+  id?: number;
+  eventId?: number;
   status?: string;
 }
 
 interface InvitationEventRecord {
-  id: number;
+  id?: number;
+  eventId?: number;
   title?: string;
   startDate?: string;
+  startDateTime?: string;
   startTime?: string | null;
   endDate?: string;
+  endDateTime?: string;
   location?: string;
+  venue?: string | null;
   imageUrl?: string;
 }
 
 interface InvitationItem {
-  invitation: InvitationRecord;
-  event: InvitationEventRecord;
+  id?: number;
+  invitation_status?: string;
+  status?: string;
+  invitation?: InvitationRecord;
+  event?: InvitationEventRecord;
+  event_detail?: InvitationEventRecord;
 }
 
 interface GetEventsParams {
@@ -88,10 +96,19 @@ const formatTime = (dateValue?: string, fallbackTime?: string | null) => {
 };
 
 const mapInvitationToEvent = (item: InvitationItem): Event => {
-  const invitationStatus = (item.invitation.status ?? "").toLowerCase();
+  const detail = item.event_detail ?? item.event ?? {};
+  const invitation = item.invitation ?? {};
+
+  const invitationStatus = (
+    item.invitation_status ?? item.status ?? invitation.status ?? ""
+  ).toLowerCase();
+
+  const startDateTime = detail.startDateTime ?? detail.startDate ?? "";
+  const endDateTimeValue = detail.endDateTime ?? detail.endDate ?? "";
+
   const now = Date.now();
-  const endDateTime = item.event.endDate
-    ? new Date(item.event.endDate).getTime()
+  const endDateTime = endDateTimeValue
+    ? new Date(endDateTimeValue).getTime()
     : undefined;
 
   const status =
@@ -101,17 +118,21 @@ const mapInvitationToEvent = (item: InvitationItem): Event => {
         ? "completed"
         : "upcoming";
 
+  const resolvedEventId =
+    detail.eventId ?? detail.id ?? invitation.eventId ?? item.id ?? invitation.id;
+  const resolvedInvitationId = item.id ?? invitation.id;
+
   return {
-    id: String(item.event.id ?? item.invitation.eventId ?? item.invitation.id),
-    invitationId: item.invitation.id,
-    title: item.event.title ?? "Untitled Event",
-    startDateTime: item.event.startDate ?? "",
-    endDateTime: item.event.endDate ?? "",
-    date: formatDate(item.event.startDate),
-    time: formatTime(item.event.startDate, item.event.startTime),
-    location: item.event.location ?? "Location TBA",
-    venue: item.event.location ?? "Location TBA",
-    imageUrl: item.event.imageUrl ?? "",
+    id: String(resolvedEventId ?? ""),
+    invitationId: resolvedInvitationId,
+    title: detail.title ?? "Untitled Event",
+    startDateTime,
+    endDateTime: endDateTimeValue,
+    date: formatDate(startDateTime),
+    time: formatTime(startDateTime, detail.startTime),
+    location: detail.location ?? "Location TBA",
+    venue: detail.venue ?? detail.location ?? "Location TBA",
+    imageUrl: detail.imageUrl ?? "",
     role: "Guest",
     status,
   };
@@ -157,9 +178,17 @@ export const getUpcomingEventsApi = async ({
 export const getInvitedEvent = async () => {
   const response = await api.get("/rsvp/invitations");
   const payload = response.data?.data;
+  console.log("🚀 [getInvitedEvent] API Response:", payload?.items);
+
   if (Array.isArray(payload?.items)) {
-    return payload.items.map(mapInvitationToEvent);
+    const mapped: Event[] = payload.items
+      .map(mapInvitationToEvent)
+      .filter((event: Event) => Boolean(event.id));
+
+    console.warn("🚀 [getInvitedEvent] Mapped events:", mapped);
+    return mapped;
   }
+
   return [] as Event[];
 };
 
