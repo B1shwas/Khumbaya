@@ -6,6 +6,7 @@ import {
   useEventById,
   useEventResponseWithUser,
 } from "@/src/features/events/hooks/use-event";
+import { useRsvpStore } from "@/src/store/useRsvpStore";
 import { EventHighlight, EventService } from "@/src/types";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -18,6 +19,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+// this will be replaced by the timelines or we will be creating the highlight (major subevent api)
 const DEFAULT_HIGHLIGHTS: EventHighlight[] = [
   {
     id: "1",
@@ -58,8 +60,8 @@ const Section = ({
   children: React.ReactNode;
 }) => (
   <View className="px-5 py-5">
-    <View className="flex-row items-center justify-between">
-      <Text variant="h2" className=" text-xl">
+    <View className="flex-row items-center justify-between mb-3">
+      <Text variant="h2" className="text-xl">
         {title}
       </Text>
       {action && onAction && (
@@ -76,26 +78,51 @@ const Section = ({
 
 export default function GuestEventDetails() {
   const router = useRouter();
+  const { eventId } = useLocalSearchParams<{ eventId: string }>();
+  const setDraft = useRsvpStore((s) => s.setDraft);
 
-  const { eventId } = useLocalSearchParams();
-
-  const { data: eventDetails, isLoading } = useEventById(eventId as any);
+  const { data: eventDetails, isLoading } = useEventById(Number(eventId));
   const { data: eventResponse, isLoading: responseLoading } =
-    useEventResponseWithUser(eventId as any);
+    useEventResponseWithUser(Number(eventId));
 
   const isFamily = eventResponse?.isFamily ?? false;
+  const responses = (eventResponse?.responses ?? []) as Array<{
+    event_guest: {
+      status: string | null;
+      arrival_date_time: string | null;
+      departure_date_time: string | null;
+      isAccomodation: boolean | null;
+      notes: string | null;
+    } | null;
+    user_detail: {
+      id: number;
+      username: string;
+      photo: string | null;
+      relation: string | null;
+    };
+  }>;
 
-  let hasRsvped = false;
+  /**
+   * Individual invite: the single guest record for the logged-in user.
+   * responses[0] is the only entry when isFamily === false.
+   */
+  const myGuestRecord = !isFamily ? (responses[0]?.event_guest ?? null) : null;
+  const hasRsvped = isFamily ? true : myGuestRecord !== null;
 
-  if (!isFamily && eventResponse?.responses[0]?.event_guest == null) {
-    hasRsvped = false;
-  } else {
-    hasRsvped = true;
-  }
+  /**
+   * Family invite: derive member list and confirmed count from responses.
+   */
+  const familyMembers = responses.map((r) => ({
+    id: r.user_detail.id.toString(),
+    name: r.user_detail.username,
+    avatarUrl: r.user_detail.photo ?? undefined,
+  }));
 
-  const imageUrl = eventDetails?.imageUrl ?? "";
+  const confirmedCount = responses.filter(
+    (r) => r.event_guest?.status === "accepted"
+  ).length;
 
-  const familyName = "Family";
+  const familyName = responses[0]?.user_detail?.relation ?? "Your Family";
 
   if (isLoading || responseLoading) {
     return (
@@ -108,17 +135,33 @@ export default function GuestEventDetails() {
     );
   }
 
+  const handleIndividualRsvp = () => {
+    const me = responses[0];
+    if (me) {
+      setDraft({
+        userId: me.user_detail.id.toString(),
+        memberName: me.user_detail.username,
+        rawStatus: me.event_guest?.status ?? null,
+        rawArrival: me.event_guest?.arrival_date_time ?? null,
+        rawDeparture: me.event_guest?.departure_date_time ?? null,
+        rawAccommodation: me.event_guest?.isAccomodation ?? null,
+        rawNotes: me.event_guest?.notes ?? null,
+      });
+    }
+    router.push(`/(protected)/(client-stack)/events/${eventId}/(guest)/rsvp`);
+  };
+
   return (
     <SafeAreaView className="flex-1 bg-background-light" edges={["top"]}>
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerClassName="pb-10"
       >
-        <View className="items-center  pb-2 px-5">
+        <View className="items-center pb-2 px-5">
           <View className="w-32 h-32 rounded-full overflow-hidden border-4 border-pink-100">
-            {imageUrl ? (
+            {eventDetails?.imageUrl ? (
               <Image
-                source={{ uri: imageUrl }}
+                source={{ uri: eventDetails.imageUrl }}
                 className="w-full h-full"
                 resizeMode="cover"
               />
@@ -144,6 +187,7 @@ export default function GuestEventDetails() {
           </View>
         </View>
 
+        {/* ── Highlights ── */}
         <Section
           title="Event Highlights"
           action="View Full Itinerary"
@@ -152,16 +196,18 @@ export default function GuestEventDetails() {
           <EventHighlightTimeline highlights={DEFAULT_HIGHLIGHTS} />
         </Section>
 
+        {/* ── Services ── */}
         <Section title="Services Offered">
           <ServiceGrid services={DEFAULT_SERVICES} />
         </Section>
 
+        {/* ── RSVP section ── */}
         <View className="px-5 py-5">
           {isFamily ? (
             <FamilyRsvpCard
               familyName={familyName}
-              members={[]}
-              confirmedCount={5}
+              members={familyMembers}
+              confirmedCount={confirmedCount}
               onManage={() =>
                 router.push(
                   `/(protected)/(client-stack)/events/${eventId}/(guest)/family-rsvp`
@@ -189,14 +235,10 @@ export default function GuestEventDetails() {
                 className="w-full py-3 mt-1 rounded-lg items-center justify-center"
                 style={{ backgroundColor: "#ee2b8c" }}
                 activeOpacity={0.85}
-                onPress={() =>
-                  router.push(
-                    `/(protected)/(client-stack)/events/${eventId}/(guest)/rsvp`
-                  )
-                }
+                onPress={handleIndividualRsvp}
               >
                 <Text className="text-white font-bold text-base">
-                  {hasRsvped ? "Manage Your RSVP" : "Complete Your RSVP"}
+                  {hasRsvped ? "Edit Your RSVP" : "Complete Your RSVP"}
                 </Text>
               </TouchableOpacity>
             </View>

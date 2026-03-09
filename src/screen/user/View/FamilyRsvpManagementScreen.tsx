@@ -1,6 +1,7 @@
 import Card from "@/src/components/ui/Card";
 import { Text } from "@/src/components/ui/Text";
 import { useEventResponseWithUser } from "@/src/features/events/hooks/use-event";
+import { useRsvpStore } from "@/src/store/useRsvpStore";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import {
@@ -53,7 +54,6 @@ interface MemberRsvp {
   dateRange?: string;
   roomNeeded?: string;
   notes?: string;
-  // raw values for pre-filling the edit form
   rawStatus: string | null;
   rawArrival: string | null;
   rawDeparture: string | null;
@@ -63,7 +63,8 @@ interface MemberRsvp {
 function deriveStatus(event_guest: EventGuest | null): RSVPStatus {
   if (!event_guest) return "pending";
   if (event_guest.status === "rejected") return "declined";
-  return "attending";
+  if (event_guest.status === "accepted") return "attending";
+  return "pending";
 }
 
 function formatDateRange(
@@ -232,6 +233,7 @@ const MemberCard = ({
 export default function FamilyRsvpManagementScreen() {
   const router = useRouter();
   const { eventId } = useLocalSearchParams<{ eventId: string }>();
+  const setDraft = useRsvpStore((s) => s.setDraft);
 
   const { data: eventResponses, isLoading } = useEventResponseWithUser(
     Number(eventId)
@@ -252,6 +254,21 @@ export default function FamilyRsvpManagementScreen() {
     );
   }
 
+  // this will set the member previous rsvp if any
+  const handleMemberRsvp = (member: MemberRsvp) => {
+    setDraft({
+      userId: member.id,
+      familyId: member.familyId,
+      memberName: member.name,
+      rawStatus: member.rawStatus,
+      rawArrival: member.rawArrival,
+      rawDeparture: member.rawDeparture,
+      rawAccommodation: member.rawAccommodation,
+      rawNotes: member.notes ?? null,
+    });
+    router.push(`/(protected)/(client-stack)/events/${eventId}/(guest)/rsvp`);
+  };
+
   return (
     <SafeAreaView className="flex-1 bg-background-light" edges={["bottom"]}>
       <ScrollView
@@ -265,11 +282,7 @@ export default function FamilyRsvpManagementScreen() {
           <MemberCard
             key={member.id}
             member={member}
-            onPressRsvp={() =>
-              router.push(
-                `/(protected)/(client-stack)/events/${eventId}/(guest)/rsvp?userId=${member.id}&familyId=${member.familyId}&memberName=${encodeURIComponent(member.name)}&rawStatus=${member.rawStatus ?? ""}&rawArrival=${encodeURIComponent(member.rawArrival ?? "")}&rawDeparture=${encodeURIComponent(member.rawDeparture ?? "")}&rawAccommodation=${member.rawAccommodation ?? ""}&rawNotes=${encodeURIComponent(member.notes ?? "")}`
-              )
-            }
+            onPressRsvp={() => handleMemberRsvp(member)}
           />
         ))}
       </ScrollView>

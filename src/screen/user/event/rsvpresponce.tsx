@@ -1,6 +1,7 @@
 import { DatePicker } from "@/components/nativewindui/DatePicker";
 import { useSubmitRsvpResponse } from "@/src/features/events/hooks/use-event";
 import { useAuthStore } from "@/src/store/AuthStore";
+import { useRsvpStore } from "@/src/store/useRsvpStore";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { DateTimePickerEvent } from "@react-native-community/datetimepicker";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -34,7 +35,6 @@ const Icon = ({
   />
 );
 
-/** Inner form fields — safe to embed inside a parent ScrollView */
 export const RSVPFormContent = ({
   userId,
   eventId,
@@ -57,12 +57,13 @@ export const RSVPFormContent = ({
   initialNotes?: string;
 }) => {
   const router = useRouter();
+  const clearDraft = useRsvpStore((s) => s.clearDraft);
   const { mutate: submitRsvp, isPending } = useSubmitRsvpResponse(eventId);
 
   const [attendance, setAttendance] = useState(initialAttendance);
   const [accommodation, setAccommodation] = useState(initialAccommodation);
-  const [arrivalPickup, setArrivalPickup] = useState(!!initialArrival);
-  const [departureDrop, setDepartureDrop] = useState(!!initialDeparture);
+  const [arrivalPickup, setArrivalPickup] = useState(false);
+  const [departureDrop, setDepartureDrop] = useState(false);
   const [notes, setNotes] = useState(initialNotes);
   const [arrivalDateTime, setArrivalDateTime] = useState(
     initialArrival ?? new Date()
@@ -94,7 +95,12 @@ export const RSVPFormContent = ({
               ? "rejected"
               : "maybe",
       },
-      { onSuccess: () => router.back() }
+      {
+        onSuccess: () => {
+          clearDraft();
+          router.back();
+        },
+      }
     );
   };
 
@@ -262,46 +268,36 @@ export const RSVPFormContent = ({
   );
 };
 
-/** Standalone full-page RSVP form (used at the /rsvp route) */
 const RSVPForm = () => {
-  const {
-    userId,
-    familyId,
-    memberName,
-    eventId,
-    rawStatus,
-    rawArrival,
-    rawDeparture,
-    rawAccommodation,
-    rawNotes,
-  } = useLocalSearchParams<{
-    userId?: string;
-    familyId?: string;
-    memberName?: string;
-    eventId?: string;
-    rawStatus?: string;
-    rawArrival?: string;
-    rawDeparture?: string;
-    rawAccommodation?: string;
-    rawNotes?: string;
-  }>();
+  const { eventId } = useLocalSearchParams<{ eventId: string }>();
   const { user } = useAuthStore();
+  const draft = useRsvpStore((s) => s.draft);
 
-  const resolvedUserId = userId ?? user?.id?.toString() ?? "";
+  /**
+   * If a draft exists (set by FamilyRsvpManagementScreen or GuestEventDetails),
+   * use it. Otherwise fall back to the logged-in user with no pre-fill
+   * (first-time RSVP from a deep-link or notification).
+   */
+  const userId = draft?.userId ?? user?.id?.toString() ?? "";
+  const familyId = draft?.familyId;
+  const memberName = draft?.memberName;
 
-  // Map backend status → attendance option
   const initialAttendance =
-    rawStatus === "accepted"
+    draft?.rawStatus === "accepted"
       ? "yes"
-      : rawStatus === "rejected"
+      : draft?.rawStatus === "rejected"
         ? "no"
-        : rawStatus === "maybe"
+        : draft?.rawStatus === "maybe"
           ? "maybe"
           : "yes";
 
-  const initialArrival = rawArrival ? new Date(rawArrival) : undefined;
-  const initialDeparture = rawDeparture ? new Date(rawDeparture) : undefined;
-  const initialAccommodation = rawAccommodation === "true";
+  const initialArrival = draft?.rawArrival
+    ? new Date(draft.rawArrival)
+    : undefined;
+  const initialDeparture = draft?.rawDeparture
+    ? new Date(draft.rawDeparture)
+    : undefined;
+  const initialAccommodation = draft?.rawAccommodation === true;
 
   return (
     <View className="flex-1 max-w-md mx-auto w-full">
@@ -322,15 +318,15 @@ const RSVPForm = () => {
           </View>
         )}
         <RSVPFormContent
-          userId={resolvedUserId}
+          userId={userId}
           eventId={Number(eventId)}
-          familyId={familyId ? Number(familyId) : undefined}
+          familyId={familyId}
           memberName={memberName}
           initialAttendance={initialAttendance}
           initialAccommodation={initialAccommodation}
           initialArrival={initialArrival}
           initialDeparture={initialDeparture}
-          initialNotes={rawNotes ?? ""}
+          initialNotes={draft?.rawNotes ?? ""}
         />
       </ScrollView>
     </View>
