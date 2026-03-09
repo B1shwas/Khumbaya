@@ -1,15 +1,10 @@
+import { Text } from "@/src/components/ui/Text";
 import { cn } from "@/src/utils/cn";
-import { MaterialIcons } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useMemo, useState } from "react";
-import {
-  FlatList,
-  Pressable,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { FlatList, Pressable, TouchableOpacity, View } from "react-native";
+import { TextInput } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useGetInvitationsForEvent } from "./api/use-guests";
 import GuestCard from "./components/GuestCard";
@@ -73,83 +68,62 @@ export default function GuestListScreen() {
   }, [invitations, activeTab]);
 
   return (
-    <SafeAreaView className="p-4">
-      <View className="sticky top-0 z-20 flex-row items-center justify-between px-4 py-3 bg-background-light/95  backdrop-blur-md">
-        {/* Back Button */}
-        <TouchableOpacity
-          activeOpacity={0.7}
-          className="h-10 w-10 shrink-0 items-center justify-center rounded-full active:bg-black/5 "
-        >
-          <MaterialIcons
-            name="arrow-back"
-            size={24}
-            className="text-slate-900 dark:text-white"
+    <SafeAreaView className="p-4  h-full" edges={[]}>
+      <View className="px-4">
+        <View className="h-14 my-2 rounded-md ">
+          <TextInput
+            className="flex-1 h-full px-6 text-base text-gray-900 bg-gray-300/50 rounded-md"
+            placeholder="Search for the friend"
+            placeholderTextColor="#9CA3AF"
           />
-        </TouchableOpacity>
-
-        {/* Center Title */}
-        <View className="flex-col items-center">
-          <Text className="text-lg font-bold leading-tight tracking-tight text-slate-900">
-            Guest Management
-          </Text>
-          {/* <Text className="text-xs font-medium text-primary ">
-          {invitations ? `${invitations.length} Guests` : "Loading..."}
-        </Text> */}
         </View>
-
-        <TouchableOpacity
-          activeOpacity={0.7}
-          className="h-10 w-10 shrink-0 items-center justify-center rounded-full active:bg-black/5 dark:active:bg-white/10"
-        >
-          <MaterialIcons
-            name="more-horiz"
-            size={24}
-            className="text-slate-900 dark:text-white"
-          />
-        </TouchableOpacity>
-      </View>
-
-      <View className="flex-row p-1 mb-4 gap-2 bg-background-tertiary !rounded-md">
-        {tabs.map((tab) => (
-          <Pressable
-            key={tab.value}
-            onPress={() => setActiveTab(tab.value)}
-            className={cn(
-              "flex-1 py-2 rounded-md items-center",
-              activeTab === tab.value ? "bg-white" : "text-gray-600"
-            )}
-          >
-            <Text
+        <View className="flex-row">
+          {tabs.map((tab) => (
+            <Pressable
+              key={tab.value}
+              onPress={() => setActiveTab(tab.value)}
               className={cn(
-                "text-sm font-jakarta-semibold p-1",
-                activeTab === tab.value ? "text-primary" : "text-gray-500"
+                "flex-1 items-center pb-3 pt-2 border-b-2",
+                activeTab === tab.value
+                  ? "border-primary"
+                  : "border-transparent"
               )}
             >
-              {tab.label}
-            </Text>
-          </Pressable>
-        ))}
+              <Text
+                variant="h2"
+                className={cn(
+                  "uppercase tracking-wider",
+                  activeTab === tab.value ? "text-primary" : "text-slate-500 "
+                )}
+              >
+                {tab.label}
+              </Text>
+            </Pressable>
+          ))}
+        </View>
       </View>
-      <View className="h-14 my-2 bg-white rounded-md ">
-        <TextInput
-          className="flex-1 h-full px-3 text-base text-gray-900 "
-          placeholder="Search for the friend"
-          placeholderTextColor="#9CA3AF"
-        />
-      </View>
+
       <TouchableOpacity
         style={{
-          paddingVertical: 14,
-          borderRadius: 12,
+          position: "absolute",
+          bottom: 50,
+          right: 24,
+          width: 56,
+          height: 56,
+          borderRadius: 28,
           backgroundColor: "#EE2B8C",
           alignItems: "center",
-          marginBottom: 20,
+          justifyContent: "center",
+          zIndex: 50,
+          shadowColor: "#EE2B8C",
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.35,
+          shadowRadius: 8,
+          elevation: 8,
         }}
         onPress={openAddGuestScreen}
       >
-        <Text style={{ fontSize: 16, fontWeight: "600", color: "#fff" }}>
-          Add Guest
-        </Text>
+        <Ionicons name="add-outline" size={28} color="#fff" />
       </TouchableOpacity>
 
       {isLoading ? (
@@ -165,6 +139,7 @@ export default function GuestListScreen() {
           )}
           contentContainerStyle={{ paddingBottom: 20 }}
           showsVerticalScrollIndicator={false}
+          className="mt-4"
           ListEmptyComponent={
             <Text
               style={{ textAlign: "center", color: "#6B7280", marginTop: 20 }}
