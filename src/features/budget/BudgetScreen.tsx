@@ -5,7 +5,6 @@ import {
   Alert,
   FlatList,
   RefreshControl,
-  StyleSheet,
   Text,
   TouchableOpacity,
   View,
@@ -49,22 +48,24 @@ export default function BudgetScreen() {
   // If user is invited guest, show no access
   if (isInvitedGuest) {
     return (
-      <SafeAreaView style={styles.container} edges={["bottom"]}>
+      <SafeAreaView className="flex-1 bg-gray-50" edges={["bottom"]}>
         {/* No Access */}
-        <View style={styles.noAccessContainer}>
-          <View style={styles.noAccessIcon}>
+        <View className="flex-1 justify-center items-center px-8">
+          <View className="w-20 h-20 rounded-full bg-gray-100 items-center justify-center mb-4">
             <Ionicons name="lock-closed" size={48} color="#9CA3AF" />
           </View>
-          <Text style={styles.noAccessTitle}>Budget Not Available</Text>
-          <Text style={styles.noAccessSubtitle}>
+          <Text className="text-xl font-bold text-gray-800 mb-2">
+            Budget Not Available
+          </Text>
+          <Text className="text-sm text-gray-500 text-center mb-6">
             The budget details for this event are only visible to the event
             organizer.
           </Text>
           <TouchableOpacity
-            style={styles.noAccessButton}
+            className="bg-pink-500 rounded-xl px-6 py-3"
             onPress={() => router.back()}
           >
-            <Text style={styles.noAccessButtonText}>Go Back</Text>
+            <Text className="text-base font-semibold text-white">Go Back</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -89,11 +90,14 @@ export default function BudgetScreen() {
         <BudgetSummary summary={summary} />
 
         {/* Section Header */}
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Expenses</Text>
-          <TouchableOpacity style={styles.sectionAction} onPress={handleAddNew}>
+        <View className="flex-row items-center justify-between mb-4">
+          <Text className="text-lg font-bold text-gray-900">Expenses</Text>
+          <TouchableOpacity
+            className="flex-row items-center gap-1"
+            onPress={handleAddNew}
+          >
             <Ionicons name="add" size={20} color="#EE2B8C" />
-            <Text style={styles.sectionActionText}>Add</Text>
+            <Text className="text-sm font-semibold text-pink-500">Add</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -103,10 +107,12 @@ export default function BudgetScreen() {
 
   const ListEmpty = useCallback(
     () => (
-      <View style={styles.emptyContainer}>
+      <View className="items-center py-10">
         <Ionicons name="wallet-outline" size={64} color="#D1D5DB" />
-        <Text style={styles.emptyTitle}>No expenses yet</Text>
-        <Text style={styles.emptySubtitle}>
+        <Text className="text-lg font-semibold text-gray-500 mt-4">
+          No expenses yet
+        </Text>
+        <Text className="text-sm text-gray-400 mt-1">
           Add your first budget item to get started
         </Text>
       </View>
@@ -115,7 +121,7 @@ export default function BudgetScreen() {
   );
 
   return (
-    <SafeAreaView style={styles.container} edges={["bottom"]}>
+    <SafeAreaView className="flex-1 bg-gray-50" edges={["bottom"]}>
       {/* Budget List */}
       <FlatList
         data={budgetItems}
@@ -123,7 +129,7 @@ export default function BudgetScreen() {
         keyExtractor={(item) => item.id}
         ListHeaderComponent={ListHeader}
         ListEmptyComponent={ListEmpty}
-        contentContainerStyle={styles.listContent}
+        className="px-4 pb-24"
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
@@ -136,7 +142,17 @@ export default function BudgetScreen() {
       />
 
       {/* Floating Action Button */}
-      <TouchableOpacity style={styles.fab} onPress={handleAddNew}>
+      <TouchableOpacity
+        className="absolute bottom-6 right-6 w-14 h-14 rounded-full bg-pink-500 items-center justify-center shadow-lg"
+        style={{
+          shadowColor: "#EE2B8C",
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.3,
+          shadowRadius: 8,
+          elevation: 8,
+        }}
+        onPress={handleAddNew}
+      >
         <Ionicons name="add" size={28} color="#fff" />
       </TouchableOpacity>
 
@@ -145,121 +161,3 @@ export default function BudgetScreen() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#F9FAFB",
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: "#fff",
-  },
-  headerButton: {
-    padding: 8,
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#1F2937",
-  },
-  listContent: {
-    padding: 16,
-    paddingBottom: 100,
-  },
-  sectionHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 16,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#111827",
-  },
-  sectionAction: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-  },
-  sectionActionText: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#EE2B8C",
-  },
-  emptyContainer: {
-    alignItems: "center",
-    paddingVertical: 40,
-  },
-  emptyTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#6B7280",
-    marginTop: 16,
-  },
-  emptySubtitle: {
-    fontSize: 14,
-    color: "#9CA3AF",
-    marginTop: 4,
-  },
-  fab: {
-    position: "absolute",
-    bottom: 24,
-    right: 24,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: "#EE2B8C",
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: "#EE2B8C",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-  // No Access Styles
-  noAccessContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 32,
-  },
-  noAccessIcon: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: "#F3F4F6",
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 16,
-  },
-  noAccessTitle: {
-    fontSize: 20,
-    fontWeight: "700",
-    color: "#1F2937",
-    marginBottom: 8,
-  },
-  noAccessSubtitle: {
-    fontSize: 14,
-    color: "#6B7280",
-    textAlign: "center",
-    marginBottom: 24,
-  },
-  noAccessButton: {
-    backgroundColor: "#EE2B8C",
-    borderRadius: 12,
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-  },
-  noAccessButtonText: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#fff",
-  },
-});

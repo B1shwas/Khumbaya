@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Alert, Text, TouchableOpacity, View } from "react-native";
 import { Swipeable } from "react-native-gesture-handler";
 import { BudgetItem } from "../types/budget.types";
 
@@ -48,10 +48,10 @@ export default function BudgetCard({
   };
 
   const rightActions = () => (
-    <View style={styles.swipeActions}>
+    <View className="flex-row items-center">
       {/* Edit Action */}
       <TouchableOpacity
-        style={[styles.actionButton, styles.editButton]}
+        className="w-16 h-full bg-blue-500 justify-center items-center"
         onPress={() => onEdit(item)}
       >
         <Ionicons name="create" size={20} color="#fff" />
@@ -59,7 +59,7 @@ export default function BudgetCard({
 
       {/* Delete Action */}
       <TouchableOpacity
-        style={[styles.actionButton, styles.deleteButton]}
+        className="w-16 h-full bg-red-500 justify-center items-center"
         onPress={handleDelete}
       >
         <Ionicons name="trash" size={20} color="#fff" />
@@ -69,40 +69,36 @@ export default function BudgetCard({
 
   return (
     <Swipeable renderRightActions={rightActions} overshootRight={false}>
-      <View style={styles.card}>
-        <View style={styles.cardHeader}>
+      <View className="bg-white rounded-2xl p-4 mb-3 shadow-sm">
+        <View className="flex-row items-center">
           {/* Icon */}
           <View
-            style={[
-              styles.iconContainer,
-              { backgroundColor: item.color + "20" },
-            ]}
+            className="w-12 h-12 rounded-xl items-center justify-center mr-3"
+            style={{ backgroundColor: item.color + "20" }}
           >
-            <Text style={styles.iconText}>{getCategoryIcon(item.icon)}</Text>
+            <Text className="text-2xl">{getCategoryIcon(item.icon)}</Text>
           </View>
 
           {/* Info */}
-          <View style={styles.infoContainer}>
-            <Text style={styles.category}>{item.category}</Text>
+          <View className="flex-1">
+            <Text className="text-base font-semibold text-gray-900 mb-2">
+              {item.category}
+            </Text>
 
             {/* Progress Bar */}
-            <View style={styles.progressContainer}>
-              <View style={styles.progressBar}>
+            <View className="flex-row items-center gap-2">
+              <View className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
                 <View
-                  style={[
-                    styles.progressFill,
-                    {
-                      width: `${Math.min(percentUsed, 100)}%`,
-                      backgroundColor: isOverBudget ? "#EF4444" : item.color,
-                    },
-                  ]}
+                  className="h-full rounded-full"
+                  style={{
+                    width: `${Math.min(percentUsed, 100)}%`,
+                    backgroundColor: isOverBudget ? "#EF4444" : item.color,
+                  }}
                 />
               </View>
               <Text
-                style={[
-                  styles.percentText,
-                  { color: isOverBudget ? "#EF4444" : "#6B7280" },
-                ]}
+                className="text-xs font-medium min-w-[36px]"
+                style={{ color: isOverBudget ? "#EF4444" : "#6B7280" }}
               >
                 {percentUsed}%
               </Text>
@@ -110,30 +106,28 @@ export default function BudgetCard({
           </View>
 
           {/* Amounts */}
-          <View style={styles.amountsContainer}>
-            <Text style={styles.actualAmount}>
+          <View className="items-end ml-3">
+            <Text className="text-base font-bold text-gray-900">
               ${item.actual.toLocaleString()}
             </Text>
-            <Text style={styles.estimatedAmount}>
+            <Text className="text-xs text-gray-500">
               of ${item.estimated.toLocaleString()}
             </Text>
           </View>
         </View>
 
         {/* Footer */}
-        <View style={styles.cardFooter}>
+        <View className="flex-row items-center justify-between mt-3 pt-3 border-t border-gray-100">
           {/* Status */}
           <TouchableOpacity
-            style={styles.statusContainer}
+            className="flex-row items-center gap-1.5"
             onPress={() => onTogglePaid(item.id)}
           >
             <View
-              style={[
-                styles.statusDot,
-                { backgroundColor: item.isPaid ? "#10B981" : "#F59E0B" },
-              ]}
+              className="w-2 h-2 rounded-full"
+              style={{ backgroundColor: item.isPaid ? "#10B981" : "#F59E0B" }}
             />
-            <Text style={styles.statusText}>
+            <Text className="text-xs text-gray-500">
               {item.isPaid ? "Paid" : "Pending"}
             </Text>
             <Ionicons
@@ -145,10 +139,8 @@ export default function BudgetCard({
 
           {/* Remaining */}
           <Text
-            style={[
-              styles.remainingText,
-              { color: isOverBudget ? "#EF4444" : "#10B981" },
-            ]}
+            className="text-sm font-semibold"
+            style={{ color: isOverBudget ? "#EF4444" : "#10B981" }}
           >
             {isOverBudget ? "+" : "-"}${Math.abs(remaining).toLocaleString()}
           </Text>
@@ -157,117 +149,3 @@ export default function BudgetCard({
     </Swipeable>
   );
 }
-
-const styles = StyleSheet.create({
-  card: {
-    backgroundColor: "#fff",
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 12,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-  },
-  cardHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  iconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 12,
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 12,
-  },
-  iconText: {
-    fontSize: 24,
-  },
-  infoContainer: {
-    flex: 1,
-  },
-  category: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#111827",
-    marginBottom: 8,
-  },
-  progressContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  progressBar: {
-    flex: 1,
-    height: 6,
-    backgroundColor: "#F3F4F6",
-    borderRadius: 3,
-    overflow: "hidden",
-  },
-  progressFill: {
-    height: "100%",
-    borderRadius: 3,
-  },
-  percentText: {
-    fontSize: 12,
-    fontWeight: "500",
-    minWidth: 36,
-  },
-  amountsContainer: {
-    alignItems: "flex-end",
-    marginLeft: 12,
-  },
-  actualAmount: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#111827",
-  },
-  estimatedAmount: {
-    fontSize: 12,
-    color: "#6B7280",
-  },
-  cardFooter: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginTop: 12,
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: "#F3F4F6",
-  },
-  statusContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-  },
-  statusDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-  },
-  statusText: {
-    fontSize: 12,
-    color: "#6B7280",
-  },
-  remainingText: {
-    fontSize: 14,
-    fontWeight: "600",
-  },
-  swipeActions: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  actionButton: {
-    justifyContent: "center",
-    alignItems: "center",
-    width: 64,
-    height: "100%",
-  },
-  editButton: {
-    backgroundColor: "#3B82F6",
-  },
-  deleteButton: {
-    backgroundColor: "#EF4444",
-  },
-});
