@@ -194,11 +194,6 @@ const Info = () => (
 
     <Row icon="person" title="Edit Profile" href="/profile/edit-profile" />
     <Row icon="group" title="Family Members" href="/profile/family-members" />
-    <Row
-      icon="lock"
-      title="Privacy & Security"
-      href="/profile/privacy-security"
-    />
-    <Row icon="settings" title="App Settings" href="/profile/app-settings" />
+    <Row icon="lock" title="Change Password" href="/profile/change-password" />
   </View>
 );
