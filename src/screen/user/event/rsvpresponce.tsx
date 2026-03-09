@@ -84,7 +84,7 @@ export const RSVPFormContent = ({
       {
         userId,
         familyId,
-        notes: notes.trim() || undefined,
+        notes: notes.trim(),
         arrival_date_time: arrivalDateTime.toISOString(),
         departure_date_time: departureDateTime.toISOString(),
         isAccomodation: accommodation.toString(),
