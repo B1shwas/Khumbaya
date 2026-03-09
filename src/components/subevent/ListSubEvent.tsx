@@ -12,7 +12,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-type SubEventTab = "all" | "upcoming" | "past";
+type SubEventTab = "all" | "upcoming" | "completed";
 
 export default function ListSubEvent() {
   const [activeTab, setActiveTab] = useState<SubEventTab>("all");
@@ -28,7 +28,7 @@ export default function ListSubEvent() {
   const tabs: { label: string; value: SubEventTab }[] = [
     { label: "All", value: "all" },
     { label: "Upcoming", value: "upcoming" },
-    { label: "Past", value: "past" },
+    { label: "completed", value: "completed" },
   ];
 
   const getFilteredSubEvents = () => {
@@ -36,7 +36,7 @@ export default function ListSubEvent() {
     switch (activeTab) {
       case "upcoming":
         return subEvents.filter((se) => new Date(se.date) >= now);
-      case "past":
+      case "completed":
         return subEvents.filter((se) => new Date(se.date) < now);
       default:
         return subEvents;
