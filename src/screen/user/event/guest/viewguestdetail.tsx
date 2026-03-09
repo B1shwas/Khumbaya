@@ -1,273 +1,175 @@
-import { useGetInvitationsForEvent } from "@/src/features/guests/api/use-guests";
+import { Text } from "@/src/components/ui/Text";
 import { Ionicons } from "@expo/vector-icons";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { useMemo, useState } from "react";
-import { ActivityIndicator, Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
+import { ScrollView, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-interface InfoItem {
-  label: string;
-  value: string;
-  icon: React.ReactNode;
-}
-
-interface InfoCardProps {
-  title: string;
-  items: InfoItem[];
-}
-
-const InfoCard = ({ title, items }: InfoCardProps) => (
-  <View className="bg-white mb-4 px-4 py-4 rounded-xl shadow-sm">
-    {title ? <Text className="text-base font-semibold text-gray-900 mb-4">{title}</Text> : null}
-    {items.map((item, idx) => (
-      <View key={idx} className="flex-row items-start mb-4 last:mb-0">
-        <View className="w-9 h-9 rounded-full bg-gray-50 items-center justify-center mr-3">
-          {item.icon}
-        </View>
-        <View className="flex-1">
-          <Text className="text-xs text-gray-500 mb-0.5">{item.label}</Text>
-          <Text className="text-base font-medium text-gray-900">
-            {item.value}
-          </Text>
-        </View>
-      </View>
-    ))}
-  </View>
-);
-
-const CollapsibleSection = ({
-  title,
-  children,
-  defaultExpanded = true,
-}: {
-  title: string;
-  children: React.ReactNode;
-  defaultExpanded?: boolean;
-}) => {
-  const [collapsed, setCollapsed] = useState(!defaultExpanded);
-
-  return (
-    <View className="mb-4 bg-white rounded-xl shadow-sm">
-      <TouchableOpacity
-        className="px-4 py-3 flex-row justify-between items-center"
-        onPress={() => setCollapsed(!collapsed)}
-        activeOpacity={0.7}
-      >
-        <Text className="font-semibold text-gray-900">{title}</Text>
-        <Ionicons
-          name={collapsed ? "chevron-down" : "chevron-up"}
-          size={20}
-          color="#6B7280"
-        />
-      </TouchableOpacity>
-      {!collapsed && <View className="px-4 pb-4">{children}</View>}
-    </View>
-  );
-};
-
 export default function ViewGuestDetail() {
-  const router = useRouter();
-  const { eventId: rawEventId, id: guestId, guest: guestParam } = useLocalSearchParams();
-
-  const eventId = useMemo(() => {
-    const raw = Array.isArray(rawEventId) ? rawEventId[0] : rawEventId;
-    return raw ? Number(raw) : null;
-  }, [rawEventId]);
-
-  const { data: invitations, isLoading } = useGetInvitationsForEvent(eventId);
-
-  const guest = useMemo(() => {
-    if (guestParam) {
-      try {
-        return JSON.parse(guestParam as string);
-      } catch (e) {
-        console.error("Failed to parse guest param", e);
-      }
-    }
-    if (invitations && guestId) {
-      return invitations.find((inv: any) => String(inv.id) === String(guestId));
-    }
-    return null;
-  }, [guestParam, invitations, guestId]);
-
-  const getStatusColor = (status: string) => {
-    const s = (status || "Pending").toLowerCase();
-    switch (s) {
-      case "accepted":
-      case "going":
-      case "confirmed":
-        return {
-          bg: "bg-green-100",
-          text: "text-green-700",
-          border: "border-green-200",
-        };
-      case "pending":
-        return {
-          bg: "bg-yellow-100",
-          text: "text-yellow-700",
-          border: "border-yellow-200",
-        };
-      case "declined":
-      case "not going":
-        return {
-          bg: "bg-red-100",
-          text: "text-red-700",
-          border: "border-red-200",
-        };
-      default:
-        return {
-          bg: "bg-gray-100",
-          text: "text-gray-700",
-          border: "border-gray-200",
-        };
-    }
-  };
-
-  const getInitials = (name: string) => {
-    if (!name) return "GU";
-    return name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
-  };
-
-  if (isLoading && !guest) {
-    return (
-      <SafeAreaView className="flex-1 bg-gray-50 items-center justify-center">
-        <ActivityIndicator size="large" color="#EE2B8C" />
-      </SafeAreaView>
-    );
-  }
-
-  if (!guest) {
-    return (
-      <SafeAreaView className="flex-1 bg-gray-50">
-        <View className="flex-1 items-center justify-center p-8">
-          <Ionicons name="alert-circle-outline" size={64} color="#EF4444" />
-          <Text className="text-lg text-gray-500 mt-4 mb-6">Guest not found</Text>
-          <TouchableOpacity
-            className="bg-[#EE2B8C] px-6 py-3 rounded-lg"
-            onPress={() => router.back()}
-          >
-            <Text className="text-white font-semibold">Go Back</Text>
-          </TouchableOpacity>
-        </View>
-      </SafeAreaView>
-    );
-  }
-
-  const displayName = guest.user?.username || guest.fullName || "Guest";
-  const displayStatus = guest.status || guest.rsvp_status || "Pending";
-  const statusStyle = getStatusColor(displayStatus);
-
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
-      {/* Header */}
-      <View className="flex-row items-center justify-between px-4 py-3 bg-white border-b border-gray-100">
-        <TouchableOpacity
-          className="w-10 h-10 items-center justify-center rounded-full active:bg-gray-100"
-          onPress={() => router.back()}
-        >
-          <Ionicons name="arrow-back" size={24} color="#1a1b3a" />
-        </TouchableOpacity>
-        <Text className="text-lg font-bold text-[#1a1b3a]">Guest Details</Text>
-        <View className="w-10" />
-      </View>
-
+    <SafeAreaView className="flex-1 bg-white" edges={[]}>
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
-        {/* Profile Header */}
-        <View className="bg-white items-center py-8 px-4 mb-4 shadow-sm border-b border-gray-100">
-          <View className="mb-4">
-            {guest.user?.photo || guest.avatar ? (
-              <Image
-                source={{ uri: guest.user?.photo || guest.avatar }}
-                className="w-24 h-24 rounded-full border-4 border-gray-50"
-              />
-            ) : (
-              <View className="w-24 h-24 rounded-full bg-[#EE2B8C] items-center justify-center shadow-md">
-                <Text className="text-white text-3xl font-bold">
-                  {getInitials(displayName)}
-                </Text>
-              </View>
-            )}
+        <LinearGradient
+          colors={["rgba(238,43,140,0.07)", "transparent"]}
+          className="items-center px-6 pt-8 pb-8"
+        >
+          <View className="relative">
+            <View
+              className="w-32 h-32 rounded-full bg-primary border-4 border-white items-center justify-center"
+              style={{
+                shadowColor: "#000",
+                shadowOpacity: 0.15,
+                shadowRadius: 12,
+                elevation: 4,
+              }}
+            >
+              <Text variant="h1" className="text-white text-4xl">
+                RS
+              </Text>
+            </View>
+            <View className="absolute bottom-1 right-1 w-5 h-5 rounded-full border-2 border-white bg-emerald-500" />
           </View>
-          <Text className="text-2xl font-bold text-gray-900 mb-2 text-center">
-            {displayName}
-          </Text>
 
-          <View className={`px-5 py-1.5 rounded-full ${statusStyle.bg} border ${statusStyle.border} shadow-sm`}>
-            <Text className={`text-sm font-bold uppercase ${statusStyle.text}`}>
-              {displayStatus}
+          <Text
+            variant="h1"
+            className="text-slate-900 text-2xl mt-4 text-center"
+          >
+            Rahul Sharma
+          </Text>
+          <Text variant="h2" className="text-primary text-sm mt-1">
+            Confirmed Guest • VVIP
+          </Text>
+          <View className="flex-row items-center gap-2 mt-2">
+            <Ionicons name="calendar-outline" size={14} color="#94A3B8" />
+            <Text variant="caption" className="text-sm">
+              Oct 12 – Oct 15, 2023
             </Text>
           </View>
+        </LinearGradient>
+
+        <View className="flex-row gap-3 px-6 pb-6 border-b border-primary/5">
+          <TouchableOpacity
+            className="flex-1 bg-primary py-2.5 rounded-xl flex-row items-center justify-center gap-2"
+            activeOpacity={0.8}
+            style={{
+              shadowColor: "#EE2B8C",
+              shadowOpacity: 0.25,
+              shadowRadius: 8,
+              shadowOffset: { width: 0, height: 4 },
+              elevation: 4,
+            }}
+          >
+            <Ionicons name="chatbubble-outline" size={16} color="#fff" />
+            <Text variant="h2" className="text-white text-sm">
+              Message
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            className="flex-1 bg-primary/10 py-2.5 rounded-xl flex-row items-center justify-center gap-2"
+            activeOpacity={0.8}
+          >
+            <Ionicons name="call-outline" size={16} color="#EE2B8C" />
+            <Text variant="h2" className="text-primary text-sm">
+              Call
+            </Text>
+          </TouchableOpacity>
         </View>
 
-        {/* Contact info */}
-        <InfoCard
-          title="Contact Information"
-          items={[
-            {
-              label: "Phone",
-              value: guest.user?.phone || guest.phone || "Not provided",
-              icon: <Ionicons name="call-outline" size={20} color="#6B7280" />,
-            },
-            {
-              label: "Email",
-              value: guest.user?.email || guest.email || "Not provided",
-              icon: <Ionicons name="mail-outline" size={20} color="#6B7280" />,
-            },
-            {
-              label: "Relation",
-              value: guest.user?.relation || guest.relation || "Not specified",
-              icon: <Ionicons name="people-outline" size={20} color="#6B7280" />,
-            },
-          ]}
-        />
-
-        {/* RSVP Details */}
-        <CollapsibleSection title="RSVP Details">
-          <InfoCard
-            title=""
-            items={[
-              {
-                label: "Total Guests",
-                value: String(guest.total_guests || guest.totalGuests || 1),
-                icon: <Ionicons name="person-add-outline" size={20} color="#6B7280" />,
-              },
-              {
-                label: "Family Invitation",
-                value: guest.is_family || guest.isFamily ? "Yes" : "No",
-                icon: <Ionicons name="home-outline" size={20} color="#6B7280" />,
-              },
-            ]}
-          />
-        </CollapsibleSection>
-
-        {/* Additional Info placeholders */}
-        {guest.notes && (
-          <CollapsibleSection title="Notes">
-            <View className="bg-gray-50 p-4 rounded-xl">
-              <Text className="text-gray-700 italic">"{guest.notes}"</Text>
+        <View className="px-6 pt-6 pb-10 gap-8">
+          <View>
+            <View className="flex-row items-center gap-2 mb-4">
+              <Ionicons
+                name="person-circle-outline"
+                size={20}
+                color="#EE2B8C"
+              />
+              <Text
+                variant="caption"
+                className="text-xs font-bold uppercase tracking-widest"
+              >
+                Guest Requirements
+              </Text>
             </View>
-          </CollapsibleSection>
-        )}
+            <View className="bg-slate-50 rounded-2xl px-4">
+              {[
+                { label: "Arrival Date", value: "Oct 12, 2023", pill: false },
+                { label: "Departure Date", value: "Oct 15, 2023", pill: false },
+                { label: "Accommodation", value: "Room Needed", pill: true },
+                { label: "Transport", value: "Pickup Required", pill: true },
+              ].map((row, i, arr) => (
+                <View
+                  key={i}
+                  className={`flex-row justify-between items-center py-3 ${i < arr.length - 1 ? "border-b border-slate-100" : ""}`}
+                >
+                  <Text variant="body" className="text-slate-500 text-sm">
+                    {row.label}
+                  </Text>
+                  {row.pill ? (
+                    <View className="bg-primary/10 px-3 py-1 rounded-full">
+                      <Text variant="h2" className="text-primary text-xs">
+                        {row.value}
+                      </Text>
+                    </View>
+                  ) : (
+                    <Text variant="h2" className="text-slate-900 text-sm">
+                      {row.value}
+                    </Text>
+                  )}
+                </View>
+              ))}
+            </View>
+          </View>
 
-        <View className="h-10" />
+          <View>
+            <View className="flex-row items-center justify-between mb-4">
+              <View className="flex-row items-center gap-2">
+                <Ionicons
+                  name="shield-checkmark-outline"
+                  size={20}
+                  color="#EE2B8C"
+                />
+                <Text
+                  variant="caption"
+                  className="text-xs font-bold uppercase tracking-widest"
+                >
+                  Host Assignments
+                </Text>
+              </View>
+              <View className="bg-slate-100 px-2 py-0.5 rounded">
+                <Text
+                  variant="caption"
+                  className="text-[10px] uppercase font-bold"
+                >
+                  Internal Use
+                </Text>
+              </View>
+            </View>
+
+            <View className="bg-white border border-slate-200 p-4 rounded-2xl mb-3">
+              <View className="flex-row justify-between items-start">
+                <View className="flex-row gap-3 flex-1">
+                  <View className="p-2 bg-primary/5 rounded-xl">
+                    <Ionicons name="bed-outline" size={22} color="#EE2B8C" />
+                  </View>
+                  <View>
+                    <Text variant="caption" className="text-xs mb-0.5">
+                      Room Assigned
+                    </Text>
+                    <Text variant="h2" className="text-slate-900 text-sm">
+                      Deluxe 402
+                    </Text>
+                  </View>
+                </View>
+                <TouchableOpacity
+                  className="p-1.5 rounded-lg"
+                  activeOpacity={0.7}
+                >
+                  <Ionicons name="pencil-outline" size={16} color="#EE2B8C" />
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </View>
       </ScrollView>
-
-      {/* Action Footer if needed */}
-      <View className="p-4 bg-white border-t border-gray-100">
-        <TouchableOpacity
-          className="w-full bg-[#EE2B8C] py-4 rounded-xl items-center shadow-lg"
-          onPress={() => {
-            // Future extension: Resend invitation or Edit guest
-          }}
-        >
-          <Text className="text-white font-bold text-base">Actions</Text>
-        </TouchableOpacity>
-      </View>
     </SafeAreaView>
   );
 }
