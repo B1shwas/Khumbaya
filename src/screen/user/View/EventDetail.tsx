@@ -76,7 +76,7 @@ const EventDetail = () => {
       name: "Sub Events",
       icon: "layers-outline",
       color: "#F97316",
-      route: `../(subevent)/subevent-create`,
+      route: `../(subevent)/ListSubEvent`,
     },
     {
       id: "tables",
