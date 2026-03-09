@@ -1,6 +1,8 @@
 import { DatePicker } from "@/components/nativewindui/DatePicker";
+import { Text } from "@/src/components/ui/Text";
 import { useSubmitRsvpResponse } from "@/src/features/events/hooks/use-event";
 import { useAuthStore } from "@/src/store/AuthStore";
+import { useRsvpStore } from "@/src/store/useRsvpStore";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { DateTimePickerEvent } from "@react-native-community/datetimepicker";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -9,13 +11,12 @@ import { useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
-  ScrollView,
   Switch,
-  Text,
   TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
+import { ScrollView } from "react-native-gesture-handler";
 
 const PRIMARY = "#ee2b8c";
 
@@ -34,7 +35,6 @@ const Icon = ({
   />
 );
 
-/** Inner form fields — safe to embed inside a parent ScrollView */
 export const RSVPFormContent = ({
   userId,
   eventId,
@@ -57,12 +57,13 @@ export const RSVPFormContent = ({
   initialNotes?: string;
 }) => {
   const router = useRouter();
+  const clearDraft = useRsvpStore((s) => s.clearDraft);
   const { mutate: submitRsvp, isPending } = useSubmitRsvpResponse(eventId);
 
   const [attendance, setAttendance] = useState(initialAttendance);
   const [accommodation, setAccommodation] = useState(initialAccommodation);
-  const [arrivalPickup, setArrivalPickup] = useState(!!initialArrival);
-  const [departureDrop, setDepartureDrop] = useState(!!initialDeparture);
+  const [arrivalPickup, setArrivalPickup] = useState(false);
+  const [departureDrop, setDepartureDrop] = useState(false);
   const [notes, setNotes] = useState(initialNotes);
   const [arrivalDateTime, setArrivalDateTime] = useState(
     initialArrival ?? new Date()
@@ -83,7 +84,7 @@ export const RSVPFormContent = ({
       {
         userId,
         familyId,
-        notes: notes.trim() || undefined,
+        notes: notes.trim(),
         arrival_date_time: arrivalDateTime.toISOString(),
         departure_date_time: departureDateTime.toISOString(),
         isAccomodation: accommodation.toString(),
@@ -94,7 +95,12 @@ export const RSVPFormContent = ({
               ? "rejected"
               : "maybe",
       },
-      { onSuccess: () => router.back() }
+      {
+        onSuccess: () => {
+          clearDraft();
+          router.back();
+        },
+      }
     );
   };
 
@@ -104,20 +110,23 @@ export const RSVPFormContent = ({
       <View>
         <View className="flex-row items-center gap-2 mb-4">
           <Icon name="event_available" />
-          <Text className="font-bold text-slate-800">Will you attend?</Text>
+          <Text variant="h1" className="text-slate-800">
+            Will you attend?
+          </Text>
         </View>
-        <View className="flex-row bg-pink-50 p-1.5 rounded-md">
+        <View className="flex-row bg-pink-100 p-2 rounded-md">
           {["yes", "no", "maybe"].map((option) => (
             <TouchableOpacity
               key={option}
               onPress={() => setAttendance(option)}
-              className={`flex-1 py-2.5 rounded-lg ${
+              className={`flex-1 py-2.5 rounded-sm ${
                 attendance === option ? "bg-[#ee2b8c]" : ""
               }`}
               style={attendance === option ? { backgroundColor: PRIMARY } : {}}
             >
               <Text
-                className={`text-center font-semibold text-sm capitalize ${
+                variant="h2"
+                className={`text-center text-sm capitalize ${
                   attendance === option ? "text-white" : "text-slate-600"
                 }`}
               >
@@ -132,11 +141,16 @@ export const RSVPFormContent = ({
       <View>
         <View className="flex-row items-center gap-2 mb-4">
           <Icon name="flight_takeoff" />
-          <Text className="font-bold text-slate-800">Travel Itinerary</Text>
+          <Text variant="h1" className="text-slate-800">
+            Travel Itinerary
+          </Text>
         </View>
         <View className="gap-4">
           <View>
-            <Text className="text-xs font-bold uppercase tracking-wider text-slate-500 ml-1 mb-1.5">
+            <Text
+              variant="h2"
+              className="text-xs uppercase tracking-wider text-slate-500 ml-1 mb-1.5"
+            >
               Arrival Date & Time
             </Text>
             <DatePicker
@@ -148,7 +162,10 @@ export const RSVPFormContent = ({
             />
           </View>
           <View>
-            <Text className="text-xs font-bold uppercase tracking-wider text-slate-500 ml-1 mb-1.5">
+            <Text
+              variant="h2"
+              className="text-xs uppercase tracking-wider text-slate-500 ml-1 mb-1.5"
+            >
               Departure Date & Time
             </Text>
             <DatePicker
@@ -168,7 +185,7 @@ export const RSVPFormContent = ({
           <View className="flex-row items-center gap-3">
             <Icon name="hotel" />
             <View>
-              <Text className="font-bold text-sm text-slate-900">
+              <Text variant="h1" className="text-sm text-slate-900">
                 Accommodation Required?
               </Text>
               <Text className="text-xs text-slate-500">
@@ -187,7 +204,7 @@ export const RSVPFormContent = ({
         <View>
           <View className="flex-row items-center gap-2 mb-3">
             <Icon name="directions_car" />
-            <Text className="font-bold text-slate-800">
+            <Text variant="h1" className="text-slate-800">
               Transportation Needed?
             </Text>
           </View>
@@ -203,7 +220,7 @@ export const RSVPFormContent = ({
               ) : (
                 <Square size={20} color="#cbd5e1" />
               )}
-              <Text className="text-sm font-medium text-slate-900">
+              <Text variant="h2" className="text-sm text-slate-900">
                 Arrival Pickup
               </Text>
             </Pressable>
@@ -218,7 +235,7 @@ export const RSVPFormContent = ({
               ) : (
                 <Square size={20} color="#cbd5e1" />
               )}
-              <Text className="text-sm font-medium text-slate-900">
+              <Text variant="h2" className="text-sm text-slate-900">
                 Departure Drop
               </Text>
             </Pressable>
@@ -230,7 +247,9 @@ export const RSVPFormContent = ({
       <View>
         <View className="flex-row items-center gap-2 mb-3">
           <Icon name="restaurant_menu" />
-          <Text className="font-bold text-slate-800">Special Notes</Text>
+          <Text variant="h1" className="text-slate-800">
+            Special Notes
+          </Text>
         </View>
         <TextInput
           multiline
@@ -255,85 +274,70 @@ export const RSVPFormContent = ({
         {isPending ? (
           <ActivityIndicator color="#ffffff" />
         ) : (
-          <Text className="text-white font-bold text-base">Save RSVP</Text>
+          <Text variant="h1" className="text-white text-base">
+            Save RSVP
+          </Text>
         )}
       </TouchableOpacity>
     </View>
   );
 };
 
-/** Standalone full-page RSVP form (used at the /rsvp route) */
 const RSVPForm = () => {
-  const {
-    userId,
-    familyId,
-    memberName,
-    eventId,
-    rawStatus,
-    rawArrival,
-    rawDeparture,
-    rawAccommodation,
-    rawNotes,
-  } = useLocalSearchParams<{
-    userId?: string;
-    familyId?: string;
-    memberName?: string;
-    eventId?: string;
-    rawStatus?: string;
-    rawArrival?: string;
-    rawDeparture?: string;
-    rawAccommodation?: string;
-    rawNotes?: string;
-  }>();
+  const { eventId } = useLocalSearchParams<{ eventId: string }>();
   const { user } = useAuthStore();
+  const draft = useRsvpStore((s) => s.draft);
 
-  const resolvedUserId = userId ?? user?.id?.toString() ?? "";
+  const userId = draft?.userId ?? user?.id?.toString() ?? "";
+  const familyId = draft?.familyId;
+  const memberName = draft?.memberName;
 
-  // Map backend status → attendance option
   const initialAttendance =
-    rawStatus === "accepted"
+    draft?.rawStatus === "accepted"
       ? "yes"
-      : rawStatus === "rejected"
+      : draft?.rawStatus === "rejected"
         ? "no"
-        : rawStatus === "maybe"
+        : draft?.rawStatus === "maybe"
           ? "maybe"
           : "yes";
 
-  const initialArrival = rawArrival ? new Date(rawArrival) : undefined;
-  const initialDeparture = rawDeparture ? new Date(rawDeparture) : undefined;
-  const initialAccommodation = rawAccommodation === "true";
+  const initialArrival = draft?.rawArrival
+    ? new Date(draft.rawArrival)
+    : undefined;
+  const initialDeparture = draft?.rawDeparture
+    ? new Date(draft.rawDeparture)
+    : undefined;
+  const initialAccommodation = draft?.rawAccommodation === true;
 
   return (
-    <View className="flex-1 max-w-md mx-auto w-full">
-      <ScrollView showsVerticalScrollIndicator={false}>
-        {memberName && (
-          <View
-            className="mx-5 mt-4 mb-0 px-4 py-3 rounded-lg flex-row items-center gap-3"
-            style={{
-              backgroundColor: "#fdf2f8",
-              borderWidth: 1,
-              borderColor: "#f9a8d4",
-            }}
-          >
-            <MaterialIcons name="person" size={18} className="!text-primary" />
-            <Text className="text-sm font-semibold text-pink-700 flex-1">
-              Filling RSVP for {memberName}
-            </Text>
-          </View>
-        )}
-        <RSVPFormContent
-          userId={resolvedUserId}
-          eventId={Number(eventId)}
-          familyId={familyId ? Number(familyId) : undefined}
-          memberName={memberName}
-          initialAttendance={initialAttendance}
-          initialAccommodation={initialAccommodation}
-          initialArrival={initialArrival}
-          initialDeparture={initialDeparture}
-          initialNotes={rawNotes ?? ""}
-        />
-      </ScrollView>
-    </View>
+    <ScrollView showsHorizontalScrollIndicator={false}>
+      {memberName && (
+        <View
+          className="mx-5 mt-4 mb-0 px-4 py-3 rounded-lg flex-row items-center gap-3"
+          style={{
+            backgroundColor: "#fdf2f8",
+            borderWidth: 1,
+            borderColor: "#f9a8d4",
+          }}
+        >
+          <MaterialIcons name="person" size={18} className="!text-primary" />
+          <Text variant="h2" className="text-sm text-pink-700 flex-1">
+            Filling RSVP for {memberName}
+          </Text>
+        </View>
+      )}
+      <RSVPFormContent
+        userId={userId}
+        eventId={Number(eventId)}
+        familyId={familyId}
+        memberName={memberName}
+        initialAttendance={initialAttendance}
+        initialAccommodation={initialAccommodation}
+        initialArrival={initialArrival}
+        initialDeparture={initialDeparture}
+        initialNotes={draft?.rawNotes ?? ""}
+      />
+    </ScrollView>
   );
 };
 

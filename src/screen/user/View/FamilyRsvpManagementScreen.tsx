@@ -1,6 +1,7 @@
 import Card from "@/src/components/ui/Card";
 import { Text } from "@/src/components/ui/Text";
 import { useEventResponseWithUser } from "@/src/features/events/hooks/use-event";
+import { useRsvpStore } from "@/src/store/useRsvpStore";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import {
@@ -53,7 +54,6 @@ interface MemberRsvp {
   dateRange?: string;
   roomNeeded?: string;
   notes?: string;
-  // raw values for pre-filling the edit form
   rawStatus: string | null;
   rawArrival: string | null;
   rawDeparture: string | null;
@@ -63,7 +63,8 @@ interface MemberRsvp {
 function deriveStatus(event_guest: EventGuest | null): RSVPStatus {
   if (!event_guest) return "pending";
   if (event_guest.status === "rejected") return "declined";
-  return "attending";
+  if (event_guest.status === "accepted") return "attending";
+  return "pending";
 }
 
 function formatDateRange(
@@ -113,17 +114,17 @@ const statusConfig: Record<
   attending: {
     label: "Attending",
     wrapperClass: "bg-green-100 px-2.5 py-0.5 rounded-full",
-    textClass: "text-xs font-semibold text-green-700",
+    textClass: "text-xs text-green-700",
   },
   declined: {
     label: "Declined",
     wrapperClass: "bg-red-100 px-2.5 py-0.5 rounded-full",
-    textClass: "text-xs font-semibold text-red-600",
+    textClass: "text-xs text-red-600",
   },
   pending: {
     label: "Not Responded",
     wrapperClass: "bg-slate-100 px-2.5 py-0.5 rounded-full",
-    textClass: "text-xs font-semibold text-slate-500",
+    textClass: "text-xs text-slate-500",
   },
 };
 
@@ -158,13 +159,16 @@ const MemberCard = ({
         <View className="flex-1 min-w-0">
           <View className="flex-row justify-between items-start">
             <Text
-              className="text-lg font-bold text-slate-900 flex-1 mr-2"
+              className="text-lg text-slate-900 flex-1 mr-2"
+              variant="h2"
               numberOfLines={1}
             >
               {member.name}
             </Text>
             <View className={wrapperClass}>
-              <Text className={textClass}>{label}</Text>
+              <Text variant="h2" className={textClass}>
+                {label}
+              </Text>
             </View>
           </View>
 
@@ -183,7 +187,7 @@ const MemberCard = ({
                   <Ionicons name="bed-outline" size={13} color="#64748b" />
                   <Text className="text-sm text-slate-500">
                     Room Needed:{" "}
-                    <Text className="text-slate-800 font-semibold">
+                    <Text variant="h2" className="text-slate-800">
                       {member.roomNeeded}
                     </Text>
                   </Text>
@@ -215,12 +219,12 @@ const MemberCard = ({
       {/* CTA */}
       <View className="mt-4 pt-4 border-t border-slate-100">
         <TouchableOpacity
-          className="w-full py-2.5 rounded-lg items-center justify-center"
+          className="w-full py-2.5 rounded-md items-center justify-center"
           style={{ backgroundColor: "#ee2b8c" }}
           activeOpacity={0.85}
           onPress={onPressRsvp}
         >
-          <Text className="text-white font-bold text-sm">
+          <Text variant="h2" className="text-white text-sm">
             {isPending ? "Complete RSVP" : "Edit RSVP"}
           </Text>
         </TouchableOpacity>
@@ -232,6 +236,7 @@ const MemberCard = ({
 export default function FamilyRsvpManagementScreen() {
   const router = useRouter();
   const { eventId } = useLocalSearchParams<{ eventId: string }>();
+  const setDraft = useRsvpStore((s) => s.setDraft);
 
   const { data: eventResponses, isLoading } = useEventResponseWithUser(
     Number(eventId)
@@ -252,24 +257,38 @@ export default function FamilyRsvpManagementScreen() {
     );
   }
 
+  // this will set the member previous rsvp if any
+  const handleMemberRsvp = (member: MemberRsvp) => {
+    setDraft({
+      userId: member.id,
+      familyId: member.familyId,
+      memberName: member.name,
+      rawStatus: member.rawStatus,
+      rawArrival: member.rawArrival,
+      rawDeparture: member.rawDeparture,
+      rawAccommodation: member.rawAccommodation,
+      rawNotes: member.notes ?? null,
+    });
+    router.push(`/(protected)/(client-stack)/events/${eventId}/(guest)/rsvp`);
+  };
+
   return (
-    <SafeAreaView className="flex-1 bg-background-light" edges={["bottom"]}>
+    <SafeAreaView className="flex-1 bg-background-tertairy" edges={["bottom"]}>
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ padding: 16, paddingBottom: 40, gap: 12 }}
       >
-        <Text className="text-xs font-semibold uppercase tracking-widest text-slate-400 px-1 mb-1">
+        <Text
+          variant="h2"
+          className="text-xs uppercase tracking-widest text-slate-400 px-1 mb-1"
+        >
           Family Members
         </Text>
         {members.map((member) => (
           <MemberCard
             key={member.id}
             member={member}
-            onPressRsvp={() =>
-              router.push(
-                `/(protected)/(client-stack)/events/${eventId}/(guest)/rsvp?userId=${member.id}&familyId=${member.familyId}&memberName=${encodeURIComponent(member.name)}&rawStatus=${member.rawStatus ?? ""}&rawArrival=${encodeURIComponent(member.rawArrival ?? "")}&rawDeparture=${encodeURIComponent(member.rawDeparture ?? "")}&rawAccommodation=${member.rawAccommodation ?? ""}&rawNotes=${encodeURIComponent(member.notes ?? "")}`
-              )
-            }
+            onPressRsvp={() => handleMemberRsvp(member)}
           />
         ))}
       </ScrollView>
