@@ -91,9 +91,12 @@ export default function HomePage() {
 
   return (
     <>
-      <SafeAreaView style={styles.header} className="px-4    border-b-3 border-black">
+      <SafeAreaView
+        style={styles.header}
+        className="px-4    border-b-3 border-black"
+      >
         <View className="flex-row items-center justify-between ">
-          <View >
+          <View>
             <Text style={styles.greeting}>
               Hi, {user?.username || user?.name || "Guest"} 👋
             </Text>
@@ -141,8 +144,6 @@ export default function HomePage() {
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={styles.horizontalList}
             />
-
-            <View style={styles.bottomSpacer} />
           </>
         }
       />
