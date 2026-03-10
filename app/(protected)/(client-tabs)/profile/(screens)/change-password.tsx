@@ -140,7 +140,7 @@ export default function ChangePasswordScreen() {
       {
         currentPassword: data.currentPassword,
         newPassword: data.newPassword,
-        confimPassword: data.confirmPassword,
+        confirmPassword: data.confirmPassword,
       },
       {
         onSuccess: () => {
@@ -182,8 +182,8 @@ export default function ChangePasswordScreen() {
               rules={{
                 required: "Current password is required",
                 minLength: {
-                  value: 5,
-                  message: "Password must be at least 5 characters",
+                  value: 8,
+                  message: "Password must be at least 8 characters",
                 },
               }}
               render={({ field: { onChange, onBlur, value } }) => (
@@ -206,9 +206,12 @@ export default function ChangePasswordScreen() {
               rules={{
                 required: "New password is required",
                 minLength: {
-                  value: 5,
-                  message: "Password must be at least 5 characters",
+                  value: 8,
+                  message: "Password must be at least 8 characters",
                 },
+                validate: (value) =>
+                  value !== getValues("currentPassword") ||
+                  "New password must be different from current password",
               }}
               render={({ field: { onChange, onBlur, value } }) => (
                 <PasswordInput
@@ -230,8 +233,8 @@ export default function ChangePasswordScreen() {
               rules={{
                 required: "Please confirm your password",
                 minLength: {
-                  value: 5,
-                  message: "Password must be at least 5 characters",
+                  value: 8,
+                  message: "Password must be at least 8 characters",
                 },
                 validate: (value) =>
                   value === getValues("newPassword") ||
@@ -268,12 +271,9 @@ export default function ChangePasswordScreen() {
               ${isLoading ? "opacity-70" : ""}`}
             activeOpacity={0.9}
           >
-            <MaterialIcons
-              name="lock"
-              size={20}
-              color="#ffffff"
-              className="mr-2"
-            />
+            <View className="mr-2">
+              <MaterialIcons name="lock" size={20} color="#ffffff" />
+            </View>
             <Text className="text-white font-bold text-lg">
               {isLoading ? "Changing..." : "Change Password"}
             </Text>

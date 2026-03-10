@@ -94,7 +94,7 @@ export function useChangePassword() {
     mutationFn: async (data: {
       currentPassword: string;
       newPassword: string;
-      confimPassword: string;
+      confirmPassword: string;
     }) => {
       const response = await api.patch("/user", data);
       return response.data;
