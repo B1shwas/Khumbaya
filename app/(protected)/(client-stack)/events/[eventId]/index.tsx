@@ -5,9 +5,9 @@ import { ActivityIndicator, View } from "react-native";
 
 export default function EventRoleRedirect() {
   const { eventId } = useLocalSearchParams();
-  const { data: eventsData = [], isLoading } = useGetEventWithRole();
+  const { data: eventsData = [], isLoading, isFetching } = useGetEventWithRole();
 
-  if (isLoading) {
+  if (isLoading || isFetching) {
     return (
       <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
         <ActivityIndicator size="large" color="#ee2b8c" />
