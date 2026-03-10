@@ -10,8 +10,8 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import BudgetCard from "./components/BudgetCard";
-import BudgetSummary from "./components/BudgetSummary";
+import BudgetCard from "../../screen/budget/BudgetCard";
+import BudgetSummary from "../../screen/budget/BudgetSummary";
 import { useBudget } from "./hooks/useBudget";
 import { BudgetItem } from "./types/budget.types";
 

@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Alert, Text, TouchableOpacity, View } from "react-native";
 import { Swipeable } from "react-native-gesture-handler";
-import { BudgetItem } from "../types/budget.types";
+import { BudgetItem } from "../../features/budget/types/budget.types";
 
 interface BudgetCardProps {
   item: BudgetItem;
