@@ -2,25 +2,19 @@ import { Text } from "@/src/components/ui/Text";
 import { cn } from "@/src/utils/cn";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { FlatList, Pressable, TouchableOpacity, View } from "react-native";
 import { TextInput } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useGetInvitationsForEvent } from "./api/use-guests";
 import GuestCard from "./components/GuestCard";
-
+import { useGuestDetailStore } from "./store/useGuestDetailStore";
 type GuestFilterTab = "all" | "accepted" | "pending";
 
 export default function GuestListScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
 
-  const onPress = (guest: any) => {
-    router.push({
-      pathname: `/(protected)/(client-stack)/events/${eventId}/(organizer)/guests/${guest.id}/guest-details`,
-      params: { guest: JSON.stringify(guest) },
-    });
-  };
   const eventId = useMemo(() => {
     const raw = Array.isArray(params.eventId)
       ? params.eventId[0]
@@ -29,16 +23,25 @@ export default function GuestListScreen() {
     return Number.isFinite(parsed) ? parsed : null;
   }, [params.eventId]);
 
-  const { data: invitations, isLoading } = useGetInvitationsForEvent(eventId);
+  const setGuestDetail = useGuestDetailStore((state) => state.setGuestDetail);
+  const clearGuestDetail = useGuestDetailStore((state) => state.clearGuestDetail);
 
+  const { data: invitations, isLoading } = useGetInvitationsForEvent(eventId);
   const [activeTab, setActiveTab] = useState<GuestFilterTab>("all");
+
   const openAddGuestScreen = useCallback(() => {
     if (!eventId) return;
     router.push(
       `/(protected)/(client-stack)/events/${eventId}/(organizer)/addguest`
     );
   }, [eventId, router]);
-
+ const onPress = (guest: any) => {
+    setGuestDetail(guest);
+    router.push({
+      pathname: `/(protected)/(client-stack)/events/${eventId}/(organizer)/guests/${guest.id}/guest-details` as any,
+      params: { guest: JSON.stringify(guest) },
+    });
+  };
   const tabs: { label: string; value: GuestFilterTab }[] = [
     { label: "All", value: "all" },
     { label: "Accepted", value: "accepted" },
@@ -66,7 +69,12 @@ export default function GuestListScreen() {
       }
     });
   }, [invitations, activeTab]);
-
+ 
+  useEffect(() => {
+    return () => {
+      clearGuestDetail();
+    };
+  }, [clearGuestDetail]);
   return (
     <SafeAreaView className="p-4  h-full" edges={[]}>
       <View className="px-4">

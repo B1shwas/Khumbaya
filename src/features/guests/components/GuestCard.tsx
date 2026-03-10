@@ -1,22 +1,13 @@
 import { Image, Text, TouchableOpacity, View } from "react-native";
+import { GuestDetailInterface } from "../types";
+
 interface GuestCardProps {
-  guest: {
-    user: {
-      id: number;
-      username: string;
-      email: string;
-      photo?: string | null;
-      phone?: string | null;
-      relation?: string | null;
-    };
-    status: string;
-    rsvp_status: string;
-  };
+  guest: GuestDetailInterface;
   onPress?: () => void;
 }
 
 export default function GuestCard({ guest, onPress }: GuestCardProps ) {
-  const displayStatus = (guest.status || guest.rsvp_status || "Pending").trim();
+  const displayStatus = (guest.event_guest.status || "Pending").trim();
 
   const getStatusColor = () => {
     switch (displayStatus.toLowerCase()) {
@@ -48,8 +39,8 @@ export default function GuestCard({ guest, onPress }: GuestCardProps ) {
     }
   };
 
-  const initials = guest.user.username
-    ? guest.user.username
+  const initials = guest.user_detail.username
+    ? guest.user_detail.username
       .split(" ")
       .map((n) => n[0])
       .join("")
@@ -57,9 +48,9 @@ export default function GuestCard({ guest, onPress }: GuestCardProps ) {
       .slice(0, 2)
     : "GU";
 
-  const displayName = guest.user.username?.trim() || guest.user.email || "Guest";
-  const relation = guest.user.relation?.trim();
-  const phone = guest.user.phone?.trim();
+  const displayName = guest.user_detail.username?.trim() || guest.user_detail.email || "Guest";
+  const relation = guest.user_detail.relation?.trim();
+  const phone = guest.user_detail.phone?.trim();
 
   return (
     <View className="mb-3 rounded-2xl bg-white">
@@ -70,9 +61,9 @@ export default function GuestCard({ guest, onPress }: GuestCardProps ) {
         className="rounded-2xl"
       >
         <View className="min-h-[86px] flex-row items-center gap-3 px-4 py-3">
-          {guest.user.photo ? (
+          {guest.user_detail.photo ? (
             <Image
-              source={{ uri: guest.user.photo }}
+              source={{ uri: guest.user_detail.photo }}
               className="h-12 w-12 rounded-full"
             />
           ) : (
