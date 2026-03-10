@@ -140,7 +140,7 @@ export default function ChangePasswordScreen() {
       {
         currentPassword: data.currentPassword,
         newPassword: data.newPassword,
-        confimPassword: data.confirmPassword,
+        confirmPassword: data.confirmPassword,
       },
       {
         onSuccess: () => {
