@@ -8,6 +8,8 @@ import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
   Alert,
+  Pressable,
+  Switch,
   Image,
   KeyboardAvoidingView,
   Platform,
@@ -20,11 +22,13 @@ import {
 import { useSharedValue } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+const PRIMARY = "#ee2b8c";
 interface EventFormData {
   name: string;
   eventType: string;
-  startdateTime: Date | undefined;
+  startdateTime: Date;
   coverImage: string | null;
+  endDateTime: Date
 }
 
 type EventType = "Wedding" | "Engagement" | "Reception" | "Nikkah" | "Other";
@@ -48,22 +52,21 @@ const EVENT_TYPE_TO_BACKEND: Record<EventType, string> = {
 export default function EventCreate() {
   const router = useRouter();
   const { mutate: createEvent, isPending: isCreatingEvent } = useCreateEvent();
+  const [toggle, setToggle] = useState(false);
 
 
-  const [selectedDateTime, setSelectedDateTime] = useState<Date>(new Date()); // make the date in the thing
+  const [selectedDateTime, setSelectedDateTime] = useState<Date>(new Date());
+  const [selectedEndDateTime, setEndDateTime] = useState<Date>(new Date());
   const [formData, setFormData] = useState<EventFormData>({
     name: "Aisha & Omar's Wedding",
     eventType: "Wedding" as EventType,
     startdateTime: selectedDateTime, // June 16, 2024
+    endDateTime: selectedEndDateTime,
     coverImage: null, // handle the image uplaoding logic
   });
 
   const scale = useSharedValue(1);
 
-  const updateSelectedDateTime = (nextDateTime: Date) => {
-    setSelectedDateTime(nextDateTime);
-    setFormData((prev) => ({ ...prev, date: nextDateTime }));
-  };
 
   const handleDateChange = (event: DateTimePickerEvent, pickedDate?: Date) => {
     if (event.type === "dismissed" || !pickedDate) return;
@@ -79,10 +82,27 @@ export default function EventCreate() {
       pickedDate.getSeconds(),
       0
     )
-    updateSelectedDateTime(next);
+    setSelectedDateTime(next);
+    setFormData((prev) => ({ ...prev, startdateTime: next }));
   };
 
-
+  const handleEndDateChange = (event: DateTimePickerEvent, pickedDate?: Date) => {
+    if (event.type === "dismissed" || !pickedDate) return;
+    const next = new Date(selectedEndDateTime);
+    next.setFullYear(
+      pickedDate.getFullYear(),
+      pickedDate.getMonth(),
+      pickedDate.getDate()
+    );
+    next.setHours(
+      pickedDate.getHours(),
+      pickedDate.getMinutes(),
+      pickedDate.getSeconds(),
+      0
+    );
+    setEndDateTime(next);
+    setFormData((prev) => ({ ...prev, endDateTime: next }));
+  };
   const handleSubmit = async () => {
     //validaton in the event creation in this
     if (!formData.name.trim()) {
@@ -100,7 +120,7 @@ export default function EventCreate() {
       description: `${formData.eventType} event`,
       type: EVENT_TYPE_TO_BACKEND[formData.eventType as EventType],
       startDateTime: selectedDateTime,
-      endDateTime: new Date(),
+      endDateTime: selectedEndDateTime,
       budget: 0,
       theme: "Classic",
       parentId: 1,
@@ -237,13 +257,24 @@ export default function EventCreate() {
               })}
             </View>
           </View>
-
-          <View className="mt-7">
+          <View className="mt-7 mb-7">
             <DatePicker
               value={selectedDateTime}
               mode="datetime"
               onChange={handleDateChange}
-              materialDateLabel="Event date"
+              materialDateLabel=" start date"
+              materialTimeLabel="start time"
+              materialDateLabelClassName="text-xs"
+            />
+          </View>
+          {/* Toggle Options */}
+          <View>
+            <DatePicker
+              value={selectedEndDateTime}
+              mode="datetime"
+              onChange={handleEndDateChange}
+              materialDateLabel=" End date (optional)"
+              materialTimeLabel="End time (optional)"
             />
           </View>
 
@@ -272,6 +303,6 @@ export default function EventCreate() {
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </SafeAreaView >
   );
 }
