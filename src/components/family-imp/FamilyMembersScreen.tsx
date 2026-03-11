@@ -23,14 +23,24 @@ export default function FamilyMembersScreen() {
   }
 
   if (!familyId) {
-    return <CreateFamilyScreen />;
+    return (
+      <>
+        <Stack.Screen
+          options={{
+            headerTitle: "Family",
+            headerTitleStyle: { fontFamily: "PlusJakartaSans-Bold" },
+          }}
+        />
+        <CreateFamilyScreen />
+      </>
+    );
   }
 
   return (
     <>
       <Stack.Screen
         options={{
-          headerTitle: familyName || "Family Members",
+          headerTitle: familyName || "Family",
           headerTitleAlign: "center",
           headerTitleStyle: { fontFamily: "PlusJakartaSans-Bold" },
           headerRight: () => (

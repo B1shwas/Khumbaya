@@ -24,7 +24,9 @@ export default function GuestListScreen() {
   }, [params.eventId]);
 
   const setGuestDetail = useGuestDetailStore((state) => state.setGuestDetail);
-  const clearGuestDetail = useGuestDetailStore((state) => state.clearGuestDetail);
+  const clearGuestDetail = useGuestDetailStore(
+    (state) => state.clearGuestDetail
+  );
 
 const { data: invitations, isLoading } = useGetInvitationsForEvent(eventId);
   const [activeTab, setActiveTab] = useState<GuestFilterTab>("all");
@@ -35,10 +37,11 @@ const { data: invitations, isLoading } = useGetInvitationsForEvent(eventId);
       `/(protected)/(client-stack)/events/${eventId}/(organizer)/addguest`
     );
   }, [eventId, router]);
- const onPress = (guest: any) => {
+  const onPress = (guest: any) => {
     setGuestDetail(guest);
     router.push({
-      pathname: `/(protected)/(client-stack)/events/${eventId}/(organizer)/guests/${guest.id}/guest-details` as any,
+      pathname:
+        `/(protected)/(client-stack)/events/${eventId}/(organizer)/guests/${guest.id}/guest-details` as any,
       params: { guest: JSON.stringify(guest) },
     });
   };
@@ -69,7 +72,7 @@ const { data: invitations, isLoading } = useGetInvitationsForEvent(eventId);
       }
     });
   }, [invitations, activeTab]);
- 
+
   useEffect(() => {
     return () => {
       clearGuestDetail();

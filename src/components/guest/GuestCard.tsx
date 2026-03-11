@@ -6,8 +6,8 @@ interface GuestCardProps {
   onPress?: () => void;
 }
 
-export default function GuestCard({ guest, onPress }: GuestCardProps ) {
-  const displayStatus = (guest.event_guest.status || "Pending").trim();
+export default function GuestCard({ guest, onPress }: GuestCardProps) {
+  const displayStatus = (guest?.event_guest?.status || "Pending").trim();
 
   const getStatusColor = () => {
     switch (displayStatus.toLowerCase()) {
@@ -41,14 +41,15 @@ export default function GuestCard({ guest, onPress }: GuestCardProps ) {
 
   const initials = guest.user_detail.username
     ? guest.user_detail.username
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2)
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .toUpperCase()
+        .slice(0, 2)
     : "GU";
 
-  const displayName = guest.user_detail.username?.trim() || guest.user_detail.email || "Guest";
+  const displayName =
+    guest.user_detail.username?.trim() || guest.user_detail.email || "Guest";
   const relation = guest.user_detail.relation?.trim();
   const phone = guest.user_detail.phone?.trim();
 
@@ -68,12 +69,17 @@ export default function GuestCard({ guest, onPress }: GuestCardProps ) {
             />
           ) : (
             <View className="h-12 w-12 items-center justify-center rounded-full bg-[#EE2B8C]">
-              <Text className="text-base font-semibold text-white">{initials}</Text>
+              <Text className="text-base font-semibold text-white">
+                {initials}
+              </Text>
             </View>
           )}
 
           <View className="flex-1">
-            <Text numberOfLines={1} className="text-base font-semibold text-gray-900">
+            <Text
+              numberOfLines={1}
+              className="text-base font-semibold text-gray-900"
+            >
               {displayName}
             </Text>
 
