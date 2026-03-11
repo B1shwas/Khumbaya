@@ -26,6 +26,9 @@ export default function ProfileLayout() {
         options={{
           presentation: "formSheet",
           headerShown: false,
+          sheetAllowedDetents: [0.5],
+          sheetInitialDetentIndex: 0,
+          sheetGrabberVisible: true,
         }}
       />
     </Stack>

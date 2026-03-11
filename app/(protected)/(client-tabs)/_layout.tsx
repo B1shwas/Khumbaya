@@ -7,6 +7,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 const TAB_BAR_HIDDEN_ROUTES = [
   "/profile/edit-profile",
   "/profile/family-members",
+  "/profile/family-options",
   "/profile/app-settings",
   "/profile/change-password",
   "/profile/privacy-security",
@@ -26,7 +27,7 @@ export default function ClientTabsLayout() {
   useEffect(() => {
     // Check if current route matches any inner screen route
     const isInnerScreen = TAB_BAR_HIDDEN_ROUTES.some(
-      (route) => pathname === route || pathname.startsWith(route + "/"),
+      (route) => pathname === route || pathname.startsWith(route + "/")
     );
 
     setHideTabBar(isInnerScreen);
