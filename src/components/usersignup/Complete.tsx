@@ -1,6 +1,5 @@
 import { Button } from "@/src/components/ui/Button";
 import { Text } from "@/src/components/ui/Text";
-import React from "react";
 import { ScrollView, TextInput, View } from "react-native";
 
 type CompleteData = {

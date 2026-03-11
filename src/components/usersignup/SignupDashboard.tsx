@@ -6,12 +6,14 @@ import { Link, useRouter } from "expo-router";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
+  KeyboardAvoidingView,
+  Platform,
   Pressable,
-  ScrollView,
   TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 type SignupDashboardFormData = {
   username: string;
@@ -55,15 +57,25 @@ export default function SignupDashboard() {
   });
 
   return (
-    <ScrollView
-      className="flex-1"
-      contentContainerStyle={{
-        paddingHorizontal: 24,
-        paddingBottom: 24,
-        flexGrow: 1,
-      }}
-      keyboardShouldPersistTaps="handled"
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 16 : 0}
     >
+      <KeyboardAwareScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{
+          paddingHorizontal: 24,
+          paddingBottom: 35,
+          flexGrow: 1,
+        }}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={true}
+        enableOnAndroid={true}
+        enableAutomaticScroll={true}
+        extraScrollHeight={40}
+        scrollEnabled={true}
+      >
       <View className="pt-4">
         <Text className="text-3xl font-jakarta-bold text-text-light">
           Let's get started
@@ -247,6 +259,7 @@ export default function SignupDashboard() {
           </Link>
         </TouchableOpacity>
       </View>
-    </ScrollView>
+      </KeyboardAwareScrollView>
+    </KeyboardAvoidingView>
   );
 }

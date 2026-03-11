@@ -8,8 +8,8 @@ export default function OnboardingLayout() {
         animation: "slide_from_right",
       }}
     >
-      <Stack.Screen name="index" />
-      <Stack.Screen name="login" />
+      <Stack.Screen name="index"/>
+      <Stack.Screen name="login"/>
       <Stack.Screen name="user-signup" />
       <Stack.Screen name="vendor-signup" />
     </Stack>

@@ -9,10 +9,10 @@ import {
   KeyboardAvoidingView,
   Platform,
   Pressable,
-  ScrollView,
   TextInput,
-  View,
+  View
 } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 
 const HERO_IMAGE = {
@@ -110,35 +110,47 @@ export default function LoginPage() {
 
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      className="flex-1 bg-gray-50"
+      style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 16 : 0}
     >
-      <ScrollView
-        contentContainerClassName="flex-grow"
+      <KeyboardAwareScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{
+       
+          paddingBottom: 35,
+          flexGrow: 1,
+        }}
         keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
+        showsVerticalScrollIndicator={true}
+        enableOnAndroid={true}
+        enableAutomaticScroll={true}
+        extraScrollHeight={40}
+        scrollEnabled={true}
       >
-        {/* Hero Image Section */}
-        <View className="h-[35vh] w-full overflow-hidden rounded-b-xl">
-          <ImageBackground
-            source={HERO_IMAGE}
-            className="w-full h-[35vh]"
-            resizeMode="cover"
-            accessibilityLabel="Wedding venue hero image"
-          />
+    <View style={{ flex: 1, backgroundColor: "#f3f4f6" }}>
+      {/* Hero Image Section (fixed, not keyboard-aware) */}
+      <View className="h-[30vh] w-full overflow-hidden rounded-b-xl">
+        <ImageBackground
+          source={HERO_IMAGE}
+          className="w-full h-[30vh]"
+          resizeMode="cover"
+          accessibilityLabel="Wedding venue hero image"
+        />
 
-          <View className="absolute bottom-6 left-0 right-0 items-center">
-            <Animated.View
-              style={{ transform: [{ scale: pulseScale }] }}
-              className="rounded-full border border-yellow-200/60 bg-white/90 p-3"
-            >
-              <MaterialIcons name="favorite" size={28} color="#ee2b8c" />
-            </Animated.View>
-          </View>
+        <View className="absolute bottom-6 left-0 right-0 items-center">
+          <Animated.View
+            style={{ transform: [{ scale: pulseScale }] }}
+            className="rounded-full border border-yellow-200/60 bg-white/90 p-3"
+          >
+            <MaterialIcons name="favorite" size={28} color="#ee2b8c" />
+          </Animated.View>
         </View>
+      </View>
 
-        {/* Content Section */}
-        <View className="px-6 pb-8 pt-6">
+    
+          {/* Content Section */}
+          <View className="px-6 pb-8 pt-6">
           <View className="mb-6 items-center">
             <Text variant="h1" className="text-center text-3xl text-text-light">
               {COPY.title}
@@ -291,8 +303,9 @@ export default function LoginPage() {
               .
             </Text>
           </View>
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+          </View>
+    </View>
+        </KeyboardAwareScrollView>
+      </KeyboardAvoidingView>
   );
 }

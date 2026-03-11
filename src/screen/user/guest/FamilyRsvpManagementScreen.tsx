@@ -11,9 +11,6 @@ import {   MemberRsvpCardProp , mapToMemberRsvp } from "@/src/utils/type/rsvp";
 import MemberCard from "@/src/components/guest/family/MemberCard";
 import { GuestDetailInterface   } from "@/src/features/guests/types";
 
-
-
-
 export default function FamilyRsvpManagementScreen() {
   const router = useRouter();
   const { eventId } = useLocalSearchParams<{ eventId: string }>();
