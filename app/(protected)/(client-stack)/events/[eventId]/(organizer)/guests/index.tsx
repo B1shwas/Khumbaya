@@ -1,3 +1,2 @@
-import { GuestListPage } from "@/src/screen/user/View";
-
-export default GuestListPage;
+import GuestListScreen from "@/src/screen/user/guest/organizerview/GuestListScreen";
+export default GuestListScreen;
