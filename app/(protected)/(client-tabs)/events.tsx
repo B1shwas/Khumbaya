@@ -1,2 +1,2 @@
-import Event from "@/src/screen/user/View/Events";
+import Event from "@/src/screen/user/event/EventstabDetail";
 export default Event;

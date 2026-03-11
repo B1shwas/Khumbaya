@@ -6,9 +6,9 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { FlatList, Pressable, TouchableOpacity, View } from "react-native";
 import { TextInput } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useGetInvitationsForEvent } from "./api/use-guests";
-import GuestCard from "./components/GuestCard";
-import { useGuestDetailStore } from "./store/useGuestDetailStore";
+import GuestCard from "../../../../components/guest/GuestCard";
+import { useGetInvitationsForEvent } from "../../../../features/guests/api/use-guests";
+import { useGuestDetailStore } from "../../../../features/guests/store/useGuestDetailStore";
 type GuestFilterTab = "all" | "accepted" | "pending";
 
 export default function GuestListScreen() {
@@ -26,7 +26,7 @@ export default function GuestListScreen() {
   const setGuestDetail = useGuestDetailStore((state) => state.setGuestDetail);
   const clearGuestDetail = useGuestDetailStore((state) => state.clearGuestDetail);
 
-  const { data: invitations, isLoading } = useGetInvitationsForEvent(eventId);
+const { data: invitations, isLoading } = useGetInvitationsForEvent(eventId);
   const [activeTab, setActiveTab] = useState<GuestFilterTab>("all");
 
   const openAddGuestScreen = useCallback(() => {

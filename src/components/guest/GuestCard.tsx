@@ -1,5 +1,5 @@
 import { Image, Text, TouchableOpacity, View } from "react-native";
-import { GuestDetailInterface } from "../types";
+import { GuestDetailInterface } from "../../features/guests/types";
 
 interface GuestCardProps {
   guest: GuestDetailInterface;
