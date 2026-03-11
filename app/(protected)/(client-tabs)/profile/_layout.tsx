@@ -19,13 +19,13 @@ export default function ProfileLayout() {
         }}
       />
 
-      {/* Inner screens - no header, no tab bar (handled by parent tabs layout) */}
+      <Stack.Screen name="family-members" />
+
       <Stack.Screen
-        name="family-members"
+        name="family-options"
         options={{
-          headerShown: true,
-          animation: "slide_from_right",
-          headerTitle: "Family Members",
+          presentation: "formSheet",
+          headerShown: false,
         }}
       />
     </Stack>
