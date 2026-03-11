@@ -1,8 +1,8 @@
 import Event from "../event/EventstabDetail";
+import FamilyRsvpManagementScreen from "../guest/FamilyRsvpManagementScreen";
 import BudgetPage from "./Budget";
 import EventDetail from "./EventDetail";
-import FamilyRsvpManagementScreen from "./FamilyRsvpManagementScreen";
-import GuestEventDetails from "./GuestEventDetails";
+import GuestEventDetails from "../guest/GuestEventDetails";
 
 import HomePage from "./Home";
 import TimelinePage from "./Timeline";

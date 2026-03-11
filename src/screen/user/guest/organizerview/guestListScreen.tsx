@@ -1,4 +1,9 @@
+import FamilyCard from "@/src/components/guest/FamilyGuestCard";
+import GuestCard from "@/src/components/guest/GuestCard";
 import { Text } from "@/src/components/ui/Text";
+import { useGetInvitationsForEvent } from "@/src/features/guests/api/use-guests";
+import { useGuestDetailStore , useFamilyGuestStore } from "@/src/features/guests/store/useGuestDetailStore";
+import { FamilyGroup, GroupedInvitation, groupInvitationsByFamily } from "@/src/features/guests/types";
 import { cn } from "@/src/utils/cn";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -6,9 +11,6 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { FlatList, Pressable, TouchableOpacity, View } from "react-native";
 import { TextInput } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
-import GuestCard from "../../../../components/guest/GuestCard";
-import { useGetInvitationsForEvent } from "../../../../features/guests/api/use-guests";
-import { useGuestDetailStore } from "../../../../features/guests/store/useGuestDetailStore";
 type GuestFilterTab = "all" | "accepted" | "pending";
 
 export default function GuestListScreen() {
@@ -24,11 +26,10 @@ export default function GuestListScreen() {
   }, [params.eventId]);
 
   const setGuestDetail = useGuestDetailStore((state) => state.setGuestDetail);
-  const clearGuestDetail = useGuestDetailStore(
-    (state) => state.clearGuestDetail
-  );
-
-const { data: invitations, isLoading } = useGetInvitationsForEvent(eventId);
+  const clearGuestDetail = useGuestDetailStore((state) => state.clearGuestDetail);
+  const setFamilyGuest = useFamilyGuestStore((state) => state.setFamilyGroup);
+  const clearFamilyGuest = useFamilyGuestStore((state) => state.clearFamilyGroup);
+  const { data: invitations, isLoading } = useGetInvitationsForEvent(eventId);
   const [activeTab, setActiveTab] = useState<GuestFilterTab>("all");
 
   const openAddGuestScreen = useCallback(() => {
@@ -37,7 +38,8 @@ const { data: invitations, isLoading } = useGetInvitationsForEvent(eventId);
       `/(protected)/(client-stack)/events/${eventId}/(organizer)/addguest`
     );
   }, [eventId, router]);
-  const onPress = (guest: any) => {
+
+  const onPressGuestCard = (guest: any) => {
     setGuestDetail(guest);
     router.push({
       pathname:
@@ -45,36 +47,68 @@ const { data: invitations, isLoading } = useGetInvitationsForEvent(eventId);
       params: { guest: JSON.stringify(guest) },
     });
   };
+  const onPressFamilyCard = (FamilyData: FamilyGroup) => {
+    
+    setFamilyGuest(FamilyData);
+    router.push({
+      pathname: `/(protected)/(client-stack)/events/${eventId}/(organizer)/guests/familymember`as any ,
+      params: { family: JSON.stringify(FamilyData) },
+    });
+
+  }
   const tabs: { label: string; value: GuestFilterTab }[] = [
     { label: "All", value: "all" },
     { label: "Accepted", value: "accepted" },
     { label: "Pending", value: "pending" },
   ];
 
-  const filteredInvitations = useMemo(() => {
+  // Group invitations by family
+  const groupedInvitations = useMemo(() => {
     if (!invitations) return [];
+    return groupInvitationsByFamily(invitations);
+  }, [invitations]);
 
-    return invitations.filter((invitation: any) => {
-      const normalizedStatus = String(
-        invitation?.status ?? invitation?.rsvp_status ?? ""
-      )
-        .trim()
-        .toLowerCase();
+  // Filter grouped invitations based on active tab
+  const filteredGroupedInvitations = useMemo(() => {
+    return groupedInvitations.filter((item: GroupedInvitation) => {
+      if (item.type === "family") {
+        // For families, check if all members match the filter or any member matches
+        const statuses = item.members.map((m) =>
+          String(m.event_guest.status ?? "pending").trim().toLowerCase()
+        );
 
-      switch (activeTab) {
-        case "pending":
-          return normalizedStatus === "pending";
-        case "accepted":
-          return normalizedStatus === "accepted";
-        case "all":
-        default:
-          return true;
+        switch (activeTab) {
+          case "pending":
+            return statuses.some((s) => s === "pending" || s === "invited");
+          case "accepted":
+            return statuses.some((s) => s === "accepted");
+          case "all":
+          default:
+            return true;
+        }
+      } else {
+        const status = String(
+          item.data.event_guest.status ?? "pending"
+        )
+          .trim()
+          .toLowerCase();
+
+        switch (activeTab) {
+          case "pending":
+            return status === "pending" || status === "invited";
+          case "accepted":
+            return status === "accepted";
+          case "all":
+          default:
+            return true;
+        }
       }
     });
-  }, [invitations, activeTab]);
-
+  }, [groupedInvitations, activeTab]);
+ 
   useEffect(() => {
     return () => {
+      clearFamilyGuest();
       clearGuestDetail();
     };
   }, [clearGuestDetail]);
@@ -115,17 +149,8 @@ const { data: invitations, isLoading } = useGetInvitationsForEvent(eventId);
       </View>
 
       <TouchableOpacity
+        className="absolute right-6 bottom-12 w-14 h-14 rounded-full bg-[#EE2B8C] items-center justify-center z-50"
         style={{
-          position: "absolute",
-          bottom: 50,
-          right: 24,
-          width: 56,
-          height: 56,
-          borderRadius: 28,
-          backgroundColor: "#EE2B8C",
-          alignItems: "center",
-          justifyContent: "center",
-          zIndex: 50,
           shadowColor: "#EE2B8C",
           shadowOffset: { width: 0, height: 4 },
           shadowOpacity: 0.35,
@@ -141,13 +166,35 @@ const { data: invitations, isLoading } = useGetInvitationsForEvent(eventId);
         <Text>Loading invitations...</Text>
       ) : (
         <FlatList
-          data={filteredInvitations}
-          keyExtractor={(item: any, index: number) =>
-            item?.user?.id ? String(item.user.id) : `guest-${index}`
-          }
-          renderItem={({ item }: { item: any }) => (
-            <GuestCard guest={item} onPress={() => onPress(item)} />
-          )}
+          data={filteredGroupedInvitations}
+          keyExtractor={(item: GroupedInvitation) => {
+            if (item.type === "family") {
+              return `family-${item.familyId}`;
+            } else {
+              return `individual-${item.data.user_detail.id}`;
+            }
+          }}
+          renderItem={({ item }: { item: GroupedInvitation }) => {
+            if (item.type === "family") {
+              return (
+                <FamilyCard
+                  family={item}
+                  onPress={() => {
+                   onPressFamilyCard(item);
+                  }}
+                />
+              );
+            } else {
+              return (
+                <GuestCard
+                  guest={item.data}
+                  onPress={() => {
+                    onPressGuestCard(item.data)
+                  }}
+                />
+              );
+            }
+          }}
           contentContainerStyle={{ paddingBottom: 20 }}
           showsVerticalScrollIndicator={false}
           className="mt-4"
