@@ -1,12 +1,12 @@
-import {
-  Image,
-  TouchableOpacity,
-  View,
-} from "react-native";
 import Card from "@/src/components/ui/Card";
-import { Text } from "@/src/components/ui/Text"
-import { MemberRsvpCardProp , RSVPStatus } from "@/src/utils/type/rsvp";
+import { Text } from "@/src/components/ui/Text";
+import { MemberRsvpCardProp, RSVPStatus } from "@/src/utils/type/rsvp";
 import { Ionicons } from "@expo/vector-icons";
+import {
+    Image,
+    TouchableOpacity,
+    View,
+} from "react-native";
 const statusConfig: Record<
   RSVPStatus,
   { label: string; wrapperClass: string; textClass: string }
