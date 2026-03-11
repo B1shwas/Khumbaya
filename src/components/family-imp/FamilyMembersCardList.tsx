@@ -37,7 +37,8 @@ export default function FamilyMembersCardList({
 
           <View className="flex-1">
             <Text
-              className="text-base font-bold text-gray-800"
+              className="text-base text-gray-800"
+              variant="h1"
               numberOfLines={1}
             >
               {member.username}
@@ -47,7 +48,10 @@ export default function FamilyMembersCardList({
               className="text-sm text-gray-600 mt-1 capitalize"
               numberOfLines={1}
             >
-              {member.relation} • Veg
+              {member.relation}
+              {member.foodPreference
+                ? ` • ${member.foodPreference}`
+                : undefined}
             </Text>
           </View>
         </View>

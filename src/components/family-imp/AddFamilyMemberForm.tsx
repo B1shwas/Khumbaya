@@ -131,7 +131,7 @@ export default function AddFamilyMemberForm({
         <Ionicons
           name="person-add-outline"
           size={18}
-          className="text-primary"
+          className="!text-primary"
         />
         <Text className="text-base font-jakarta-bold text-primary">
           Add New Member
@@ -190,11 +190,11 @@ export default function AddFamilyMemberForm({
       />
 
       <TouchableOpacity
-        className="w-full bg-primary rounded-lg py-3.5 flex-row items-center justify-center mt-1"
+        className="w-full bg-primary rounded-sm py-3.5 flex-row items-center justify-center mt-1"
         onPress={handleSubmit(onSubmit)}
         disabled={isPending}
       >
-        <Text className="text-white text-sm font-jakarta-bold">
+        <Text className="text-white text-base" variant="h2">
           {isPending ? "Saving..." : "Save & Add Member"}
         </Text>
         {!isPending && (

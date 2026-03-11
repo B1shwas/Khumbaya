@@ -45,10 +45,18 @@ export const useGetFamilyByUserId = () => {
 export const useUpdateFamily = () => {
   const queryClient = useQueryClient();
 
+  type UpdateFamilyInput = {
+    id: number;
+    data: {
+      familyName: string;
+    };
+  };
+
   return useMutation({
-    mutationFn: updateFamilyApi,
+    mutationFn: ({ id, data }: UpdateFamilyInput) => updateFamilyApi(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["family"] });
+      queryClient.invalidateQueries({ queryKey: ["family-user"] });
     },
   });
 };
@@ -60,6 +68,7 @@ export const useDeleteFamily = () => {
     mutationFn: deleteFamilyApi,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["family"] });
+      queryClient.invalidateQueries({ queryKey: ["family-user"] });
       queryClient.invalidateQueries({ queryKey: ["family-members"] });
     },
   });

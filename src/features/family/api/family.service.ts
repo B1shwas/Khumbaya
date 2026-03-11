@@ -25,6 +25,7 @@ export interface FamilyMember {
   dob: string;
   username: string;
   email: string;
+  foodPreference?: string;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -34,8 +35,8 @@ export const createFamilyApi = async (data: FamilyPayload) => {
   return response.data;
 };
 
-export const updateFamilyApi = async (data: FamilyPayload) => {
-  const response = await api.patch("/family", data);
+export const updateFamilyApi = async (id: number, data: FamilyPayload) => {
+  const response = await api.patch(`/family/${id}`, data);
   return response.data;
 };
 
