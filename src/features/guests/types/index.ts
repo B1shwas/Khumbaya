@@ -1,0 +1,25 @@
+export interface GuestDetailInterface{
+   user_detail: {
+    id: number ,
+    username: string ,
+    email: string,
+    phone: string,
+    photo: string | null,
+    familyId: number | null,
+    relation: string | null,
+  },
+  event_guest: {
+    id: number ,
+    userId: number,
+    eventId: number,
+    familyId: number | null,
+    invited_by: number,
+    role: string,
+    status: string | null | undefined,
+    notes: string | null,
+    arrival_date_time: string | null,
+    departure_date_time: string | null,
+    isAccomodation: boolean,
+    joined_at: string | null,
+  },
+}

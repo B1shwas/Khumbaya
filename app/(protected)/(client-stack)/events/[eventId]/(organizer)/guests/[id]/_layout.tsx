@@ -1,6 +1,6 @@
 import { Stack } from "expo-router";
 
-export default function EventGuestManagementLayout() {
+export default function GuestDetailLayout() {
   return (
     <Stack
       screenOptions={{
@@ -13,8 +13,8 @@ export default function EventGuestManagementLayout() {
         },
       }}
     >
-      <Stack.Screen name="index" options={{ title: "Guest Management" }} />
-      <Stack.Screen name="[id]" options={{ headerShown:false}} />
+     
+      <Stack.Screen name="guest-details" options={{ title: "Guest Details" }} />
     </Stack>
   );
 }

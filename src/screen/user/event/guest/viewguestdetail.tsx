@@ -1,10 +1,11 @@
 import { Text } from "@/src/components/ui/Text";
+import { useGuestDetailStore } from "@/src/features/guests/store/useGuestDetailStore";
 import { Ionicons } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
-import { ScrollView, TouchableOpacity, View } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";import { ScrollView, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-
+import { formatDate, formatTime } from "@/src/utils/helper";
 export default function ViewGuestDetail() {
+const guestDetail = useGuestDetailStore((state) => state.guestDraft);
   return (
     <SafeAreaView className="flex-1 bg-white" edges={[]}>
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
@@ -23,7 +24,14 @@ export default function ViewGuestDetail() {
               }}
             >
               <Text variant="h1" className="text-white text-4xl">
-                RS
+                {guestDetail?.user_detail.username
+                  ? guestDetail.user_detail.username
+                      .split(" ")
+                      .map((n) => n[0])
+                      .join("")
+                      .toUpperCase()
+                      .slice(0, 2)
+                  : "US"}
               </Text>
             </View>
             <View className="absolute bottom-1 right-1 w-5 h-5 rounded-full border-2 border-white bg-emerald-500" />
@@ -33,16 +41,26 @@ export default function ViewGuestDetail() {
             variant="h1"
             className="text-slate-900 text-2xl mt-4 text-center"
           >
-            Rahul Sharma
+            {guestDetail?.user_detail.username || "User Name"}
           </Text>
           <Text variant="h2" className="text-primary text-sm mt-1">
-            Confirmed Guest • VVIP
+         {guestDetail?.event_guest.status=="accepted"||"confirmed" ? "Confirmed" : "Pending"} Guest • {guestDetail?.event_guest.role || "VVIP"}
           </Text>
           <View className="flex-row items-center gap-2 mt-2">
-            <Ionicons name="calendar-outline" size={14} color="#94A3B8" />
-            <Text variant="caption" className="text-sm">
-              Oct 12 – Oct 15, 2023
-            </Text>
+            <View>
+              <View className="flex-row items-center">
+                <Ionicons name="calendar-outline" size={14} color="#94A3B8" className="mr-2 " />
+                <Text variant="caption" className=" text-sm text-center">
+                  {formatDate(guestDetail?.event_guest.arrival_date_time||"—")} – {formatDate(guestDetail?.event_guest.departure_date_time||"—")}
+                </Text>
+
+              </View>
+            
+              <Text variant="caption" className="text-sm text-center">
+                {formatTime(guestDetail?.event_guest.arrival_date_time||"TBD")} – {formatTime(guestDetail?.event_guest.departure_date_time||"TBD")}
+              </Text>
+            </View>
+           
           </View>
         </LinearGradient>
 
@@ -91,10 +109,11 @@ export default function ViewGuestDetail() {
             </View>
             <View className="bg-slate-50 rounded-2xl px-4">
               {[
-                { label: "Arrival Date", value: "Oct 12, 2023", pill: false },
-                { label: "Departure Date", value: "Oct 15, 2023", pill: false },
-                { label: "Accommodation", value: "Room Needed", pill: true },
-                { label: "Transport", value: "Pickup Required", pill: true },
+                { label: "Arrival Date", value: `${formatDate(guestDetail?.event_guest.arrival_date_time||"TBD")}`, pill: false },
+                
+                { label: "Departure Date", value: `${formatDate(guestDetail?.event_guest.departure_date_time||"TBD")}`, pill: false },
+                { label: "Accommodation", value: `${guestDetail?.event_guest.isAccomodation? "Room Needed" : "Room not needed"}`, pill: `${guestDetail?.event_guest.isAccomodation? true : false}` },
+                { label: "Transport", value: `${guestDetail?.event_guest.isAccomodation? "Pickup Required" : "No Pickup Required"}`, pill: `${guestDetail?.event_guest.isAccomodation? true : false}` },
               ].map((row, i, arr) => (
                 <View
                   key={i}
@@ -118,6 +137,31 @@ export default function ViewGuestDetail() {
               ))}
             </View>
           </View>
+
+
+          
+ <View className="bg-white border border-slate-200 p-4 rounded-2xl mb-3">
+              <View className="flex-row justify-between items-start">
+                <View className="flex-row gap-3 flex-1">
+                  <View className="p-2 bg-primary/5 rounded-xl">
+                    <Ionicons name="book-outline" size={24} color="#EE2B8C" />
+                  </View>
+                  <View>
+                    <Text variant="caption" className="text-xs mb-0.5">
+                      Notes
+                    </Text>
+                    <Text variant="h2" className="text-slate-900 text-sm">
+                      {guestDetail?.event_guest.notes || "No additional notes"}
+                    </Text>
+                  </View>
+                </View>
+                <TouchableOpacity
+                  className="p-1.5 rounded-lg"
+                  activeOpacity={0.7}
+                >
+                 </TouchableOpacity>
+              </View>
+            </View>
 
           <View>
             <View className="flex-row items-center justify-between mb-4">
@@ -167,6 +211,7 @@ export default function ViewGuestDetail() {
                 </TouchableOpacity>
               </View>
             </View>
+           
           </View>
         </View>
       </ScrollView>

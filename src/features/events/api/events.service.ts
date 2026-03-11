@@ -1,6 +1,6 @@
 import api from "@/src/api/axios";
 import { Event } from "@/src/constants/event";
-
+import { formatDate, formatTime } from "@/src/utils/helper";
 export interface CREATEEVENT {
   title: string;
   description?: string;
@@ -69,31 +69,7 @@ interface GetEventsParams {
   limit?: number;
 }
 
-const formatDate = (dateValue?: string) => {
-  if (!dateValue) return "—";
 
-  const parsed = new Date(dateValue);
-  if (Number.isNaN(parsed.getTime())) return "—";
-
-  return parsed.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
-};
-
-const formatTime = (dateValue?: string, fallbackTime?: string | null) => {
-  if (fallbackTime) return fallbackTime;
-  if (!dateValue) return "TBD";
-
-  const parsed = new Date(dateValue);
-  if (Number.isNaN(parsed.getTime())) return "TBD";
-
-  return parsed.toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-  });
-};
 
 const mapInvitationToEvent = (item: InvitationItem): Event => {
   const detail = item.event_detail ?? item.event ?? {};
