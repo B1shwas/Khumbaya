@@ -1,9 +1,8 @@
 import { FamilyMember } from "@/src/features/family/api/family.service";
 import { useGetFamilyMembers } from "@/src/features/family/hooks/use-family";
-import { ScrollView, View } from "react-native";
+import { View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { Text } from "../ui/Text";
-import AddFamilyMemberForm from "./AddFamilyMemberForm";
 import FamilyMembersCardList from "./FamilyMembersCardList";
 
 type AlreadyHasAFamilyScreenProps = {
@@ -47,15 +46,7 @@ export default function AlreadyHasAFamilyScreen({
         <Text className="text-sm text-gray-500">{members.length} added</Text>
       </View>
 
-      <ScrollView
-        className="flex-1"
-        showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
-      >
-        <FamilyMembersCardList members={members} />
-      </ScrollView>
-
-      <AddFamilyMemberForm familyId={id} />
+      <FamilyMembersCardList members={members} familyId={id} />
     </KeyboardAwareScrollView>
   );
 }
