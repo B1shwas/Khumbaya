@@ -6,6 +6,7 @@ import {
   useAddFamilyMember,
   useUpdateFamilyMember,
 } from "@/src/features/family/hooks/use-family";
+import { toISODateString, toIsoDate } from "@/src/utils/helper";
 import { Ionicons } from "@expo/vector-icons";
 import { Controller, useForm } from "react-hook-form";
 import { Alert, TextInput, TouchableOpacity, View } from "react-native";
@@ -37,18 +38,7 @@ type FieldProps = {
   editable?: boolean;
 };
 
-const toIsoDate = (rawDate: string) => {
-  const parsed = new Date(rawDate);
-  if (Number.isNaN(parsed.getTime())) return null;
-  return parsed.toISOString();
-};
-
-const formatDateForDisplay = (isoDate?: string) => {
-  if (!isoDate) return "";
-  const date = new Date(isoDate);
-  if (Number.isNaN(date.getTime())) return "";
-  return date.toISOString().split("T")[0];
-};
+const formatDateForDisplay = (isoDate?: string) => toISODateString(isoDate);
 
 function FormField({
   label,

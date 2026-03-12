@@ -20,7 +20,10 @@ export const formatDate = (dateValue?: string) => {
   });
 };
 
-export const formatTime = (dateValue?: string, fallbackTime?: string | null) => {
+export const formatTime = (
+  dateValue?: string,
+  fallbackTime?: string | null
+) => {
   if (fallbackTime) return fallbackTime;
   if (!dateValue) return "TBD";
 
@@ -31,4 +34,20 @@ export const formatTime = (dateValue?: string, fallbackTime?: string | null) => 
     hour: "numeric",
     minute: "2-digit",
   });
+};
+
+export const toISODateString = (
+  date: Date | string | null | undefined
+): string => {
+  if (!date) return "";
+  const parsed = typeof date === "string" ? new Date(date) : date;
+  if (Number.isNaN(parsed.getTime())) return "";
+  return parsed.toISOString().split("T")[0];
+};
+
+export const toIsoDate = (rawDate: string): string | null => {
+  if (!rawDate) return null;
+  const parsed = new Date(rawDate);
+  if (Number.isNaN(parsed.getTime())) return null;
+  return parsed.toISOString();
 };

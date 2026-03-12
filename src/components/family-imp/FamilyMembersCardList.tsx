@@ -17,8 +17,9 @@ export default function FamilyMembersCardList({
 }: FamilyMembersCardListProps) {
   const [editingMember, setEditingMember] = useState<FamilyMember | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
-  
-  const { mutate: deleteMember, isPending: isDeleting } = useDeleteFamilyMember();
+
+  const { mutate: deleteMember, isPending: isDeleting } =
+    useDeleteFamilyMember();
 
   const avatarUri =
     "https://lh3.googleusercontent.com/aida-public/AB6AXuBBLor0Omw5GQnEDi4KhI8VPI30Ouh9jQ4b2wfQNJ51iL5aY1qdsn-7m3BYgtHMSM-HvZ0pe5d9vhNKO6rKEmXy3926x1LY3qxAKIikj3s5DFv8IQPuKi1NFQ3JJ_V8k7VNrTxdqpelZB_pyj2bB5N0Ruw8KJjCdaLSk2729h9Q7ptpMuq2EVE4SIuB_ilJ6_N2sHshxtygeBbLAzGKtwkcVQJcIHZwzMBb7ZjmJixXMO7NFxT3yf8wxifpl_E78wEtZ7i9L6K89lM";
@@ -61,6 +62,7 @@ export default function FamilyMembersCardList({
 
   const handleEditSuccess = () => {
     setEditingMember(null);
+    setShowAddModal(false);
   };
 
   const handleAddSuccess = () => {
@@ -152,7 +154,9 @@ export default function FamilyMembersCardList({
       >
         <View className="flex-1 bg-gray-50">
           <View className="flex-row justify-between items-center p-4 bg-white border-b border-gray-200">
-            <Text className="text-lg font-bold text-gray-800">Add New Member</Text>
+            <Text className="text-lg font-bold text-gray-800">
+              Add New Member
+            </Text>
             <TouchableOpacity onPress={() => setShowAddModal(false)}>
               <Ionicons name="close" size={28} color="#374151" />
             </TouchableOpacity>
