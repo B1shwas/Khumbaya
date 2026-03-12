@@ -1,11 +1,11 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import {
-    Animated,
-    Image,
-    Pressable,
-    StyleSheet,
-    Text,
-    View,
+  Animated,
+  Image,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
 } from "react-native";
 
 type AvatarPickerProps = {
@@ -125,7 +125,7 @@ export default function AvatarPicker({
         </Text>
       )}
 
-      {!showName && <Text style={styles.hintText}>Tap to upload photo</Text>}
+      {/* {!showName && <Text style={styles.hintText}>Tap to upload photo</Text>} */}
     </View>
   );
 }

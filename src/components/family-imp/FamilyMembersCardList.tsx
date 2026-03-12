@@ -2,7 +2,8 @@ import { FamilyMember } from "@/src/features/family/api/family.service";
 import { useDeleteFamilyMember } from "@/src/features/family/hooks/use-family";
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
-import { Alert, Image, Modal, TouchableOpacity, View } from "react-native";
+import { Alert, Modal, TouchableOpacity, View } from "react-native";
+import AvatarPicker from "../ui/AvatarPicker";
 import { Text } from "../ui/Text";
 import AddFamilyMemberForm from "./AddFamilyMemberForm";
 
@@ -20,9 +21,6 @@ export default function FamilyMembersCardList({
 
   const { mutate: deleteMember, isPending: isDeleting } =
     useDeleteFamilyMember();
-
-  const avatarUri =
-    "https://lh3.googleusercontent.com/aida-public/AB6AXuBBLor0Omw5GQnEDi4KhI8VPI30Ouh9jQ4b2wfQNJ51iL5aY1qdsn-7m3BYgtHMSM-HvZ0pe5d9vhNKO6rKEmXy3926x1LY3qxAKIikj3s5DFv8IQPuKi1NFQ3JJ_V8k7VNrTxdqpelZB_pyj2bB5N0Ruw8KJjCdaLSk2729h9Q7ptpMuq2EVE4SIuB_ilJ6_N2sHshxtygeBbLAzGKtwkcVQJcIHZwzMBb7ZjmJixXMO7NFxT3yf8wxifpl_E78wEtZ7i9L6K89lM";
 
   const handleDeletePress = (member: FamilyMember) => {
     const memberId = Number(member.userId);
@@ -96,10 +94,11 @@ export default function FamilyMembersCardList({
           key={index}
           className="bg-white rounded-2xl p-4 mb-3 border border-gray-200 flex-row items-center gap-4"
         >
-          <Image
-            source={{ uri: avatarUri }}
-            className="h-14 w-14 rounded-full"
-            resizeMode="cover"
+          <AvatarPicker
+            name={member.username}
+            size="small"
+            showEditButton={false}
+            onPick={() => {}}
           />
 
           <View className="flex-1">
