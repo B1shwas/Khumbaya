@@ -8,8 +8,6 @@ import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
   Alert,
-  Pressable,
-  Switch,
   Image,
   KeyboardAvoidingView,
   Platform,
@@ -28,7 +26,7 @@ interface EventFormData {
   eventType: string;
   startdateTime: Date;
   coverImage: string | null;
-  endDateTime: Date
+  endDateTime: Date;
 }
 
 type EventType = "Wedding" | "Engagement" | "Reception" | "Nikkah" | "Other";
@@ -54,7 +52,6 @@ export default function EventCreate() {
   const { mutate: createEvent, isPending: isCreatingEvent } = useCreateEvent();
   const [toggle, setToggle] = useState(false);
 
-
   const [selectedDateTime, setSelectedDateTime] = useState<Date>(new Date());
   const [selectedEndDateTime, setEndDateTime] = useState<Date>(new Date());
   const [formData, setFormData] = useState<EventFormData>({
@@ -66,7 +63,6 @@ export default function EventCreate() {
   });
 
   const scale = useSharedValue(1);
-
 
   const handleDateChange = (event: DateTimePickerEvent, pickedDate?: Date) => {
     if (event.type === "dismissed" || !pickedDate) return;
@@ -81,12 +77,15 @@ export default function EventCreate() {
       pickedDate.getMinutes(),
       pickedDate.getSeconds(),
       0
-    )
+    );
     setSelectedDateTime(next);
     setFormData((prev) => ({ ...prev, startdateTime: next }));
   };
 
-  const handleEndDateChange = (event: DateTimePickerEvent, pickedDate?: Date) => {
+  const handleEndDateChange = (
+    event: DateTimePickerEvent,
+    pickedDate?: Date
+  ) => {
     if (event.type === "dismissed" || !pickedDate) return;
     const next = new Date(selectedEndDateTime);
     next.setFullYear(
@@ -123,7 +122,7 @@ export default function EventCreate() {
       endDateTime: selectedEndDateTime,
       budget: 0,
       theme: "Classic",
-      parentId: 1,
+      parentId: undefined,
       role: "Organizer",
       location: "TBD",
       imageUrl:
@@ -137,7 +136,6 @@ export default function EventCreate() {
     createEvent(payload, {
       onSuccess: () => {
         router.push("/(protected)/(client-tabs)/events");
-
       },
       onError: () => {
         Alert.alert(
@@ -303,6 +301,6 @@ export default function EventCreate() {
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
-    </SafeAreaView >
+    </SafeAreaView>
   );
 }

@@ -69,8 +69,6 @@ interface GetEventsParams {
   limit?: number;
 }
 
-
-
 const mapInvitationToEvent = (item: InvitationItem): Event => {
   const detail = item.event_detail ?? item.event ?? {};
   const invitation = item.invitation ?? {};
@@ -122,6 +120,7 @@ const mapInvitationToEvent = (item: InvitationItem): Event => {
 };
 
 export const createEventApi = async (data: CREATEEVENT) => {
+  console.log("🚀 [createEventApi] Payload:", data);
   const response = await api.post("/event", data);
   return response.data;
 };
@@ -237,4 +236,9 @@ export const submitRsvpResponseApi = async (
 ) => {
   const response = await api.post(`invitation/responce/${eventId}`, payload);
   return response.data;
+};
+
+export const getSubEventOfEvent = async (eventId: number) => {
+  const response = await api.get(`/event/${eventId}/sub-events`);
+  return response.data.data;
 };

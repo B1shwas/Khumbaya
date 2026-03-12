@@ -1,49 +1,48 @@
-import { useSubEvents } from "@/src/hooks/useSubEvents";
-import { cn } from "@/src/utils/cn";
+import { useSubEventsOfEvent } from "@/src/features/events/hooks/use-event";
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
-import { useEffect, useState } from "react";
-import {
-    FlatList,
-    Pressable,
-    Text,
-    TouchableOpacity,
-    View,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
+import { useCallback } from "react";
+import { FlatList, Image, Text, TouchableOpacity, View } from "react-native";
 
-type SubEventTab = "all" | "upcoming" | "completed";
+interface SubEvent {
+  id: number;
+  title: string;
+  type: string;
+  description: string;
+  imageUrl: string;
+  date: string;
+  startDateTime: string;
+  endDateTime: string;
+  location: string;
+  budget: number;
+  theme: string;
+  status: string;
+  organizer: number;
+  parentId: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+const STATUS_COLORS: Record<string, string> = {
+  upcoming: "bg-blue-100 text-blue-700",
+  ongoing: "bg-green-100 text-green-700",
+  completed: "bg-gray-100 text-gray-600",
+  cancelled: "bg-red-100 text-red-600",
+};
 
 export default function ListSubEvent() {
-  const [activeTab, setActiveTab] = useState<SubEventTab>("all");
-  const [mounted, setMounted] = useState(false);
-  const { subEvents, loading, refreshing, refresh } = useSubEvents();
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
   const router = useRouter();
 
-  const tabs: { label: string; value: SubEventTab }[] = [
-    { label: "All", value: "all" },
-    { label: "Upcoming", value: "upcoming" },
-    { label: "completed", value: "completed" },
-  ];
+  const { eventId } = useLocalSearchParams();
+  const { data: subEvents, isLoading, refetch } = useSubEventsOfEvent(
+    Number(eventId)
+  );
 
-  const getFilteredSubEvents = () => {
-    const now = new Date();
-    switch (activeTab) {
-      case "upcoming":
-        return subEvents.filter((se) => new Date(se.date) >= now);
-      case "completed":
-        return subEvents.filter((se) => new Date(se.date) < now);
-      default:
-        return subEvents;
-    }
-  };
-
-  const filteredSubEvents = getFilteredSubEvents();
+  useFocusEffect(
+    useCallback(() => {
+      refetch();
+    }, [refetch])
+  );
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -51,50 +50,83 @@ export default function ListSubEvent() {
       month: "short",
       day: "numeric",
       year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     }).format(date);
   };
 
-  const renderSubEventCard = ({ item }: { item: (typeof subEvents)[0] }) => (
-    <TouchableOpacity
-      className="bg-white rounded-xl p-4 mb-3 border border-gray-100 shadow-sm"
-      onPress={() => {
-        // Navigate to sub-event details if needed
-      }}
-    >
-      <View className="flex-row items-center justify-between">
-        <View className="flex-row items-center flex-1">
-          <View className="w-12 h-12 rounded-full bg-pink-100 items-center justify-center mr-3">
-            <Ionicons
-              name={(item.template.icon as any) || "layers-outline"}
-              size={24}
-              color="#ee2b8c"
-            />
+  const renderSubEventCard = ({ item }: { item: SubEvent }) => {
+    const statusStyle =
+      STATUS_COLORS[item.status] ?? "bg-gray-100 text-gray-600";
+    const [bgClass, textClass] = statusStyle.split(" ");
+
+    return (
+      <TouchableOpacity
+        className="bg-white rounded-2xl mb-3 overflow-hidden border border-gray-100 shadow-sm"
+        activeOpacity={0.85}
+        onPress={() => {
+          // Navigate to sub-event details
+        }}
+      >
+        {/* Cover Image */}
+        {item.imageUrl ? (
+          <Image
+            source={{ uri: item.imageUrl }}
+            className="w-full h-36"
+            resizeMode="cover"
+          />
+        ) : (
+          <View className="w-full h-36 bg-pink-50 items-center justify-center">
+            <Ionicons name="layers-outline" size={40} color="#f9a8d4" />
           </View>
-          <View className="flex-1">
-            <Text className="text-base font-semibold text-gray-900">
-              {item.template.name}
+        )}
+
+        <View className="p-4">
+          {/* Title + Status */}
+          <View className="flex-row items-center justify-between mb-1">
+            <Text className="text-base font-semibold text-gray-900 flex-1 mr-2">
+              {item.title}
             </Text>
-            <Text className="text-sm text-gray-500">
-              {formatDate(item.date)}
+            <View className={`px-2 py-0.5 rounded-full ${bgClass}`}>
+              <Text className={`text-xs font-medium capitalize ${textClass}`}>
+                {item.status}
+              </Text>
+            </View>
+          </View>
+
+          {/* Date */}
+          <View className="flex-row items-center gap-1 mb-1">
+            <Ionicons name="calendar-outline" size={13} color="#9CA3AF" />
+            <Text className="text-xs text-gray-500">
+              {formatDate(item.startDateTime)}
+            </Text>
+          </View>
+
+          {/* Location */}
+          {item.location && item.location !== "TBD" ? (
+            <View className="flex-row items-center gap-1 mb-1">
+              <Ionicons name="location-outline" size={13} color="#9CA3AF" />
+              <Text className="text-xs text-gray-500">{item.location}</Text>
+            </View>
+          ) : null}
+
+          {/* Footer: theme + budget */}
+          <View className="flex-row items-center justify-between mt-2 pt-2 border-t border-gray-100">
+            {item.theme ? (
+              <Text className="text-xs text-gray-400">
+                Theme: <Text className="text-gray-600">{item.theme}</Text>
+              </Text>
+            ) : (
+              <View />
+            )}
+            <Text className="text-sm font-semibold text-pink-500">
+              ₹{item.budget.toLocaleString()}
             </Text>
           </View>
         </View>
-        <View className="flex-row items-center gap-2">
-          <Text className="text-sm font-medium text-gray-600">
-            ${item.budget}
-          </Text>
-          <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
-        </View>
-      </View>
-      {item.theme && (
-        <View className="mt-3 pt-3 border-t border-gray-100">
-          <Text className="text-xs text-gray-500">
-            Theme: <Text className="text-gray-700">{item.theme}</Text>
-          </Text>
-        </View>
-      )}
-    </TouchableOpacity>
-  );
+      </TouchableOpacity>
+    );
+  };
 
   const renderEmptyState = () => (
     <View className="flex-1 items-center justify-center py-20">
@@ -110,84 +142,37 @@ export default function ListSubEvent() {
     </View>
   );
 
-  if (!mounted) return null;
-
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
-      {/* Header */}
-      <View className="flex-row items-center justify-between px-4 py-3">
-        <View className="flex-row items-center">
-          <TouchableOpacity
-            onPress={() => router.back()}
-            className="w-9 h-9 rounded-full bg-gray-200 items-center justify-center mr-3"
-          >
-            <Ionicons name="arrow-back" size={20} color="#374151" />
-          </TouchableOpacity>
-          <Text className="text-xl font-bold text-gray-900">Sub Events</Text>
-        </View>
-        <TouchableOpacity
-          onPress={() => {
-            router.push("/(protected)/(client-tabs)/profile");
-          }}
-          className="w-9 h-9 rounded-full bg-gray-200 items-center justify-center"
-        >
-          <Ionicons name="person-outline" size={20} color="#374151" />
-        </TouchableOpacity>
-      </View>
-
-      {/* Tabs */}
-      <View className="flex-row p-1 mb-4 gap-2 bg-background-tertiary !rounded-md mx-4">
-        {tabs.map((tab) => (
-          <Pressable
-            key={tab.value}
-            onPress={() => setActiveTab(tab.value)}
-            className={cn(
-              "flex-1 py-2 rounded-md items-center",
-              activeTab === tab.value ? "bg-white" : "text-gray-600"
-            )}
-          >
-            <Text
-              className={cn(
-                "text-sm font-jakarta-semibold p-1",
-                activeTab === tab.value ? "text-primary" : "text-gray-500"
-              )}
-            >
-              {tab.label}
-            </Text>
-          </Pressable>
-        ))}
-      </View>
-
-      {/* Sub Event List */}
-      {loading ? (
+    <View className="flex-1 bg-gray-50">
+      {isLoading ? (
         <View className="flex-1 items-center justify-center">
           <Text className="text-gray-500">Loading...</Text>
         </View>
-      ) : filteredSubEvents.length === 0 ? (
+      ) : !subEvents || subEvents.length === 0 ? (
         renderEmptyState()
       ) : (
         <FlatList
-          data={filteredSubEvents}
+          data={subEvents}
           renderItem={renderSubEventCard}
-          keyExtractor={(item) => item.template.id}
-          contentContainerClassName="px-4 pb-24"
+          keyExtractor={(item) => String(item.id)}
+          contentContainerClassName="px-4 pb-24 pt-2"
           showsVerticalScrollIndicator={false}
-          onRefresh={refresh}
-          refreshing={refreshing}
         />
       )}
 
       {/* Floating Action Button */}
       <TouchableOpacity
         onPress={() => {
-          router.push(
-            "/(protected)/(client-stack)/events/[eventId]/(subevent)/subevent-create"
-          );
+          router.push({
+            pathname:
+              "/(protected)/(client-stack)/events/[eventId]/(organizer)/subevent-create",
+            params: { eventId: eventId as string },
+          });
         }}
         className="absolute bottom-6 right-6 w-14 h-14 bg-pink-500 rounded-full items-center justify-center shadow-lg"
       >
         <Ionicons name="add" size={28} color="white" />
       </TouchableOpacity>
-    </SafeAreaView>
+    </View>
   );
 }

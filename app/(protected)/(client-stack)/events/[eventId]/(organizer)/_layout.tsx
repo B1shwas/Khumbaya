@@ -29,6 +29,11 @@ export default function OrganizerEventDetailLayout() {
       <Stack.Screen name="addguest" options={{ title: "Add Guest" }} />
       <Stack.Screen name="timeline" options={{ title: "Timeline" }} />
       <Stack.Screen name="vendor" options={{ title: "Vendors" }} />
+      <Stack.Screen name="sub-event" options={{ title: "Sub Events" }} />
+      <Stack.Screen
+        name="subevent-create"
+        options={{ title: "Create new event" }}
+      />
     </Stack>
   );
 }

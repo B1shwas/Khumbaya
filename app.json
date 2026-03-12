@@ -18,7 +18,7 @@
     },
     "extra": {
       "eas": {
-        "projectId": "4bf86eea-d845-4d70-af1c-4ad27fad7b16"
+        "projectId": "fc7b654d-0faf-4ce2-b027-1da2ab8e7344"
       }
     },
     "plugins": [
@@ -51,7 +51,7 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.aaditya_lamichhane_event.khumbaya"
+      "package": "com.b1shwas.khumbaya"
     }
   }
 }

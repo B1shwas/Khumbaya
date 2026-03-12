@@ -8,6 +8,7 @@ import {
   getEventById,
   getInvitedEvent,
   getResponsesWithUser,
+  getSubEventOfEvent,
   getUpcomingEventsApi,
   RsvpResponsePayload,
   submitRsvpResponseApi,
@@ -83,12 +84,24 @@ export const useCreateEvent = () => {
         );
       }
     },
-    onSuccess: async () => {
-      await Promise.all([
+    onSuccess: async (_data, variables) => {
+      const invalidations = [
         queryClient.invalidateQueries({ queryKey: ["events/upcoming"] }),
         queryClient.invalidateQueries({ queryKey: ["events/completed"] }),
         queryClient.invalidateQueries({ queryKey: ["events/with-role"] }),
-      ]);
+      ];
+      if (variables.parentId) {
+        console.log(
+          "🚀 [useCreateEvent] Invalidating sub-events for parentId:",
+          variables.parentId
+        );
+        invalidations.push(
+          queryClient.invalidateQueries({
+            queryKey: ["sub-events", variables.parentId],
+          })
+        );
+      }
+      await Promise.all(invalidations);
     },
   });
 };
@@ -190,6 +203,16 @@ export const useSubmitRsvpResponse = (eventId: number) => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["event-responses", eventId] });
       queryClient.invalidateQueries({ queryKey: ["rsvp-invitations"] });
+    },
+  });
+};
+
+export const useSubEventsOfEvent = (eventId: number) => {
+  return useQuery({
+    queryKey: ["sub-events", eventId],
+    queryFn: async () => {
+      const subEvents = await getSubEventOfEvent(eventId);
+      return subEvents;
     },
   });
 };
