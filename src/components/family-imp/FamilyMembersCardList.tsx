@@ -1,16 +1,71 @@
 import { FamilyMember } from "@/src/features/family/api/family.service";
-import { Image, View } from "react-native";
+import { useDeleteFamilyMember } from "@/src/features/family/hooks/use-family";
+import { Ionicons } from "@expo/vector-icons";
+import { useState } from "react";
+import { Alert, Modal, TouchableOpacity, View } from "react-native";
+import AvatarPicker from "../ui/AvatarPicker";
 import { Text } from "../ui/Text";
+import AddFamilyMemberForm from "./AddFamilyMemberForm";
 
 type FamilyMembersCardListProps = {
   members: FamilyMember[];
+  familyId: number;
 };
 
 export default function FamilyMembersCardList({
   members,
+  familyId,
 }: FamilyMembersCardListProps) {
-  const avatarUri =
-    "https://lh3.googleusercontent.com/aida-public/AB6AXuBBLor0Omw5GQnEDi4KhI8VPI30Ouh9jQ4b2wfQNJ51iL5aY1qdsn-7m3BYgtHMSM-HvZ0pe5d9vhNKO6rKEmXy3926x1LY3qxAKIikj3s5DFv8IQPuKi1NFQ3JJ_V8k7VNrTxdqpelZB_pyj2bB5N0Ruw8KJjCdaLSk2729h9Q7ptpMuq2EVE4SIuB_ilJ6_N2sHshxtygeBbLAzGKtwkcVQJcIHZwzMBb7ZjmJixXMO7NFxT3yf8wxifpl_E78wEtZ7i9L6K89lM";
+  const [editingMember, setEditingMember] = useState<FamilyMember | null>(null);
+  const [showAddModal, setShowAddModal] = useState(false);
+
+  const { mutate: deleteMember, isPending: isDeleting } =
+    useDeleteFamilyMember();
+
+  const handleDeletePress = (member: FamilyMember) => {
+    const memberId = Number(member.userId);
+
+    if (!memberId || isNaN(memberId)) {
+      Alert.alert("Error", "Invalid member ID");
+      return;
+    }
+
+    Alert.alert(
+      "Delete Member",
+      `Are you sure you want to delete ${member.username}?`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: () => {
+            deleteMember(
+              { familyId, memberId },
+              {
+                onSuccess: () => {
+                  Alert.alert("Success", "Member deleted successfully");
+                },
+                onError: (error: any) => {
+                  const message =
+                    error?.response?.data?.message || "Failed to delete member";
+                  Alert.alert("Error", message);
+                },
+              }
+            );
+          },
+        },
+      ]
+    );
+  };
+
+  const handleEditSuccess = () => {
+    setEditingMember(null);
+    setShowAddModal(false);
+  };
+
+  const handleAddSuccess = () => {
+    setShowAddModal(false);
+  };
 
   if (members.length === 0) {
     return (
@@ -24,15 +79,26 @@ export default function FamilyMembersCardList({
 
   return (
     <>
+      {/* Add New Member Button */}
+      <TouchableOpacity
+        onPress={() => setShowAddModal(true)}
+        className="bg-primary/10 border border-primary/30 rounded-2xl p-4 flex-row items-center justify-center gap-2 mb-4"
+      >
+        <Ionicons name="add-circle" size={24} color="#4F46E5" />
+        <Text className="text-primary font-semibold">Add New Member</Text>
+      </TouchableOpacity>
+
+      {/* Member Cards */}
       {members.map((member, index) => (
         <View
           key={index}
-          className="bg-white rounded-2xl p-4 mb-3 border border-gray-200 flex-row items-center gap-6"
+          className="bg-white rounded-2xl p-4 mb-3 border border-gray-200 flex-row items-center gap-4"
         >
-          <Image
-            source={{ uri: avatarUri }}
-            className="h-16 w-16 rounded-full"
-            resizeMode="cover"
+          <AvatarPicker
+            name={member.username}
+            size="small"
+            showEditButton={false}
+            onPick={() => {}}
           />
 
           <View className="flex-1">
@@ -45,7 +111,7 @@ export default function FamilyMembersCardList({
             </Text>
 
             <Text
-              className="text-sm text-gray-600 mt-1 capitalize"
+              className="text-sm text-gray-600 mt-0.5 capitalize"
               numberOfLines={1}
             >
               {member.relation}
@@ -54,8 +120,81 @@ export default function FamilyMembersCardList({
                 : undefined}
             </Text>
           </View>
+
+          {/* Action Buttons - hide for self member */}
+          {member.relation !== "self" && (
+            <View className="flex-row gap-2">
+              <TouchableOpacity
+                onPress={() => setEditingMember(member)}
+                className="p-2 bg-blue-50 rounded-full"
+                disabled={isDeleting}
+              >
+                <Ionicons name="pencil" size={18} color="#2563eb" />
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={() => handleDeletePress(member)}
+                className="p-2 bg-red-50 rounded-full"
+                disabled={isDeleting}
+              >
+                <Ionicons name="trash-outline" size={18} color="#dc2626" />
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
       ))}
+
+      {/* Add Member Modal */}
+      <Modal
+        visible={showAddModal}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setShowAddModal(false)}
+      >
+        <View className="flex-1 bg-gray-50">
+          <View className="flex-row justify-between items-center p-4 bg-white border-b border-gray-200">
+            <Text className="text-lg font-bold text-gray-800">
+              Add New Member
+            </Text>
+            <TouchableOpacity onPress={() => setShowAddModal(false)}>
+              <Ionicons name="close" size={28} color="#374151" />
+            </TouchableOpacity>
+          </View>
+          <View className="p-4">
+            <AddFamilyMemberForm
+              familyId={familyId}
+              onSuccess={handleAddSuccess}
+            />
+          </View>
+        </View>
+      </Modal>
+
+      {/* Edit Member Modal */}
+      <Modal
+        visible={!!editingMember}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setEditingMember(null)}
+      >
+        <View className="flex-1 bg-gray-50">
+          <View className="flex-row justify-between items-center p-4 bg-white border-b border-gray-200">
+            <Text className="text-lg font-bold text-gray-800">Edit Member</Text>
+            <TouchableOpacity onPress={() => setEditingMember(null)}>
+              <Ionicons name="close" size={28} color="#374151" />
+            </TouchableOpacity>
+          </View>
+          <View className="p-4">
+            {editingMember && (
+              <AddFamilyMemberForm
+                familyId={familyId}
+                memberId={editingMember.userId}
+                initialData={editingMember}
+                onSuccess={handleEditSuccess}
+              />
+            )}
+          </View>
+        </View>
+      </Modal>
     </>
   );
 }

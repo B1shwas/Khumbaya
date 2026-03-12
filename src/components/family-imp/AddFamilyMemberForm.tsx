@@ -1,5 +1,12 @@
-import { FamilyMemberPayload } from "@/src/features/family/api/family.service";
-import { useAddFamilyMember } from "@/src/features/family/hooks/use-family";
+import {
+  FamilyMember,
+  FamilyMemberPayload,
+} from "@/src/features/family/api/family.service";
+import {
+  useAddFamilyMember,
+  useUpdateFamilyMember,
+} from "@/src/features/family/hooks/use-family";
+import { toISODateString, toIsoDate } from "@/src/utils/helper";
 import { Ionicons } from "@expo/vector-icons";
 import { Controller, useForm } from "react-hook-form";
 import { Alert, TextInput, TouchableOpacity, View } from "react-native";
@@ -14,6 +21,9 @@ type AddFamilyMemberFormValues = {
 
 type AddFamilyMemberFormProps = {
   familyId: number;
+  memberId?: number;
+  initialData?: FamilyMember;
+  onSuccess?: () => void;
 };
 
 type FieldProps = {
@@ -25,13 +35,10 @@ type FieldProps = {
   rules?: Record<string, any>;
   keyboardType?: "default" | "email-address";
   autoCapitalize?: "none" | "sentences";
+  editable?: boolean;
 };
 
-const toIsoDate = (rawDate: string) => {
-  const parsed = new Date(rawDate);
-  if (Number.isNaN(parsed.getTime())) return null;
-  return parsed.toISOString();
-};
+const formatDateForDisplay = (isoDate?: string) => toISODateString(isoDate);
 
 function FormField({
   label,
@@ -42,6 +49,7 @@ function FormField({
   rules,
   keyboardType = "default",
   autoCapitalize = "sentences",
+  editable = true,
 }: FieldProps) {
   const inputBaseClass =
     "w-full bg-background rounded-sm px-4 py-3 text-sm text-text-primary border";
@@ -57,13 +65,14 @@ function FormField({
         rules={rules}
         render={({ field: { value, onChange } }) => (
           <TextInput
-            className={`${inputBaseClass} ${error ? "border-red-500" : "border-border"}`}
+            className={`${inputBaseClass} ${error ? "border-red-500" : "border-border"} ${!editable ? "bg-gray-100" : ""}`}
             placeholder={placeholder}
             placeholderTextColor="#9CA3AF"
             value={value}
             onChangeText={onChange}
             keyboardType={keyboardType}
             autoCapitalize={autoCapitalize}
+            editable={editable}
           />
         )}
       />
@@ -76,8 +85,17 @@ function FormField({
 
 export default function AddFamilyMemberForm({
   familyId,
+  memberId,
+  initialData,
+  onSuccess,
 }: AddFamilyMemberFormProps) {
-  const { mutate: addMember, isPending } = useAddFamilyMember();
+  const isEditMode = !!memberId;
+
+  const { mutate: addMember, isPending: isAdding } = useAddFamilyMember();
+  const { mutate: updateMember, isPending: isUpdating } =
+    useUpdateFamilyMember();
+
+  const isPending = isAdding || isUpdating;
 
   const {
     control,
@@ -87,54 +105,80 @@ export default function AddFamilyMemberForm({
     formState: { errors },
   } = useForm<AddFamilyMemberFormValues>({
     defaultValues: {
-      name: "",
-      email: "",
-      relation: "",
-      dob: "",
+      name: initialData?.username || "",
+      email: initialData?.email || "",
+      relation: initialData?.relation || "",
+      dob: formatDateForDisplay(initialData?.dob),
     },
   });
 
   const onSubmit = (values: AddFamilyMemberFormValues) => {
     const dobIso = toIsoDate(values.dob);
 
-    if (!dobIso) {
+    if (!dobIso && isEditMode === false) {
       setError("dob", { message: "Enter valid DOB (YYYY-MM-DD)" });
       return;
     }
 
-    const payload: FamilyMemberPayload = {
-      relation: values.relation.trim(),
-      dob: dobIso,
-      name: values.name.trim(),
-      email: values.email.trim(),
-    };
+    if (isEditMode) {
+      // Edit mode - update member
+      const payload: Partial<FamilyMemberPayload> = {
+        name: values.name.trim(),
+        relation: values.relation.trim(),
+        dob: dobIso || undefined,
+      };
 
-    addMember(
-      { familyId, data: payload },
-      {
-        onSuccess: () => {
-          Alert.alert("Success", "Family member added");
-          reset();
-        },
-        onError: (error: any) => {
-          const message =
-            error?.response?.data?.message || "Failed to add family member";
-          Alert.alert("Error", message);
-        },
-      }
-    );
+      updateMember(
+        { familyId, memberId: memberId!, data: payload },
+        {
+          onSuccess: () => {
+            Alert.alert("Success", "Family member updated");
+            onSuccess?.();
+          },
+          onError: (error: any) => {
+            const message =
+              error?.response?.data?.message ||
+              "Failed to update family member";
+            Alert.alert("Error", message);
+          },
+        }
+      );
+    } else {
+      // Add mode - create new member
+      const payload: FamilyMemberPayload = {
+        relation: values.relation.trim(),
+        dob: dobIso!,
+        name: values.name.trim(),
+        email: values.email.trim(),
+      };
+
+      addMember(
+        { familyId, data: payload },
+        {
+          onSuccess: () => {
+            Alert.alert("Success", "Family member added");
+            reset();
+          },
+          onError: (error: any) => {
+            const message =
+              error?.response?.data?.message || "Failed to add family member";
+            Alert.alert("Error", message);
+          },
+        }
+      );
+    }
   };
 
   return (
     <View className="bg-primary/5 border-2 border-dashed border-primary/30 rounded-xl p-5 mt-6 ">
       <View className="flex-row items-center justify-center gap-2 mb-4">
         <Ionicons
-          name="person-add-outline"
+          name={isEditMode ? "create-outline" : "person-add-outline"}
           size={18}
           className="!text-primary"
         />
         <Text className="text-base font-jakarta-bold text-primary">
-          Add New Member
+          {isEditMode ? "Edit Member" : "Add New Member"}
         </Text>
       </View>
 
@@ -152,9 +196,9 @@ export default function AddFamilyMemberForm({
           <FormField
             label="DOB"
             name="dob"
-            placeholder="YYYY-MM-DD"
+            placeholder={isEditMode ? "YYYY-MM-DD" : "YYYY-MM-DD"}
             control={control}
-            rules={{ required: "DOB is required" }}
+            rules={isEditMode ? {} : { required: "DOB is required" }}
             error={errors.dob?.message}
             autoCapitalize="none"
           />
@@ -172,22 +216,24 @@ export default function AddFamilyMemberForm({
         </View>
       </View>
 
-      <FormField
-        label="Email Address"
-        name="email"
-        placeholder="example@mail.com"
-        control={control}
-        rules={{
-          required: "Email is required",
-          pattern: {
-            value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-            message: "Invalid email address",
-          },
-        }}
-        error={errors.email?.message}
-        keyboardType="email-address"
-        autoCapitalize="none"
-      />
+      {!isEditMode && (
+        <FormField
+          label="Email Address"
+          name="email"
+          placeholder="example@mail.com"
+          control={control}
+          rules={{
+            required: "Email is required",
+            pattern: {
+              value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+              message: "Invalid email address",
+            },
+          }}
+          error={errors.email?.message}
+          keyboardType="email-address"
+          autoCapitalize="none"
+        />
+      )}
 
       <TouchableOpacity
         className="w-full bg-primary rounded-sm py-3.5 flex-row items-center justify-center mt-1"
@@ -195,11 +241,15 @@ export default function AddFamilyMemberForm({
         disabled={isPending}
       >
         <Text className="text-white text-base" variant="h2">
-          {isPending ? "Saving..." : "Save & Add Member"}
+          {isPending
+            ? "Saving..."
+            : isEditMode
+              ? "Update Member"
+              : "Save & Add Member"}
         </Text>
         {!isPending && (
           <Ionicons
-            name="add"
+            name={isEditMode ? "checkmark" : "add"}
             size={20}
             color="white"
             style={{ marginLeft: 8 }}

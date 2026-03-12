@@ -19,12 +19,13 @@ export interface FamilyMemberPayload {
 }
 
 export interface FamilyMember {
-  id: number;
+  userId: number; // API returns userId, not id
   familyId: number;
   relation: string;
-  dob: string;
+  dob?: string;
   username: string;
   email: string;
+  phone?: string;
   foodPreference?: string;
   createdAt?: string;
   updatedAt?: string;
