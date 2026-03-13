@@ -18,6 +18,7 @@ type AddFamilyMemberFormValues = {
   email: string;
   relation: string;
   dob: string;
+  foodPreference: string;
 };
 
 type AddFamilyMemberFormProps = {
@@ -110,6 +111,7 @@ export default function AddFamilyMemberForm({
       email: initialData?.email || "",
       relation: initialData?.relation || "",
       dob: formatDateForDisplay(initialData?.dob),
+      foodPreference: initialData?.foodPreference || "",
     },
   });
 
@@ -126,7 +128,7 @@ export default function AddFamilyMemberForm({
       const payload: Partial<FamilyMemberPayload> = {
         name: values.name.trim(),
         relation: values.relation.trim(),
-        dob: dobIso || undefined,
+        foodPreference: values.foodPreference,
       };
 
       updateMember(
@@ -151,6 +153,7 @@ export default function AddFamilyMemberForm({
         dob: dobIso!,
         name: values.name.trim(),
         email: values.email.trim(),
+        foodPreference: values.foodPreference,
       };
 
       addMember(
@@ -193,34 +196,39 @@ export default function AddFamilyMemberForm({
       />
 
       <View className="flex-row gap-3">
-        <View className="flex-1">
-          <Controller
-            control={control}
-            name="dob"
-            rules={isEditMode ? {} : { required: "DOB is required" }}
-            render={({ field: { value, onChange }, fieldState: { error } }) => (
-              <>
-                <DatePicker
-                  mode="date"
-                  value={value ? new Date(value) : new Date()}
-                  onChange={(event: any, date?: Date) => {
-                    if (date) {
-                      const formattedDate = date.toISOString().split("T")[0];
-                      onChange(formattedDate);
-                    }
-                  }}
-                  materialDateLabel="DOB"
-                  materialDateClassName="mb-1"
-                />
-                {error ? (
-                  <Text className="text-xs text-red-500 mt-1 ml-1">
-                    {error.message}
-                  </Text>
-                ) : null}
-              </>
-            )}
-          />
-        </View>
+        {!isEditMode && (
+          <View className="flex-1">
+            <Controller
+              control={control}
+              name="dob"
+              rules={{ required: "DOB is required" }}
+              render={({
+                field: { value, onChange },
+                fieldState: { error },
+              }) => (
+                <>
+                  <DatePicker
+                    mode="date"
+                    value={value ? new Date(value) : new Date()}
+                    onChange={(event: any, date?: Date) => {
+                      if (date) {
+                        const formattedDate = date.toISOString().split("T")[0];
+                        onChange(formattedDate);
+                      }
+                    }}
+                    materialDateLabel="DOB"
+                    materialDateClassName="mb-1"
+                  />
+                  {error ? (
+                    <Text className="text-xs text-red-500 mt-1 ml-1">
+                      {error.message}
+                    </Text>
+                  ) : null}
+                </>
+              )}
+            />
+          </View>
+        )}
 
         <View className="flex-1">
           <FormField
@@ -252,6 +260,33 @@ export default function AddFamilyMemberForm({
           autoCapitalize="none"
         />
       )}
+
+      <View className="mb-3">
+        <Text className="text-xs font-jakarta-bold uppercase tracking-wide text-text-tertiary mb-1.5 ml-1">
+          Meal Preference
+        </Text>
+        <Controller
+          control={control}
+          name="foodPreference"
+          render={({ field: { value, onChange } }) => (
+            <View className="flex-row gap-2">
+              {["Vegetarian", "Non-Vegetarian", "Vegan", "Jain"].map((pref) => (
+                <TouchableOpacity
+                  key={pref}
+                  className={`flex-1 py-2 px-3 rounded-sm border ${value === pref ? "bg-primary border-primary" : "border-border bg-background"}`}
+                  onPress={() => onChange(pref)}
+                >
+                  <Text
+                    className={`text-xs text-center ${value === pref ? "text-white" : "text-text-primary"}`}
+                  >
+                    {pref}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
+        />
+      </View>
 
       <TouchableOpacity
         className="w-full bg-primary rounded-sm py-3.5 flex-row items-center justify-center mt-1"
