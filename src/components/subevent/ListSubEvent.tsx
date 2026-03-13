@@ -34,9 +34,11 @@ export default function ListSubEvent() {
   const router = useRouter();
 
   const { eventId } = useLocalSearchParams();
-  const { data: subEvents, isLoading, refetch } = useSubEventsOfEvent(
-    Number(eventId)
-  );
+  const {
+    data: subEvents,
+    isLoading,
+    refetch,
+  } = useSubEventsOfEvent(Number(eventId));
 
   useFocusEffect(
     useCallback(() => {
@@ -64,11 +66,8 @@ export default function ListSubEvent() {
       <TouchableOpacity
         className="bg-white rounded-2xl mb-3 overflow-hidden border border-gray-100 shadow-sm"
         activeOpacity={0.85}
-        onPress={() => {
-          // Navigate to sub-event details
-        }}
+        onPress={() => {}}
       >
-        {/* Cover Image */}
         {item.imageUrl ? (
           <Image
             source={{ uri: item.imageUrl }}
@@ -82,7 +81,6 @@ export default function ListSubEvent() {
         )}
 
         <View className="p-4">
-          {/* Title + Status */}
           <View className="flex-row items-center justify-between mb-1">
             <Text className="text-base font-semibold text-gray-900 flex-1 mr-2">
               {item.title}
@@ -94,7 +92,6 @@ export default function ListSubEvent() {
             </View>
           </View>
 
-          {/* Date */}
           <View className="flex-row items-center gap-1 mb-1">
             <Ionicons name="calendar-outline" size={13} color="#9CA3AF" />
             <Text className="text-xs text-gray-500">
@@ -102,7 +99,6 @@ export default function ListSubEvent() {
             </Text>
           </View>
 
-          {/* Location */}
           {item.location && item.location !== "TBD" ? (
             <View className="flex-row items-center gap-1 mb-1">
               <Ionicons name="location-outline" size={13} color="#9CA3AF" />
@@ -110,7 +106,6 @@ export default function ListSubEvent() {
             </View>
           ) : null}
 
-          {/* Footer: theme + budget */}
           <View className="flex-row items-center justify-between mt-2 pt-2 border-t border-gray-100">
             {item.theme ? (
               <Text className="text-xs text-gray-400">

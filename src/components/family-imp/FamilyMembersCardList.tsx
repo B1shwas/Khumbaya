@@ -3,6 +3,7 @@ import { useDeleteFamilyMember } from "@/src/features/family/hooks/use-family";
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
 import { Alert, Modal, TouchableOpacity, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import AvatarPicker from "../ui/AvatarPicker";
 import { Text } from "../ui/Text";
 import AddFamilyMemberForm from "./AddFamilyMemberForm";
@@ -18,6 +19,12 @@ export default function FamilyMembersCardList({
 }: FamilyMembersCardListProps) {
   const [editingMember, setEditingMember] = useState<FamilyMember | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
+
+  const selfItem = members.find((i) => i.relation.toLowerCase() === "self");
+  const sortedArrayWithCreatorAtTop = [
+    ...(selfItem ? [selfItem] : []),
+    ...members.filter((i) => i.relation.toLowerCase() !== "self"),
+  ];
 
   const { mutate: deleteMember, isPending: isDeleting } =
     useDeleteFamilyMember();
@@ -89,7 +96,7 @@ export default function FamilyMembersCardList({
       </TouchableOpacity>
 
       {/* Member Cards */}
-      {members.map((member, index) => (
+      {sortedArrayWithCreatorAtTop.map((member, index) => (
         <View
           key={index}
           className="bg-white rounded-2xl p-4 mb-3 border border-gray-200 flex-row items-center gap-4"
@@ -151,7 +158,7 @@ export default function FamilyMembersCardList({
         presentationStyle="pageSheet"
         onRequestClose={() => setShowAddModal(false)}
       >
-        <View className="flex-1 bg-gray-50">
+        <SafeAreaView className="flex-1 bg-gray-50" edges={["top", "bottom"]}>
           <View className="flex-row justify-between items-center p-4 bg-white border-b border-gray-200">
             <Text className="text-lg font-bold text-gray-800">
               Add New Member
@@ -166,7 +173,7 @@ export default function FamilyMembersCardList({
               onSuccess={handleAddSuccess}
             />
           </View>
-        </View>
+        </SafeAreaView>
       </Modal>
 
       {/* Edit Member Modal */}
@@ -176,7 +183,7 @@ export default function FamilyMembersCardList({
         presentationStyle="pageSheet"
         onRequestClose={() => setEditingMember(null)}
       >
-        <View className="flex-1 bg-gray-50">
+        <SafeAreaView className="flex-1 bg-gray-50" edges={["top", "bottom"]}>
           <View className="flex-row justify-between items-center p-4 bg-white border-b border-gray-200">
             <Text className="text-lg font-bold text-gray-800">Edit Member</Text>
             <TouchableOpacity onPress={() => setEditingMember(null)}>
@@ -193,7 +200,7 @@ export default function FamilyMembersCardList({
               />
             )}
           </View>
-        </View>
+        </SafeAreaView>
       </Modal>
     </>
   );

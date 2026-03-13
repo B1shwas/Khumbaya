@@ -1,5 +1,6 @@
 import { Text } from "@/src/components/ui/Text";
 import { Modal, TextInput, TouchableOpacity, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export type EditFamilyModalProps = {
   visible: boolean;
@@ -25,7 +26,10 @@ export default function EditFamilyModal({
       animationType="fade"
       onRequestClose={onClose}
     >
-      <View className="flex-1 bg-black/30 items-center justify-center px-6">
+      <SafeAreaView
+        className="flex-1 bg-black/30 items-center justify-center px-6"
+        edges={["top", "bottom"]}
+      >
         <View className="w-full max-w-md bg-white rounded-2xl p-5">
           <Text className="text-lg font-jakarta-bold text-gray-900 mb-1">
             Edit Family
@@ -66,7 +70,7 @@ export default function EditFamilyModal({
             </TouchableOpacity>
           </View>
         </View>
-      </View>
+      </SafeAreaView>
     </Modal>
   );
 }
