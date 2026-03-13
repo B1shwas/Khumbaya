@@ -3,9 +3,9 @@ import { Text } from "@/src/components/ui/Text";
 import { MemberRsvpCardProp, RSVPStatus } from "@/src/utils/type/rsvp";
 import { Ionicons } from "@expo/vector-icons";
 import {
-    Image,
-    TouchableOpacity,
-    View,
+  Image,
+  TouchableOpacity,
+  View,
 } from "react-native";
 const statusConfig: Record<
   RSVPStatus,
@@ -110,9 +110,15 @@ const MemberCard = ({
             </View>
           )}
 
-          {isPending && (
+          {(isPending && !isOrganizerView) && (
             <Text className="mt-2 text-sm text-slate-400 italic">
               Please complete details for {member.name.split(" ")[0]}
+            </Text>
+          )}
+
+          {(isPending && isOrganizerView) && (
+            <Text className="mt-2 text-sm text-slate-400 italic">
+              Invitation Sent is not responded
             </Text>
           )}
         </View>

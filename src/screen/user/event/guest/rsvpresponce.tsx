@@ -1,4 +1,6 @@
 import { DatePicker } from "@/components/nativewindui/DatePicker";
+import { KeyboardAvoidingView, Platform } from "react-native";
+import { KeyboardAwareScrollView, } from "react-native-keyboard-aware-scroll-view";
 import { Text } from "@/src/components/ui/Text";
 import { useSubmitRsvpResponse } from "@/src/features/events/hooks/use-event";
 import { useAuthStore } from "@/src/store/AuthStore";
@@ -39,7 +41,6 @@ export const RSVPFormContent = ({
   userId,
   eventId,
   familyId,
-  memberName,
   initialAttendance = "yes",
   initialAccommodation = false,
   initialArrival,
@@ -74,10 +75,10 @@ export const RSVPFormContent = ({
 
   const makeDateHandler =
     (setter: (d: Date) => void) =>
-    (event: DateTimePickerEvent, picked?: Date) => {
-      if (event.type === "dismissed" || !picked) return;
-      setter(picked);
-    };
+      (event: DateTimePickerEvent, picked?: Date) => {
+        if (event.type === "dismissed" || !picked) return;
+        setter(picked);
+      };
 
   const handleSubmit = () => {
     submitRsvp(
@@ -105,6 +106,7 @@ export const RSVPFormContent = ({
   };
 
   return (
+
     <View className="px-5 py-4 gap-8">
       {/* Attendance */}
       <View>
@@ -119,16 +121,14 @@ export const RSVPFormContent = ({
             <TouchableOpacity
               key={option}
               onPress={() => setAttendance(option)}
-              className={`flex-1 py-2.5 rounded-sm ${
-                attendance === option ? "bg-[#ee2b8c]" : ""
-              }`}
+              className={`flex-1 py-2.5 rounded-sm ${attendance === option ? "bg-[#ee2b8c]" : ""
+                }`}
               style={attendance === option ? { backgroundColor: PRIMARY } : {}}
             >
               <Text
                 variant="h2"
-                className={`text-center text-sm capitalize ${
-                  attendance === option ? "text-white" : "text-slate-600"
-                }`}
+                className={`text-center text-sm capitalize ${attendance === option ? "text-white" : "text-slate-600"
+                  }`}
               >
                 {option}
               </Text>
@@ -211,9 +211,8 @@ export const RSVPFormContent = ({
           <View className="flex-row gap-3">
             <Pressable
               onPress={() => setArrivalPickup(!arrivalPickup)}
-              className={`flex-1 flex-row items-center gap-3 p-3 bg-slate-50 rounded-md border-2 ${
-                arrivalPickup ? "border-pink-200" : "border-transparent"
-              }`}
+              className={`flex-1 flex-row items-center gap-3 p-3 bg-slate-50 rounded-md border-2 ${arrivalPickup ? "border-pink-200" : "border-transparent"
+                }`}
             >
               {arrivalPickup ? (
                 <CheckSquare size={20} color={PRIMARY} />
@@ -226,9 +225,8 @@ export const RSVPFormContent = ({
             </Pressable>
             <Pressable
               onPress={() => setDepartureDrop(!departureDrop)}
-              className={`flex-1 flex-row items-center gap-3 p-3 bg-slate-50 rounded-md border-2 ${
-                departureDrop ? "border-pink-200" : "border-transparent"
-              }`}
+              className={`flex-1 flex-row items-center gap-3 p-3 bg-slate-50 rounded-md border-2 ${departureDrop ? "border-pink-200" : "border-transparent"
+                }`}
             >
               {departureDrop ? (
                 <CheckSquare size={20} color={PRIMARY} />
@@ -310,34 +308,55 @@ const RSVPForm = () => {
   const initialAccommodation = draft?.rawAccommodation === true;
 
   return (
-    <ScrollView showsHorizontalScrollIndicator={false}>
-      {memberName && (
-        <View
-          className="mx-5 mt-4 mb-0 px-4 py-3 rounded-lg flex-row items-center gap-3"
-          style={{
-            backgroundColor: "#fdf2f8",
-            borderWidth: 1,
-            borderColor: "#f9a8d4",
-          }}
-        >
-          <MaterialIcons name="person" size={18} className="!text-primary" />
-          <Text variant="h2" className="text-sm text-pink-700 flex-1">
-            Filling RSVP for {memberName}
-          </Text>
-        </View>
-      )}
-      <RSVPFormContent
-        userId={userId}
-        eventId={Number(eventId)}
-        familyId={familyId}
-        memberName={memberName}
-        initialAttendance={initialAttendance}
-        initialAccommodation={initialAccommodation}
-        initialArrival={initialArrival}
-        initialDeparture={initialDeparture}
-        initialNotes={draft?.rawNotes ?? ""}
-      />
-    </ScrollView>
+
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 16 : 0}
+    >
+      <KeyboardAwareScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{
+          paddingBottom: 35,
+          flexGrow: 1,
+        }}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={true}
+        enableOnAndroid={true}
+        enableAutomaticScroll={true}
+        extraScrollHeight={240}
+        scrollEnabled={true}
+      >
+        <ScrollView showsHorizontalScrollIndicator={false} >
+          {memberName && (
+            <View
+              className="mx-5 mt-4 mb-0 px-4 py-3 rounded-lg flex-row items-center gap-3"
+              style={{
+                backgroundColor: "#fdf2f8",
+                borderWidth: 1,
+                borderColor: "#f9a8d4",
+              }}
+            >
+              <MaterialIcons name="person" size={18} className="!text-primary" />
+              <Text variant="h2" className="text-sm text-pink-700 flex-1">
+                Filling RSVP for {memberName}
+              </Text>
+            </View>
+          )}
+          <RSVPFormContent
+            userId={userId}
+            eventId={Number(eventId)}
+            familyId={familyId}
+            memberName={memberName}
+            initialAttendance={initialAttendance}
+            initialAccommodation={initialAccommodation}
+            initialArrival={initialArrival}
+            initialDeparture={initialDeparture}
+            initialNotes={draft?.rawNotes ?? ""}
+          />
+        </ScrollView>
+      </KeyboardAwareScrollView>
+    </KeyboardAvoidingView>
   );
 };
 

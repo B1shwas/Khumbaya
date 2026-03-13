@@ -1,18 +1,19 @@
 import NavigateComponent from "@/src/components/event/NavigateComponent";
+import ToggleBar from "@/src/components/ui/ToggleBar";
 import { Event } from "@/src/constants/event";
 import { useGetEventWithRole } from "@/src/features/events/hooks/use-event";
 import { Ionicons } from "@expo/vector-icons";
 import {
-  router,
+  RelativePathString,
   useLocalSearchParams,
-  type RelativePathString,
+  useRouter
 } from "expo-router";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import EventDetailHero from "./EventDetailHero";
 
 const EventDetail = () => {
   const { eventId } = useLocalSearchParams<{ eventId: string }>();
-
+  const router = useRouter();
   const { data: found } = useGetEventWithRole();
   const foundEvent = found?.find(
     (e: Event) => String(e.id) === String(eventId)
@@ -202,21 +203,13 @@ const EventDetail = () => {
           ))}
 
           {/* Gallery - Full Width */}
-          <TouchableOpacity
-            className="w-full bg-white p-4 rounded-xl shadow-sm border border-gray-100 active:scale-[0.98] transition-transform flex-row items-center gap-4"
-            onPress={() => router.push("./gallery" as RelativePathString)}
-          >
-            <View className="p-2.5 bg-primary/10 rounded-full shrink-0">
-              <Ionicons name="images" size={20} color="#ee2b8c" />
-            </View>
-            <View className="flex-1">
-              <Text className="font-bold text-gray-900 text-base">Gallery</Text>
-              <Text className="text-xs text-gray-500">
-                Upload & Share Photos
-              </Text>
-            </View>
-            <Ionicons name="chevron-forward" size={20} color="#D1D5DB" />
-          </TouchableOpacity>
+          {/* Component with the Titleicon and the description Gallery , Upload & Share photos */}
+          <ToggleBar title="Gallery" description="Upload & Share Photos" iconstring="images" onPress={()=>{
+            router.push("./gallery" as RelativePathString) 
+          }} />
+            <ToggleBar title="Event Details" description="Complete Event Information" iconstring="" onPress={()=>{
+            router.push("./gallery" as RelativePathString) 
+          }} />
         </View>
       </View>
 
@@ -225,4 +218,5 @@ const EventDetail = () => {
     </ScrollView>
   );
 };
+
 export default EventDetail;
