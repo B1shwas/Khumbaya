@@ -24,7 +24,10 @@ export default function OrganizerEventDetailLayout() {
     >
       <Stack.Screen name="index" options={{ title: "Event Details" }} />
       <Stack.Screen name="budget" options={{ title: "Budget" }} />
-      <Stack.Screen name="gallery" options={{ title: "Gallery" }} />
+      <Stack.Screen
+        name="gallery"
+        options={{ title: "Gallery", headerShown: false }}
+      />
       <Stack.Screen name="guests" options={{ headerShown: false }} />
       <Stack.Screen name="addguest" options={{ title: "Add Guest" }} />
       <Stack.Screen name="timeline" options={{ title: "Timeline" }} />
