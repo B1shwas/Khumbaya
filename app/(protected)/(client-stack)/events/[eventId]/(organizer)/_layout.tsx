@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import { router as expoRouter, Stack, } from "expo-router";
+import { router as expoRouter, Stack, useLocalSearchParams } from "expo-router";
 import { Settings, } from "lucide-react-native";
 import { Pressable, TouchableOpacity } from "react-native";
 
@@ -8,17 +8,27 @@ const headerBackButton = () => (
     <Ionicons name="arrow-back" size={24} color="#111827" />
   </TouchableOpacity>
 );
-const headerRightButton = () => {
+const headerRightButton = (eventId?: string) => {
   return (
     <Pressable
       onPress={() => {
-        expoRouter.push('/events/[eventId]/(organizer)/settings')
+        if (!eventId) {
+          return;
+        }
+
+        expoRouter.push({
+          pathname: "/(protected)/(client-stack)/events/[eventId]/(organizer)/settings",
+          params: { eventId },
+        })
       }}>
       <Settings size={20} />
     </Pressable>
   )
 }
 export default function OrganizerEventDetailLayout() {
+  const params = useLocalSearchParams<{ eventId?: string | string[] }>();
+  const eventId = Array.isArray(params.eventId) ? params.eventId[0] : params.eventId;
+
   return (
     <Stack
       screenOptions={{
@@ -33,7 +43,7 @@ export default function OrganizerEventDetailLayout() {
 
       }}
     >
-      <Stack.Screen name="index" options={{ title: "Event Detail", headerRight: headerRightButton, animation: "slide_from_left" }} />
+      <Stack.Screen name="index" options={{ title: "Event Detail", headerRight: () => headerRightButton(eventId), animation: "slide_from_left" }} />
       <Stack.Screen name="budget" options={{ title: "Budget" }} />
       <Stack.Screen name="gallery" options={{ title: "Gallery" }} />
       <Stack.Screen name="guests" options={{ headerShown: false }} />

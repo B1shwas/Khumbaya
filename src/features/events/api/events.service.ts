@@ -14,7 +14,10 @@ export interface CREATEEVENT {
   role?: string;
   imageUrl?: string;
 }
-
+export interface MakeEventMemberType {
+  userId: number;
+  role: string;
+}
 export interface EVENT {
   id: number;
   title: string;
@@ -242,3 +245,8 @@ export const getSubEventOfEvent = async (eventId: number) => {
   const response = await api.get(`/event/${eventId}/sub-events`);
   return response.data.data;
 };
+
+export const makeEventMember = async (eventId: number, data: MakeEventMemberType) => {
+  const response = await api.post(`/event/${eventId}/member`, data);
+  return response.data;
+}

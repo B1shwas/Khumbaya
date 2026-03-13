@@ -6,6 +6,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   createUserApi,
   getUserProfile,
+  getUserWithPhone,
   updateUserMeApi,
   type UpdateUserMePayload,
 } from "./user.service";
@@ -98,6 +99,27 @@ export function useChangePassword() {
     }) => {
       const response = await api.patch("/user", data);
       return response.data;
+    },
+  });
+}
+interface UseFindUserWithPhoneOptions {
+  enabled?: boolean;
+}
+
+export function useFindUserWithPhone(
+  phone: string,
+  { enabled = true }: UseFindUserWithPhoneOptions = {}
+) {
+  const token = useAuthStore((s) => s.token);
+  const isLoading = useAuthStore((s) => s.isLoading);
+  const normalizedPhone = phone.trim();
+
+  return useQuery({
+    queryKey: ["find", normalizedPhone],
+    enabled: !!token && !isLoading && enabled && !!normalizedPhone,
+    queryFn: async () => {
+      const data = await getUserWithPhone(normalizedPhone);
+      return data;
     },
   });
 }

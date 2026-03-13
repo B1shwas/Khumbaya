@@ -10,6 +10,8 @@ import {
   getResponsesWithUser,
   getSubEventOfEvent,
   getUpcomingEventsApi,
+  makeEventMember,
+  MakeEventMemberType,
   RsvpResponsePayload,
   submitRsvpResponseApi,
 } from "../api/events.service";
@@ -216,3 +218,16 @@ export const useSubEventsOfEvent = (eventId: number) => {
     },
   });
 };
+
+export const useMakeEventMember = (eventId: number) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: MakeEventMemberType) =>
+      makeEventMember(eventId, payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["event-responses", eventId] });
+      queryClient.invalidateQueries({ queryKey: ["rsvp-invitations"] });
+    },
+
+  });
+}

@@ -23,25 +23,27 @@ export default function EventRoleRedirect() {
   }
 
   switch (role) {
-    case "Organizer":
-      return (
-        <Redirect
-          href={`/(protected)/(client-stack)/events/${eventId}/(organizer)/`}
-        />
-      );
     case "Vendor":
       return (
         <Redirect
-          href={`/(protected)/(client-stack)/events/${eventId}/(vendor)/`}
+        href={`/(protected)/(client-stack)/events/${eventId}/(vendor)/`}
         />
       );
-    case "Guest":
-      return (
+      case "Guest":
+        return (
         <Redirect
-          href={`/(protected)/(client-stack)/events/${eventId}/(guest)/`}
+        href={`/(protected)/(client-stack)/events/${eventId}/(guest)/`}
         />
       );
+      case "Organizer":
+        return (
+          <Redirect
+            href={`/(protected)/(client-stack)/events/${eventId}/(organizer)/`}
+          />
+        );
     default:
-      return <Redirect href="/(protected)/(client-tabs)/events" />;
+      return( <Redirect
+       href={`/(protected)/(client-stack)/events/${eventId}/(organizer)/`} 
+       />);
   }
 }

@@ -28,6 +28,10 @@ export const getUserApi = async () => {
   const response = await api.get("/user");
   return response.data;
 };
+export const getUserWithPhone = async (data: string) => {
+  const responce = await api.get(`/user?phone=${data}`);
+  return responce.data.data;
+}
 
 export const updateUserApi = async (data: any) => {
   const response = await api.patch("/user", data);
