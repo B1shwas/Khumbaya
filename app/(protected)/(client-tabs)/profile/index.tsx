@@ -1,2 +1,2 @@
-import Profile from "@/src/screen/user/View/Profile";
+import Profile from "@/src/screen/user/Profile/ProfileScreen";
 export default Profile;

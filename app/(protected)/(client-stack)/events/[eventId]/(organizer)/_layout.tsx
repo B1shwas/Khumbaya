@@ -1,13 +1,23 @@
 import { Ionicons } from "@expo/vector-icons";
-import { router, Stack } from "expo-router";
-import { TouchableOpacity } from "react-native";
+import { router as expoRouter, Stack, } from "expo-router";
+import { Settings, } from "lucide-react-native";
+import { Pressable, TouchableOpacity } from "react-native";
 
 const headerBackButton = () => (
-  <TouchableOpacity onPress={() => router.back()} style={{ paddingRight: 8 }}>
+  <TouchableOpacity onPress={() => expoRouter.back()} style={{ paddingRight: 8 }}>
     <Ionicons name="arrow-back" size={24} color="#111827" />
   </TouchableOpacity>
 );
-
+const headerRightButton = () => {
+  return (
+    <Pressable
+      onPress={() => {
+        expoRouter.push('/events/[eventId]/(organizer)/settings')
+      }}>
+      <Settings size={20} />
+    </Pressable>
+  )
+}
 export default function OrganizerEventDetailLayout() {
   return (
     <Stack
@@ -20,9 +30,10 @@ export default function OrganizerEventDetailLayout() {
           fontSize: 18,
         },
         headerLeft: headerBackButton,
+
       }}
     >
-      <Stack.Screen name="index" options={{ title: "Event Details" }} />
+      <Stack.Screen name="index" options={{ title: "Event Detail", headerRight: headerRightButton, animation: "slide_from_left" }} />
       <Stack.Screen name="budget" options={{ title: "Budget" }} />
       <Stack.Screen name="gallery" options={{ title: "Gallery" }} />
       <Stack.Screen name="guests" options={{ headerShown: false }} />
@@ -34,6 +45,7 @@ export default function OrganizerEventDetailLayout() {
         name="subevent-create"
         options={{ title: "Create new event" }}
       />
+      <Stack.Screen name="settings" options={{ headerShown: false }} />
     </Stack>
   );
 }

@@ -9,7 +9,8 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.aaditya-lamichhane.khumbaya"
     },
     "web": {
       "output": "static",
@@ -18,8 +19,9 @@
     },
     "extra": {
       "eas": {
-        "projectId": "fc7b654d-0faf-4ce2-b027-1da2ab8e7344"
-      }
+        "projectId": "2fc43e7a-14bc-48b0-93f2-b96986ee5427"
+      },
+      "router": {}
     },
     "plugins": [
       "expo-router",
@@ -51,7 +53,7 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.b1shwas.khumbaya"
+      "package": "com.aaditya_lamichhane.khumbaya"
     }
   }
 }

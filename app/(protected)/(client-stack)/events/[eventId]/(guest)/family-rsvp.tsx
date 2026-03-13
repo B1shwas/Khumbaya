@@ -1,2 +1,2 @@
-import FamilyRsvpManagementScreen from "@/src/screen/user/View/FamilyRsvpManagementScreen";
+import FamilyRsvpManagementScreen from "@/src/screen/user/guest/FamilyRsvpManagementScreen";
 export default FamilyRsvpManagementScreen;

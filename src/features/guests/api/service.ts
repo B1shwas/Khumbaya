@@ -23,10 +23,11 @@ export const getEventGuest = async (eventId: number) => {
   return response.data.data;
 };
 export const getInvitation = async (eventId: number) => {
-  const response = await api.get(`/event/event/${eventId}/invitation`);
+  const response = await api.get(`/event/${eventId}/invitation`);
   return response.data.data;
 };
 export const acceptInvitation = async (invitationId: number) => {
   const response = await api.post(`/event/invitation/accept/${invitationId}`);
   return response.data.data.items;
 };
+

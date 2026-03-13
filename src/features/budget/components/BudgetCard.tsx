@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Alert, Text, TouchableOpacity, View } from "react-native";
-import { Swipeable } from "react-native-gesture-handler";
+import Swipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
 import { BudgetItem } from "../types/budget.types";
 
 interface BudgetCardProps {
@@ -48,22 +48,11 @@ export default function BudgetCard({
   };
 
   const rightActions = () => (
-    <View className="flex-row items-center">
+    <View className="flex-row items-center rounded-md" >
       {/* Edit Action */}
-      <TouchableOpacity
-        className="w-16 h-full bg-blue-500 justify-center items-center"
-        onPress={() => onEdit(item)}
-      >
-        <Ionicons name="create" size={20} color="#fff" />
-      </TouchableOpacity>
-
-      {/* Delete Action */}
-      <TouchableOpacity
-        className="w-16 h-full bg-red-500 justify-center items-center"
-        onPress={handleDelete}
-      >
-        <Ionicons name="trash" size={20} color="#fff" />
-      </TouchableOpacity>
+    <Text>
+      Gaysdasdhjk
+    </Text>
     </View>
   );
 
