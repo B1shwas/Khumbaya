@@ -125,8 +125,9 @@ export default function AddFamilyMemberForm({
       const payload: Partial<FamilyMemberPayload> = {
         name: values.name.trim(),
         relation: values.relation.trim(),
-        dob: dobIso || undefined,
       };
+
+      console.log(payload);
 
       updateMember(
         { familyId, memberId: memberId!, data: payload },

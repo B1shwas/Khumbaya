@@ -30,12 +30,9 @@ export default function FamilyMembersCardList({
     useDeleteFamilyMember();
 
   const handleDeletePress = (member: FamilyMember) => {
-    const memberId = Number(member.userId);
+    const memberId = Number(member.id);
 
-    if (!memberId || isNaN(memberId)) {
-      Alert.alert("Error", "Invalid member ID");
-      return;
-    }
+    console.log(memberId);
 
     Alert.alert(
       "Delete Member",
@@ -114,7 +111,7 @@ export default function FamilyMembersCardList({
               variant="h1"
               numberOfLines={1}
             >
-              jgdajhswgdjahsdh{member.username}
+              {member.username}
             </Text>
 
             <Text
@@ -194,7 +191,7 @@ export default function FamilyMembersCardList({
             {editingMember && (
               <AddFamilyMemberForm
                 familyId={familyId}
-                memberId={editingMember.userId}
+                memberId={editingMember.id}
                 initialData={editingMember}
                 onSuccess={handleEditSuccess}
               />
