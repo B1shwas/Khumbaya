@@ -1,3 +1,4 @@
+import { DatePicker } from "@/components/nativewindui/DatePicker";
 import {
   FamilyMember,
   FamilyMemberPayload,
@@ -193,14 +194,31 @@ export default function AddFamilyMemberForm({
 
       <View className="flex-row gap-3">
         <View className="flex-1">
-          <FormField
-            label="DOB"
-            name="dob"
-            placeholder={isEditMode ? "YYYY-MM-DD" : "YYYY-MM-DD"}
+          <Controller
             control={control}
+            name="dob"
             rules={isEditMode ? {} : { required: "DOB is required" }}
-            error={errors.dob?.message}
-            autoCapitalize="none"
+            render={({ field: { value, onChange }, fieldState: { error } }) => (
+              <>
+                <DatePicker
+                  mode="date"
+                  value={value ? new Date(value) : new Date()}
+                  onChange={(event: any, date?: Date) => {
+                    if (date) {
+                      const formattedDate = date.toISOString().split("T")[0];
+                      onChange(formattedDate);
+                    }
+                  }}
+                  materialDateLabel="DOB"
+                  materialDateClassName="mb-1"
+                />
+                {error ? (
+                  <Text className="text-xs text-red-500 mt-1 ml-1">
+                    {error.message}
+                  </Text>
+                ) : null}
+              </>
+            )}
           />
         </View>
 
