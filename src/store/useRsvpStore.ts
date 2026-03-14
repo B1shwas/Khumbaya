@@ -1,7 +1,7 @@
 import { create } from "zustand";
 
 export interface RsvpDraft {
-  userId: string;
+  userId: number;
   familyId?: number;
   memberName?: string;
   rawStatus: string | null;

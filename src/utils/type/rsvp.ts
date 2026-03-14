@@ -1,7 +1,7 @@
 export type RSVPStatus = "attending" | "declined" | "pending";
-import { GuestDetailInterface , EventGuest } from "@/src/features/guests/types";
+import { GuestDetailInterface, EventGuest } from "@/src/features/guests/types";
 export interface MemberRsvpCardProp {
-  id: string;
+  id: number;
   familyId: number;
   name: string;
   avatarUrl?: string;
@@ -36,19 +36,19 @@ function formatDateRange(
 }
 
 
-  export function mapToMemberRsvp(item: GuestDetailInterface): MemberRsvpCardProp {
+export function mapToMemberRsvp(item: GuestDetailInterface): MemberRsvpCardProp {
   const status = deriveStatus(item.event_guest);
   return {
-    id: item.user_detail.id.toString(),
+    id: item.user_detail.id,
     familyId: item.user_detail.familyId,
     name: item.user_detail.username,
     avatarUrl: item.user_detail.photo ?? undefined,
     status,
     dateRange: item.event_guest
       ? formatDateRange(
-          item.event_guest.arrival_date_time,
-          item.event_guest.departure_date_time
-        )
+        item.event_guest.arrival_date_time,
+        item.event_guest.departure_date_time
+      )
       : undefined,
     roomNeeded:
       item.event_guest?.isAccomodation != null

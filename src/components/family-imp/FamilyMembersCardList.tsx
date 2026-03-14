@@ -23,7 +23,7 @@ export default function FamilyMembersCardList({
   const selfItem = members.find((i) => i.relation.toLowerCase() === "self");
   const sortedArrayWithCreatorAtTop = [
     ...(selfItem ? [selfItem] : []),
-    ...members.filter((i) => i.relation.toLowerCase() !== "self"),
+    ...members.filter((i) => i.relation?.toLowerCase() !== "self"),
   ];
 
   const { mutate: deleteMember, isPending: isDeleting } =
@@ -102,7 +102,7 @@ export default function FamilyMembersCardList({
             name={member.username}
             size="small"
             showEditButton={false}
-            onPick={() => {}}
+            onPick={() => { }}
           />
 
           <View className="flex-1">

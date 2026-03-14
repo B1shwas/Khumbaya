@@ -1,5 +1,6 @@
 import ToggleBar from "@/src/components/ui/ToggleBar"
-import { useRouter } from "expo-router"
+import { useLocalSearchParams, useRouter } from "expo-router"
+import { useMemo } from "react"
 import { View } from "react-native"
 
 const settingItems = [
@@ -20,10 +21,10 @@ const settingItems = [
     iconstring: "card-outline" as const,
   },
   {
-    title: "Transfer Ownership",
+    title: "Add Event organizer",
     description: "Assign a new event host",
     iconstring: "swap-horizontal-outline" as const,
-    onPressPath: "./transfer" as const
+    action: "transfer-ownership" as const,
   },
   {
     title: "Archive Event",
@@ -34,6 +35,24 @@ const settingItems = [
 
 export default function EventSettingsScreen() {
   const router = useRouter()
+  const params = useLocalSearchParams<{ eventId?: string | string[] }>()
+
+  const eventId = useMemo(() => {
+    const raw = Array.isArray(params.eventId) ? params.eventId[0] : params.eventId
+    return raw && raw !== "[eventId]" ? raw : ""
+  }, [params.eventId])
+
+  const handleTransferOwnershipPress = () => {
+    if (!eventId) {
+      return
+    }
+
+    router.push({
+      pathname: "/(protected)/(client-stack)/events/[eventId]/(organizer)/settings/transfer-ownership",
+      params: { eventId },
+    })
+  }
+
   return (
     <View className="p-4 gap-3">
       {settingItems.map((item) => (
@@ -42,7 +61,7 @@ export default function EventSettingsScreen() {
           iconstring={item.iconstring}
           title={item.title}
           description={item.description}
-          onPress={item.onPressPath ? () => router.push(item.onPressPath) : undefined}
+          onPress={item.action === "transfer-ownership" ? handleTransferOwnershipPress : undefined}
         />
       ))}
     </View>

@@ -139,7 +139,7 @@ export default function GuestEventDetails() {
     const me = responses[0];
     if (me) {
       setDraft({
-        userId: me.user_detail.id.toString(),
+        userId: me.user_detail.id,
         memberName: me.user_detail.username,
         rawStatus: me.event_guest?.status ?? null,
         rawArrival: me.event_guest?.arrival_date_time ?? null,
@@ -191,7 +191,7 @@ export default function GuestEventDetails() {
         <Section
           title="Event Highlights"
           action="View Full Itinerary"
-          onAction={() => {}}
+          onAction={() => { }}
         >
           <EventHighlightTimeline highlights={DEFAULT_HIGHLIGHTS} />
         </Section>

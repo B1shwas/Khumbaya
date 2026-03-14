@@ -24,7 +24,7 @@ export default function OrganizerEventDetailLayout() {
       }}
     >
       <Stack.Screen name="index" options={{ title: "Settings", animation: "flip" }} />
-      <Stack.Screen name="transferowner" options={{ title: "Add event Organizer", animation: "flip" }} />
+      <Stack.Screen name="transfer-ownership" options={{ title: "Add Event Organizer", animation: "flip" }} />
 
     </Stack>
   );

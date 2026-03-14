@@ -1,3 +1,5 @@
+import { useEffect, useState } from "react";
+
 type PasswordStrength = "weak" | "medium" | "strong" | "very-strong";
 export const calculatePasswordStrength = (pwd: string): PasswordStrength => {
   if (pwd.length === 0) return "weak";
@@ -51,3 +53,13 @@ export const toIsoDate = (rawDate: string): string | null => {
   if (Number.isNaN(parsed.getTime())) return null;
   return parsed.toISOString();
 };
+export function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedValue(value), delay);
+    return () => clearTimeout(timer);
+  }, [value, delay]);
+
+  return debouncedValue;
+}

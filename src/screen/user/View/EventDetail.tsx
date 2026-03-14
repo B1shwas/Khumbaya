@@ -204,11 +204,11 @@ const EventDetail = () => {
 
           {/* Gallery - Full Width */}
           {/* Component with the Titleicon and the description Gallery , Upload & Share photos */}
-          <ToggleBar title="Gallery" description="Upload & Share Photos" iconstring="images" onPress={()=>{
-            router.push("./gallery" as RelativePathString) 
+          <ToggleBar title="Gallery" description="Upload & Share Photos" iconstring="images" onPress={() => {
+            router.push("./gallery" as RelativePathString)
           }} />
-            <ToggleBar title="Event Details" description="Complete Event Information" iconstring="" onPress={()=>{
-            router.push("./gallery" as RelativePathString) 
+          <ToggleBar title="Event Details" description="Complete Event Information" iconstring="create" onPress={() => {
+            router.push("./" as RelativePathString)
           }} />
         </View>
       </View>
