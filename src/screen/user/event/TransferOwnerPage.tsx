@@ -125,13 +125,13 @@ export function TransferOwnerShipPage() {
               Phone Number
             </Text>
             <TextInput
-              
-              className="w-full"
+
+              className="w-full rounded-md border border-slate-200 p-3 "
               placeholder="9761890004"
               keyboardType="phone-pad"
               value={phone}
               onChangeText={(text) => setPhone(text)}
-              
+
             />
           </View>
 
