@@ -223,11 +223,11 @@ export const getResponsesWithUser = async (eventId: number) => {
 };
 
 export interface RsvpResponsePayload {
-  userId: string;
+  userId: number;
   notes?: string;
   arrival_date_time?: string | null;
   departure_date_time?: string | null;
-  isAccomodation?: string;
+  isAccomodation?: boolean;
   role?: string;
   status?: string;
   familyId?: number;
@@ -237,6 +237,7 @@ export const submitRsvpResponseApi = async (
   eventId: number,
   payload: RsvpResponsePayload
 ) => {
+  console.log("⟵⟵⟵⟵⟵⟵⟵⟵⟵⟵Submitting thr rsvp responve with the atpyl", eventId, payload);
   const response = await api.post(`invitation/responce/${eventId}`, payload);
   return response.data;
 };

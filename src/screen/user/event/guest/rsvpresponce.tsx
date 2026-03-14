@@ -47,7 +47,7 @@ export const RSVPFormContent = ({
   initialDeparture,
   initialNotes = "",
 }: {
-  userId: string;
+  userId: number;
   eventId: number;
   familyId?: number;
   memberName?: string;
@@ -88,7 +88,7 @@ export const RSVPFormContent = ({
         notes: notes.trim(),
         arrival_date_time: arrivalDateTime.toISOString(),
         departure_date_time: departureDateTime.toISOString(),
-        isAccomodation: accommodation.toString(),
+        isAccomodation: accommodation,
         status:
           attendance === "yes"
             ? "accepted"
@@ -286,7 +286,7 @@ const RSVPForm = () => {
   const { user } = useAuthStore();
   const draft = useRsvpStore((s) => s.draft);
 
-  const userId = draft?.userId ?? user?.id?.toString() ?? "";
+  const userId = Number(draft?.userId) ?? Number(user?.id);
   const familyId = draft?.familyId;
   const memberName = draft?.memberName;
 
