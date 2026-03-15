@@ -9,7 +9,7 @@ import {
 } from "@/src/features/family/hooks/use-family";
 import { toISODateString, toIsoDate } from "@/src/utils/helper";
 import { Ionicons } from "@expo/vector-icons";
-import React from "react";
+import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Alert, TextInput, TouchableOpacity, View } from "react-native";
 import { Text } from "../ui/Text";
@@ -114,6 +114,7 @@ export default function AddFamilyMemberForm({
     reset,
     setError,
     setValue,
+    watch,
     formState: { errors },
   } = useForm<AddFamilyMemberFormValues>({
     defaultValues: {
@@ -128,6 +129,7 @@ export default function AddFamilyMemberForm({
   const [dobDate, setDobDate] = React.useState<Date>(
     initialData?.dob ? new Date(initialData.dob) : new Date()
   );
+  const [showFoodPreferenceModal, setShowFoodPreferenceModal] = useState(false);
 
   const onSubmit = (values: AddFamilyMemberFormValues) => {
     const dobIso = toIsoDate(values.dob);
@@ -306,37 +308,50 @@ export default function AddFamilyMemberForm({
           control={control}
           name="foodPreference"
           render={({ field: { value }, fieldState: { error } }) => (
-            <View className="flex-row flex-wrap gap-2">
-              {FOOD_PREFERENCES.map((option) => {
-                const isSelected = value === option.value;
-                return (
-                  <TouchableOpacity
-                    key={option.value}
-                    className={`px-4 py-2 rounded-full border ${
-                      isSelected
-                        ? "bg-primary border-primary"
-                        : "bg-background border-border"
-                    }`}
-                    onPress={() => setValue("foodPreference", option.value)}
-                  >
-                    <Text
-                      className={`text-sm ${
-                        isSelected ? "text-white" : "text-gray-600"
-                      }`}
+            <View className="relative">
+              <TouchableOpacity
+                className={`w-full bg-background rounded-sm px-4 py-3 border flex-row justify-between items-center ${error ? "border-red-500" : "border-border"}`}
+                onPress={() =>
+                  setShowFoodPreferenceModal(!showFoodPreferenceModal)
+                }
+              >
+                <Text className="text-sm text-gray-600">
+                  {value
+                    ? FOOD_PREFERENCES.find((f) => f.value === value)?.label
+                    : "Select meal preference"}
+                </Text>
+                <Ionicons name="chevron-down" size={20} color="#6B7280" />
+              </TouchableOpacity>
+
+              {/* Dropdown Options */}
+              {showFoodPreferenceModal && (
+                <View className="absolute top-full left-0 right-0 mt-1 bg-white border border-border rounded-sm z-10 shadow-lg">
+                  {FOOD_PREFERENCES.map((option) => (
+                    <TouchableOpacity
+                      key={option.value}
+                      className={`px-4 py-3 border-b border-gray-100 ${value === option.value ? "bg-primary/10" : ""}`}
+                      onPress={() => {
+                        setValue("foodPreference", option.value);
+                        setShowFoodPreferenceModal(false);
+                      }}
                     >
-                      {option.label}
-                    </Text>
-                  </TouchableOpacity>
-                );
-              })}
+                      <Text
+                        className={`text-sm ${value === option.value ? "text-primary font-jakarta-bold" : "text-gray-700"}`}
+                      >
+                        {option.label}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              )}
+              {error ? (
+                <Text className="text-xs text-red-500 mt-1 ml-1">
+                  {error.message}
+                </Text>
+              ) : null}
             </View>
           )}
         />
-        {errors.foodPreference ? (
-          <Text className="text-xs text-red-500 mt-1 ml-1">
-            {errors.foodPreference.message}
-          </Text>
-        ) : null}
       </View>
 
       <TouchableOpacity
