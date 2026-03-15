@@ -289,7 +289,11 @@ export default function ViewGuestDetail() {
                   <View className="flex-row justify-between items-start">
                     <View className="flex-row gap-3 flex-1">
                       <View className="p-2 bg-primary/5 rounded-xl">
-                        <Ionicons name="car-outline" size={22} color="#EE2B8C" />
+                        <Ionicons
+                          name="car-outline"
+                          size={22}
+                          color="#EE2B8C"
+                        />
                       </View>
                       <View>
                         <Text variant="caption" className="text-xs mb-0.5">
@@ -319,7 +323,11 @@ export default function ViewGuestDetail() {
                   <View className="flex-row justify-between items-start">
                     <View className="flex-row gap-3 flex-1">
                       <View className="p-2 bg-primary/5 rounded-xl">
-                        <Ionicons name="car-sport-outline" size={22} color="#EE2B8C" />
+                        <Ionicons
+                          name="car-sport-outline"
+                          size={22}
+                          color="#EE2B8C"
+                        />
                       </View>
                       <View>
                         <Text variant="caption" className="text-xs mb-0.5">
