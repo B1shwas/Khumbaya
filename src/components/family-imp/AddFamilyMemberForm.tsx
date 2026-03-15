@@ -1,3 +1,4 @@
+import { DatePicker } from "@/components/nativewindui/DatePicker/DatePicker.android";
 import {
   FamilyMember,
   FamilyMemberPayload,
@@ -8,15 +9,26 @@ import {
 } from "@/src/features/family/hooks/use-family";
 import { toISODateString, toIsoDate } from "@/src/utils/helper";
 import { Ionicons } from "@expo/vector-icons";
+import React from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Alert, TextInput, TouchableOpacity, View } from "react-native";
+import { Dropdown } from "react-native-element-dropdown";
 import { Text } from "../ui/Text";
+
+// Food preference options
+const FOOD_PREFERENCES = [
+  { label: "Veg", value: "Vegetarian" },
+  { label: "Non-Veg", value: "Non-Vegetarian" },
+  { label: "Vegan", value: "Vegan" },
+  { label: "Jain", value: "Jain" },
+];
 
 type AddFamilyMemberFormValues = {
   name: string;
   email: string;
   relation: string;
   dob: string;
+  foodPreference: string;
 };
 
 type AddFamilyMemberFormProps = {
@@ -102,6 +114,8 @@ export default function AddFamilyMemberForm({
     handleSubmit,
     reset,
     setError,
+    setValue,
+    watch,
     formState: { errors },
   } = useForm<AddFamilyMemberFormValues>({
     defaultValues: {
@@ -109,8 +123,13 @@ export default function AddFamilyMemberForm({
       email: initialData?.email || "",
       relation: initialData?.relation || "",
       dob: formatDateForDisplay(initialData?.dob),
+      foodPreference: initialData?.foodPreference || "",
     },
   });
+
+  const [dobDate, setDobDate] = React.useState<Date>(
+    initialData?.dob ? new Date(initialData.dob) : new Date()
+  );
 
   const onSubmit = (values: AddFamilyMemberFormValues) => {
     const dobIso = toIsoDate(values.dob);
@@ -122,9 +141,17 @@ export default function AddFamilyMemberForm({
 
     if (isEditMode) {
       // Edit mode - update member
+      console.log(
+        "Editing member - DOB:",
+        values.dob,
+        "Food Preference:",
+        values.foodPreference
+      );
       const payload: Partial<FamilyMemberPayload> = {
         name: values.name.trim(),
         relation: values.relation.trim(),
+        dob: values.dob || undefined,
+        foodPreference: values.foodPreference || undefined,
       };
 
       console.log(payload);
@@ -146,11 +173,18 @@ export default function AddFamilyMemberForm({
       );
     } else {
       // Add mode - create new member
+      console.log(
+        "Adding new member - DOB:",
+        dobIso,
+        "Food Preference:",
+        values.foodPreference
+      );
       const payload: FamilyMemberPayload = {
         relation: values.relation.trim(),
         dob: dobIso!,
         name: values.name.trim(),
         email: values.email.trim(),
+        foodPreference: values.foodPreference || undefined,
       };
 
       addMember(
@@ -192,32 +226,50 @@ export default function AddFamilyMemberForm({
         error={errors.name?.message}
       />
 
-      <View className="flex-row gap-3">
-        <View className="flex-1">
-          <FormField
-            label="DOB"
-            name="dob"
-            placeholder={isEditMode ? "YYYY-MM-DD" : "YYYY-MM-DD"}
-            control={control}
-            rules={isEditMode ? {} : { required: "DOB is required" }}
-            error={errors.dob?.message}
-            autoCapitalize="none"
-          />
-        </View>
-
-        <View className="flex-1">
-          <FormField
-            label="Relation"
-            name="relation"
-            placeholder="Spouse"
-            control={control}
-            rules={{ required: "Relation is required" }}
-            error={errors.relation?.message}
-          />
-        </View>
+      <View className="mb-3">
+        <Text className="text-xs font-jakarta-bold uppercase tracking-wide text-text-tertiary mb-1.5 ml-1">
+          Date of Birth
+        </Text>
+        <Controller
+          control={control}
+          name="dob"
+          rules={isEditMode ? {} : { required: "DOB is required" }}
+          render={({ field: { value }, fieldState: { error } }) => (
+            <DatePicker
+              mode="date"
+              value={dobDate}
+              onChange={(event: any, date?: Date) => {
+                console.log("Date selected from picker:", date);
+                if (date) {
+                  setDobDate(date);
+                  const formattedDate = toISODateString(date.toISOString());
+                  console.log("Formatted date for form:", formattedDate);
+                  setValue("dob", formattedDate);
+                }
+              }}
+              maximumDate={new Date()}
+            />
+          )}
+        />
+        {errors.dob && (
+          <Text className="text-xs text-red-500 mt-1 ml-1">
+            {errors.dob.message}
+          </Text>
+        )}
       </View>
 
-      {!isEditMode && (
+      <View className="mb-3">
+        <FormField
+          label="Relation"
+          name="relation"
+          placeholder="Spouse"
+          control={control}
+          rules={{ required: "Relation is required" }}
+          error={errors.relation?.message}
+        />
+      </View>
+
+      {!isEditMode ? (
         <FormField
           label="Email Address"
           name="email"
@@ -234,7 +286,60 @@ export default function AddFamilyMemberForm({
           keyboardType="email-address"
           autoCapitalize="none"
         />
+      ) : (
+        <View className="mb-3">
+          <Text className="text-xs font-jakarta-bold uppercase tracking-wide text-text-tertiary mb-1.5 ml-1">
+            Email Address
+          </Text>
+          <View className="w-full bg-gray-100 rounded-sm px-4 py-3 border border-border">
+            <Text className="text-sm text-gray-600">
+              {initialData?.email || "N/A"}
+            </Text>
+          </View>
+        </View>
       )}
+
+      {/* Food Preference Dropdown */}
+      <View className="mb-3">
+        <Text className="text-xs font-jakarta-bold uppercase tracking-wide text-text-tertiary mb-1.5 ml-1">
+          Meal Preference
+        </Text>
+
+        <Controller
+          control={control}
+          name="foodPreference"
+          render={({ field: { value, onChange }, fieldState: { error } }) => (
+            <>
+              <Dropdown
+                style={{
+                  height: 50,
+                  borderWidth: 1,
+                  borderColor: error ? "#ef4444" : "#e5e7eb",
+                  borderRadius: 6,
+                  paddingHorizontal: 12,
+                  backgroundColor: "white",
+                }}
+                placeholderStyle={{ color: "#9CA3AF" }}
+                selectedTextStyle={{ color: "#111827", fontSize: 14 }}
+                data={FOOD_PREFERENCES}
+                labelField="label"
+                valueField="value"
+                placeholder="Select meal preference"
+                value={value}
+                onChange={(item: any) => {
+                  onChange(item.value);
+                }}
+              />
+
+              {error ? (
+                <Text className="text-xs text-red-500 mt-1 ml-1">
+                  {error.message}
+                </Text>
+              ) : null}
+            </>
+          )}
+        />
+      </View>
 
       <TouchableOpacity
         className="w-full bg-primary rounded-sm py-3.5 flex-row items-center justify-center mt-1"

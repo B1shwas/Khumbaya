@@ -16,6 +16,7 @@ export interface FamilyMemberPayload {
   dob: string;
   name: string;
   email: string;
+  foodPreference?: string;
 }
 
 export interface FamilyMember {

@@ -1,4 +1,3 @@
-import NavigateComponent from "@/src/components/event/NavigateComponent";
 import ToggleBar from "@/src/components/ui/ToggleBar";
 import { Event } from "@/src/constants/event";
 import { useGetEventWithRole } from "@/src/features/events/hooks/use-event";
@@ -6,7 +5,7 @@ import { Ionicons } from "@expo/vector-icons";
 import {
   RelativePathString,
   useLocalSearchParams,
-  useRouter
+  useRouter,
 } from "expo-router";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import EventDetailHero from "./EventDetailHero";
@@ -14,7 +13,9 @@ import EventDetailHero from "./EventDetailHero";
 const EventDetail = () => {
   const { eventId } = useLocalSearchParams<{ eventId: string }>();
   const router = useRouter();
+
   const { data: found } = useGetEventWithRole();
+
   const foundEvent = found?.find(
     (e: Event) => String(e.id) === String(eventId)
   );
@@ -28,71 +29,38 @@ const EventDetail = () => {
       location: "—",
       venue: "—",
       imageUrl: "",
-      role: "Organizer" as const,
-      status: "upcoming" as const,
-      time: "",
-      startDateTime: "",
-      endDateTime: "",
-      days: 0,
-      hours: 0,
-      minutes: 0,
-      guests: { confirmed: 0, total: 0 },
-      budget: { spent: 0, total: 0 },
-      tasks: { pending: 0 },
-      vendors: { booked: 0, pending: 0 },
-      nextTask: "",
+      role: "Organizer",
+      status: "upcoming",
     } as Event);
 
   const manageActions = [
     {
-      id: "timeline",
-      name: "Timeline",
-      icon: "time",
-      color: "#F59E0B",
-      route: `./timeline`,
-    },
-    {
       id: "guests",
-      name: "Guest Management",
+      name: "Guest List",
       icon: "people",
-      color: "#8B5CF6",
-      route: `./guests`,
+      route: "./guests",
     },
-    {
-      id: "vendors",
-      name: "Vendors",
-      icon: "business",
-      color: "#3B82F6",
-      route: `./vendor`,
-    },
+
     {
       id: "budget",
       name: "Budget",
       icon: "wallet",
-      color: "#10B981",
-      route: `./budget`,
+      route: "./budget",
     },
     {
       id: "subevents",
       name: "Sub Events",
       icon: "layers-outline",
-      color: "#F97316",
-      route: `./sub-event`,
-    },
-    {
-      id: "tables",
-      name: "Table Plan",
-      icon: "tablet-landscape",
-      color: "#EC4899",
-      route: `../(table)/table-management`,
+      route: "./sub-event",
     },
   ];
 
   return (
     <ScrollView
-      className="flex-1 bg-background-light"
+      className="flex-1 bg-gray-100"
       showsVerticalScrollIndicator={false}
     >
+      {/* Hero Section */}
       <EventDetailHero
         imageUrl={event.imageUrl}
         status={event.status}
@@ -101,119 +69,70 @@ const EventDetail = () => {
         location={event.location}
       />
 
-      {/* Quick Stats Row */}
-      <View className="mt-6 px-4">
-        <View className="flex-row items-center justify-between mb-3">
-          {/* dark:text-white removed */}
-          <Text className="text-lg font-bold">Quick Stats</Text>
-          <TouchableOpacity>
-            <Text className="text-sm font-semibold text-primary">View All</Text>
-          </TouchableOpacity>
-        </View>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ gap: 12 }}
+      <View className="px-4 -mt-6 items-center">
+        {/* Checklist */}
+        <TouchableOpacity className="bg-white p-5 rounded-xl border border-gray-200 mb-4">
+          
+        </TouchableOpacity>
+
+        {/* Invite Partner */}
+        <TouchableOpacity
+          className="bg-white p-4 rounded-xl border border-primary flex-row items-center justify-between mb-4"
+          onPress={() => router.push("./addguest" as RelativePathString)}
         >
-          {/* Guests Card */}
-          {/* dark:bg-surface-dark and dark:border-gray-800 removed */}
-          <View className="min-w-[160px] flex-1 bg-white p-4 rounded-xl shadow-sm border border-gray-50 flex-col items-center justify-center gap-2">
-            <View className="relative h-16 w-16">
-              {/* dark:border-gray-700 removed */}
-              <View className="absolute inset-0 rounded-full border-4 border-gray-100" />
-              <View
-                className="absolute inset-0 rounded-full border-4 border-primary"
-                style={{
-                  borderBottomColor: "transparent",
-                  borderRightColor: "transparent",
-                  transform: [{ rotate: "270deg" }],
-                }}
-              />
-              <View className="absolute inset-0 flex items-center justify-center">
-                {/* dark:text-white removed */}
-                <Text className="text-xs font-bold text-gray-700">75%</Text>
-              </View>
-            </View>
-            <View className="text-center">
-              {/* dark:text-white removed */}
-              <Text className="text-sm font-bold text-gray-900">Guests</Text>
-              <Text className="text-xs text-gray-500">150/200 Yes</Text>
-            </View>
+          <View>
+            <Text className="text-gray-800 font-medium">
+              Invite your partner to plan together
+            </Text>
+            <Text className="text-primary mt-1">Invite your partner</Text>
           </View>
 
-          {/* Budget Card */}
+          <Ionicons name="chevron-forward" size={20} color="#666" />
+        </TouchableOpacity>
 
-          <View className="min-w-[160px] flex-1 bg-white p-4 rounded-xl shadow-sm border border-gray-50 flex-col justify-between">
-            <View>
-              <View className="bg-green-100 p-3 rounded-sm self-start">
-                <Ionicons name="pricetag" size={20} color="#16A34A" />
-              </View>
-              {/* dark:text-white removed */}
-              <Text className="text-sm font-bold mt-2 text-gray-900">
-                Budget
-              </Text>
-              <Text className="text-xs text-gray-500">$12k / $30k</Text>
-            </View>
-            {/* dark:bg-gray-700 removed */}
-            <View className="w-full bg-gray-100 rounded-full h-1.5 mt-3">
-              <View
-                className="bg-primary h-1.5 rounded-full"
-                style={{ width: "40%" }}
-              />
-            </View>
-          </View>
-
-          {/* Tasks Card */}
-          {/* dark:bg-surface-dark and dark:border-gray-800 removed */}
-          <View className="min-w-[160px] flex-1 bg-white p-4 rounded-xl shadow-sm border border-gray-50 flex-col justify-between">
-            <View>
-              {/* dark:bg-orange-900/30 and dark:text-orange-400 removed */}
-              <View className="bg-orange-100 p-3 rounded-sm self-start">
-                <Ionicons
-                  name="checkmark-circle"
-                  size={20}
-                  color="#EA580C"
-                  className="text-orange-600"
-                />
-              </View>
-              {/* dark:text-white removed */}
-              <Text className="text-sm font-bold mt-2 text-gray-900">
-                Tasks
-              </Text>
-              <Text className="text-xs text-gray-500">12 Pending</Text>
-            </View>
-            {/* dark:bg-gray-700 removed */}
-            <View className="w-full bg-gray-100 rounded-full h-1.5 mt-3">
-              <View
-                className="bg-orange-500 h-1.5 rounded-full"
-                style={{ width: "65%" }}
-              />
-            </View>
-          </View>
-        </ScrollView>
-      </View>
-
-      {/* Main Navigation Grid */}
-      <View className="  mt-6 px-4 pb-4">
-        {/* dark:text-white removed */}
-        <Text className="text-lg font-bold mb-3">Manage Event</Text>
-        <View className="flex-row flex-wrap gap-3 justify-center">
+        {/* Grid */}
+        <View className="flex-row flex-wrap justify-between">
           {manageActions.map((action) => (
-            <NavigateComponent key={action.id} {...action} />
+            <TouchableOpacity
+              key={action.id}
+              onPress={() => router.push(action.route as RelativePathString)}
+              className="w-[48%] bg-white rounded-xl p-4 mb-4 border border-gray-200"
+            >
+              <View className="w-10 h-10 bg-gray-100 rounded-full items-center justify-center mb-3">
+                <Ionicons name={action.icon as any} size={18} color="#555" />
+              </View>
+
+              <Text className="font-semibold text-gray-900">{action.name}</Text>
+            </TouchableOpacity>
           ))}
 
-          {/* Gallery - Full Width */}
-          {/* Component with the Titleicon and the description Gallery , Upload & Share photos */}
-          <ToggleBar title="Gallery" description="Upload & Share Photos" iconstring="images" onPress={() => {
-            router.push("./gallery" as RelativePathString)
-          }} />
-          <ToggleBar title="Event Details" description="Complete Event Information" iconstring="create" onPress={() => {
-            router.push("./" as RelativePathString)
-          }} />
+          {/* Gallery */}
+          <ToggleBar
+            title="Gallery"
+            description="Upload & Share Photos"
+            iconstring="images"
+            onPress={() => {
+              router.push("./gallery" as RelativePathString);
+            }}
+          />
+
+          {/* Event Details */}
+          <ToggleBar
+            title="Event Details"
+            description="Complete Event Information"
+            iconstring="create"
+            onPress={() => {
+              router.push("./" as RelativePathString);
+            }}
+          />
+        </View>
+
+        {/* Favourites */}
+        <View className="bg-white rounded-xl p-4 border border-gray-200 mt-2">
+          <Text className="font-semibold text-gray-800">Favourites</Text>
         </View>
       </View>
 
-      {/* Bottom spacer */}
       <View className="h-24" />
     </ScrollView>
   );
