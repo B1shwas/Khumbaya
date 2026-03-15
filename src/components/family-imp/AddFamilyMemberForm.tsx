@@ -9,9 +9,10 @@ import {
 } from "@/src/features/family/hooks/use-family";
 import { toISODateString, toIsoDate } from "@/src/utils/helper";
 import { Ionicons } from "@expo/vector-icons";
-import React, { useState } from "react";
+import React from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Alert, TextInput, TouchableOpacity, View } from "react-native";
+import { Dropdown } from "react-native-element-dropdown";
 import { Text } from "../ui/Text";
 
 // Food preference options
@@ -20,7 +21,7 @@ const FOOD_PREFERENCES = [
   { label: "Non-Veg", value: "Non-Vegetarian" },
   { label: "Vegan", value: "Vegan" },
   { label: "Jain", value: "Jain" },
-] as const;
+];
 
 type AddFamilyMemberFormValues = {
   name: string;
@@ -129,7 +130,6 @@ export default function AddFamilyMemberForm({
   const [dobDate, setDobDate] = React.useState<Date>(
     initialData?.dob ? new Date(initialData.dob) : new Date()
   );
-  const [showFoodPreferenceModal, setShowFoodPreferenceModal] = useState(false);
 
   const onSubmit = (values: AddFamilyMemberFormValues) => {
     const dobIso = toIsoDate(values.dob);
@@ -304,52 +304,39 @@ export default function AddFamilyMemberForm({
         <Text className="text-xs font-jakarta-bold uppercase tracking-wide text-text-tertiary mb-1.5 ml-1">
           Meal Preference
         </Text>
+
         <Controller
           control={control}
           name="foodPreference"
-          render={({ field: { value }, fieldState: { error } }) => (
-            <View className="relative">
-              <TouchableOpacity
-                className={`w-full bg-background rounded-sm px-4 py-3 border flex-row justify-between items-center ${error ? "border-red-500" : "border-border"}`}
-                onPress={() =>
-                  setShowFoodPreferenceModal(!showFoodPreferenceModal)
-                }
-              >
-                <Text className="text-sm text-gray-600">
-                  {value
-                    ? FOOD_PREFERENCES.find((f) => f.value === value)?.label
-                    : "Select meal preference"}
-                </Text>
-                <Ionicons name="chevron-down" size={20} color="#6B7280" />
-              </TouchableOpacity>
+          render={({ field: { value, onChange }, fieldState: { error } }) => (
+            <>
+              <Dropdown
+                style={{
+                  height: 50,
+                  borderWidth: 1,
+                  borderColor: error ? "#ef4444" : "#e5e7eb",
+                  borderRadius: 6,
+                  paddingHorizontal: 12,
+                  backgroundColor: "white",
+                }}
+                placeholderStyle={{ color: "#9CA3AF" }}
+                selectedTextStyle={{ color: "#111827", fontSize: 14 }}
+                data={FOOD_PREFERENCES}
+                labelField="label"
+                valueField="value"
+                placeholder="Select meal preference"
+                value={value}
+                onChange={(item: any) => {
+                  onChange(item.value);
+                }}
+              />
 
-              {/* Dropdown Options */}
-              {showFoodPreferenceModal && (
-                <View className="absolute top-full left-0 right-0 mt-1 bg-white border border-border rounded-sm z-10 shadow-lg">
-                  {FOOD_PREFERENCES.map((option) => (
-                    <TouchableOpacity
-                      key={option.value}
-                      className={`px-4 py-3 border-b border-gray-100 ${value === option.value ? "bg-primary/10" : ""}`}
-                      onPress={() => {
-                        setValue("foodPreference", option.value);
-                        setShowFoodPreferenceModal(false);
-                      }}
-                    >
-                      <Text
-                        className={`text-sm ${value === option.value ? "text-primary font-jakarta-bold" : "text-gray-700"}`}
-                      >
-                        {option.label}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              )}
               {error ? (
                 <Text className="text-xs text-red-500 mt-1 ml-1">
                   {error.message}
                 </Text>
               ) : null}
-            </View>
+            </>
           )}
         />
       </View>
