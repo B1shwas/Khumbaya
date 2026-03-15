@@ -228,6 +228,8 @@ export interface RsvpResponsePayload {
   arrival_date_time?: string | null;
   departure_date_time?: string | null;
   isAccomodation?: boolean;
+  isArrivalPickupRequired?: boolean;
+  isDeparturePickupRequired?: boolean;
   role?: string;
   status?: string;
   familyId?: number;
@@ -237,7 +239,11 @@ export const submitRsvpResponseApi = async (
   eventId: number,
   payload: RsvpResponsePayload
 ) => {
-  console.log("⟵⟵⟵⟵⟵⟵⟵⟵⟵⟵Submitting thr rsvp responve with the atpyl", eventId, payload);
+  console.log(
+    "✅Submitting thr rsvp responve with the atpyl",
+    eventId,
+    payload
+  );
   const response = await api.post(`invitation/responce/${eventId}`, payload);
   return response.data;
 };
@@ -247,7 +253,10 @@ export const getSubEventOfEvent = async (eventId: number) => {
   return response.data.data;
 };
 
-export const makeEventMember = async (eventId: number, data: MakeEventMemberType) => {
+export const makeEventMember = async (
+  eventId: number,
+  data: MakeEventMemberType
+) => {
   const response = await api.post(`/event/${eventId}/member`, data);
   return response.data;
-}
+};

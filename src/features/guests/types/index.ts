@@ -7,6 +7,8 @@ export interface EventGuest {
   arrival_date_time: string | null;
   departure_date_time: string | null;
   isAccomodation: boolean | null;
+  isArrivalPickupRequired: boolean | null;
+  isDeparturePickupRequired: boolean | null;
   notes: string | null;
   role: string | null;
   invited_by: number;
@@ -23,14 +25,14 @@ export interface UserDetail {
   relation: string | null;
 }
 
-export interface GuestDetailInterface{
-   user_detail: UserDetail,
-  event_guest: EventGuest,
-  family_name: string | null,
+export interface GuestDetailInterface {
+  user_detail: UserDetail;
+  event_guest: EventGuest;
+  family_name: string | null;
 }
 
 export interface FamilyGroup {
-  type: 'family';
+  type: "family";
   familyId: number;
   family_name: string;
   members: GuestDetailInterface[];
@@ -39,7 +41,7 @@ export interface FamilyGroup {
 }
 
 export interface IndividualGuest {
-  type: 'individual';
+  type: "individual";
   data: GuestDetailInterface;
 }
 
@@ -67,9 +69,9 @@ export function groupInvitationsByFamily(
 
   familyMap.forEach((members, familyId) => {
     grouped.push({
-      type: 'family',
+      type: "family",
       familyId,
-      family_name: members[0].family_name || 'Family',
+      family_name: members[0].family_name || "Family",
       members,
       primaryMember: members[0],
       memberCount: members.length,
@@ -78,7 +80,7 @@ export function groupInvitationsByFamily(
 
   individuals.forEach((guest) => {
     grouped.push({
-      type: 'individual',
+      type: "individual",
       data: guest,
     });
   });

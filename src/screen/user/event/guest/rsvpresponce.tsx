@@ -1,6 +1,4 @@
 import { DatePicker } from "@/components/nativewindui/DatePicker";
-import { KeyboardAvoidingView, Platform } from "react-native";
-import { KeyboardAwareScrollView, } from "react-native-keyboard-aware-scroll-view";
 import { Text } from "@/src/components/ui/Text";
 import { useSubmitRsvpResponse } from "@/src/features/events/hooks/use-event";
 import { useAuthStore } from "@/src/store/AuthStore";
@@ -9,9 +7,11 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { DateTimePickerEvent } from "@react-native-community/datetimepicker";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { CheckSquare, Square } from "lucide-react-native";
-import { useState } from "react";
+import { useForm } from "react-hook-form";
 import {
   ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
   Pressable,
   Switch,
   TextInput,
@@ -19,8 +19,21 @@ import {
   View,
 } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 const PRIMARY = "#ee2b8c";
+
+type AttendanceValue = "yes" | "no" | "maybe";
+
+interface RSVPFormValues {
+  attendance: AttendanceValue;
+  accommodation: boolean;
+  arrivalDateTime: Date;
+  departureDateTime: Date;
+  isArrivalPickupRequired: boolean;
+  isDeparturePickupRequired: boolean;
+  notes: string;
+}
 
 const Icon = ({
   name,
@@ -46,6 +59,8 @@ export const RSVPFormContent = ({
   initialArrival,
   initialDeparture,
   initialNotes = "",
+  initialIsDeparturePickupRequired = false,
+  initialIsArrivalPickupRequired = false,
 }: {
   userId: number;
   eventId: number;
@@ -56,43 +71,60 @@ export const RSVPFormContent = ({
   initialArrival?: Date;
   initialDeparture?: Date;
   initialNotes?: string;
+  initialIsArrivalPickupRequired?: boolean;
+  initialIsDeparturePickupRequired?: boolean;
 }) => {
   const router = useRouter();
   const clearDraft = useRsvpStore((s) => s.clearDraft);
   const { mutate: submitRsvp, isPending } = useSubmitRsvpResponse(eventId);
 
-  const [attendance, setAttendance] = useState(initialAttendance);
-  const [accommodation, setAccommodation] = useState(initialAccommodation);
-  const [arrivalPickup, setArrivalPickup] = useState(false);
-  const [departureDrop, setDepartureDrop] = useState(false);
-  const [notes, setNotes] = useState(initialNotes);
-  const [arrivalDateTime, setArrivalDateTime] = useState(
-    initialArrival ?? new Date()
-  );
-  const [departureDateTime, setDepartureDateTime] = useState(
-    initialDeparture ?? new Date()
-  );
+  const { control, handleSubmit, watch, setValue } = useForm<RSVPFormValues>({
+    defaultValues: {
+      attendance:
+        initialAttendance === "no"
+          ? "no"
+          : initialAttendance === "maybe"
+            ? "maybe"
+            : "yes",
+      accommodation: initialAccommodation,
+      arrivalDateTime: initialArrival ?? new Date(),
+      departureDateTime: initialDeparture ?? new Date(),
+      isArrivalPickupRequired: initialIsArrivalPickupRequired,
+      isDeparturePickupRequired: initialIsDeparturePickupRequired,
+      notes: initialNotes,
+    },
+  });
+
+  const attendance = watch("attendance");
+  const accommodation = watch("accommodation");
+  const arrivalPickup = watch("isArrivalPickupRequired");
+  const departureDrop = watch("isDeparturePickupRequired");
+  const notes = watch("notes");
+  const arrivalDateTime = watch("arrivalDateTime");
+  const departureDateTime = watch("departureDateTime");
 
   const makeDateHandler =
-    (setter: (d: Date) => void) =>
-      (event: DateTimePickerEvent, picked?: Date) => {
-        if (event.type === "dismissed" || !picked) return;
-        setter(picked);
-      };
+    (field: "arrivalDateTime" | "departureDateTime") =>
+    (event: DateTimePickerEvent, picked?: Date) => {
+      if (event.type === "dismissed" || !picked) return;
+      setValue(field, picked, { shouldDirty: true });
+    };
 
-  const handleSubmit = () => {
+  const onSubmit = (values: RSVPFormValues) => {
     submitRsvp(
       {
         userId,
         familyId,
-        notes: notes.trim(),
-        arrival_date_time: arrivalDateTime.toISOString(),
-        departure_date_time: departureDateTime.toISOString(),
-        isAccomodation: accommodation,
+        notes: values.notes.trim(),
+        arrival_date_time: values.arrivalDateTime.toISOString(),
+        departure_date_time: values.departureDateTime.toISOString(),
+        isAccomodation: values.accommodation,
+        isArrivalPickupRequired: values.isArrivalPickupRequired,
+        isDeparturePickupRequired: values.isDeparturePickupRequired,
         status:
-          attendance === "yes"
+          values.attendance === "yes"
             ? "accepted"
-            : attendance === "no"
+            : values.attendance === "no"
               ? "rejected"
               : "maybe",
       },
@@ -106,7 +138,6 @@ export const RSVPFormContent = ({
   };
 
   return (
-
     <View className="px-5 py-4 gap-8">
       {/* Attendance */}
       <View>
@@ -120,15 +151,21 @@ export const RSVPFormContent = ({
           {["yes", "no", "maybe"].map((option) => (
             <TouchableOpacity
               key={option}
-              onPress={() => setAttendance(option)}
-              className={`flex-1 py-2.5 rounded-sm ${attendance === option ? "bg-[#ee2b8c]" : ""
-                }`}
+              onPress={() =>
+                setValue("attendance", option as AttendanceValue, {
+                  shouldDirty: true,
+                })
+              }
+              className={`flex-1 py-2.5 rounded-sm ${
+                attendance === option ? "bg-[#ee2b8c]" : ""
+              }`}
               style={attendance === option ? { backgroundColor: PRIMARY } : {}}
             >
               <Text
                 variant="h2"
-                className={`text-center text-sm capitalize ${attendance === option ? "text-white" : "text-slate-600"
-                  }`}
+                className={`text-center text-sm capitalize ${
+                  attendance === option ? "text-white" : "text-slate-600"
+                }`}
               >
                 {option}
               </Text>
@@ -156,7 +193,7 @@ export const RSVPFormContent = ({
             <DatePicker
               value={arrivalDateTime}
               mode="datetime"
-              onChange={makeDateHandler(setArrivalDateTime)}
+              onChange={makeDateHandler("arrivalDateTime")}
               materialDateLabel="Arrival Date"
               materialTimeLabel="Arrival Time"
             />
@@ -171,7 +208,7 @@ export const RSVPFormContent = ({
             <DatePicker
               value={departureDateTime}
               mode="datetime"
-              onChange={makeDateHandler(setDepartureDateTime)}
+              onChange={makeDateHandler("departureDateTime")}
               materialDateLabel="Departure Date"
               materialTimeLabel="Departure Time"
             />
@@ -195,7 +232,9 @@ export const RSVPFormContent = ({
           </View>
           <Switch
             value={accommodation}
-            onValueChange={setAccommodation}
+            onValueChange={(value) =>
+              setValue("accommodation", value, { shouldDirty: true })
+            }
             trackColor={{ false: "#e2e8f0", true: PRIMARY }}
             thumbColor="#ffffff"
           />
@@ -210,9 +249,14 @@ export const RSVPFormContent = ({
           </View>
           <View className="flex-row gap-3">
             <Pressable
-              onPress={() => setArrivalPickup(!arrivalPickup)}
-              className={`flex-1 flex-row items-center gap-3 p-3 bg-slate-50 rounded-md border-2 ${arrivalPickup ? "border-pink-200" : "border-transparent"
-                }`}
+              onPress={() =>
+                setValue("isArrivalPickupRequired", !arrivalPickup, {
+                  shouldDirty: true,
+                })
+              }
+              className={`flex-1 flex-row items-center gap-3 p-3 bg-slate-50 rounded-md border-2 ${
+                arrivalPickup ? "border-pink-200" : "border-transparent"
+              }`}
             >
               {arrivalPickup ? (
                 <CheckSquare size={20} color={PRIMARY} />
@@ -224,9 +268,14 @@ export const RSVPFormContent = ({
               </Text>
             </Pressable>
             <Pressable
-              onPress={() => setDepartureDrop(!departureDrop)}
-              className={`flex-1 flex-row items-center gap-3 p-3 bg-slate-50 rounded-md border-2 ${departureDrop ? "border-pink-200" : "border-transparent"
-                }`}
+              onPress={() =>
+                setValue("isDeparturePickupRequired", !departureDrop, {
+                  shouldDirty: true,
+                })
+              }
+              className={`flex-1 flex-row items-center gap-3 p-3 bg-slate-50 rounded-md border-2 ${
+                departureDrop ? "border-pink-200" : "border-transparent"
+              }`}
             >
               {departureDrop ? (
                 <CheckSquare size={20} color={PRIMARY} />
@@ -254,7 +303,9 @@ export const RSVPFormContent = ({
           numberOfLines={4}
           placeholder="Dietary restrictions, allergies, or any other requests..."
           value={notes}
-          onChangeText={setNotes}
+          onChangeText={(value) =>
+            setValue("notes", value, { shouldDirty: true })
+          }
           className="w-full bg-slate-50 rounded-md p-4 text-sm text-slate-900"
           placeholderTextColor="#94a3b8"
           textAlignVertical="top"
@@ -266,7 +317,7 @@ export const RSVPFormContent = ({
         className="w-full py-4 rounded-md items-center justify-center mb-4"
         style={{ backgroundColor: PRIMARY }}
         activeOpacity={0.9}
-        onPress={handleSubmit}
+        onPress={handleSubmit(onSubmit)}
         disabled={isPending}
       >
         {isPending ? (
@@ -306,9 +357,12 @@ const RSVPForm = () => {
     ? new Date(draft.rawDeparture)
     : undefined;
   const initialAccommodation = draft?.rawAccommodation === true;
+  const initialIsArrivalPickupRequired =
+    draft?.rawIsArrivalPickupRequired === true;
+  const initialIsDeparturePickupRequired =
+    draft?.rawIsDeparturePickupRequired === true;
 
   return (
-
     <KeyboardAvoidingView
       style={{ flex: 1 }}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
@@ -327,7 +381,7 @@ const RSVPForm = () => {
         extraScrollHeight={240}
         scrollEnabled={true}
       >
-        <ScrollView showsHorizontalScrollIndicator={false} >
+        <ScrollView showsHorizontalScrollIndicator={false}>
           {memberName && (
             <View
               className="mx-5 mt-4 mb-0 px-4 py-3 rounded-lg flex-row items-center gap-3"
@@ -337,7 +391,11 @@ const RSVPForm = () => {
                 borderColor: "#f9a8d4",
               }}
             >
-              <MaterialIcons name="person" size={18} className="!text-primary" />
+              <MaterialIcons
+                name="person"
+                size={18}
+                className="!text-primary"
+              />
               <Text variant="h2" className="text-sm text-pink-700 flex-1">
                 Filling RSVP for {memberName}
               </Text>
@@ -353,6 +411,8 @@ const RSVPForm = () => {
             initialArrival={initialArrival}
             initialDeparture={initialDeparture}
             initialNotes={draft?.rawNotes ?? ""}
+            initialIsArrivalPickupRequired={initialIsArrivalPickupRequired}
+            initialIsDeparturePickupRequired={initialIsDeparturePickupRequired}
           />
         </ScrollView>
       </KeyboardAwareScrollView>

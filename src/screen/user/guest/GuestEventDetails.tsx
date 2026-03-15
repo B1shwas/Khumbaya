@@ -92,6 +92,8 @@ export default function GuestEventDetails() {
       arrival_date_time: string | null;
       departure_date_time: string | null;
       isAccomodation: boolean | null;
+      isArrivalPickupRequired: boolean | null;
+      isDeparturePickupRequired: boolean | null;
       notes: string | null;
     } | null;
     user_detail: {
@@ -137,6 +139,8 @@ export default function GuestEventDetails() {
 
   const handleIndividualRsvp = () => {
     const me = responses[0];
+
+    console.log("🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀", me);
     if (me) {
       setDraft({
         userId: me.user_detail.id,
@@ -145,6 +149,10 @@ export default function GuestEventDetails() {
         rawArrival: me.event_guest?.arrival_date_time ?? null,
         rawDeparture: me.event_guest?.departure_date_time ?? null,
         rawAccommodation: me.event_guest?.isAccomodation ?? null,
+        rawIsArrivalPickupRequired:
+          me.event_guest?.isArrivalPickupRequired ?? null,
+        rawIsDeparturePickupRequired:
+          me.event_guest?.isDeparturePickupRequired ?? null,
         rawNotes: me.event_guest?.notes ?? null,
       });
     }
@@ -191,7 +199,7 @@ export default function GuestEventDetails() {
         <Section
           title="Event Highlights"
           action="View Full Itinerary"
-          onAction={() => { }}
+          onAction={() => {}}
         >
           <EventHighlightTimeline highlights={DEFAULT_HIGHLIGHTS} />
         </Section>

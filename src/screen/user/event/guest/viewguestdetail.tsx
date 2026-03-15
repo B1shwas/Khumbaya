@@ -1,11 +1,29 @@
 import { Text } from "@/src/components/ui/Text";
 import { useGuestDetailStore } from "@/src/features/guests/store/useGuestDetailStore";
-import { Ionicons } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";import { ScrollView, TouchableOpacity, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { formatDate, formatTime } from "@/src/utils/helper";
+import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
+import { ScrollView, TouchableOpacity, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 export default function ViewGuestDetail() {
-const guestDetail = useGuestDetailStore((state) => state.guestDraft);
+  const guestDetail = useGuestDetailStore((state) => state.guestDraft);
+  console.log("🚀🚀🚀🚀🚀🚀🚀", guestDetail);
+
+  let messageForTransportation;
+
+  if (
+    guestDetail?.event_guest.isArrivalPickupRequired &&
+    guestDetail?.event_guest?.isDeparturePickupRequired
+  ) {
+    messageForTransportation = "Pickup and Departure";
+  } else if (guestDetail?.event_guest.isArrivalPickupRequired) {
+    messageForTransportation = "Arrival Pickup";
+  } else if (guestDetail?.event_guest?.isDeparturePickupRequired) {
+    messageForTransportation = "Departure Pickup";
+  } else {
+    messageForTransportation = "Not Required";
+  }
+
   return (
     <SafeAreaView className="flex-1 bg-white" edges={[]}>
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
@@ -44,23 +62,41 @@ const guestDetail = useGuestDetailStore((state) => state.guestDraft);
             {guestDetail?.user_detail.username || "User Name"}
           </Text>
           <Text variant="h2" className="text-primary text-sm mt-1">
-         {guestDetail?.event_guest.status=="accepted"||"confirmed" ? "Confirmed" : "Pending"} Guest • {guestDetail?.event_guest.role || "VVIP"}
+            {guestDetail?.event_guest.status == "accepted" || "confirmed"
+              ? "Confirmed"
+              : "Pending"}{" "}
+            Guest • {guestDetail?.event_guest.role || "VVIP"}
           </Text>
           <View className="flex-row items-center gap-2 mt-2">
             <View>
               <View className="flex-row items-center">
-                <Ionicons name="calendar-outline" size={14} color="#94A3B8" className="mr-2 " />
+                <Ionicons
+                  name="calendar-outline"
+                  size={14}
+                  color="#94A3B8"
+                  className="mr-2 "
+                />
                 <Text variant="caption" className=" text-sm text-center">
-                  {formatDate(guestDetail?.event_guest.arrival_date_time||"—")} – {formatDate(guestDetail?.event_guest.departure_date_time||"—")}
+                  {formatDate(
+                    guestDetail?.event_guest.arrival_date_time || "—"
+                  )}{" "}
+                  –{" "}
+                  {formatDate(
+                    guestDetail?.event_guest.departure_date_time || "—"
+                  )}
                 </Text>
-
               </View>
-            
+
               <Text variant="caption" className="text-sm text-center">
-                {formatTime(guestDetail?.event_guest.arrival_date_time||"TBD")} – {formatTime(guestDetail?.event_guest.departure_date_time||"TBD")}
+                {formatTime(
+                  guestDetail?.event_guest.arrival_date_time || "TBD"
+                )}{" "}
+                –{" "}
+                {formatTime(
+                  guestDetail?.event_guest.departure_date_time || "TBD"
+                )}
               </Text>
             </View>
-           
           </View>
         </LinearGradient>
 
@@ -109,11 +145,37 @@ const guestDetail = useGuestDetailStore((state) => state.guestDraft);
             </View>
             <View className="bg-slate-50 rounded-2xl px-4">
               {[
-                { label: "Arrival Date", value: `${formatDate(guestDetail?.event_guest.arrival_date_time||"TBD")}`, pill: false },
-                
-                { label: "Departure Date", value: `${formatDate(guestDetail?.event_guest.departure_date_time||"TBD")}`, pill: false },
-                { label: "Accommodation", value: `${guestDetail?.event_guest.isAccomodation? "Room Needed" : "Room not needed"}`, pill: `${guestDetail?.event_guest.isAccomodation? true : false}` },
-                { label: "Transport", value: `${guestDetail?.event_guest.isAccomodation? "Pickup Required" : "No Pickup Required"}`, pill: `${guestDetail?.event_guest.isAccomodation? true : false}` },
+                {
+                  label: "Arrival Date",
+                  value: `${formatDate(guestDetail?.event_guest.arrival_date_time || "TBD")}`,
+                  pill: false,
+                },
+
+                {
+                  label: "Departure Date",
+                  value: `${formatDate(guestDetail?.event_guest.departure_date_time || "TBD")}`,
+                  pill: false,
+                },
+                {
+                  label: "Accommodation",
+                  value: `${guestDetail?.event_guest.isAccomodation ? "Room Needed" : "Room not needed"}`,
+                  pill: true,
+                },
+                {
+                  label: "Arrival Pickup",
+                  value: `${guestDetail?.event_guest.isArrivalPickupRequired ? "Required" : "Not Required"}`,
+                  pill: true,
+                },
+                {
+                  label: "Departure Pickup",
+                  value: `${guestDetail?.event_guest.isDeparturePickupRequired ? "Required" : "Not Required"}`,
+                  pill: true,
+                },
+                {
+                  label: "Transport Summary",
+                  value: messageForTransportation,
+                  pill: false,
+                },
               ].map((row, i, arr) => (
                 <View
                   key={i}
@@ -138,81 +200,151 @@ const guestDetail = useGuestDetailStore((state) => state.guestDraft);
             </View>
           </View>
 
-
-          
- <View className="bg-white border border-slate-200 p-4 rounded-2xl mb-3">
-              <View className="flex-row justify-between items-start">
-                <View className="flex-row gap-3 flex-1">
-                  <View className="p-2 bg-primary/5 rounded-xl">
-                    <Ionicons name="book-outline" size={24} color="#EE2B8C" />
-                  </View>
-                  <View>
-                    <Text variant="caption" className="text-xs mb-0.5">
-                      Notes
-                    </Text>
-                    <Text variant="h2" className="text-slate-900 text-sm">
-                      {guestDetail?.event_guest.notes || "No additional notes"}
-                    </Text>
-                  </View>
+          <View className="bg-white border border-slate-200 p-4 rounded-2xl mb-3">
+            <View className="flex-row justify-between items-start">
+              <View className="flex-row gap-3 flex-1">
+                <View className="p-2 bg-primary/5 rounded-xl">
+                  <Ionicons name="book-outline" size={24} color="#EE2B8C" />
                 </View>
-                <TouchableOpacity
-                  className="p-1.5 rounded-lg"
-                  activeOpacity={0.7}
-                >
-                 </TouchableOpacity>
-              </View>
-            </View>
-
-          <View>
-            <View className="flex-row items-center justify-between mb-4">
-              <View className="flex-row items-center gap-2">
-                <Ionicons
-                  name="shield-checkmark-outline"
-                  size={20}
-                  color="#EE2B8C"
-                />
-                <Text
-                  variant="caption"
-                  className="text-xs font-bold uppercase tracking-widest"
-                >
-                  Host Assignments
-                </Text>
-              </View>
-              <View className="bg-slate-100 px-2 py-0.5 rounded">
-                <Text
-                  variant="caption"
-                  className="text-[10px] uppercase font-bold"
-                >
-                  Internal Use
-                </Text>
-              </View>
-            </View>
-
-            <View className="bg-white border border-slate-200 p-4 rounded-2xl mb-3">
-              <View className="flex-row justify-between items-start">
-                <View className="flex-row gap-3 flex-1">
-                  <View className="p-2 bg-primary/5 rounded-xl">
-                    <Ionicons name="bed-outline" size={22} color="#EE2B8C" />
-                  </View>
-                  <View>
-                    <Text variant="caption" className="text-xs mb-0.5">
-                      Room Assigned
-                    </Text>
-                    <Text variant="h2" className="text-slate-900 text-sm">
-                      Deluxe 402
-                    </Text>
-                  </View>
+                <View>
+                  <Text variant="caption" className="text-xs mb-0.5">
+                    Notes
+                  </Text>
+                  <Text variant="h2" className="text-slate-900 text-sm">
+                    {guestDetail?.event_guest.notes || "No additional notes"}
+                  </Text>
                 </View>
-                <TouchableOpacity
-                  className="p-1.5 rounded-lg"
-                  activeOpacity={0.7}
-                >
-                  <Ionicons name="pencil-outline" size={16} color="#EE2B8C" />
-                </TouchableOpacity>
               </View>
+              <TouchableOpacity
+                className="p-1.5 rounded-lg"
+                activeOpacity={0.7}
+              ></TouchableOpacity>
             </View>
-           
           </View>
+
+          {(guestDetail?.event_guest?.isAccomodation ||
+            guestDetail?.event_guest?.isArrivalPickupRequired ||
+            guestDetail?.event_guest?.isDeparturePickupRequired) && (
+            <View>
+              <View className="flex-row items-center justify-between mb-4">
+                <View className="flex-row items-center gap-2">
+                  <Ionicons
+                    name="shield-checkmark-outline"
+                    size={20}
+                    color="#EE2B8C"
+                  />
+                  <Text
+                    variant="caption"
+                    className="text-xs font-bold uppercase tracking-widest"
+                  >
+                    Host Assignments
+                  </Text>
+                </View>
+                <View className="bg-slate-100 px-2 py-0.5 rounded">
+                  <Text
+                    variant="caption"
+                    className="text-[10px] uppercase font-bold"
+                  >
+                    Internal Use
+                  </Text>
+                </View>
+              </View>
+
+              {guestDetail.event_guest.isAccomodation && (
+                <View className="bg-white border border-slate-200 p-4 rounded-2xl mb-3">
+                  <View className="flex-row justify-between items-start">
+                    <View className="flex-row gap-3 flex-1">
+                      <View className="p-2 bg-primary/5 rounded-xl">
+                        <Ionicons
+                          name="bed-outline"
+                          size={22}
+                          color="#EE2B8C"
+                        />
+                      </View>
+                      <View>
+                        <Text variant="caption" className="text-xs mb-0.5">
+                          Room Assigned
+                        </Text>
+                        <Text variant="h2" className="text-slate-900 text-sm">
+                          Deluxe 402
+                        </Text>
+                      </View>
+                    </View>
+                    <TouchableOpacity
+                      className="p-1.5 rounded-lg"
+                      activeOpacity={0.7}
+                    >
+                      <Ionicons
+                        name="pencil-outline"
+                        size={16}
+                        color="#EE2B8C"
+                      />
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              )}
+
+              {guestDetail.event_guest.isArrivalPickupRequired && (
+                <View className="bg-white border border-slate-200 p-4 rounded-2xl mb-3">
+                  <View className="flex-row justify-between items-start">
+                    <View className="flex-row gap-3 flex-1">
+                      <View className="p-2 bg-primary/5 rounded-xl">
+                        <Ionicons name="car-outline" size={22} color="#EE2B8C" />
+                      </View>
+                      <View>
+                        <Text variant="caption" className="text-xs mb-0.5">
+                          Arrival Pickup Assigned
+                        </Text>
+                        <Text variant="h2" className="text-slate-900 text-sm">
+                          Driver pending
+                        </Text>
+                      </View>
+                    </View>
+                    <TouchableOpacity
+                      className="p-1.5 rounded-lg"
+                      activeOpacity={0.7}
+                    >
+                      <Ionicons
+                        name="pencil-outline"
+                        size={16}
+                        color="#EE2B8C"
+                      />
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              )}
+
+              {guestDetail.event_guest.isDeparturePickupRequired && (
+                <View className="bg-white border border-slate-200 p-4 rounded-2xl mb-3">
+                  <View className="flex-row justify-between items-start">
+                    <View className="flex-row gap-3 flex-1">
+                      <View className="p-2 bg-primary/5 rounded-xl">
+                        <Ionicons name="car-sport-outline" size={22} color="#EE2B8C" />
+                      </View>
+                      <View>
+                        <Text variant="caption" className="text-xs mb-0.5">
+                          Departure Pickup Assigned
+                        </Text>
+                        <Text variant="h2" className="text-slate-900 text-sm">
+                          Driver pending
+                        </Text>
+                      </View>
+                    </View>
+                    <TouchableOpacity
+                      className="p-1.5 rounded-lg"
+                      activeOpacity={0.7}
+                    >
+                      <Ionicons
+                        name="pencil-outline"
+                        size={16}
+                        color="#EE2B8C"
+                      />
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              )}
+            </View>
+          )}
         </View>
       </ScrollView>
     </SafeAreaView>

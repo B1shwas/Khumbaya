@@ -8,6 +8,8 @@ export interface RsvpDraft {
   rawArrival: string | null;
   rawDeparture: string | null;
   rawAccommodation: boolean | null;
+  rawIsArrivalPickupRequired: boolean | null;
+  rawIsDeparturePickupRequired: boolean | null;
   rawNotes: string | null;
 }
 

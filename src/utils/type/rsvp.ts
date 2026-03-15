@@ -1,5 +1,5 @@
 export type RSVPStatus = "attending" | "declined" | "pending";
-import { GuestDetailInterface, EventGuest } from "@/src/features/guests/types";
+import { EventGuest, GuestDetailInterface } from "@/src/features/guests/types";
 export interface MemberRsvpCardProp {
   id: number;
   familyId: number;
@@ -13,8 +13,9 @@ export interface MemberRsvpCardProp {
   rawArrival: string | null;
   rawDeparture: string | null;
   rawAccommodation: boolean | null;
+  rawIsArrivalPickupRequired: boolean | null;
+  rawIsDeparturePickupRequired: boolean | null;
 }
-
 
 function deriveStatus(event_guest: EventGuest | null): RSVPStatus {
   if (!event_guest) return "pending";
@@ -35,8 +36,9 @@ function formatDateRange(
   return `Until ${fmt(departure!)}`;
 }
 
-
-export function mapToMemberRsvp(item: GuestDetailInterface): MemberRsvpCardProp {
+export function mapToMemberRsvp(
+  item: GuestDetailInterface
+): MemberRsvpCardProp {
   const status = deriveStatus(item.event_guest);
   return {
     id: item.user_detail.id,
@@ -46,9 +48,9 @@ export function mapToMemberRsvp(item: GuestDetailInterface): MemberRsvpCardProp 
     status,
     dateRange: item.event_guest
       ? formatDateRange(
-        item.event_guest.arrival_date_time,
-        item.event_guest.departure_date_time
-      )
+          item.event_guest.arrival_date_time,
+          item.event_guest.departure_date_time
+        )
       : undefined,
     roomNeeded:
       item.event_guest?.isAccomodation != null
@@ -61,6 +63,9 @@ export function mapToMemberRsvp(item: GuestDetailInterface): MemberRsvpCardProp 
     rawArrival: item.event_guest?.arrival_date_time ?? null,
     rawDeparture: item.event_guest?.departure_date_time ?? null,
     rawAccommodation: item.event_guest?.isAccomodation ?? null,
+    rawIsArrivalPickupRequired:
+      item.event_guest?.isArrivalPickupRequired ?? null,
+    rawIsDeparturePickupRequired:
+      item.event_guest?.isDeparturePickupRequired ?? null,
   };
 }
-

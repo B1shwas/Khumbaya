@@ -1,15 +1,12 @@
+import MemberCard from "@/src/components/guest/family/MemberCard";
 import { Text } from "@/src/components/ui/Text";
 import { useEventResponseWithUser } from "@/src/features/events/hooks/use-event";
+import { GuestDetailInterface } from "@/src/features/guests/types";
 import { useRsvpStore } from "@/src/store/useRsvpStore";
+import { MemberRsvpCardProp, mapToMemberRsvp } from "@/src/utils/type/rsvp";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import {
-  ActivityIndicator,
-  ScrollView,
-} from "react-native";
+import { ActivityIndicator, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import {   MemberRsvpCardProp , mapToMemberRsvp } from "@/src/utils/type/rsvp";
-import MemberCard from "@/src/components/guest/family/MemberCard";
-import { GuestDetailInterface   } from "@/src/features/guests/types";
 
 export default function FamilyRsvpManagementScreen() {
   const router = useRouter();
@@ -42,6 +39,8 @@ export default function FamilyRsvpManagementScreen() {
       rawArrival: member.rawArrival,
       rawDeparture: member.rawDeparture,
       rawAccommodation: member.rawAccommodation,
+      rawIsArrivalPickupRequired: member.rawIsArrivalPickupRequired,
+      rawIsDeparturePickupRequired: member.rawIsDeparturePickupRequired,
       rawNotes: member.notes ?? null,
     });
     router.push(`/(protected)/(client-stack)/events/${eventId}/(guest)/rsvp`);
