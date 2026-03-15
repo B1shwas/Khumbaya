@@ -4,7 +4,6 @@ import api from "@/src/api/axios";
 export interface InviteGuestPayload {
   fullName: string;
   invitation_name: string;
-  email: string;
   phone: string;
   eventId: number;
   isFamily: boolean;
