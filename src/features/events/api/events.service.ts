@@ -230,6 +230,9 @@ export interface RsvpResponsePayload {
   isAccomodation?: boolean;
   isArrivalPickupRequired?: boolean;
   isDeparturePickupRequired?: boolean;
+  assigned_room?: string | null;
+  arrival_info?: string | null;
+  departure_info?: string | null;
   role?: string;
   status?: string;
   familyId?: number;

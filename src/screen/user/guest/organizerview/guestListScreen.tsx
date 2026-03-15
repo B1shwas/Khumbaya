@@ -2,8 +2,15 @@ import FamilyCard from "@/src/components/guest/FamilyGuestCard";
 import GuestCard from "@/src/components/guest/GuestCard";
 import { Text } from "@/src/components/ui/Text";
 import { useGetInvitationsForEvent } from "@/src/features/guests/api/use-guests";
-import { useGuestDetailStore , useFamilyGuestStore } from "@/src/features/guests/store/useGuestDetailStore";
-import { FamilyGroup, GroupedInvitation, groupInvitationsByFamily } from "@/src/features/guests/types";
+import {
+  useFamilyGuestStore,
+  useGuestDetailStore,
+} from "@/src/features/guests/store/useGuestDetailStore";
+import {
+  FamilyGroup,
+  GroupedInvitation,
+  groupInvitationsByFamily,
+} from "@/src/features/guests/types";
 import { cn } from "@/src/utils/cn";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -26,10 +33,17 @@ export default function GuestListScreen() {
   }, [params.eventId]);
 
   const setGuestDetail = useGuestDetailStore((state) => state.setGuestDetail);
-  const clearGuestDetail = useGuestDetailStore((state) => state.clearGuestDetail);
+  const clearGuestDetail = useGuestDetailStore(
+    (state) => state.clearGuestDetail
+  );
   const setFamilyGuest = useFamilyGuestStore((state) => state.setFamilyGroup);
-  const clearFamilyGuest = useFamilyGuestStore((state) => state.clearFamilyGroup);
+  const clearFamilyGuest = useFamilyGuestStore(
+    (state) => state.clearFamilyGroup
+  );
   const { data: invitations, isLoading } = useGetInvitationsForEvent(eventId);
+
+  console.log("🙏🏻🙏🏻🙏🏻🙏🏻🙏🏻🙏🏻🙏🏻🙏🏻🙏🏻", invitations);
+
   const [activeTab, setActiveTab] = useState<GuestFilterTab>("all");
 
   const openAddGuestScreen = useCallback(() => {
@@ -48,14 +62,13 @@ export default function GuestListScreen() {
     });
   };
   const onPressFamilyCard = (FamilyData: FamilyGroup) => {
-    
     setFamilyGuest(FamilyData);
     router.push({
-      pathname: `/(protected)/(client-stack)/events/${eventId}/(organizer)/guests/familymember`as any ,
+      pathname:
+        `/(protected)/(client-stack)/events/${eventId}/(organizer)/guests/familymember` as any,
       params: { family: JSON.stringify(FamilyData) },
     });
-
-  }
+  };
   const tabs: { label: string; value: GuestFilterTab }[] = [
     { label: "All", value: "all" },
     { label: "Accepted", value: "accepted" },
@@ -74,7 +87,9 @@ export default function GuestListScreen() {
       if (item.type === "family") {
         // For families, check if all members match the filter or any member matches
         const statuses = item.members.map((m) =>
-          String(m.event_guest.status ?? "pending").trim().toLowerCase()
+          String(m.event_guest.status ?? "pending")
+            .trim()
+            .toLowerCase()
         );
 
         switch (activeTab) {
@@ -87,9 +102,7 @@ export default function GuestListScreen() {
             return true;
         }
       } else {
-        const status = String(
-          item.data.event_guest.status ?? "pending"
-        )
+        const status = String(item.data.event_guest.status ?? "pending")
           .trim()
           .toLowerCase();
 
@@ -105,13 +118,13 @@ export default function GuestListScreen() {
       }
     });
   }, [groupedInvitations, activeTab]);
- 
+
   useEffect(() => {
     return () => {
       clearFamilyGuest();
       clearGuestDetail();
     };
-  }, [clearGuestDetail]);
+  }, []);
   return (
     <SafeAreaView className="p-4  h-full" edges={[]}>
       <View className="px-4">
@@ -180,7 +193,7 @@ export default function GuestListScreen() {
                 <FamilyCard
                   family={item}
                   onPress={() => {
-                   onPressFamilyCard(item);
+                    onPressFamilyCard(item);
                   }}
                 />
               );
@@ -189,7 +202,8 @@ export default function GuestListScreen() {
                 <GuestCard
                   guest={item.data}
                   onPress={() => {
-                    onPressGuestCard(item.data)
+                    console.log("🚀🚀✅🚀🚀✅🚀🚀✅", item.data);
+                    onPressGuestCard(item.data);
                   }}
                 />
               );

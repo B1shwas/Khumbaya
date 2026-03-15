@@ -14,7 +14,7 @@ export const useGuestDetailStore = create<GuestDetailStore>((set) => ({
 }));
 
 interface FamilyGuestStore {
-  familyGroup:FamilyGroup | null;
+  familyGroup: FamilyGroup | null;
   setFamilyGroup: (familyGroup: FamilyGroup) => void;
   clearFamilyGroup: () => void;
 }

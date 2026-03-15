@@ -1,10 +1,11 @@
 import MemberCard from "@/src/components/guest/family/MemberCard";
 import { Text } from "@/src/components/ui/Text";
+import { useGetInvitationsForEvent } from "@/src/features/guests/api/use-guests";
 import {
   useFamilyGuestStore,
   useGuestDetailStore,
 } from "@/src/features/guests/store/useGuestDetailStore";
-import { FamilyGroup } from "@/src/features/guests/types";
+import { FamilyGroup, GuestDetailInterface } from "@/src/features/guests/types";
 import { mapToMemberRsvp, MemberRsvpCardProp } from "@/src/utils/type/rsvp";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useMemo } from "react";
@@ -18,30 +19,47 @@ export default function GuestFamilyMember() {
     family?: string;
   }>();
 
-  const familyGroupFromStore = useFamilyGuestStore((state) => state.familyGroup);
+  const familyGroupFromStore = useFamilyGuestStore(
+    (state) => state.familyGroup
+  );
   const setGuestDetail = useGuestDetailStore((state) => state.setGuestDetail);
 
-  const selectedFamilyGroup: FamilyGroup | null = useMemo(() => {
-    if (familyGroupFromStore) return familyGroupFromStore;
-    if (!family) return null;
-
+  // Resolve familyId and family_name from store or route param (no stale snapshots)
+  const { familyId, familyName } = useMemo(() => {
+    if (familyGroupFromStore) {
+      return {
+        familyId: familyGroupFromStore.familyId,
+        familyName: familyGroupFromStore.family_name,
+      };
+    }
+    if (!family) return { familyId: null, familyName: "Family" };
     try {
-      const parsed = JSON.parse(family);
-      return parsed as FamilyGroup;
+      const parsed = JSON.parse(family) as FamilyGroup;
+      return { familyId: parsed.familyId, familyName: parsed.family_name };
     } catch {
-      return null;
+      return { familyId: null, familyName: "Family" };
     }
   }, [familyGroupFromStore, family]);
 
+  // Live data from API — auto-updates when useSubmitRsvpResponse invalidates ["event-invitations", eventId]
+  const { data: invitations } = useGetInvitationsForEvent(Number(eventId));
+
+  const liveFamilyMembers = useMemo(() => {
+    if (!invitations || familyId == null) return [];
+    return (invitations as GuestDetailInterface[]).filter(
+      (inv) => inv.event_guest.familyId === familyId
+    );
+  }, [invitations, familyId]);
+
   const members: MemberRsvpCardProp[] = useMemo(
-    () => (selectedFamilyGroup?.members ?? []).map(mapToMemberRsvp),
-    [selectedFamilyGroup]
+    () => liveFamilyMembers.map(mapToMemberRsvp),
+    [liveFamilyMembers]
   );
 
   const handleOpenMember = (member: MemberRsvpCardProp) => {
-    if (!selectedFamilyGroup || !eventId) return;
+    if (familyId == null || !eventId) return;
 
-    const guest = selectedFamilyGroup.members.find(
+    const guest = liveFamilyMembers.find(
       (item) => item.user_detail.id === member.id
     );
 
@@ -64,7 +82,7 @@ export default function GuestFamilyMember() {
           variant="h2"
           className="text-xs uppercase tracking-widest text-slate-400 px-1 mb-1"
         >
-          {selectedFamilyGroup?.family_name ?? "Family"} Members
+          {familyName} Members
         </Text>
 
         {members.length ? (

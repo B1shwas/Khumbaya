@@ -10,6 +10,10 @@ export interface EventGuest {
   isArrivalPickupRequired: boolean | null;
   isDeparturePickupRequired: boolean | null;
   notes: string | null;
+  assigned_room: string | null;
+  arrival_info: string | null;
+  pickup_info?: string | null;
+  departure_info: string | null;
   role: string | null;
   invited_by: number;
   joined_at: string;

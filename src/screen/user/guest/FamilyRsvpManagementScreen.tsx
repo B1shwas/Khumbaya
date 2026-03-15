@@ -15,6 +15,7 @@ export default function FamilyRsvpManagementScreen() {
   const { data: eventResponses, isLoading } = useEventResponseWithUser(
     Number(eventId)
   );
+
   const members: MemberRsvpCardProp[] = (eventResponses?.responses ?? []).map(
     (item: GuestDetailInterface) => mapToMemberRsvp(item)
   );

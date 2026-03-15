@@ -200,9 +200,14 @@ export const useEventResponseWithUser = (eventId: number) => {
 export const useSubmitRsvpResponse = (eventId: number) => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (payload: RsvpResponsePayload) => submitRsvpResponseApi(eventId, payload),
+    mutationFn: (payload: RsvpResponsePayload) =>
+      submitRsvpResponseApi(eventId, payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["event-responses", eventId] });
+      queryClient.invalidateQueries({
+        queryKey: ["event-invitations", eventId],
+      });
+      queryClient.invalidateQueries({ queryKey: ["event-guests", eventId] });
       queryClient.invalidateQueries({ queryKey: ["rsvp-invitations"] });
     },
   });
@@ -227,6 +232,5 @@ export const useMakeEventMember = (eventId: number) => {
       queryClient.invalidateQueries({ queryKey: ["event-responses", eventId] });
       queryClient.invalidateQueries({ queryKey: ["rsvp-invitations"] });
     },
-
   });
-}
+};
