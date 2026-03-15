@@ -20,7 +20,6 @@ import {
 import { useSharedValue } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-const PRIMARY = "#ee2b8c";
 interface EventFormData {
   name: string;
   eventType: string;
@@ -50,12 +49,10 @@ const EVENT_TYPE_TO_BACKEND: Record<EventType, string> = {
 export default function EventCreate() {
   const router = useRouter();
   const { mutate: createEvent, isPending: isCreatingEvent } = useCreateEvent();
-  const [toggle, setToggle] = useState(false);
-
   const [selectedDateTime, setSelectedDateTime] = useState<Date>(new Date());
   const [selectedEndDateTime, setEndDateTime] = useState<Date>(new Date());
   const [formData, setFormData] = useState<EventFormData>({
-    name: "Aisha & Omar's Wedding",
+    name: "",
     eventType: "Wedding" as EventType,
     startdateTime: selectedDateTime, // June 16, 2024
     endDateTime: selectedEndDateTime,

@@ -6,6 +6,7 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Controller, useForm, type FieldErrors } from "react-hook-form";
+import * as Contact from "expo-contacts"
 import {
   ActivityIndicator,
   Alert,
@@ -21,7 +22,6 @@ import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view
 
 type AddGuestFormValues = {
   fullName: string;
-  email: string;
   phone: string;
   familyName: string;
 };
@@ -35,7 +35,7 @@ type FoundUser = {
 };
 
 const AddGuestScreen = () => {
-   const router = useRouter();
+  const router = useRouter();
   const params = useLocalSearchParams();
   const inviteGuestMutation = useInviteGuest();
 
@@ -51,7 +51,6 @@ const AddGuestScreen = () => {
   const { control, handleSubmit, reset, watch, setValue, getValues } = useForm<AddGuestFormValues>({
     defaultValues: {
       fullName: "",
-      email: "",
       phone: "",
       familyName: "",
     },
@@ -98,7 +97,6 @@ const AddGuestScreen = () => {
       setValue("fullName", foundUser.username || foundUser.name || "", {
         shouldValidate: true,
       });
-      setValue("email", foundUser.email || "", { shouldValidate: true });
       setAutoFilledPhone(debouncedPhone);
     }
   }, [isMatchedUser, foundUser, debouncedPhone, setValue]);
@@ -106,7 +104,6 @@ const AddGuestScreen = () => {
   useEffect(() => {
     if (shouldSearch && !isFindingUser && !foundUser && autoFilledPhone) {
       setValue("fullName", "", { shouldValidate: true });
-      setValue("email", "", { shouldValidate: true });
       setAutoFilledPhone(null);
     }
   }, [shouldSearch, isFindingUser, foundUser, autoFilledPhone, setValue]);
@@ -121,8 +118,8 @@ const AddGuestScreen = () => {
       Alert.alert(
         "Error",
         maybeResponse.response?.data?.message ||
-          maybeResponse.message ||
-          "Failed to find user with this phone number."
+        maybeResponse.message ||
+        "Failed to find user with this phone number."
       );
     }
   }, [isFindUserError, findUserError]);
@@ -143,14 +140,12 @@ const AddGuestScreen = () => {
       }
 
       const resolvedName = foundUser?.username || foundUser?.name || values.fullName.trim();
-      const resolvedEmail = foundUser?.email || values.email.trim();
 
       try {
         await inviteGuestMutation.mutateAsync({
           eventId,
           payload: {
             invitation_name: resolvedName,
-            email: resolvedEmail,
             phone: currentPhone,
             eventId,
             fullName: resolvedName,
@@ -184,7 +179,7 @@ const AddGuestScreen = () => {
   );
 
   const onInvalidSubmit = useCallback((errors: FieldErrors<AddGuestFormValues>) => {
-    const firstError = errors.fullName || errors.email || errors.phone || errors.familyName;
+    const firstError = errors.fullName || errors.phone || errors.familyName;
     if (firstError?.message) {
       Alert.alert("Error", firstError.message as string);
     }
@@ -223,7 +218,7 @@ const AddGuestScreen = () => {
           </View>
 
           <View className="flex flex-col gap-6 px-6" style={{ gap: 24 }}>
-              <View style={{ gap: 8 }}>
+            <View style={{ gap: 8 }}>
               <Text className="text-sm font-semibold tracking-wide text-[#1a1b3a]">
                 INVITATION NAME
               </Text>
@@ -247,7 +242,7 @@ const AddGuestScreen = () => {
               />
             </View>
 
-               <View style={{ gap: 8 }}>
+            <View style={{ gap: 8 }}>
               <Text className="text-sm font-semibold tracking-wide text-[#1a1b3a]">
                 PHONE NUMBER
               </Text>
@@ -271,7 +266,7 @@ const AddGuestScreen = () => {
                 )}
               />
               <View className="min-h-5 mt-1">
-                {isFindingUser  ? (
+                {isFindingUser ? (
                   <View className="flex-row items-center" style={{ gap: 6 }}>
                     <ActivityIndicator size="small" color="#ee2b8c" />
                     <Text className="text-xs text-slate-500">Searching user...</Text>
@@ -295,7 +290,7 @@ const AddGuestScreen = () => {
                   </View>
                 ) : null}
 
-                {  !isFindingUser && !foundUser ? (
+                {!isFindingUser && !foundUser ? (
                   <Text className="text-xs text-slate-500">
                     User was not found. You are creating a new guest entry.
                   </Text>
@@ -327,42 +322,8 @@ const AddGuestScreen = () => {
                     )}
                   />
                 </View>
-
-                <View style={{ gap: 8 }}>
-                  <Text className="text-sm font-semibold tracking-wide text-[#1a1b3a]">
-                    EMAIL ADDRESS
-                  </Text>
-                  <Controller
-                    control={control}
-                    name="email"
-                    rules={{
-                      validate: (value) => {
-                        if (!value.trim()) return "Please enter a guest email";
-                        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim())) {
-                          return "Please enter a valid email";
-                        }
-                        return true;
-                      },
-                    }}
-                    render={({ field: { onChange, value } }) => (
-                      <TextInput
-                        className="h-14 w-full rounded-md border border-slate-200 bg-white px-4 text-base text-slate-900"
-                        placeholder="alexander@example.com"
-                        placeholderTextColor="#94a3b8"
-                        keyboardType="email-address"
-                        autoCapitalize="none"
-                        value={value}
-                        onChangeText={onChange}
-                      />
-                    )}
-                  />
-                </View>
               </>
             )}
-
-         
-
-          
             <View
               className="rounded-md border border-[#ee2b8c]/10 p-5"
               style={{ backgroundColor: "rgba(238,43,140,0.05)", gap: 16 }}
