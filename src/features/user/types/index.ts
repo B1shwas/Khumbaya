@@ -4,7 +4,7 @@ type UserSignupType = {
   password: string;
 };
 type UserLoginType = {
-  email: string;
+  phone: string;
   password: string;
 };
 export { UserLoginType, UserSignupType };

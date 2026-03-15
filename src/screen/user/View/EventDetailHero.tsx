@@ -40,7 +40,7 @@ const EventDetailHero = ({
 
   return (
     <View>
-      <View className="relative w-full h-[38vh] min-h-[300px] rounded-full ">
+      <View className="relative w-full h-[30vh]  rounded-full ">
         <Image
           source={{ uri: event.imageUrl }}
           className="absolute inset-0 w-full h-full "
@@ -61,16 +61,19 @@ const EventDetailHero = ({
             <Text className="text-3xl font-extrabold text-white leading-tight tracking-tight text-center">
               {event.title}
             </Text>
-            <View className="flex-row items-center gap-2 text-white/90 mt-1">
-              <Ionicons name="calendar" size={18} color="white" />
-              <Text className="text-sm font-medium text-white">
-                {event.date}
-              </Text>
-              <Text className="mx-1 opacity-50">•</Text>
-              <Ionicons name="location" size={18} color="white" />
-              <Text className="text-sm font-medium text-white">
-                {event.location}
-              </Text>
+            <View className="flex items-center gap-1 text-white/90 mt-1">
+              <View className="flex flex-row gap-3">
+                <Ionicons name="calendar" size={18} color="white" />
+                <Text className="text-sm font-medium text-white">
+                  {event.date}
+                </Text>
+              </View>
+              <View className="flex flex-row gap-3">
+                <Ionicons name="location" size={18} color="white" />
+                <Text className="text-sm font-medium text-white">
+                  {event.location}
+                </Text>
+              </View>
             </View>
           </View>
         </View>

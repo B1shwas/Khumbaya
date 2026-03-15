@@ -22,15 +22,13 @@ const HERO_IMAGE = {
 const COPY = {
   title: "Plan Your Perfect Day",
   subtitle: "Get Started with Your Account",
-  usernameLabel: "Username or Email",
-  usernamePlaceholder: "Emma@wedding.com",
+  phoneLabel: "Phone number (10 digits) ",
+  phonePlaceholder: "9761890004",
   passwordLabel: "Password",
   passwordPlaceholder: "••••••••",
   login: "Login",
   signupPrompt: "Don't have an account?",
   signupCta: "Sign up",
-  // vendorPrompt: "I am a vendor",
-  // vendorCta: "Sign up as Vendor",
   socialDivider: "Or continue with",
   google: "Google",
   apple: "Apple",
@@ -42,9 +40,7 @@ const COPY = {
 
 export default function LoginPage() {
   const { mutate: login, isPending, error: mutationError } = useLogin();
-  const router = useRouter();
-  // const { login } = useAuth();
-  const [username, setUsername] = useState("");
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
@@ -53,7 +49,7 @@ export default function LoginPage() {
   const isValidEmail = true;
   const isValidPassword = password.length >= 6;
   const emailError =
-    username.trim().length > 0 && !isValidEmail
+    phone.trim().length > 0 && !isValidEmail
       ? "Please enter a valid email"
       : null;
   const passwordError =
@@ -86,18 +82,17 @@ export default function LoginPage() {
 
   const isLoginDisabled = useMemo(
     () =>
-      username.trim().length === 0 ||
       password.trim().length === 0 ||
       !isValidEmail ||
       !isValidPassword,
-    [username, password, isValidEmail, isValidPassword]
+    [password, isValidEmail, isValidPassword]
   );
 
   const handleLogin = useCallback(async () => {
     if (isLoginDisabled || isPending) return;
 
     const loginPayload = {
-      email: username,
+      phone: phone,
       password: password,
     };
 
@@ -106,7 +101,7 @@ export default function LoginPage() {
         console.log("Login successful:", data)
       },
     });
-  }, [isLoginDisabled, isPending, login, username, password]);
+  }, [isLoginDisabled, isPending, login, phone, password]);
 
   return (
     <KeyboardAvoidingView
@@ -117,7 +112,7 @@ export default function LoginPage() {
       <KeyboardAwareScrollView
         style={{ flex: 1 }}
         contentContainerStyle={{
-       
+
           paddingBottom: 35,
           flexGrow: 1,
         }}
@@ -128,138 +123,138 @@ export default function LoginPage() {
         extraScrollHeight={40}
         scrollEnabled={true}
       >
-    <View style={{ flex: 1, backgroundColor: "#f3f4f6" }}>
-      {/* Hero Image Section (fixed, not keyboard-aware) */}
-      <View className="h-[30vh] w-full overflow-hidden rounded-b-xl">
-        <ImageBackground
-          source={HERO_IMAGE}
-          className="w-full h-[30vh]"
-          resizeMode="cover"
-          accessibilityLabel="Wedding venue hero image"
-        />
+        <View style={{ flex: 1, backgroundColor: "#f3f4f6" }}>
+          {/* Hero Image Section (fixed, not keyboard-aware) */}
+          <View className="h-[30vh] w-full overflow-hidden rounded-b-xl">
+            <ImageBackground
+              source={HERO_IMAGE}
+              className="w-full h-[30vh]"
+              resizeMode="cover"
+              accessibilityLabel="Wedding venue hero image"
+            />
 
-        <View className="absolute bottom-6 left-0 right-0 items-center">
-          <Animated.View
-            style={{ transform: [{ scale: pulseScale }] }}
-            className="rounded-full border border-yellow-200/60 bg-white/90 p-3"
-          >
-            <MaterialIcons name="favorite" size={28} color="#ee2b8c" />
-          </Animated.View>
-        </View>
-      </View>
-
-    
-          {/* Content Section */}
-          <View className="px-6 pb-8 pt-6">
-          <View className="mb-6 items-center">
-            <Text variant="h1" className="text-center text-3xl text-text-light">
-              {COPY.title}
-            </Text>
-            <Text
-              variant="body"
-              className="mt-2 text-center text-sm font-medium text-muted-light px-2"
-            >
-              {COPY.subtitle}
-            </Text>
+            <View className="absolute bottom-6 left-0 right-0 items-center">
+              <Animated.View
+                style={{ transform: [{ scale: pulseScale }] }}
+                className="rounded-full border border-yellow-200/60 bg-white/90 p-3"
+              >
+                <MaterialIcons name="favorite" size={28} color="#ee2b8c" />
+              </Animated.View>
+            </View>
           </View>
 
-          <View className="gap-5">
-            <View>
-              <Text className="mb-1 ml-1 text-xs font-semibold uppercase tracking-wider text-text-light">
-                {COPY.usernameLabel}
+
+          {/* Content Section */}
+          <View className="px-6 pb-8 pt-6">
+            <View className="mb-6 items-center">
+              <Text variant="h1" className="text-center text-3xl text-text-light">
+                {COPY.title}
               </Text>
-              <TextInput
-                value={username}
-                onChangeText={setUsername}
-                placeholder={COPY.usernamePlaceholder}
-                placeholderTextColor="text-muted-light"
-                autoCapitalize="none"
-                keyboardType="email-address"
-                className={`h-14 rounded-md border bg-white px-4 text-base text-text-light ${emailError ? "border-red-500" : "border-gray-200"
-                  }`}
-              />
-              {emailError && (
-                <Text className="ml-1 mt-1 text-xs text-red-500">
-                  {emailError}
-                </Text>
-              )}
+              <Text
+                variant="body"
+                className="mt-2 text-center text-sm font-medium text-muted-light px-2"
+              >
+                {COPY.subtitle}
+              </Text>
             </View>
 
-            <View>
-              <Text className="mb-1 ml-1 text-xs font-semibold uppercase tracking-wider text-text-light">
-                {COPY.passwordLabel}
-              </Text>
-              <View className="relative">
+            <View className="gap-5">
+              <View>
+                <Text className="mb-1 ml-1 text-xs font-semibold uppercase tracking-wider text-text-light">
+                  {COPY.phoneLabel}
+                </Text>
                 <TextInput
-                  value={password}
-                  onChangeText={setPassword}
-                  placeholder={COPY.passwordPlaceholder}
+                  value={phone}
+                  onChangeText={setPhone}
+                  placeholder={COPY.phonePlaceholder}
                   placeholderTextColor="text-muted-light"
-                  secureTextEntry={!isPasswordVisible}
-                  className={`h-14 rounded-md border bg-white px-4 text-base text-text-light ${passwordError ? "border-red-500" : "border-gray-200"
+                  autoCapitalize="none"
+                  keyboardType="phone-pad"
+                  className={`h-14 rounded-md border bg-white px-4 text-base text-text-light ${emailError ? "border-red-500" : "border-gray-200"
                     }`}
                 />
-                <Pressable
-                  onPress={() => setIsPasswordVisible((prev) => !prev)}
-                  className="absolute right-0 h-full items-center justify-center px-3"
-                  accessibilityRole="button"
-                  accessibilityLabel={
-                    isPasswordVisible ? "Hide password" : "Show password"
-                  }
-                >
-                  <MaterialIcons
-                    name={isPasswordVisible ? "visibility-off" : "visibility"}
-                    size={20}
-                    color="text-muted-light"
-                  />
-                </Pressable>
-              </View>
-              {passwordError && (
-                <Text className="ml-1 mt-1 text-xs text-red-500">
-                  {passwordError}
-                </Text>
-              )}
-            </View>
-
-            <Pressable
-              onPress={handleLogin}
-              disabled={isLoginDisabled || isPending}
-              className={`h-14 flex-row items-center justify-center gap-2 rounded-md bg-primary shadow-md shadow-primary/20 ${isLoginDisabled || isPending ? "opacity-60" : ""
-                }`}
-              accessibilityRole="button"
-              accessibilityLabel="Login"
-            >
-              {isPending ? (
-                <Animated.View className="h-5 w-5 items-center justify-center rounded-full border-2 border-white border-t-transparent" />
-              ) : (
-                <>
-                  <Text className="font-bold text-white">{COPY.login}</Text>
-                  <MaterialIcons name="arrow-forward" size={18} color="white" />
-                </>
-              )}
-            </Pressable>
-
-            {mutationError && (
-              <View className="rounded-lg bg-red-50 p-3">
-                <Text className="text-center text-sm text-red-600">
-                  {mutationError.message || "Invalid credentials. Please try again."}
-                </Text>
-              </View>
-            )}
-
-            <View className="items-center gap-3 pt-1">
-              <Link href="/(onboarding)/user-signup" asChild>
-                <Pressable accessibilityRole="link">
-                  <Text className="text-sm text-muted-light">
-                    {COPY.signupPrompt}{" "}
-                    <Text className=" underline text-black font-bold">
-                      {COPY.signupCta}
-                    </Text>
+                {emailError && (
+                  <Text className="ml-1 mt-1 text-xs text-red-500">
+                    {emailError}
                   </Text>
-                </Pressable>
-              </Link>
+                )}
+              </View>
 
-              {/* Vendor sign up temporarily disabled
+              <View>
+                <Text className="mb-1 ml-1 text-xs font-semibold uppercase tracking-wider text-text-light">
+                  {COPY.passwordLabel}
+                </Text>
+                <View className="relative">
+                  <TextInput
+                    value={password}
+                    onChangeText={setPassword}
+                    placeholder={COPY.passwordPlaceholder}
+                    placeholderTextColor="text-muted-light"
+                    secureTextEntry={!isPasswordVisible}
+                    className={`h-14 rounded-md border bg-white px-4 text-base text-text-light ${passwordError ? "border-red-500" : "border-gray-200"
+                      }`}
+                  />
+                  <Pressable
+                    onPress={() => setIsPasswordVisible((prev) => !prev)}
+                    className="absolute right-0 h-full items-center justify-center px-3"
+                    accessibilityRole="button"
+                    accessibilityLabel={
+                      isPasswordVisible ? "Hide password" : "Show password"
+                    }
+                  >
+                    <MaterialIcons
+                      name={isPasswordVisible ? "visibility-off" : "visibility"}
+                      size={20}
+                      color="text-muted-light"
+                    />
+                  </Pressable>
+                </View>
+                {passwordError && (
+                  <Text className="ml-1 mt-1 text-xs text-red-500">
+                    {passwordError}
+                  </Text>
+                )}
+              </View>
+
+              <Pressable
+                onPress={handleLogin}
+                disabled={isLoginDisabled || isPending}
+                className={`h-14 flex-row items-center justify-center gap-2 rounded-md bg-primary shadow-md shadow-primary/20 ${isLoginDisabled || isPending ? "opacity-60" : ""
+                  }`}
+                accessibilityRole="button"
+                accessibilityLabel="Login"
+              >
+                {isPending ? (
+                  <Animated.View className="h-5 w-5 items-center justify-center rounded-full border-2 border-white border-t-transparent" />
+                ) : (
+                  <>
+                    <Text className="font-bold text-white">{COPY.login}</Text>
+                    <MaterialIcons name="arrow-forward" size={18} color="white" />
+                  </>
+                )}
+              </Pressable>
+
+              {mutationError && (
+                <View className="rounded-lg bg-red-50 p-3">
+                  <Text className="text-center text-sm text-red-600">
+                    {mutationError.message || "Invalid credentials. Please try again."}
+                  </Text>
+                </View>
+              )}
+
+              <View className="items-center gap-3 pt-1">
+                <Link href="/(onboarding)/user-signup" asChild>
+                  <Pressable accessibilityRole="link">
+                    <Text className="text-sm text-muted-light">
+                      {COPY.signupPrompt}{" "}
+                      <Text className=" underline text-black font-bold">
+                        {COPY.signupCta}
+                      </Text>
+                    </Text>
+                  </Pressable>
+                </Link>
+
+                {/* Vendor sign up temporarily disabled
               <Link href="/(onboarding)/vendor-signup" asChild>
                 <Pressable accessibilityRole="link">
                   <Text className="text-sm text-muted-light">
@@ -271,41 +266,41 @@ export default function LoginPage() {
                 </Pressable>
               </Link>
               */}
+              </View>
             </View>
-          </View>
 
-          <View className="mt-8 flex-row justify-center gap-6">
-            <View className="flex-row items-center gap-1.5">
-              <MaterialIcons name="verified-user" size={16} color="#c5a059" />
-              <Text className="text-[10px] font-bold uppercase tracking-wider text-gray-400">
-                {COPY.trustA}
-              </Text>
+            <View className="mt-8 flex-row justify-center gap-6">
+              <View className="flex-row items-center gap-1.5">
+                <MaterialIcons name="verified-user" size={16} color="#c5a059" />
+                <Text className="text-[10px] font-bold uppercase tracking-wider text-gray-400">
+                  {COPY.trustA}
+                </Text>
+              </View>
+              <View className="flex-row items-center gap-1.5">
+                <MaterialIcons name="lock" size={16} color="#c5a059" />
+                <Text className="text-[10px] font-bold uppercase tracking-wider text-gray-400">
+                  {COPY.trustB}
+                </Text>
+              </View>
             </View>
-            <View className="flex-row items-center gap-1.5">
-              <MaterialIcons name="lock" size={16} color="#c5a059" />
-              <Text className="text-[10px] font-bold uppercase tracking-wider text-gray-400">
-                {COPY.trustB}
-              </Text>
-            </View>
-          </View>
 
-          <View className=" self-end mt-6 px-4">
-            <Text className="text-center text-xs leading-relaxed text-gray-400">
-              By continuing, you agree to our{" "}
-              <Text className="underline text-text-light text-xs  font-medium">
-                {COPY.terms}
+            <View className=" self-end mt-6 px-4">
+              <Text className="text-center text-xs leading-relaxed text-gray-400">
+                By continuing, you agree to our{" "}
+                <Text className="underline text-text-light text-xs  font-medium">
+                  {COPY.terms}
+                </Text>
+                {"  "}
+                and {"  "}
+                <Text className="underline text-text-light text-xs  font-medium">
+                  {COPY.privacy}
+                </Text>
+                .
               </Text>
-              {"  "}
-              and {"  "}
-              <Text className="underline text-text-light text-xs  font-medium">
-                {COPY.privacy}
-              </Text>
-              .
-            </Text>
+            </View>
           </View>
-          </View>
-    </View>
-        </KeyboardAwareScrollView>
-      </KeyboardAvoidingView>
+        </View>
+      </KeyboardAwareScrollView>
+    </KeyboardAvoidingView>
   );
 }

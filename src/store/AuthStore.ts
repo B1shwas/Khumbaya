@@ -1,9 +1,8 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as SecureStore from "expo-secure-store";
 import { create } from "zustand";
-import { API_BASE_URL, DEBUG_AUTO_LOGIN, } from "../config/env";
+import { API_BASE_URL } from "../config/env";
 import { getUserProfile } from "../features/user/api/user.service";
-// import { API_BASE_URL, DEBUG_AUTO_LOGIN, TEST_USER } from "../config/env";
 
 export type User = {
   id: number;
