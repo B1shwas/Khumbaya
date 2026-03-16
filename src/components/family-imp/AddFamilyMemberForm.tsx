@@ -18,13 +18,13 @@ import { Text } from "../ui/Text";
 // Food preference options
 const FOOD_PREFERENCES = [
   { label: "Veg", value: "Vegetarian" },
-  { label: "Non-Veg", value: "Non-Vegetarian" },
+  { label: "Non-Veg", value: "Non-Veg" },
   { label: "Vegan", value: "Vegan" },
   { label: "Jain", value: "Jain" },
 ];
 
 type AddFamilyMemberFormValues = {
-  name: string;
+  username: string;
   email: string;
   relation: string;
   dob: string;
@@ -101,6 +101,7 @@ export default function AddFamilyMemberForm({
   initialData,
   onSuccess,
 }: AddFamilyMemberFormProps) {
+  console.log(initialData);
   const isEditMode = !!memberId;
 
   const { mutate: addMember, isPending: isAdding } = useAddFamilyMember();
@@ -119,7 +120,7 @@ export default function AddFamilyMemberForm({
     formState: { errors },
   } = useForm<AddFamilyMemberFormValues>({
     defaultValues: {
-      name: initialData?.username || "",
+      username: initialData?.username || "",
       email: initialData?.email || "",
       relation: initialData?.relation || "",
       dob: formatDateForDisplay(initialData?.dob),
@@ -140,21 +141,12 @@ export default function AddFamilyMemberForm({
     }
 
     if (isEditMode) {
-      // Edit mode - update member
-      console.log(
-        "Editing member - DOB:",
-        values.dob,
-        "Food Preference:",
-        values.foodPreference
-      );
       const payload: Partial<FamilyMemberPayload> = {
-        name: values.name.trim(),
+        username: values.username.trim(),
         relation: values.relation.trim(),
         dob: values.dob || undefined,
         foodPreference: values.foodPreference || undefined,
       };
-
-      console.log(payload);
 
       updateMember(
         { familyId, memberId: memberId!, data: payload },
@@ -182,7 +174,7 @@ export default function AddFamilyMemberForm({
       const payload: FamilyMemberPayload = {
         relation: values.relation.trim(),
         dob: dobIso!,
-        name: values.name.trim(),
+        username: values.username.trim(),
         email: values.email.trim(),
         foodPreference: values.foodPreference || undefined,
       };
@@ -219,11 +211,11 @@ export default function AddFamilyMemberForm({
 
       <FormField
         label="Full Name"
-        name="name"
+        name="username"
         placeholder="Enter name"
         control={control}
         rules={{ required: "Name is required" }}
-        error={errors.name?.message}
+        error={errors.username?.message}
       />
 
       <View className="mb-3">

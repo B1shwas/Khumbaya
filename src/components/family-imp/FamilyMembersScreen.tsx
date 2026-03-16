@@ -3,16 +3,37 @@ import CreateFamilyScreen from "@/src/components/family-imp/CreateFamilyScreen";
 import { Text } from "@/src/components/ui/Text";
 import { useGetFamilyByUserId } from "@/src/features/family/hooks/use-family";
 import { Ionicons } from "@expo/vector-icons";
+import { useQueryClient } from "@tanstack/react-query";
 import { Stack, useRouter } from "expo-router";
+import { useState } from "react";
 import { TouchableOpacity } from "react-native";
 
 export default function FamilyMembersScreen() {
-  const { isLoading, data, error } = useGetFamilyByUserId();
+  const queryClient = useQueryClient();
+  const [refreshing, setRefreshing] = useState(false);
+  const { isLoading, data, error, refetch } = useGetFamilyByUserId();
   const router = useRouter();
 
   const family = data?.data ?? data;
   const familyId = family?.id;
   const familyName = family?.familyName ?? "";
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+
+    try {
+      await refetch();
+
+      if (familyId) {
+        await queryClient.refetchQueries({
+          queryKey: ["family-members", familyId],
+          exact: true,
+        });
+      }
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   if (isLoading) {
     return <Text>Loading</Text>;
@@ -61,7 +82,11 @@ export default function FamilyMembersScreen() {
         }}
       />
 
-      <AlreadyHasAFamilyScreen id={familyId} />
+      <AlreadyHasAFamilyScreen
+        id={familyId}
+        refreshing={refreshing}
+        onRefresh={handleRefresh}
+      />
     </>
   );
 }

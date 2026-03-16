@@ -14,7 +14,7 @@ export interface Family {
 export interface FamilyMemberPayload {
   relation: string;
   dob: string;
-  name: string;
+  username: string;
   email: string;
   foodPreference?: string;
 }
@@ -80,6 +80,7 @@ export const updateFamilyMemberApi = async (
   memberId: number,
   data: Partial<FamilyMemberPayload>
 ) => {
+  console.log("✅", data);
   const response = await api.patch(
     `/family/${familyId}/member/${memberId}`,
     data

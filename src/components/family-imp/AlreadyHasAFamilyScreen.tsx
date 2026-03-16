@@ -1,16 +1,20 @@
 import { FamilyMember } from "@/src/features/family/api/family.service";
 import { useGetFamilyMembers } from "@/src/features/family/hooks/use-family";
-import { View } from "react-native";
+import { RefreshControl, View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { Text } from "../ui/Text";
 import FamilyMembersCardList from "./FamilyMembersCardList";
 
 type AlreadyHasAFamilyScreenProps = {
   id: number;
+  refreshing: boolean;
+  onRefresh: () => void | Promise<void>;
 };
 
 export default function AlreadyHasAFamilyScreen({
   id,
+  refreshing,
+  onRefresh,
 }: AlreadyHasAFamilyScreenProps) {
   const {
     data: members = [],
@@ -36,10 +40,12 @@ export default function AlreadyHasAFamilyScreen({
       }}
       keyboardShouldPersistTaps="handled"
       showsVerticalScrollIndicator={false}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
       enableOnAndroid={true}
       enableAutomaticScroll={true}
       extraScrollHeight={100}
-      scrollEnabled={false}
     >
       <View className="flex-row justify-between items-center px-2 mb-2">
         <Text className="text-xl font-bold text-gray-800">Family Members</Text>

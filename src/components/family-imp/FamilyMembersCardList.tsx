@@ -1,5 +1,6 @@
 import { FamilyMember } from "@/src/features/family/api/family.service";
 import { useDeleteFamilyMember } from "@/src/features/family/hooks/use-family";
+import { useAuthStore } from "@/src/store/AuthStore";
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
 import { Alert, Modal, TouchableOpacity, View } from "react-native";
@@ -19,8 +20,9 @@ export default function FamilyMembersCardList({
 }: FamilyMembersCardListProps) {
   const [editingMember, setEditingMember] = useState<FamilyMember | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
+  const { user } = useAuthStore();
 
-  const selfItem = members.find((i) => i.relation.toLowerCase() === "self");
+  const selfItem = members.find((i) => i.id === user?.id);
   const sortedArrayWithCreatorAtTop = [
     ...(selfItem ? [selfItem] : []),
     ...members.filter((i) => i.relation?.toLowerCase() !== "self"),
@@ -102,7 +104,7 @@ export default function FamilyMembersCardList({
             name={member.username}
             size="small"
             showEditButton={false}
-            onPick={() => { }}
+            onPick={() => {}}
           />
 
           <View className="flex-1">
@@ -126,7 +128,7 @@ export default function FamilyMembersCardList({
           </View>
 
           {/* Action Buttons - hide for self member */}
-          {member.relation !== "self" && (
+          {member.id !== user?.id && (
             <View className="flex-row gap-2">
               <TouchableOpacity
                 onPress={() => setEditingMember(member)}
