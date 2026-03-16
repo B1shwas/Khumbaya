@@ -1,12 +1,10 @@
 import { Text } from "@/src/components/ui/Text";
 import { useInviteGuest } from "@/src/features/guests/api/use-guests";
 import { useFindUserWithPhone } from "@/src/features/user/api/use-user";
-import { useDebounce } from "@/src/utils/helper";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Controller, useForm, type FieldErrors } from "react-hook-form";
-import * as Contact from "expo-contacts"
 import {
   ActivityIndicator,
   Alert,
@@ -48,7 +46,7 @@ const AddGuestScreen = () => {
     return Number.isFinite(parsed) ? parsed : null;
   }, [params.eventId]);
 
-  const { control, handleSubmit, reset, watch, setValue, getValues } = useForm<AddGuestFormValues>({
+  const { control, handleSubmit, reset, watch, setValue } = useForm<AddGuestFormValues>({
     defaultValues: {
       fullName: "",
       phone: "",
@@ -57,20 +55,20 @@ const AddGuestScreen = () => {
   });
 
   const watchedPhone = watch("phone");
-
-  const debouncedPhone = useDebounce(watchedPhone, 1000);
+  const trimmedWatchedPhone = watchedPhone.trim();
 
   const shouldSearch = useMemo(() => {
-    return debouncedPhone.trim().length > 0;
-  }, [debouncedPhone]);
+    return trimmedWatchedPhone.length > 0;
+  }, [trimmedWatchedPhone]);
 
   const {
     data: foundUsersResponse,
     isFetching: isFindingUser,
     error: findUserError,
     isError: isFindUserError,
-  } = useFindUserWithPhone(debouncedPhone, {
+  } = useFindUserWithPhone(trimmedWatchedPhone, {
     enabled: shouldSearch,
+    debounceMs: 1000,
   });
 
   const foundUserData = (foundUsersResponse as { items?: unknown } | undefined)?.items ?? foundUsersResponse;
@@ -86,20 +84,20 @@ const AddGuestScreen = () => {
   const isMatchedUser = shouldSearch && !isFindingUser && !!foundUser;
 
   useEffect(() => {
-    if (!watchedPhone.trim()) {
+    if (!trimmedWatchedPhone) {
       setAutoFilledPhone(null);
       return;
     }
-  }, [watchedPhone]);
+  }, [trimmedWatchedPhone]);
 
   useEffect(() => {
     if (isMatchedUser && foundUser) {
       setValue("fullName", foundUser.username || foundUser.name || "", {
         shouldValidate: true,
       });
-      setAutoFilledPhone(debouncedPhone);
+      setAutoFilledPhone(trimmedWatchedPhone);
     }
-  }, [isMatchedUser, foundUser, debouncedPhone, setValue]);
+  }, [isMatchedUser, foundUser, trimmedWatchedPhone, setValue]);
 
   useEffect(() => {
     if (shouldSearch && !isFindingUser && !foundUser && autoFilledPhone) {
@@ -132,7 +130,14 @@ const AddGuestScreen = () => {
       }
 
       const currentPhone = values.phone.trim();
-      const isSearchComplete = !isFindingUser && debouncedPhone === currentPhone;
+
+      if (!currentPhone) {
+        Alert.alert("Error", "Please enter a phone number.");
+        return;
+      }
+
+      const isSearchComplete =
+        !isFindingUser && (!shouldSearch || trimmedWatchedPhone === currentPhone);
 
       if (!isSearchComplete) {
         Alert.alert("Please wait", "Wait for phone lookup to finish before sending invitation.");
@@ -140,15 +145,22 @@ const AddGuestScreen = () => {
       }
 
       const resolvedName = foundUser?.username || foundUser?.name || values.fullName.trim();
+      const invitationName = values.familyName.trim() || resolvedName || currentPhone;
+      const payloadFullName = resolvedName || invitationName;
+
+      if (!payloadFullName) {
+        Alert.alert("Error", "Please enter guest full name or use a phone that matches an existing user.");
+        return;
+      }
 
       try {
         await inviteGuestMutation.mutateAsync({
           eventId,
           payload: {
-            invitation_name: resolvedName,
+            invitation_name: invitationName,
             phone: currentPhone,
             eventId,
-            fullName: resolvedName,
+            fullName: payloadFullName,
             isFamily: inviteWithFamily,
             role: "Guest",
             category: "Friend",
@@ -167,7 +179,6 @@ const AddGuestScreen = () => {
       }
     },
     [
-      debouncedPhone,
       eventId,
       foundUser,
       isFindingUser,
@@ -175,6 +186,8 @@ const AddGuestScreen = () => {
       inviteWithFamily,
       reset,
       router,
+      shouldSearch,
+      trimmedWatchedPhone,
     ]
   );
 
@@ -257,7 +270,7 @@ const AddGuestScreen = () => {
                 render={({ field: { onChange, value } }) => (
                   <TextInput
                     className="h-14 w-full rounded-md border border-slate-200 bg-white px-4 text-base text-slate-900"
-                    placeholder="+1 (555) 000-0000"
+                    placeholder="9761890004"
                     placeholderTextColor="#94a3b8"
                     keyboardType="phone-pad"
                     value={value}
@@ -290,7 +303,7 @@ const AddGuestScreen = () => {
                   </View>
                 ) : null}
 
-                {!isFindingUser && !foundUser ? (
+                {shouldSearch && !isFindingUser && !foundUser ? (
                   <Text className="text-xs text-slate-500">
                     User was not found. You are creating a new guest entry.
                   </Text>
@@ -308,6 +321,7 @@ const AddGuestScreen = () => {
                     name="fullName"
                     rules={{
                       validate: (value) => {
+                        if (isMatchedUser) return true;
                         return value.trim().length > 0 || "Please enter a guest name";
                       },
                     }}
@@ -390,7 +404,7 @@ const AddGuestScreen = () => {
                 elevation: 6,
               }}
               activeOpacity={0.9}
-              disabled={inviteGuestMutation.isPending || isFindingUser || (!debouncedPhone.trim() && !foundUser && !isFindingUser)}
+              disabled={inviteGuestMutation.isPending || isFindingUser || !trimmedWatchedPhone}
               onPress={handleSubmit(onValidSubmit, onInvalidSubmit)}
             >
               <Text className="text-base font-bold text-white">

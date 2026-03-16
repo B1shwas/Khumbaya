@@ -7,14 +7,21 @@ import {
   useAddFamilyMember,
   useUpdateFamilyMember,
 } from "@/src/features/family/hooks/use-family";
+import { useFindUserWithPhone } from "@/src/features/user/api/use-user";
 import { toISODateString, toIsoDate } from "@/src/utils/helper";
+import { User } from "@/store/AuthStore";
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import { Controller, useForm } from "react-hook-form";
-import { Alert, TextInput, TouchableOpacity, View } from "react-native";
+import {
+  ActivityIndicator,
+  Alert,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
 import { Text } from "../ui/Text";
-
 // Food preference options
 const FOOD_PREFERENCES = [
   { label: "Veg", value: "Vegetarian" },
@@ -23,12 +30,19 @@ const FOOD_PREFERENCES = [
   { label: "Jain", value: "Jain" },
 ];
 
+const normalizePhone = (value?: string) => (value ?? "").replace(/\D/g, "");
+
 type AddFamilyMemberFormValues = {
+  phone: string | undefined;
   username: string;
-  email: string;
+  email: string | undefined;
   relation: string;
   dob: string;
   foodPreference: string;
+};
+
+type FamilyMemberMutationPayload = Omit<FamilyMemberPayload, "email"> & {
+  email?: string;
 };
 
 type AddFamilyMemberFormProps = {
@@ -101,8 +115,7 @@ export default function AddFamilyMemberForm({
   initialData,
   onSuccess,
 }: AddFamilyMemberFormProps) {
-  console.log(initialData);
-  const isEditMode = !!memberId;
+  const isEditMode = !!initialData;
 
   const { mutate: addMember, isPending: isAdding } = useAddFamilyMember();
   const { mutate: updateMember, isPending: isUpdating } =
@@ -120,6 +133,7 @@ export default function AddFamilyMemberForm({
     formState: { errors },
   } = useForm<AddFamilyMemberFormValues>({
     defaultValues: {
+      phone: initialData?.phone || "",
       username: initialData?.username || "",
       email: initialData?.email || "",
       relation: initialData?.relation || "",
@@ -131,22 +145,156 @@ export default function AddFamilyMemberForm({
   const [dobDate, setDobDate] = React.useState<Date>(
     initialData?.dob ? new Date(initialData.dob) : new Date()
   );
+  const [autoFilledPhone, setAutoFilledPhone] = React.useState<string | null>(
+    null
+  );
+
+  const watchedPhone = watch("phone") ?? "";
+  const trimmedWatchedPhone = watchedPhone.trim();
+  const shouldSearchUserByPhone = !isEditMode && trimmedWatchedPhone.length > 0;
+
+  const {
+    data: foundUsersResponse,
+    isFetching: isFindingUser,
+    error: findUserError,
+    isError: isFindUserError,
+  } = useFindUserWithPhone(trimmedWatchedPhone, {
+    enabled: shouldSearchUserByPhone,
+    debounceMs: 1000,
+  });
+
+  const foundUserData =
+    (foundUsersResponse as { items?: unknown } | undefined)?.items ??
+    foundUsersResponse;
+
+  const foundUser = React.useMemo<User | null>(() => {
+    if (!foundUserData) return null;
+    const targetPhone = normalizePhone(trimmedWatchedPhone);
+
+    if (Array.isArray(foundUserData)) {
+      const exactMatch = (foundUserData as User[]).find(
+        (user) => normalizePhone(user?.phone) === targetPhone
+      );
+      return exactMatch ?? null;
+    }
+
+    const singleUser = foundUserData as User;
+    if (normalizePhone(singleUser?.phone) === targetPhone) {
+      return singleUser;
+    }
+
+    return null;
+  }, [foundUserData, trimmedWatchedPhone]);
+
+  const isMatchedUser =
+    shouldSearchUserByPhone && !isFindingUser && !!foundUser;
+  const shouldLockFullName = !isEditMode && isMatchedUser;
+  const hasExistingFamily =
+    !isEditMode && isMatchedUser && foundUser?.familyId != null;
+  const canSubmit =
+    !isPending &&
+    !isFindingUser &&
+    familyId != null &&
+    familyId > 0 &&
+    !hasExistingFamily;
+
+  React.useEffect(() => {
+    if (!trimmedWatchedPhone) {
+      setAutoFilledPhone(null);
+    }
+  }, [trimmedWatchedPhone]);
+
+  React.useEffect(() => {
+    if (!isEditMode && isMatchedUser && foundUser) {
+      setValue("username", foundUser.username  || "", {
+        shouldValidate: true,
+      });
+      if (foundUser.email) {
+        setValue("email", foundUser.email, { shouldValidate: true });
+      }
+      setAutoFilledPhone(trimmedWatchedPhone);
+    }
+  }, [isEditMode, isMatchedUser, foundUser, setValue, trimmedWatchedPhone]);
+
+  React.useEffect(() => {
+    if (
+      !isEditMode &&
+      shouldSearchUserByPhone &&
+      !isFindingUser &&
+      !foundUser &&
+      autoFilledPhone
+    ) {
+      setValue("username", "", { shouldValidate: true });
+      setValue("email", "", { shouldValidate: true });
+      setAutoFilledPhone(null);
+    }
+  }, [
+    autoFilledPhone,
+    foundUser,
+    isEditMode,
+    isFindingUser,
+    setValue,
+    shouldSearchUserByPhone,
+  ]);
+
+  React.useEffect(() => {
+    if (isFindUserError && findUserError) {
+      const maybeResponse = findUserError as {
+        response?: { data?: { message?: string } };
+        message?: string;
+      };
+
+      Alert.alert(
+        "Error",
+        maybeResponse.response?.data?.message ||
+          maybeResponse.message ||
+          "Failed to find user with this phone number."
+      );
+    }
+  }, [findUserError, isFindUserError]);
 
   const onSubmit = (values: AddFamilyMemberFormValues) => {
     const dobIso = toIsoDate(values.dob);
+    const resolvedUsername = (values.username || foundUser?.username || "").trim();
+    const trimmedEmail = values.email?.trim();
+
+    if (!familyId) {
+      Alert.alert("Error", "Family not found. Please create/select a family first.");
+      return;
+    }
+
+    if (!isEditMode && hasExistingFamily) {
+      Alert.alert(
+        "Cannot add member",
+        "This user is already linked to another family."
+      );
+      return;
+    }
 
     if (!dobIso && isEditMode === false) {
       setError("dob", { message: "Enter valid DOB (YYYY-MM-DD)" });
       return;
     }
 
+    if (!resolvedUsername) {
+      setError("username", { message: "Name is required" });
+      return;
+    }
+
     if (isEditMode) {
-      const payload: Partial<FamilyMemberPayload> = {
-        username: values.username.trim(),
+      const trimmedEditEmail = values.email?.trim();
+      const payload: Partial<FamilyMemberMutationPayload> = {
+        username: resolvedUsername,
         relation: values.relation.trim(),
         dob: values.dob || undefined,
         foodPreference: values.foodPreference || undefined,
+        ...(trimmedEditEmail ? { email: trimmedEditEmail } : {}),
       };
+
+      if (!memberId) {
+        Alert.alert("Error", "Invalid member for editing.");
+        return;
+      }
 
       updateMember(
         { familyId, memberId: memberId!, data: payload },
@@ -164,18 +312,11 @@ export default function AddFamilyMemberForm({
         }
       );
     } else {
-      // Add mode - create new member
-      console.log(
-        "Adding new member - DOB:",
-        dobIso,
-        "Food Preference:",
-        values.foodPreference
-      );
-      const payload: FamilyMemberPayload = {
+      const payload: FamilyMemberMutationPayload = {
         relation: values.relation.trim(),
         dob: dobIso!,
-        username: values.username.trim(),
-        email: values.email.trim(),
+        username: resolvedUsername,
+        ...(trimmedEmail ? { email: trimmedEmail } : {}),
         foodPreference: values.foodPreference || undefined,
       };
 
@@ -209,19 +350,50 @@ export default function AddFamilyMemberForm({
         </Text>
       </View>
 
+   
+      {!isEditMode && (
+        <View className="min-h-5 mt-1 mb-2">
+          {isFindingUser ? (
+            <View className="flex-row items-center" style={{ gap: 6 }}>
+              <ActivityIndicator size="small" color="#ee2b8c" />
+              <Text className="text-xs text-slate-500">Searching user...</Text>
+            </View>
+          ) : null}
+
+          {isMatchedUser ? (
+            <View className="flex-row items-center rounded-md border border-[#ee2b8c]/20 bg-[#ee2b8c]/5 p-3">
+              <View className="flex-1">
+                <Text className="text-sm font-bold text-[#1a1b3a]">
+                  {foundUser?.username || "User found"}
+                </Text>
+                <Text className="text-xs text-slate-600">
+                  {hasExistingFamily
+                    ? "This user is already in a family and cannot be added."
+                    : "User found. Name/email auto-filled."}
+                </Text>
+              </View>
+            </View>
+          ) : null}
+
+          {shouldSearchUserByPhone && !isFindingUser && !foundUser ? (
+            <Text className="text-xs text-slate-500">
+              No user found with this phone. Continue adding manually.
+            </Text>
+          ) : null}
+        </View>
+      )}
+
       <FormField
         label="Full Name"
         name="username"
-        placeholder="Enter name"
+        placeholder={shouldLockFullName ? "Auto-filled from phone lookup" : "Enter name"}
         control={control}
         rules={{ required: "Name is required" }}
         error={errors.username?.message}
+        editable={!shouldLockFullName}
       />
 
       <View className="mb-3">
-        <Text className="text-xs font-jakarta-bold uppercase tracking-wide text-text-tertiary mb-1.5 ml-1">
-          Date of Birth
-        </Text>
         <Controller
           control={control}
           name="dob"
@@ -229,13 +401,15 @@ export default function AddFamilyMemberForm({
           render={({ field: { value }, fieldState: { error } }) => (
             <DatePicker
               mode="date"
+           
               value={dobDate}
+              materialDateLabel="Date of Birth"
+        
+              materialDateLabelClassName="text-xs font-jakarta-bold uppercase tracking-wide text-text-tertiary mb-1.5 ml-1 text-left "
               onChange={(event: any, date?: Date) => {
-                console.log("Date selected from picker:", date);
                 if (date) {
                   setDobDate(date);
                   const formattedDate = toISODateString(date.toISOString());
-                  console.log("Formatted date for form:", formattedDate);
                   setValue("dob", formattedDate);
                 }
               }}
@@ -249,6 +423,15 @@ export default function AddFamilyMemberForm({
           </Text>
         )}
       </View>
+         <FormField
+        label="Phone Number (Optional) "
+        name="phone"
+        placeholder="9761890004"
+        control={control}
+        rules={{}}
+        error={errors.phone?.message}
+      />
+
 
       <View className="mb-3">
         <FormField
@@ -261,35 +444,23 @@ export default function AddFamilyMemberForm({
         />
       </View>
 
-      {!isEditMode ? (
+     
         <FormField
-          label="Email Address"
+          label="Email Address (optional)"
           name="email"
-          placeholder="example@mail.com"
+          placeholder="example@mail.com "
           control={control}
           rules={{
-            required: "Email is required",
-            pattern: {
-              value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-              message: "Invalid email address",
+            validate: (value: string) => {
+              if (!value) return true;
+              return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) || "Invalid email address";
             },
           }}
           error={errors.email?.message}
           keyboardType="email-address"
           autoCapitalize="none"
         />
-      ) : (
-        <View className="mb-3">
-          <Text className="text-xs font-jakarta-bold uppercase tracking-wide text-text-tertiary mb-1.5 ml-1">
-            Email Address
-          </Text>
-          <View className="w-full bg-gray-100 rounded-sm px-4 py-3 border border-border">
-            <Text className="text-sm text-gray-600">
-              {initialData?.email || "N/A"}
-            </Text>
-          </View>
-        </View>
-      )}
+  
 
       {/* Food Preference Dropdown */}
       <View className="mb-3">
@@ -336,7 +507,7 @@ export default function AddFamilyMemberForm({
       <TouchableOpacity
         className="w-full bg-primary rounded-sm py-3.5 flex-row items-center justify-center mt-1"
         onPress={handleSubmit(onSubmit)}
-        disabled={isPending}
+        disabled={!isEditMode && !canSubmit ? true : isPending}
       >
         <Text className="text-white text-base" variant="h2">
           {isPending
@@ -354,6 +525,18 @@ export default function AddFamilyMemberForm({
           />
         )}
       </TouchableOpacity>
+
+      {!isEditMode && familyId == null ? (
+        <Text className="text-xs text-red-500 mt-2 text-center">
+          Please create a family first before adding members.
+        </Text>
+      ) : null}
+
+      {!isEditMode && hasExistingFamily ? (
+        <Text className="text-xs text-red-500 mt-2 text-center">
+          This phone belongs to a user who already has a family.
+        </Text>
+      ) : null}
     </View>
   );
 }

@@ -1,6 +1,7 @@
 import api from "@/src/api/axios";
 import { UserLoginType, UserSignupType } from "@/src/features/user/types";
 import { useAuthStore } from "@/src/store/AuthStore";
+import { useDebounce } from "@/src/utils/helper";
 import { ResponseFormat } from "@/src/utils/type/responce";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -130,21 +131,23 @@ export function useChangePassword() {
 }
 interface UseFindUserWithPhoneOptions {
   enabled?: boolean;
+  debounceMs?: number;
 }
 
 export function useFindUserWithPhone(
   phone: string,
-  { enabled = true }: UseFindUserWithPhoneOptions = {}
+  { enabled = true, debounceMs = 1000 }: UseFindUserWithPhoneOptions = {}
 ) {
   const token = useAuthStore((s) => s.token);
   const isLoading = useAuthStore((s) => s.isLoading);
   const normalizedPhone = phone.trim();
+  const debouncedPhone = useDebounce(normalizedPhone, debounceMs);
 
   return useQuery({
-    queryKey: ["find", normalizedPhone],
-    enabled: !!token && !isLoading && enabled && !!normalizedPhone,
+    queryKey: ["find", debouncedPhone],
+    enabled: !!token && !isLoading && enabled && !!debouncedPhone,
     queryFn: async () => {
-      const data = await getUserWithPhone(normalizedPhone);
+      const data = await getUserWithPhone(debouncedPhone);
       return data;
     },
   });

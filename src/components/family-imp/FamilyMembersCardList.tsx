@@ -85,7 +85,6 @@ export default function FamilyMembersCardList({
 
   return (
     <>
-      {/* Add New Member Button */}
       <TouchableOpacity
         onPress={() => setShowAddModal(true)}
         className="bg-primary/10 border border-primary/30 rounded-2xl p-4 flex-row items-center justify-center gap-2 mb-4"
@@ -97,7 +96,7 @@ export default function FamilyMembersCardList({
       {/* Member Cards */}
       {sortedArrayWithCreatorAtTop.map((member, index) => (
         <View
-          key={index}
+        key={index}
           className="bg-white rounded-2xl p-4 mb-3 border border-gray-200 flex-row items-center gap-4"
         >
           <AvatarPicker
