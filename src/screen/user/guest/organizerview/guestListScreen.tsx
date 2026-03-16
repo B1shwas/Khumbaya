@@ -53,6 +53,13 @@ export default function GuestListScreen() {
     );
   }, [eventId, router]);
 
+  const openContactPickerScreen = useCallback(() => {
+    if (!eventId) return;
+    router.push(
+      `/(protected)/(client-stack)/events/${eventId}/(organizer)/contactpicker`
+    );
+  }, [eventId, router]);
+
   const onPressGuestCard = (guest: any) => {
     setGuestDetail(guest);
     router.push({
@@ -161,6 +168,22 @@ export default function GuestListScreen() {
         </View>
       </View>
 
+      {/* Import from contacts FAB */}
+      <TouchableOpacity
+        className="absolute right-6 bottom-32 w-14 h-14 rounded-full bg-white border border-[#EE2B8C] items-center justify-center z-50"
+        style={{
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.12,
+          shadowRadius: 4,
+          elevation: 4,
+        }}
+        onPress={openContactPickerScreen}
+      >
+        <Ionicons name="people-outline" size={24} color="#EE2B8C" />
+      </TouchableOpacity>
+
+      {/* Add guest manually FAB */}
       <TouchableOpacity
         className="absolute right-6 bottom-12 w-14 h-14 rounded-full bg-[#EE2B8C] items-center justify-center z-50"
         style={{

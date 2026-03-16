@@ -50,14 +50,14 @@ export default function BudgetCard({
   const rightActions = () => (
     <View className="flex-row items-center rounded-md" >
       {/* Edit Action */}
-    <Text>
-      Gaysdasdhjk
-    </Text>
+      <Text>
+        Gaysdasdhjk
+      </Text>
     </View>
   );
 
   return (
-    <Swipeable renderRightActions={rightActions} overshootRight={false}>
+    <Swipeable renderRightActions={rightActions} overshootRight={true}>
       <View className="bg-white rounded-2xl p-4 mb-3 shadow-sm">
         <View className="flex-row items-center">
           {/* Icon */}
