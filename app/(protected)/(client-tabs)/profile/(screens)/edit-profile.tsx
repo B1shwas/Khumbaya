@@ -32,7 +32,6 @@ interface ProfileForm {
   phone: string;
   bio: string;
   foodPreference: string;
-  avatarImage: string;
 }
 
 type FormErrors = Partial<Record<keyof ProfileForm, string>>;
@@ -58,18 +57,16 @@ export default function EditProfileScreen() {
     phone: "",
     bio: "",
     foodPreference: "",
-    avatarImage: "",
   });
 
   useEffect(() => {
     if (!isProfileLoading && user) {
       setForm({
-        name: user.username || user.name || "",
+        name: user.username || user.username || "",
         email: user.email || "",
         phone: user.phone || "",
         bio: user.bio || "",
-        foodPreference: user.foodPreference || user.food_preference || "",
-        avatarImage: user.photo || user.avatarImage || user.avatar || "",
+        foodPreference: user.foodPreference || user.foodPreference || "",
       });
       setLoading(false);
     } else if (!isProfileLoading && !user) {
@@ -108,7 +105,7 @@ export default function EditProfileScreen() {
         phone: form.phone.trim() || undefined,
         bio: form.bio.trim() || undefined,
         foodPreference: form.foodPreference.trim() || undefined,
-        photo: form.avatarImage || undefined,
+        familyId: user?.familyId,
       };
 
       const updatedUser = await updateUserMeMutation.mutateAsync(payload);
@@ -121,8 +118,6 @@ export default function EditProfileScreen() {
         phone: updatedUser?.phone ?? payload.phone,
         bio: updatedUser?.bio ?? payload.bio,
         foodPreference: updatedUser?.foodPreference ?? payload.foodPreference,
-        photo: updatedUser?.photo ?? payload.photo,
-        avatarImage: updatedUser?.avatarImage ?? payload.photo,
       });
 
       setSaveState("saved");
@@ -149,8 +144,6 @@ export default function EditProfileScreen() {
       aspect: [1, 1],
       quality: 0.85,
     });
-    if (!result.canceled && result.assets[0])
-      set("avatarImage", result.assets[0].uri);
   };
 
   const isSaving = saveState === "saving";
@@ -185,11 +178,7 @@ export default function EditProfileScreen() {
           }}
         >
           {/* Avatar */}
-          <AvatarPicker
-            name={form.name}
-            avatarUri={form.avatarImage}
-            onPick={pickAvatar}
-          />
+          <AvatarPicker name={form.name} onPick={pickAvatar} />
 
           {/* Personal Details */}
           <View className="mt-5 mb-3">

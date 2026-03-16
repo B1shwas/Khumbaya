@@ -66,9 +66,26 @@ export function useProfile() {
       const data = await getUserProfile();
 
       setAuth(token as string, {
-        name: data.username,
+        username: data.username,
         email: data.email,
         id: data.id,
+        info: data.info ?? null,
+        dob: data.dob ?? null,
+        city: data.city ?? null,
+        zip: data.zip ?? null,
+        address: data.address ?? null,
+        coverPhoto: data.coverPhoto ?? null,
+        photo: data.photo ?? null,
+        familyId: data.familyId ?? null,
+        relation: data.relation ?? null,
+        foodPreference: data.foodPreference ?? null,
+        country: data.country ?? null,
+        bio: data.bio ?? null,
+        location: data.location ?? null,
+        phone: data.phone ?? "",
+        accountStatus: data.accountStatus ?? null,
+        createdAt: data.createdAt ?? null,
+        updatedAt: data.updatedAt ?? null,
       });
 
       return data;
@@ -80,12 +97,21 @@ export function useUpdateUserMe() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (payload: UpdateUserMePayload) => {
-      const data = await updateUserMeApi(payload);
+    mutationFn: async (
+      payload: UpdateUserMePayload & { familyId?: number | null }
+    ) => {
+      const { familyId: _familyId, ...userPayload } = payload;
+      const data = await updateUserMeApi(userPayload);
       return data;
     },
-    onSuccess: async () => {
+    onSuccess: async (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["profile"] });
+
+      if (variables.familyId != null) {
+        queryClient.invalidateQueries({
+          queryKey: ["family-members", variables.familyId],
+        });
+      }
     },
   });
 }

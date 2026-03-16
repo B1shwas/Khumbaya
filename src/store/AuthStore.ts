@@ -6,27 +6,25 @@ import { getUserProfile } from "../features/user/api/user.service";
 
 export type User = {
   id: number;
+  username: string;
+  info: any | null;
+  dob: string | null;
   email: string;
-  name?: string;
-  username?: string;
-  phone?: string;
-  bio?: string;
-  photo?: string;
-  avatar?: string;
-  avatarImage?: string;
-  profilePicture?: string;
-  foodPreference?: string;
-  food_preference?: string;
-  identity?: string;
-  idType?: string;
-  idProof?: string;
-  id_proof?: string;
-  idNumber?: string;
-  dateOfBirth?: string;
-  date_of_birth?: string;
-  idImage?: string;
-  id_image?: string;
-  governmentId?: string;
+  city: string | null;
+  zip: string | null;
+  address: string | null;
+  coverPhoto: string | null;
+  photo: string | null;
+  familyId: number | null;
+  relation: string | null;
+  foodPreference: string | null;
+  country: string | null;
+  bio: string | null;
+  location: string | null;
+  phone: string;
+  accountStatus: boolean | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
 };
 
 type AuthState = {
