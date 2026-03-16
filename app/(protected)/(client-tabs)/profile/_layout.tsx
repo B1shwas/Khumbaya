@@ -7,12 +7,10 @@ export default function ProfileLayout() {
         headerShown: true,
       }}
     >
-      {/* Main Profile Screen - shows header and tab bar */}
       <Stack.Screen
         name="index"
         options={{
           headerShown: true,
-
           headerTitle: "My Profile",
           animation: "fade",
           headerTitleAlign: "center",

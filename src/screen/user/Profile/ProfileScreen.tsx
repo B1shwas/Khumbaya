@@ -1,9 +1,9 @@
 import AvatarPicker from "@/src/components/ui/AvatarPicker";
 import { useAuthStore } from "@/src/store/AuthStore";
-import { MaterialIcons } from "@expo/vector-icons";
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { LinearGradient } from "expo-linear-gradient";
-import { Link, useRouter } from "expo-router";
+import { Link, Stack, useRouter } from "expo-router";
 import { useState } from "react";
 import { Alert, Pressable, ScrollView, Text, View } from "react-native";
 
@@ -23,8 +23,8 @@ export default function ProfileScreen() {
   const { clearAuth: logout, user, updateUser } = useAuthStore();
   const router = useRouter();
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     router.replace("/(onboarding)");
   };
 
@@ -47,62 +47,73 @@ export default function ProfileScreen() {
 
     if (!result.canceled && result.assets[0]) {
       updateUser({
-        avatarImage: result.assets[0].uri,
         photo: result.assets[0].uri,
       });
     }
   };
 
-  // Get avatar from user
-  const avatarUri =
-    user?.avatarImage || user?.photo || user?.avatar || user?.profilePicture;
+  const avatarUri = user?.photo;
 
   return (
-    <View className="bg-white">
-      <ScrollView showsVerticalScrollIndicator={false}>
-        {/* PROFILE */}
-        <View className="items-center mt-6 mb-6 bg-white py-6">
-          <AvatarPicker
-            name={user?.name || user?.username || "User"}
-            avatarUri={avatarUri}
-            onPick={handlePickAvatar}
-            size="large"
-            showEditButton={true}
-            showName={false}
-          />
+    <>
+      <Stack.Screen
+        options={{
+          headerRight: () => (
+            <Pressable
+              onPress={handleLogout}
+              className="px-2 py-1"
+              accessibilityRole="button"
+              accessibilityLabel="Log out"
+            >
+              <Ionicons name="log-out-outline" size={22} />
+            </Pressable>
+          ),
+        }}
+      />
 
-          <Text className="text-2xl font-bold mt-4 text-gray-900">
-            {user?.name || user?.username || "User"}
-          </Text>
+      <View className="bg-white">
+        <ScrollView showsVerticalScrollIndicator={false}>
+          {/* PROFILE */}
+          <View className="items-center bg-white py-6">
+            <AvatarPicker
+              name={user?.username || "User"}
+              onPick={handlePickAvatar}
+              size="large"
+              showEditButton={true}
+              showName={false}
+            />
 
-          <Text className="text-gray-500 text-sm">{user?.email}</Text>
-        </View>
+            <Text className="text-2xl font-bold mt-4 text-gray-900">
+              {user?.username || "User"}
+            </Text>
 
-        {/* GLASS TOGGLE */}
-        <View className="mx-6 mt-8 bg-white rounded-2xl p-1 flex-row shadow-sm">
-          <ToggleButton
-            title=" Business"
-            active={tab === "account"}
-            onPress={() => setTab("account")}
-          />
-          <ToggleButton
-            title="Account"
-            active={tab === "info"}
-            onPress={() => setTab("info")}
-          />
-        </View>
+            <Text className="text-gray-500 text-sm">{user?.email}</Text>
+            <Text className="text-gray-500 text-sm">{user?.phone}</Text>
+          </View>
 
-        {/* CONTENT */}
-        {tab === "account" ? <Account /> : <Info />}
+          <View className="mx-6 bg-white rounded-2xl p-1 flex-row shadow-sm">
+            <ToggleButton
+              title=" Business"
+              active={tab === "account"}
+              onPress={() => setTab("account")}
+            />
+            <ToggleButton
+              title="Account"
+              active={tab === "info"}
+              onPress={() => setTab("info")}
+            />
+          </View>
 
-        {/* LOGOUT */}
-        <Pressable className="mx-6 mt-10 mb-20" onPress={handleLogout}>
+          {tab === "account" ? <Account /> : <Info />}
+
+          {/* <Pressable className="mx-6 mt-10 mb-20" onPress={handleLogout}>
           <View className="bg-pink-500 rounded-2xl py-4 items-center">
             <Text className="text-white font-bold text-lg">Log Out</Text>
           </View>
-        </Pressable>
-      </ScrollView>
-    </View>
+        </Pressable> */}
+        </ScrollView>
+      </View>
+    </>
   );
 }
 
@@ -161,11 +172,7 @@ const Row = ({ icon, title, href }: RowProps & { href: string }) => (
 /* ---------- Sections ---------- */
 
 const Account = () => (
-  <View className="mx-6 mt-8">
-    <Text className="text-xs font-bold text-gray-400 mb-4 uppercase tracking-wider">
-      BUSINESS
-    </Text>
-
+  <View className="mx-6 mt-4">
     <Row icon="analytics" title="Analytics" href="/profile/analytics" />
     <Row
       icon="business"
@@ -187,11 +194,7 @@ const Account = () => (
 );
 
 const Info = () => (
-  <View className="mx-6 mt-8">
-    <Text className="text-xs font-bold text-gray-400 mb-4 uppercase tracking-wider">
-      PERSONAL
-    </Text>
-
+  <View className="mx-6 mt-4">
     <Row icon="person" title="Edit Profile" href="/profile/edit-profile" />
     <Row icon="group" title="Family Members" href="/profile/family-members" />
     <Row icon="lock" title="Change Password" href="/profile/change-password" />
