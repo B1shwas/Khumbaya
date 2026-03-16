@@ -10,12 +10,11 @@ const headerBackButton = () => (
 );
 const headerRightButton = (eventId?: string) => {
   return (
-    <Pressable
+    <Pressable className="color-primary p-3  "
       onPress={() => {
         if (!eventId) {
           return;
         }
-
         expoRouter.push({
           pathname: "/(protected)/(client-stack)/events/[eventId]/(organizer)/settings",
           params: { eventId },

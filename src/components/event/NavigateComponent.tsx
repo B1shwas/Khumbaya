@@ -18,7 +18,7 @@ export default function NavigateComponent({
 }: QuickServiceButtonProps) {
   return (
     <TouchableOpacity
-      className="flex-row items-center gap-2 px-4 py-3 bg-white dark:bg-surface-dark rounded-xl shadow-sm border border-gray-100"
+      className="flex items-center gap-2 px-4 py-3 bg-white  justify-center dark:bg-surface-dark rounded-xl shadow-sm border border-gray-100 h-[100px]"
       onPress={() => router.push(route as RelativePathString)}
       activeOpacity={0.8}
       style={{ width: "47%" }}
