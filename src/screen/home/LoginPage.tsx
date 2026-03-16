@@ -167,7 +167,7 @@ export default function LoginPage() {
                   value={phone}
                   onChangeText={setPhone}
                   placeholder={COPY.phonePlaceholder}
-                  placeholderTextColor="text-muted-light"
+                  placeholderTextColor="#896175"
                   autoCapitalize="none"
                   keyboardType="phone-pad"
                   className={`h-14 rounded-md border bg-white px-4 text-base text-text-light ${emailError ? "border-red-500" : "border-gray-200"
@@ -189,7 +189,7 @@ export default function LoginPage() {
                     value={password}
                     onChangeText={setPassword}
                     placeholder={COPY.passwordPlaceholder}
-                    placeholderTextColor="text-muted-light"
+                    placeholderTextColor="#896175"
                     secureTextEntry={!isPasswordVisible}
                     className={`h-14 rounded-md border bg-white px-4 text-base text-text-light ${passwordError ? "border-red-500" : "border-gray-200"
                       }`}

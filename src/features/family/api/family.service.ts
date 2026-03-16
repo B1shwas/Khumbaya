@@ -11,26 +11,21 @@ export interface Family {
   updatedAt?: string;
 }
 
-export interface FamilyMemberPayload {
-  relation: string;
-  dob: string;
-  username: string;
-  email: string;
-  foodPreference?: string;
-}
 
 export interface FamilyMember {
-  id: number;
+  id?: number;
   familyId: number;
   relation: string;
   dob?: string;
   username: string;
-  email: string;
+  email?: string;
   phone?: string;
   foodPreference?: string;
   createdAt?: string;
   updatedAt?: string;
 }
+
+export type FamilyMemberPayload = Omit<FamilyMember, "id" | "familyId">;
 
 export const createFamilyApi = async (data: FamilyPayload) => {
   const response = await api.post("/family", data);
@@ -38,6 +33,7 @@ export const createFamilyApi = async (data: FamilyPayload) => {
 };
 
 export const updateFamilyApi = async (id: number, data: FamilyPayload) => {
+  console.log('this is the dta while calling the update f🍈🍈🍈🍈🍈🍈🍈🍈🍈🍈🍈🍈🍈unction ; ', data);
   const response = await api.patch(`/family/${id}`, data);
   return response.data;
 };
@@ -56,7 +52,7 @@ export const addFamilyMemberApi = async (
   familyId: number,
   data: FamilyMemberPayload
 ) => {
-  const response = await api.post(`/family/${familyId}/member`, data);
+  const response = await api.post(`/family/${familyId}/member`, { ...data, name: data.username });
   return response.data;
 };
 
@@ -78,7 +74,7 @@ export const getFamilyMembersApi = async (familyId: number) => {
 export const updateFamilyMemberApi = async (
   familyId: number,
   memberId: number,
-  data: Partial<FamilyMemberPayload>
+  data: Partial<FamilyMember>
 ) => {
   console.log("✅", data);
   const response = await api.patch(
