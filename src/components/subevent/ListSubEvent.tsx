@@ -66,7 +66,13 @@ export default function ListSubEvent() {
       <TouchableOpacity
         className="bg-white rounded-2xl mb-3 overflow-hidden border border-gray-100 shadow-sm"
         activeOpacity={0.85}
-        onPress={() => {}}
+        onPress={() => {
+          router.push({
+            pathname:
+              "/(protected)/(client-stack)/events/[eventId]/(organizer)/(subevent)/[subEventId]/subevntdetail",
+            params: { eventId: eventId as string, subEventId: String(item.id) },
+          });
+        }}
       >
         {item.imageUrl ? (
           <Image
