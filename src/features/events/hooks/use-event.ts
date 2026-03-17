@@ -93,10 +93,7 @@ export const useCreateEvent = () => {
         queryClient.invalidateQueries({ queryKey: ["events/with-role"] }),
       ];
       if (variables.parentId) {
-        console.log(
-          "🚀 [useCreateEvent] Invalidating sub-events for parentId:",
-          variables.parentId
-        );
+     
         invalidations.push(
           queryClient.invalidateQueries({
             queryKey: ["sub-events", variables.parentId],

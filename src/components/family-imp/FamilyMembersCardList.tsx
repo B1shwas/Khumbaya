@@ -34,8 +34,6 @@ export default function FamilyMembersCardList({
   const handleDeletePress = (member: FamilyMember) => {
     const memberId = Number(member.id);
 
-    console.log(memberId);
-
     Alert.alert(
       "Delete Member",
       `Are you sure you want to delete ${member.username}?`,

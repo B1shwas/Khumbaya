@@ -123,7 +123,6 @@ export default function EditProfileScreen() {
       setSaveState("saved");
       setTimeout(() => router.back(), 600);
     } catch (error) {
-      console.error("Error saving profile:", error);
       setSaveState("idle");
       Alert.alert("Save Failed", "Please check your connection and try again.");
     }

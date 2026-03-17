@@ -272,7 +272,7 @@ export default function TimelinePage() {
   );
 
   const handleSaveEvent = (data: any) => {
-    console.log("Saved event data:", data);
+ 
     // Handle save logic here
   };
 

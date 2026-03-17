@@ -394,7 +394,6 @@ export const useSubEvent = (subEventId: string): UseSubEventReturn => {
     // Update in API
     await subEventApi.update(subEventId, subEventData);
 
-    console.log("Sub-event saved:", subEventData);
   }, [template, date, theme, budget, activities, subEventId]);
 
   return {

@@ -140,7 +140,6 @@ export default function GuestEventDetails() {
   const handleIndividualRsvp = () => {
     const me = responses[0];
 
-    console.log("🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀", me);
     if (me) {
       setDraft({
         userId: me.user_detail.id,

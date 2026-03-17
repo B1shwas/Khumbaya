@@ -208,11 +208,7 @@ export default function AccommodationManagement() {
   };
 
   const handleSave = () => {
-    console.log("Saving accommodation:", {
-      eventId,
-      selectedRoom,
-      rooms,
-    });
+
     Alert.alert("Saved!", "Accommodation details saved successfully!");
     router.back();
   };

@@ -42,8 +42,6 @@ export default function GuestListScreen() {
   );
   const { data: invitations, isLoading } = useGetInvitationsForEvent(eventId);
 
-  console.log("🙏🏻🙏🏻🙏🏻🙏🏻🙏🏻🙏🏻🙏🏻🙏🏻🙏🏻", invitations);
-
   const [activeTab, setActiveTab] = useState<GuestFilterTab>("all");
 
   const openAddGuestScreen = useCallback(() => {
@@ -225,7 +223,6 @@ export default function GuestListScreen() {
                 <GuestCard
                   guest={item.data}
                   onPress={() => {
-                    console.log("🚀🚀✅🚀🚀✅🚀🚀✅", item.data);
                     onPressGuestCard(item.data);
                   }}
                 />

@@ -17,7 +17,6 @@ import {
 export default function CreateSubEventScreen() {
   const router = useRouter();
   const { eventId } = useLocalSearchParams();
-  console.log("🙏🏻", eventId);
   const queryClient = useQueryClient();
   const { mutateAsync: createEvent } = useCreateEvent();
   const [loading, setLoading] = useState(false);

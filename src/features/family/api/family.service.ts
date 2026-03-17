@@ -1,4 +1,5 @@
 import api from "@/src/api/axios";
+import { User } from "@/store/AuthStore";
 
 export interface FamilyPayload {
   familyName: string;
@@ -11,19 +12,7 @@ export interface Family {
   updatedAt?: string;
 }
 
-
-export interface FamilyMember {
-  id?: number;
-  familyId: number;
-  relation: string;
-  dob?: string;
-  username: string;
-  email?: string;
-  phone?: string;
-  foodPreference?: string;
-  createdAt?: string;
-  updatedAt?: string;
-}
+export type FamilyMember = User;
 
 export type FamilyMemberPayload = Omit<FamilyMember, "id" | "familyId">;
 
@@ -33,7 +22,6 @@ export const createFamilyApi = async (data: FamilyPayload) => {
 };
 
 export const updateFamilyApi = async (id: number, data: FamilyPayload) => {
-  console.log('this is the dta while calling the update f🍈🍈🍈🍈🍈🍈🍈🍈🍈🍈🍈🍈🍈unction ; ', data);
   const response = await api.patch(`/family/${id}`, data);
   return response.data;
 };
@@ -76,7 +64,6 @@ export const updateFamilyMemberApi = async (
   memberId: number,
   data: Partial<FamilyMember>
 ) => {
-  console.log("✅", data);
   const response = await api.patch(
     `/family/${familyId}/member/${memberId}`,
     data

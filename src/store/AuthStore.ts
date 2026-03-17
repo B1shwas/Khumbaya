@@ -56,13 +56,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       // ✅ If token exists, validate it with backend
       if (token) {
         try {
-          // Temporarily set token so axios interceptor can use it
+      
           set({ token, user, isLoading: true });
-
-          // Validate token by fetching user profile
           const profileData = await getUserProfile();
 
-          // Token is valid! Update with full profile data
           user = {
             id: profileData.id,
             email: profileData.email,
