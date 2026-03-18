@@ -98,7 +98,7 @@ export default function LoginPage() {
 
     login(loginPayload, {
       onSuccess: (data) => {
-        console.log("Login successful:", data)
+     
       },
     });
   }, [isLoginDisabled, isPending, login, phone, password]);

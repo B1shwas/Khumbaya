@@ -20,7 +20,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 export default function ViewGuestDetail() {
   const router = useRouter();
   const guestDetail = useGuestDetailStore((state) => state.guestDraft);
-  console.log("🚀🚀🚀🚀🚀🚀🚀", guestDetail);
 
   const eventId = Number(guestDetail?.event_guest?.eventId ?? 0);
   const { mutate: submitRsvpResponse, isPending } =
@@ -32,8 +31,6 @@ export default function ViewGuestDetail() {
     guestDetail?.event_guest?.pickup_info ??
     "";
   const initialDepartureInfo = guestDetail?.event_guest?.departure_info ?? "";
-  console.log("fiwofjwef", guestDetail?.event_guest);
-
   const [assignedRoom, setAssignedRoom] = useState(initialRoom);
   const [arrivalInfo, setArrivalInfo] = useState(initialArrivalInfo);
   const [departureInfo, setDepartureInfo] = useState(initialDepartureInfo);

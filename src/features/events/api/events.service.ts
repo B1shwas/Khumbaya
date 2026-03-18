@@ -123,7 +123,7 @@ const mapInvitationToEvent = (item: InvitationItem): Event => {
 };
 
 export const createEventApi = async (data: CREATEEVENT) => {
-  console.log("🚀 [createEventApi] Payload:", data);
+  
   const response = await api.post("/event", data);
   return response.data;
 };
@@ -163,14 +163,11 @@ export const getUpcomingEventsApi = async ({
 export const getInvitedEvent = async () => {
   const response = await api.get("/rsvp/invitations");
   const payload = response.data?.data;
-  console.log("🚀 [getInvitedEvent] API Response:", payload?.items);
-
+  
   if (Array.isArray(payload?.items)) {
     const mapped: Event[] = payload.items
       .map(mapInvitationToEvent)
       .filter((event: Event) => Boolean(event.id));
-
-    console.warn("🚀 [getInvitedEvent] Mapped events:", mapped);
     return mapped;
   }
 
@@ -242,11 +239,7 @@ export const submitRsvpResponseApi = async (
   eventId: number,
   payload: RsvpResponsePayload
 ) => {
-  console.log(
-    "✅Submitting thr rsvp responve with the atpyl",
-    eventId,
-    payload
-  );
+
   const response = await api.post(`invitation/responce/${eventId}`, payload);
   return response.data;
 };

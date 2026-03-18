@@ -127,9 +127,7 @@ export default function EventCreate() {
         "https://images.unsplash.com/photo-1519741497674-611481863552?w=1200&q=80",
     };
 
-    console.log(
-      `This is the payload in the on success in the backend ${payload.startDateTime}`
-    );
+   
     createEvent(payload, {
       onSuccess: () => {
         router.push("/(protected)/(client-tabs)/events");
@@ -157,7 +155,6 @@ export default function EventCreate() {
 
   const handleCoverPress = () => {
     // TODO: Backend Integration - Image picker
-    console.log("Open image picker for cover image");
   };
   return (
     <SafeAreaView className="flex-1 bg-[#f8f6f7]">

@@ -19,14 +19,12 @@ export const inviteGuest = async (
   eventId: number,
   payload: InviteGuestPayload
 ) => {
-  console.log("This is the data ", eventId, payload);
   const response = await api.post(`/event/${eventId}/invite`, payload);
   return response.data;
 };
 
 export const getEventGuest = async (eventId: number) => {
   const response = await api.get(`/event/guest/${eventId}`);
-  console.warn("🚀 [getEventGuest] API Response:", response.data);
   return response.data.data;
 };
 export const getInvitation = async (eventId: number) => {
