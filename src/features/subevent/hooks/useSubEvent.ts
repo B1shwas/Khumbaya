@@ -1,14 +1,14 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-    createSubEventApi,
-    CreateSubEventPayload,
-    deleteSubEventApi,
-    getSubEventById,
-    getSubEventsApi,
-    getSubEventTemplatesApi,
-    SubEvent,
-    updateSubEventApi,
-    UpdateSubEventPayload,
+  createSubEventApi,
+  CreateSubEventPayload,
+  deleteSubEventApi,
+  getSubEventById,
+  getSubEventsApi,
+  getSubEventTemplatesApi,
+  SubEvent,
+  updateSubEventApi,
+  UpdateSubEventPayload,
 } from "../api/subEvent.service";
 
 export interface SubEventQueryOptions {
@@ -132,12 +132,21 @@ export const useCreateSubEventOptimistic = () => {
       ]);
 
       const optimisticSubEvent: SubEvent = {
-        id: Date.now() as unknown as number,
+        id: `temp-${Date.now()}`,
+        title: newSubEvent.title,
+        date: newSubEvent.date,
+        theme: newSubEvent.theme ?? "",
+        budget: newSubEvent.budget,
+        startDateTime: newSubEvent.startDateTime ?? "",
+        endDateTime: newSubEvent.endDateTime ?? "",
+        location: newSubEvent.location ?? "",
+        venue: newSubEvent.location ?? "",
+        imageUrl: newSubEvent.imageUrl ?? "",
+        role: "Organizer",
+        status: "upcoming",
+        time: "",
         eventId: newSubEvent.eventId,
         templateId: newSubEvent.templateId,
-        date: newSubEvent.date,
-        theme: newSubEvent.theme,
-        budget: newSubEvent.budget,
         activities: newSubEvent.activities,
         createdAt: new Date().toISOString(),
       };
