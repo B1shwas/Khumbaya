@@ -1,9 +1,6 @@
 import { Text } from "@/src/components/ui/Text";
 import { useEventById } from "@/src/features/events/hooks/use-event";
-import {
-
-  formatTime,
-} from "@/src/utils/helper";
+import { formatTime } from "@/src/utils/helper";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import {
@@ -39,14 +36,8 @@ export default function SubEventDetailScreen() {
   const { subEventId, eventId } = useLocalSearchParams();
 
   const parsedSubEventId = Number(subEventId);
-  const isValidId = !isNaN(parsedSubEventId) && parsedSubEventId > 0;
 
-  const { data: subEvent, isLoading } = useEventById(parsedSubEventId, {
-    enabled: isValidId,
-  });
-
-  
-
+  const { data: subEvent, isLoading } = useEventById(parsedSubEventId);
 
   if (isLoading) {
     return (
@@ -175,7 +166,7 @@ export default function SubEventDetailScreen() {
 
           <View className="bg-gray-50 p-4 rounded-xl mb-4">
             <Text className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
-              📅 Date & Time
+              Date & Time
             </Text>
 
             <View className="flex-row items-start gap-3">
@@ -195,7 +186,7 @@ export default function SubEventDetailScreen() {
 
           <View className="bg-gray-50 p-4 rounded-xl mb-4">
             <Text className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
-              📍 Location
+              Location
             </Text>
 
             {subEvent?.location ? (
@@ -233,18 +224,9 @@ export default function SubEventDetailScreen() {
               </View>
               <Ionicons name="chevron-forward" size={20} color="white" />
             </TouchableOpacity>
-
-          
-          </View>
-
-          <View className="mt-6 pt-4 border-t border-gray-100">
-            <Text className="text-xs text-gray-400 text-center">
-              Sub-Event ID: {subEvent?.id}
-            </Text>
           </View>
         </View>
       </ScrollView>
     </SafeAreaView>
   );
 }
-

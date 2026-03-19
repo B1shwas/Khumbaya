@@ -177,17 +177,13 @@ interface UseEventByIdOptions {
   enabled?: boolean;
 }
 
-export const useEventById = (
-  eventId: number,
-  options?: UseEventByIdOptions
-) => {
+export const useEventById = (eventId: number) => {
   return useQuery({
     queryKey: ["event", eventId],
     queryFn: async () => {
       const events = await getEventById(eventId);
       return events;
     },
-    enabled: options?.enabled ?? true,
   });
 };
 
