@@ -76,7 +76,7 @@ export default function ProfileScreen() {
           {/* PROFILE */}
           <View className="items-center bg-white py-6">
             <AvatarPicker
-              name={user?.username || "User"}
+              name={user?.username || "USER"}
               onPick={handlePickAvatar}
               size="large"
               showEditButton={true}

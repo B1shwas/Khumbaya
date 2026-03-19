@@ -23,9 +23,18 @@ export default function FamilyMembersCardList({
   const { user } = useAuthStore();
 
   const selfItem = members.find((i) => i.id === user?.id);
+  const filteredArray = members.filter((i) => i.id !== user?.id);
+  console.log(
+    "🐽🐽🐽🐽🐽🐽🐽🐽🐽🐽🐽🐽",
+    selfItem,
+    user?.id,
+    "🐽",
+    filteredArray
+  );
+
   const sortedArrayWithCreatorAtTop = [
     ...(selfItem ? [selfItem] : []),
-    ...members.filter((i) => i.relation?.toLowerCase() !== "self"),
+    ...filteredArray,
   ];
 
   const { mutate: deleteMember, isPending: isDeleting } =
@@ -94,7 +103,7 @@ export default function FamilyMembersCardList({
       {/* Member Cards */}
       {sortedArrayWithCreatorAtTop.map((member, index) => (
         <View
-        key={index}
+          key={index}
           className="bg-white rounded-2xl p-4 mb-3 border border-gray-200 flex-row items-center gap-4"
         >
           <AvatarPicker
