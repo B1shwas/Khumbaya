@@ -2,13 +2,12 @@ import NavigateComponent from "@/src/components/event/NavigateComponent";
 import ToggleBar from "@/src/components/ui/ToggleBar";
 import { Event } from "@/src/constants/event";
 import { useGetEventWithRole } from "@/src/features/events/hooks/use-event";
-import { Ionicons } from "@expo/vector-icons";
 import {
   RelativePathString,
   useLocalSearchParams,
-  useRouter
+  useRouter,
 } from "expo-router";
-import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { ScrollView, Text, View } from "react-native";
 import EventDetailHero from "./EventDetailHero";
 
 const EventDetail = () => {
@@ -45,11 +44,11 @@ const EventDetail = () => {
 
   const manageActions = [
     {
-      id: "timeline",
-      name: "Timeline",
-      icon: "time",
+      id: "hotel-management",
+      name: "Hotel Management",
+      icon: "bed-outline",
       color: "#F59E0B",
-      route: `./timeline`,
+      route: `./hotel-management`,
     },
     {
       id: "guests",
@@ -80,11 +79,11 @@ const EventDetail = () => {
       route: `./sub-event`,
     },
     {
-      id: "tables",
-      name: "Table Plan",
-      icon: "tablet-landscape",
+      id: "checklist",
+      name: "Checklist",
+      icon: "checkmark-circle-outline",
       color: "#EC4899",
-      route: `../(table)/table-management`,
+      route: `./checklist`,
     },
   ];
 
@@ -101,7 +100,6 @@ const EventDetail = () => {
         location={event.location}
       />
 
-
       {/* Main Navigation Grid */}
       <View className="  mt-6 px-4 pb-4">
         {/* dark:text-white removed */}
@@ -113,12 +111,22 @@ const EventDetail = () => {
 
           {/* Gallery - Full Width */}
           {/* Component with the Titleicon and the description Gallery , Upload & Share photos */}
-          <ToggleBar title="Gallery" description="Upload & Share Photos" iconstring="images" onPress={() => {
-            router.push("./gallery" as RelativePathString)
-          }} />
-          <ToggleBar title="Event Details" description="Complete Event Information" iconstring="create" onPress={() => {
-            router.push("./" as RelativePathString)
-          }} />
+          <ToggleBar
+            title="Gallery"
+            description="Upload & Share Photos"
+            iconstring="images"
+            onPress={() => {
+              router.push("./gallery" as RelativePathString);
+            }}
+          />
+          <ToggleBar
+            title="Event Details"
+            description="Complete Event Information"
+            iconstring="create"
+            onPress={() => {
+              router.push("./" as RelativePathString);
+            }}
+          />
         </View>
       </View>
 
