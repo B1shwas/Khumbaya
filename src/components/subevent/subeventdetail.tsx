@@ -116,8 +116,8 @@ export default function SubEventDetailScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-white">
-      <View className="flex-row items-center justify-between px-4 py-3 border-b border-gray-100">
-        <TouchableOpacity
+   
+        {/* <TouchableOpacity
           onPress={() => router.back()}
           className="flex-row items-center"
         >
@@ -125,12 +125,12 @@ export default function SubEventDetailScreen() {
           <Text className="ml-2 text-base font-semibold text-gray-700">
             Back
           </Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
 
-        <TouchableOpacity className="p-2">
+        {/* <TouchableOpacity className="p-2">
           <Ionicons name="pencil" size={22} color="#6b7280" />
-        </TouchableOpacity>
-      </View>
+        </TouchableOpacity> */}
+   
 
       <ScrollView showsVerticalScrollIndicator={false}>
         <View className="relative">
