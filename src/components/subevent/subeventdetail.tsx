@@ -274,43 +274,7 @@ export default function SubEventDetailScreen() {
               <Ionicons name="chevron-forward" size={20} color="white" />
             </TouchableOpacity>
 
-            <TouchableOpacity className="bg-white border border-gray-200 p-4 rounded-xl flex-row justify-between items-center">
-              <View className="flex-row items-center gap-3">
-                <Ionicons name="people-outline" size={20} color="#374151" />
-                <Text className="text-gray-700 font-semibold">
-                  Manage Vendors
-                </Text>
-              </View>
-              <Ionicons name="chevron-forward" size={20} color="#9ca3af" />
-            </TouchableOpacity>
-
-            <TouchableOpacity className="bg-white border border-gray-200 p-4 rounded-xl flex-row justify-between items-center">
-              <View className="flex-row items-center gap-3">
-                <Ionicons name="person-add-outline" size={20} color="#374151" />
-                <Text className="text-gray-700 font-semibold">Guest List</Text>
-              </View>
-              <Ionicons name="chevron-forward" size={20} color="#9ca3af" />
-            </TouchableOpacity>
-
-            <TouchableOpacity className="bg-white border border-gray-200 p-4 rounded-xl flex-row justify-between items-center">
-              <View className="flex-row items-center gap-3">
-                <Ionicons name="time-outline" size={20} color="#374151" />
-                <Text className="text-gray-700 font-semibold">
-                  Timeline / Agenda
-                </Text>
-              </View>
-              <Ionicons name="chevron-forward" size={20} color="#9ca3af" />
-            </TouchableOpacity>
-
-            <TouchableOpacity className="bg-white border border-gray-200 p-4 rounded-xl flex-row justify-between items-center">
-              <View className="flex-row items-center gap-3">
-                <Ionicons name="checkbox-outline" size={20} color="#374151" />
-                <Text className="text-gray-700 font-semibold">
-                  Tasks & Checklist
-                </Text>
-              </View>
-              <Ionicons name="chevron-forward" size={20} color="#9ca3af" />
-            </TouchableOpacity>
+          
           </View>
 
           <View className="mt-6 pt-4 border-t border-gray-100">
@@ -323,3 +287,4 @@ export default function SubEventDetailScreen() {
     </SafeAreaView>
   );
 }
+
