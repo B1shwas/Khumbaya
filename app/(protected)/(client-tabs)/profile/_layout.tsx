@@ -1,4 +1,6 @@
+import { Ionicons } from "@expo/vector-icons";
 import { Stack } from "expo-router";
+import Pressable from "react-native-gesture-handler/lib/typescript/components/Pressable";
 
 export default function ProfileLayout() {
   return (
@@ -9,6 +11,7 @@ export default function ProfileLayout() {
     >
       <Stack.Screen
         name="index"
+        
         options={{
           headerShown: true,
           headerTitle: "My Profile",

@@ -1,19 +1,17 @@
 import { Button } from "@/src/components/ui/Button";
 import { Text } from "@/src/components/ui/Text";
+import { COUNTRY_DATA } from "@/src/constants/countrydata";
 import { useSignup } from "@/src/features/user/api/use-user";
 import { MaterialIcons } from "@expo/vector-icons";
 import { Link, useRouter } from "expo-router";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
-  KeyboardAvoidingView,
-  Platform,
-  Pressable,
-  TextInput,
-  TouchableOpacity,
-  View,
+  Image, KeyboardAvoidingView,
+  Platform, Pressable, TextInput, TouchableOpacity, View
 } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import { CountryOption, CountryPickerModal } from "../ui/CountryPhone";
 
 type SignupDashboardFormData = {
   username: string;
@@ -45,9 +43,14 @@ export default function SignupDashboard() {
   });
 
   const agreedToTerms = watch("agreedToTerms");
+const [selectedCountry, setSelectedCountry] = useState<CountryOption>(COUNTRY_DATA[0]);
+    const [pickerVisible, setPickerVisible] = useState(false);
+   const phone = watch("phone");
+    const digits = phone.replace(/\D/g, "");
+  const fullPhone = `+${selectedCountry.dialCode}-${digits}`;
 
   const handleSignUp = handleSubmit((formData) => {
-    const { agreedToTerms: _, ...signupData } = formData;
+    const { agreedToTerms: _, ...signupData } = {...formData,phone:fullPhone};
 
     signup(signupData, {
       onSuccess: () => {
@@ -55,7 +58,7 @@ export default function SignupDashboard() {
       },
     });
   });
-
+  
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
@@ -76,6 +79,7 @@ export default function SignupDashboard() {
         extraScrollHeight={40}
         scrollEnabled={true}
       >
+     
         <View className="pt-4">
           <Text className="text-3xl font-jakarta-bold text-text-light">
             Let's get started
@@ -84,6 +88,12 @@ export default function SignupDashboard() {
             Enter your details to begin planning your dream event.
           </Text>
         </View>
+           <CountryPickerModal
+          visible={pickerVisible}
+          selected={selectedCountry}
+          onSelect={setSelectedCountry}
+          onClose={() => setPickerVisible(false)}
+        />
 
         <View className="gap-6 pt-6">
           <View className="gap-2">
@@ -142,25 +152,47 @@ export default function SignupDashboard() {
             )}
           </View>
 
-          <View className="gap-2">
-            <Text className="text-xs font-jakarta-semibold uppercase tracking-wider text-text-light">
-              Phone Number
-            </Text>
-            <Controller
-              control={control}
-              name="phone"
-              render={({ field: { value, onChange: onFieldChange } }) => (
-                <TextInput
-                  value={value}
-                  onChangeText={onFieldChange}
-                  placeholder="9761890004"
-                  placeholderTextColor="#896175"
-                  keyboardType="phone-pad"
-                  className="h-14 rounded-xl border border-border bg-white px-4 text-base text-text-light"
+        
+            <View>
+              <Text className="mb-1 ml-1 text-xs font-semibold uppercase tracking-wider text-text-light">
+                Phone number
+              </Text>
+              <View className="h-14 flex-row items-center rounded-md border border-gray-200 bg-white overflow-hidden">
+
+                {/* Country trigger — opens full-screen modal */}
+              <Pressable
+                onPress={() =>setPickerVisible(true)}
+                    className="h-full flex-row items-center gap-1.5 px-3 border-r border-gray-200">
+
+                  <Image
+                    source={selectedCountry.image}
+                    style={{ width: 26, height: 18, borderRadius: 3 }}
+                    resizeMode="cover"
+                  />
+                  <Text className="text-sm font-medium text-gray-800">
+                    +{selectedCountry.dialCode}
+                  </Text>
+                      <MaterialIcons name="arrow-drop-down" size={18} color="#9ca3af" />
+
+                </Pressable>
+
+                <Controller
+                  control={control}
+                  name="phone"
+                  render={({ field: { onChange, value } }) => (
+                    <TextInput
+                      value={value}
+                      onChangeText={onChange}
+                      placeholder="Enter phone number"
+                      placeholderTextColor="#896175"
+                      keyboardType="phone-pad"
+                      editable={true}
+                      className="flex-1 px-4 text-base text-text-light"
+                    />
+                  )}
                 />
-              )}
-            />
-          </View>
+                </View>
+              </View>
 
           <View className="gap-2">
             <Text className="text-xs font-jakarta-semibold uppercase tracking-wider text-text-light">

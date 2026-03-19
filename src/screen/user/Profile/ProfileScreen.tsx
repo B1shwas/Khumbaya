@@ -52,68 +52,65 @@ export default function ProfileScreen() {
     }
   };
 
-  const avatarUri = user?.photo;
 
-  return (
-    <>
-      <Stack.Screen
-        options={{
-          headerRight: () => (
-            <Pressable
-              onPress={handleLogout}
-              className="px-2 py-1"
-              accessibilityRole="button"
-              accessibilityLabel="Log out"
-            >
-              <Ionicons name="log-out-outline" size={22} />
-            </Pressable>
-          ),
-        }}
-      />
+  return (<>
 
-      <View className="bg-white">
-        <ScrollView showsVerticalScrollIndicator={false}>
-          {/* PROFILE */}
-          <View className="items-center bg-white py-6">
-            <AvatarPicker
-              name={user?.username || "USER"}
-              onPick={handlePickAvatar}
-              size="large"
-              showEditButton={true}
-              showName={false}
-            />
+    <Stack.Screen
+      options={{
+        headerRight: () => (
+          <Pressable
+            onPress={handleLogout}
+            className="px-2 py-1"
+            accessibilityRole="button"
+            accessibilityLabel="Log out"
+          >
+            <Ionicons name="log-out-outline" size={22} />
+          </Pressable>
+        ),
+      }}
+    >
+    </Stack.Screen>
 
-            <Text className="text-2xl font-bold mt-4 text-gray-900">
-              {user?.username || "User"}
-            </Text>
 
-            <Text className="text-gray-500 text-sm">{user?.email}</Text>
-            <Text className="text-gray-500 text-sm">{user?.phone}</Text>
-          </View>
 
-          <View className="mx-6 bg-white rounded-2xl p-1 flex-row shadow-sm">
-            <ToggleButton
-              title=" Business"
-              active={tab === "account"}
-              onPress={() => setTab("account")}
-            />
-            <ToggleButton
-              title="Account"
-              active={tab === "info"}
-              onPress={() => setTab("info")}
-            />
-          </View>
+    <ScrollView showsVerticalScrollIndicator={false} className="px-2  bg-white pb-11">
+      {/* PROFILE */}
+      <View className="items-center bg-white py-6">
+        <AvatarPicker
+          name={user?.username || "User"}
+          onPick={handlePickAvatar}
+          size="large"
+          showEditButton={true}
+          showName={false}
+        />
 
-          {tab === "account" ? <Account /> : <Info />}
+        <Text className="text-2xl font-bold mt-4 text-gray-900">
+          {user?.username || "User"}
+        </Text>
 
-          {/* <Pressable className="mx-6 mt-10 mb-20" onPress={handleLogout}>
-          <View className="bg-pink-500 rounded-2xl py-4 items-center">
-            <Text className="text-white font-bold text-lg">Log Out</Text>
-          </View>
-        </Pressable> */}
-        </ScrollView>
+        <Text className="text-gray-500 text-sm">{user?.email}</Text>
+        <Text className="text-gray-500 text-sm">{user?.phone}</Text>
       </View>
-    </>
+
+      <View className="mx-6 bg-white rounded-2xl p-1 flex-row shadow-sm">
+        <ToggleButton
+          title=" Business"
+          active={tab === "account"}
+          onPress={() => setTab("account")}
+        />
+        <ToggleButton
+          title="Account"
+          active={tab === "info"}
+          onPress={() => setTab("info")}
+        />
+      </View>
+
+      {tab === "account" ? <Account /> : <Info />}
+
+
+    </ScrollView>
+
+  </>
   );
 }
 
@@ -152,13 +149,17 @@ const ToggleButton = ({ title, active, onPress }: ToggleButtonProps) => {
 
 const Row = ({ icon, title, href }: RowProps & { href: string }) => (
   <Link href={href as any} asChild>
-    <Pressable className="flex-row items-center justify-between bg-white p-4 rounded-2xl mb-3 shadow-sm active:scale-[0.98]">
-      <View className="flex-row items-center gap-3">
+    <Pressable className="flex-row items-center justify-between border border-gray-200 p-4 rounded-md  mb-3 shadow-sm active:scale-[0.98]">
+
+      <View className="flex-row items-center gap-4">
         <LinearGradient
           colors={["#ec489933", "#db277733"]}
-          className="p-2 rounded-xl"
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={{ borderRadius: 9999 }}
+          className="p-2 border border-gray-200 rounded-full"
         >
-          <MaterialIcons name={icon} size={20} color="#ec4899" />
+          <MaterialIcons name={icon} size={24} color="#ec4899" />
         </LinearGradient>
 
         <Text className="font-semibold text-gray-900">{title}</Text>

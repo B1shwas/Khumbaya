@@ -44,15 +44,9 @@ export const toISODateString = (
   if (!date) return "";
   const parsed = typeof date === "string" ? new Date(date) : date;
   if (Number.isNaN(parsed.getTime())) return "";
-  return parsed.toISOString().split("T")[0];
-};
-
-export const toIsoDate = (rawDate: string): string | null => {
-  if (!rawDate) return null;
-  const parsed = new Date(rawDate);
-  if (Number.isNaN(parsed.getTime())) return null;
   return parsed.toISOString();
 };
+
 export function useDebounce<T>(value: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = useState<T>(value);
 

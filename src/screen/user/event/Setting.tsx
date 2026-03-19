@@ -1,4 +1,4 @@
-import ToggleBar from "@/src/components/ui/ToggleBar"
+import RowComponent from "@/src/components/ui/RowComponent"
 import { useLocalSearchParams, useRouter } from "expo-router"
 import { useMemo } from "react"
 import { View } from "react-native"
@@ -56,7 +56,7 @@ export default function EventSettingsScreen() {
   return (
     <View className="p-4 gap-3">
       {settingItems.map((item) => (
-        <ToggleBar
+        <RowComponent
           key={item.title}
           iconstring={item.iconstring}
           title={item.title}

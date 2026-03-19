@@ -1,7 +1,7 @@
 import api from "@/src/api/axios";
 import { User } from "@/store/AuthStore";
 
-export interface FamilyPayload {
+export interface FamilyCreatePayload {
   familyName: string;
 }
 
@@ -14,14 +14,23 @@ export interface Family {
 
 export type FamilyMember = User;
 
-export type FamilyMemberPayload = Omit<FamilyMember, "id" | "familyId">;
+export type AddFamilyMemberPayload = {
+  phone: string | undefined;
+  username: string;
+  email: string | undefined;
+  relation: string;
+  dob: Date;
+  foodPreference: string;
+};
 
-export const createFamilyApi = async (data: FamilyPayload) => {
+export type UpdateFamilyMemberPayload = Partial<FamilyMember>;
+
+export const createFamilyApi = async (data: FamilyCreatePayload) => {
   const response = await api.post("/family", data);
   return response.data;
 };
 
-export const updateFamilyApi = async (id: number, data: FamilyPayload) => {
+export const updateFamilyApi = async (id: number, data: FamilyCreatePayload) => {
   const response = await api.patch(`/family/${id}`, data);
   return response.data;
 };
@@ -38,7 +47,7 @@ export const getFamilyByIdApi = async (id: number) => {
 
 export const addFamilyMemberApi = async (
   familyId: number,
-  data: FamilyMemberPayload
+  data: AddFamilyMemberPayload
 ) => {
   const response = await api.post(`/family/${familyId}/member`, { ...data, name: data.username });
   return response.data;
@@ -62,8 +71,9 @@ export const getFamilyMembersApi = async (familyId: number) => {
 export const updateFamilyMemberApi = async (
   familyId: number,
   memberId: number,
-  data: Partial<FamilyMember>
+  data: UpdateFamilyMemberPayload
 ) => {
+  console.log("thiis it the u🍈🍈🍈🍈🍈🍈🍈🍈ser information that is going to be updated in the backend in the system of the user in thiis ", data);
   const response = await api.patch(
     `/family/${familyId}/member/${memberId}`,
     data

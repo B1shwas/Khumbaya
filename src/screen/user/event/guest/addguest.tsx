@@ -1,15 +1,21 @@
+import { CountryOption, CountryPickerModal } from "@/src/components/ui/CountryPhone";
 import { Text } from "@/src/components/ui/Text";
+import { COUNTRY_DATA } from "@/src/constants/countrydata";
 import { useInviteGuest } from "@/src/features/guests/api/use-guests";
 import { useFindUserWithPhone } from "@/src/features/user/api/use-user";
+import { User } from "@/src/store/AuthStore";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Controller, useForm, type FieldErrors } from "react-hook-form";
 import {
   ActivityIndicator,
   Alert,
+  Image,
   KeyboardAvoidingView,
   Platform,
+  Pressable,
   ScrollView,
   Switch,
   TextInput,
@@ -24,13 +30,7 @@ type AddGuestFormValues = {
   familyName: string;
 };
 
-type FoundUser = {
-  id?: number;
-  username?: string;
-  name?: string;
-  email?: string;
-  phone?: string;
-};
+type FoundUser = User;
 
 const AddGuestScreen = () => {
   const router = useRouter();
@@ -39,6 +39,8 @@ const AddGuestScreen = () => {
 
   const [inviteWithFamily, setInviteWithFamily] = useState(true);
   const [autoFilledPhone, setAutoFilledPhone] = useState<string | null>(null);
+  const [selectedCountry, setSelectedCountry] = useState<CountryOption>(COUNTRY_DATA[0]);
+  const [pickerVisible, setPickerVisible] = useState(false);
 
   const eventId = useMemo(() => {
     const raw = Array.isArray(params.eventId) ? params.eventId[0] : params.eventId;
@@ -55,18 +57,20 @@ const AddGuestScreen = () => {
   });
 
   const watchedPhone = watch("phone");
-  const trimmedWatchedPhone = watchedPhone.trim();
+  const phoneDigits = watchedPhone.replace(/\D/g, "");
 
   const shouldSearch = useMemo(() => {
-    return trimmedWatchedPhone.length > 0;
-  }, [trimmedWatchedPhone]);
+    return phoneDigits.length > 0;
+  }, [phoneDigits]);
+
+  const fullGuestPhone = `+${selectedCountry.dialCode}-${phoneDigits}`;
 
   const {
     data: foundUsersResponse,
     isFetching: isFindingUser,
     error: findUserError,
     isError: isFindUserError,
-  } = useFindUserWithPhone(trimmedWatchedPhone, {
+  } = useFindUserWithPhone(fullGuestPhone, {
     enabled: shouldSearch,
     debounceMs: 1000,
   });
@@ -84,20 +88,20 @@ const AddGuestScreen = () => {
   const isMatchedUser = shouldSearch && !isFindingUser && !!foundUser;
 
   useEffect(() => {
-    if (!trimmedWatchedPhone) {
+    if (!phoneDigits) {
       setAutoFilledPhone(null);
       return;
     }
-  }, [trimmedWatchedPhone]);
+  }, [phoneDigits]);
 
   useEffect(() => {
     if (isMatchedUser && foundUser) {
-      setValue("fullName", foundUser.username || foundUser.name || "", {
+      setValue("fullName", foundUser.username || "", {
         shouldValidate: true,
       });
-      setAutoFilledPhone(trimmedWatchedPhone);
+      setAutoFilledPhone(phoneDigits);
     }
-  }, [isMatchedUser, foundUser, trimmedWatchedPhone, setValue]);
+  }, [isMatchedUser, foundUser, phoneDigits, setValue]);
 
   useEffect(() => {
     if (shouldSearch && !isFindingUser && !foundUser && autoFilledPhone) {
@@ -129,22 +133,21 @@ const AddGuestScreen = () => {
         return;
       }
 
-      const currentPhone = values.phone.trim();
+      const currentPhone = fullGuestPhone.trim();
 
       if (!currentPhone) {
         Alert.alert("Error", "Please enter a phone number.");
         return;
       }
 
-      const isSearchComplete =
-        !isFindingUser && (!shouldSearch || trimmedWatchedPhone === currentPhone);
+      const isSearchComplete = !isFindingUser;
 
       if (!isSearchComplete) {
         Alert.alert("Please wait", "Wait for phone lookup to finish before sending invitation.");
         return;
       }
 
-      const resolvedName = foundUser?.username || foundUser?.name || values.fullName.trim();
+      const resolvedName = foundUser?.username || values.fullName.trim();
       const invitationName = values.familyName.trim() || resolvedName || currentPhone;
       const payloadFullName = resolvedName || invitationName;
 
@@ -158,12 +161,12 @@ const AddGuestScreen = () => {
           eventId,
           payload: {
             invitation_name: invitationName,
-            phone: currentPhone,
+            phone: fullGuestPhone,
             eventId,
             fullName: payloadFullName,
             isFamily: inviteWithFamily,
             role: "Guest",
-            category: "Friend",
+            category: inviteWithFamily ? "Family" : "Friend",
             status: "pending",
             isAccomodation: false,
           },
@@ -187,7 +190,7 @@ const AddGuestScreen = () => {
       reset,
       router,
       shouldSearch,
-      trimmedWatchedPhone,
+      phoneDigits,
     ]
   );
 
@@ -203,6 +206,12 @@ const AddGuestScreen = () => {
       behavior={Platform.OS === "ios" ? "padding" : undefined}
       keyboardVerticalOffset={Platform.OS === "ios" ? 16 : 0}
     >
+      <CountryPickerModal
+        visible={pickerVisible}
+        selected={selectedCountry}
+        onSelect={setSelectedCountry}
+        onClose={() => setPickerVisible(false)}
+      />
       <KeyboardAwareScrollView
         className="flex-1 "
         contentContainerStyle={{
@@ -268,14 +277,30 @@ const AddGuestScreen = () => {
                   },
                 }}
                 render={({ field: { onChange, value } }) => (
-                  <TextInput
-                    className="h-14 w-full rounded-md border border-slate-200 bg-white px-4 text-base text-slate-900"
-                    placeholder="9761890004"
-                    placeholderTextColor="#94a3b8"
-                    keyboardType="phone-pad"
-                    value={value}
-                    onChangeText={onChange}
-                  />
+                  <View className="h-14 w-full flex-row items-center overflow-hidden rounded-md border border-slate-200 bg-white">
+                    <Pressable
+                      onPress={() => setPickerVisible(true)}
+                      className="h-full flex-row items-center gap-1.5 border-r border-slate-200 px-3"
+                    >
+                      <Image
+                        source={selectedCountry.image}
+                        style={{ width: 26, height: 18, borderRadius: 3 }}
+                        resizeMode="cover"
+                      />
+                      <Text className="text-sm font-medium text-slate-800">
+                        +{selectedCountry.dialCode}
+                      </Text>
+                      <MaterialIcons name="arrow-drop-down" size={18} color="#94a3b8" />
+                    </Pressable>
+                    <TextInput
+                      className="flex-1 px-4 text-base text-slate-900"
+                      placeholder="9761890004"
+                      placeholderTextColor="#94a3b8"
+                      keyboardType="phone-pad"
+                      value={value}
+                      onChangeText={onChange}
+                    />
+                  </View>
                 )}
               />
               <View className="min-h-5 mt-1">
@@ -296,7 +321,7 @@ const AddGuestScreen = () => {
                     </View>
                     <View className="flex-1 flex-row justify-between">
                       <Text className="text-sm font-bold text-[#1a1b3a]">
-                        {foundUser?.username || foundUser?.name || "User found"}
+                        {foundUser?.username || "User found"}
                       </Text>
                       <Text className="text-xs text-black ">User Found</Text>
                     </View>
@@ -404,7 +429,7 @@ const AddGuestScreen = () => {
                 elevation: 6,
               }}
               activeOpacity={0.9}
-              disabled={inviteGuestMutation.isPending || isFindingUser || !trimmedWatchedPhone}
+              disabled={inviteGuestMutation.isPending || isFindingUser || !phoneDigits}
               onPress={handleSubmit(onValidSubmit, onInvalidSubmit)}
             >
               <Text className="text-base font-bold text-white">

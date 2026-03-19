@@ -1,14 +1,14 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as SecureStore from "expo-secure-store";
 import { create } from "zustand";
-import { API_BASE_URL } from "../config/env";
+import axios from "../api/axios";
 import { getUserProfile } from "../features/user/api/user.service";
 
 export type User = {
   id: number;
   username: string;
   info: any | null;
-  dob: string | null;
+  dob: Date | null;
   email: string;
   city: string | null;
   zip: string | null;
@@ -24,6 +24,7 @@ export type User = {
   phone: string;
   accountStatus: boolean | null;
   createdAt: Date | null;
+  isActivated: boolean;
   updatedAt: Date | null;
 };
 
@@ -56,7 +57,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       // ✅ If token exists, validate it with backend
       if (token) {
         try {
-      
+
           set({ token, user, isLoading: true });
           const profileData = await getUserProfile();
 
@@ -130,30 +131,19 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       console.warn("⚠️ [AuthStore] No token found, cannot fetch profile");
       return;
     }
-
     set({ isProfileLoading: true });
-
     try {
-      const response = await fetch(`${API_BASE_URL}/user/me`, {
+      const response = await axios.get(`/user/me`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
       });
+      console.log(response.data);
 
-      if (!response.ok) {
-        throw new Error(`Failed to fetch user profile: ${response.status}`);
-      }
-
-      const userData = await response.json();
-      console.log("✅ [AuthStore] Fetched user profile:", userData);
-
-      // Extract the actual user data from the response (API wraps data in { data: ... })
+      const userData = response.data
       const actualUserData = userData.data || userData;
-      console.log("✅ [AuthStore] User data extracted:", actualUserData);
-
-      // Update local storage and state
       await AsyncStorage.setItem("user", JSON.stringify(actualUserData));
       set({ user: actualUserData, isProfileLoading: false });
     } catch (error) {

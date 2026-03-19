@@ -1,13 +1,15 @@
 import api from "@/src/api/axios";
 import { UserLoginType, UserSignupType } from "@/src/features/user/types";
-import { useAuthStore } from "@/src/store/AuthStore";
+import { useAuthStore, User } from "@/src/store/AuthStore";
 import { useDebounce } from "@/src/utils/helper";
 import { ResponseFormat } from "@/src/utils/type/responce";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   createUserApi,
+  getFindUserWithPhone,
   getUserProfile,
   getUserWithPhone,
+  resetPasswordApi,
   updateUserMeApi,
   type UpdateUserMePayload,
 } from "./user.service";
@@ -15,10 +17,7 @@ import {
 interface LoginResponse {
   id: number;
   token: string;
-  user: {
-    name: string;
-    email: string;
-  };
+  user:User
 }
 
 export function useLogin() {
@@ -26,6 +25,7 @@ export function useLogin() {
 
   return useMutation({
     mutationFn: async (credentials: UserLoginType) => {
+       console.log('The informatin of the user trying to login is ',credentials);
       const { data } = await api.post<ResponseFormat<LoginResponse>>(
         "user/login",
         credentials
@@ -77,6 +77,7 @@ export function useProfile() {
         address: data.address ?? null,
         coverPhoto: data.coverPhoto ?? null,
         photo: data.photo ?? null,
+        isActivated: data.isActivated ?? false,
         familyId: data.familyId ?? null,
         relation: data.relation ?? null,
         foodPreference: data.foodPreference ?? null,
@@ -152,3 +153,20 @@ export function useFindUserWithPhone(
     },
   });
 }
+
+export function useResetPasswordMutation(){
+  return useMutation({
+    mutationFn: async (data:{userId:number , newPassword:string} )=>{
+      const user = await resetPasswordApi({userId:data.userId , newPassword:data.newPassword});
+      return user;
+    }
+  })
+}
+export function  usefindUserMutation(){
+   
+    return useMutation({
+      mutationFn: async (phoneNumber: string) => {
+        const user = await getFindUserWithPhone(phoneNumber);
+        return user;
+      }
+    });}

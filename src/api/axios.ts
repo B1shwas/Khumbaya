@@ -1,7 +1,5 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
-// import { useAuthStore } from "../store/useAuthStore"; // Zustand store (if you store token here)
 
-// Create axios instance
 import { API_BASE_URL } from "../config/env";
 import { useAuthStore } from "../store/AuthStore";
 export const api = axios.create({
@@ -11,16 +9,17 @@ export const api = axios.create({
     "Content-Type": "application/json",
   },
 });
+type ApiErrorData = {
+  message?: string;
+  error?: string;
+};
 
 api.interceptors.request.use(
   async (config: InternalAxiosRequestConfig) => {
-    // const token = Get the token from the auth stooree (if you have one)
-    const token = useAuthStore.getState().token; // Dummy token for now
-
+    const token = useAuthStore.getState().token; 
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-
     console.log("📡 API Request:", {
       method: config.method?.toUpperCase(),
       url: `${config.baseURL}${config.url}`,
@@ -30,8 +29,16 @@ api.interceptors.request.use(
 
     return config;
   },
-  (error: AxiosError) => {
-    return Promise.reject(error);
+  (error: AxiosError<ApiErrorData>) => {
+      const message = error.response?.data?.message?.split(":").slice(1).join(":").trim()
+      || error.response?.data?.error 
+      || error.message 
+      || "Something went wrong";
+    return Promise.reject({
+        ...error,
+      message,
+      isAxiosError: true,
+    });
   }
 );
 
@@ -41,7 +48,7 @@ api.interceptors.response.use(
     console.log("✅ Response:", response.status, response.data);
     return response;
   },
-  (error: any) => {
+  (error: AxiosError<ApiErrorData>) => {
     console.error(
       "❌ API Error:",
       error.response?.status,
@@ -52,7 +59,17 @@ api.interceptors.response.use(
       useAuthStore.getState().clearAuth();
     }
 
-    return Promise.reject(error);
+     const message =
+      error.response?.data?.message?.split(":").slice(1).join(":").trim() ||
+      error.response?.data?.error ||
+      error.message ||
+      "Something went wrong";
+
+    return Promise.reject({
+      ...error,
+      message,
+      isAxiosError: true,
+    });
   }
 );
 

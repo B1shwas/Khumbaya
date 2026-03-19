@@ -1,5 +1,5 @@
 import NavigateComponent from "@/src/components/event/NavigateComponent";
-import ToggleBar from "@/src/components/ui/ToggleBar";
+import Row from "@/src/components/ui/RowComponent";
 import { Event } from "@/src/constants/event";
 import { useGetEventWithRole } from "@/src/features/events/hooks/use-event";
 import {
@@ -32,6 +32,7 @@ const EventDetail = () => {
       time: "",
       startDateTime: "",
       endDateTime: "",
+
       days: 0,
       hours: 0,
       minutes: 0,
@@ -40,7 +41,7 @@ const EventDetail = () => {
       tasks: { pending: 0 },
       vendors: { booked: 0, pending: 0 },
       nextTask: "",
-    } as Event);
+    } );
 
   const manageActions = [
     {
@@ -106,27 +107,17 @@ const EventDetail = () => {
         <Text className="text-lg font-bold mb-3">Manage Event</Text>
         <View className="flex-row flex-wrap gap-3 justify-center">
           {manageActions.map((action) => (
-            <NavigateComponent key={action.id} {...action} />
+            <NavigateComponent key={action.id} {...action} className="" />
           ))}
 
           {/* Gallery - Full Width */}
           {/* Component with the Titleicon and the description Gallery , Upload & Share photos */}
-          <ToggleBar
-            title="Gallery"
-            description="Upload & Share Photos"
-            iconstring="images"
-            onPress={() => {
-              router.push("./gallery" as RelativePathString);
-            }}
-          />
-          <ToggleBar
-            title="Event Details"
-            description="Complete Event Information"
-            iconstring="create"
-            onPress={() => {
-              router.push("./" as RelativePathString);
-            }}
-          />
+          < Row title="Gallery" description="Upload & Share Photos" iconstring="images" onPress={() => {
+            router.push("./gallery" as RelativePathString)
+          }} />
+          <Row title="Event Details" description="Complete Event Information" iconstring="create" onPress={() => {
+            router.push("./" as RelativePathString)
+          }} />
         </View>
       </View>
 

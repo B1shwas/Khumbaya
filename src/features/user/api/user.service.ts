@@ -28,11 +28,14 @@ export const getUserApi = async () => {
   const response = await api.get("/user");
   return response.data;
 };
-export const getUserWithPhone = async (data: string) => {
+export const getUserWithPhone = async (data: string) => { // update this to make this the list not the find
   const responce = await api.get(`/user?phone=${data}`);
   return responce.data.data;
 }
-
+export const getFindUserWithPhone = async(data:string)=>{
+  const responce = await api.get(`/user/find?phone=${data}`);
+  return responce.data.data;
+}
 export const updateUserApi = async (data: any) => {
   const response = await api.patch("/user", data);
   return response.data;
@@ -51,7 +54,10 @@ export const updateUserMeApi = async (data: UpdateUserMePayload) => {
   const response = await api.patch("/user/me", payload);
   return response.data.data ?? response.data;
 };
-
+export const resetPasswordApi = async (data:{userId:number , newPassword:string} )=>{
+  const response = await api.post("user/resetPassword",data);
+  return response.data.data ; 
+}
 export const changePassword = async (data: {
   currentPassword: string;
   newPassword: string;

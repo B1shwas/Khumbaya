@@ -113,7 +113,6 @@ export default function EditProfileScreen() {
       updateUser({
         ...(updatedUser ?? {}),
         username: updatedUser?.username ?? payload.username,
-        name: updatedUser?.name ?? payload.username,
         email: updatedUser?.email ?? payload.email,
         phone: updatedUser?.phone ?? payload.phone,
         bio: updatedUser?.bio ?? payload.bio,
@@ -191,7 +190,7 @@ export default function EditProfileScreen() {
               Full Name
             </Text>
             <TextInput
-              className="bg-white rounded-xl px-4 py-3.5 text-sm text-gray-900 border border-gray-200"
+              className="bg-white rounded-md px-4 py-3.5 text-sm text-gray-900 border border-gray-200"
               placeholder="Enter your legal name"
               placeholderTextColor="#9CA3AF"
               value={form.name}
@@ -204,7 +203,7 @@ export default function EditProfileScreen() {
               Email Address <Text className="text-pink-500">*</Text>
             </Text>
             <TextInput
-              className={`bg-white rounded-xl px-4 py-3.5 text-sm text-gray-900 border ${errors.email ? "border-red-500" : "border-gray-200"}`}
+              className={`bg-white rounded-md px-4 py-3.5 text-sm text-gray-900 border ${errors.email ? "border-red-500" : "border-gray-200"}`}
               placeholder="name@example.com"
               placeholderTextColor="#9CA3AF"
               value={form.email}
@@ -222,7 +221,7 @@ export default function EditProfileScreen() {
               Phone Number
             </Text>
             <TextInput
-              className="bg-white rounded-xl px-4 py-3.5 text-sm text-gray-900 border border-gray-200"
+              className="bg-white rounded-md px-4 py-3.5 text-sm text-gray-900 border border-gray-200"
               placeholder="+977 98XXXXXXXX"
               placeholderTextColor="#9CA3AF"
               value={form.phone}
@@ -242,26 +241,21 @@ export default function EditProfileScreen() {
             <Text className="text-sm font-semibold text-gray-700 mb-2">
               Food Preference
             </Text>
-            <View className="flex-row gap-2 flex-wrap">
+            <View className="flex-row flex-wrap gap-2">
               {FOOD_OPTIONS.map((opt) => {
                 const active = form.foodPreference === opt;
                 return (
                   <TouchableOpacity
                     key={opt}
-                    className={`flex-1 min-w-[80px] items-center justify-center py-3 rounded-xl border ${
-                      active
-                        ? "bg-pink-500 border-pink-500"
-                        : "bg-white border-gray-200"
-                    }`}
+                    // Use w-[31%] to roughly simulate grid-cols-3 with gap
+                    className={`w-[31%] min-w-[80px] items-center justify-center px-2 py-1 h-10 rounded-full border ${active ? "bg-pink-500 border-pink-500" : "bg-white border-gray-200"
+                      }`}
                     onPress={() => set("foodPreference", opt)}
                   >
-                    <Text
-                      className={`text-xs font-medium ${active ? "text-white" : "text-gray-500"}`}
-                    >
+                    <Text className={`text-xs font-medium ${active ? "text-white" : "text-gray-500"}`}>
                       {opt}
                     </Text>
-                  </TouchableOpacity>
-                );
+                  </TouchableOpacity>);
               })}
             </View>
           </View>
@@ -278,7 +272,7 @@ export default function EditProfileScreen() {
               Bio
             </Text>
             <TextInput
-              className="bg-white rounded-xl px-4 py-3.5 text-sm text-gray-900 border border-gray-200 h-24"
+              className="bg-white rounded-md px-4 py-3.5 text-sm text-gray-900 border border-gray-200 h-24"
               style={{ textAlignVertical: "top" }}
               placeholder="Tell others about yourself, your profession, your interests…"
               placeholderTextColor="#9CA3AF"
@@ -296,7 +290,7 @@ export default function EditProfileScreen() {
 
           {/* Save Button */}
           <TouchableOpacity
-            className="bg-pink-500 rounded-xl py-4 flex-row items-center justify-center gap-2 mt-6 mb-4"
+            className="bg-pink-500 rounded-md py-4 flex-row items-center justify-center gap-2 mt-6 mb-4"
             onPress={handleSave}
             disabled={isSaving}
             activeOpacity={0.85}
