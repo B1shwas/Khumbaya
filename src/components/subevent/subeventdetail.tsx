@@ -2,38 +2,20 @@ import { Text } from "@/src/components/ui/Text";
 import { useEventById } from "@/src/features/events/hooks/use-event";
 import { formatTime } from "@/src/utils/helper";
 import { Ionicons } from "@expo/vector-icons";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 import {
   ActivityIndicator,
   Image,
   ScrollView,
-  TouchableOpacity,
-  View,
+  View
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-interface SubEventData {
-  id: number;
-  title: string;
-  type: string;
-  description: string;
-  imageUrl: string;
-  date: string;
-  startDateTime: string;
-  endDateTime: string;
-  location: string;
-  budget: number;
-  theme: string;
-  status: string;
-  organizer: number;
-  parentId: number;
-  createdAt: string;
-  updatedAt: string;
-}
-
 export default function SubEventDetailScreen() {
-  const router = useRouter();
-  const { subEventId, eventId } = useLocalSearchParams();
+  const { subEventId } = useLocalSearchParams<{
+    subEventId: string;
+    eventId: string;
+  }>();
 
   const parsedSubEventId = Number(subEventId);
 
@@ -58,12 +40,6 @@ export default function SubEventDetailScreen() {
         <Text className="mt-1 text-sm text-gray-500 text-center">
           This sub-event may have been deleted or doesn't exist.
         </Text>
-        <TouchableOpacity
-          className="mt-6 bg-pink-500 px-6 py-3 rounded-xl"
-          onPress={() => router.back()}
-        >
-          <Text className="text-white font-semibold">Go Back</Text>
-        </TouchableOpacity>
       </SafeAreaView>
     );
   }
@@ -74,59 +50,53 @@ export default function SubEventDetailScreen() {
     : 0;
 
   return (
-    <SafeAreaView>
+    <SafeAreaView className="flex-1 bg-white">
       <ScrollView showsVerticalScrollIndicator={false}>
-        <View className="relative">
+        <View className="relative mx-4 mt-4 rounded-2xl overflow-hidden shadow-lg">
           {subEvent?.imageUrl ? (
             <Image
               source={{ uri: subEvent.imageUrl }}
-              className="w-full h-56"
+              className="w-full h-64"
               resizeMode="cover"
             />
           ) : (
-            <View className="w-full h-56 bg-pink-50 items-center justify-center">
+            <View className="w-full h-64 bg-pink-50 items-center justify-center">
               <Ionicons name="image-outline" size={64} color="#f9a8d4" />
             </View>
           )}
 
-          <View className="absolute bottom-3 left-4 bg-white/90 px-3 py-2 rounded-lg">
-            <Text className="text-dark text-base font-semibold">
+          <View className="absolute bottom-0 left-0 right-0 h-32 bg-black/50" />
+
+          <View className="absolute bottom-4 left-4 right-4">
+            <View className="self-start bg-pink-500 px-3 py-1 rounded-full mb-2">
+              <Text className="text-white text-xs font-semibold">
+                SUB-EVENT
+              </Text>
+            </View>
+
+            {/* Title and Status - Horizontal */}
+            <View className="flex-row items-center justify-between">
+              <Text className="text-white text-xl font-bold flex-1">
+                {subEvent?.title}
+              </Text>
+              <Text className="text-white text-lg font-medium ml-2">
+                {subEvent?.status}
+              </Text>
+            </View>
+
+            {/* Time + Location */}
+            <Text className="text-white/90 text-sm mt-1">
               {formatTime(subEvent?.startDateTime)}
-            </Text>
-            <Text className="text-dark/70 text-sm">
-              {formatTime(subEvent?.startDateTime, "")}
-              {subEvent?.endDateTime &&
-                ` - ${formatTime(subEvent.endDateTime, "")}`}
-              {" • "}
-              {subEvent?.location || "Location TBD"}
+              {subEvent?.location && ` • ${subEvent.location}`}
             </Text>
           </View>
         </View>
 
+        {/* 📝 DESCRIPTION */}
         <View className="p-4">
-          <Text className="text-2xl font-bold text-dark-900">
-            {subEvent?.title}
-          </Text>
-
-          <View className="flex-row items-center gap-2 mt-2 mb-4">
-            <View className="px-3 py-1 bg-pink-100 rounded-full">
-              <Text className="text-xs text-pink-600 font-medium">
-                {subEvent?.type || "Sub-Event"}
-              </Text>
-            </View>
-
-            {subEvent?.status && (
-              <View className="px-3 py-1 rounded-full bg-green-100">
-                <Text className="text-xs font-medium capitalize text-green-700">
-                  {subEvent.status}
-                </Text>
-              </View>
-            )}
-          </View>
-
           {subEvent?.description && (
             <View className="mb-4">
-              <Text className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-1">
+              <Text className="text-sm font-semibold text-gray-500 uppercase mb-1">
                 Description
               </Text>
               <Text className="text-sm text-gray-700 leading-relaxed">
@@ -135,6 +105,7 @@ export default function SubEventDetailScreen() {
             </View>
           )}
 
+          {/* 💰 BUDGET */}
           {subEvent?.budget && subEvent.budget > 0 && (
             <View className="bg-gray-50 p-4 rounded-xl mb-4">
               <View className="flex-row justify-between items-center mb-2">
@@ -163,68 +134,6 @@ export default function SubEventDetailScreen() {
               </Text>
             </View>
           )}
-
-          <View className="bg-gray-50 p-4 rounded-xl mb-4">
-            <Text className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
-              Date & Time
-            </Text>
-
-            <View className="flex-row items-start gap-3">
-              <Ionicons name="calendar-outline" size={20} color="#6b7280" />
-              <View className="flex-1">
-                <Text className="text-sm font-medium text-gray-800">
-                  {formatTime(subEvent?.startDateTime)}
-                </Text>
-                {subEvent?.endDateTime && (
-                  <Text className="text-sm text-gray-500 mt-0.5">
-                    Ends: {formatTime(subEvent.endDateTime)}
-                  </Text>
-                )}
-              </View>
-            </View>
-          </View>
-
-          <View className="bg-gray-50 p-4 rounded-xl mb-4">
-            <Text className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
-              Location
-            </Text>
-
-            {subEvent?.location ? (
-              <View className="flex-row items-start gap-3">
-                <Ionicons name="location-outline" size={20} color="#6b7280" />
-                <View className="flex-1">
-                  <Text className="text-sm font-medium text-gray-800">
-                    {subEvent.location}
-                  </Text>
-                </View>
-              </View>
-            ) : (
-              <Text className="text-sm text-gray-400 italic">
-                Location not specified
-              </Text>
-            )}
-          </View>
-
-          <View className="mt-2 gap-3">
-            <TouchableOpacity
-              className="bg-gray-900 p-4 rounded-xl flex-row justify-between items-center"
-              onPress={() =>
-                router.push({
-                  pathname:
-                    "/(protected)/(client-stack)/events/[eventId]/(organizer)/settings",
-                  params: { eventId: String(eventId) },
-                })
-              }
-            >
-              <View className="flex-row items-center gap-3">
-                <Ionicons name="settings-outline" size={20} color="white" />
-                <Text className="text-white font-semibold">
-                  Sub-Event Settings
-                </Text>
-              </View>
-              <Ionicons name="chevron-forward" size={20} color="white" />
-            </TouchableOpacity>
-          </View>
         </View>
       </ScrollView>
     </SafeAreaView>
