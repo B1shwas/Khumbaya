@@ -1,4 +1,4 @@
 
-import subeventdetail from "@/src/screen/user/event/subevent/subeventdetail";
+import subeventdetail from "@/src/components/subevent/subeventdetail";
 
 export default subeventdetail;
