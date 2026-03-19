@@ -38,6 +38,35 @@ export const formatTime = (
   });
 };
 
+export const formatFullDateTime = (dateValue?: string) => {
+  if (!dateValue) return "TBD";
+
+  const parsed = new Date(dateValue);
+  if (Number.isNaN(parsed.getTime())) return "TBD";
+
+  return parsed.toLocaleDateString("en-US", {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
+
+export const formatShortDayDate = (dateValue?: string) => {
+  if (!dateValue) return "TBD";
+
+  const parsed = new Date(dateValue);
+  if (Number.isNaN(parsed.getTime())) return "TBD";
+
+  return parsed.toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "short",
+    day: "numeric",
+  });
+};
+
 export const toISODateString = (
   date: Date | string | null | undefined
 ): string => {

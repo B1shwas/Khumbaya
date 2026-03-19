@@ -93,7 +93,6 @@ export const useCreateEvent = () => {
         queryClient.invalidateQueries({ queryKey: ["events/with-role"] }),
       ];
       if (variables.parentId) {
-     
         invalidations.push(
           queryClient.invalidateQueries({
             queryKey: ["sub-events", variables.parentId],
@@ -174,13 +173,21 @@ export const useAcceptRsvpInvitation = () => {
   });
 };
 
-export const useEventById = (eventId: number) => {
+interface UseEventByIdOptions {
+  enabled?: boolean;
+}
+
+export const useEventById = (
+  eventId: number,
+  options?: UseEventByIdOptions
+) => {
   return useQuery({
     queryKey: ["event", eventId],
     queryFn: async () => {
       const events = await getEventById(eventId);
       return events;
     },
+    enabled: options?.enabled ?? true,
   });
 };
 

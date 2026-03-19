@@ -1,5 +1,10 @@
 import { Text } from "@/src/components/ui/Text";
-import { useSubEventsOfEvent } from "@/src/features/events/hooks/use-event";
+import { useEventById } from "@/src/features/events/hooks/use-event";
+import {
+  formatFullDateTime,
+  formatShortDayDate,
+  formatTime,
+} from "@/src/utils/helper";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import {
@@ -34,13 +39,54 @@ export default function SubEventDetailScreen() {
   const router = useRouter();
   const { subEventId, eventId } = useLocalSearchParams();
 
-  const { data: subEvents, isLoading } = useSubEventsOfEvent(
-    eventId ? Number(eventId) : 0
-  );
+  const parsedSubEventId = Number(subEventId);
+  const isValidId = !isNaN(parsedSubEventId) && parsedSubEventId > 0;
 
-  const subEvent = subEvents?.find(
-    (se: SubEventData) => se.id === Number(subEventId)
-  );
+  const { data: subEvent, isLoading } = useEventById(parsedSubEventId, {
+    enabled: isValidId,
+  });
+
+  // Show error if ID is invalid
+  if (!isValidId) {
+    return (
+      <SafeAreaView className="flex-1 bg-white items-center justify-center px-6">
+        <Ionicons name="alert-circle-outline" size={64} color="#ef4444" />
+        <Text className="mt-3 text-lg font-semibold text-gray-800 text-center">
+          Invalid Sub-Event ID
+        </Text>
+        <Text className="mt-1 text-sm text-gray-500 text-center">
+          The sub-event ID is missing or invalid.
+        </Text>
+        <TouchableOpacity
+          className="mt-6 bg-pink-500 px-6 py-3 rounded-xl"
+          onPress={() => router.back()}
+        >
+          <Text className="text-white font-semibold">Go Back</Text>
+        </TouchableOpacity>
+      </SafeAreaView>
+    );
+  }
+
+  // Validate that this is actually a sub-event (has parentId)
+  if (subEvent && !subEvent.parentId) {
+    return (
+      <SafeAreaView className="flex-1 bg-white items-center justify-center px-6">
+        <Ionicons name="alert-circle-outline" size={64} color="#ef4444" />
+        <Text className="mt-3 text-lg font-semibold text-gray-800 text-center">
+          Invalid Request
+        </Text>
+        <Text className="mt-1 text-sm text-gray-500 text-center">
+          This is a main event, not a sub-event.
+        </Text>
+        <TouchableOpacity
+          className="mt-6 bg-pink-500 px-6 py-3 rounded-xl"
+          onPress={() => router.back()}
+        >
+          <Text className="text-white font-semibold">Go Back</Text>
+        </TouchableOpacity>
+      </SafeAreaView>
+    );
+  }
 
   if (isLoading) {
     return (
@@ -71,67 +117,13 @@ export default function SubEventDetailScreen() {
     );
   }
 
-  const formatDate = (dateString?: string) => {
-    if (!dateString) return "TBD";
-    const date = new Date(dateString);
-    if (isNaN(date.getTime())) return "TBD";
-
-    return new Intl.DateTimeFormat("en-US", {
-      weekday: "short",
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    }).format(date);
-  };
-
-  const formatShortDate = (dateString?: string) => {
-    if (!dateString) return "TBD";
-    const date = new Date(dateString);
-    if (isNaN(date.getTime())) return "TBD";
-
-    return new Intl.DateTimeFormat("en-US", {
-      weekday: "long",
-      month: "short",
-      day: "numeric",
-    }).format(date);
-  };
-
-  const formatTime = (dateString?: string) => {
-    if (!dateString) return "";
-    const date = new Date(dateString);
-    if (isNaN(date.getTime())) return "";
-
-    return new Intl.DateTimeFormat("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-    }).format(date);
-  };
-
   const spent = subEvent?.budget ? subEvent.budget * 0.7 : 0;
   const percent = subEvent?.budget
     ? Math.min((spent / subEvent.budget) * 100, 100)
     : 0;
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
-   
-        {/* <TouchableOpacity
-          onPress={() => router.back()}
-          className="flex-row items-center"
-        >
-          <Ionicons name="arrow-back" size={24} color="#374151" />
-          <Text className="ml-2 text-base font-semibold text-gray-700">
-            Back
-          </Text>
-        </TouchableOpacity> */}
-
-        {/* <TouchableOpacity className="p-2">
-          <Ionicons name="pencil" size={22} color="#6b7280" />
-        </TouchableOpacity> */}
-   
-
+    <SafeAreaView>
       <ScrollView showsVerticalScrollIndicator={false}>
         <View className="relative">
           {subEvent?.imageUrl ? (
@@ -148,12 +140,12 @@ export default function SubEventDetailScreen() {
 
           <View className="absolute bottom-3 left-4 bg-white/90 px-3 py-2 rounded-lg">
             <Text className="text-dark text-base font-semibold">
-              {formatShortDate(subEvent?.startDateTime)}
+              {formatShortDayDate(subEvent?.startDateTime)}
             </Text>
             <Text className="text-dark/70 text-sm">
-              {formatTime(subEvent?.startDateTime)}
+              {formatTime(subEvent?.startDateTime, "")}
               {subEvent?.endDateTime &&
-                ` - ${formatTime(subEvent.endDateTime)}`}
+                ` - ${formatTime(subEvent.endDateTime, "")}`}
               {" • "}
               {subEvent?.location || "Location TBD"}
             </Text>
@@ -230,11 +222,11 @@ export default function SubEventDetailScreen() {
               <Ionicons name="calendar-outline" size={20} color="#6b7280" />
               <View className="flex-1">
                 <Text className="text-sm font-medium text-gray-800">
-                  {formatDate(subEvent?.startDateTime)}
+                  {formatFullDateTime(subEvent?.startDateTime)}
                 </Text>
                 {subEvent?.endDateTime && (
                   <Text className="text-sm text-gray-500 mt-0.5">
-                    Ends: {formatDate(subEvent.endDateTime)}
+                    Ends: {formatFullDateTime(subEvent.endDateTime)}
                   </Text>
                 )}
               </View>
@@ -300,7 +292,7 @@ export default function SubEventDetailScreen() {
               <Ionicons name="chevron-forward" size={20} color="#9ca3af" />
             </TouchableOpacity>
 
-             <TouchableOpacity className="bg-white border border-gray-200 p-4 rounded-xl flex-row justify-between items-center">
+            <TouchableOpacity className="bg-white border border-gray-200 p-4 rounded-xl flex-row justify-between items-center">
               <View className="flex-row items-center gap-3">
                 <Ionicons name="time-outline" size={20} color="#374151" />
                 <Text className="text-gray-700 font-semibold">
@@ -308,11 +300,9 @@ export default function SubEventDetailScreen() {
                 </Text>
               </View>
               <Ionicons name="chevron-forward" size={20} color="#9ca3af" />
-            </TouchableOpacity> 
+            </TouchableOpacity>
 
-          
-
-             <TouchableOpacity className="bg-white border border-gray-200 p-4 rounded-xl flex-row justify-between items-center">
+            <TouchableOpacity className="bg-white border border-gray-200 p-4 rounded-xl flex-row justify-between items-center">
               <View className="flex-row items-center gap-3">
                 <Ionicons name="checkbox-outline" size={20} color="#374151" />
                 <Text className="text-gray-700 font-semibold">
