@@ -1,8 +1,7 @@
 import { Text } from "@/src/components/ui/Text";
 import { useEventById } from "@/src/features/events/hooks/use-event";
 import {
-  formatFullDateTime,
-  formatShortDayDate,
+
   formatTime,
 } from "@/src/utils/helper";
 import { Ionicons } from "@expo/vector-icons";
@@ -46,47 +45,8 @@ export default function SubEventDetailScreen() {
     enabled: isValidId,
   });
 
-  // Show error if ID is invalid
-  if (!isValidId) {
-    return (
-      <SafeAreaView className="flex-1 bg-white items-center justify-center px-6">
-        <Ionicons name="alert-circle-outline" size={64} color="#ef4444" />
-        <Text className="mt-3 text-lg font-semibold text-gray-800 text-center">
-          Invalid Sub-Event ID
-        </Text>
-        <Text className="mt-1 text-sm text-gray-500 text-center">
-          The sub-event ID is missing or invalid.
-        </Text>
-        <TouchableOpacity
-          className="mt-6 bg-pink-500 px-6 py-3 rounded-xl"
-          onPress={() => router.back()}
-        >
-          <Text className="text-white font-semibold">Go Back</Text>
-        </TouchableOpacity>
-      </SafeAreaView>
-    );
-  }
+  
 
-  // Validate that this is actually a sub-event (has parentId)
-  if (subEvent && !subEvent.parentId) {
-    return (
-      <SafeAreaView className="flex-1 bg-white items-center justify-center px-6">
-        <Ionicons name="alert-circle-outline" size={64} color="#ef4444" />
-        <Text className="mt-3 text-lg font-semibold text-gray-800 text-center">
-          Invalid Request
-        </Text>
-        <Text className="mt-1 text-sm text-gray-500 text-center">
-          This is a main event, not a sub-event.
-        </Text>
-        <TouchableOpacity
-          className="mt-6 bg-pink-500 px-6 py-3 rounded-xl"
-          onPress={() => router.back()}
-        >
-          <Text className="text-white font-semibold">Go Back</Text>
-        </TouchableOpacity>
-      </SafeAreaView>
-    );
-  }
 
   if (isLoading) {
     return (
@@ -140,7 +100,7 @@ export default function SubEventDetailScreen() {
 
           <View className="absolute bottom-3 left-4 bg-white/90 px-3 py-2 rounded-lg">
             <Text className="text-dark text-base font-semibold">
-              {formatShortDayDate(subEvent?.startDateTime)}
+              {formatTime(subEvent?.startDateTime)}
             </Text>
             <Text className="text-dark/70 text-sm">
               {formatTime(subEvent?.startDateTime, "")}
@@ -222,11 +182,11 @@ export default function SubEventDetailScreen() {
               <Ionicons name="calendar-outline" size={20} color="#6b7280" />
               <View className="flex-1">
                 <Text className="text-sm font-medium text-gray-800">
-                  {formatFullDateTime(subEvent?.startDateTime)}
+                  {formatTime(subEvent?.startDateTime)}
                 </Text>
                 {subEvent?.endDateTime && (
                   <Text className="text-sm text-gray-500 mt-0.5">
-                    Ends: {formatFullDateTime(subEvent.endDateTime)}
+                    Ends: {formatTime(subEvent.endDateTime)}
                   </Text>
                 )}
               </View>
