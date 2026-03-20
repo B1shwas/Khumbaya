@@ -91,7 +91,7 @@ export default function SubEventDetailScreen() {
         <View className="px-4 pb-4">
           {subEvent?.description && (
             <View className="mb-4">
-              <Text className="text-sm font-semibold text-gray-500 uppercase mb-1">
+              <Text className="text-sm font-semibold text-gray-500 uppercase mb-1 mt-4">
                 Description
               </Text>
               <Text className="text-sm text-gray-700 leading-relaxed">
