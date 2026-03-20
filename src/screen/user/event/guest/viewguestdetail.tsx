@@ -159,37 +159,44 @@ export default function ViewGuestDetail() {
                   : "Pending"}{" "}
                 Guest • {guestDetail?.event_guest.role || "VVIP"}
               </Text>
-              <View className="flex-row items-center gap-2 mt-2">
-                <View>
-                  <View className="flex-row items-center">
-                    <Ionicons
-                      name="calendar-outline"
-                      size={14}
-                      color="#94A3B8"
-                      className="mr-2 "
-                    />
-                    <Text variant="caption" className=" text-sm text-center">
-                      {formatDate(
-                        guestDetail?.event_guest.arrival_date_time || "—"
-                      )}{" "}
-                      –{" "}
-                      {formatDate(
-                        guestDetail?.event_guest.departure_date_time || "—"
-                      )}
-                    </Text>
-                  </View>
+              {/* Only render date/time if both arrival and departure dates exist */}
+              {guestDetail?.event_guest.arrival_date_time &&
+                guestDetail?.event_guest.departure_date_time && (
+                  <View className="flex-row items-center gap-2 mt-2">
+                    <View>
+                      <View className="flex-row items-center">
+                        <Ionicons
+                          name="calendar-outline"
+                          size={14}
+                          color="#94A3B8"
+                          className="mr-2 "
+                        />
+                        <Text
+                          variant="caption"
+                          className=" text-sm text-center"
+                        >
+                          {formatDate(
+                            guestDetail?.event_guest.arrival_date_time || "—"
+                          )}{" "}
+                          –{" "}
+                          {formatDate(
+                            guestDetail?.event_guest.departure_date_time || "—"
+                          )}
+                        </Text>
+                      </View>
 
-                  <Text variant="caption" className="text-sm text-center">
-                    {formatTime(
-                      guestDetail?.event_guest.arrival_date_time || "TBD"
-                    )}{" "}
-                    –{" "}
-                    {formatTime(
-                      guestDetail?.event_guest.departure_date_time || "TBD"
-                    )}
-                  </Text>
-                </View>
-              </View>
+                      <Text variant="caption" className="text-sm text-center">
+                        {formatTime(
+                          guestDetail?.event_guest.arrival_date_time || "TBD"
+                        )}{" "}
+                        –{" "}
+                        {formatTime(
+                          guestDetail?.event_guest.departure_date_time || "TBD"
+                        )}
+                      </Text>
+                    </View>
+                  </View>
+                )}
             </LinearGradient>
 
             <View className="flex-row gap-3 px-6 pb-6 border-b border-primary/5">
