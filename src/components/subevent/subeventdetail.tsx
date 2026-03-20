@@ -3,12 +3,7 @@ import { useEventById } from "@/src/features/events/hooks/use-event";
 import { formatTime } from "@/src/utils/helper";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams } from "expo-router";
-import {
-  ActivityIndicator,
-  Image,
-  ScrollView,
-  View
-} from "react-native";
+import { ActivityIndicator, Image, ScrollView, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function SubEventDetailScreen() {
@@ -52,7 +47,7 @@ export default function SubEventDetailScreen() {
   return (
     <SafeAreaView className="flex-1 bg-white">
       <ScrollView showsVerticalScrollIndicator={false}>
-        <View className="relative mx-4 mt-4 rounded-2xl overflow-hidden shadow-lg">
+        <View className="relative mx-4 mt-0 rounded-2xl overflow-hidden shadow-lg">
           {subEvent?.imageUrl ? (
             <Image
               source={{ uri: subEvent.imageUrl }}
@@ -93,7 +88,7 @@ export default function SubEventDetailScreen() {
         </View>
 
         {/* 📝 DESCRIPTION */}
-        <View className="p-4">
+        <View className="px-4 pb-4">
           {subEvent?.description && (
             <View className="mb-4">
               <Text className="text-sm font-semibold text-gray-500 uppercase mb-1">
