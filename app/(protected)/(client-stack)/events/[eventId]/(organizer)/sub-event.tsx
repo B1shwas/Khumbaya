@@ -1,4 +1,4 @@
-import ListSubEvent from "@/src/components/subevent/ListSubEvent";
+import ListSubEvent from "@/src/screen/user/event/subevent/ListSubEvent";
 
 export default function SubEventListPage() {
   return <ListSubEvent />;

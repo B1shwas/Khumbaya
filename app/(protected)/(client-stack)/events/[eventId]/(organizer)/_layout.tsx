@@ -50,6 +50,7 @@ export default function OrganizerEventDetailLayout() {
       <Stack.Screen name="timeline" options={{ title: "Timeline" }} />
       <Stack.Screen name="vendor" options={{ title: "Vendors" }} />
       <Stack.Screen name="sub-event" options={{ title: "Sub Events" }} />
+      <Stack.Screen name="edit-event" options={{ title: "Event Details" }} />
       <Stack.Screen
         name="subevent-create"
         options={{ title: "Create new event" }}
