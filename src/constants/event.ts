@@ -12,7 +12,7 @@ export interface Event {
   date: string;
   time: string;
   description?: string; //cmt out if neces
-  type?: string; //cmt out if neces
+  type?: EventType; //cmt out if neces
   budget?: number;//cmt out if neces
   theme?: string; //cmt out if neces
 }
@@ -29,3 +29,22 @@ export interface SubEvent extends Event {
 
 export type EventRole = "Vendor" | "Organizer" | "Guest";
 export type EventTab = "upcoming" | "invited" | "completed";
+
+export type EventType = "Wedding" | "Engagement" | "Reception" | "Nikkah" | "Other";
+
+export const EVENT_TYPES: EventType[] = [
+  "Wedding",
+  "Engagement",
+  "Reception",
+  "Nikkah",
+  "Other",
+];
+
+export const EVENT_TYPE_TO_BACKEND: Record<EventType, string> = {
+  Wedding: "WEDDING",
+  Engagement: "ENGAGEMENT",
+  Reception: "RECEPTION",
+  Nikkah: "NIKKAH",
+  Other: "OTHER",
+};
+

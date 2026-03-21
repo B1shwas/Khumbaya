@@ -54,7 +54,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         AsyncStorage.getItem("user"),
       ]);
       let user = userString ? JSON.parse(userString) : null;
-      // ✅ If token exists, validate it with backend
+    
       if (token) {
         try {
 
@@ -64,7 +64,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           user = {
             id: profileData.id,
             email: profileData.email,
-            name: profileData.username,
+            username: profileData.username,
+            phone:profileData.phone ?? "",
           };
 
           set({ token, user, isLoading: false });
