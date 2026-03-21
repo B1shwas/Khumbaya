@@ -22,15 +22,17 @@ export default function CreateSubEventScreen() {
   const [loading, setLoading] = useState(false);
   const [name, setName] = useState("");
 
-  const [selectedDate, setSelectedDate] = useState(new Date());
-  const [selectedTime, setSelectedTime] = useState(new Date());
+  const [selectedStartDateTime, setSelectedStartDateTime] = useState(
+    new Date()
+  );
+  const [selectedEndDateTime, setSelectedEndDateTime] = useState(new Date());
 
-  const handleDateChange = (_event: any, date?: Date) => {
-    if (date) setSelectedDate(date);
+  const handleStartDateChange = (_event: any, date?: Date) => {
+    if (date) setSelectedStartDateTime(date);
   };
 
-  const handleTimeChange = (_event: any, date?: Date) => {
-    if (date) setSelectedTime(date);
+  const handleEndDateChange = (_event: any, date?: Date) => {
+    if (date) setSelectedEndDateTime(date);
   };
 
   const handleSave = async () => {
@@ -41,19 +43,14 @@ export default function CreateSubEventScreen() {
 
     setLoading(true);
 
-    const startDateTime = new Date(selectedDate);
-    startDateTime.setHours(
-      selectedTime.getHours(),
-      selectedTime.getMinutes(),
-      0,
-      0
-    );
+    const startDateTime = new Date(selectedStartDateTime);
+    const endDateTime = new Date(selectedEndDateTime);
 
     try {
       await createEvent({
         title: name.trim(),
         startDateTime,
-        endDateTime: startDateTime,
+        endDateTime,
         parentId: Number(eventId),
         type: "Subevent -1 (Edit it later)",
       });
@@ -99,22 +96,22 @@ export default function CreateSubEventScreen() {
         {/* Date */}
         <View className="mt-6">
           <DatePicker
-            mode="date"
-            value={selectedDate}
-            onChange={handleDateChange}
-            materialDateLabel="Date"
+            mode="datetime"
+            value={selectedStartDateTime}
+            onChange={handleStartDateChange}
+            materialDateLabel="Start Date"
+            materialTimeLabel="Start Time"
             materialDateClassName="mb-2"
           />
         </View>
-
-        {/* Time */}
-        <View className="mt-4">
+        <View className="mt-6">
           <DatePicker
-            mode="time"
-            value={selectedTime}
-            onChange={handleTimeChange}
-            materialTimeLabel="Time"
-            materialTimeClassName="mb-2"
+            mode="datetime"
+            value={selectedEndDateTime}
+            onChange={handleEndDateChange}
+            materialDateLabel="End Date"
+            materialTimeLabel="End Time"
+            materialDateClassName="mb-2"
           />
         </View>
 

@@ -24,14 +24,7 @@ export default function FamilyMembersCardList({
 
   const selfItem = members.find((i) => i.id === user?.id);
   const filteredArray = members.filter((i) => i.id !== user?.id);
-  console.log(
-    "🐽🐽🐽🐽🐽🐽🐽🐽🐽🐽🐽🐽",
-    selfItem,
-    user?.id,
-    "🐽",
-    filteredArray
-  );
-
+ 
   const sortedArrayWithCreatorAtTop = [
     ...(selfItem ? [selfItem] : []),
     ...filteredArray,

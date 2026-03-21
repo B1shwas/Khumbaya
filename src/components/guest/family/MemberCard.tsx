@@ -73,6 +73,27 @@ const MemberCard = ({
               </Text>
             </View>
           </View>
+          <View>
+            <View className="mt-2 gap-1">
+              {member.phone ? (
+                <View className="flex-row items-center gap-2">
+                  <Ionicons name="call-outline" size={13} color="#64748b" />
+                  <Text className="text-sm text-slate-500">
+                    {member.phone}
+                  </Text>
+                </View>
+              ) : null}
+
+              {member.email ? (
+                <View className="flex-row items-center gap-2">
+                  <Ionicons name="mail-open-outline" size={13} color="#64748b" />
+                  <Text className="text-sm text-slate-500">
+                    {member.email}
+                  </Text>
+                </View>
+              ) : null}
+            </View>
+          </View>
 
           {isAttending && (
             <View className="mt-2 gap-1">
@@ -88,9 +109,9 @@ const MemberCard = ({
                 <View className="flex-row items-center gap-2">
                   <Ionicons name="bed-outline" size={13} color="#64748b" />
                   <Text className="text-sm text-slate-500">
-                    Room Needed:{" "}
-                    <Text variant="h2" className="text-slate-800">
-                      {member.roomNeeded}
+                    Room:{" "}
+                    <Text variant="caption" className="text-slate-800 text-sm">
+                      {member.assigned_room && member.assigned_room.length > 0 ? member.assigned_room : "Not Assigned"}
                     </Text>
                   </Text>
                 </View>
