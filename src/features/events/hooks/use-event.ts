@@ -6,6 +6,8 @@ import {
   createEventApi,
   getCompletedEventsApi,
   getEventById,
+  getEventOwners,
+  updateEventApi,
   getInvitedEvent,
   getResponsesWithUser,
   getSubEventOfEvent,
@@ -15,6 +17,7 @@ import {
   RsvpResponsePayload,
   submitRsvpResponseApi,
 } from "../api/events.service";
+import { User } from "@/src/store/AuthStore";
 
 export const useCreateEvent = () => {
   const queryClient = useQueryClient();
@@ -234,3 +237,29 @@ export const useMakeEventMember = (eventId: number) => {
     },
   });
 };
+export const useGetEventOwner = (eventId:number) => {
+  return useQuery({
+    queryKey: ["event-owner", eventId],
+    queryFn: async () => {
+      const responses:{
+        user:User,
+        role:string
+      }[] = await getEventOwners(eventId);
+      return responses ; 
+    },
+  });
+}
+
+export const useUpdateEvent = (eventId: number) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (updatedEvent: Partial<Event>) =>
+      updateEventApi(eventId, updatedEvent),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["event", eventId] });
+      queryClient.invalidateQueries({ queryKey: ["events/upcoming"] });
+      queryClient.invalidateQueries({ queryKey: ["events/completed"] });
+      queryClient.invalidateQueries({ queryKey: ["events/with-role"] });
+    },
+  });
+}
