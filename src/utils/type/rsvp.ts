@@ -8,6 +8,9 @@ export interface MemberRsvpCardProp {
   status: RSVPStatus;
   dateRange?: string;
   roomNeeded?: string;
+  email?: string;
+  phone: string;
+  assigned_room?: string;
   notes?: string;
   rawStatus: string | null;
   rawArrival: string | null;
@@ -44,13 +47,15 @@ export function mapToMemberRsvp(
     id: item.user_detail.id,
     familyId: item.user_detail.familyId,
     name: item.user_detail.username,
+    email: item.user_detail.email,
+    phone: item.user_detail.phone,
     avatarUrl: item.user_detail.photo ?? undefined,
     status,
     dateRange: item.event_guest
       ? formatDateRange(
-          item.event_guest.arrival_date_time,
-          item.event_guest.departure_date_time
-        )
+        item.event_guest.arrival_date_time,
+        item.event_guest.departure_date_time
+      )
       : undefined,
     roomNeeded:
       item.event_guest?.isAccomodation != null
@@ -58,6 +63,7 @@ export function mapToMemberRsvp(
           ? "Yes"
           : "No"
         : undefined,
+    assigned_room:item.event_guest?.assigned_room ?? undefined,
     notes: item.event_guest?.notes ?? undefined,
     rawStatus: item.event_guest?.status ?? null,
     rawArrival: item.event_guest?.arrival_date_time ?? null,
