@@ -21,12 +21,6 @@ const settingItems = [
     iconstring: "card-outline" as const,
   },
   {
-    title: "Add Event organizer",
-    description: "Assign a new event host",
-    iconstring: "swap-horizontal-outline" as const,
-    action: "transfer-ownership" as const,
-  },
-  {
     title: "Archive Event",
     description: "Hide event from dashboard",
     iconstring: "archive-outline" as const,
@@ -61,8 +55,7 @@ export default function EventSettingsScreen() {
           iconstring={item.iconstring}
           title={item.title}
           description={item.description}
-          onPress={item.action === "transfer-ownership" ? handleTransferOwnershipPress : undefined}
-        />
+          />
       ))}
     </View>
   )

@@ -5,7 +5,6 @@ import EventDetail from "./EventDetail";
 import GuestEventDetails from "../guest/GuestEventDetails";
 
 import HomePage from "./Home";
-import TimelinePage from "./Timeline";
 
 export {
   BudgetPage,
@@ -14,6 +13,5 @@ export {
   FamilyRsvpManagementScreen,
   GuestEventDetails,
   HomePage,
-  TimelinePage
 };
 

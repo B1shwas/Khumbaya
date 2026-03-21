@@ -2,17 +2,20 @@ import NavigateComponent from "@/src/components/event/NavigateComponent";
 import Row from "@/src/components/ui/RowComponent";
 import { Event } from "@/src/constants/event";
 import { useGetEventWithRole } from "@/src/features/events/hooks/use-event";
+import { useEventStore } from "@/src/features/events/store/useEventStore";
 import {
   RelativePathString,
   useLocalSearchParams,
   useRouter,
 } from "expo-router";
+import { useEffect } from "react";
 import { ScrollView, Text, View } from "react-native";
 import EventDetailHero from "./EventDetailHero";
 
 const EventDetail = () => {
   const { eventId } = useLocalSearchParams<{ eventId: string }>();
   const router = useRouter();
+  const { clearEventDraft, setEventDraft } = useEventStore();
   const { data: found } = useGetEventWithRole();
   const foundEvent = found?.find(
     (e: Event) => String(e.id) === String(eventId)
@@ -42,6 +45,10 @@ const EventDetail = () => {
       vendors: { booked: 0, pending: 0 },
       nextTask: "",
     } );
+
+  useEffect(() => {
+    clearEventDraft();
+  }, [clearEventDraft]);
 
   const manageActions = [
     {
@@ -85,7 +92,7 @@ const EventDetail = () => {
       icon: "checkmark-circle-outline",
       color: "#EC4899",
       route: `./checklist`,
-    },
+    }
   ];
 
   return (
@@ -112,12 +119,31 @@ const EventDetail = () => {
 
           {/* Gallery - Full Width */}
           {/* Component with the Titleicon and the description Gallery , Upload & Share photos */}
-          < Row title="Gallery" description="Upload & Share Photos" iconstring="images" onPress={() => {
-            router.push("./gallery" as RelativePathString)
-          }} />
-          <Row title="Event Details" description="Complete Event Information" iconstring="create" onPress={() => {
-            router.push("./" as RelativePathString)
-          }} />
+          <Row
+            title="Gallery"
+            description="Upload & Share Photos"
+            iconstring="images"
+            onPress={() => {
+              router.push("./gallery" as RelativePathString)
+            }}
+          />
+          <Row
+            title="Event Details"
+            description="Complete Event Information"
+            iconstring="create"
+            onPress={() => {
+              setEventDraft(event as Event);
+              router.push("./edit-event" as RelativePathString)
+            }}
+          />
+        <Row
+            title="Planning Committee"
+            description="Add Event Organizers and Collaborators"
+            iconstring="person"
+            onPress={() => {
+              router.push("./settings/transfer-ownership" as RelativePathString)
+            }}
+          />
         </View>
       </View>
 

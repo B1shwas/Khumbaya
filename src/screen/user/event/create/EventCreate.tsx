@@ -1,4 +1,5 @@
 import { DatePicker } from "@/components/nativewindui/DatePicker";
+import { EVENT_TYPES, EVENT_TYPE_TO_BACKEND, type EventType } from "@/src/constants/event";
 import { CREATEEVENT } from "@/src/features/events/api/events.service";
 import { useCreateEvent } from "@/src/features/events/hooks/use-event";
 import { Ionicons } from "@expo/vector-icons";
@@ -27,24 +28,6 @@ interface EventFormData {
   coverImage: string | null;
   endDateTime: Date;
 }
-
-type EventType = "Wedding" | "Engagement" | "Reception" | "Nikkah" | "Other";
-
-const EVENT_TYPES: EventType[] = [
-  "Wedding",
-  "Engagement",
-  "Reception",
-  "Nikkah",
-  "Other",
-];
-
-const EVENT_TYPE_TO_BACKEND: Record<EventType, string> = {
-  Wedding: "WEDDING",
-  Engagement: "ENGAGEMENT",
-  Reception: "RECEPTION",
-  Nikkah: "NIKKAH",
-  Other: "OTHER",
-};
 
 export default function EventCreate() {
   const router = useRouter();

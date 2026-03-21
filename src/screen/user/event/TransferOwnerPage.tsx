@@ -1,13 +1,16 @@
 import { Button } from "@/src/components/ui/Button";
+import { CountryOption, CountryPickerModal } from "@/src/components/ui/CountryPhone";
 import { Text } from "@/src/components/ui/Text";
-import { useMakeEventMember } from "@/src/features/events/hooks/use-event";
+import { COUNTRY_DATA } from "@/src/constants/countrydata";
+import { useGetEventOwner, useMakeEventMember } from "@/src/features/events/hooks/use-event";
 import { useFindUserWithPhone } from "@/src/features/user/api/use-user";
 import { cn } from "@/src/utils/cn";
 import { useDebounce } from "@/src/utils/helper";
 import { Ionicons } from "@expo/vector-icons";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
-import { Alert, ScrollView, TextInput, TouchableOpacity, View } from "react-native";
+import { Alert, Image, Pressable, ScrollView, TextInput, TouchableOpacity, View } from "react-native";
 
 type Role = "co-host" | "planner" | "editor";
 
@@ -16,9 +19,16 @@ export function TransferOwnerShipPage() {
   const params = useLocalSearchParams();
   const [phone, setPhone] = useState("");
   const [selectedRole, setSelectedRole] = useState<Role>("co-host");
-  const trimmedPhone = phone.trim();
-  const debouncedPhone = useDebounce(trimmedPhone, 1000);
-  const searchPhone = trimmedPhone ? debouncedPhone : "";
+  const [selectedCountry, setSelectedCountry] = useState<CountryOption>(COUNTRY_DATA[0]);
+  const [pickerVisible, setPickerVisible] = useState(false);
+  const {data: eventMembers , isLoading:memberLoading} = useGetEventOwner(Number(params.eventId));
+  const phoneDigits = phone.replace(/\D/g, "");
+  const fullPhone = useMemo(() => {
+    if (!phoneDigits) return "";
+    return `+${selectedCountry.dialCode}-${phoneDigits}`;
+  }, [phoneDigits, selectedCountry.dialCode]);
+  const debouncedPhone = useDebounce(fullPhone, 1000);
+  const searchPhone = phoneDigits ? debouncedPhone : "";
   const hasSearched = !!searchPhone;
 
   const eventId = useMemo(() => {
@@ -41,10 +51,13 @@ export function TransferOwnerShipPage() {
     if (Array.isArray(foundUserData)) return foundUserData[0] ?? null;
     return foundUserData;
   }, [foundUserData]);
+
+
   const { mutateAsync: addEventMember, isPending: isAddingMember } =
     useMakeEventMember(eventId ?? 0);
   const resolvedUserId = Number((foundUser as { id?: number } | null)?.id ?? NaN);
   const canAddMember = !!eventId && Number.isFinite(resolvedUserId) && hasSearched;
+  
   const getErrorMessage = (error: unknown) => {
     if (typeof error === "object" && error !== null) {
       const maybeResponse = error as {
@@ -109,9 +122,15 @@ export function TransferOwnerShipPage() {
     },
   ];
   return (
-    <View className="flex-1 bg-white ">
+    <View className="flex-1 ">
+      <CountryPickerModal
+        visible={pickerVisible}
+        selected={selectedCountry}
+        onSelect={setSelectedCountry}
+        onClose={() => setPickerVisible(false)}
+      />
       <ScrollView
-        className="flex-1 px-6 pt-8"
+        className="flex-1 px-6 pt-8 pb-36"
         contentContainerStyle={{ paddingBottom: 100 }}
       >
         <Text variant="h1" className="text-3xl mb-2">Find a host</Text>
@@ -124,15 +143,29 @@ export function TransferOwnerShipPage() {
             <Text className="text-slate-900  text-sm font-jakarta-bold uppercase mb-3">
               Phone Number
             </Text>
-            <TextInput
-
-              className="w-full rounded-md border border-slate-200 p-3 "
-              placeholder="9761890004"
-              keyboardType="phone-pad"
-              value={phone}
-              onChangeText={(text) => setPhone(text)}
-
-            />
+            <View className="h-14 w-full flex-row items-center overflow-hidden rounded-md border border-slate-200 bg-white">
+              <Pressable
+                onPress={() => setPickerVisible(true)}
+                className="h-full flex-row items-center gap-1.5 border-r border-slate-200 px-3"
+              >
+                <Image
+                  source={selectedCountry.image}
+                  style={{ width: 26, height: 18, borderRadius: 3 }}
+                  resizeMode="cover"
+                />
+                <Text className="text-sm font-medium text-slate-800">
+                  +{selectedCountry.dialCode}
+                </Text>
+                <MaterialIcons name="arrow-drop-down" size={18} color="#94a3b8" />
+              </Pressable>
+              <TextInput
+                className="flex-1 px-4 text-base text-slate-900"
+                placeholder="9761890004"
+                keyboardType="phone-pad"
+                value={phone}
+                onChangeText={setPhone}
+              />
+            </View>
           </View>
 
           {hasSearched && !!foundUser && (
@@ -161,6 +194,7 @@ export function TransferOwnerShipPage() {
             </View>
           )}
 
+         
           <View className="pt-4">
             <Text className="text-slate-900 text-sm font-jakarta-bold uppercase mb-4">
               Assign Role
@@ -205,12 +239,8 @@ export function TransferOwnerShipPage() {
             </View>
           </View>
         </View>
-      </ScrollView>
-
-      {/* Sticky Bottom CTA */}
-      <View className="absolute bottom-0 left-0 right-0 p-6 bg-white  border-t border-slate-100 ">
-        <Button
-          className="flex-row items-center gap-2"
+           <Button
+          className="flex-row items-center gap-2 mt-5"
           onPress={handleAddMember}
           disabled={!canAddMember || isAddingMember}
         >
@@ -220,7 +250,53 @@ export function TransferOwnerShipPage() {
         <Text className="text-center text-xs text-slate-400 mt-4 px-4">
           The user will receive an invite notification to join your event team.
         </Text>
-      </View>
+         <View className="pt-2">
+            <Text className="text-slate-900 text-sm font-jakarta-bold uppercase mb-3">
+              Event Members
+            </Text>
+            {memberLoading ? (
+              <View className="p-4 rounded-md border border-slate-200 bg-slate-50">
+                <Text className="text-sm text-slate-600">Loading members...</Text>
+              </View>
+            ) : !!eventMembers && eventMembers.length ? (
+              <View className="gap-3">
+                {eventMembers?.map((member, index) => {
+                  const user = (member as { user?: any })?.user ?? member;
+                  const name =
+                    user?.username ||"Member";
+                  const role = member?.role;
+
+                  return (
+                    <View
+                      key={String((member as { id?: number | string })?.id ?? index)}
+                      className="flex-row items-center p-4 bg-slate-50 rounded-md border border-slate-200"
+                    >
+                      <View className="size-12 rounded-full bg-slate-200 items-center justify-center mr-4">
+                        <Ionicons name="person" size={24} color="#64748b" />
+                      </View>
+                      <View className="flex-1">
+                        <Text className="font-jakarta-bold text-slate-900">
+                          {name}
+                        </Text>
+                        <Text className="text-sm text-slate-500">
+                          {role ? `Role: ${role}` : "Event member"}
+                        </Text>
+                      </View>
+                    </View>
+                  );
+                })}
+              </View>
+            ) : (
+              <View className="p-4 rounded-md border border-slate-200 bg-slate-50">
+                <Text className="text-sm text-slate-600">No members yet.</Text>
+              </View>
+            )}
+          </View>
+
+      </ScrollView>
+
+      {/* Sticky Bottom CTA */}
+ 
     </View>
   );
 }
