@@ -1,6 +1,7 @@
 import { MaterialIcons } from "@expo/vector-icons";
-import { Tabs, usePathname } from "expo-router";
+import { Tabs, usePathname, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
+import { Pressable } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 // Routes where tab bar should be hidden (inner screens)
@@ -16,11 +17,13 @@ const TAB_BAR_HIDDEN_ROUTES = [
   "/profile/services-pricing",
   "/profile/portfolio",
   "/profile/analytics",
+  "/business/create",
 ];
 
 export default function ClientTabsLayout() {
   const insets = useSafeAreaInsets();
   const pathname = usePathname();
+  const router = useRouter();
   const [hideTabBar, setHideTabBar] = useState(false);
 
   // Hide tab bar for profile inner screens
@@ -80,6 +83,25 @@ export default function ClientTabsLayout() {
           title: "Explore",
           tabBarIcon: ({ color }) => (
             <MaterialIcons name="explore" size={24} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="business"
+        options={{
+          title: "Business",
+          headerShown: true,
+          headerTitleAlign: "center",
+          headerStyle: { backgroundColor: "#ffffff" },
+          headerTitleStyle: { fontSize: 18, fontWeight: "800", color: "#181114" },
+          headerShadowVisible: true,
+          headerLeft: () => (
+            <Pressable onPress={() => router.back()} style={{ marginLeft: 12 }}>
+              <MaterialIcons name="arrow-back" size={24} color="#181114" />
+            </Pressable>
+          ),
+          tabBarIcon: ({ color }) => (
+            <MaterialIcons name="business" size={24} color={color} />
           ),
         }}
       />
