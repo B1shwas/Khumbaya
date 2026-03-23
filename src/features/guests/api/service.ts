@@ -37,3 +37,9 @@ export const acceptInvitation = async (invitationId: number) => {
   const response = await api.post(`/event/invitation/accept/${invitationId}`);
   return response.data.data.items;
 };
+
+export const removeInvitation = async(eventId: number, guestId: number) => {
+
+  const response = await api.delete(`/event/${eventId}/invitation`, { data: { userId: guestId } });
+  return response.data.data;
+}
