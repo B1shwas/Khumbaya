@@ -74,20 +74,7 @@ export default function CreateBusinessScreen() {
   return (
     <View className="flex-1 bg-[#f8f6f7]">
       {/* Header */}
-      <SafeAreaView edges={["top"]} className="bg-white shadow-sm">
-        <View className="flex-row items-center px-4 h-16">
-          <Pressable
-            onPress={() => router.back()}
-            className="p-2 rounded-full active:bg-[#ee2b8c]/10"
-          >
-            <MaterialIcons name="arrow-back" size={24} color="#594048" />
-          </Pressable>
-          <Text className="text-[18px] font-extrabold text-[#ee2b8c] ml-3 tracking-tight">
-            Create Business
-          </Text>
-        </View>
-      </SafeAreaView>
-
+ 
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         className="flex-1"

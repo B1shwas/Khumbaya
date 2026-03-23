@@ -1,5 +1,6 @@
 import { Text } from "@/src/components/ui/Text";
 import { useSubmitRsvpResponse } from "@/src/features/events/hooks/use-event";
+import { useRemoveInvitation } from "@/src/features/guests/api/use-guests";
 import { useGuestDetailStore } from "@/src/features/guests/store/useGuestDetailStore";
 import { formatDate, formatTime } from "@/src/utils/helper";
 import { Ionicons } from "@expo/vector-icons";
@@ -8,6 +9,7 @@ import { useRouter } from "expo-router";
 import { useMemo, useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -24,6 +26,7 @@ export default function ViewGuestDetail() {
   const eventId = Number(guestDetail?.event_guest?.eventId ?? 0);
   const { mutate: submitRsvpResponse, isPending } =
     useSubmitRsvpResponse(eventId);
+  const removeInvitationMutation = useRemoveInvitation();
 
   const initialRoom = guestDetail?.event_guest?.assigned_room ?? "";
   const initialArrivalInfo =
@@ -83,6 +86,45 @@ export default function ViewGuestDetail() {
     });
   };
 
+  const handleDeleteGuest = () => {
+    if (!guestDetail?.user_detail?.id || !eventId) {
+      Alert.alert("Error", "Missing event or guest id.");
+      return;
+    }
+
+    const displayName =
+      guestDetail.user_detail.username?.trim() ||
+      guestDetail.user_detail.email ||
+      "this guest";
+
+    Alert.alert(
+      "Remove guest",
+      `Remove ${displayName}'s invitation from this event?`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Remove",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await removeInvitationMutation.mutateAsync({
+                eventId,
+                guestId: guestDetail.user_detail.id,
+              });
+              router.back();
+            } catch (error: any) {
+              const message =
+                error?.response?.data?.message ||
+                error?.message ||
+                "Failed to remove guest. Please try again.";
+              Alert.alert("Error", message);
+            }
+          },
+        },
+      ]
+    );
+  };
+
   let messageForTransportation;
 
   if (
@@ -123,6 +165,20 @@ export default function ViewGuestDetail() {
               colors={["rgba(238,43,140,0.07)", "transparent"]}
               className="items-center px-6 pt-8 pb-8"
             >
+              <TouchableOpacity
+                onPress={handleDeleteGuest}
+                className="absolute right-4 top-4 p-2 rounded-full bg-white"
+                activeOpacity={0.8}
+                style={{
+                  shadowColor: "#000",
+                  shadowOpacity: 0.12,
+                  shadowRadius: 4,
+                  elevation: 3,
+                }}
+              >
+                <Ionicons name="trash-outline" size={18} color="#EF4444" />
+              </TouchableOpacity>
+
               <View className="relative">
                 <View
                   className="w-32 h-32 rounded-full bg-primary border-4 border-white items-center justify-center"

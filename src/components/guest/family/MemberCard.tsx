@@ -40,6 +40,8 @@ const MemberCard = ({
   const { label, wrapperClass, textClass } = statusConfig[member.status];
   const isAttending = member.status === "attending";
   const isPending = member.status === "pending";
+  const shouldShowEmail =
+    !!member.email && !member.email.toLowerCase().startsWith("guest_");
 
   return (
     <Card className="p-4 bg-background-secondary">
@@ -84,7 +86,7 @@ const MemberCard = ({
                 </View>
               ) : null}
 
-              {member.email ? (
+              {shouldShowEmail ? (
                 <View className="flex-row items-center gap-2">
                   <Ionicons name="mail-open-outline" size={13} color="#64748b" />
                   <Text className="text-sm text-slate-500">
@@ -134,12 +136,6 @@ const MemberCard = ({
           {(isPending && !isOrganizerView) && (
             <Text className="mt-2 text-sm text-slate-400 italic">
               Please complete details for {member.name.split(" ")[0]}
-            </Text>
-          )}
-
-          {(isPending && isOrganizerView) && (
-            <Text className="mt-2 text-sm text-slate-400 italic">
-              Invitation Sent is not responded
             </Text>
           )}
         </View>

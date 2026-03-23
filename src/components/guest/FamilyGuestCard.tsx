@@ -1,12 +1,18 @@
+import { Ionicons } from "@expo/vector-icons";
 import { Image, Text, TouchableOpacity, View } from "react-native";
 import { FamilyGroup } from "../../features/guests/types";
 
 interface FamilyCardProps {
   family: FamilyGroup;
   onPress?: () => void;
+  onDelete?: () => void;
 }
 
-export default function FamilyCard({ family, onPress }: FamilyCardProps) {
+export default function FamilyCard({
+  family,
+  onPress,
+  onDelete,
+}: FamilyCardProps) {
   const primaryGuest = family.primaryMember;
   const displayStatus = (primaryGuest.event_guest.status || "Pending").trim();
 
@@ -100,26 +106,36 @@ export default function FamilyCard({ family, onPress }: FamilyCardProps) {
             </Text>
           </View>
 
-          {/* Status badge */}
-          <View
-            style={{
-              paddingHorizontal: 10,
-              paddingVertical: 4,
-              borderRadius: 12,
-              backgroundColor: getStatusBgColor(),
-              maxWidth: 120,
-            }}
-          >
-            <Text
-              numberOfLines={1}
+          <View className="items-end justify-center gap-2">
+            <View
               style={{
-                fontSize: 12,
-                fontWeight: "600",
-                color: getStatusColor(),
+                paddingHorizontal: 10,
+                paddingVertical: 4,
+                borderRadius: 12,
+                backgroundColor: getStatusBgColor(),
+                maxWidth: 120,
               }}
             >
-              {displayStatus}
-            </Text>
+              <Text
+                numberOfLines={1}
+                style={{
+                  fontSize: 12,
+                  fontWeight: "600",
+                  color: getStatusColor(),
+                }}
+              >
+                {displayStatus}
+              </Text>
+            </View>
+
+            {onDelete ? (
+              <TouchableOpacity
+                onPress={onDelete}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              >
+                <Ionicons name="trash-outline" size={18} color="#EF4444" />
+              </TouchableOpacity>
+            ) : null}
           </View>
         </View>
       </TouchableOpacity>

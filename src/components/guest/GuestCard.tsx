@@ -1,12 +1,18 @@
+import { Ionicons } from "@expo/vector-icons";
 import { Image, Text, TouchableOpacity, View } from "react-native";
 import { GuestDetailInterface } from "../../features/guests/types";
 
 interface GuestCardProps {
   guest: GuestDetailInterface;
   onPress?: () => void;
+  onDelete?: () => void;
 }
 
-export default function GuestCard({ guest, onPress }: GuestCardProps) {
+export default function GuestCard({
+  guest,
+  onPress,
+  onDelete,
+}: GuestCardProps) {
   const displayStatus = (guest?.event_guest?.status || "Pending").trim();
 
   const getStatusColor = () => {
@@ -96,22 +102,33 @@ export default function GuestCard({ guest, onPress }: GuestCardProps) {
             ) : null}
           </View>
 
-          <View
-            style={{
-              paddingHorizontal: 10,
-              paddingVertical: 4,
-              borderRadius: 12,
-              backgroundColor: getStatusBgColor(),
-              maxWidth: 120,
-            }}
-          >
-            <Text
-              numberOfLines={1}
-              className="text-xs font-semibold"
-              style={{ color: getStatusColor() }}
+          <View className="items-end justify-center gap-2">
+            <View
+              style={{
+                paddingHorizontal: 10,
+                paddingVertical: 4,
+                borderRadius: 12,
+                backgroundColor: getStatusBgColor(),
+                maxWidth: 120,
+              }}
             >
-              {displayStatus}
-            </Text>
+              <Text
+                numberOfLines={1}
+                className="text-xs font-semibold"
+                style={{ color: getStatusColor() }}
+              >
+                {displayStatus}
+              </Text>
+            </View>
+
+            {onDelete ? (
+              <TouchableOpacity
+                onPress={onDelete}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              >
+                <Ionicons name="trash-outline" size={18} color="#EF4444" />
+              </TouchableOpacity>
+            ) : null}
           </View>
         </View>
       </TouchableOpacity>

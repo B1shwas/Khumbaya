@@ -90,16 +90,6 @@ export default function ClientTabsLayout() {
         name="business"
         options={{
           title: "Business",
-          headerShown: true,
-          headerTitleAlign: "center",
-          headerStyle: { backgroundColor: "#ffffff" },
-          headerTitleStyle: { fontSize: 18, fontWeight: "800", color: "#181114" },
-          headerShadowVisible: true,
-          headerLeft: () => (
-            <Pressable onPress={() => router.back()} style={{ marginLeft: 12 }}>
-              <MaterialIcons name="arrow-back" size={24} color="#181114" />
-            </Pressable>
-          ),
           tabBarIcon: ({ color }) => (
             <MaterialIcons name="business" size={24} color={color} />
           ),
