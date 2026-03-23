@@ -7,6 +7,7 @@ interface FamilyCardProps {
 }
 
 export default function FamilyCard({ family, onPress }: FamilyCardProps) {
+  console.log("🚀🚀🚀🚀🚀🚀🚀🚀", family);
   const primaryGuest = family.primaryMember;
   const displayStatus = (primaryGuest.event_guest.status || "Pending").trim();
 
@@ -92,10 +93,7 @@ export default function FamilyCard({ family, onPress }: FamilyCardProps) {
               {family.family_name}
             </Text>
 
-            <Text
-              numberOfLines={1}
-              className="mt-0.5 text-xs text-gray-500"
-            >
+            <Text numberOfLines={1} className="mt-0.5 text-xs text-gray-500">
               {family.memberCount} member{family.memberCount !== 1 ? "s" : ""}
             </Text>
           </View>
