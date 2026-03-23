@@ -6,7 +6,6 @@ import {
   Alert,
   Image,
   KeyboardAvoidingView,
-  Platform,
   Pressable,
   ScrollView,
   Text,
@@ -72,19 +71,18 @@ export default function CreateBusinessScreen() {
   };
 
   return (
-    <View className="flex-1 bg-[#f8f6f7]">
+    <KeyboardAvoidingView
+      behavior="padding"
+      className="flex-1 bg-[#f8f6f7]"
+    >
       {/* Header */}
- 
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
+
+      <ScrollView
         className="flex-1"
+        contentContainerStyle={{ paddingHorizontal: 24, paddingTop: 24, paddingBottom: 24 }}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
       >
-        <ScrollView
-          className="flex-1"
-          contentContainerStyle={{ paddingHorizontal: 24, paddingTop: 24, paddingBottom: 120 }}
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
-        >
           {/* Visual Assets */}
           <View className="mb-8 gap-5">
             {/* Cover Image — full width */}
@@ -249,10 +247,9 @@ export default function CreateBusinessScreen() {
             </View>
           </View>
         </ScrollView>
-      </KeyboardAvoidingView>
 
       {/* Sticky Submit Button */}
-      <SafeAreaView edges={["bottom"]} className="absolute bottom-0 left-0 right-0 px-6 pb-4 bg-[#f8f6f7]/95">
+      <SafeAreaView edges={["bottom"]} className="px-6 pb-4 bg-[#f8f6f7]/95">
         <TouchableOpacity
           activeOpacity={0.85}
           className="w-full bg-[#ee2b8c] rounded-2xl py-5 flex-row items-center justify-center gap-3 shadow-lg"
@@ -264,6 +261,6 @@ export default function CreateBusinessScreen() {
           <MaterialIcons name="arrow-forward" size={22} color="white" />
         </TouchableOpacity>
       </SafeAreaView>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
