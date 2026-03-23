@@ -218,7 +218,7 @@ export default function EditEventScreen() {
             budget: values.budget ? Number(values.budget) : undefined,
         };
 
-        updateEvent(payload, {
+        updateEvent(payload as any, {
             onSuccess: () => {
                 Alert.alert("Success", "Event updated successfully.");
                 router.back();

@@ -1,13 +1,17 @@
 import FamilyCard from "@/src/components/guest/FamilyGuestCard";
 import GuestCard from "@/src/components/guest/GuestCard";
 import { Text } from "@/src/components/ui/Text";
-import { useGetInvitationsForEvent } from "@/src/features/guests/api/use-guests";
+import {
+  useGetInvitationsForEvent,
+  useRemoveInvitation,
+} from "@/src/features/guests/api/use-guests";
 import {
   useFamilyGuestStore,
   useGuestDetailStore,
 } from "@/src/features/guests/store/useGuestDetailStore";
 import {
   FamilyGroup,
+  GuestDetailInterface,
   GroupedInvitation,
   groupInvitationsByFamily,
 } from "@/src/features/guests/types";
@@ -15,7 +19,7 @@ import { cn } from "@/src/utils/cn";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { FlatList, Pressable, TouchableOpacity, View } from "react-native";
+import { Alert, FlatList, Pressable, TouchableOpacity, View } from "react-native";
 import { TextInput } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
 type GuestFilterTab = "all" | "accepted" | "pending";
@@ -41,6 +45,7 @@ export default function GuestListScreen() {
     (state) => state.clearFamilyGroup
   );
   const { data: invitations, isLoading } = useGetInvitationsForEvent(eventId);
+  const removeInvitationMutation = useRemoveInvitation();
 
   const [activeTab, setActiveTab] = useState<GuestFilterTab>("all");
 
@@ -58,14 +63,18 @@ export default function GuestListScreen() {
     );
   }, [eventId, router]);
 
-  const onPressGuestCard = (guest: any) => {
+  const onPressGuestCard = (guest: GuestDetailInterface) => {
     setGuestDetail(guest);
     router.push({
       pathname:
-        `/(protected)/(client-stack)/events/${eventId}/(organizer)/guests/${guest.id}/guest-details` as any,
+        `/(protected)/(client-stack)/events/${eventId}/(organizer)/guests/${guest.user_detail.id}/guest-details` as any,
       params: { guest: JSON.stringify(guest) },
     });
   };
+
+
+
+
   const onPressFamilyCard = (FamilyData: FamilyGroup) => {
     setFamilyGuest(FamilyData);
     router.push({
@@ -216,6 +225,7 @@ export default function GuestListScreen() {
                   onPress={() => {
                     onPressFamilyCard(item);
                   }}
+                 
                 />
               );
             } else {
@@ -225,6 +235,8 @@ export default function GuestListScreen() {
                   onPress={() => {
                     onPressGuestCard(item.data);
                   }}
+            
+               
                 />
               );
             }

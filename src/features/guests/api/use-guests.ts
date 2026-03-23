@@ -3,6 +3,7 @@ import {
   getEventGuest,
   getInvitation,
   inviteGuest,
+  removeInvitation,
   type InviteGuestPayload,
 } from "./service";
 
@@ -33,6 +34,24 @@ export const useInviteGuest = () => {
       eventId: number;
       payload: InviteGuestPayload;
     }) => inviteGuest(eventId, payload),
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ["event-invitations", variables.eventId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["event-guests", variables.eventId],
+      });
+      queryClient.invalidateQueries({ queryKey: ["events"] });
+    },
+  });
+};
+
+export const useRemoveInvitation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ eventId, guestId }: { eventId: number; guestId: number }) =>
+      removeInvitation(eventId, guestId),
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({
         queryKey: ["event-invitations", variables.eventId],
