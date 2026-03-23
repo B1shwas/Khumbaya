@@ -1,18 +1,14 @@
-
 import api from "@/src/api/axios";
 
 export interface InviteGuestPayload {
   fullName: string;
   invitation_name: string;
   phone: string;
-  eventId: number;
   isFamily: boolean;
-  role: string,
-  category: string,
-  status: string,
-  isAccomodation: boolean,
-  // TODO: Enable once backend invite endpoint supports linking existing users.
-  // userId?: number;
+  role: string;
+  category: string;
+  status: string;
+  isAccomodation: boolean;
 }
 
 export const inviteGuest = async (
@@ -35,4 +31,3 @@ export const acceptInvitation = async (invitationId: number) => {
   const response = await api.post(`/event/invitation/accept/${invitationId}`);
   return response.data.data.items;
 };
-
