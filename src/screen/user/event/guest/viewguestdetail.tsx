@@ -77,6 +77,7 @@ export default function ViewGuestDetail() {
       assigned_room: assignedRoom.trim() || null,
       arrival_info: arrivalInfo.trim() || null,
       departure_info: departureInfo.trim() || null,
+      category: guestDetail.event_guest.category,
     };
 
     submitRsvpResponse(payload, {
@@ -128,11 +129,11 @@ export default function ViewGuestDetail() {
   let messageForTransportation;
 
   if (
-    guestDetail?.event_guest.isArrivalPickupRequired &&
+    guestDetail?.event_guest?.isArrivalPickupRequired &&
     guestDetail?.event_guest?.isDeparturePickupRequired
   ) {
     messageForTransportation = "Pickup and Departure";
-  } else if (guestDetail?.event_guest.isArrivalPickupRequired) {
+  } else if (guestDetail?.event_guest?.isArrivalPickupRequired) {
     messageForTransportation = "Arrival Pickup";
   } else if (guestDetail?.event_guest?.isDeparturePickupRequired) {
     messageForTransportation = "Departure Pickup";
@@ -331,6 +332,10 @@ export default function ViewGuestDetail() {
                       value: messageForTransportation,
                       pill: false,
                     },
+                    {
+                      label: "Category",
+                      value: guestDetail?.event_guest?.category,
+                    },
                   ].map((row, i, arr) => (
                     <View
                       key={i}
@@ -342,12 +347,16 @@ export default function ViewGuestDetail() {
                       {row.pill ? (
                         <View className="bg-primary/10 px-3 py-1 rounded-full">
                           <Text variant="h2" className="text-primary text-xs">
-                            {row.value}
+                            {row.value.charAt(0).toUpperCase() +
+                              row.value.slice(1)}
                           </Text>
                         </View>
                       ) : (
                         <Text variant="h2" className="text-slate-900 text-sm">
-                          {row.value}
+                          {row.value
+                            ? row.value?.charAt(0).toUpperCase() +
+                              row.value?.slice(1)
+                            : "-"}
                         </Text>
                       )}
                     </View>
