@@ -1,3 +1,4 @@
+import { DatePicker } from "@/components/nativewindui/DatePicker";
 import AvatarPicker from "@/src/components/ui/AvatarPicker";
 import { useUpdateUserMe } from "@/src/features/user/api/use-user";
 import { useAuthStore } from "@/src/store/AuthStore";
@@ -32,6 +33,12 @@ interface ProfileForm {
   phone: string;
   bio: string;
   foodPreference: string;
+  location: string;
+  country: string;
+  city: string;
+  address: string;
+  zip: string;
+  dob: string;
 }
 
 type FormErrors = Partial<Record<keyof ProfileForm, string>>;
@@ -57,16 +64,28 @@ export default function EditProfileScreen() {
     phone: "",
     bio: "",
     foodPreference: "",
+    location: "",
+    country: "",
+    city: "",
+    address: "",
+    zip: "",
+    dob: "",
   });
 
   useEffect(() => {
     if (!isProfileLoading && user) {
       setForm({
-        name: user.username || user.username || "",
+        name: user.username || "",
         email: user.email || "",
         phone: user.phone || "",
         bio: user.bio || "",
-        foodPreference: user.foodPreference || user.foodPreference || "",
+        foodPreference: user.foodPreference || "",
+        location: user.location || "",
+        country: user.country || "",
+        city: user.city || "",
+        address: user.address || "",
+        zip: user.zip || "",
+        dob: user.dob ? new Date(user.dob).toISOString() : "",
       });
       setLoading(false);
     } else if (!isProfileLoading && !user) {
@@ -105,6 +124,12 @@ export default function EditProfileScreen() {
         phone: form.phone.trim() || undefined,
         bio: form.bio.trim() || undefined,
         foodPreference: form.foodPreference.trim() || undefined,
+        location: form.location.trim() || undefined,
+        country: form.country.trim() || undefined,
+        city: form.city.trim() || undefined,
+        address: form.address.trim() || undefined,
+        zip: form.zip.trim() || undefined,
+        dob: form.dob.trim() || undefined,
         familyId: user?.familyId,
       };
 
@@ -117,6 +142,12 @@ export default function EditProfileScreen() {
         phone: updatedUser?.phone ?? payload.phone,
         bio: updatedUser?.bio ?? payload.bio,
         foodPreference: updatedUser?.foodPreference ?? payload.foodPreference,
+        location: updatedUser?.location ?? payload.location,
+        country: updatedUser?.country ?? payload.country,
+        city: updatedUser?.city ?? payload.city,
+        address: updatedUser?.address ?? payload.address,
+        zip: updatedUser?.zip ?? payload.zip,
+        dob: updatedUser?.dob ?? payload.dob,
       });
 
       setSaveState("saved");
@@ -230,6 +261,95 @@ export default function EditProfileScreen() {
             />
           </View>
 
+          {/* Date of Birth */}
+          <View className="mb-4">
+            <Text className="text-sm font-semibold text-gray-700 mb-2">
+              Date of Birth
+            </Text>
+            <DatePicker
+              value={form.dob ? new Date(form.dob) : new Date()}
+              onChange={(_event, date) => {
+                if (date) {
+                  set("dob", date.toISOString());
+                }
+              }}
+              mode="date"
+            />
+          </View>
+
+          {/* Location Details */}
+          <View className="mt-5 mb-3">
+            <Text className="text-xs font-semibold text-gray-500 uppercase tracking-widest">
+              Location Details
+            </Text>
+          </View>
+
+          <View className="mb-4">
+            <Text className="text-sm font-semibold text-gray-700 mb-2">
+              Location
+            </Text>
+            <TextInput
+              className="bg-white rounded-md px-4 py-3.5 text-sm text-gray-900 border border-gray-200"
+              placeholder="Enter your location"
+              placeholderTextColor="#9CA3AF"
+              value={form.location}
+              onChangeText={(v) => set("location", v)}
+            />
+          </View>
+
+          <View className="mb-4">
+            <Text className="text-sm font-semibold text-gray-700 mb-2">
+              Country
+            </Text>
+            <TextInput
+              className="bg-white rounded-md px-4 py-3.5 text-sm text-gray-900 border border-gray-200"
+              placeholder="Enter your country"
+              placeholderTextColor="#9CA3AF"
+              value={form.country}
+              onChangeText={(v) => set("country", v)}
+            />
+          </View>
+
+          <View className="mb-4">
+            <Text className="text-sm font-semibold text-gray-700 mb-2">
+              City
+            </Text>
+            <TextInput
+              className="bg-white rounded-md px-4 py-3.5 text-sm text-gray-900 border border-gray-200"
+              placeholder="Enter your city"
+              placeholderTextColor="#9CA3AF"
+              value={form.city}
+              onChangeText={(v) => set("city", v)}
+            />
+          </View>
+
+          <View className="mb-4">
+            <Text className="text-sm font-semibold text-gray-700 mb-2">
+              Address
+            </Text>
+            <TextInput
+              className="bg-white rounded-md px-4 py-3.5 text-sm text-gray-900 border border-gray-200"
+              placeholder="Enter your address"
+              placeholderTextColor="#9CA3AF"
+              value={form.address}
+              onChangeText={(v) => set("address", v)}
+            />
+          </View>
+
+          <View className="mb-4">
+            <Text className="text-sm font-semibold text-gray-700 mb-2">
+              Zip Code
+            </Text>
+            <TextInput
+              className="bg-white rounded-md px-4 py-3.5 text-sm text-gray-900 border border-gray-200"
+              placeholder="Enter your zip code"
+              placeholderTextColor="#9CA3AF"
+              value={form.zip}
+              onChangeText={(v) => set("zip", v)}
+              keyboardType="numeric"
+            />
+          </View>
+
           {/* Stay Preferences */}
           <View className="mt-5 mb-3">
             <Text className="text-xs font-semibold text-gray-500 uppercase tracking-widest">
@@ -248,14 +368,20 @@ export default function EditProfileScreen() {
                   <TouchableOpacity
                     key={opt}
                     // Use w-[31%] to roughly simulate grid-cols-3 with gap
-                    className={`w-[31%] min-w-[80px] items-center justify-center px-2 py-1 h-10 rounded-full border ${active ? "bg-pink-500 border-pink-500" : "bg-white border-gray-200"
-                      }`}
+                    className={`w-[31%] min-w-[80px] items-center justify-center px-2 py-1 h-10 rounded-full border ${
+                      active
+                        ? "bg-pink-500 border-pink-500"
+                        : "bg-white border-gray-200"
+                    }`}
                     onPress={() => set("foodPreference", opt)}
                   >
-                    <Text className={`text-xs font-medium ${active ? "text-white" : "text-gray-500"}`}>
+                    <Text
+                      className={`text-xs font-medium ${active ? "text-white" : "text-gray-500"}`}
+                    >
                       {opt}
                     </Text>
-                  </TouchableOpacity>);
+                  </TouchableOpacity>
+                );
               })}
             </View>
           </View>
