@@ -1,6 +1,6 @@
 import { MaterialIcons } from "@expo/vector-icons";
-import { useState } from "react";
 import { useRouter } from "expo-router";
+import { useState } from "react";
 import {
   SafeAreaView,
   ScrollView,
@@ -60,19 +60,7 @@ export default function AddBudgetItemScreen() {
     <SafeAreaView className="flex-1 bg-[#f8f6f7]">
       <StatusBar barStyle="dark-content" backgroundColor="#f8f6f7" />
 
-      {/* ── Top App Bar ── */}
-      <View className="flex-row items-center justify-between px-6 h-16 bg-white/70 border-b border-gray-100">
-        <TouchableOpacity
-          onPress={() => router.back()}
-          activeOpacity={0.7}
-        >
-          <MaterialIcons name="arrow-back" size={24} color="#ee2b8c" />
-        </TouchableOpacity>
-        <Text className="font-extrabold text-[20px] text-[#181114] tracking-tight">
-          Add Budget Item
-        </Text>
-        <View className="w-8" />
-      </View>
+    
 
       {/* ── Scrollable Content ── */}
       <ScrollView
@@ -195,14 +183,6 @@ export default function AddBudgetItemScreen() {
         </TouchableOpacity>
       </ScrollView>
 
-      {/* FAB to add another item */}
-      <TouchableOpacity
-        className="absolute right-5 bottom-8 w-14 h-14 rounded-full bg-[#059669] items-center justify-center shadow-lg"
-        activeOpacity={0.8}
-        onPress={() => handleSave(false)}
-      >
-        <MaterialIcons name="check" size={28} color="#fff" />
-      </TouchableOpacity>
     </SafeAreaView>
   );
 }

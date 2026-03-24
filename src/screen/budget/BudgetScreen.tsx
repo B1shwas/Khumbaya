@@ -1,6 +1,6 @@
 import { MaterialIcons } from "@expo/vector-icons";
-import { useState } from "react";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { useState } from "react";
 import {
   SafeAreaView,
   ScrollView,
@@ -104,7 +104,9 @@ export default function EventBudgetScreen() {
   const [search, setSearch] = useState("");
   const router = useRouter();
   const params = useLocalSearchParams<{ eventId?: string | string[] }>();
-  const eventId = Array.isArray(params.eventId) ? params.eventId[0] : params.eventId;
+  const eventId = Array.isArray(params.eventId)
+    ? params.eventId[0]
+    : params.eventId;
 
   const filteredCategories = CATEGORIES.map((cat) => ({
     ...cat,
@@ -118,9 +120,13 @@ export default function EventBudgetScreen() {
   const handleAddPress = () => {
     // Navigate to add budget item screen within the current stack
     if (eventId) {
-      router.push(`/(protected)/(client-stack)/events/${eventId}/(organizer)/addBudgetItem`);
+      router.push(
+        `/(protected)/(client-stack)/events/${eventId}/(organizer)/addBudgetItem`
+      );
     } else {
-      router.push(`/(protected)/(client-stack)/events/unknown/(organizer)/addBudgetItem`);
+      router.push(
+        `/(protected)/(client-stack)/events/unknown/(organizer)/addBudgetItem`
+      );
     }
   };
 
@@ -185,9 +191,13 @@ export default function EventBudgetScreen() {
             cat={cat}
             onPress={() => {
               if (eventId) {
-                router.push(`/(protected)/(client-stack)/events/${eventId}/(organizer)/editCategoryBudget`);
+                router.push(
+                  `/(protected)/(client-stack)/events/${eventId}/(organizer)/editCategoryBudget`
+                );
               } else {
-                router.push(`/(protected)/(client-stack)/events/unknown/(organizer)/editCategoryBudget`);
+                router.push(
+                  `/(protected)/(client-stack)/events/unknown/(organizer)/editCategoryBudget`
+                );
               }
             }}
           />

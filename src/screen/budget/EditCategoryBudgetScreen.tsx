@@ -1,6 +1,6 @@
 import { MaterialIcons } from "@expo/vector-icons";
-import { useState } from "react";
 import { useRouter } from "expo-router";
+import { useState } from "react";
 import {
     Modal,
     Pressable,
@@ -13,7 +13,6 @@ import {
     View,
 } from "react-native";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
 interface PaymentRecord {
   id: string;
   label: string;
@@ -23,7 +22,6 @@ interface PaymentRecord {
   status: "Verified" | "Pending";
 }
 
-// ─── Static Data ──────────────────────────────────────────────────────────────
 const PAYMENT_METHODS = ["Bank Transfer", "Credit Card", "Cash"];
 
 const INITIAL_PAYMENTS: PaymentRecord[] = [
@@ -45,11 +43,10 @@ const INITIAL_PAYMENTS: PaymentRecord[] = [
   },
 ];
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+
 const fmt = (n: number) =>
   `$${n.toLocaleString("en-US", { minimumFractionDigits: 2 })}`;
 
-// ─── Sub-components ───────────────────────────────────────────────────────────
 
 /** Labelled field wrapper */
 function FieldLabel({ children }: { children: string }) {
@@ -266,21 +263,6 @@ export default function EditCategoryBudgetScreen() {
     <SafeAreaView className="flex-1 bg-[#fdfbfc]">
       <StatusBar barStyle="dark-content" backgroundColor="#fdfbfc" />
 
-      {/* ── Top App Bar ── */}
-      <View className="flex-row items-center justify-between px-6 h-16 bg-white/80 border-b border-gray-100">
-        <View className="flex-row items-center gap-3">
-          <TouchableOpacity onPress={handleBack} activeOpacity={0.7}>
-            <MaterialIcons name="arrow-back-ios" size={22} color="#181114" />
-          </TouchableOpacity>
-          <Text className="font-bold text-lg tracking-tight text-[#181114]">
-            Edit Category
-          </Text>
-        </View>
-        <TouchableOpacity onPress={handleCancel} activeOpacity={0.7}>
-          <Text className="text-sm font-semibold text-gray-400">Cancel</Text>
-        </TouchableOpacity>
-      </View>
-
       {/* ── Scrollable Body ── */}
       <ScrollView
         className="flex-1"
@@ -390,8 +372,7 @@ export default function EditCategoryBudgetScreen() {
         </TouchableOpacity>
       </ScrollView>
 
-      {/* ── Sticky Remaining Balance ── */}
-      <RemainingBalanceBar remaining={remaining} />
+      {/* <RemainingBalanceBar remaining={remaining} /> */}
     </SafeAreaView>
   );
 }
