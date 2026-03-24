@@ -16,6 +16,8 @@ export interface SelectedSubEvent {
   budget: string;
   activities: SelectedActivity[];
 }
+export type SubEvent = Event;
+
 
 export type { SubEventTemplate, TemplateActivity };
 

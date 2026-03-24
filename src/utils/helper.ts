@@ -89,11 +89,21 @@ export const formatTimeRange = (
   const endText = endDateTime ? formatTime(endDateTime) : "";
 
   if (startText && endText) return `${startText} — ${endText}`;
-  if (startText) return `${startText} — ${fallbackText}`;
-  if (endText) return `${fallbackText} — ${endText}`;
+  if (startText) return startText;
+  if (endText) return endText;
   return fallbackText;
 };
 
+export  const formatShort = (date: Date) =>
+  date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+  });
+
+export const formatDayOnly = (date: Date) =>
+  date.toLocaleDateString("en-US", {
+    day: "numeric",
+  });
 type SubEventStatusMeta = {
   label: string;
   badgeClassName: string;
@@ -110,7 +120,7 @@ export const getSubEventStatusMeta = (
   switch (normalized) {
     case "ongoing":
       return {
-        label: "Happening now",
+      label: "Happening now",
         badgeClassName: "bg-pink-500 text-white",
         dotClassName:
           "bg-pink-500 text-white ring-1 ring-pink-200 border-2 border-[#f8f6f7]",

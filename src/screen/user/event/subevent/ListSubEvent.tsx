@@ -1,25 +1,34 @@
-import { Event } from "@/src/constants/event";
+import SubEventCard from "@/src/components/event/subevent/CardSubevent";
+import { SubEvent } from "@/src/constants/event";
 import { useSubEventsOfEvent } from "@/src/features/events/hooks/use-event";
-import {
-  formatDate,
-  formatTimeRange,
-  getDateKey,
-  getSubEventStatusMeta,
-  sortByDateTime,
-} from "@/src/utils/helper";
+import { sortByDateTime } from "@/src/utils/helper";
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { formatShort , formatDayOnly } from "@/src/utils/helper";
 import {
-  FlatList,
-  Image,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View,
+    FlatList,
+    ScrollView,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 
-export type SubEvent = Event;
+
+type ParsedSubEvent = {
+  item: SubEvent;
+  startTime: number;
+  endTime: number;
+};
+
+type MergedGroup = {
+  key: string;
+  dateValue: string;
+  items: SubEvent[];
+  label: string;
+  startTime: number;
+  endTime: number;
+};
 
 export default function ListSubEvent() {
   const router = useRouter();
@@ -41,37 +50,62 @@ export default function ListSubEvent() {
 
   const [selectedDayKey, setSelectedDayKey] = useState<string | null>(null);
 
+  const parseSubEvent = (item: SubEvent): ParsedSubEvent | null => {
+    const start = item.startDateTime;
+    if (!start) return null;
+    const startTime = new Date(start).getTime();
+    if (!Number.isFinite(startTime)) return null;
+
+    const endRaw = item.endDateTime ?? start;
+    const endTime = new Date(endRaw).getTime();
+    if (!Number.isFinite(endTime)) return null;
+
+    return { item, startTime, endTime };
+  };
+
+  const mergeOverlapping = (entries: ParsedSubEvent[]): MergedGroup[] => {
+    if (entries.length === 0) return [];
+
+    const sorted = [...entries].sort((a, b) => a.startTime - b.startTime);
+    const mergedGroups: MergedGroup[] = [];
+
+    sorted.forEach((entry) => {
+      const lastGroup = mergedGroups[mergedGroups.length - 1];
+      if (!lastGroup || entry.startTime > lastGroup.endTime) {
+        const dateValue = new Date(entry.startTime).toISOString();
+        mergedGroups.push({
+          key: `${dateValue}-${mergedGroups.length + 1}`,
+          dateValue,
+          items: [entry.item],
+          label: "",
+          startTime: entry.startTime,
+          endTime: entry.endTime,
+        });
+        return;
+      }
+
+      lastGroup.items.push(entry.item);
+      lastGroup.endTime = Math.max(lastGroup.endTime, entry.endTime);
+    });
+
+    return mergedGroups;
+  };
+
   const dayGroups = useMemo(() => {
     if (subEvents.length === 0) return [];
 
-    const grouped = new Map<
-      string,
-      { key: string; dateValue: string; items: SubEvent[]; label: string }
-    >();
+    const parsedItems = subEvents
+      .map(parseSubEvent)
+      .filter((entry): entry is ParsedSubEvent => entry !== null);
 
-    subEvents.forEach((item) => {
-      const dateValue = item.startDateTime || item.date;
-      const key = getDateKey(dateValue);
-      if (!key) return;
+    if (parsedItems.length === 0) return [];
 
-      if (!grouped.has(key)) {
-        grouped.set(key, {
-          key,
-          dateValue,
-          items: [],
-          label: "",
-        });
-      }
+    const mergedGroups = mergeOverlapping(parsedItems);
 
-      grouped.get(key)?.items.push(item);
-    });
-
-    return Array.from(grouped.values())
-      .sort((a, b) => new Date(a.key).getTime() - new Date(b.key).getTime())
-      .map((group, index) => ({
-        ...group,
-        label: `Day ${index + 1}`,
-      }));
+    return mergedGroups.map((group, index) => ({
+      ...group,
+      label: `Day ${index + 1}`,
+    }));
   }, [subEvents]);
 
   useEffect(() => {
@@ -85,171 +119,10 @@ export default function ListSubEvent() {
       ? dayGroups.find((group) => group.key === selectedDayKey)?.items ?? []
       : subEvents;
 
-    return sortByDateTime(scopedItems, (item) =>
-      item.startDateTime || item.date ? item.startDateTime || item.date : null
-    );
+    return sortByDateTime(scopedItems, (item) => item.startDateTime);
   }, [dayGroups, selectedDayKey, subEvents]);
 
-  const getStatusIcon = (status: string) => {
-    const normalized = status?.toLowerCase?.() ?? "upcoming";
-    if (normalized === "completed") return "checkmark-circle";
-    if (normalized === "ongoing") return "heart";
-    if (normalized === "cancelled") return "close-circle";
-    return "calendar-outline";
-  };
 
-  const getStatusIconColor = (status: string) => {
-    const normalized = status?.toLowerCase?.() ?? "upcoming";
-    if (normalized === "completed") return "#16A34A";
-    if (normalized === "ongoing") return "#C026D3";
-    if (normalized === "cancelled") return "#DC2626";
-    return "#5a2c3e";
-  };
-
-  const getStatusCircleStyle = (status: string) => {
-    const normalized = status?.toLowerCase?.() ?? "upcoming";
-    if (normalized === "completed") {
-      return { borderColor: "#16A34A", backgroundColor: "#DCFCE7" };
-    }
-    if (normalized === "ongoing") {
-      return { borderColor: "#C026D3", backgroundColor: "#F5D0FE" };
-    }
-    if (normalized === "cancelled") {
-      return { borderColor: "#DC2626", backgroundColor: "#FEE2E2" };
-    }
-    return { borderColor: "#5a2c3e", backgroundColor: "#F3E8EE" };
-  };
-
-  const getDerivedStatus = (item: SubEvent) => {
-    const start = item.startDateTime || item.date;
-    const end = item.endDateTime || item.startDateTime || item.date;
-    if (!start) return "upcoming";
-
-    const now = new Date().getTime();
-    const startTime = new Date(start).getTime();
-    const endTime = new Date(end).getTime();
-
-    if (!Number.isFinite(startTime) || !Number.isFinite(endTime)) {
-      return item.status || "upcoming";
-    }
-
-    if (endTime < now) return "completed";
-    if (startTime <= now && now <= endTime) return "ongoing";
-    return "upcoming";
-  };
-
-  const renderSubEventCard = ({
-    item,
-    index,
-  }: {
-    item: SubEvent;
-    index: number;
-  }) => {
-    const derivedStatus = getDerivedStatus(item);
-    const statusMeta = getSubEventStatusMeta(derivedStatus);
-    const timeRange = formatTimeRange(item.startDateTime, item.endDateTime);
-    const statusIcon = getStatusIcon(derivedStatus);
-    const statusIconColor = getStatusIconColor(derivedStatus);
-    const statusCircleStyle = getStatusCircleStyle(derivedStatus);
-    const isFirst = index === 0;
-    const isLast = index === filteredSubEvents.length - 1;
-    const iconCenterOffset = 22;
-
-    return (
-      <View className="relative flex-row gap-4 pb-6">
-        {!isFirst ? (
-          <View
-            className="absolute z-0 w-0.5 bg-[#e6dbe0]"
-            style={{ left: 20, top: 0, height: iconCenterOffset }}
-          />
-        ) : null}
-        {!isLast ? (
-          <View
-            className="absolute z-0 w-0.5 bg-[#e6dbe0]"
-            style={{ left: 20, top: iconCenterOffset, bottom: 0 }}
-          />
-        ) : null}
-        <View className="flex-col items-center z-10">
-          <View
-            className={`w-11 h-11 rounded-full items-center justify-center border ${statusMeta.dotClassName}`}
-            style={statusCircleStyle}
-          >
-            <Ionicons name={statusIcon} size={18} color={statusIconColor} />
-          </View>
-        </View>
-
-        <TouchableOpacity
-          className={`flex-1 bg-white rounded-2xl p-4 ${statusMeta.cardClassName}`}
-          activeOpacity={0.85}
-          onPress={() => {
-            router.push({
-              pathname:
-                "/(protected)/(client-stack)/events/[eventId]/(organizer)/(subevent)/[subEventId]/subevntdetail",
-              params: {
-                eventId: eventId as string,
-                subEventId: String(item.id),
-              },
-            });
-          }}
-        >
-          <View className="flex-row items-start justify-between mb-1">
-            <Text className="text-xs font-bold text-primary uppercase tracking-widest">
-              {timeRange}
-            </Text>
-            <View className={`px-2 py-1 rounded-lg  ${statusMeta.badgeClassName} `}>
-              <Text className="text-[10px] font-bold uppercase text-white">
-                {statusMeta.label}
-              </Text>
-            </View>
-          </View>
-
-          <Text className="text-base font-bold text-gray-900 mb-3">
-            {item.title}
-          </Text>
-
-          <View className="flex-row items-center gap-3 mb-3">
-            {item.imageUrl ? (
-              <View className="w-12 h-12 rounded-xl overflow-hidden bg-gray-200">
-                <Image
-                  source={{ uri: item.imageUrl }}
-                  className="w-full h-full"
-                  resizeMode="cover"
-                />
-              </View>
-            ) : (
-              <View className="w-12 h-12 rounded-xl bg-gray-100 items-center justify-center">
-                <Ionicons name="image-outline" size={20} color="#9CA3AF" />
-              </View>
-            )}
-
-            <View className="flex-1">
-              <Text className="text-sm font-semibold text-gray-900">
-                {item.location && item.location !== "TBD"
-                  ? item.location
-                  : "Location TBD"}
-              </Text>
-              <Text className="text-xs text-[#896175]">
-                {formatDate(item.startDateTime || item.date)}
-              </Text>
-            </View>
-          </View>
-
-          <View className="flex-row items-center justify-between">
-            {item.theme ? (
-              <Text className="text-xs text-gray-500">
-                Theme: <Text className="text-gray-700">{item.theme}</Text>
-              </Text>
-            ) : (
-              <View />
-            )}
-            <Text className="text-sm font-semibold text-primary">
-              ₹{item.budget?.toLocaleString()}
-            </Text>
-          </View>
-        </TouchableOpacity>
-      </View>
-    );
-  };
 
   const renderEmptyState = () => (
     <View className="flex-1 items-center justify-center py-20">
@@ -267,9 +140,7 @@ export default function ListSubEvent() {
 
   return (
     <View className="flex-1 bg-[#f8f6f7] p-2">
-      <View className="bg-white/80 border-b border-[#e6dbe0]">
-      
-
+      <View className="pt-2">
         {dayGroups.length > 1 ? (
           <ScrollView
             horizontal
@@ -278,6 +149,49 @@ export default function ListSubEvent() {
           >
             {dayGroups.map((group) => {
               const isActive = selectedDayKey === group.key;
+              const startValue = group.items[0]?.startDateTime;
+              const parsedDate = startValue ? new Date(startValue) : null;
+              const isValidDate =
+                parsedDate !== null && !Number.isNaN(parsedDate.getTime());
+              const baseYear = isValidDate ? parsedDate.getFullYear() : null;
+              const groupDateValues = group.items
+                .map((item) => {
+                  const start = item.startDateTime;
+                  const end = item.endDateTime || start;
+                  return { start, end };
+                })
+                .filter((value) => value.start || value.end);
+
+              const startTimes = groupDateValues
+                .map((value) => value.start)
+                .filter(Boolean)
+                .map((value) => new Date(value).getTime())
+                .filter((time) => Number.isFinite(time));
+
+              const endTimes = groupDateValues
+                .map((value) => value.end)
+                .filter(Boolean)
+                .map((value) => new Date(value).getTime())
+                .filter((time) => Number.isFinite(time));
+
+              const minStart = startTimes.length
+                ? new Date(Math.min(...startTimes))
+                : null;
+              const maxEnd = endTimes.length
+                ? new Date(Math.max(...endTimes))
+                : null;
+
+              const displayYear =
+                typeof baseYear === "number" ? String(baseYear) : "";
+
+              const rangeText = minStart
+                ? maxEnd && maxEnd.getTime() !== minStart.getTime()
+                  ? minStart.getMonth() === maxEnd.getMonth()
+                    ? `${formatShort(minStart)} - ${formatDayOnly(maxEnd)}`
+                    : `${formatShort(minStart)} - ${formatShort(maxEnd)}`
+                  : formatShort(minStart)
+                : "";
+
               return (
                 <TouchableOpacity
                   key={group.key}
@@ -288,19 +202,23 @@ export default function ListSubEvent() {
                       : "bg-white border-[#e6dbe0]"
                   }`}
                 >
+                  <View className="flex-col items-start">
+                    {displayYear ? (
+                      <Text
+                        className={`text-[11px] uppercase tracking-wide ${
+                          isActive ? "text-white/70" : "text-[#896175]"
+                        }`}
+                      >
+                        {displayYear}
+                      </Text>
+                    ) : null}
+                  </View>
                   <Text
-                    className={`text-xs uppercase tracking-wider mb-1 ${
-                      isActive ? "text-white/70" : "text-[#896175]"
-                    }`}
-                  >
-                    {formatDate(group.dateValue)}
-                  </Text>
-                  <Text
-                    className={`text-sm font-semibold ${
+                    className={`text-sm font-semibold mt-1 ${
                       isActive ? "text-white" : "text-gray-900"
                     }`}
                   >
-                    {group.label}
+                    {rangeText}
                   </Text>
                 </TouchableOpacity>
               );
@@ -317,15 +235,19 @@ export default function ListSubEvent() {
         renderEmptyState()
       ) : (
         <View className="flex-1 px-4 pb-24">
-<View
->
-  </View>
           <FlatList
             data={filteredSubEvents}
-            renderItem={renderSubEventCard}
             keyExtractor={(item) => String(item.id)}
             contentContainerClassName="pt-4 pb-24"
             showsVerticalScrollIndicator={false}
+            renderItem={({ item, index }) => (
+              <SubEventCard
+                item={item}
+                index={index}
+                total={filteredSubEvents.length}
+                eventId={eventId as string}
+              />
+            )}
           />
         </View>
       )}

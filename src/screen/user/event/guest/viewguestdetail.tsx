@@ -23,6 +23,9 @@ export default function ViewGuestDetail() {
   const router = useRouter();
   const guestDetail = useGuestDetailStore((state) => state.guestDraft);
 
+  const statusValue = guestDetail?.event_guest?.status?.toLowerCase?.() ?? "";
+  const isConfirmed = statusValue === "accepted" || statusValue === "confirmed";
+
   const eventId = Number(guestDetail?.event_guest?.eventId ?? 0);
   const { mutate: submitRsvpResponse, isPending } =
     useSubmitRsvpResponse(eventId);
@@ -166,19 +169,21 @@ export default function ViewGuestDetail() {
               colors={["rgba(238,43,140,0.07)", "transparent"]}
               className="items-center px-6 pt-8 pb-8"
             >
-              <TouchableOpacity
-                onPress={handleDeleteGuest}
-                className="absolute right-4 top-4 p-2 rounded-full bg-white"
-                activeOpacity={0.8}
-                style={{
-                  shadowColor: "#000",
-                  shadowOpacity: 0.12,
-                  shadowRadius: 4,
-                  elevation: 3,
-                }}
-              >
-                <Ionicons name="trash-outline" size={18} color="#EF4444" />
-              </TouchableOpacity>
+              {!isConfirmed ? (
+                <TouchableOpacity
+                  onPress={handleDeleteGuest}
+                  className="absolute right-4 top-4 p-2 rounded-full bg-white"
+                  activeOpacity={0.8}
+                  style={{
+                    shadowColor: "#000",
+                    shadowOpacity: 0.12,
+                    shadowRadius: 4,
+                    elevation: 3,
+                  }}
+                >
+                  <Ionicons name="trash-outline" size={18} color="#EF4444" />
+                </TouchableOpacity>
+              ) : null}
 
               <View className="relative">
                 <View
@@ -211,9 +216,7 @@ export default function ViewGuestDetail() {
                 {guestDetail?.user_detail.username || "User Name"}
               </Text>
               <Text variant="h2" className="text-primary text-sm mt-1">
-                {guestDetail?.event_guest.status == "accepted" || "confirmed"
-                  ? "Confirmed"
-                  : "Pending"}{" "}
+                {isConfirmed ? "Confirmed" : "Pending"}{" "}
                 Guest • {guestDetail?.event_guest.role || "VVIP"}
               </Text>
               {/* Only render date/time if both arrival and departure dates exist */}
