@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Text, View } from "react-native";
-import { BudgetSummary as BudgetSummaryType } from "../types/budget.types";
+import { BudgetSummary as BudgetSummaryType } from "../../features/budget/types/budget.types";
 
 interface BudgetSummaryProps {
   summary: BudgetSummaryType;
