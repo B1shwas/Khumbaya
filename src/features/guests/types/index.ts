@@ -17,7 +17,7 @@ export interface EventGuest {
   role: string | null;
   invited_by: number;
   joined_at: string;
-  category: "friend" | "family" | "colleague" | "vvip";,
+  category: "friend" | "family" | "colleague" | "vvip";
 }
 
 export interface UserDetail {
