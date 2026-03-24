@@ -1,8 +1,14 @@
 import { Button } from "@/src/components/ui/Button";
-import { CountryOption, CountryPickerModal } from "@/src/components/ui/CountryPhone";
+import {
+  CountryOption,
+  CountryPickerModal,
+} from "@/src/components/ui/CountryPhone";
 import { Text } from "@/src/components/ui/Text";
 import { COUNTRY_DATA } from "@/src/constants/countrydata";
-import { useGetEventOwner, useMakeEventMember } from "@/src/features/events/hooks/use-event";
+import {
+  useGetEventOwner,
+  useMakeEventMember,
+} from "@/src/features/events/hooks/use-event";
 import { useFindUserWithPhone } from "@/src/features/user/api/use-user";
 import { cn } from "@/src/utils/cn";
 import { useDebounce } from "@/src/utils/helper";
@@ -10,7 +16,15 @@ import { Ionicons } from "@expo/vector-icons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
-import { Alert, Image, Pressable, ScrollView, TextInput, TouchableOpacity, View } from "react-native";
+import {
+  Alert,
+  Image,
+  Pressable,
+  ScrollView,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 type Role = "co-host" | "planner" | "editor";
 
@@ -19,9 +33,13 @@ export function TransferOwnerShipPage() {
   const params = useLocalSearchParams();
   const [phone, setPhone] = useState("");
   const [selectedRole, setSelectedRole] = useState<Role>("co-host");
-  const [selectedCountry, setSelectedCountry] = useState<CountryOption>(COUNTRY_DATA[0]);
+  const [selectedCountry, setSelectedCountry] = useState<CountryOption>(
+    COUNTRY_DATA[0]
+  );
   const [pickerVisible, setPickerVisible] = useState(false);
-  const {data: eventMembers , isLoading:memberLoading} = useGetEventOwner(Number(params.eventId));
+  const { data: eventMembers, isLoading: memberLoading } = useGetEventOwner(
+    Number(params.eventId)
+  );
   const phoneDigits = phone.replace(/\D/g, "");
   const fullPhone = useMemo(() => {
     if (!phoneDigits) return "";
@@ -32,7 +50,9 @@ export function TransferOwnerShipPage() {
   const hasSearched = !!searchPhone;
 
   const eventId = useMemo(() => {
-    const raw = Array.isArray(params.eventId) ? params.eventId[0] : params.eventId;
+    const raw = Array.isArray(params.eventId)
+      ? params.eventId[0]
+      : params.eventId;
     const parsed = raw ? Number(raw) : NaN;
     return Number.isFinite(parsed) ? parsed : null;
   }, [params.eventId]);
@@ -44,7 +64,8 @@ export function TransferOwnerShipPage() {
   } = useFindUserWithPhone(searchPhone, { enabled: hasSearched });
 
   const foundUserData =
-    (foundUsersResponse as { items?: unknown } | undefined)?.items ?? foundUsersResponse;
+    (foundUsersResponse as { items?: unknown } | undefined)?.items ??
+    foundUsersResponse;
 
   const foundUser = useMemo(() => {
     if (!foundUserData) return null;
@@ -52,12 +73,14 @@ export function TransferOwnerShipPage() {
     return foundUserData;
   }, [foundUserData]);
 
-
   const { mutateAsync: addEventMember, isPending: isAddingMember } =
     useMakeEventMember(eventId ?? 0);
-  const resolvedUserId = Number((foundUser as { id?: number } | null)?.id ?? NaN);
-  const canAddMember = !!eventId && Number.isFinite(resolvedUserId) && hasSearched;
-  
+  const resolvedUserId = Number(
+    (foundUser as { id?: number } | null)?.id ?? NaN
+  );
+  const canAddMember =
+    !!eventId && Number.isFinite(resolvedUserId) && hasSearched;
+
   const getErrorMessage = (error: unknown) => {
     if (typeof error === "object" && error !== null) {
       const maybeResponse = error as {
@@ -101,7 +124,12 @@ export function TransferOwnerShipPage() {
     }
   };
 
-  const roles: { id: Role; title: string; desc: string; icon: keyof typeof Ionicons.glyphMap }[] = [
+  const roles: {
+    id: Role;
+    title: string;
+    desc: string;
+    icon: keyof typeof Ionicons.glyphMap;
+  }[] = [
     {
       id: "co-host",
       title: "Co-Host",
@@ -130,18 +158,69 @@ export function TransferOwnerShipPage() {
         onClose={() => setPickerVisible(false)}
       />
       <ScrollView
-        className="flex-1 px-6 pt-8 pb-36"
+        className="flex-1 px-6 pt-2 pb-36"
         contentContainerStyle={{ paddingBottom: 100 }}
       >
-        <Text variant="h1" className="text-3xl mb-2">Find a host</Text>
-        <Text className="text-slate-600  text-base mb-8">
-          Search for an existing user by their phone number to add them to your event team.
-        </Text>
+        <View className="pt-2">
+          <Text className="text-slate-900 text-sm font-jakarta-bold uppercase mb-3">
+            Event Members
+          </Text>
+          {memberLoading ? (
+            <View className="p-4 rounded-md border border-slate-200 bg-slate-50">
+              <Text className="text-sm text-slate-600">Loading members...</Text>
+            </View>
+          ) : !!eventMembers && eventMembers.length ? (
+            <View className="gap-3">
+              {eventMembers?.map((member, index) => {
+                const user = (member as { user?: any })?.user ?? member;
+                const name = user?.username || "Member";
+                const phone = user?.phone || user?.phoneNumber || null;
+                const role = member?.role;
 
-        <View className="gap-6">
+                return (
+                  <View
+                    key={String(
+                      (member as { id?: number | string })?.id ?? index
+                    )}
+                    className="flex-row items-center p-4 bg-slate-50 rounded-md border border-slate-200"
+                  >
+                    <View className="size-12 rounded-full bg-slate-200 items-center justify-center mr-4">
+                      <Ionicons name="person" size={24} color="#64748b" />
+                    </View>
+                    <View className="flex-1">
+                      <Text className="font-jakarta-bold text-slate-900">
+                        {name}
+                      </Text>
+                      {phone && (
+                        <Text className="text-sm text-dark-500">{phone}</Text>
+                      )}
+                      <Text className="text-sm text-dark-500">
+                        {role ? `Role: ${role}` : "Event member"}
+                      </Text>
+                    </View>
+                  </View>
+                );
+              })}
+            </View>
+          ) : (
+            <View className="p-4 rounded-md border border-slate-200 bg-slate-50">
+              <Text className="text-sm text-slate-600">No members yet.</Text>
+            </View>
+          )}
+        </View>
+        <View className="mt-8">
+          <Text className="text-slate-900 text-sm font-jakarta-bold uppercase mb-3">
+            Transfer Ownership
+          </Text>
+          <Text className="text-sm text-slate-600 mb-4">
+            Search for a member to transfer ownership to.
+          </Text>
+        </View>
+
+        <View className="mt-2">
           <View>
             <Text className="text-slate-900  text-sm font-jakarta-bold uppercase mb-3">
-              Phone Number
+              Add Phone Number
             </Text>
             <View className="h-14 w-full flex-row items-center overflow-hidden rounded-md border border-slate-200 bg-white">
               <Pressable
@@ -156,7 +235,11 @@ export function TransferOwnerShipPage() {
                 <Text className="text-sm font-medium text-slate-800">
                   +{selectedCountry.dialCode}
                 </Text>
-                <MaterialIcons name="arrow-drop-down" size={18} color="#94a3b8" />
+                <MaterialIcons
+                  name="arrow-drop-down"
+                  size={18}
+                  color="#94a3b8"
+                />
               </Pressable>
               <TextInput
                 className="flex-1 px-4 text-base text-slate-900"
@@ -175,13 +258,14 @@ export function TransferOwnerShipPage() {
               </View>
               <View>
                 <Text className="font-jakarta-bold text-slate-900 ">
-                  {
-                    (foundUser as { username?: string; name?: string })?.username ||
+                  {(foundUser as { username?: string; name?: string })
+                    ?.username ||
                     (foundUser as { username?: string; name?: string })?.name ||
-                    "User found"
-                  }
+                    "User found"}
                 </Text>
-                <Text className="text-sm text-slate-500">Found in database</Text>
+                <Text className="text-sm text-slate-500">
+                  Found in database
+                </Text>
               </View>
             </View>
           )}
@@ -194,7 +278,6 @@ export function TransferOwnerShipPage() {
             </View>
           )}
 
-         
           <View className="pt-4">
             <Text className="text-slate-900 text-sm font-jakarta-bold uppercase mb-4">
               Assign Role
@@ -227,7 +310,9 @@ export function TransferOwnerShipPage() {
                   <View
                     className={cn(
                       "size-5 rounded-full border-2 items-center justify-center",
-                      selectedRole === role.id ? "border-primary" : "border-slate-200 "
+                      selectedRole === role.id
+                        ? "border-primary"
+                        : "border-slate-200 "
                     )}
                   >
                     {selectedRole === role.id && (
@@ -239,7 +324,7 @@ export function TransferOwnerShipPage() {
             </View>
           </View>
         </View>
-           <Button
+        <Button
           className="flex-row items-center gap-2 mt-5"
           onPress={handleAddMember}
           disabled={!canAddMember || isAddingMember}
@@ -250,53 +335,9 @@ export function TransferOwnerShipPage() {
         <Text className="text-center text-xs text-slate-400 mt-4 px-4">
           The user will receive an invite notification to join your event team.
         </Text>
-         <View className="pt-2">
-            <Text className="text-slate-900 text-sm font-jakarta-bold uppercase mb-3">
-              Event Members
-            </Text>
-            {memberLoading ? (
-              <View className="p-4 rounded-md border border-slate-200 bg-slate-50">
-                <Text className="text-sm text-slate-600">Loading members...</Text>
-              </View>
-            ) : !!eventMembers && eventMembers.length ? (
-              <View className="gap-3">
-                {eventMembers?.map((member, index) => {
-                  const user = (member as { user?: any })?.user ?? member;
-                  const name =
-                    user?.username ||"Member";
-                  const role = member?.role;
-
-                  return (
-                    <View
-                      key={String((member as { id?: number | string })?.id ?? index)}
-                      className="flex-row items-center p-4 bg-slate-50 rounded-md border border-slate-200"
-                    >
-                      <View className="size-12 rounded-full bg-slate-200 items-center justify-center mr-4">
-                        <Ionicons name="person" size={24} color="#64748b" />
-                      </View>
-                      <View className="flex-1">
-                        <Text className="font-jakarta-bold text-slate-900">
-                          {name}
-                        </Text>
-                        <Text className="text-sm text-slate-500">
-                          {role ? `Role: ${role}` : "Event member"}
-                        </Text>
-                      </View>
-                    </View>
-                  );
-                })}
-              </View>
-            ) : (
-              <View className="p-4 rounded-md border border-slate-200 bg-slate-50">
-                <Text className="text-sm text-slate-600">No members yet.</Text>
-              </View>
-            )}
-          </View>
-
       </ScrollView>
 
       {/* Sticky Bottom CTA */}
- 
     </View>
   );
 }
