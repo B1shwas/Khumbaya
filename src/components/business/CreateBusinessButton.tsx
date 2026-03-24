@@ -1,29 +1,45 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import React from "react";
-import { Text, TouchableOpacity, View } from "react-native";
+import { Platform, TouchableOpacity } from "react-native";
 
 interface CreateBusinessButtonProps {
   onPress?: () => void;
 }
+
+const shadowStyle = Platform.select({
+  ios: {
+    shadowColor: "#ee2b8c",
+    shadowOpacity: 0.45,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 4 },
+  },
+  android: { elevation: 8 },
+  default: {},
+});
 
 const CreateBusinessButton = React.memo(function CreateBusinessButton({
   onPress,
 }: CreateBusinessButtonProps) {
   return (
     <TouchableOpacity
-      activeOpacity={0.7}
-      className="border-2 border-dashed border-gray-200 rounded-xl py-8 items-center justify-center bg-white/50 mb-2"
+      activeOpacity={0.85}
       onPress={onPress}
+      style={[
+        shadowStyle,
+        {
+          position: "absolute",
+          bottom: 24,
+          right: 20,
+          width: 56,
+          height: 56,
+          borderRadius: 28,
+          backgroundColor: "#ee2b8c",
+          alignItems: "center",
+          justifyContent: "center",
+        },
+      ]}
     >
-      <View className="w-14 h-14 rounded-full bg-primary/10 items-center justify-center mb-2.5">
-        <MaterialIcons name="add" size={30} color="#ee2b8c" />
-      </View>
-      <Text className="text-[15px] font-bold text-[#181114]">
-        Create New Business
-      </Text>
-      <Text className="text-xs text-[#594048] mt-1">
-        Grow your portfolio today
-      </Text>
+      <MaterialIcons name="add" size={30} color="white" />
     </TouchableOpacity>
   );
 });
