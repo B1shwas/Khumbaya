@@ -1,5 +1,6 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { useState } from "react";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import {
   SafeAreaView,
   ScrollView,
@@ -99,8 +100,11 @@ const SPENT_PCT = (SPENT / TOTAL_BUDGET) * 100;
 
 const fmt = (n: number) => (n === 0 ? "$0" : `$${n.toLocaleString("en-US")}`);
 
-export default function EventBudgetScreen({ navigation }: any) {
+export default function EventBudgetScreen() {
   const [search, setSearch] = useState("");
+  const router = useRouter();
+  const params = useLocalSearchParams<{ eventId?: string | string[] }>();
+  const eventId = Array.isArray(params.eventId) ? params.eventId[0] : params.eventId;
 
   const filteredCategories = CATEGORIES.map((cat) => ({
     ...cat,
@@ -112,12 +116,11 @@ export default function EventBudgetScreen({ navigation }: any) {
   })).filter((cat) => cat.items.length > 0 || search === "");
 
   const handleAddPress = () => {
-    // Navigate to add budget item screen
-    if (navigation) {
-      const parent = navigation.getParent();
-      if (parent) {
-        parent.navigate("addBudgetItem");
-      }
+    // Navigate to add budget item screen within the current stack
+    if (eventId) {
+      router.push(`/(protected)/(client-stack)/events/${eventId}/(organizer)/addBudgetItem`);
+    } else {
+      router.push(`/(protected)/(client-stack)/events/unknown/(organizer)/addBudgetItem`);
     }
   };
 
@@ -181,11 +184,10 @@ export default function EventBudgetScreen({ navigation }: any) {
             key={cat.id}
             cat={cat}
             onPress={() => {
-              if (navigation) {
-                const parent = navigation.getParent();
-                if (parent) {
-                  parent.navigate("editCategoryBudget");
-                }
+              if (eventId) {
+                router.push(`/(protected)/(client-stack)/events/${eventId}/(organizer)/editCategoryBudget`);
+              } else {
+                router.push(`/(protected)/(client-stack)/events/unknown/(organizer)/editCategoryBudget`);
               }
             }}
           />

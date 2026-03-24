@@ -1,5 +1,6 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { useState } from "react";
+import { useRouter } from "expo-router";
 import {
   SafeAreaView,
   ScrollView,
@@ -21,7 +22,8 @@ const CATEGORIES = [
   { id: "other", label: "Other", icon: "more-horiz" },
 ];
 
-export default function AddBudgetItemScreen({ navigation }: any) {
+export default function AddBudgetItemScreen() {
+  const router = useRouter();
   const [category, setCategory] = useState("");
   const [itemName, setItemName] = useState("");
   const [vendor, setVendor] = useState("");
@@ -42,7 +44,7 @@ export default function AddBudgetItemScreen({ navigation }: any) {
 
     // Clear form for next entry or go back
     if (goBack) {
-      navigation?.goBack();
+      router.back();
     } else {
       // Clear form
       setCategory("");
@@ -61,7 +63,7 @@ export default function AddBudgetItemScreen({ navigation }: any) {
       {/* ── Top App Bar ── */}
       <View className="flex-row items-center justify-between px-6 h-16 bg-white/70 border-b border-gray-100">
         <TouchableOpacity
-          onPress={() => navigation?.goBack()}
+          onPress={() => router.back()}
           activeOpacity={0.7}
         >
           <MaterialIcons name="arrow-back" size={24} color="#ee2b8c" />

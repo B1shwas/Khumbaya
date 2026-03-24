@@ -1,5 +1,6 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { useState } from "react";
+import { useRouter } from "expo-router";
 import {
     Modal,
     Pressable,
@@ -223,7 +224,8 @@ function RemainingBalanceBar({ remaining }: { remaining: number }) {
 }
 
 // ─── Main Screen ──────────────────────────────────────────────────────────────
-export default function EditCategoryBudgetScreen({ navigation }: any) {
+export default function EditCategoryBudgetScreen() {
+  const router = useRouter();
   // Form state
   const [categoryName, setCategoryName] = useState("Photography");
   const [estimated, setEstimated] = useState("3500");
@@ -240,11 +242,11 @@ export default function EditCategoryBudgetScreen({ navigation }: any) {
   const remaining = Math.max(0, estimatedNum - spentNum);
 
   const handleBack = () => {
-    navigation?.goBack();
+    router.back();
   };
 
   const handleCancel = () => {
-    navigation?.goBack();
+    router.back();
   };
 
   const handleSave = () => {
@@ -257,7 +259,7 @@ export default function EditCategoryBudgetScreen({ navigation }: any) {
       dueDate,
       notes,
     });
-    navigation?.goBack();
+    router.back();
   };
 
   return (
