@@ -98,10 +98,7 @@ export default function FamilyCard({
               {family.family_name}
             </Text>
 
-            <Text
-              numberOfLines={1}
-              className="mt-0.5 text-xs text-gray-500"
-            >
+            <Text numberOfLines={1} className="mt-0.5 text-xs text-gray-500">
               {family.memberCount} member{family.memberCount !== 1 ? "s" : ""}
             </Text>
           </View>
