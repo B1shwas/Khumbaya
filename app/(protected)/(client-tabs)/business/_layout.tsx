@@ -32,6 +32,10 @@ export default function BusinessLayout() {
         name="create"
         options={{ title: "Create Business" }}
       />
+      <Stack.Screen
+        name="[businessId]"
+        options={{ title: "Business Details" }}
+      />
     </Stack>
   );
 }

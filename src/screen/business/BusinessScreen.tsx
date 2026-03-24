@@ -29,11 +29,17 @@ export default function BusinessScreen() {
         {/* Business list */}
         <View className="px-4 gap-5">
           {BUSINESSES.map((business) => (
-            <BusinessCard key={business.id} business={business} />
+            <BusinessCard
+              key={business.id}
+              business={business}
+              onPress={() => router.push(`/business/${business.id}`)}
+            />
           ))}
-          <CreateBusinessButton onPress={() => router.push("/business/create")} />
         </View>
       </ScrollView>
+
+      {/* Floating action button */}
+      <CreateBusinessButton onPress={() => router.push("/business/create")} />
     </View>
   );
 }
