@@ -14,9 +14,7 @@ export function BudgetHeroCard({
   spentPercentage,
 }: BudgetHeroCardProps) {
   return (
-    <View className="rounded-[32px] bg-[#181114] p-8 shadow-2xl overflow-hidden mb-4">
-      {/* decorative blob */}
-      <View className="absolute -top-10 -right-10 w-48 h-48 rounded-full bg-[#ee2b8c]/20 opacity-60" />
+   <View className="bg-[#181114] rounded-2xl p-5 mb-5">
       <Text className="text-xs font-bold uppercase tracking-widest text-white/60 mb-1">
         Total Budget
       </Text>

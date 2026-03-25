@@ -7,11 +7,9 @@ import {
   StatusBar,
   TextInput,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
 import {
-  AdviceCard,
-  BudgetHeroCard,
   CategorySection,
   ExpenseCategory,
   StatCard,
@@ -140,34 +138,40 @@ export default function EventBudgetScreen() {
         contentContainerClassName="px-5 pt-6 pb-32"
         showsVerticalScrollIndicator={false}
       >
-        {/* Hero Budget Card */}
-        <BudgetHeroCard
-          totalBudget={TOTAL_BUDGET}
-          spent={SPENT}
-          spentPercentage={SPENT_PCT}
-        />
-
-        {/* Stats Row */}
-        <View className="flex-row -mx-0.5 mb-4">
-          <StatCard
-            label="Spent"
-            value={fmt(SPENT)}
-            iconName="payments"
-            accent="#ee2b8c"
-          />
-          <StatCard
-            label="Pending"
-            value={fmt(PENDING)}
-            iconName="pending-actions"
-            accent="#d97706"
-          />
-          <StatCard
-            label="Remaining"
-            value={fmt(REMAINING)}
-            iconName="account-balance-wallet"
-            accent="#059669"
-            valueCls="text-emerald-600"
-          />
+        {/* 2x2 Budget Stats Grid */}
+        <View className="mb-4">
+          {/* Row 1: Total Budget and Spent */}
+          <View className="flex-row mb-3">
+            <StatCard
+              label="Total Budget"
+              value={fmt(TOTAL_BUDGET)}
+              iconName="account-balance"
+              accent="#181114"
+            />
+            <StatCard
+              label="Spent"
+              value={fmt(SPENT)}
+              iconName="payments"
+              accent="#ee2b8c"
+            />
+          </View>
+          {/* Row 2: Pending and Remaining */}
+          <View className="flex-row">
+            <StatCard
+              label="Pending"
+              value={fmt(PENDING)}
+              iconName="pending-actions"
+              accent="#d97706"
+              valueCls="text-[#d97706]"
+            />
+            <StatCard
+              label="Remaining"
+              value={fmt(REMAINING)}
+              iconName="account-balance-wallet"
+              accent="#059669"
+              valueCls="text-emerald-600"
+            />
+          </View>
         </View>
 
         {/* Search Bar */}
@@ -202,9 +206,6 @@ export default function EventBudgetScreen() {
             }}
           />
         ))}
-
-        {/* Advice Card */}
-        <AdviceCard />
       </ScrollView>
 
       {/* Floating Action Button */}

@@ -1,5 +1,5 @@
-import { Text, View } from "react-native";
-
+import {  View } from "react-native";
+import { Text } from "../ui/Text";
 export interface ExpenseItem {
   id: string;
   name: string;
@@ -17,6 +17,8 @@ const fmt = (n: number) => (n === 0 ? "$0" : `$${n.toLocaleString("en-US")}`);
 
 export function ExpenseRow({ item }: ExpenseRowProps) {
   const dim = item.pending;
+  const total = item.actual === 0 ? item.estimated : item.actual;
+
   return (
     <View className="flex-row items-center px-5 py-4 border-b border-gray-100">
       <View className="flex-1">
@@ -31,17 +33,48 @@ export function ExpenseRow({ item }: ExpenseRowProps) {
           {item.vendor}
         </Text>
       </View>
-      <View className="items-end gap-0.5 ml-2">
-        <Text className={`text-xs ${dim ? "text-gray-300" : "text-gray-500"}`}>
-          Est. {fmt(item.estimated)}
-        </Text>
-        <Text
-          className={`text-sm font-bold ${
-            dim ? "text-gray-300" : "text-[#ee2b8c]"
-          }`}
-        >
-          {item.actual === 0 ? "Pending" : fmt(item.actual)}
-        </Text>
+      {/* Est, Actual, Total in horizontal line */}
+      <View className="flex-row items-center gap-3 ml-2">
+        <View className="items-center">
+          <Text
+            className={`text-[10px] ${dim ? "text-gray-300" : "text-gray-400"}`}
+          >
+            Est
+          </Text>
+          <Text
+            className={`text-xs font-semibold ${dim ? "text-gray-300" : "text-gray-600"}`}
+          >
+            {fmt(item.estimated)}
+          </Text>
+        </View>
+        <View className="w-px h-8 bg-gray-200" />
+        <View className="items-center">
+          <Text
+            className={`text-[10px] ${dim ? "text-gray-300" : "text-gray-400"}`}
+          >
+            Actual
+          </Text>
+          <Text
+            className={`text-xs font-semibold ${
+              dim ? "text-gray-300" : "text-[#ee2b8c]"
+            }`}
+          >
+            {item.actual === 0 ? "Pending" : fmt(item.actual)}
+          </Text>
+        </View>
+        <View className="w-px h-8 bg-gray-200" />
+        <View className="items-center">
+          <Text
+            className={`text-[10px] ${dim ? "text-gray-300" : "text-gray-400"}`}
+          >
+            Total
+          </Text>
+          <Text
+            className={`text-xs font-bold ${dim ? "text-gray-300" : "text-[#181114]"}`}
+          >
+            {fmt(total)}
+          </Text>
+        </View>
       </View>
     </View>
   );
