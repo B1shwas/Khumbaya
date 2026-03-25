@@ -1,11 +1,18 @@
-import { MaterialIcons } from "@expo/vector-icons";
-import { View } from "react-native";
+import { TouchableOpacity, View } from "react-native";
 import { Text } from "../ui/Text";
-import { ExpenseItem, ExpenseRow } from "./ExpenseRow";
+
+export interface ExpenseItem {
+  id: string;
+  name: string;
+  vendor: string;
+  estimated: number;
+  actual: number;
+  pending?: boolean;
+}
 
 export interface ExpenseCategory {
   id: string;
-  label: string; // MaterialIcons name
+  label: string;
   icon: string;
   total?: number;
   items: ExpenseItem[];
@@ -16,33 +23,48 @@ interface CategorySectionProps {
   onItemPress?: (item: ExpenseItem) => void;
 }
 
-const fmt = (n: number) => (n === 0 ? "$0" : `${n.toLocaleString("en-US")}`);
-
 export function CategorySection({ cat, onItemPress }: CategorySectionProps) {
   return (
-    <View className="mb-2">
-      {/* header */}
-      <View className="flex-row items-center justify-between px-5 py-3">
-        <View className="flex-row items-center">
-          <MaterialIcons name={cat.icon as any} size={20} color="#ee2b8c" />
-          <Text className="text-base font-bold text-[#181114] ml-2">
-            {cat.label}
-          </Text>
-        </View>
-        {cat.total !== undefined && (
-          <Text className="text-sm font-bold text-[#181114]">
-            {fmt(cat.total)}
-          </Text>
-        )}
-      </View>
+    <View className="mb-6">
+      <Text className="text-lg text-[#181114] mb-3 px-5" variant="h2">
+        {cat.label}
+      </Text>
 
-      <View className="border-t border-gray-100">
-        {cat.items.map((item) => (
-          <ExpenseRow
+      <View className="flex-1">
+        <View className="flex-row bg-[#f5e6ed] px-5">
+          {["expense name", "vendor", "estimated", "actual"].map((name) => (
+            <Text
+              key={name}
+              className="flex-1 py-3 px-3 text-xs text-nowrap text-[#181114]"
+              variant="h2"
+            >
+              {name.toUpperCase()}
+            </Text>
+          ))}
+        </View>
+
+        {cat.items.map((item, index) => (
+          <TouchableOpacity
             key={item.id}
-            item={item}
-            onPress={() => onItemPress?.(item)}
-          />
+            className={`flex-row px-5 border-b-[1px] border-gray-200`}
+          >
+            <Text className="flex-1 py-3 px-3 text-sm text-[#181114]">
+              {item.name}
+            </Text>
+            <Text className="flex-1 py-3 px-3 text-sm text-gray-600">
+              {item.vendor}
+            </Text>
+            <Text className="flex-[0.7] py-3 px-3 text-sm text-gray-600">
+              Rs. {item.estimated}
+            </Text>
+            <Text
+              className={`flex-[0.7] py-3 px-3 text-sm ${
+                item.actual === 0 ? "text-gray-400" : "text-[#ee2b8c]"
+              }`}
+            >
+              {item.actual === 0 ? "Pending" : `Rs. ${item.actual}`}
+            </Text>
+          </TouchableOpacity>
         ))}
       </View>
     </View>

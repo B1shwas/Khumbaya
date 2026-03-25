@@ -1,19 +1,9 @@
+import { Text } from "@/src/components/ui/Text";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
-import {
-    SafeAreaView,
-    ScrollView,
-    StatusBar,
-    TextInput,
-    TouchableOpacity,
-    View,
-} from "react-native";
-import {
-    CategorySection,
-    ExpenseCategory,
-    StatCard,
-} from "../../components/budget";
+import { ScrollView, TextInput, TouchableOpacity, View } from "react-native";
+import { CategorySection, ExpenseCategory } from "../../components/budget";
 
 const CATEGORIES: ExpenseCategory[] = [
   {
@@ -64,14 +54,6 @@ const CATEGORIES: ExpenseCategory[] = [
         estimated: 4500,
         actual: 4200,
       },
-      {
-        id: "a2",
-        name: "Groom Tuxedo",
-        vendor: "The Black Tux",
-        estimated: 800,
-        actual: 0,
-        pending: true,
-      },
     ],
   },
   {
@@ -89,14 +71,6 @@ const CATEGORIES: ExpenseCategory[] = [
     ],
   },
 ];
-
-const TOTAL_BUDGET = 45000;
-const SPENT = 18240;
-const PENDING = 4500;
-const REMAINING = TOTAL_BUDGET - SPENT - PENDING;
-const SPENT_PCT = (SPENT / TOTAL_BUDGET) * 100;
-
-const fmt = (n: number) => (n === 0 ? "$0" : `$${n.toLocaleString("en-US")}`);
 
 export default function EventBudgetScreen() {
   const [search, setSearch] = useState("");
@@ -116,79 +90,61 @@ export default function EventBudgetScreen() {
   })).filter((cat) => cat.items.length > 0 || search === "");
 
   const handleAddPress = () => {
-    // Navigate to add budget item screen within the current stack
-    if (eventId) {
-      router.push(
-        `/(protected)/(client-stack)/events/${eventId}/(organizer)/addBudgetItem`
-      );
-    } else {
-      router.push(
-        `/(protected)/(client-stack)/events/unknown/(organizer)/addBudgetItem`
-      );
-    }
+    router.push(
+      `/(protected)/(client-stack)/events/${eventId}/(organizer)/addBudgetItem`
+    );
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-[#f8f6f7]">
-      <StatusBar barStyle="dark-content" backgroundColor="#f8f6f7" />
-
-      {/* ── Scrollable Content ── */}
+    <View className="flex-1">
       <ScrollView
         className="flex-1"
-        contentContainerClassName="px-5 pt-6 pb-32"
+        contentContainerClassName="pb-32"
         showsVerticalScrollIndicator={false}
       >
-        {/* 2x2 Budget Stats Grid */}
-        <View className="mb-4">
-          {/* Row 1: Total Budget and Spent */}
-          <View className="flex-row mb-3">
-            <StatCard
-              label="Total Budget"
-              value={fmt(TOTAL_BUDGET)}
-              iconName="account-balance"
-              accent="#181114"
-            />
-            <StatCard
-              label="Spent"
-              value={fmt(SPENT)}
-              iconName="payments"
-              accent="#ee2b8c"
-            />
-          </View>
-          {/* Row 2: Pending and Remaining */}
-          <View className="flex-row">
-            <StatCard
-              label="Pending"
-              value={fmt(PENDING)}
-              iconName="pending-actions"
-              accent="#d97706"
-              valueCls="text-[#d97706]"
-            />
-            <StatCard
-              label="Remaining"
-              value={fmt(REMAINING)}
-              iconName="account-balance-wallet"
-              accent="#059669"
-              valueCls="text-emerald-600"
-            />
-          </View>
-        </View>
-
-        {/* Search Bar */}
-        <View className="mb-8">
-          <View className="flex-row items-center bg-white rounded-2xl px-4 h-14 shadow-sm border border-gray-100">
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          className="mb-4 -mx-5 px-5 bg-white py-5 border-b-[1px] border-gray-200"
+          contentContainerClassName="gap-4 pr-8"
+        >
+          {[
+            { title: "Total Budget", value: "10,000" },
+            { title: "Pending", value: "10,000" },
+            { title: "Spent", value: "10,000" },
+            { title: "Remaining", value: "10,000" },
+          ].map((i, index) => (
+            <View
+              key={i.title}
+              className="gap-2 px-4 border-r-[1px] border-gray-200"
+            >
+              <Text
+                variant="h2"
+                className="text-xs text-gray-500 tracking-widest"
+              >
+                {i.title.toUpperCase()}
+              </Text>
+              <Text
+                variant="h1"
+                className={`text-xl text-background-dark ${index === 0 && "text-teal-600"}`}
+              >{`Rs. ${i.value}`}</Text>
+            </View>
+          ))}
+        </ScrollView>
+        <View className="mb-8 px-5">
+          <View className="flex-row items-center bg-white rounded-md px-4 h-14 shadow-sm border border-gray-100">
             <MaterialIcons name="search" size={20} color="#9ca3af" />
             <TextInput
-              className="flex-1 ml-2 text-sm font-medium text-[#181114]"
+              className="flex-1 ml-2 text-sm text-[#181114]"
               placeholder="Search expenses or vendors..."
               placeholderTextColor="#9ca3af"
+              placeholderClassName="font-jakarta"
               value={search}
               onChangeText={setSearch}
             />
           </View>
         </View>
 
-        {/* Category Sections */}
         {filteredCategories.map((cat) => (
           <CategorySection
             key={cat.id}
@@ -196,21 +152,14 @@ export default function EventBudgetScreen() {
             onItemPress={(item) => {
               const categoryData = JSON.stringify(cat);
               const paramsQuery = `category=${encodeURIComponent(categoryData)}&itemId=${encodeURIComponent(item.id)}`;
-              if (eventId) {
-                router.push(
-                  `/(protected)/(client-stack)/events/${eventId}/(organizer)/editCategoryBudget?${paramsQuery}`
-                );
-              } else {
-                router.push(
-                  `/(protected)/(client-stack)/events/unknown/(organizer)/editCategoryBudget?${paramsQuery}`
-                );
-              }
+              router.push(
+                `/(protected)/(client-stack)/events/${eventId}/(organizer)/editCategoryBudget?${paramsQuery}`
+              );
             }}
           />
         ))}
       </ScrollView>
 
-      {/* Floating Action Button */}
       <TouchableOpacity
         className="absolute right-5 bottom-8 w-14 h-14 rounded-full bg-[#ee2b8c] items-center justify-center shadow-lg"
         activeOpacity={0.8}
@@ -218,6 +167,6 @@ export default function EventBudgetScreen() {
       >
         <MaterialIcons name="add" size={28} color="#fff" />
       </TouchableOpacity>
-    </SafeAreaView>
+    </View>
   );
 }
