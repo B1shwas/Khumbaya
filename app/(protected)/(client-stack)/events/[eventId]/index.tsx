@@ -5,7 +5,11 @@ import { ActivityIndicator, View } from "react-native";
 
 export default function EventRoleRedirect() {
   const { eventId } = useLocalSearchParams();
-  const { data: eventsData = [], isLoading, isFetching } = useGetEventWithRole();
+  const {
+    data: eventsData = [],
+    isLoading,
+    isFetching,
+  } = useGetEventWithRole();
 
   if (isLoading || isFetching) {
     return (
@@ -26,24 +30,26 @@ export default function EventRoleRedirect() {
     case "Vendor":
       return (
         <Redirect
-        href={`/(protected)/(client-stack)/events/${eventId}/(vendor)/`}
+          href={`/(protected)/(client-stack)/events/${eventId}/(vendor)/`}
         />
       );
-      case "Guest":
-        return (
+    case "Guest":
+      return (
         <Redirect
-        href={`/(protected)/(client-stack)/events/${eventId}/(guest)/`}
+          href={`/(protected)/(client-stack)/events/${eventId}/(guest)/`}
         />
       );
-      case "Organizer":
-        return (
-          <Redirect
-            href={`/(protected)/(client-stack)/events/${eventId}/(organizer)/`}
-          />
-        );
+    case "Organizer":
+      return (
+        <Redirect
+          href={`/(protected)/(client-stack)/events/${eventId}/(organizer)/`}
+        />
+      );
     default:
-      return( <Redirect
-       href={`/(protected)/(client-stack)/events/${eventId}/(organizer)/`} 
-       />);
+      return (
+        <Redirect
+          href={`/(protected)/(client-stack)/events/${eventId}/(organizer)/`}
+        />
+      );
   }
 }

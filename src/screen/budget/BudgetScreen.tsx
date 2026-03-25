@@ -1,8 +1,15 @@
 import { Text } from "@/src/components/ui/Text";
+import { useBudgetSummary } from "@/src/features/budget/hooks/use-budget";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
-import { ScrollView, TextInput, TouchableOpacity, View } from "react-native";
+import {
+  ActivityIndicator,
+  ScrollView,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { CategorySection, ExpenseCategory } from "../../components/budget";
 
 const CATEGORIES: ExpenseCategory[] = [
@@ -75,25 +82,23 @@ const CATEGORIES: ExpenseCategory[] = [
 export default function EventBudgetScreen() {
   const [search, setSearch] = useState("");
   const router = useRouter();
-  const params = useLocalSearchParams<{ eventId?: string | string[] }>();
-  const eventId = Array.isArray(params.eventId)
-    ? params.eventId[0]
-    : params.eventId;
-
-  const filteredCategories = CATEGORIES.map((cat) => ({
-    ...cat,
-    items: cat.items.filter(
-      (item) =>
-        item.name.toLowerCase().includes(search.toLowerCase()) ||
-        item.vendor.toLowerCase().includes(search.toLowerCase())
-    ),
-  })).filter((cat) => cat.items.length > 0 || search === "");
+  const { eventId } = useLocalSearchParams();
+  const { data, isLoading } = useBudgetSummary(Number(eventId));
+  console.log("🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀", data);
 
   const handleAddPress = () => {
     router.push(
       `/(protected)/(client-stack)/events/${eventId}/(organizer)/addBudgetItem`
     );
   };
+
+  if (isLoading) {
+    return (
+      <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+        <ActivityIndicator size="large" color="#ee2b8c" />
+      </View>
+    );
+  }
 
   return (
     <View className="flex-1">
@@ -109,10 +114,10 @@ export default function EventBudgetScreen() {
           contentContainerClassName="gap-4 pr-8"
         >
           {[
-            { title: "Total Budget", value: "10,000" },
-            { title: "Pending", value: "10,000" },
-            { title: "Spent", value: "10,000" },
-            { title: "Remaining", value: "10,000" },
+            { title: "Total Budget", value: data.summary?.totalBudget },
+            { title: "Pending", value: data.summary?.totalPending },
+            { title: "Spent", value: data.summary?.totalSpent },
+            { title: "Remaining", value: data.summary?.totalRemaining },
           ].map((i, index) => (
             <View
               key={i.title}
@@ -145,7 +150,7 @@ export default function EventBudgetScreen() {
           </View>
         </View>
 
-        {filteredCategories.map((cat) => (
+        {data.categories.map((cat) => (
           <CategorySection
             key={cat.id}
             cat={cat}
