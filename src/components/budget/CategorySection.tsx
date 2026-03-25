@@ -1,5 +1,5 @@
 import { MaterialIcons } from "@expo/vector-icons";
-import { TouchableOpacity, View } from "react-native";
+import { View } from "react-native";
 import { Text } from "../ui/Text";
 import { ExpenseItem, ExpenseRow } from "./ExpenseRow";
 
@@ -13,20 +13,16 @@ export interface ExpenseCategory {
 
 interface CategorySectionProps {
   cat: ExpenseCategory;
-  onPress?: () => void;
+  onItemPress?: (item: ExpenseItem) => void;
 }
 
 const fmt = (n: number) => (n === 0 ? "$0" : `${n.toLocaleString("en-US")}`);
 
-export function CategorySection({ cat, onPress }: CategorySectionProps) {
+export function CategorySection({ cat, onItemPress }: CategorySectionProps) {
   return (
     <View className="mb-2">
       {/* header */}
-      <TouchableOpacity
-        onPress={onPress}
-        activeOpacity={0.7}
-        className="flex-row items-center justify-between px-5 py-3"
-      >
+      <View className="flex-row items-center justify-between px-5 py-3">
         <View className="flex-row items-center">
           <MaterialIcons name={cat.icon as any} size={20} color="#ee2b8c" />
           <Text className="text-base font-bold text-[#181114] ml-2">
@@ -38,11 +34,15 @@ export function CategorySection({ cat, onPress }: CategorySectionProps) {
             {fmt(cat.total)}
           </Text>
         )}
-      </TouchableOpacity>
+      </View>
 
       <View className="border-t border-gray-100">
         {cat.items.map((item) => (
-          <ExpenseRow key={item.id} item={item} />
+          <ExpenseRow
+            key={item.id}
+            item={item}
+            onPress={() => onItemPress?.(item)}
+          />
         ))}
       </View>
     </View>

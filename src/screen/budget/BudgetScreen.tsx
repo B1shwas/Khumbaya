@@ -2,17 +2,17 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
 import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  TextInput,
-  TouchableOpacity,
-  View,
+    SafeAreaView,
+    ScrollView,
+    StatusBar,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import {
-  CategorySection,
-  ExpenseCategory,
-  StatCard,
+    CategorySection,
+    ExpenseCategory,
+    StatCard,
 } from "../../components/budget";
 
 const CATEGORIES: ExpenseCategory[] = [
@@ -193,15 +193,16 @@ export default function EventBudgetScreen() {
           <CategorySection
             key={cat.id}
             cat={cat}
-            onPress={() => {
+            onItemPress={(item) => {
               const categoryData = JSON.stringify(cat);
+              const paramsQuery = `category=${encodeURIComponent(categoryData)}&itemId=${encodeURIComponent(item.id)}`;
               if (eventId) {
                 router.push(
-                  `/(protected)/(client-stack)/events/${eventId}/(organizer)/editCategoryBudget?category=${encodeURIComponent(categoryData)}`
+                  `/(protected)/(client-stack)/events/${eventId}/(organizer)/editCategoryBudget?${paramsQuery}`
                 );
               } else {
                 router.push(
-                  `/(protected)/(client-stack)/events/unknown/(organizer)/editCategoryBudget?category=${encodeURIComponent(categoryData)}`
+                  `/(protected)/(client-stack)/events/unknown/(organizer)/editCategoryBudget?${paramsQuery}`
                 );
               }
             }}

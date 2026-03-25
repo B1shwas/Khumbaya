@@ -240,7 +240,7 @@ function RemainingBalanceBar({ remaining }: { remaining: number }) {
 // ─── Main Screen ──────────────────────────────────────────────────────────────
 export default function EditCategoryBudgetScreen() {
   const router = useRouter();
-  const params = useLocalSearchParams<{ category?: string }>();
+  const params = useLocalSearchParams<{ category?: string; itemId?: string }>();
 
   // Parse category data from params with memoization and error handling
   const parsedCategoryData = useMemo(() => {
@@ -269,6 +269,15 @@ export default function EditCategoryBudgetScreen() {
       return { estimated, actual };
     }, [parsedCategoryData?.items]);
 
+  const selectedItem = useMemo(() => {
+    if (!parsedCategoryData?.items || !params.itemId) return null;
+    return (
+      parsedCategoryData.items.find(
+        (item: { id: string }) => item.id === params.itemId
+      ) || null
+    );
+  }, [parsedCategoryData?.items, params.itemId]);
+
   // Form state - use dynamic data if available, otherwise defaults
   const [selectedCategory, setSelectedCategory] = useState(
     parsedCategoryData?.id || ""
@@ -277,13 +286,21 @@ export default function EditCategoryBudgetScreen() {
     parsedCategoryData?.label || "Photography"
   );
   const [itemName, setItemName] = useState(
-    parsedCategoryData?.items?.[0]?.name || ""
+    selectedItem?.name || parsedCategoryData?.items?.[0]?.name || ""
   );
   const [estimated, setEstimated] = useState(
-    categoryEstimated > 0 ? categoryEstimated.toString() : "3500"
+    selectedItem
+      ? String(selectedItem.estimated)
+      : categoryEstimated > 0
+        ? categoryEstimated.toString()
+        : "3500"
   );
   const [actualSpent, setActualSpent] = useState(
-    categoryActual > 0 ? categoryActual.toString() : "1200"
+    selectedItem
+      ? String(selectedItem.actual)
+      : categoryActual > 0
+        ? categoryActual.toString()
+        : "1200"
   );
   const [paymentMethod, setPaymentMethod] = useState("Bank Transfer");
   const [dueDate, setDueDate] = useState("08/15/2024");

@@ -1,4 +1,4 @@
-import {  View } from "react-native";
+import { TouchableOpacity, View } from "react-native";
 import { Text } from "../ui/Text";
 export interface ExpenseItem {
   id: string;
@@ -11,16 +11,21 @@ export interface ExpenseItem {
 
 interface ExpenseRowProps {
   item: ExpenseItem;
+  onPress?: () => void;
 }
 
 const fmt = (n: number) => (n === 0 ? "$0" : `$${n.toLocaleString("en-US")}`);
 
-export function ExpenseRow({ item }: ExpenseRowProps) {
+export function ExpenseRow({ item, onPress }: ExpenseRowProps) {
   const dim = item.pending;
   const total = item.actual === 0 ? item.estimated : item.actual;
 
   return (
-    <View className="flex-row items-center px-5 py-4 border-b border-gray-100">
+    <TouchableOpacity
+      onPress={onPress}
+      activeOpacity={0.7}
+      className="flex-row items-center px-5 py-4 border-b border-gray-100"
+    >
       <View className="flex-1">
         <Text
           className={`text-sm font-bold ${dim ? "text-gray-300" : "text-[#181114]"}`}
@@ -76,6 +81,6 @@ export function ExpenseRow({ item }: ExpenseRowProps) {
           </Text>
         </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 }
