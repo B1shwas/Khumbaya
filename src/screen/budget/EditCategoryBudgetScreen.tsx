@@ -1,18 +1,37 @@
+import { Text } from "@/src/components/ui/Text";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Modal,
   Pressable,
   SafeAreaView,
   ScrollView,
   StatusBar,
- 
   TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
-import { Text } from "@/src/components/ui/Text";
+import { Dropdown } from "react-native-element-dropdown";
+
+// Category dropdown data (same as AddBudgetItemScreen)
+const CATEGORIES = [
+  { id: "venue", label: "Venue & Site", icon: "location-on" },
+  { id: "catering", label: "Catering", icon: "restaurant" },
+  { id: "apparel", label: "Apparel", icon: "checkroom" },
+  { id: "flowers", label: "Flowers & Decor", icon: "local-florist" },
+  { id: "photography", label: "Photography", icon: "camera-alt" },
+  { id: "entertainment", label: "Entertainment", icon: "music-note" },
+  { id: "transportation", label: "Transportation", icon: "directions-car" },
+  { id: "other", label: "Other", icon: "more-horiz" },
+];
+
+const CATEGORY_OPTIONS = CATEGORIES.map((cat) => ({
+  label: cat.label,
+  value: cat.id,
+  icon: cat.icon,
+}));
+
 interface PaymentRecord {
   id: string;
   label: string;
@@ -223,27 +242,42 @@ export default function EditCategoryBudgetScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{ category?: string }>();
 
-  // Parse category data from params
-  const categoryData = params.category ? JSON.parse(params.category) : null;
+  // Parse category data from params with memoization and error handling
+  const parsedCategoryData = useMemo(() => {
+    if (!params.category) return null;
+    try {
+      return JSON.parse(params.category);
+    } catch (error) {
+      console.warn("Failed to parse category data:", error);
+      return null;
+    }
+  }, [params.category]);
 
-  // Calculate totals from items
-  const calculateTotals = (items: { estimated: number; actual: number }[]) => {
-    const estimated = items.reduce(
-      (sum, item) => sum + (item.estimated || 0),
-      0
-    );
-    const actual = items.reduce((sum, item) => sum + (item.actual || 0), 0);
-    return { estimated, actual };
-  };
-
+  // Calculate totals from items with memoization
   const { estimated: categoryEstimated, actual: categoryActual } =
-    categoryData?.items
-      ? calculateTotals(categoryData.items)
-      : { estimated: 0, actual: 0 };
+    useMemo(() => {
+      if (!parsedCategoryData?.items) return { estimated: 0, actual: 0 };
+      const estimated = parsedCategoryData.items.reduce(
+        (sum: number, item: { estimated: number }) =>
+          sum + (item.estimated || 0),
+        0
+      );
+      const actual = parsedCategoryData.items.reduce(
+        (sum: number, item: { actual: number }) => sum + (item.actual || 0),
+        0
+      );
+      return { estimated, actual };
+    }, [parsedCategoryData?.items]);
 
   // Form state - use dynamic data if available, otherwise defaults
+  const [selectedCategory, setSelectedCategory] = useState(
+    parsedCategoryData?.id || ""
+  );
   const [categoryName, setCategoryName] = useState(
-    categoryData?.label || "Photography"
+    parsedCategoryData?.label || "Photography"
+  );
+  const [itemName, setItemName] = useState(
+    parsedCategoryData?.items?.[0]?.name || ""
   );
   const [estimated, setEstimated] = useState(
     categoryEstimated > 0 ? categoryEstimated.toString() : "3500"
@@ -274,6 +308,7 @@ export default function EditCategoryBudgetScreen() {
     // TODO: Implement save functionality
     console.log({
       categoryName,
+      itemName,
       estimated,
       actualSpent,
       paymentMethod,
@@ -300,10 +335,58 @@ export default function EditCategoryBudgetScreen() {
         </Text>
 
         <View className="bg-white rounded-[32px] border border-gray-100 shadow-sm p-6 space-y-5 mb-8">
-          {/* Category Name */}
+          {/* Category Selection (Dropdown) */}
           <View>
-            <FieldLabel>Category Name</FieldLabel>
-            <StyledInput value={categoryName} onChangeText={setCategoryName} />
+            <FieldLabel>Category</FieldLabel>
+            <View className="bg-gray-50 rounded-2xl">
+              <Dropdown
+                style={{
+                  paddingHorizontal: 16,
+                  paddingVertical: 12,
+                  height: 50,
+                }}
+                placeholderStyle={{
+                  fontSize: 14,
+                  color: "#9ca3af",
+                }}
+                selectedTextStyle={{
+                  fontSize: 14,
+                  fontWeight: "500",
+                  color: "#181114",
+                }}
+                iconStyle={{
+                  tintColor: "#6b7280",
+                }}
+                data={CATEGORY_OPTIONS}
+                maxHeight={300}
+                labelField="label"
+                valueField="value"
+                placeholder="Select a category"
+                value={selectedCategory}
+                onChange={(item: { value: string; label: string }) => {
+                  setSelectedCategory(item.value);
+                  setCategoryName(item.label);
+                }}
+                renderLeftIcon={() => (
+                  <MaterialIcons
+                    name="category"
+                    size={20}
+                    color="#6b7280"
+                    style={{ marginRight: 8 }}
+                  />
+                )}
+              />
+            </View>
+          </View>
+
+          {/* Item Name (for selected category item) */}
+          <View>
+            <FieldLabel>Item Name</FieldLabel>
+            <StyledInput
+              value={itemName}
+              onChangeText={setItemName}
+              placeholder="e.g., Grand Ballroom"
+            />
           </View>
 
           {/* Estimated + Actual row */}
@@ -327,7 +410,7 @@ export default function EditCategoryBudgetScreen() {
                 onChange={setPaymentMethod}
               />
             </View>
-            <View className="flex-1">
+            {/* <View className="flex-1">
               <FieldLabel>Next Due Date</FieldLabel>
               <View className="flex-row items-center bg-gray-50 rounded-2xl px-4">
                 <TextInput
@@ -343,7 +426,7 @@ export default function EditCategoryBudgetScreen() {
                   color="#9ca3af"
                 />
               </View>
-            </View>
+            </View> */}
           </View>
 
           {/* Notes & Terms */}
@@ -362,26 +445,6 @@ export default function EditCategoryBudgetScreen() {
             />
           </View>
         </View>
-
-        {/* ── Payment History ── */}
-        <View className="flex-row items-center justify-between mb-4">
-          <Text className="text-xl font-extrabold tracking-tight text-[#181114]">
-            Payment History
-          </Text>
-          <TouchableOpacity
-            className="flex-row items-center gap-1 bg-[#ee2b8c]/5 px-3 py-1.5 rounded-full"
-            activeOpacity={0.7}
-          >
-            <MaterialIcons name="add" size={14} color="#ee2b8c" />
-            <Text className="text-[10px] font-extrabold uppercase tracking-widest text-[#ee2b8c]">
-              Log Payment
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        {payments.map((p) => (
-          <PaymentRow key={p.id} item={p} />
-        ))}
 
         {/* ── Save Button ── */}
         <TouchableOpacity
