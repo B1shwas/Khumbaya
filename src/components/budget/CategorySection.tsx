@@ -1,7 +1,7 @@
 import { MaterialIcons } from "@expo/vector-icons";
-import {  View } from "react-native";
-import { ExpenseItem, ExpenseRow } from "./ExpenseRow";
+import { TouchableOpacity, View } from "react-native";
 import { Text } from "../ui/Text";
+import { ExpenseItem, ExpenseRow } from "./ExpenseRow";
 
 export interface ExpenseCategory {
   id: string;
@@ -22,7 +22,11 @@ export function CategorySection({ cat, onPress }: CategorySectionProps) {
   return (
     <View className="mb-2">
       {/* header */}
-      <View className="flex-row items-center justify-between px-5 py-3">
+      <TouchableOpacity
+        onPress={onPress}
+        activeOpacity={0.7}
+        className="flex-row items-center justify-between px-5 py-3"
+      >
         <View className="flex-row items-center">
           <MaterialIcons name={cat.icon as any} size={20} color="#ee2b8c" />
           <Text className="text-base font-bold text-[#181114] ml-2">
@@ -34,7 +38,7 @@ export function CategorySection({ cat, onPress }: CategorySectionProps) {
             {fmt(cat.total)}
           </Text>
         )}
-      </View>
+      </TouchableOpacity>
 
       <View className="border-t border-gray-100">
         {cat.items.map((item) => (

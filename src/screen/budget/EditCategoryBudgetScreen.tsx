@@ -1,18 +1,18 @@
 import { MaterialIcons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
 import {
-    Modal,
-    Pressable,
-    SafeAreaView,
-    ScrollView,
-    StatusBar,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Modal,
+  Pressable,
+  SafeAreaView,
+  ScrollView,
+  StatusBar,
+ 
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
-
+import { Text } from "@/src/components/ui/Text";
 interface PaymentRecord {
   id: string;
   label: string;
@@ -43,10 +43,8 @@ const INITIAL_PAYMENTS: PaymentRecord[] = [
   },
 ];
 
-
 const fmt = (n: number) =>
   `$${n.toLocaleString("en-US", { minimumFractionDigits: 2 })}`;
-
 
 /** Labelled field wrapper */
 function FieldLabel({ children }: { children: string }) {
@@ -223,10 +221,36 @@ function RemainingBalanceBar({ remaining }: { remaining: number }) {
 // ─── Main Screen ──────────────────────────────────────────────────────────────
 export default function EditCategoryBudgetScreen() {
   const router = useRouter();
-  // Form state
-  const [categoryName, setCategoryName] = useState("Photography");
-  const [estimated, setEstimated] = useState("3500");
-  const [actualSpent, setActualSpent] = useState("1200");
+  const params = useLocalSearchParams<{ category?: string }>();
+
+  // Parse category data from params
+  const categoryData = params.category ? JSON.parse(params.category) : null;
+
+  // Calculate totals from items
+  const calculateTotals = (items: { estimated: number; actual: number }[]) => {
+    const estimated = items.reduce(
+      (sum, item) => sum + (item.estimated || 0),
+      0
+    );
+    const actual = items.reduce((sum, item) => sum + (item.actual || 0), 0);
+    return { estimated, actual };
+  };
+
+  const { estimated: categoryEstimated, actual: categoryActual } =
+    categoryData?.items
+      ? calculateTotals(categoryData.items)
+      : { estimated: 0, actual: 0 };
+
+  // Form state - use dynamic data if available, otherwise defaults
+  const [categoryName, setCategoryName] = useState(
+    categoryData?.label || "Photography"
+  );
+  const [estimated, setEstimated] = useState(
+    categoryEstimated > 0 ? categoryEstimated.toString() : "3500"
+  );
+  const [actualSpent, setActualSpent] = useState(
+    categoryActual > 0 ? categoryActual.toString() : "1200"
+  );
   const [paymentMethod, setPaymentMethod] = useState("Bank Transfer");
   const [dueDate, setDueDate] = useState("08/15/2024");
   const [notes, setNotes] = useState(

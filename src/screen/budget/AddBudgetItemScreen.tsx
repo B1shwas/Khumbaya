@@ -1,3 +1,4 @@
+import { Text } from "@/src/components/ui/Text";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
@@ -5,11 +6,11 @@ import {
   SafeAreaView,
   ScrollView,
   StatusBar,
-  Text,
   TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
+import { Dropdown } from "react-native-element-dropdown";
 
 const CATEGORIES = [
   { id: "venue", label: "Venue & Site", icon: "location-on" },
@@ -21,6 +22,11 @@ const CATEGORIES = [
   { id: "transportation", label: "Transportation", icon: "directions-car" },
   { id: "other", label: "Other", icon: "more-horiz" },
 ];
+
+const categoryData = CATEGORIES.map((cat) => ({
+  label: cat.label,
+  value: cat.id,
+}));
 
 export default function AddBudgetItemScreen() {
   const router = useRouter();
@@ -60,8 +66,6 @@ export default function AddBudgetItemScreen() {
     <SafeAreaView className="flex-1 bg-[#f8f6f7]">
       <StatusBar barStyle="dark-content" backgroundColor="#f8f6f7" />
 
-    
-
       {/* ── Scrollable Content ── */}
       <ScrollView
         className="flex-1"
@@ -70,32 +74,43 @@ export default function AddBudgetItemScreen() {
       >
         {/* Category Selection */}
         <Text className="text-sm font-bold text-gray-700 mb-2">Category</Text>
-        <View className="flex-row flex-wrap gap-2 mb-6">
-          {CATEGORIES.map((cat) => (
-            <TouchableOpacity
-              key={cat.id}
-              onPress={() => setCategory(cat.id)}
-              className={`flex-row items-center px-4 py-2 rounded-full border ${
-                category === cat.id
-                  ? "bg-[#ee2b8c] border-[#ee2b8c]"
-                  : "bg-white border-gray-200"
-              }`}
-              activeOpacity={0.7}
-            >
+        <View className="bg-white rounded-2xl shadow-sm border border-gray-100 mb-6">
+          <Dropdown
+            style={{
+              paddingHorizontal: 16,
+              paddingVertical: 12,
+              height: 50,
+            }}
+            placeholderStyle={{
+              fontSize: 14,
+              color: "#9ca3af",
+            }}
+            selectedTextStyle={{
+              fontSize: 14,
+              fontWeight: "500",
+              color: "#181114",
+            }}
+            iconStyle={{
+              tintColor: "#6b7280",
+            }}
+            data={categoryData}
+            maxHeight={300}
+            labelField="label"
+            valueField="value"
+            placeholder="Select a category"
+            value={category}
+            onChange={(item: { value: string }) => {
+              setCategory(item.value);
+            }}
+            renderLeftIcon={() => (
               <MaterialIcons
-                name={cat.icon as any}
-                size={16}
-                color={category === cat.id ? "#fff" : "#6b7280"}
+                name="category"
+                size={20}
+                color="#6b7280"
+                style={{ marginRight: 8 }}
               />
-              <Text
-                className={`text-xs font-semibold ml-1.5 ${
-                  category === cat.id ? "text-white" : "text-gray-600"
-                }`}
-              >
-                {cat.label}
-              </Text>
-            </TouchableOpacity>
-          ))}
+            )}
+          />
         </View>
 
         {/* Item Name */}
@@ -182,7 +197,6 @@ export default function AddBudgetItemScreen() {
           </Text>
         </TouchableOpacity>
       </ScrollView>
-
     </SafeAreaView>
   );
 }

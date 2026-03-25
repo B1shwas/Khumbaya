@@ -7,7 +7,7 @@ import {
   StatusBar,
   TextInput,
   TouchableOpacity,
-  View
+  View,
 } from "react-native";
 import {
   CategorySection,
@@ -194,13 +194,14 @@ export default function EventBudgetScreen() {
             key={cat.id}
             cat={cat}
             onPress={() => {
+              const categoryData = JSON.stringify(cat);
               if (eventId) {
                 router.push(
-                  `/(protected)/(client-stack)/events/${eventId}/(organizer)/editCategoryBudget`
+                  `/(protected)/(client-stack)/events/${eventId}/(organizer)/editCategoryBudget?category=${encodeURIComponent(categoryData)}`
                 );
               } else {
                 router.push(
-                  `/(protected)/(client-stack)/events/unknown/(organizer)/editCategoryBudget`
+                  `/(protected)/(client-stack)/events/unknown/(organizer)/editCategoryBudget?category=${encodeURIComponent(categoryData)}`
                 );
               }
             }}
