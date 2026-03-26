@@ -1,5 +1,9 @@
 import { DatePicker } from "@/components/nativewindui/DatePicker";
-import { EVENT_TYPES, EVENT_TYPE_TO_BACKEND, type EventType } from "@/src/constants/event";
+import {
+  EVENT_TYPES,
+  EVENT_TYPE_TO_BACKEND,
+  type EventType,
+} from "@/src/constants/event";
 import { CREATEEVENT } from "@/src/features/events/api/events.service";
 import { useCreateEvent } from "@/src/features/events/hooks/use-event";
 import { Ionicons } from "@expo/vector-icons";
@@ -27,6 +31,7 @@ interface EventFormData {
   startdateTime: Date;
   coverImage: string | null;
   endDateTime: Date;
+  budget: string;
 }
 
 export default function EventCreate() {
@@ -40,6 +45,7 @@ export default function EventCreate() {
     startdateTime: selectedDateTime, // June 16, 2024
     endDateTime: selectedEndDateTime,
     coverImage: null, // handle the image uplaoding logic
+    budget: "",
   });
 
   const scale = useSharedValue(1);
@@ -100,7 +106,7 @@ export default function EventCreate() {
       type: EVENT_TYPE_TO_BACKEND[formData.eventType as EventType],
       startDateTime: selectedDateTime,
       endDateTime: selectedEndDateTime,
-      budget: 0,
+      budget: parseFloat(formData.budget) || 0,
       theme: "Classic",
       parentId: undefined,
       role: "Organizer",
@@ -110,7 +116,6 @@ export default function EventCreate() {
         "https://images.unsplash.com/photo-1519741497674-611481863552?w=1200&q=80",
     };
 
-   
     createEvent(payload, {
       onSuccess: () => {
         router.push("/(protected)/(client-tabs)/events");
@@ -134,6 +139,15 @@ export default function EventCreate() {
 
   const handleEventTypeSelect = (type: EventType) => {
     setFormData((prev) => ({ ...prev, eventType: type }));
+  };
+
+  const handleBudgetChange = (text: string) => {
+    // Only allow numbers and decimal point
+    const cleaned = text.replace(/[^0-9.]/g, "");
+    // Prevent multiple decimals
+    const parts = cleaned.split(".");
+    if (parts.length > 2) return;
+    setFormData((prev) => ({ ...prev, budget: cleaned }));
   };
 
   const handleCoverPress = () => {
@@ -251,6 +265,26 @@ export default function EventCreate() {
               materialDateLabel=" End date (optional)"
               materialTimeLabel="End time (optional)"
             />
+          </View>
+
+          {/* Budget Input */}
+          <View className="px-4 pt-3">
+            <Text className="font-plusjakartasans-bold text-base text-[#181114] mb-3">
+              Total Budget (Optional)
+            </Text>
+            <View className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-4 flex-row items-center">
+              <Text className="text-base font-plusjakartasans-regular text-[#181114] mr-1">
+                Rs.
+              </Text>
+              <TextInput
+                className="flex-1 text-base font-plusjakartasans-regular text-[#181114]"
+                placeholder="0"
+                placeholderTextColor="#9CA3AF"
+                value={formData.budget}
+                onChangeText={handleBudgetChange}
+                keyboardType="numeric"
+              />
+            </View>
           </View>
 
           {/* Bottom spacing for footer */}
