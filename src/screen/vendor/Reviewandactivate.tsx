@@ -1,4 +1,3 @@
-import React from "react";
 import {
   ImageBackground,
   ScrollView,
@@ -107,7 +106,7 @@ const ProfileActivation = () => {
               Activate My Profile
             </Text>
             {/* Replace with Icon: rocket_launch */}
-            <Text className="text-white text-xl">🚀</Text>
+            <Text className="text-white text-xl"></Text>
           </TouchableOpacity>
         </View>
       </View>

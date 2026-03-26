@@ -36,10 +36,7 @@ interface CategoryDetailsData {
 export default function CategoryDetailsScreen() {
   const router = useRouter();
   const { eventId, categoryId } = useLocalSearchParams();
-  const { data, isLoading } = useCategoryDetails(
-    Number(eventId),
-    Number(categoryId)
-  );
+  const { data, isLoading } = useCategoryDetails(Number(categoryId));
 
   const handleAddExpensePress = () => {
     router.push(
@@ -205,8 +202,7 @@ export default function CategoryDetailsScreen() {
                         Contract:
                       </Text>
                       <Text className="text-xs text-[#181114] " variant="h2">
-                        {/* Rs. {expense.contractAmount.toLocaleString()} */}
-                        Rs. 2000000000
+                        Rs. {expense.contractAmount.toLocaleString()}
                       </Text>
                     </View>
                     <Text
