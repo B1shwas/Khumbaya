@@ -476,7 +476,7 @@ export default function EditCategoryBudgetScreen() {
         </TouchableOpacity>
       </ScrollView>
 
-      {/* <RemainingBalanceBar remaining={remaining} /> */}
+  
     </SafeAreaView>
   );
 }
