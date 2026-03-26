@@ -12,6 +12,32 @@ module.exports = {
         "text-dark": "#fce7f3",
         "muted-light": "#896175",
         "muted-dark": "#dcbcd0",
+
+        // Event Team specific colors (add these)
+        "on-primary": "#ffffff",
+        "primary-container": "#fdf2f8",
+        "on-primary-container": "#9d1759",
+        "secondary": "#a23665",
+        "on-secondary": "#ffffff",
+        "secondary-container": "#fe7fb0",
+        "on-secondary-container": "#771143",
+        "tertiary": "#046c00",
+        "on-tertiary": "#ffffff",
+        "tertiary-container": "#dcfce7",
+        "on-tertiary-container": "#166534",
+        "surface": "#f8f6f7",
+        "on-surface": "#181114",
+        "surface-variant": "#ffffff",
+        "on-surface-variant": "#594048",
+        "surface-container": "#f8f6f7",
+        "surface-container-low": "#ffffff",
+        "surface-container-high": "#f0edee",
+        "outline": "#e5e7eb",
+        "outline-variant": "#f3f4f6",
+        "inverse-surface": "#331d27",
+        "inverse-on-surface": "#ffecf0",
+        "inverse-primary": "#ffb0ca",
+
         // Backgrounds
         background: {
           DEFAULT: "#FFFFFF",

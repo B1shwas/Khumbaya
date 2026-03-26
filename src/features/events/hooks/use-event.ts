@@ -234,6 +234,7 @@ export const useMakeEventMember = (eventId: number) => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["event-responses", eventId] });
       queryClient.invalidateQueries({ queryKey: ["rsvp-invitations"] });
+      queryClient.invalidateQueries({ queryKey: ["event-owner", eventId] });
     },
   });
 };

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Platform } from "react-native";
 
 type PasswordStrength = "weak" | "medium" | "strong" | "very-strong";
 export const calculatePasswordStrength = (pwd: string): PasswordStrength => {
@@ -94,6 +95,28 @@ export const formatTimeRange = (
   return fallbackText;
 };
 
+type ChecklistDueMeta = {
+  label: string;
+  badgeClassName: string;
+  textClassName: string;
+};
+
+export const getChecklistDueMeta = (
+  dateValue?: string | null
+): ChecklistDueMeta | null => {
+  if (!dateValue) return null;
+  const dateKey = getDateKey(dateValue);
+  if (!dateKey) return null;
+  const todayKey = getDateKey(new Date().toISOString());
+  if (dateKey !== todayKey) return null;
+
+  return {
+    label: "Due Today",
+    badgeClassName: "bg-orange-50",
+    textClassName: "text-orange-500",
+  };
+};
+
 export  const formatShort = (date: Date) =>
   date.toLocaleDateString("en-US", {
     month: "short",
@@ -178,3 +201,14 @@ export function useDebounce<T>(value: T, delay: number): T {
 
   return debouncedValue;
 }
+
+export const shadowStyle = Platform.select({
+  ios: {
+    shadowColor: "#000",
+    shadowOpacity: 0.07,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+  },
+  android: { elevation: 3 },
+  default: {},
+});

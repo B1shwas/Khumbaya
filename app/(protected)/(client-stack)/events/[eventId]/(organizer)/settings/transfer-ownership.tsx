@@ -1,2 +1,2 @@
-import { TransferOwnerShipPage } from "@/src/screen/user/event/TransferOwnerPage";
+import { TransferOwnerShipPage } from "@/src/screen/user/event/planningcommitte";
 export default TransferOwnerShipPage; 

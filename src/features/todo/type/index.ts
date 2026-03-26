@@ -1,0 +1,23 @@
+export interface TodoColumn {
+	id?: number;
+	eventId: number | null;
+	task: string | null;
+	isDone: boolean | null;
+	assigned_to: number | null;
+	title: string | null;
+	parentId: number | null;
+	dueDate: Date | string | null;
+	status: string | null;
+	created_at?: Date | string | null;
+	updated_at?: Date | string | null;
+}
+
+export interface CreateTodoPayload {
+    eventId: number;
+    task: string;
+    assigned_to?: number | null;
+    title?: string | null;
+    parentId?: number | null;
+    dueDate?: Date | string | null;
+    status?: string | null;
+}
