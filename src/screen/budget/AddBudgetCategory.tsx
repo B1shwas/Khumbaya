@@ -1,7 +1,17 @@
 import { Text } from "@/src/components/ui/Text";
-import { useRouter } from "expo-router";
+import { useBudgetCategoryMutation } from "@/src/features/budget/hooks/use-budget";
+import { budgetCategoryFormSchema } from "@/src/features/budget/schema";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { Controller, useForm } from "react-hook-form";
-import { ScrollView, TextInput, TouchableOpacity, View } from "react-native";
+import {
+  ActivityIndicator,
+  Alert,
+  ScrollView,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
 
 const CATEGORIES = [
@@ -20,23 +30,47 @@ const categoryData = CATEGORIES.map((cat) => ({
   value: cat.id,
 }));
 
-interface AddBudgetFormData {
-  category: string;
-  allocatedBudget: string;
-}
-
 export default function AddBudgetItemScreen() {
   const router = useRouter();
-  const { control, handleSubmit } = useForm<AddBudgetFormData>({
+  const { eventId } = useLocalSearchParams();
+
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(budgetCategoryFormSchema),
     defaultValues: {
-      category: "",
+      name: "",
       allocatedBudget: "",
     },
   });
 
-  const onSubmit = (data: AddBudgetFormData) => {
-    console.log(data);
-    router.back();
+  const mutation = useBudgetCategoryMutation(Number(eventId || 0));
+
+  const onSubmit = async (data: any) => {
+    if (!eventId) {
+      Alert.alert("Error", "Event ID is missing");
+      return;
+    }
+
+    try {
+      await mutation.mutateAsync({
+        name: data.name,
+        allocatedBudget: data.allocatedBudget,
+      });
+
+      Alert.alert("Success", "Budget category created successfully!", [
+        {
+          text: "OK",
+          onPress: () => router.back(),
+        },
+      ]);
+    } catch (error: any) {
+      const errorMessage =
+        error?.message || "Failed to create budget category. Please try again.";
+      Alert.alert("Error", errorMessage);
+    }
   };
 
   return (
@@ -52,44 +86,39 @@ export default function AddBudgetItemScreen() {
         <View className="bg-white rounded-md shadow-sm border border-gray-100 mb-6">
           <Controller
             control={control}
-            name="category"
+            name="name"
             render={({ field: { value, onChange } }) => (
               <Dropdown
                 style={{
-                  paddingHorizontal: 16,
-                  paddingVertical: 12,
                   height: 50,
+                  borderWidth: 1,
+                  borderColor: "#e5e7eb",
+                  borderRadius: 6,
+                  paddingHorizontal: 12,
+                  backgroundColor: "white",
                 }}
-                placeholderStyle={{
-                  fontSize: 14,
-                  color: "#9ca3af",
-                }}
-                selectedTextStyle={{
-                  fontSize: 14,
-                  fontWeight: "500",
-                  color: "#181114",
-                }}
-                iconStyle={{
-                  tintColor: "#6b7280",
-                }}
-                data={categoryData}
-                maxHeight={300}
+                placeholderStyle={{ color: "#9CA3AF" }}
+                selectedTextStyle={{ color: "#111827", fontSize: 14 }}
+                data={CATEGORIES}
                 labelField="label"
                 valueField="value"
                 placeholder="Select a category"
                 value={value}
-                onChange={(item: { value: string }) => {
-                  onChange(item.value);
-                }}
+                onChange={(item: any) => onChange(item.value)}
               />
             )}
           />
         </View>
+        {errors.name && (
+          <Text className="text-red-500 text-xs mb-4">
+            {errors.name.message}
+          </Text>
+        )}
 
         <Text className="text-sm  text-gray-700 mb-2" variant="h2">
           Allocated Budget
         </Text>
-        <View className="bg-white rounded-md px-4 h-14 shadow-sm border border-gray-100 mb-6">
+        <View className="bg-white rounded-sm px-4 h-14 shadow-sm border border-gray-100 mb-6">
           <Controller
             control={control}
             name="allocatedBudget"
@@ -105,15 +134,25 @@ export default function AddBudgetItemScreen() {
             )}
           />
         </View>
+        {errors.allocatedBudget && (
+          <Text className="text-red-500 text-xs mb-4">
+            {errors.allocatedBudget.message}
+          </Text>
+        )}
 
         <TouchableOpacity
-          className="bg-[#ee2b8c] rounded-md h-14 items-center justify-center shadow-lg"
+          className="bg-[#ee2b8c] rounded-md h-14 items-center justify-center shadow-lg disabled:opacity-50"
           activeOpacity={0.8}
+          disabled={mutation.isPending}
           onPress={handleSubmit(onSubmit)}
         >
-          <Text className="text-white text-base" variant="h2">
-            Add Budget Category
-          </Text>
+          {mutation.isPending ? (
+            <ActivityIndicator color="white" />
+          ) : (
+            <Text className="text-white text-base" variant="h2">
+              Add Budget Category
+            </Text>
+          )}
         </TouchableOpacity>
       </ScrollView>
     </View>

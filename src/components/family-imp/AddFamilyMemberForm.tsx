@@ -1,8 +1,5 @@
 import { DatePicker } from "@/components/nativewindui/DatePicker/DatePicker.android";
-import {
-  AddFamilyMemberPayload,
-  AddFamilyMemberFormProps
-} from "@/src/features/family/api/family.service";
+import { AddFamilyMemberPayload } from "@/src/features/family/api/family.service";
 import {
   useAddFamilyMember,
   useUpdateFamilyMember,
@@ -28,6 +25,13 @@ const FOOD_PREFERENCES = [
   { label: "Jain", value: "Jain" },
 ];
 
+interface AddFamilyMemberFormProps {
+  familyId: number;
+  memberId: number;
+  initialData: any;
+  onSuccess: any;
+}
+
 export default function AddFamilyMemberForm({
   familyId,
   memberId,
@@ -37,7 +41,8 @@ export default function AddFamilyMemberForm({
   const isEditMode = !!initialData;
 
   const { mutate: addMember, isPending: isAdding } = useAddFamilyMember();
-  const { mutate: updateMember, isPending: isUpdating } = useUpdateFamilyMember();
+  const { mutate: updateMember, isPending: isUpdating } =
+    useUpdateFamilyMember();
 
   const isPending = isAdding || isUpdating;
 
@@ -75,13 +80,17 @@ export default function AddFamilyMemberForm({
     debounceMs: 1000,
   });
 
-  const foundUser = userWithPhone?.items?.length > 0 ? userWithPhone.items[0] : undefined;
-  const isMatchedUser = shouldSearchUserByPhone && !isFindingUser && !!foundUser;
+  const foundUser =
+    userWithPhone?.items?.length > 0 ? userWithPhone.items[0] : undefined;
+  const isMatchedUser =
+    shouldSearchUserByPhone && !isFindingUser && !!foundUser;
   const shouldLockFullName = !isEditMode && isMatchedUser;
-  const hasExistingFamily = !isEditMode && isMatchedUser && foundUser?.familyId != null;
+  const hasExistingFamily =
+    !isEditMode && isMatchedUser && foundUser?.familyId != null;
 
   // Button disabled if: pending, searching, no family, or user already in another family
-  const isButtonDisabled = isPending || isFindingUser || !familyId || hasExistingFamily;
+  const isButtonDisabled =
+    isPending || isFindingUser || !familyId || hasExistingFamily;
 
   React.useEffect(() => {
     if (!isEditMode && isMatchedUser && foundUser) {
@@ -94,31 +103,41 @@ export default function AddFamilyMemberForm({
 
   React.useEffect(() => {
     if (isFindUserError && findUserError) {
-      const message = (findUserError as any)?.response?.data?.message
-        || (findUserError as any)?.message
-        || "Failed to find user with this phone number.";
+      const message =
+        (findUserError as any)?.response?.data?.message ||
+        (findUserError as any)?.message ||
+        "Failed to find user with this phone number.";
       Alert.alert("Error", message);
     }
   }, [findUserError, isFindUserError]);
 
   const onSubmit = (values: AddFamilyMemberPayload) => {
     if (!familyId) {
-      Alert.alert("Error", "Family not found. Please create/select a family first.");
+      Alert.alert(
+        "Error",
+        "Family not found. Please create/select a family first."
+      );
       return;
     }
 
     if (!isEditMode && hasExistingFamily) {
-      Alert.alert("Cannot add member", "This user is already linked to another family.");
+      Alert.alert(
+        "Cannot add member",
+        "This user is already linked to another family."
+      );
       return;
     }
-    console.log('The data of r🍈🍈🍈🍈🍈🍈🍈🍈🍈🍈🍈he user while editing or creating the new member in the famili are', {
-      username: values.username?.trim(),
-      relation: values.relation?.trim(),
-      dob: values.dob,
-      phone: values.phone || undefined,
-      foodPreference: values.foodPreference || undefined,
-      email: values.email?.trim() || undefined,
-    })
+    console.log(
+      "The data of r🍈🍈🍈🍈🍈🍈🍈🍈🍈🍈🍈he user while editing or creating the new member in the famili are",
+      {
+        username: values.username?.trim(),
+        relation: values.relation?.trim(),
+        dob: values.dob,
+        phone: values.phone || undefined,
+        foodPreference: values.foodPreference || undefined,
+        email: values.email?.trim() || undefined,
+      }
+    );
     const payload = {
       username: values.username?.trim(),
       relation: values.relation?.trim(),
@@ -141,7 +160,10 @@ export default function AddFamilyMemberForm({
             onSuccess?.();
           },
           onError: (error: any) => {
-            Alert.alert("Error", error?.response?.data?.message || "Failed to update family member");
+            Alert.alert(
+              "Error",
+              error?.response?.data?.message || "Failed to update family member"
+            );
           },
         }
       );
@@ -154,7 +176,10 @@ export default function AddFamilyMemberForm({
             onSuccess?.();
           },
           onError: (error: any) => {
-            Alert.alert("Error", error?.response?.data?.message || "Failed to add family member");
+            Alert.alert(
+              "Error",
+              error?.response?.data?.message || "Failed to add family member"
+            );
           },
         }
       );
@@ -216,8 +241,9 @@ export default function AddFamilyMemberForm({
           name="phone"
           render={({ field: { value, onChange } }) => (
             <TextInput
-              className={`w-full bg-background rounded-sm px-4 py-3 text-sm text-text-primary border ${errors.phone ? "border-red-500" : "border-border"
-                }`}
+              className={`w-full bg-background rounded-sm px-4 py-3 text-sm text-text-primary border ${
+                errors.phone ? "border-red-500" : "border-border"
+              }`}
               placeholder="9761890004"
               placeholderTextColor="#9CA3AF"
               value={value}
@@ -226,13 +252,15 @@ export default function AddFamilyMemberForm({
           )}
         />
         {errors.phone && (
-          <Text className="text-xs text-red-500 mt-1 ml-1">{errors.phone.message}</Text>
+          <Text className="text-xs text-red-500 mt-1 ml-1">
+            {errors.phone.message}
+          </Text>
         )}
       </View>
 
       {/* Full Name */}
 
-      {(!isMatchedUser) && (
+      {!isMatchedUser && (
         <View className="mb-3">
           <Text className="text-xs font-jakarta-bold uppercase tracking-wide text-text-tertiary mb-1.5 ml-1">
             Full Name
@@ -243,9 +271,14 @@ export default function AddFamilyMemberForm({
             rules={{ required: "Name is required" }}
             render={({ field: { value, onChange } }) => (
               <TextInput
-                className={`w-full bg-background rounded-sm px-4 py-3 text-sm text-text-primary border ${errors.username ? "border-red-500" : "border-border"
-                  } ${shouldLockFullName ? "bg-gray-100" : ""}`}
-                placeholder={shouldLockFullName ? "Auto-filled from phone lookup" : "Enter name"}
+                className={`w-full bg-background rounded-sm px-4 py-3 text-sm text-text-primary border ${
+                  errors.username ? "border-red-500" : "border-border"
+                } ${shouldLockFullName ? "bg-gray-100" : ""}`}
+                placeholder={
+                  shouldLockFullName
+                    ? "Auto-filled from phone lookup"
+                    : "Enter name"
+                }
                 placeholderTextColor="#9CA3AF"
                 value={foundUser?.username || value}
                 onChangeText={onChange}
@@ -254,7 +287,9 @@ export default function AddFamilyMemberForm({
             )}
           />
           {errors.username && (
-            <Text className="text-xs text-red-500 mt-1 ml-1">{errors.username.message}</Text>
+            <Text className="text-xs text-red-500 mt-1 ml-1">
+              {errors.username.message}
+            </Text>
           )}
         </View>
       )}
@@ -282,10 +317,11 @@ export default function AddFamilyMemberForm({
           )}
         />
         {errors.dob && (
-          <Text className="text-xs text-red-500 mt-1 ml-1">{errors.dob.message}</Text>
+          <Text className="text-xs text-red-500 mt-1 ml-1">
+            {errors.dob.message}
+          </Text>
         )}
       </View>
-
 
       {/* Relation */}
       <View className="mb-3">
@@ -298,8 +334,9 @@ export default function AddFamilyMemberForm({
           rules={{ required: "Relation is required" }}
           render={({ field: { value, onChange } }) => (
             <TextInput
-              className={`w-full bg-background rounded-sm px-4 py-3 text-sm text-text-primary border ${errors.relation ? "border-red-500" : "border-border"
-                }`}
+              className={`w-full bg-background rounded-sm px-4 py-3 text-sm text-text-primary border ${
+                errors.relation ? "border-red-500" : "border-border"
+              }`}
               placeholder="Spouse"
               placeholderTextColor="#9CA3AF"
               value={value}
@@ -308,7 +345,9 @@ export default function AddFamilyMemberForm({
           )}
         />
         {errors.relation && (
-          <Text className="text-xs text-red-500 mt-1 ml-1">{errors.relation.message}</Text>
+          <Text className="text-xs text-red-500 mt-1 ml-1">
+            {errors.relation.message}
+          </Text>
         )}
       </View>
 
@@ -324,13 +363,17 @@ export default function AddFamilyMemberForm({
             rules={{
               validate: (value) => {
                 if (!value) return true;
-                return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) || "Invalid email address";
+                return (
+                  /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) ||
+                  "Invalid email address"
+                );
               },
             }}
             render={({ field: { value, onChange } }) => (
               <TextInput
-                className={`w-full bg-background rounded-sm px-4 py-3 text-sm text-text-primary border ${errors.email ? "border-red-500" : "border-border"
-                  }`}
+                className={`w-full bg-background rounded-sm px-4 py-3 text-sm text-text-primary border ${
+                  errors.email ? "border-red-500" : "border-border"
+                }`}
                 placeholder="example@mail.com"
                 placeholderTextColor="#9CA3AF"
                 value={value}
@@ -341,7 +384,9 @@ export default function AddFamilyMemberForm({
             )}
           />
           {errors.email && (
-            <Text className="text-xs text-red-500 mt-1 ml-1">{errors.email.message}</Text>
+            <Text className="text-xs text-red-500 mt-1 ml-1">
+              {errors.email.message}
+            </Text>
           )}
         </View>
       )}
@@ -383,7 +428,11 @@ export default function AddFamilyMemberForm({
         disabled={isButtonDisabled}
       >
         <Text className="text-white text-base" variant="h2">
-          {isPending ? "Saving..." : isEditMode ? "Update Member" : "Save & Add Member"}
+          {isPending
+            ? "Saving..."
+            : isEditMode
+              ? "Update Member"
+              : "Save & Add Member"}
         </Text>
         {!isPending && (
           <Ionicons

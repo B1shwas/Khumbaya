@@ -10,81 +10,13 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { CategorySection, ExpenseCategory } from "../../components/budget";
-
-const CATEGORIES: ExpenseCategory[] = [
-  {
-    id: "venue",
-    label: "Venue & Site",
-    icon: "location-on",
-    total: 14800,
-    items: [
-      {
-        id: "v1",
-        name: "Grand Ballroom",
-        vendor: "Majestic Hotel",
-        estimated: 12000,
-        actual: 12000,
-      },
-      {
-        id: "v2",
-        name: "Ceremony Garden",
-        vendor: "Botanical Gardens",
-        estimated: 3000,
-        actual: 2800,
-      },
-    ],
-  },
-  {
-    id: "catering",
-    label: "Catering",
-    icon: "restaurant",
-    items: [
-      {
-        id: "c1",
-        name: "Plated Dinner",
-        vendor: "Artisan Eats",
-        estimated: 10000,
-        actual: 9200,
-      },
-    ],
-  },
-  {
-    id: "apparel",
-    label: "Apparel",
-    icon: "checkroom",
-    items: [
-      {
-        id: "a1",
-        name: "Bridal Gown",
-        vendor: "Vera Wang",
-        estimated: 4500,
-        actual: 4200,
-      },
-    ],
-  },
-  {
-    id: "flowers",
-    label: "Flowers & Decor",
-    icon: "local-florist",
-    items: [
-      {
-        id: "f1",
-        name: "Floral Arches",
-        vendor: "Wild Bloom",
-        estimated: 2200,
-        actual: 2000,
-      },
-    ],
-  },
-];
+import { CategorySection } from "../../components/budget";
 
 export default function EventBudgetScreen() {
   const [search, setSearch] = useState("");
   const router = useRouter();
   const { eventId } = useLocalSearchParams();
   const { data, isLoading } = useBudgetSummary(Number(eventId));
-  console.log("🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀", data);
 
   const handleAddPress = () => {
     router.push(
@@ -150,7 +82,7 @@ export default function EventBudgetScreen() {
           </View>
         </View>
 
-        {data.categories.map((cat) => (
+        {data.categories.map((cat: any) => (
           <CategorySection
             key={cat.id}
             cat={cat}
