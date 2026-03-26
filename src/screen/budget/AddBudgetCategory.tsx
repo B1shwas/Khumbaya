@@ -103,8 +103,8 @@ export default function AddBudgetItemScreen() {
                 labelField="label"
                 valueField="value"
                 placeholder="Select a category"
-                value={value}
-                onChange={(item: any) => onChange(item.value)}
+                value="lable"
+                onChange={(item: any) => onChange(item.label)}
               />
             )}
           />
@@ -118,14 +118,15 @@ export default function AddBudgetItemScreen() {
         <Text className="text-sm  text-gray-700 mb-2" variant="h2">
           Allocated Budget
         </Text>
-        <View className="bg-white rounded-sm px-4 h-14 shadow-sm border border-gray-100 mb-6">
+        <View className="bg-white rounded-sm px-4 h-14 shadow-sm border border-gray-100 flex-row items-center mb-6">
+          <Text className="text-sm font-medium text-[#181114]">Rs. </Text>
           <Controller
             control={control}
             name="allocatedBudget"
             render={({ field: { value, onChange } }) => (
               <TextInput
                 className="flex-1 text-sm font-medium text-[#181114]"
-                placeholder="Rs. 0"
+                placeholder="0"
                 placeholderTextColor="#9ca3af"
                 value={value}
                 onChangeText={onChange}

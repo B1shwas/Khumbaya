@@ -66,6 +66,10 @@ export default function OrganizerEventDetailLayout() {
         name="editCategoryBudget"
         options={{ title: "Edit Category" }}
       />
+      <Stack.Screen
+        name="addBudgetCategory"
+        options={{ title: "Add Budget Category" }}
+      />
       <Stack.Screen name="gallery" options={{ title: "Gallery" }} />
       <Stack.Screen name="guests" options={{ headerShown: false }} />
       <Stack.Screen name="addguest" options={{ title: "Add Guest" }} />

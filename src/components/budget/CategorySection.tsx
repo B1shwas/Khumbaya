@@ -33,14 +33,27 @@ export interface ExpenseCategory {
 interface CategorySectionProps {
   cat: ExpenseCategory;
   onItemPress?: (item: ExpenseItem) => void;
+  onAddExpense?: () => void;
 }
 
-export function CategorySection({ cat, onItemPress }: CategorySectionProps) {
+export function CategorySection({
+  cat,
+  onItemPress,
+  onAddExpense,
+}: CategorySectionProps) {
   return (
     <View className="mb-6">
-      <Text className="text-lg text-[#181114] mb-3 px-5" variant="h2">
-        {cat.name}
-      </Text>
+      <View className="flex-row items-center justify-between px-5 mb-2">
+        <Text className="text-lg text-[#181114]" variant="h2">
+          {cat.name}
+        </Text>
+        <View className="flex-row items-center gap-3">
+          <Text className="text-base font-semibold text-[#ee2b8c]">
+            Rs. {cat.allocatedBudget?.toLocaleString() || 0}
+          </Text>
+        
+        </View>
+      </View>
 
       <View className="flex-1">
         <View className="flex-row bg-[#f5e6ed] px-5">
@@ -64,6 +77,17 @@ export function CategorySection({ cat, onItemPress }: CategorySectionProps) {
             <Text className="text-xs text-gray-300 text-center">
               Add your first expense to get started
             </Text>
+            {onAddExpense && (
+              <TouchableOpacity
+                onPress={onAddExpense}
+                className="mt-2 flex-row items-center gap-1 px-4 py-2 bg-[#ee2b8c] rounded-full"
+              >
+                <MaterialIcons name="add" size={16} color="#fff" />
+                <Text className="text-white text-xs font-medium">
+                  Add Expense
+                </Text>
+              </TouchableOpacity>
+            )}
           </View>
         )}
 

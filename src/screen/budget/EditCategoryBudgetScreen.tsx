@@ -1,8 +1,10 @@
 import { Text } from "@/src/components/ui/Text";
+import { useBudgetCategoryUpdateMutation } from "@/src/features/budget";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useMemo, useState } from "react";
 import {
+  Alert,
   Modal,
   Pressable,
   SafeAreaView,
@@ -63,7 +65,7 @@ const INITIAL_PAYMENTS: PaymentRecord[] = [
 ];
 
 const fmt = (n: number) =>
-  `$${n.toLocaleString("en-US", { minimumFractionDigits: 2 })}`;
+  `Rs. ${n.toLocaleString("en-US", { minimumFractionDigits: 2 })}`;
 
 /** Labelled field wrapper */
 function FieldLabel({ children }: { children: string }) {
@@ -108,7 +110,7 @@ function AmountInput({
 }) {
   return (
     <View className="flex-row items-center bg-gray-50 rounded-2xl px-4">
-      <Text className="text-[#ee2b8c] font-bold text-sm mr-1">$</Text>
+      <Text className="text-[#ee2b8c] font-bold text-sm mr-1">Rs.</Text>
       <TextInput
         className="flex-1 py-4 text-sm font-bold text-[#181114]"
         value={value}
@@ -240,7 +242,13 @@ function RemainingBalanceBar({ remaining }: { remaining: number }) {
 // ─── Main Screen ──────────────────────────────────────────────────────────────
 export default function EditCategoryBudgetScreen() {
   const router = useRouter();
-  const params = useLocalSearchParams<{ category?: string; itemId?: string }>();
+  const params = useLocalSearchParams<{
+    category?: string;
+    itemId?: string;
+    eventId?: string;
+  }>();
+  const eventId = params.eventId ? Number(params.eventId) : 0;
+  const updateMutation = useBudgetCategoryUpdateMutation(eventId);
 
   // Parse category data from params with memoization and error handling
   const parsedCategoryData = useMemo(() => {
@@ -321,18 +329,30 @@ export default function EditCategoryBudgetScreen() {
     router.back();
   };
 
-  const handleSave = () => {
-    // TODO: Implement save functionality
-    console.log({
-      categoryName,
-      itemName,
-      estimated,
-      actualSpent,
-      paymentMethod,
-      dueDate,
-      notes,
-    });
-    router.back();
+  const handleSave = async () => {
+    if (!eventId || !parsedCategoryData?.id) {
+      Alert.alert("Error", "Missing event or category ID");
+      return;
+    }
+
+    try {
+      await updateMutation.mutateAsync({
+        categoryId: Number(parsedCategoryData.id),
+        name: categoryName,
+        allocatedBudget: parseFloat(estimated) || 0,
+      });
+
+      Alert.alert("Success", "Budget category updated successfully!", [
+        {
+          text: "OK",
+          onPress: () => router.back(),
+        },
+      ]);
+    } catch (error: any) {
+      const errorMessage =
+        error?.message || "Failed to update budget category. Please try again.";
+      Alert.alert("Error", errorMessage);
+    }
   };
 
   return (

@@ -17,3 +17,15 @@ export const addBudgetCategory = async (
   );
   return response.data.data;
 };
+
+export const updateBudgetCategory = async (
+  eventId: number,
+  categoryId: number,
+  payload: z.infer<typeof budgetCategoryFormSchema>
+) => {
+  const response = await api.put(
+    `/event/${eventId}/budget-category/${categoryId}`,
+    payload
+  );
+  return response.data.data;
+};

@@ -5,6 +5,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
 import {
   ActivityIndicator,
+  SafeAreaView,
   ScrollView,
   TextInput,
   TouchableOpacity,
@@ -18,9 +19,15 @@ export default function EventBudgetScreen() {
   const { eventId } = useLocalSearchParams();
   const { data, isLoading } = useBudgetSummary(Number(eventId));
 
-  const handleAddPress = () => {
+  const handleAddCategory = () => {
     router.push(
-      `/(protected)/(client-stack)/events/${eventId}/(organizer)/addBudgetItem`
+      `/(protected)/(client-stack)/events/${eventId}/(organizer)/addBudgetCategory`
+    );
+  };
+
+  const handleAddExpense = (categoryId: number, categoryName: string) => {
+    router.push(
+      `/(protected)/(client-stack)/events/${eventId}/(organizer)/addBudgetItem?categoryId=${categoryId}&categoryName=${encodeURIComponent(categoryName)}`
     );
   };
 
@@ -32,8 +39,32 @@ export default function EventBudgetScreen() {
     );
   }
 
+  // Handle case when data is not available yet
+  if (!data?.summary) {
+    return (
+      <SafeAreaView className="flex-1">
+        <View className="flex-1 items-center justify-center py-20">
+          <MaterialIcons name="wallet" size={48} color="#9CA3AF" />
+          <Text className="text-lg font-semibold text-gray-900 mt-4">
+            No Budget Data
+          </Text>
+          <Text className="text-sm text-gray-500 mt-2 text-center px-8">
+            Start by adding budget categories to track your event expenses
+          </Text>
+        </View>
+        <TouchableOpacity
+          className="absolute right-5 bottom-8 w-14 h-14 rounded-full bg-[#ee2b8c] items-center justify-center shadow-lg"
+          activeOpacity={0.8}
+          onPress={handleAddCategory}
+        >
+          <MaterialIcons name="add" size={28} color="#fff" />
+        </TouchableOpacity>
+      </SafeAreaView>
+    );
+  }
+
   return (
-    <View className="flex-1">
+    <SafeAreaView className="flex-1">
       <ScrollView
         className="flex-1"
         contentContainerClassName="pb-32"
@@ -43,13 +74,18 @@ export default function EventBudgetScreen() {
           horizontal
           showsHorizontalScrollIndicator={false}
           className="mb-4 -mx-5 px-5 bg-white py-5 border-b-[1px] border-gray-200"
-          contentContainerClassName="gap-4 pr-8"
+          contentContainerStyle={{
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 16,
+            paddingRight: 32,
+          }}
         >
           {[
-            { title: "Total Budget", value: data.summary?.totalBudget },
-            { title: "Pending", value: data.summary?.totalPending },
-            { title: "Spent", value: data.summary?.totalSpent },
-            { title: "Remaining", value: data.summary?.totalRemaining },
+            { title: "Total Budget", value: data.summary?.totalBudget || 0 },
+            { title: "Pending", value: data.summary?.totalPending || 0 },
+            { title: "Spent", value: data.summary?.totalSpent || 0 },
+            { title: "Remaining", value: data.summary?.totalRemaining || 0 },
           ].map((i, index) => (
             <View
               key={i.title}
@@ -82,28 +118,42 @@ export default function EventBudgetScreen() {
           </View>
         </View>
 
-        {data.categories.map((cat: any) => (
-          <CategorySection
-            key={cat.id}
-            cat={cat}
-            onItemPress={(item) => {
-              const categoryData = JSON.stringify(cat);
-              const paramsQuery = `category=${encodeURIComponent(categoryData)}&itemId=${encodeURIComponent(item.id)}`;
-              router.push(
-                `/(protected)/(client-stack)/events/${eventId}/(organizer)/editCategoryBudget?${paramsQuery}`
-              );
-            }}
-          />
-        ))}
+        {/* Categories List */}
+        {data?.categories?.length > 0 ? (
+          data.categories.map((cat: any) => (
+            <CategorySection
+              key={cat.id}
+              cat={cat}
+              onAddExpense={() => handleAddExpense(cat.id, cat.name)}
+              onItemPress={(item) => {
+                const categoryData = JSON.stringify(cat);
+                const paramsQuery = `category=${encodeURIComponent(categoryData)}&itemId=${encodeURIComponent(item.id)}`;
+                router.push(
+                  `/(protected)/(client-stack)/events/${eventId}/(organizer)/editCategoryBudget?${paramsQuery}`
+                );
+              }}
+            />
+          ))
+        ) : (
+          <View className="flex-1 items-center justify-center py-20">
+            <MaterialIcons name="wallet" size={48} color="#9CA3AF" />
+            <Text className="text-lg font-semibold text-gray-900 mt-4">
+              No Budget Categories
+            </Text>
+            <Text className="text-sm text-gray-500 mt-2 text-center px-8">
+              Add budget categories to start tracking your event expenses
+            </Text>
+          </View>
+        )}
       </ScrollView>
 
       <TouchableOpacity
         className="absolute right-5 bottom-8 w-14 h-14 rounded-full bg-[#ee2b8c] items-center justify-center shadow-lg"
         activeOpacity={0.8}
-        onPress={handleAddPress}
+        onPress={handleAddCategory}
       >
         <MaterialIcons name="add" size={28} color="#fff" />
       </TouchableOpacity>
-    </View>
+    </SafeAreaView>
   );
 }
