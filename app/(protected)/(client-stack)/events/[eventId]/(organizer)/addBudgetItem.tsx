@@ -1,5 +1,5 @@
-import AddBudgetItemScreen from "@/src/screen/budget/AddBudgetCategory";
+import AddExpenseForm from "@/src/components/budget/AddExpnseForm";
 
 export default function AddBudgetItemPage() {
-  return <AddBudgetItemScreen />;
+  return <AddExpenseForm />;
 }

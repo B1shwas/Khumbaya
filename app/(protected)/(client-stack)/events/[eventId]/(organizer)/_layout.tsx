@@ -58,10 +58,7 @@ export default function OrganizerEventDetailLayout() {
         }}
       />
       <Stack.Screen name="budget" options={{ title: "Budget" }} />
-      <Stack.Screen
-        name="addBudgetItem"
-        options={{ title: "Add Budget Item" }}
-      />
+      <Stack.Screen name="addBudgetItem" options={{ title: "Add Expense" }} />
       <Stack.Screen
         name="editCategoryBudget"
         options={{ title: "Edit Category" }}
