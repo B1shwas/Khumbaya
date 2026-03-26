@@ -101,10 +101,10 @@ export default function AddBudgetItemScreen() {
                 selectedTextStyle={{ color: "#111827", fontSize: 14 }}
                 data={CATEGORIES}
                 labelField="label"
-                valueField="value"
+                valueField="label"
                 placeholder="Select a category"
                 value={value}
-                onChange={(item: any) => onChange(item.value)}
+                onChange={(item: any) => onChange(item.label)}
               />
             )}
           />
