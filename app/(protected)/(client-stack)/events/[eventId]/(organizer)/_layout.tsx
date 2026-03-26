@@ -78,6 +78,11 @@ export default function OrganizerEventDetailLayout() {
         options={{ title: "Create new event" }}
       />
       <Stack.Screen name="settings" options={{ headerShown: false }} />
+
+      <Stack.Screen
+        name="[categoryId]/index"
+        options={{ title: "Category Details" }}
+      />
     </Stack>
   );
 }

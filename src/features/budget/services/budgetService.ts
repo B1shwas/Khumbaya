@@ -17,3 +17,8 @@ export const addBudgetCategory = async (
   );
   return response.data.data;
 };
+
+export const getCategoryDetails = async (categoryId: number) => {
+  const response = await api.get(`/budget-category/${categoryId}`);
+  return response.data.data;
+};

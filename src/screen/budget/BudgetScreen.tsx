@@ -139,10 +139,8 @@ export default function EventBudgetScreen() {
                 allocatedBudget={cat.allocatedBudget}
                 spend={cat.spend}
                 onPress={() => {
-                  const categoryData = JSON.stringify(cat);
-                  const paramsQuery = `category=${encodeURIComponent(categoryData)}`;
                   router.push(
-                    `/(protected)/(client-stack)/events/${eventId}/(organizer)/editCategoryBudget?${paramsQuery}`
+                    `/(protected)/(client-stack)/events/${eventId}/(organizer)/${cat.id}`
                   );
                 }}
               />
