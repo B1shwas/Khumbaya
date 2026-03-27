@@ -38,3 +38,5 @@ export const acceptInvitation = async (invitationId: number) => {
   const response = await api.post(`/event/invitation/accept/${invitationId}`);
   return response.data.data.items;
 };
+
+

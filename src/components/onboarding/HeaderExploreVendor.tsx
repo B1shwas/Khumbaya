@@ -2,7 +2,12 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { TextInput, View } from "react-native";
 import { Text } from "../ui/Text";
 
-export function HeaderExploreVendor() {
+type Props = {
+  searchQuery: string;
+  onSearchChange: (text: string) => void;
+};
+
+export function HeaderExploreVendor({ searchQuery, onSearchChange }: Props) {
   return (
     <View className="px-4 pt-6 pb-2 bg-gray-50 ">
       <Text className="text-2xl mb-4 px-1 text-gray-900" variant="h1">
@@ -15,8 +20,8 @@ export function HeaderExploreVendor() {
           className="flex-1 h-full px-3 text-base text-gray-900"
           placeholder="Search for photographers, venues..."
           placeholderTextColor="#9CA3AF"
-          // value={searchQuery}
-          // onChangeText={setSearchQuery}
+          value={searchQuery}
+          onChangeText={onSearchChange}
         />
       </View>
     </View>
