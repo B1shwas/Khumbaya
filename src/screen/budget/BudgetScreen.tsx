@@ -1,6 +1,8 @@
 import { BudgetStatsGrid, CategoryCard } from "@/src/components/budget";
 import { Text } from "@/src/components/ui/Text";
+import { SetBudgetForm } from "@/src/features/budget/components";
 import { useBudgetSummary } from "@/src/features/budget/hooks/use-budget";
+import { useEventById } from "@/src/features/events/hooks/use-event";
 import { MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -17,7 +19,17 @@ export default function EventBudgetScreen() {
   const [search, setSearch] = useState("");
   const router = useRouter();
   const { eventId } = useLocalSearchParams();
-  const { data, isLoading } = useBudgetSummary(Number(eventId));
+
+  const { data: eventData, isLoading: eventLoading } = useEventById(
+    Number(eventId)
+  );
+
+  const hasBudget = eventData?.budget && eventData.budget > 0;
+  console.log(hasBudget);
+  const { data: budgetData, isLoading: budgetLoading } = useBudgetSummary(
+    Number(eventId),
+    { enabled: hasBudget }
+  );
 
   const handleAddPress = () => {
     router.push(
@@ -25,7 +37,7 @@ export default function EventBudgetScreen() {
     );
   };
 
-  if (isLoading) {
+  if (eventLoading) {
     return (
       <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
         <ActivityIndicator size="large" color="#ee2b8c" />
@@ -33,6 +45,19 @@ export default function EventBudgetScreen() {
     );
   }
 
+  if (!hasBudget) {
+    return <SetBudgetForm eventId={Number(eventId)} />;
+  }
+
+  if (budgetLoading) {
+    return (
+      <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+        <ActivityIndicator size="large" color="#ee2b8c" />
+      </View>
+    );
+  }
+
+  const data = budgetData;
   const totalBudget = data.summary?.totalBudget || 0;
   const totalAllocated = data.summary?.totalAllocated || 0;
   const totalSpent = data.summary?.totalSpent || 0;

@@ -1,4 +1,5 @@
 import { Event } from "@/src/constants/event";
+import { User } from "@/src/store/AuthStore";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   acceptRsvpInvitationApi,
@@ -7,7 +8,6 @@ import {
   getCompletedEventsApi,
   getEventById,
   getEventOwners,
-  updateEventApi,
   getInvitedEvent,
   getResponsesWithUser,
   getSubEventOfEvent,
@@ -16,8 +16,8 @@ import {
   MakeEventMemberType,
   RsvpResponsePayload,
   submitRsvpResponseApi,
+  updateEventApi,
 } from "../api/events.service";
-import { User } from "@/src/store/AuthStore";
 
 export const useCreateEvent = () => {
   const queryClient = useQueryClient();
@@ -237,18 +237,18 @@ export const useMakeEventMember = (eventId: number) => {
     },
   });
 };
-export const useGetEventOwner = (eventId:number) => {
+export const useGetEventOwner = (eventId: number) => {
   return useQuery({
     queryKey: ["event-owner", eventId],
     queryFn: async () => {
-      const responses:{
-        user:User,
-        role:string
+      const responses: {
+        user: User;
+        role: string;
       }[] = await getEventOwners(eventId);
-      return responses ; 
+      return responses;
     },
   });
-}
+};
 
 export const useUpdateEvent = (eventId: number) => {
   const queryClient = useQueryClient();
@@ -260,6 +260,7 @@ export const useUpdateEvent = (eventId: number) => {
       queryClient.invalidateQueries({ queryKey: ["events/upcoming"] });
       queryClient.invalidateQueries({ queryKey: ["events/completed"] });
       queryClient.invalidateQueries({ queryKey: ["events/with-role"] });
+      queryClient.invalidateQueries({ queryKey: ["budget-summary", eventId] });
     },
   });
-}
+};

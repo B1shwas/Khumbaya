@@ -123,7 +123,6 @@ const mapInvitationToEvent = (item: InvitationItem): Event => {
 };
 
 export const createEventApi = async (data: CREATEEVENT) => {
-
   const response = await api.post("/event", data);
   return response.data;
 };
@@ -194,10 +193,7 @@ export const acceptRsvpInvitationApi = async (invitationId: number) => {
   const response = await api.post(`/rsvp/accept/${invitationId}`);
   return response.data;
 };
-export const updateEventApi = async (
-  id: number,
-  data: Partial<Event>
-) => {
+export const updateEventApi = async (id: number, data: Partial<Event>) => {
   const response = await api.patch(`/event/${id}`, data);
   return response.data;
 };
@@ -239,7 +235,6 @@ export const submitRsvpResponseApi = async (
   eventId: number,
   payload: RsvpResponsePayload
 ) => {
-
   const response = await api.post(`invitation/responce/${eventId}`, payload);
   return response.data;
 };
@@ -256,9 +251,7 @@ export const makeEventMember = async (
   const response = await api.post(`/event/${eventId}/member`, data);
   return response.data;
 };
-export const getEventOwners = async(
-  eventId:number
-) => {
+export const getEventOwners = async (eventId: number) => {
   const response = await api.get(`/event/${eventId}/users`);
   return response.data.data;
-}
+};

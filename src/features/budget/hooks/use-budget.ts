@@ -8,12 +8,16 @@ import {
   getExpenseById,
 } from "../services/budgetService";
 
-export const useBudgetSummary = (eventId: number) => {
+export const useBudgetSummary = (
+  eventId: number,
+  options?: { enabled?: boolean }
+) => {
   return useQuery({
     queryKey: ["budget-summary", eventId],
     queryFn: () => getBudgetSummary(eventId),
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
+    enabled: options?.enabled !== false,
   });
 };
 
