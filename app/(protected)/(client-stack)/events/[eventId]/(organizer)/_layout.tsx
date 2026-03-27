@@ -87,6 +87,10 @@ export default function OrganizerEventDetailLayout() {
         name="[categoryId]/add-expense"
         options={{ title: "New Expense" }}
       />
+      <Stack.Screen
+        name="[categoryId]/[expenseId]/index"
+        options={{ title: "Expense Details" }}
+      />
     </Stack>
   );
 }

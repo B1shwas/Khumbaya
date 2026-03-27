@@ -1,5 +1,6 @@
 import { BudgetStatsGrid } from "@/src/components/budget";
 import { Text } from "@/src/components/ui/Text";
+import { useExpenseById } from "@/src/features/budget/hooks/use-budget";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import {
@@ -9,62 +10,50 @@ import {
   View,
 } from "react-native";
 
-interface Payment {
+type Expense = {
   id: number;
+  categoryId: number;
+  name: string;
+  businessId: number | null;
+  estimatedCost: number;
+  contractAmount: number | null;
+  nextDueDate: Date;
+  notes: string;
+  spend: number;
+  payments: Payment[];
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+type Payment = {
+  id: number;
+  expenseId: number;
   name: string;
   amount: number;
-  date: string;
-  method: string;
-  status: "cleared" | "pending";
-}
-
-interface ExpenseDetailsData {
-  id: number;
-  name: string;
-  businessName: string;
-  status: "on-track" | "at-risk" | "overbudget";
-  estimatedCost: number;
-  contractAmount: number;
-  amountSpent: number;
-  balanceDue: number;
-  percentPaid: number;
-  payments: Payment[];
-}
-
-const mockExpenseData: ExpenseDetailsData = {
-  id: 1,
-  name: "Royal Chefs Catering",
-  businessName: "Royal Chefs",
-  status: "on-track",
-  estimatedCost: 10000,
-  contractAmount: 9500,
-  amountSpent: 4000,
-  balanceDue: 55000000,
-  percentPaid: 42,
-  payments: [
-    {
-      id: 1,
-      name: "Initial Deposit",
-      amount: 2000,
-      date: "Sept 1, 2024",
-      method: "bank_transfer",
-      status: "cleared",
-    },
-    {
-      id: 2,
-      name: "Booking Confirmation",
-      amount: 2000,
-      date: "Aug 20, 2024",
-      method: "credit_card",
-      status: "cleared",
-    },
-  ],
+  paidOn: string;
+  mode: string;
+  status: "cleared" | "bank_transfer";
+  notes: string;
+  createdAt: Date;
+  updatedAt: Date;
 };
 
 export default function ExpenseDetailScreen() {
   const router = useRouter();
   const { eventId, categoryId, expenseId } = useLocalSearchParams();
-  const isLoading = false; // Replace with actual loading state
+  const { data, isLoading } = useExpenseById(Number(expenseId));
+
+  let remainingBalance,
+    dueBalance,
+    percentPaid = null;
+  if (!isLoading) {
+    remainingBalance = data.estimatedCost - data.spend;
+    dueBalance = data.contractAmount ? data.contractAmount - data.spend : null;
+
+    if (data.contractAmount) {
+      percentPaid = Math.round((data.spend / data.contractAmount) * 100);
+    }
+  }
 
   const handleAddPaymentPress = () => {
     router.push(
@@ -79,8 +68,6 @@ export default function ExpenseDetailScreen() {
       </View>
     );
   }
-
-  const data = mockExpenseData;
 
   return (
     <View className="flex-1 bg-[#f8f6f7]">
@@ -97,52 +84,63 @@ export default function ExpenseDetailScreen() {
               </Text>
               <View className="flex-row items-center gap-2">
                 <Text variant="caption" className="text-base">
-                  {data.businessName}
+                  {/* currently storing bussinessid in backend . this has not been implemented properly. after the implementation , we will be able to join that business name  */}
+                  {data.bussinessId || "Vendor"}
                 </Text>
               </View>
             </View>
           </View>
 
           <View className="bg-[#ee2b8c]/10 rounded-md p-6 flex-row items-center gap-4 border border-[#ee2b8c]/70">
-            <View>
-              <Text
-                variant="h2"
-                className="text-[#9d1759] uppercase tracking-wider mb-1 text-xs"
-              >
-                Balance Due
-              </Text>
-              <Text variant="h1" className="text-[#ee2b8c] text-xl">
-                Rs. {data.balanceDue.toLocaleString()}
-              </Text>
-            </View>
+            {data.contractAmount ? (
+              <>
+                <View>
+                  <Text
+                    variant="h2"
+                    className="text-[#9d1759] uppercase tracking-wider mb-1 text-xs"
+                  >
+                    Balance Due
+                  </Text>
+                  <Text variant="h1" className="text-[#ee2b8c] text-xl">
+                    Rs. {dueBalance?.toLocaleString()}
+                  </Text>
+                </View>
 
-            <View className="h-10 w-px bg-[#ee2b8c]/20" />
+                <View className="h-10 w-px bg-[#ee2b8c]/20" />
 
-            <View className="flex-1 items-center gap-1">
-              <View className="h-2 w-24 bg-gray-200 rounded-md overflow-hidden">
-                <View
-                  className="h-full bg-[#ee2b8c]"
-                  style={{ width: `${data.percentPaid}%` }}
-                />
+                <View className="flex-1 items-center gap-1">
+                  <View className="h-2 w-24 bg-gray-200 rounded-md overflow-hidden">
+                    <View
+                      className="h-full bg-[#ee2b8c]"
+                      style={{ width: `${percentPaid ?? 0}%` }}
+                    />
+                  </View>
+                  <Text variant="h2" className="text-gray-500">
+                    {percentPaid ?? 0}% Paid
+                  </Text>
+                </View>
+              </>
+            ) : (
+              <View className="flex-1 items-center gap-2">
+                <MaterialIcons name="warning" size={24} color="#ee2b8c" />
+                <Text variant="h2" className="text-[#9d1759] text-center">
+                  You have not finalized the contract yet
+                </Text>
               </View>
-              <Text variant="h2" className="text-gray-500">
-                {data.percentPaid}% Paid
-              </Text>
-            </View>
+            )}
           </View>
 
           <BudgetStatsGrid
             stats={[
-              { label: "Estimated", value: 10000000 },
-              { label: "Contract", value: 250000 },
-              { label: "Spent", value: 300000 },
-              { label: "Balance", value: 4000000 },
+              { label: "Estimated", value: data.estimatedCost },
+              { label: "Contract", value: data.contractAmount },
+              { label: "Spent", value: data.spend },
+              { label: "Balance", value: remainingBalance },
             ]}
             variant="expense"
           />
         </View>
 
-        {/* Payment History Section */}
         <View className="mx-5 mt-8">
           <View className="flex-row items-center justify-between mb-4">
             <Text variant="h2" className="text-[#181114] text-lg">
@@ -157,7 +155,7 @@ export default function ExpenseDetailScreen() {
 
           {data.payments.length > 0 ? (
             <View className="gap-3">
-              {data.payments.map((payment) => (
+              {data.payments.map((payment: Payment) => (
                 <TouchableOpacity
                   key={payment.id}
                   activeOpacity={0.7}
@@ -175,14 +173,14 @@ export default function ExpenseDetailScreen() {
                             variant="h2"
                             className="text-on-surface-variant"
                           >
-                            {payment.date}
+                            {payment.paidOn}
                           </Text>
                           <Text variant="h2" className="text-gray-300">
                             •
                           </Text>
                           <View className="flex-row items-center gap-1">
                             <Text variant="h2" className="text-gray-500">
-                              {payment.method === "bank_transfer"
+                              {payment.mode === "bank_transfer"
                                 ? "Bank Transfer"
                                 : "Credit Card"}
                             </Text>
@@ -193,14 +191,14 @@ export default function ExpenseDetailScreen() {
 
                     <View className="items-end">
                       <Text variant="h2" className="text-[#181114] mb-2">
-                        Rs. {payment.amount.toLocaleString()}
+                        Rs. {payment?.amount?.toLocaleString()}
                       </Text>
                       <View className="bg-emerald-100 px-2 py-0.5 rounded-lg">
                         <Text
                           variant="h2"
                           className="text-emerald-700 uppercase text-xs"
                         >
-                          {payment.status}
+                          {payment.status.toUpperCase()}
                         </Text>
                       </View>
                     </View>

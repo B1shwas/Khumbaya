@@ -4,6 +4,7 @@ import {
   addExpenseToCategory,
   getBudgetSummary,
   getCategoryDetails,
+  getExpenseById,
 } from "../services/budgetService";
 
 export const useBudgetSummary = (eventId: number) => {
@@ -56,5 +57,14 @@ export const useExpenseMutation = (categoryId: number, eventId: number) => {
       });
       queryClient.invalidateQueries({ queryKey: ["budget-summary", eventId] });
     },
+  });
+};
+
+export const useExpenseById = (expenseId: number) => {
+  return useQuery({
+    queryKey: ["expense-details", expenseId],
+    queryFn: () => getExpenseById(expenseId),
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
   });
 };
