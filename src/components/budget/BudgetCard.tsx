@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Alert, Text, TouchableOpacity, View } from "react-native";
-import Swipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
-import { BudgetItem } from "../types/budget.types";
+import Swipeable from "react-native-gesture-handler/ReanimatedSwipeable";
+import { BudgetItem } from "../../features/budget/types/budget.types";
 
 interface BudgetCardProps {
   item: BudgetItem;
@@ -48,11 +48,9 @@ export default function BudgetCard({
   };
 
   const rightActions = () => (
-    <View className="flex-row items-center rounded-md" >
+    <View className="flex-row items-center rounded-md">
       {/* Edit Action */}
-      <Text>
-        Gaysdasdhjk
-      </Text>
+      <Text>Gaysdasdhjk</Text>
     </View>
   );
 

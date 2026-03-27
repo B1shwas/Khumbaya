@@ -1,5 +1,5 @@
-import { BudgetPage } from "@/src/screen/user/View";
+import EventBudgetScreen from "@/src/screen/budget/BudgetScreen";
 
-export default function BudgetScreen() {
-  return <BudgetPage />;
+export default function BudgetPage() {
+  return <EventBudgetScreen />;
 }

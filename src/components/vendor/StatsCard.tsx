@@ -1,5 +1,4 @@
 import { Text } from "@/src/components/ui/Text";
-import { cardBase } from "@/src/styles/vendorhome-style";
 import React from "react";
 import { View } from "react-native";
 
@@ -14,6 +13,7 @@ export const StatsCard: React.FC<StatsCardProps> = ({
   value,
   isPrimary = false,
 }) => {
+  const cardBase = "";
   return (
     <View
       className={`min-w-[160px] p-5 gap-1 rounded-xl ${

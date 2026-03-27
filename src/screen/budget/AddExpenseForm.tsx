@@ -1,0 +1,379 @@
+import { Text } from "@/src/components/ui/Text";
+import { useExpenseMutation } from "@/src/features/budget/hooks/use-budget";
+import { expenseFormSchema } from "@/src/features/budget/schema";
+import { MaterialIcons } from "@expo/vector-icons";
+import { zodResolver } from "@hookform/resolvers/zod";
+import DateTimePicker from "@react-native-community/datetimepicker";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useEffect, useState } from "react";
+import { Controller, useForm } from "react-hook-form";
+import {
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { z } from "zod";
+
+type ExpenseFormData = z.infer<typeof expenseFormSchema>;
+
+export default function AddExpenseScreen() {
+  const router = useRouter();
+  const { categoryId, eventId } = useLocalSearchParams();
+  const [showDatePicker, setShowDatePicker] = useState(false);
+
+  const expenseMutation = useExpenseMutation(
+    Number(categoryId),
+    Number(eventId)
+  );
+
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+    watch,
+    setValue,
+  } = useForm<ExpenseFormData>({
+    resolver: zodResolver(expenseFormSchema),
+    defaultValues: {
+      name: "",
+      estimatedCost: "",
+      contractAmount: "",
+      businessId: "",
+      nextDueDate: "",
+      notes: "",
+    },
+  });
+
+  const nextDueDate = watch("nextDueDate");
+
+  const handleDateChange = (event: any, date: Date | undefined) => {
+    setShowDatePicker(false);
+    if (date) {
+      const formattedDate = date.toISOString().split("T")[0];
+      setValue("nextDueDate", formattedDate);
+    }
+  };
+
+  const onSubmit = async (data: ExpenseFormData) => {
+    try {
+      const payload = {
+        name: data.name,
+        estimatedCost: parseFloat(data.estimatedCost),
+        contractAmount: data.contractAmount
+          ? parseFloat(data.contractAmount)
+          : undefined,
+        businessId: data.businessId || undefined,
+        nextDueDate: data.nextDueDate || undefined,
+        notes: data.notes || undefined,
+      };
+
+      await expenseMutation.mutateAsync(payload);
+
+      Alert.alert("Success", "Expense created successfully!", [
+        {
+          text: "OK",
+          onPress: () => router.back(),
+        },
+      ]);
+    } catch (error) {
+      Alert.alert(
+        "Error",
+        error instanceof Error
+          ? error.message
+          : "Failed to create expense. Please try again."
+      );
+    }
+  };
+
+  useEffect(() => {}, [categoryId]);
+
+  return (
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      className="flex-1"
+    >
+      <View className="flex-1 bg-[#f8f6f7]">
+        <ScrollView
+          className="flex-1"
+          contentContainerClassName="pb-32"
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View className="px-6 pt-8">
+            {/* Hero Context */}
+            <View className="mb-8">
+              <View>
+                <Text className="text-3xl text-[#181114]" variant="h1">
+                  Detail your new
+                </Text>
+                <Text className="text-3xl text-[#ee2b8c]" variant="h1">
+                  financial commitment.
+                </Text>
+              </View>
+            </View>
+
+            {/* Form Card */}
+            <View className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 gap-6 mb-8">
+              {/* Expense Name */}
+              <View className="gap-2">
+                <Text className="text-sm text-gray-600 ml-1" variant="h2">
+                  Expense Name
+                </Text>
+                <Controller
+                  control={control}
+                  name="name"
+                  render={({ field: { onChange, value } }) => (
+                    <View>
+                      <TextInput
+                        className="w-full h-14 bg-[#f8f6f7] px-4 rounded-md text-[#181114] border border-gray-100 focus:border-[#ee2b8c]"
+                        placeholder="e.g. Adobe Creative Cloud"
+                        placeholderTextColor="#999"
+                        value={value}
+                        onChangeText={onChange}
+                      />
+                      {errors.name && (
+                        <Text
+                          className="text-xs text-red-500 mt-1"
+                          variant="h2"
+                        >
+                          {errors.name.message}
+                        </Text>
+                      )}
+                    </View>
+                  )}
+                />
+              </View>
+
+              <View className="gap-6">
+                {/* Estimated Cost */}
+                <View className="gap-2">
+                  <Text className="text-sm text-gray-600 ml-1" variant="h2">
+                    Estimated Cost
+                  </Text>
+                  <Controller
+                    control={control}
+                    name="estimatedCost"
+                    render={({ field: { onChange, value } }) => (
+                      <View>
+                        <View className="relative">
+                          <Text
+                            className="absolute left-4 top-3.5 text-sm text-gray-600"
+                            variant="h2"
+                          >
+                            Rs.
+                          </Text>
+                          <TextInput
+                            className="w-full h-14 bg-[#f8f6f7] pl-12 pr-4 rounded-md text-[#181114] border border-gray-100"
+                            placeholder="0.00"
+                            placeholderTextColor="#999"
+                            keyboardType="decimal-pad"
+                            value={value}
+                            onChangeText={onChange}
+                          />
+                        </View>
+                        {errors.estimatedCost && (
+                          <Text
+                            className="text-xs text-red-500 mt-1"
+                            variant="h2"
+                          >
+                            {errors.estimatedCost.message}
+                          </Text>
+                        )}
+                      </View>
+                    )}
+                  />
+                </View>
+
+                {/* Contract Amount */}
+                <View className="gap-2">
+                  <View className="flex-row items-center gap-1">
+                    <Text className="text-sm text-gray-600 ml-1" variant="h2">
+                      Contract Amount
+                    </Text>
+                    <Text className="text-[10px] text-gray-400" variant="h2">
+                      (Optional)
+                    </Text>
+                  </View>
+                  <Controller
+                    control={control}
+                    name="contractAmount"
+                    render={({ field: { onChange, value } }) => (
+                      <View>
+                        <View className="relative">
+                          <Text
+                            className="absolute left-4 top-3.5 text-sm text-gray-600"
+                            variant="h2"
+                          >
+                            Rs.
+                          </Text>
+                          <TextInput
+                            className="w-full h-14 bg-[#f8f6f7] pl-12 pr-4 rounded-md text-[#181114] border border-gray-100"
+                            placeholder="0.00"
+                            placeholderTextColor="#999"
+                            keyboardType="decimal-pad"
+                            value={value || ""}
+                            onChangeText={onChange}
+                          />
+                        </View>
+                        {errors.contractAmount && (
+                          <Text
+                            className="text-xs text-red-500 mt-1"
+                            variant="h2"
+                          >
+                            {errors.contractAmount.message}
+                          </Text>
+                        )}
+                      </View>
+                    )}
+                  />
+                </View>
+
+                {/* Business Name */}
+                <View className="gap-2">
+                  <View className="flex-row items-center gap-1">
+                    <Text className="text-sm text-gray-600 ml-1" variant="h2">
+                      Business Name
+                    </Text>
+                    <Text className="text-[10px] text-gray-400" variant="h2">
+                      (Optional)
+                    </Text>
+                  </View>
+                  <Controller
+                    control={control}
+                    name="businessId"
+                    render={({ field: { onChange, value } }) => (
+                      <View>
+                        <View className="relative">
+                          <TextInput
+                            className="w-full h-14 bg-[#f8f6f7] px-4 rounded-md text-[#181114] border border-gray-100"
+                            placeholder="Search businesses..."
+                            placeholderTextColor="#999"
+                            value={value}
+                            onChangeText={onChange}
+                          />
+                          <MaterialIcons
+                            name="search"
+                            size={20}
+                            color="#999"
+                            style={{ position: "absolute", right: 16, top: 12 }}
+                          />
+                        </View>
+                        {errors.businessId && (
+                          <Text
+                            className="text-xs text-red-500 mt-1"
+                            variant="h2"
+                          >
+                            {errors.businessId.message}
+                          </Text>
+                        )}
+                      </View>
+                    )}
+                  />
+                </View>
+
+                {/* Due Date */}
+                <View className="gap-2">
+                  <View className="flex-row items-center gap-1">
+                    <Text className="text-sm text-gray-600 ml-1" variant="h2">
+                      Next Due Date
+                    </Text>
+                    <Text className="text-[10px] text-gray-400" variant="h2">
+                      (Optional)
+                    </Text>
+                  </View>
+                  <TouchableOpacity
+                    onPress={() => setShowDatePicker(true)}
+                    className="h-14 bg-[#f8f6f7] px-4 rounded-md border border-gray-100 flex-row items-center"
+                  >
+                    <MaterialIcons
+                      name="calendar-today"
+                      size={20}
+                      color="#999"
+                    />
+                    <Text className="ml-3 text-[#181114]" variant="h2">
+                      {nextDueDate ? nextDueDate : "Select date"}
+                    </Text>
+                  </TouchableOpacity>
+                  {errors.nextDueDate && (
+                    <Text className="text-xs text-red-500 mt-1" variant="h2">
+                      {errors.nextDueDate.message}
+                    </Text>
+                  )}
+                  {showDatePicker && (
+                    <DateTimePicker
+                      value={nextDueDate ? new Date(nextDueDate) : new Date()}
+                      mode="date"
+                      display="default"
+                      onChange={handleDateChange}
+                    />
+                  )}
+                </View>
+              </View>
+
+              {/* Notes */}
+              <View className="gap-2">
+                <View className="flex-row items-center gap-1">
+                  <Text className="text-sm text-gray-600 ml-1" variant="h2">
+                    Notes
+                  </Text>
+                  <Text className="text-[10px] text-gray-400" variant="h2">
+                    (Optional)
+                  </Text>
+                </View>
+                <Controller
+                  control={control}
+                  name="notes"
+                  render={({ field: { onChange, value } }) => (
+                    <View>
+                      <TextInput
+                        className="w-full bg-[#f8f6f7] px-4 py-3 rounded-md text-[#181114] border border-gray-100"
+                        placeholder="Additional details or terms..."
+                        placeholderTextColor="#999"
+                        value={value}
+                        onChangeText={onChange}
+                        multiline
+                        numberOfLines={3}
+                      />
+                      {errors.notes && (
+                        <Text
+                          className="text-xs text-red-500 mt-1"
+                          variant="h2"
+                        >
+                          {errors.notes.message}
+                        </Text>
+                      )}
+                    </View>
+                  )}
+                />
+              </View>
+
+              {/* Submit Button */}
+              <TouchableOpacity
+                onPress={handleSubmit(onSubmit)}
+                disabled={expenseMutation.isPending}
+                className="h-16 bg-[#ee2b8c] rounded-md flex items-center justify-center mt-2"
+                activeOpacity={0.8}
+              >
+                {expenseMutation.isPending ? (
+                  <MaterialIcons
+                    name="hourglass-empty"
+                    size={24}
+                    color="white"
+                  />
+                ) : (
+                  <Text className="text-white text-base" variant="h2">
+                    Create Expense
+                  </Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </ScrollView>
+      </View>
+    </KeyboardAvoidingView>
+  );
+}
