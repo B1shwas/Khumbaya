@@ -96,6 +96,7 @@ export default function EventBudgetScreen() {
             </View>
 
             <BudgetStatsGrid
+              variant="budget"
               stats={[
                 { label: "Estimated", value: totalEstimated },
                 { label: "Spent", value: totalSpent },

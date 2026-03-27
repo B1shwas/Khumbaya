@@ -10,6 +10,7 @@ export interface BudgetStat {
 
 interface BudgetStatsGridProps {
   stats: BudgetStat[];
+  variant: "budget" | "expense";
 }
 
 const DEFAULT_DESCRIPTIONS: Record<string, string> = {
@@ -21,20 +22,22 @@ const DEFAULT_DESCRIPTIONS: Record<string, string> = {
     "Total amount that is owed but not yet paid. These are outstanding payments for contracted services.",
   Remaining:
     "Amount left in your budget that hasn't been allocated or spent yet. This is your available budget.",
+  Contract: "Something that will always be the things",
+  Balance: "Something that is not somethnige",
 };
 
-export function BudgetStatsGrid({ stats }: BudgetStatsGridProps) {
+export function BudgetStatsGrid({ stats, variant }: BudgetStatsGridProps) {
   return (
     <View className="gap-3 pt-4">
       <View className="flex-row gap-3">
         {stats.slice(0, 2).map((stat, idx) => (
           <View
             key={stat.label}
-            className={`flex-1 bg-white/25  rounded-md p-4`}
+            className={`flex-1 ${variant === "budget" ? "bg-white/25" : "bg-pink-200"} rounded-md p-4 `}
           >
             <View className="flex-row items-center gap-2 mb-2">
               <Text
-                className="text-white text-xs opacity-80 flex-1"
+                className={`${variant === "budget" ? "text-white" : "text-background-dark"} text-xs opacity-80 flex-1`}
                 variant="h2"
               >
                 {stat.label}
@@ -48,7 +51,10 @@ export function BudgetStatsGrid({ stats }: BudgetStatsGridProps) {
                 />
               )}
             </View>
-            <Text className="text-white text-base" variant="h2">
+            <Text
+              className={`text-base ${variant === "budget" ? "text-white" : "text-background-dark"}`}
+              variant="h2"
+            >
               Rs. {stat.value.toLocaleString()}
             </Text>
           </View>
@@ -58,11 +64,11 @@ export function BudgetStatsGrid({ stats }: BudgetStatsGridProps) {
         {stats.slice(2, 4).map((stat, idx) => (
           <View
             key={stat.label}
-            className={`flex-1 bg-white/25 rounded-md p-4`}
+            className={`flex-1 ${variant === "budget" ? "bg-white/25" : "bg-pink-200"} rounded-md p-4 `}
           >
             <View className="flex-row items-center gap-2 mb-2">
               <Text
-                className="text-white text-xs opacity-80 flex-1"
+                className={`${variant === "budget" ? "text-white" : "text-background-dark"} text-xs opacity-80 flex-1`}
                 variant="h2"
               >
                 {stat.label}
@@ -76,7 +82,10 @@ export function BudgetStatsGrid({ stats }: BudgetStatsGridProps) {
                 />
               )}
             </View>
-            <Text className="text-white text-base" variant="h2">
+            <Text
+              className={`text-base ${variant === "budget" ? "text-white" : "text-background-dark"}`}
+              variant="h2"
+            >
               Rs. {stat.value.toLocaleString()}
             </Text>
           </View>
