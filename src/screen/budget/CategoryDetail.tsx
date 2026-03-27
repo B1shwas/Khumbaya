@@ -207,7 +207,9 @@ export default function CategoryDetailsScreen() {
                         Contract:
                       </Text>
                       <Text className="text-xs text-[#181114] " variant="h2">
-                        Rs. {expense.contractAmount.toLocaleString()}
+                        {expense.contractAmount
+                          ? `Rs. ${expense.contractAmount.toLocaleString()}`
+                          : "Not done"}
                       </Text>
                     </View>
                     <Text
