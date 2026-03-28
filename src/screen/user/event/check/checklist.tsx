@@ -51,8 +51,8 @@ const ChecklistTaskItem = ({
   return (
     <Pressable
       className={`${task.isDone
-        ? "bg-surface-secondary border-border flex-row items-start p-5 rounded-xl mb-4 border"
-        : "bg-surface border-border shadow-sm flex-row items-start p-5 rounded-xl mb-4 border"
+        ? "bg-surface-secondary  flex-row items-start p-5 rounded-xl mb-4"
+        : "bg-surface  shadow-sm flex-row items-start p-5 rounded-xl mb-4"
         }`}
       onPress={onToggleComplete}
     >

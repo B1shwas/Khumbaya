@@ -73,7 +73,7 @@ export default function ProfileScreen() {
 
 
 
-    <ScrollView showsVerticalScrollIndicator={false} className="px-2  bg-white pb-11">
+    <ScrollView showsVerticalScrollIndicator={false} className="px-2 bg-white pb-11">
       <View className="items-center bg-white py-6">
         <AvatarPicker
           name={user?.username || "User"}
@@ -102,14 +102,10 @@ export default function ProfileScreen() {
         />
       </View>
       {tab === "account" ? <Account /> : <Info />}
-
     </ScrollView>
-
   </>
   );
 }
-
-/* ---------- Toggle ---------- */
 
 const ToggleButton = ({ title, active, onPress }: ToggleButtonProps) => {
   return (

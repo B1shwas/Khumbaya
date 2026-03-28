@@ -137,17 +137,17 @@ export default function EditProfileScreen() {
 
       updateUser({
         ...(updatedUser ?? {}),
-        username: updatedUser?.username ?? payload.username,
-        email: updatedUser?.email ?? payload.email,
-        phone: updatedUser?.phone ?? payload.phone,
-        bio: updatedUser?.bio ?? payload.bio,
-        foodPreference: updatedUser?.foodPreference ?? payload.foodPreference,
-        location: updatedUser?.location ?? payload.location,
-        country: updatedUser?.country ?? payload.country,
-        city: updatedUser?.city ?? payload.city,
-        address: updatedUser?.address ?? payload.address,
-        zip: updatedUser?.zip ?? payload.zip,
-        dob: updatedUser?.dob ?? payload.dob,
+        username: updatedUser?.username ?? null,
+        email: updatedUser?.email ?? null,
+        phone: updatedUser?.phone ?? null,
+        bio: updatedUser?.bio ?? null,
+        foodPreference: updatedUser?.foodPreference ?? null,
+        location: updatedUser?.location ?? null,
+        country: updatedUser?.country ?? null,
+        city: updatedUser?.city ?? null,
+        address: updatedUser?.address ?? null,
+        zip: updatedUser?.zip ?? null,
+        dob: updatedUser?.dob ?? null,
       });
 
       setSaveState("saved");
@@ -368,11 +368,10 @@ export default function EditProfileScreen() {
                   <TouchableOpacity
                     key={opt}
                     // Use w-[31%] to roughly simulate grid-cols-3 with gap
-                    className={`w-[31%] min-w-[80px] items-center justify-center px-2 py-1 h-10 rounded-full border ${
-                      active
-                        ? "bg-pink-500 border-pink-500"
-                        : "bg-white border-gray-200"
-                    }`}
+                    className={`w-[31%] min-w-[80px] items-center justify-center px-2 py-1 h-10 rounded-full border ${active
+                      ? "bg-pink-500 border-pink-500"
+                      : "bg-white border-gray-200"
+                      }`}
                     onPress={() => set("foodPreference", opt)}
                   >
                     <Text

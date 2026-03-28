@@ -4,6 +4,7 @@ import { useUpdateTodo } from "@/src/features/todo/hooks/useTodo";
 import { useTodoDraftStore } from "@/src/features/todo/store";
 import { shadowStyle } from "@/src/utils/helper";
 import { MaterialIcons } from "@expo/vector-icons";
+import { useGetEventOwner } from "@/src/features/events/hooks/use-event";
 import { router, useLocalSearchParams } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
@@ -44,7 +45,7 @@ type TaskData = {
 const EditTaskScreen: React.FC = () => {
   const params = useLocalSearchParams<{ taskId?: string | string[] }>();
   const rawTaskId = Array.isArray(params.taskId) ? params.taskId[0] : params.taskId;
-  const parsedTaskId =Number(rawTaskId)
+  const parsedTaskId = Number(rawTaskId)
   const taskId = Number.isFinite(parsedTaskId) ? parsedTaskId : null;
   const { todoDraft } = useTodoDraftStore();
   const { mutate: updateTodo, isPending: isUpdating } = useUpdateTodo();
@@ -76,13 +77,16 @@ const EditTaskScreen: React.FC = () => {
     initialDueValue
   );
 
+
+  if (!todoDraft?.eventId) return null;
+  const eventOwner = useGetEventOwner(todoDraft?.eventId);
   const [task, setTask] = useState<TaskData>({
     title: initialTitle,
     dueDate: initialDueDate,
     dueTime: "04:00 PM",
     assignee: {
-      name: "Sarah Jenkins",
-      role: "Lead Decorator",
+      name: "Assignee Name",
+      role: "Organizer",
       avatar:
         "https://lh3.googleusercontent.com/aida-public/AB6AXuAfmF-fDRZPXgVfKKzR8xlRKeQe-AbtrVoAY94UZqBTUVAd6N5fMWqb5wGRKpya_9ar8WRmvkcUbTUihSerOH4gPZuo_oqZUCrGjskCE-cYdDqgRcxd--gG4aJ8ANTP5hcG3_llM0xnhh7HoDSW-LwUCqI_pRPGf1zXrvWQ5e0CZEgQ1uL07-LdmK8hNKtLK49Qk3C7yJlrFHYLFUmJfBgtxIStsojUEhFEkZCmsfCNRDMPK5_-qxZ9mdIfszEnSz8KcTXr7I9zthM",
       verified: true,
@@ -142,7 +146,6 @@ const EditTaskScreen: React.FC = () => {
         dueDateIso = parsed.toISOString();
       }
     }
-
     updateTodo(
       {
         id: todoId,
@@ -174,6 +177,7 @@ const EditTaskScreen: React.FC = () => {
     taskId,
     updateTodo,
   ]);
+
 
   const handleDelete = useCallback(() => {
     Alert.alert(
@@ -211,7 +215,7 @@ const EditTaskScreen: React.FC = () => {
       <StatusBar style="dark" />
 
       <View className="absolute top-0 left-0 right-0 z-50">
-     
+
       </View>
 
       <KeyboardAvoidingView
@@ -346,17 +350,15 @@ const EditTaskScreen: React.FC = () => {
                 {task.subTasks.map((subTask, index) => (
                   <View
                     key={subTask.id}
-                    className={`flex-row items-center gap-4 p-4 bg-white ${
-                      index < task.subTasks.length - 1 ? "border-b border-border/30" : ""
-                    }`}
+                    className={`flex-row items-center gap-4 p-4 bg-white ${index < task.subTasks.length - 1 ? "border-b border-border/30" : ""
+                      }`}
                   >
                     <TouchableOpacity
                       onPress={() => toggleSubTask(subTask.id)}
-                      className={`w-5 h-5 rounded-md border-2 items-center justify-center ${
-                        subTask.completed
-                          ? "border-primary/30 bg-primary"
-                          : "border-stone-200"
-                      }`}
+                      className={`w-5 h-5 rounded-md border-2 items-center justify-center ${subTask.completed
+                        ? "border-primary/30 bg-primary"
+                        : "border-stone-200"
+                        }`}
                       accessibilityLabel={
                         subTask.completed ? "Mark as incomplete" : "Mark as complete"
                       }
@@ -368,11 +370,10 @@ const EditTaskScreen: React.FC = () => {
                     </TouchableOpacity>
 
                     <Text
-                      className={`flex-1 text-sm font-jakarta-medium ${
-                        subTask.completed
-                          ? "text-text-disabled line-through"
-                          : "text-on-surface"
-                      }`}
+                      className={`flex-1 text-sm font-jakarta-medium ${subTask.completed
+                        ? "text-text-disabled line-through"
+                        : "text-on-surface"
+                        }`}
                     >
                       {subTask.title}
                     </Text>
@@ -392,9 +393,8 @@ const EditTaskScreen: React.FC = () => {
               <TouchableOpacity
                 onPress={handleSave}
                 disabled={isUpdating}
-                className={`flex-row items-center gap-2 px-6 py-3 rounded-full active:scale-95 ${
-                  isUpdating ? "bg-primary/40" : "bg-primary"
-                }`}
+                className={`flex-row items-center gap-2 px-6 py-3 rounded-full active:scale-95 ${isUpdating ? "bg-primary/40" : "bg-primary"
+                  }`}
                 accessibilityLabel="Update this task"
               >
                 <MaterialIcons name="edit" size={16} color="#fff" />
