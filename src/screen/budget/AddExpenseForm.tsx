@@ -27,7 +27,11 @@ export default function AddExpenseScreen() {
 
   const expenseMutation = useExpenseMutation(
     Number(categoryId),
-    Number(eventId)
+    Number(eventId),
+    () => {
+      // Navigate back after successful expense creation
+      router.back();
+    }
   );
 
   const {
@@ -73,12 +77,7 @@ export default function AddExpenseScreen() {
 
       await expenseMutation.mutateAsync(payload);
 
-      Alert.alert("Success", "Expense created successfully!", [
-        {
-          text: "OK",
-          onPress: () => router.back(),
-        },
-      ]);
+      Alert.alert("Success", "Expense created successfully!");
     } catch (error) {
       Alert.alert(
         "Error",

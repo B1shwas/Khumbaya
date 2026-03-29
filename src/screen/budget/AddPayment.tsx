@@ -1,8 +1,11 @@
 import { DatePicker } from "@/components/nativewindui/DatePicker";
 import { Text } from "@/src/components/ui/Text";
-import { usePaymentMutation } from "@/src/features/budget/hooks/use-budget";
+import {
+  usePaymentMutation,
+  useUpdatePaymentMutation,
+} from "@/src/features/budget/hooks/use-budget";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
   ActivityIndicator,
@@ -30,7 +33,20 @@ type PaymentFormData = {
 
 export default function AddPaymentScreen() {
   const router = useRouter();
-  const { eventId, categoryId, expenseId } = useLocalSearchParams();
+  const {
+    eventId,
+    categoryId,
+    expenseId,
+    paymentId,
+    paymentName,
+    amount,
+    paidOn,
+    mode,
+    status,
+    notes,
+  } = useLocalSearchParams();
+
+  const isEditMode = !!paymentId;
 
   const { control, handleSubmit, setValue, reset } = useForm<PaymentFormData>({
     defaultValues: {
@@ -45,12 +61,37 @@ export default function AddPaymentScreen() {
 
   const [selectedDate, setSelectedDate] = useState(new Date());
 
-  // Mutation hook with proper error handling and refresh
-  const { mutate: createPayment, isPending } = usePaymentMutation(
+  // Pre-fill form fields when editing
+  useEffect(() => {
+    if (isEditMode) {
+      if (amount) setValue("amount", amount as string);
+      if (paymentName) setValue("paymentName", paymentName as string);
+      if (paidOn) {
+        const date = new Date(paidOn as string);
+        setSelectedDate(date);
+        setValue("paidOn", date);
+      }
+      if (mode) setValue("paymentMode", mode as PaymentMode);
+      if (status) setValue("status", status as PaymentStatus);
+      if (notes) setValue("notes", notes as string);
+    }
+  }, [isEditMode, amount, paymentName, paidOn, mode, status, notes, setValue]);
+
+  // Mutation hooks with proper error handling and refresh
+  const { mutate: createPayment, isPending: isCreating } = usePaymentMutation(
     Number(expenseId),
     Number(categoryId),
     Number(eventId)
   );
+
+  const { mutate: updatePayment, isPending: isUpdating } =
+    useUpdatePaymentMutation(
+      Number(expenseId),
+      Number(categoryId),
+      Number(eventId)
+    );
+
+  const isPending = isCreating || isUpdating;
 
   const paymentModes = [
     { label: "Bank Transfer", value: "bank_transfer" },
@@ -80,19 +121,42 @@ export default function AddPaymentScreen() {
       notes: data.notes || undefined,
     };
 
-    createPayment(paymentPayload, {
-      onSuccess: () => {
-        Alert.alert("Success", "Payment recorded successfully");
-        reset();
-        router.back();
-      },
-      onError: (error: any) => {
-        const errorMessage =
-          error?.response?.data?.message ||
-          "Failed to record payment. Please try again.";
-        Alert.alert("Error", errorMessage);
-      },
-    });
+    if (isEditMode && paymentId) {
+      // Update existing payment
+      updatePayment(
+        {
+          paymentId: Number(paymentId),
+          payload: paymentPayload,
+        },
+        {
+          onSuccess: () => {
+            Alert.alert("Success", "Payment updated successfully");
+            router.back();
+          },
+          onError: (error: any) => {
+            const errorMessage =
+              error?.response?.data?.message ||
+              "Failed to update payment. Please try again.";
+            Alert.alert("Error", errorMessage);
+          },
+        }
+      );
+    } else {
+      // Create new payment
+      createPayment(paymentPayload, {
+        onSuccess: () => {
+          Alert.alert("Success", "Payment recorded successfully");
+          reset();
+          router.back();
+        },
+        onError: (error: any) => {
+          const errorMessage =
+            error?.response?.data?.message ||
+            "Failed to record payment. Please try again.";
+          Alert.alert("Error", errorMessage);
+        },
+      });
+    }
   };
 
   return (
@@ -108,10 +172,12 @@ export default function AddPaymentScreen() {
         <View className="flex-row items-center gap-3 px-5 pt-4 pb-6">
           <View className="flex-1">
             <Text variant="h1" className="text-[#181114] text-2xl">
-              Record Payment
+              {isEditMode ? "Edit Payment" : "Record Payment"}
             </Text>
             <Text variant="caption" className="text-gray-500">
-              Log a new transaction for your expenses.
+              {isEditMode
+                ? "Update payment details."
+                : "Log a new transaction for your expenses."}
             </Text>
           </View>
         </View>
@@ -314,7 +380,11 @@ export default function AddPaymentScreen() {
             >
               {isPending && <ActivityIndicator size="small" color="#fff" />}
               <Text variant="h2" className="text-white text-base">
-                {isPending ? "Saving..." : "Save Payment"}
+                {isPending
+                  ? "Saving..."
+                  : isEditMode
+                    ? "Update Payment"
+                    : "Save Payment"}
               </Text>
             </TouchableOpacity>
 

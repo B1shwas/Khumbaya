@@ -63,3 +63,29 @@ export const addPayment = async (
   );
   return response.data.data;
 };
+
+export const updatePayment = async (
+  expenseId: number,
+  paymentId: number,
+  payload: {
+    name: string;
+    amount: number;
+    paidOn: string;
+    mode: string;
+    status: string;
+    notes?: string;
+  }
+) => {
+  const response = await api.put(
+    `/expense/${expenseId}/payment/${paymentId}`,
+    payload
+  );
+  return response.data.data;
+};
+
+export const deletePayment = async (expenseId: number, paymentId: number) => {
+  const response = await api.delete(
+    `/expense/${expenseId}/payment/${paymentId}`
+  );
+  return response.data.data;
+};

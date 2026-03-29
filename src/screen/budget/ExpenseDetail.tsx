@@ -1,10 +1,14 @@
-import { BudgetStatsGrid } from "@/src/components/budget";
+import { BudgetStatsGrid, PaymentHistoryCard } from "@/src/components/budget";
 import { Text } from "@/src/components/ui/Text";
-import { useExpenseById } from "@/src/features/budget/hooks/use-budget";
+import {
+  useDeletePaymentMutation,
+  useExpenseById,
+} from "@/src/features/budget/hooks/use-budget";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import {
   ActivityIndicator,
+  Alert,
   ScrollView,
   TouchableOpacity,
   View,
@@ -15,11 +19,11 @@ type Expense = {
   categoryId: number;
   name: string;
   businessId: number | null;
-  estimatedCost: number;
+  estimatedCost: number | null;
   contractAmount: number | null;
-  nextDueDate: Date;
+  nextDueDate: Date | null;
   notes: string;
-  spend: number;
+  spend: number | null;
   payments: Payment[];
   createdAt: Date;
   updatedAt: Date;
@@ -42,22 +46,81 @@ export default function ExpenseDetailScreen() {
   const router = useRouter();
   const { eventId, categoryId, expenseId } = useLocalSearchParams();
   const { data, isLoading } = useExpenseById(Number(expenseId));
+  const { mutate: deletePayment, isPending: isDeleting } =
+    useDeletePaymentMutation(
+      Number(expenseId),
+      Number(categoryId),
+      Number(eventId)
+    );
 
   let remainingBalance,
     dueBalance,
     percentPaid = null;
   if (!isLoading) {
-    remainingBalance = data.estimatedCost - data.spend;
-    dueBalance = data.contractAmount ? data.contractAmount - data.spend : null;
+    const estimatedCost = data.estimatedCost ?? 0;
+    const spend = data.spend ?? 0;
+    const contractAmount = data.contractAmount ?? 0;
 
-    if (data.contractAmount) {
-      percentPaid = Math.round((data.spend / data.contractAmount) * 100);
+    remainingBalance = estimatedCost - spend;
+    dueBalance = contractAmount ? contractAmount - spend : null;
+
+    if (contractAmount) {
+      percentPaid = Math.round((spend / contractAmount) * 100);
     }
   }
 
   const handleAddPaymentPress = () => {
     router.push(
       `/(protected)/(client-stack)/events/${eventId}/(organizer)/${categoryId}/${expenseId}/add-payment`
+    );
+  };
+
+  const handleEditPayment = (payment: Payment) => {
+    router.push({
+      pathname:
+        "/(protected)/(client-stack)/events/[eventId]/(organizer)/[categoryId]/[expenseId]/add-payment" as any,
+      params: {
+        eventId: eventId as string,
+        categoryId: categoryId as string,
+        expenseId: expenseId as string,
+        paymentId: payment.id.toString(),
+        paymentName: payment.name,
+        amount: payment.amount.toString(),
+        paidOn: payment.paidOn,
+        mode: payment.mode,
+        status: payment.status,
+        notes: payment.notes || "",
+      },
+    });
+  };
+
+  const handleDeletePayment = (paymentId: number) => {
+    Alert.alert(
+      "Delete Payment",
+      "Are you sure you want to delete this payment? This action cannot be undone.",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: () => {
+            deletePayment(paymentId, {
+              onSuccess: () => {
+                Alert.alert("Success", "Payment deleted successfully");
+              },
+              onError: (error: any) => {
+                const errorMessage =
+                  error?.response?.data?.message ||
+                  "Failed to delete payment. Please try again.";
+                Alert.alert("Error", errorMessage);
+              },
+            });
+          },
+        },
+      ]
     );
   };
 
@@ -156,54 +219,18 @@ export default function ExpenseDetailScreen() {
           {data.payments.length > 0 ? (
             <View className="gap-3">
               {data.payments.map((payment: Payment) => (
-                <TouchableOpacity
+                <PaymentHistoryCard
                   key={payment.id}
-                  activeOpacity={0.7}
-                  className="bg-white rounded-md p-5 shadow-sm border border-gray-100"
-                >
-                  <View className="flex-row items-center justify-between">
-                    <View className="flex-row items-center gap-4 flex-1">
-                      {/* Details */}
-                      <View className="flex-1">
-                        <Text variant="h2" className="text-[#181114] mb-1">
-                          {payment.name}
-                        </Text>
-                        <View className="flex-row items-center gap-2">
-                          <Text
-                            variant="h2"
-                            className="text-on-surface-variant"
-                          >
-                            {payment.paidOn}
-                          </Text>
-                          <Text variant="h2" className="text-gray-300">
-                            •
-                          </Text>
-                          <View className="flex-row items-center gap-1">
-                            <Text variant="h2" className="text-gray-500">
-                              {payment.mode === "bank_transfer"
-                                ? "Bank Transfer"
-                                : "Credit Card"}
-                            </Text>
-                          </View>
-                        </View>
-                      </View>
-                    </View>
-
-                    <View className="items-end">
-                      <Text variant="h2" className="text-[#181114] mb-2">
-                        Rs. {payment?.amount?.toLocaleString()}
-                      </Text>
-                      <View className="bg-emerald-100 px-2 py-0.5 rounded-lg">
-                        <Text
-                          variant="h2"
-                          className="text-emerald-700 uppercase text-xs"
-                        >
-                          {payment.status.toUpperCase()}
-                        </Text>
-                      </View>
-                    </View>
-                  </View>
-                </TouchableOpacity>
+                  id={payment.id}
+                  name={payment.name}
+                  amount={payment.amount}
+                  paidOn={payment.paidOn}
+                  mode={payment.mode}
+                  status={payment.status}
+                  onEdit={() => handleEditPayment(payment)}
+                  onDelete={handleDeletePayment}
+                  isDeleting={isDeleting}
+                />
               ))}
             </View>
           ) : (

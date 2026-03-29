@@ -13,10 +13,10 @@ import {
 interface Expense {
   id: number;
   name: string;
-  estimatedCost: number;
-  contractAmount: number;
+  estimatedCost: number | null;
+  contractAmount: number | null;
   businessName: string;
-  nextDueDate: string;
+  nextDueDate: string | null;
 }
 
 interface CategoryDetailsData {
@@ -83,7 +83,7 @@ export default function CategoryDetailsScreen() {
                 Allocated
               </Text>
               <Text className="text-base text-[#181114]" variant="h2">
-                Rs. {categoryData.allocatedBudget.toLocaleString()}
+                Rs. {(categoryData.allocatedBudget ?? 0).toLocaleString()}
               </Text>
             </View>
           </View>
@@ -108,7 +108,7 @@ export default function CategoryDetailsScreen() {
                 variant="h2"
                 style={{ flexShrink: 1 }}
               >
-                Rs. {categoryData.spend.toLocaleString()}
+                Rs. {(categoryData.spend ?? 0).toLocaleString()}
               </Text>
             </View>
 
@@ -131,7 +131,7 @@ export default function CategoryDetailsScreen() {
                 style={{ flexShrink: 1 }}
                 variant="h2"
               >
-                Rs. {categoryData.pending.toLocaleString()}
+                Rs. {(categoryData.pending ?? 0).toLocaleString()}
               </Text>
             </View>
 
@@ -158,7 +158,7 @@ export default function CategoryDetailsScreen() {
                 style={{ flexShrink: 1 }}
                 variant="h2"
               >
-                Rs. {Math.abs(categoryData.budgetBalance).toLocaleString()}
+                Rs. {Math.abs(categoryData.budgetBalance ?? 0).toLocaleString()}
               </Text>
             </View>
           </View>
@@ -199,7 +199,7 @@ export default function CategoryDetailsScreen() {
                         Est:
                       </Text>
                       <Text className="text-xs text-[#181114]" variant="h2">
-                        Rs. {expense.estimatedCost.toLocaleString()}
+                        Rs. {(expense.estimatedCost ?? 0).toLocaleString()}
                       </Text>
                     </View>
                     <View className="flex-row gap-2">
@@ -207,14 +207,17 @@ export default function CategoryDetailsScreen() {
                         Contract:
                       </Text>
                       <Text className="text-xs text-[#181114] " variant="h2">
-                        Rs. {expense.contractAmount.toLocaleString()}
+                        Rs. {(expense.contractAmount ?? 0).toLocaleString()}
                       </Text>
                     </View>
                     <Text
                       className="text-[10px] text-gray-400 mt-1"
                       variant="h2"
                     >
-                      Due {new Date(expense.nextDueDate).toLocaleDateString()}
+                      Due{" "}
+                      {expense.nextDueDate
+                        ? new Date(expense.nextDueDate).toLocaleDateString()
+                        : "N/A"}
                     </Text>
                   </View>
                 </View>

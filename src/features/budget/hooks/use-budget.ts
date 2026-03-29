@@ -3,9 +3,11 @@ import {
   addBudgetCategory,
   addExpenseToCategory,
   addPayment,
+  deletePayment,
   getBudgetSummary,
   getCategoryDetails,
   getExpenseById,
+  updatePayment,
 } from "../services/budgetService";
 
 export const useBudgetSummary = (eventId: number) => {
@@ -39,7 +41,11 @@ export const useBudgetCategoryMutation = (eventId: number) => {
   });
 };
 
-export const useExpenseMutation = (categoryId: number, eventId: number) => {
+export const useExpenseMutation = (
+  categoryId: number,
+  eventId: number,
+  onSuccess?: () => void
+) => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -57,6 +63,14 @@ export const useExpenseMutation = (categoryId: number, eventId: number) => {
         queryKey: ["category-details", categoryId],
       });
       queryClient.invalidateQueries({ queryKey: ["budget-summary", eventId] });
+
+      // Call the onSuccess callback if provided (e.g., for navigation)
+      if (onSuccess) {
+        // Use setTimeout to ensure navigation happens after React Query updates
+        setTimeout(() => {
+          onSuccess();
+        }, 100);
+      }
     },
   });
 };
@@ -87,6 +101,73 @@ export const usePaymentMutation = (
       status: string;
       notes?: string;
     }) => addPayment(expenseId, payload),
+    onSuccess: () => {
+      // Refresh expense details
+      queryClient.invalidateQueries({
+        queryKey: ["expense-details", expenseId],
+      });
+      // Refresh category details
+      queryClient.invalidateQueries({
+        queryKey: ["category-details", categoryId],
+      });
+      // Refresh budget summary
+      queryClient.invalidateQueries({
+        queryKey: ["budget-summary", eventId],
+      });
+    },
+  });
+};
+
+export const useUpdatePaymentMutation = (
+  expenseId: number,
+  categoryId: number,
+  eventId: number
+) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationKey: ["update-payment", expenseId],
+    mutationFn: ({
+      paymentId,
+      payload,
+    }: {
+      paymentId: number;
+      payload: {
+        name: string;
+        amount: number;
+        paidOn: string;
+        mode: string;
+        status: string;
+        notes?: string;
+      };
+    }) => updatePayment(expenseId, paymentId, payload),
+    onSuccess: () => {
+      // Refresh expense details
+      queryClient.invalidateQueries({
+        queryKey: ["expense-details", expenseId],
+      });
+      // Refresh category details
+      queryClient.invalidateQueries({
+        queryKey: ["category-details", categoryId],
+      });
+      // Refresh budget summary
+      queryClient.invalidateQueries({
+        queryKey: ["budget-summary", eventId],
+      });
+    },
+  });
+};
+
+export const useDeletePaymentMutation = (
+  expenseId: number,
+  categoryId: number,
+  eventId: number
+) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationKey: ["delete-payment", expenseId],
+    mutationFn: (paymentId: number) => deletePayment(expenseId, paymentId),
     onSuccess: () => {
       // Refresh expense details
       queryClient.invalidateQueries({

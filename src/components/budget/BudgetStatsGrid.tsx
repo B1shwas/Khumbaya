@@ -4,7 +4,7 @@ import { Text } from "../ui/Text";
 
 export interface BudgetStat {
   label: string;
-  value: number;
+  value: number | null;
   description?: string;
 }
 
@@ -55,7 +55,7 @@ export function BudgetStatsGrid({ stats, variant }: BudgetStatsGridProps) {
               className={`text-base ${variant === "budget" ? "text-white" : "text-background-dark"}`}
               variant="h2"
             >
-              Rs. {stat.value.toLocaleString()}
+              Rs. {(stat.value ?? 0).toLocaleString()}
             </Text>
           </View>
         ))}
@@ -86,7 +86,7 @@ export function BudgetStatsGrid({ stats, variant }: BudgetStatsGridProps) {
               className={`text-base ${variant === "budget" ? "text-white" : "text-background-dark"}`}
               variant="h2"
             >
-              Rs. {stat.value.toLocaleString()}
+              Rs. {(stat.value ?? 0).toLocaleString()}
             </Text>
           </View>
         ))}
