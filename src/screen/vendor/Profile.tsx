@@ -3,13 +3,20 @@ import { useAuthStore } from "@/src/store/AuthStore";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useState } from "react";
 import {
+  Dimensions,
+  FlatList,
   Image,
   ImageBackground,
+  Modal,
   Pressable,
   ScrollView,
   View,
 } from "react-native";
+
 import { SafeAreaView } from "react-native-safe-area-context";
+
+const SCREEN_WIDTH = Dimensions.get("window").width;
+const TILE_SIZE = SCREEN_WIDTH / 3 - 2;
 
 const HEADER_IMAGE =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuCkAYir1uyaMJpHYxd3cTDm5UEx_lcVJTxtNY2aX-7SjfphxWwmRyzcN_I9jAgIIpqkB_WoA3q32x9izN6Kr_lfZk_2h8e2QgTa8ySCVzEuaPyt5iGLXvBLYh3Zmyzj9cd9ehQAy-8AIflmKb745Ui3-jn0RoRfgnaTlQuf-Ma27foOExZUSdI-ngacDOkkK56JuW_U6PfIPZug2LybUCfyo33uKUW6vcSNo2nbtsj91MFuVaVvo5d1GpzvmPpd9hv1643KT_ec4KM";
@@ -62,6 +69,7 @@ const REVIEWS = [
 export default function Profile() {
   const { clearAuth: logout } = useAuthStore();
   const [logginOut, setLoggingOut] = useState(false);
+  const [showGallery, setShowGallery] = useState(false);
   if (logginOut) {
     return (
       <View className="flex-1 items-center justify-center bg-gray-50">
@@ -76,7 +84,7 @@ export default function Profile() {
         contentContainerClassName="pb-28"
         stickyHeaderIndices={[4]}
         showsVerticalScrollIndicator={false}
-      >
+      >         
         <View className="relative w-full">
           <ImageBackground
             source={{ uri: HEADER_IMAGE }}
@@ -173,7 +181,9 @@ export default function Profile() {
             <Text className="text-lg font-bold text-[#181114]">
               Featured Gallery
             </Text>
-            <Text className="text-primary text-sm font-bold">View All</Text>
+            <Pressable onPress={() => setShowGallery(true)}>
+              <Text className="text-primary text-sm font-bold">View All</Text>
+            </Pressable>
           </View>
           <View className="gap-2">
             <View className="w-full aspect-[21/9] rounded-xl overflow-hidden shadow-sm">
@@ -322,6 +332,38 @@ export default function Profile() {
           </ScrollView>
         </View>
       </ScrollView>
+
+      <Modal
+        visible={showGallery}
+        animationType="slide"
+        onRequestClose={() => setShowGallery(false)}
+      >
+        <SafeAreaView className="flex-1 bg-white">
+          <View className="flex-row items-center justify-between px-4 py-3 border-b border-gray-100">
+            <Text className="text-lg font-bold text-[#181114]">Gallery</Text>
+            <Pressable
+              onPress={() => setShowGallery(false)}
+              className="h-8 w-8 items-center justify-center rounded-full bg-gray-100"
+            >
+              <MaterialIcons name="close" size={20} color="#181114" />
+            </Pressable>
+          </View>
+          <FlatList
+            data={GALLERY}
+            numColumns={3}
+            keyExtractor={(_, index) => String(index)}
+            contentContainerStyle={{ gap: 2 }}
+            columnWrapperStyle={{ gap: 2 }}
+            renderItem={({ item }) => (
+              <Image
+                source={{ uri: item }}
+                style={{ width: TILE_SIZE, height: TILE_SIZE }}
+                resizeMode="cover"
+              />
+            )}
+          />
+        </SafeAreaView>
+      </Modal>
     </SafeAreaView>
   );
 }
