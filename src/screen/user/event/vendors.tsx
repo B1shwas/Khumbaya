@@ -1,178 +1,125 @@
+import {
+  useContactVendor,
+  useGetVendorList,
+  useHireVendor,
+} from "@/src/features/vendor/hooks/use-vendor";
+import type { Vendor } from "@/src/features/vendor/types";
 import { Ionicons } from "@expo/vector-icons";
-import { router, type RelativePathString } from "expo-router";
+import {
+  router,
+  useLocalSearchParams,
+  type RelativePathString,
+} from "expo-router";
 import { useState } from "react";
 import {
+  ActivityIndicator,
+  Alert,
   Image,
+  RefreshControl,
   ScrollView,
-  StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-interface Vendor {
-  id: string;
-  name: string;
-  category: string;
-  status: "booked" | "pending" | "available";
-  contact?: string;
-  price?: string;
-  rating?: number;
-  imageUrl?: string;
-}
-
-const vendorsData: Vendor[] = [
-  {
-    id: "1",
-    name: "Floral Dreams Studio",
-    category: "Florist",
-    status: "booked",
-    contact: "+91 98765 43210",
-    price: "₹50,000",
-    rating: 4.9,
-    imageUrl:
-      "https://images.unsplash.com/photo-1459411552884-841db9b3cc2a?w=800&q=80",
-  },
-  {
-    id: "2",
-    name: "Crown Catering",
-    category: "Catering",
-    status: "booked",
-    contact: "+91 98765 43211",
-    price: "₹1,500/plate",
-    rating: 4.7,
-    imageUrl:
-      "https://images.unsplash.com/photo-1555244162-803834f70033?w=800&q=80",
-  },
-  {
-    id: "3",
-    name: "Elite Photography",
-    category: "Photography",
-    status: "booked",
-    contact: "+91 98765 43212",
-    price: "₹75,000",
-    rating: 4.8,
-    imageUrl:
-      "https://images.unsplash.com/photo-1519741497674-611481863552?w=800&q=80",
-  },
-  {
-    id: "4",
-    name: "DJ Wave Sounds",
-    category: "DJ/Music",
-    status: "pending",
-    contact: "+91 98765 43213",
-    price: "₹25,000",
-    rating: 4.6,
-    imageUrl:
-      "https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?w=800&q=80",
-  },
-  {
-    id: "5",
-    name: "Royal Decorations",
-    category: "Decoration",
-    status: "pending",
-    contact: "+91 98765 43214",
-    price: "₹1,00,000",
-    rating: 4.5,
-    imageUrl:
-      "https://images.unsplash.com/photo-1519225421980-715cb0202128?w=800&q=80",
-  },
-  {
-    id: "6",
-    name: "Sweet Tooth Cakes",
-    category: "Cake",
-    status: "available",
-    contact: "+91 98765 43215",
-    price: "₹5,000",
-    rating: 4.9,
-    imageUrl:
-      "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=800&q=80",
-  },
-];
-
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case "booked":
-      return "bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400";
-    case "pending":
-      return "bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400";
-    case "available":
-      return "bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400";
-    default:
-      return "bg-gray-100 text-gray-600";
-  }
-};
-
-const VendorCard = ({ vendor }: { vendor: Vendor }) => (
+const VendorCard = ({
+  vendor,
+  onHire,
+  onContact,
+}: {
+  vendor: Vendor;
+  onHire: (vendor: Vendor) => void;
+  onContact: (vendor: Vendor) => void;
+}) => (
   <TouchableOpacity
-    style={styles.vendorCard}
+    className="bg-white rounded-2xl overflow-hidden shadow-lg flex-row items-center"
     onPress={() =>
       router.push(`/events/vendors/${vendor.id}` as RelativePathString)
     }
     activeOpacity={0.8}
   >
-    <View style={styles.vendorImageContainer}>
+    <View className="w-[100px] h-[100px] relative">
       {vendor.imageUrl ? (
         <Image
           source={{ uri: vendor.imageUrl }}
-          style={styles.vendorImage}
+          className="w-full h-full"
           resizeMode="cover"
         />
       ) : (
-        <View style={styles.vendorImagePlaceholder}>
+        <View className="w-full h-full bg-gray-100 items-center justify-center">
           <Ionicons name="storefront" size={32} color="#9CA3AF" />
         </View>
       )}
       <View
-        style={[
-          styles.statusBadge,
-          vendor.status === "booked" && styles.statusBooked,
-          vendor.status === "pending" && styles.statusPending,
-          vendor.status === "available" && styles.statusAvailable,
-        ]}
+        className={`absolute top-2 left-2 px-2 py-1 rounded-xl ${
+          vendor.status === "booked"
+            ? "bg-green-100"
+            : vendor.status === "pending"
+              ? "bg-orange-100"
+              : "bg-blue-100"
+        }`}
       >
         <Text
-          style={[
-            styles.statusText,
-            vendor.status === "booked" && styles.statusTextBooked,
-            vendor.status === "pending" && styles.statusTextPending,
-            vendor.status === "available" && styles.statusTextAvailable,
-          ]}
+          className={`text-[10px] font-semibold capitalize ${
+            vendor.status === "booked"
+              ? "text-green-600"
+              : vendor.status === "pending"
+                ? "text-orange-600"
+                : "text-blue-600"
+          }`}
         >
-          {vendor.status.charAt(0).toUpperCase() + vendor.status.slice(1)}
+          {vendor.status}
         </Text>
       </View>
     </View>
 
-    <View style={styles.vendorInfo}>
-      <Text style={styles.vendorName}>{vendor.name}</Text>
-      <Text style={styles.vendorCategory}>{vendor.category}</Text>
+    <View className="flex-1 p-3">
+      <Text className="text-base font-semibold text-[#181114]">
+        {vendor.name}
+      </Text>
+      <Text className="text-xs text-gray-500 mt-0.5">{vendor.category}</Text>
 
-      <View style={styles.vendorMeta}>
+      <View className="flex-row items-center gap-3 mt-1.5">
         {vendor.rating && (
-          <View style={styles.ratingContainer}>
+          <View className="flex-row items-center gap-1">
             <Ionicons name="star" size={14} color="#F59E0B" fill="#F59E0B" />
-            <Text style={styles.ratingText}>{vendor.rating}</Text>
+            <Text className="text-xs font-medium text-amber-500">
+              {vendor.rating}
+            </Text>
           </View>
         )}
-        {vendor.price && <Text style={styles.priceText}>{vendor.price}</Text>}
+        {vendor.price && (
+          <Text className="text-xs font-semibold text-emerald-500">
+            {vendor.price}
+          </Text>
+        )}
       </View>
     </View>
 
-    <View style={styles.vendorAction}>
+    <View className="pr-3">
       {vendor.status === "available" ? (
-        <TouchableOpacity
-          style={styles.bookButton}
-          onPress={() =>
-            router.push(`/events/vendors/${vendor.id}` as RelativePathString)
-          }
-        >
-          <Text style={styles.bookButtonText}>Book Now</Text>
-        </TouchableOpacity>
+        <View className="flex-col gap-2">
+          <TouchableOpacity
+            className="bg-[#ee2b8c] px-3 py-1.5 rounded-lg flex-row items-center gap-1"
+            onPress={() => onHire(vendor)}
+          >
+            <Ionicons name="briefcase-outline" size={16} color="white" />
+            <Text className="text-white text-xs font-semibold">Hire</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            className="bg-white px-3 py-1.5 rounded-lg border border-[#ee2b8c] flex-row items-center gap-1"
+            onPress={() => onContact(vendor)}
+          >
+            <Ionicons name="chatbubble-outline" size={16} color="#ee2b8c" />
+            <Text className="text-[#ee2b8c] text-xs font-semibold">
+              Contact
+            </Text>
+          </TouchableOpacity>
+        </View>
       ) : (
         <TouchableOpacity
-          style={styles.viewButton}
+          className="p-2"
           onPress={() =>
             router.push(`/events/vendors/${vendor.id}` as RelativePathString)
           }
@@ -185,57 +132,171 @@ const VendorCard = ({ vendor }: { vendor: Vendor }) => (
 );
 
 export default function EventVendorsPage() {
+  const { eventId } = useLocalSearchParams<{ eventId: string }>();
   const [activeTab, setActiveTab] = useState<
     "all" | "booked" | "pending" | "available"
   >("all");
+  const [refreshing, setRefreshing] = useState(false);
 
-  const filteredVendors = vendorsData.filter((vendor) => {
+  const { data: vendors, isLoading, isError, refetch } = useGetVendorList();
+  const hireVendorMutation = useHireVendor();
+  const contactVendorMutation = useContactVendor();
+
+  const vendorList = Array.isArray(vendors) ? vendors : [];
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await refetch();
+    setRefreshing(false);
+  };
+
+  const filteredVendors = vendorList.filter((vendor) => {
     if (activeTab === "all") return true;
     return vendor.status === activeTab;
   });
 
-  const bookedCount = vendorsData.filter((v) => v.status === "booked").length;
-  const pendingCount = vendorsData.filter((v) => v.status === "pending").length;
-  const availableCount = vendorsData.filter(
+  const bookedCount = vendorList.filter((v) => v.status === "booked").length;
+  const pendingCount = vendorList.filter((v) => v.status === "pending").length;
+  const availableCount = vendorList.filter(
     (v) => v.status === "available"
   ).length;
 
+  const handleHire = (vendor: Vendor) => {
+    Alert.alert(
+      "Hire Vendor",
+      `Are you sure you want to hire ${vendor.name}?`,
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Hire",
+          onPress: async () => {
+            try {
+              await hireVendorMutation.mutateAsync({
+                vendorId: vendor.id,
+                eventId: eventId || "",
+              });
+              Alert.alert("Success", `${vendor.name} has been hired!`);
+              refetch();
+            } catch (error) {
+              Alert.alert("Error", "Failed to hire vendor. Please try again.");
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const handleContact = (vendor: Vendor) => {
+    Alert.alert(
+      "Contact Vendor",
+      `How would you like to contact ${vendor.name}?`,
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Message",
+          onPress: async () => {
+            try {
+              await contactVendorMutation.mutateAsync({
+                vendorId: vendor.id,
+                message: "Hello, I'm interested in your services.",
+                contactType: "message",
+              });
+              Alert.alert("Success", "Message sent successfully!");
+            } catch (error) {
+              Alert.alert("Error", "Failed to send message. Please try again.");
+            }
+          },
+        },
+        {
+          text: "Call",
+          onPress: () => {
+            if (vendor.contact) {
+              Alert.alert("Call Vendor", `Call ${vendor.contact}?`);
+            } else {
+              Alert.alert("No Contact", "No contact number available.");
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  if (isLoading) {
+    return (
+      <SafeAreaView className="flex-1 bg-[#f8f6f7]" edges={["bottom"]}>
+        <View className="flex-1 items-center justify-center">
+          <ActivityIndicator size="large" color="#ee2b8c" />
+          <Text className="mt-3 text-sm text-gray-500">Loading vendors...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  if (isError) {
+    return (
+      <SafeAreaView className="flex-1 bg-[#f8f6f7]" edges={["bottom"]}>
+        <View className="flex-1 items-center justify-center px-8">
+          <Ionicons name="alert-circle-outline" size={64} color="#EF4444" />
+          <Text className="text-lg font-semibold text-gray-500 mt-4">
+            Failed to load vendors
+          </Text>
+          <Text className="text-sm text-gray-400 mt-1 text-center">
+            Pull down to try again
+          </Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
   return (
-    <SafeAreaView style={styles.container} edges={["bottom"]}>
+    <SafeAreaView className="flex-1 bg-[#f8f6f7]" edges={["bottom"]}>
       {/* Stats Row */}
-      <View style={styles.statsRow}>
-        <View style={styles.statCard}>
-          <Text style={styles.statNumber}>{bookedCount}</Text>
-          <Text style={styles.statLabel}>Booked</Text>
+      <View className="flex-row px-4 py-3 gap-3">
+        <View className="flex-1 bg-white rounded-xl p-3 items-center shadow-sm">
+          <Text className="text-2xl font-bold text-[#ee2b8c]">
+            {bookedCount}
+          </Text>
+          <Text className="text-xs text-gray-500 mt-0.5">Booked</Text>
         </View>
-        <View style={styles.statCard}>
-          <Text style={styles.statNumber}>{pendingCount}</Text>
-          <Text style={styles.statLabel}>Pending</Text>
+        <View className="flex-1 bg-white rounded-xl p-3 items-center shadow-sm">
+          <Text className="text-2xl font-bold text-[#ee2b8c]">
+            {pendingCount}
+          </Text>
+          <Text className="text-xs text-gray-500 mt-0.5">Pending</Text>
         </View>
-        <View style={styles.statCard}>
-          <Text style={styles.statNumber}>{availableCount}</Text>
-          <Text style={styles.statLabel}>Available</Text>
+        <View className="flex-1 bg-white rounded-xl p-3 items-center shadow-sm">
+          <Text className="text-2xl font-bold text-[#ee2b8c]">
+            {availableCount}
+          </Text>
+          <Text className="text-xs text-gray-500 mt-0.5">Available</Text>
         </View>
       </View>
 
       {/* Tabs */}
-      <View style={styles.tabsContainer}>
+      <View className="bg-white border-b border-gray-200">
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.tabsContent}
+          className="px-4 py-2 gap-2"
         >
           {(["all", "booked", "pending", "available"] as const).map((tab) => (
             <TouchableOpacity
               key={tab}
-              style={[styles.tab, activeTab === tab && styles.tabActive]}
+              className={`px-4 py-2 rounded-full ${
+                activeTab === tab ? "bg-[#ee2b8c]" : "bg-gray-100"
+              }`}
               onPress={() => setActiveTab(tab)}
             >
               <Text
-                style={[
-                  styles.tabText,
-                  activeTab === tab && styles.tabTextActive,
-                ]}
+                className={`text-sm font-medium ${
+                  activeTab === tab ? "text-white" : "text-gray-500"
+                }`}
               >
                 {tab.charAt(0).toUpperCase() + tab.slice(1)}
               </Text>
@@ -246,29 +307,45 @@ export default function EventVendorsPage() {
 
       {/* Vendor List */}
       <ScrollView
-        style={styles.content}
-        contentContainerStyle={styles.vendorList}
+        className="flex-1"
+        contentContainerStyle={{ padding: 16, gap: 12 }}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor="#ee2b8c"
+          />
+        }
       >
         {filteredVendors.map((vendor) => (
-          <VendorCard key={vendor.id} vendor={vendor} />
+          <VendorCard
+            key={vendor.id}
+            vendor={vendor}
+            onHire={handleHire}
+            onContact={handleContact}
+          />
         ))}
 
         {filteredVendors.length === 0 && (
-          <View style={styles.emptyState}>
+          <View className="items-center justify-center py-16">
             <Ionicons name="storefront-outline" size={64} color="#D1D5DB" />
-            <Text style={styles.emptyTitle}>No vendors found</Text>
-            <Text style={styles.emptySubtitle}>Try adjusting your filters</Text>
+            <Text className="text-lg font-semibold text-gray-500 mt-4">
+              No vendors found
+            </Text>
+            <Text className="text-sm text-gray-400 mt-1">
+              Try adjusting your filters
+            </Text>
           </View>
         )}
 
         {/* Bottom spacer for FAB */}
-        <View style={styles.bottomSpacer} />
+        <View className="h-20" />
       </ScrollView>
 
       {/* Floating Action Button: Add Vendor */}
       <TouchableOpacity
-        style={styles.fab}
+        className="absolute bottom-6 right-6 w-14 h-14 rounded-full bg-[#ee2b8c] items-center justify-center shadow-lg"
         onPress={() => router.push("/(shared)/explore/explore")}
       >
         <Ionicons name="add" size={28} color="white" />
@@ -276,247 +353,3 @@ export default function EventVendorsPage() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#f8f6f7",
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: "white",
-    borderBottomWidth: 1,
-    borderBottomColor: "#E5E7EB",
-  },
-  backButton: {
-    padding: 8,
-    marginLeft: -8,
-  },
-  headerCenter: {
-    flex: 1,
-    alignItems: "center",
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#181114",
-  },
-  headerSubtitle: {
-    fontSize: 12,
-    color: "#6B7280",
-  },
-  headerButton: {
-    padding: 8,
-  },
-  statsRow: {
-    flexDirection: "row",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    gap: 12,
-  },
-  statCard: {
-    flex: 1,
-    backgroundColor: "white",
-    borderRadius: 12,
-    padding: 12,
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
-  },
-  statNumber: {
-    fontSize: 24,
-    fontWeight: "700",
-    color: "#ee2b8c",
-  },
-  statLabel: {
-    fontSize: 12,
-    color: "#6B7280",
-    marginTop: 2,
-  },
-  tabsContainer: {
-    backgroundColor: "white",
-    borderBottomWidth: 1,
-    borderBottomColor: "#E5E7EB",
-  },
-  tabsContent: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    gap: 8,
-  },
-  tab: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    backgroundColor: "#F3F4F6",
-  },
-  tabActive: {
-    backgroundColor: "#ee2b8c",
-  },
-  tabText: {
-    fontSize: 14,
-    fontWeight: "500",
-    color: "#6B7280",
-  },
-  tabTextActive: {
-    color: "white",
-  },
-  content: {
-    flex: 1,
-  },
-  vendorList: {
-    padding: 16,
-    gap: 12,
-  },
-  vendorCard: {
-    backgroundColor: "white",
-    borderRadius: 16,
-    overflow: "hidden",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  vendorImageContainer: {
-    width: 100,
-    height: 100,
-    position: "relative",
-  },
-  vendorImage: {
-    width: "100%",
-    height: "100%",
-  },
-  vendorImagePlaceholder: {
-    width: "100%",
-    height: "100%",
-    backgroundColor: "#F3F4F6",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  statusBadge: {
-    position: "absolute",
-    top: 8,
-    left: 8,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  statusBooked: {
-    backgroundColor: "#DCFCE7",
-  },
-  statusPending: {
-    backgroundColor: "#FFEDD5",
-  },
-  statusAvailable: {
-    backgroundColor: "#DBEAFE",
-  },
-  statusText: {
-    fontSize: 10,
-    fontWeight: "600",
-    textTransform: "capitalize",
-  },
-  statusTextBooked: {
-    color: "#16A34A",
-  },
-  statusTextPending: {
-    color: "#EA580C",
-  },
-  statusTextAvailable: {
-    color: "#2563EB",
-  },
-  vendorInfo: {
-    flex: 1,
-    padding: 12,
-  },
-  vendorName: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#181114",
-  },
-  vendorCategory: {
-    fontSize: 12,
-    color: "#6B7280",
-    marginTop: 2,
-  },
-  vendorMeta: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    marginTop: 6,
-  },
-  ratingContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-  },
-  ratingText: {
-    fontSize: 12,
-    fontWeight: "500",
-    color: "#F59E0B",
-  },
-  priceText: {
-    fontSize: 12,
-    fontWeight: "600",
-    color: "#10B981",
-  },
-  vendorAction: {
-    paddingRight: 12,
-  },
-  bookButton: {
-    backgroundColor: "#ee2b8c",
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 8,
-  },
-  bookButtonText: {
-    color: "white",
-    fontSize: 12,
-    fontWeight: "600",
-  },
-  viewButton: {
-    padding: 8,
-  },
-  emptyState: {
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 60,
-  },
-  emptyTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#6B7280",
-    marginTop: 16,
-  },
-  emptySubtitle: {
-    fontSize: 14,
-    color: "#9CA3AF",
-    marginTop: 4,
-  },
-  bottomSpacer: {
-    height: 80,
-  },
-  fab: {
-    position: "absolute",
-    bottom: 24,
-    right: 24,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: "#ee2b8c",
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: "#ee2b8c",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-});
