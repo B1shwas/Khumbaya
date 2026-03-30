@@ -160,7 +160,7 @@ export default function GuestEventDetails() {
         rawDepartureInfo: me.event_guest?.departure_info ?? null,
       });
     }
-    router.push(`/(protected)/(client-stack)/events/${eventId}/(guest)/rsvp`);
+    router.push(`/(protected)/(client-stack)/events/${eventId}/(guest)/guest-details`);
   };
 
   return (

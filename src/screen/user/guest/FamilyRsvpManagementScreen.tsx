@@ -43,8 +43,30 @@ export default function FamilyRsvpManagementScreen() {
       rawIsArrivalPickupRequired: member.rawIsArrivalPickupRequired,
       rawIsDeparturePickupRequired: member.rawIsDeparturePickupRequired,
       rawNotes: member.notes ?? null,
+      rawAssignedRoom: member.rawAssignedRoom,
+      rawArrivalInfo: member.rawArrivalInfo,
+      rawDepartureInfo: member.rawDepartureInfo,
     });
     router.push(`/(protected)/(client-stack)/events/${eventId}/(guest)/rsvp`);
+  };
+
+  const handleMemberDetails = (member: MemberRsvpCardProp) => {
+    setDraft({
+      userId: member.id,
+      familyId: member.familyId,
+      memberName: member.name,
+      rawStatus: member.rawStatus,
+      rawArrival: member.rawArrival,
+      rawDeparture: member.rawDeparture,
+      rawAccommodation: member.rawAccommodation,
+      rawIsArrivalPickupRequired: member.rawIsArrivalPickupRequired,
+      rawIsDeparturePickupRequired: member.rawIsDeparturePickupRequired,
+      rawNotes: member.notes ?? null,
+      rawAssignedRoom: member.rawAssignedRoom,
+      rawArrivalInfo: member.rawArrivalInfo,
+      rawDepartureInfo: member.rawDepartureInfo,
+    });
+    router.push(`/(protected)/(client-stack)/events/${eventId}/(guest)/guest-details`);
   };
 
   return (
@@ -64,6 +86,7 @@ export default function FamilyRsvpManagementScreen() {
             key={member.id}
             member={member}
             onPressRsvp={() => handleMemberRsvp(member)}
+            onPressDetails={() => handleMemberDetails(member)}
           />
         ))}
       </ScrollView>

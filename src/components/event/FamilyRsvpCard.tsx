@@ -79,21 +79,13 @@ const FamilyRsvpCard = React.memo(
               activeOpacity={0.8}
             >
               <Text className="text-white font-extrabold text-sm uppercase tracking-wide">
-                Edit RSVP
+                RSVP for Family
               </Text>
-              <Ionicons name="create" size={16} color="#fff" />
+              <Ionicons name="people" size={16} color="#fff" />
+
             </TouchableOpacity>
 
-            <TouchableOpacity
-              className="flex-1 bg-blue-900/30 rounded-md flex-row items-center justify-center py-3.5 gap-2 border border-white/10 active:bg-blue-900/50 active:scale-[0.97] transition-all"
-              onPress={onView}
-              activeOpacity={0.8}
-            >
-              <Text className="text-white font-extrabold text-sm uppercase tracking-wide">
-                View Data
-              </Text>
-              <Ionicons name="eye" size={16} color="#fff" />
-            </TouchableOpacity>
+
           </View>
         </View>
       </View>
