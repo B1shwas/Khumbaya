@@ -1,8 +1,12 @@
 import { DatePicker } from "@/components/nativewindui/DatePicker";
 import { Text } from "@/src/components/ui/Text";
-import { usePaymentMutation } from "@/src/features/budget/hooks/use-budget";
+import {
+  usePaymentById,
+  usePaymentMutation,
+  useUpdatePaymentMutation,
+} from "@/src/features/budget/hooks/use-budget";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
   ActivityIndicator,
@@ -28,9 +32,20 @@ type PaymentFormData = {
   notes: string;
 };
 
-export default function AddPaymentScreen() {
+interface AddPaymentScreenProps {
+  editMode?: boolean;
+}
+
+export default function AddPaymentScreen({
+  editMode = false,
+}: AddPaymentScreenProps) {
   const router = useRouter();
-  const { eventId, categoryId, expenseId } = useLocalSearchParams();
+  const { eventId, categoryId, expenseId, paymentId } = useLocalSearchParams();
+
+  const { data: paymentData, isLoading: isPaymentLoading } = usePaymentById(
+    Number(paymentId || 0),
+    { enabled: editMode && !!paymentId }
+  );
 
   const { control, handleSubmit, setValue, reset } = useForm<PaymentFormData>({
     defaultValues: {
@@ -45,12 +60,33 @@ export default function AddPaymentScreen() {
 
   const [selectedDate, setSelectedDate] = useState(new Date());
 
-  // Mutation hook with proper error handling and refresh
   const { mutate: createPayment, isPending } = usePaymentMutation(
     Number(expenseId),
     Number(categoryId),
     Number(eventId)
   );
+
+  const updateMutation = useUpdatePaymentMutation(
+    Number(paymentId || 0),
+    Number(expenseId),
+    Number(categoryId),
+    Number(eventId)
+  );
+
+  useEffect(() => {
+    if (editMode && paymentData) {
+      setValue("amount", paymentData.amount?.toString() || "");
+      setValue("paymentName", paymentData.name || "");
+      setValue("paymentMode", paymentData.mode || "bank_transfer");
+      setValue("status", paymentData.status || "cleared");
+      setValue("notes", paymentData.notes || "");
+      if (paymentData.paidOn) {
+        const date = new Date(paymentData.paidOn);
+        setSelectedDate(date);
+        setValue("paidOn", date);
+      }
+    }
+  }, [editMode, paymentData, setValue]);
 
   const paymentModes = [
     { label: "Bank Transfer", value: "bank_transfer" },
@@ -65,7 +101,6 @@ export default function AddPaymentScreen() {
   };
 
   const handleSavePayment = (data: PaymentFormData) => {
-    // Validate required fields
     if (!data.amount || !data.paymentName || !data.paymentMode) {
       Alert.alert("Validation Error", "Please fill in all required fields");
       return;
@@ -80,20 +115,46 @@ export default function AddPaymentScreen() {
       notes: data.notes || undefined,
     };
 
-    createPayment(paymentPayload, {
-      onSuccess: () => {
-        Alert.alert("Success", "Payment recorded successfully");
-        reset();
-        router.back();
-      },
-      onError: (error: any) => {
-        const errorMessage =
-          error?.response?.data?.message ||
-          "Failed to record payment. Please try again.";
-        Alert.alert("Error", errorMessage);
-      },
-    });
+    const mutation = editMode ? updateMutation : { mutate: createPayment };
+
+    if (editMode) {
+      updateMutation.mutate(paymentPayload, {
+        onSuccess: () => {
+          Alert.alert("Success", "Payment updated successfully");
+          reset();
+          router.back();
+        },
+        onError: (error: any) => {
+          const errorMessage =
+            error?.response?.data?.message ||
+            "Failed to update payment. Please try again.";
+          Alert.alert("Error", errorMessage);
+        },
+      });
+    } else {
+      createPayment(paymentPayload, {
+        onSuccess: () => {
+          Alert.alert("Success", "Payment recorded successfully");
+          reset();
+          router.back();
+        },
+        onError: (error: any) => {
+          const errorMessage =
+            error?.response?.data?.message ||
+            "Failed to record payment. Please try again.";
+          Alert.alert("Error", errorMessage);
+        },
+      });
+    }
   };
+
+  if (editMode && isPaymentLoading) {
+    return (
+      <View className="flex-1 bg-[#f8f6f7] items-center justify-center">
+        <ActivityIndicator size="large" color="#ee2b8c" />
+      </View>
+    );
+  }
 
   return (
     <KeyboardAvoidingView
@@ -108,10 +169,12 @@ export default function AddPaymentScreen() {
         <View className="flex-row items-center gap-3 px-5 pt-4 pb-6">
           <View className="flex-1">
             <Text variant="h1" className="text-[#181114] text-2xl">
-              Record Payment
+              {editMode ? "Update Payment" : "Record Payment"}
             </Text>
             <Text variant="caption" className="text-gray-500">
-              Log a new transaction for your expenses.
+              {editMode
+                ? "Make changes to your payment details."
+                : "Log a new transaction for your expenses."}
             </Text>
           </View>
         </View>

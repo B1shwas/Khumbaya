@@ -4,10 +4,15 @@ import {
   addExpenseToCategory,
   addPayment,
   deleteBudgetCategory,
+  deleteExpense,
+  deletePayment,
   getBudgetSummary,
   getCategoryDetails,
   getExpenseById,
+  getPaymentById,
   updateBudgetCategory,
+  updateExpense,
+  updatePayment,
 } from "../services/budgetService";
 
 export const useBudgetSummary = (
@@ -108,12 +113,29 @@ export const useExpenseMutation = (categoryId: number, eventId: number) => {
   });
 };
 
-export const useExpenseById = (expenseId: number) => {
+export const useExpenseById = (
+  expenseId: number,
+  options?: { enabled?: boolean }
+) => {
   return useQuery({
     queryKey: ["expense-details", expenseId],
     queryFn: () => getExpenseById(expenseId),
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
+    enabled: options?.enabled !== false,
+  });
+};
+
+export const usePaymentById = (
+  paymentId: number,
+  options?: { enabled?: boolean }
+) => {
+  return useQuery({
+    queryKey: ["payment-details", paymentId],
+    queryFn: () => getPaymentById(paymentId),
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+    enabled: options?.enabled !== false,
   });
 };
 
@@ -144,6 +166,118 @@ export const usePaymentMutation = (
         queryKey: ["category-details", categoryId],
       });
       // Refresh budget summary
+      queryClient.invalidateQueries({
+        queryKey: ["budget-summary", eventId],
+      });
+    },
+  });
+};
+
+export const useUpdateExpenseMutation = (
+  expenseId: number,
+  categoryId: number,
+  eventId: number
+) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationKey: ["update-expense", expenseId],
+    mutationFn: (payload: {
+      name: string;
+      estimatedCost: number;
+      contractAmount?: number;
+      businessId?: string;
+      nextDueDate?: string;
+      notes?: string;
+    }) => updateExpense(expenseId, payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["expense-details", expenseId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["category-details", categoryId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["budget-summary", eventId],
+      });
+    },
+  });
+};
+
+export const useDeleteExpenseMutation = (
+  expenseId: number,
+  categoryId: number,
+  eventId: number
+) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationKey: ["delete-expense", expenseId],
+    mutationFn: () => deleteExpense(expenseId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["expense-details", expenseId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["category-details", categoryId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["budget-summary", eventId],
+      });
+    },
+  });
+};
+
+export const useUpdatePaymentMutation = (
+  paymentId: number,
+  expenseId: number,
+  categoryId: number,
+  eventId: number
+) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationKey: ["update-payment", paymentId],
+    mutationFn: (payload: {
+      name: string;
+      amount: number;
+      paidOn: string;
+      mode: string;
+      status: string;
+      notes?: string;
+    }) => updatePayment(paymentId, payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["expense-details", expenseId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["category-details", categoryId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["budget-summary", eventId],
+      });
+    },
+  });
+};
+
+export const useDeletePaymentMutation = (
+  paymentId: number,
+  expenseId: number,
+  categoryId: number,
+  eventId: number
+) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationKey: ["delete-payment", paymentId],
+    mutationFn: () => deletePayment(paymentId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["expense-details", expenseId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["category-details", categoryId],
+      });
       queryClient.invalidateQueries({
         queryKey: ["budget-summary", eventId],
       });

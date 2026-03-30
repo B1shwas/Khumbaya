@@ -46,6 +46,11 @@ export const getExpenseById = async (expenseId: number) => {
   return response.data.data;
 };
 
+export const getPaymentById = async (paymentId: number) => {
+  const response = await api.get(`/payment/${paymentId}`);
+  return response.data.data;
+};
+
 export const updateBudgetCategory = async (
   categoryId: number,
   payload: z.infer<typeof budgetCategoryFormSchema>
@@ -74,5 +79,45 @@ export const addPayment = async (
     `/expense/${expenseId}/payment/create`,
     payload
   );
+  return response.data.data;
+};
+
+export const updateExpense = async (
+  expenseId: number,
+  payload: {
+    name: string;
+    estimatedCost: number;
+    contractAmount?: number;
+    businessId?: string;
+    nextDueDate?: string;
+    notes?: string;
+  }
+) => {
+  const response = await api.patch(`/expense/${expenseId}`, payload);
+  return response.data.data;
+};
+
+export const deleteExpense = async (expenseId: number) => {
+  const response = await api.delete(`/expense/${expenseId}`);
+  return response.data.data;
+};
+
+export const updatePayment = async (
+  paymentId: number,
+  payload: {
+    name: string;
+    amount: number;
+    paidOn: string;
+    mode: string;
+    status: string;
+    notes?: string;
+  }
+) => {
+  const response = await api.patch(`/payment/${paymentId}`, payload);
+  return response.data.data;
+};
+
+export const deletePayment = async (paymentId: number) => {
+  const response = await api.delete(`/payment/${paymentId}`);
   return response.data.data;
 };

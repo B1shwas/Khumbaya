@@ -1,5 +1,9 @@
 import { Text } from "@/src/components/ui/Text";
-import { useExpenseMutation } from "@/src/features/budget/hooks/use-budget";
+import {
+  useExpenseById,
+  useExpenseMutation,
+  useUpdateExpenseMutation,
+} from "@/src/features/budget/hooks/use-budget";
 import { expenseFormSchema } from "@/src/features/budget/schema";
 import { MaterialIcons } from "@expo/vector-icons";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -8,6 +12,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
+  ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
   Platform,
@@ -20,12 +25,30 @@ import { z } from "zod";
 
 type ExpenseFormData = z.infer<typeof expenseFormSchema>;
 
-export default function AddExpenseScreen() {
+interface AddExpenseScreenProps {
+  editMode?: boolean;
+}
+
+export default function AddExpenseScreen({
+  editMode = false,
+}: AddExpenseScreenProps) {
   const router = useRouter();
-  const { categoryId, eventId } = useLocalSearchParams();
+  const { categoryId, eventId, expenseId } = useLocalSearchParams();
   const [showDatePicker, setShowDatePicker] = useState(false);
 
+  // Fetch expense data in edit mode
+  const { data: expenseData, isLoading: isExpenseLoading } = useExpenseById(
+    Number(expenseId || 0),
+    { enabled: editMode && !!expenseId }
+  );
+
   const expenseMutation = useExpenseMutation(
+    Number(categoryId),
+    Number(eventId)
+  );
+
+  const updateMutation = useUpdateExpenseMutation(
+    Number(expenseId || 0),
     Number(categoryId),
     Number(eventId)
   );
@@ -50,6 +73,17 @@ export default function AddExpenseScreen() {
 
   const nextDueDate = watch("nextDueDate");
 
+  useEffect(() => {
+    if (editMode && expenseData) {
+      setValue("name", expenseData.name);
+      setValue("estimatedCost", expenseData.estimatedCost?.toString() || "");
+      setValue("contractAmount", expenseData.contractAmount?.toString() || "");
+      setValue("businessId", expenseData.businessId || "");
+      setValue("nextDueDate", expenseData.nextDueDate || "");
+      setValue("notes", expenseData.notes || "");
+    }
+  }, [editMode, expenseData, setValue]);
+
   const handleDateChange = (event: any, date: Date | undefined) => {
     setShowDatePicker(false);
     if (date) {
@@ -71,9 +105,11 @@ export default function AddExpenseScreen() {
         notes: data.notes || undefined,
       };
 
-      await expenseMutation.mutateAsync(payload);
+      const mutation = editMode ? updateMutation : expenseMutation;
+      await mutation.mutateAsync(payload);
 
-      Alert.alert("Success", "Expense created successfully!", [
+      const action = editMode ? "updated" : "created";
+      Alert.alert("Success", `Expense ${action} successfully!`, [
         {
           text: "OK",
           onPress: () => router.back(),
@@ -84,12 +120,18 @@ export default function AddExpenseScreen() {
         "Error",
         error instanceof Error
           ? error.message
-          : "Failed to create expense. Please try again."
+          : "Failed to save expense. Please try again."
       );
     }
   };
 
-  useEffect(() => {}, [categoryId]);
+  if (editMode && isExpenseLoading) {
+    return (
+      <View className="flex-1 bg-[#f8f6f7] items-center justify-center">
+        <ActivityIndicator size="large" color="#ee2b8c" />
+      </View>
+    );
+  }
 
   return (
     <KeyboardAvoidingView
@@ -104,17 +146,18 @@ export default function AddExpenseScreen() {
           keyboardShouldPersistTaps="handled"
         >
           <View className="px-6 pt-8">
-            {/* Hero Context */}
-            <View className="mb-8">
-              <View>
-                <Text className="text-3xl text-[#181114]" variant="h1">
-                  Detail your new
-                </Text>
-                <Text className="text-3xl text-[#ee2b8c]" variant="h1">
-                  financial commitment.
-                </Text>
+            {!editMode && (
+              <View className="mb-8">
+                <View>
+                  <Text className="text-3xl text-[#181114]" variant="h1">
+                    Detail your new
+                  </Text>
+                  <Text className="text-3xl text-[#ee2b8c]" variant="h1">
+                    financial commitment.
+                  </Text>
+                </View>
               </View>
-            </View>
+            )}
 
             {/* Form Card */}
             <View className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 gap-6 mb-8">

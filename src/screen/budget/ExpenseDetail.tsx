@@ -1,10 +1,17 @@
 import { BudgetStatsGrid } from "@/src/components/budget";
 import { Text } from "@/src/components/ui/Text";
-import { useExpenseById } from "@/src/features/budget/hooks/use-budget";
+import {
+  useExpenseById,
+  useDeleteExpenseMutation,
+} from "@/src/features/budget/hooks/use-budget";
 import { MaterialIcons } from "@expo/vector-icons";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { Stack, useLocalSearchParams, useRouter } from "expo-router";
+import { useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
+  Modal,
+  Pressable,
   ScrollView,
   TouchableOpacity,
   View,
@@ -42,6 +49,12 @@ export default function ExpenseDetailScreen() {
   const router = useRouter();
   const { eventId, categoryId, expenseId } = useLocalSearchParams();
   const { data, isLoading } = useExpenseById(Number(expenseId));
+  const [menuVisible, setMenuVisible] = useState(false);
+  const deleteMutation = useDeleteExpenseMutation(
+    Number(expenseId || 0),
+    Number(categoryId || 0),
+    Number(eventId || 0)
+  );
 
   let remainingBalance,
     dueBalance,
@@ -61,6 +74,56 @@ export default function ExpenseDetailScreen() {
     );
   };
 
+  const handleEditExpense = () => {
+    setMenuVisible(false);
+    router.push({
+      pathname:
+        `/(protected)/(client-stack)/events/${eventId}/(organizer)/edit-expense` as any,
+      params: {
+        expenseId: expenseId,
+        categoryId: categoryId,
+        eventId: eventId,
+      },
+    });
+  };
+
+  const handleDeleteExpense = () => {
+    setMenuVisible(false);
+    Alert.alert(
+      "Delete Expense",
+      "Are you sure you want to delete this expense? This action cannot be undone.",
+      [
+        {
+          text: "Cancel",
+          onPress: () => {},
+          style: "cancel",
+        },
+        {
+          text: "Delete",
+          onPress: async () => {
+            try {
+              await deleteMutation.mutateAsync();
+              Alert.alert("Success", "Expense deleted successfully!", [
+                {
+                  text: "OK",
+                  onPress: () => {
+                    router.back();
+                  },
+                },
+              ]);
+            } catch (error: any) {
+              const errorMessage =
+                error?.message ||
+                "Failed to delete expense. Please try again.";
+              Alert.alert("Error", errorMessage);
+            }
+          },
+          style: "destructive",
+        },
+      ]
+    );
+  };
+
   if (isLoading) {
     return (
       <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
@@ -71,6 +134,51 @@ export default function ExpenseDetailScreen() {
 
   return (
     <View className="flex-1 bg-[#f8f6f7]">
+      <Stack.Screen
+        options={{
+          headerRight: () => (
+            <TouchableOpacity
+              onPress={() => setMenuVisible(true)}
+              className="pr-4"
+              activeOpacity={0.7}
+            >
+              <MaterialIcons name="more-vert" size={24} color="#181114" />
+            </TouchableOpacity>
+          ),
+        }}
+      />
+      <Modal
+        visible={menuVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setMenuVisible(false)}
+      >
+        <Pressable
+          className="flex-1 bg-black/50"
+          onPress={() => setMenuVisible(false)}
+        >
+          <View className="absolute bottom-0 bg-white shadow-lg w-full pb-4">
+            <TouchableOpacity
+              onPress={handleEditExpense}
+              className="flex-row items-center gap-3 px-5 py-4 border-b border-gray-100"
+            >
+              <MaterialIcons name="edit" size={20} color="#181114" />
+              <Text className="text-[#181114]" variant="h2">
+                Edit Expense
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={handleDeleteExpense}
+              className="flex-row items-center gap-3 px-5 py-4"
+            >
+              <MaterialIcons name="delete" size={20} color="#ee2b8c" />
+              <Text className="text-[#ee2b8c]" variant="h2">
+                Delete Expense
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </Pressable>
+      </Modal>
       <ScrollView
         className="flex-1"
         contentContainerClassName="pb-24"
