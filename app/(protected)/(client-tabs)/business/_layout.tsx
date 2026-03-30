@@ -36,6 +36,10 @@ export default function BusinessLayout() {
         name="[businessId]"
         options={{ title: "Business Details" }}
       />
+      <Stack.Screen
+        name="edit/[businessId]"
+        options={{ title: "Edit Business" }}
+      />
     </Stack>
   );
 }

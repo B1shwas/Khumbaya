@@ -1,16 +1,18 @@
 import { Text } from "@/src/components/ui/Text";
 import {
   Business,
-  BusinessCategory,
-  BUSINESSES,
   BusinessRequest,
   BusinessReview,
   BusinessService,
 } from "@/src/constants/business";
+import { getBusinessIcon } from "@/src/constants/business-icons";
+import { useGetBusinessById, useDeleteBusiness } from "@/src/features/business";
 import { MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import {
+  ActivityIndicator,
+  Alert,
   Dimensions,
   FlatList,
   Image,
@@ -20,29 +22,6 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-
-const CATEGORY_ICONS: Record<
-  BusinessCategory,
-  keyof typeof MaterialIcons.glyphMap
-> = {
-  photography: "photo-camera",
-  videography: "videocam",
-  decor: "palette",
-  catering: "restaurant",
-  music: "music-note",
-  venue: "location-city",
-  makeup: "face",
-  florist: "local-florist",
-  "wedding-planning": "event",
-  other: "storefront",
-};
-
-function getBusinessIcon(
-  category?: BusinessCategory
-): keyof typeof MaterialIcons.glyphMap {
-  if (!category) return "storefront";
-  return CATEGORY_ICONS[category];
-}
 
 const shadowStyle = Platform.select({
   ios: {
@@ -67,7 +46,7 @@ function HeroSection({
   return (
     <View style={{ height: 210 }} className="w-full">
       <Image
-        source={{ uri: business.coverImageUrl ?? business.imageUrl }}
+        source={{ uri: business.cover ?? business.avatar ?? undefined }}
         style={{ width: "100%", height: "100%", position: "absolute" }}
         resizeMode="cover"
       />
@@ -98,7 +77,7 @@ function HeroSection({
       <View className="absolute bottom-0 left-0 right-0 px-4 pb-4">
         <View className="flex-row items-end gap-3">
           <View className="w-14 h-14 rounded-2xl bg-white/20 border-2 border-white/50 items-center justify-center">
-            <MaterialIcons name={getBusinessIcon(business.category)} size={28} color="white" />
+            <MaterialIcons name={getBusinessIcon(business.category ?? undefined)} size={28} color="white" />
           </View>
           <View className="flex-1">
             <Text
@@ -106,7 +85,7 @@ function HeroSection({
               className="text-white text-lg leading-tight"
               numberOfLines={1}
             >
-              {business.name}
+              {business.business_name}
             </Text>
             <View className="flex-row items-center gap-1 mt-0.5">
               <MaterialIcons
@@ -117,9 +96,9 @@ function HeroSection({
               <Text className="text-white/75 text-xs">
                 {business.location ?? "Location not set"}
               </Text>
-              {business.priceTier && (
+              {business.price_starting_from != null && (
                 <Text className="text-white/60 text-xs ml-2">
-                  {business.priceTier}
+                  From {business.price_starting_from.toLocaleString()}
                 </Text>
               )}
             </View>
@@ -576,8 +555,45 @@ function LatestReviewSection({ reviews }: { reviews: BusinessReview[] }) {
 // ─── Main Screen ──────────────────────────────────────────────────────────────
 
 export default function BusinessDetailsScreen() {
+  const router = useRouter();
   const { businessId } = useLocalSearchParams<{ businessId: string }>();
-  const business = BUSINESSES.find((b) => b.id === businessId);
+  const { data: business, isLoading } = useGetBusinessById(businessId ?? "");
+  const deleteBusiness = useDeleteBusiness();
+
+  const handleDelete = () => {
+    if (!business) return;
+    Alert.alert(
+      "Delete Business",
+      `Are you sure you want to delete "${business.business_name}"? This action cannot be undone.`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: () => {
+            deleteBusiness.mutate(businessId!, {
+              onSuccess: () => {
+                Alert.alert("Deleted", "Business deleted successfully.", [
+                  { text: "OK", onPress: () => router.back() },
+                ]);
+              },
+              onError: () => {
+                Alert.alert("Error", "Failed to delete business. Please try again.");
+              },
+            });
+          },
+        },
+      ]
+    );
+  };
+
+  if (isLoading) {
+    return (
+      <SafeAreaView className="flex-1 bg-[#f8f6f7] items-center justify-center">
+        <ActivityIndicator color="#ee2b8c" />
+      </SafeAreaView>
+    );
+  }
 
   if (!business) {
     return (
@@ -596,18 +612,39 @@ export default function BusinessDetailsScreen() {
         contentContainerStyle={{ paddingBottom: 40 }}
         showsVerticalScrollIndicator={false}
       >
-        <HeroSection business={business} onEditPress={() => {}} />
+        <HeroSection
+          business={business}
+          onEditPress={() => router.push(`/business/edit/${businessId}`)}
+        />
 
         <View className="px-4 gap-4 mt-4">
-          {/* <ProfileCompletionCard
-            completion={business.profileCompletion ?? 0}
-          /> */}
           <StatsRow business={business} />
           <ActiveRequestsSection requests={business.requests ?? []} />
           <PortfolioGrid portfolio={business.portfolio ?? []} />
           <ServicesSection services={business.services ?? []} />
           <AvailabilityCalendar dates={business.availabilityDates} />
           <LatestReviewSection reviews={business.reviews ?? []} />
+
+          {/* Danger Zone */}
+          <View className="flex-row items-center justify-between rounded-2xl border border-red-200 bg-red-50 p-4">
+            <View>
+              <Text variant="h1" className="text-sm text-red-600">
+                Delete Business
+              </Text>
+              <Text className="text-[11px] text-red-400">
+                This action cannot be undone.
+              </Text>
+            </View>
+            <TouchableOpacity
+              onPress={handleDelete}
+              activeOpacity={0.8}
+              className="rounded-lg px-4 py-2"
+            >
+              <Text variant="h1" className="text-xs uppercase tracking-widest text-red-600">
+                Delete
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </ScrollView>
     </View>
