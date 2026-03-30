@@ -9,7 +9,7 @@ import VENUES from "@/src/constants/venues";
 import { useProfile } from "@/src/features/user/api/use-user";
 import { useAuthStore } from "@/src/store/AuthStore";
 import { Ionicons } from "@expo/vector-icons";
-import { router, type RelativePathString } from "expo-router";
+import { router } from "expo-router";
 import { useCallback } from "react";
 import {
   FlatList,
@@ -98,7 +98,7 @@ export default function HomePage() {
         <View className="flex-row items-center justify-between ">
           <View>
             <Text style={styles.greeting}>
-              Hi, {user?.username || user?.name || "Guest"} 👋
+              Hi, {user?.username || "Guest"} 👋
             </Text>
             <Text style={styles.title}>Plan Your Dream Event</Text>
           </View>
@@ -148,17 +148,6 @@ export default function HomePage() {
         }
       />
 
-      {/* Floating Action Button */}
-      <TouchableOpacity
-        style={styles.fab}
-        onPress={() =>
-          router.push(
-            "/(protected)/(client-stack)/events/createevent" as RelativePathString
-          )
-        }
-      >
-        <Ionicons name="add" size={28} color="white" />
-      </TouchableOpacity>
     </>
   );
 }
@@ -256,22 +245,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     marginTop: -30,
-    shadowColor: "#ee2b8c",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-  fab: {
-    position: "absolute",
-    right: 20,
-    bottom: 30,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: "#ee2b8c",
-    alignItems: "center",
-    justifyContent: "center",
     shadowColor: "#ee2b8c",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
