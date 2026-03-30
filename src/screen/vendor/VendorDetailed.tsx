@@ -15,18 +15,13 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-<<<<<<< HEAD
-=======
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const TILE_SIZE = (SCREEN_WIDTH - 48) / 2; // 2-column grid with 16px side padding + 8px gap
 
->>>>>>> 480416c4e8a4cf96941d643458f956f8176f4965
 const HEADER_IMAGE =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuCkAYir1uyaMJpHYxd3cTDm5UEx_lcVJTxtNY2aX-7SjfphxWwmRyzcN_I9jAgIIpqkB_WoA3q32x9izN6Kr_lfZk_2h8e2QgTa8ySCVzEuaPyt5iGLXvBLYh3Zmyzj9cd9ehQAy-8AIflmKb745Ui3-jn0RoRfgnaTlQuf-Ma27foOExZUSdI-ngacDOkkK56JuW_U6PfIPZug2LybUCfyo33uKUW6vcSNo2nbtsj91MFuVaVvo5d1GpzvmPpd9hv1643KT_ec4KM";
 const AVATAR_IMAGE =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuDIWVyUn7mizRXt-pU0k_RKFdAfNF_d21mLZuL6fE-z88oUHVipXSGUhNmA5WfOISIeb5QApM1WV-MqiArQgJejxYGuerwubu6lcVkwkED06qEDLGBM7Xqz0ISW7b9rPn7S5ZW1hwAZxyVJLtwp0mkKKpGBUzYThC2D9AsRi-INlhoD8olL86wNyceuSQjvSCGLvlkuKEaRRpvGNa3ooDKEzBTa-g2eoD-4QuvwrSjC7f8_Nwv5Gm18EKFeYf5rKFnpg1QNMlLOq18";
-<<<<<<< HEAD
-=======
 
 const TAGS = ["Mehndi", "Sangeet", "Nikah", "Pre-Wedding"];
 
@@ -81,7 +76,6 @@ export default function VendorDetailed({
   const router = useRouter();
   const [showGallery, setShowGallery] = useState(false);
   const [activeFilter, setActiveFilter] = useState("All Photos");
->>>>>>> 480416c4e8a4cf96941d643458f956f8176f4965
 
 const TAGS = ["Mehndi", "Sangeet", "Nikah", "Pre-Wedding"];
 
