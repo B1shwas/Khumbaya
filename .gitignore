@@ -5,6 +5,7 @@ node_modules/
 package-lock.json
 package-lock*
 pnpm-lock.yaml
+.agent
 pnpm-lock*
 # Expo
 .expo/

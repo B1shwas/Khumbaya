@@ -1,9 +1,11 @@
 import Card from "@/src/components/ui/Card";
 import { Text } from "@/src/components/ui/Text";
+import { shadowStyle } from "@/src/utils/helper";
 import { MemberRsvpCardProp, RSVPStatus } from "@/src/utils/type/rsvp";
 import { Ionicons } from "@expo/vector-icons";
 import {
   Image,
+  Pressable,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -31,10 +33,12 @@ const statusConfig: Record<
 const MemberCard = ({
   member,
   onPressRsvp,
+  onPressDetails,
   isOrganizerView = false,
 }: {
   member: MemberRsvpCardProp;
   onPressRsvp: () => void;
+  onPressDetails?: () => void;
   isOrganizerView?: boolean;
 }) => {
   const { label, wrapperClass, textClass } = statusConfig[member.status];
@@ -113,7 +117,9 @@ const MemberCard = ({
                   <Text className="text-sm text-slate-500">
                     Room:{" "}
                     <Text variant="caption" className="text-slate-800 text-sm">
-                      {member.assigned_room && member.assigned_room.length > 0 ? member.assigned_room : "Not Assigned"}
+                      {member.assigned_room && member.assigned_room.length > 0
+                        ? member.assigned_room
+                        : "Not Assigned"}
                     </Text>
                   </Text>
                 </View>
@@ -132,19 +138,13 @@ const MemberCard = ({
               )}
             </View>
           )}
-
-          {(isPending && !isOrganizerView) && (
-            <Text className="mt-2 text-sm text-slate-400 italic">
-              Please complete details for {member.name.split(" ")[0]}
-            </Text>
-          )}
         </View>
       </View>
 
       {/* CTA */}
-      <View className="mt-4 pt-4 border-t border-slate-100">
+      <View className="w-full mt-4 pt-4 border-t border-slate-100 flex flex-row gap-2">
         <TouchableOpacity
-          className="w-full py-2.5 rounded-md items-center justify-center"
+          className="flex-1 py-2.5 rounded-md items-center justify-center"
           style={{ backgroundColor: "#ee2b8c" }}
           activeOpacity={0.85}
           onPress={onPressRsvp}
@@ -157,6 +157,17 @@ const MemberCard = ({
                 : "Edit RSVP"}
           </Text>
         </TouchableOpacity>
+        {!isOrganizerView && !isPending && (
+          <Pressable
+            className="flex-1 py-2.5 rounded-md items-center justify-center border border-primary "
+            style={shadowStyle}
+            onPress={onPressDetails}
+          >
+            <Text variant="h2" className="text-primary text-sm">
+              RSVP details
+            </Text>
+          </Pressable>
+        )}
       </View>
     </Card>
   );

@@ -34,3 +34,12 @@ export const updateTodoApi = async (
   const response = await api.patch(`/todo/${id}`, payload);
   return response.data?.data ?? response.data;
 };
+
+export const bulkUpdateTodoStatusApi = async (updates: Array<{
+  todoId: number;
+  isDone: boolean;
+  status: string;
+}>) => {
+  const response = await api.post("/todo/bulk", updates);
+  return response.data;
+};
