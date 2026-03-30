@@ -2,13 +2,21 @@ import { Text } from "@/src/components/ui/Text";
 import { ONBOARDING_VENDORS } from "@/src/constants/vendors";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import { useState } from "react";
 import {
+  Dimensions,
+  FlatList,
   Image,
   ImageBackground,
+  Modal,
   Pressable,
   ScrollView,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+
+const SCREEN_WIDTH = Dimensions.get("window").width;
+const TILE_SIZE = (SCREEN_WIDTH - 48) / 2; // 2-column grid with 16px side padding + 8px gap
 
 const HEADER_IMAGE =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuCkAYir1uyaMJpHYxd3cTDm5UEx_lcVJTxtNY2aX-7SjfphxWwmRyzcN_I9jAgIIpqkB_WoA3q32x9izN6Kr_lfZk_2h8e2QgTa8ySCVzEuaPyt5iGLXvBLYh3Zmyzj9cd9ehQAy-8AIflmKb745Ui3-jn0RoRfgnaTlQuf-Ma27foOExZUSdI-ngacDOkkK56JuW_U6PfIPZug2LybUCfyo33uKUW6vcSNo2nbtsj91MFuVaVvo5d1GpzvmPpd9hv1643KT_ec4KM";
@@ -18,10 +26,12 @@ const AVATAR_IMAGE =
 const TAGS = ["Mehndi", "Sangeet", "Nikah", "Pre-Wedding"];
 
 const GALLERY = [
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuDl1WMOA-FGsUYEo4NC3d-GP8U8IPst7R9ffefFCrImLzEXvVQhpjyl1XVqKmXYO3nWx6tb0bWpmfNuGvZhiUUJmY8csevYr7Pov0XjJskRdf1wnNtHoLTnWvXfbk5fTOTLBxZ9gEcYNOyevxjhFExMz0x_9dnhY-JwCMcd9gLxinxUBoYlhHyf6Y72ASivvCVZZm4O8MhgLe7gmOvumPyOLEHUyyQVQkg7gk6jqw1Gb9wYnah9neKBND8Sp1LIosywjXyTzHhU-XY",
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuCYeV71hF5lCTG2Rs3fVfHbHj6xW0lLMJjeKIT5t2oFNQvMQCsyn9LQwEaTDjwe7KKiPSpkxWI_anv_EQNgNuL76Rhc5BRTzg_y6bKvLDVLhYudAbzBBN38BIv74wdSXaHgS-h175YWOIdPF3mVUI0iDu9dSS4A3AdFm8XNt7FnpAIOjEBKI2LLO-tOdnvsj3GaxdBJd0Fv7IXUUqIHS4nJ0Aq_17FmXfQTIKfipCWpCcaiAcxN4UCEn66V3UtdBbiL2qun6mk6UyE",
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuDpp51MGdcz2CaS_-F_SFIuK3aVZ7OXvsVVPqCvX7ehi1wfAm0fu52s3HOa5lTBmal9m9zwFDRL7eWZLoAQtcVWnYGLr4BmuBovXDqMNoqp-fmiQaw7P7Qby6ftrwPBK-2bQQDjvHk6viUHa1utnrhN8z88x3-BmmzDvd9_O59ZQtyCjRNNgX1yF6iLvPi9IiGmPwoIRnt48r8eoTfOwqfJkgeHrhNcdWgDX74rELXlJaXEI5CrgqS-VACXj2LzM7xIQ4KP311BeaI",
+  { uri: "https://lh3.googleusercontent.com/aida-public/AB6AXuDl1WMOA-FGsUYEo4NC3d-GP8U8IPst7R9ffefFCrImLzEXvVQhpjyl1XVqKmXYO3nWx6tb0bWpmfNuGvZhiUUJmY8csevYr7Pov0XjJskRdf1wnNtHoLTnWvXfbk5fTOTLBxZ9gEcYNOyevxjhFExMz0x_9dnhY-JwCMcd9gLxinxUBoYlhHyf6Y72ASivvCVZZm4O8MhgLe7gmOvumPyOLEHUyyQVQkg7gk6jqw1Gb9wYnah9neKBND8Sp1LIosywjXyTzHhU-XY", category: "Mehndi" },
+  { uri: "https://lh3.googleusercontent.com/aida-public/AB6AXuCYeV71hF5lCTG2Rs3fVfHbHj6xW0lLMJjeKIT5t2oFNQvMQCsyn9LQwEaTDjwe7KKiPSpkxWI_anv_EQNgNuL76Rhc5BRTzg_y6bKvLDVLhYudAbzBBN38BIv74wdSXaHgS-h175YWOIdPF3mVUI0iDu9dSS4A3AdFm8XNt7FnpAIOjEBKI2LLO-tOdnvsj3GaxdBJd0Fv7IXUUqIHS4nJ0Aq_17FmXfQTIKfipCWpCcaiAcxN4UCEn66V3UtdBbiL2qun6mk6UyE", category: "Sangeet" },
+  { uri: "https://lh3.googleusercontent.com/aida-public/AB6AXuDpp51MGdcz2CaS_-F_SFIuK3aVZ7OXvsVVPqCvX7ehi1wfAm0fu52s3HOa5lTBmal9m9zwFDRL7eWZLoAQtcVWnYGLr4BmuBovXDqMNoqp-fmiQaw7P7Qby6ftrwPBK-2bQQDjvHk6viUHa1utnrhN8z88x3-BmmzDvd9_O59ZQtyCjRNNgX1yF6iLvPi9IiGmPwoIRnt48r8eoTfOwqfJkgeHrhNcdWgDX74rELXlJaXEI5CrgqS-VACXj2LzM7xIQ4KP311BeaI", category: "Pre-Wedding" },
 ];
+
+const GALLERY_FILTERS = ["All Photos", ...TAGS];
 
 const PACKAGES = [
   {
@@ -63,8 +73,9 @@ export default function VendorDetailed({
 }: {
   vendorId: string | string[];
 }) {
-
   const router = useRouter();
+  const [showGallery, setShowGallery] = useState(false);
+  const [activeFilter, setActiveFilter] = useState("All Photos");
 
   // Find the vendor data based on the vendorId from route params
   const resolvedId = Array.isArray(vendorId) ? vendorId[0] : vendorId;
@@ -231,44 +242,24 @@ export default function VendorDetailed({
         </View>
 
         <View className="px-4 py-6 bg-white">
-          <View className="flex-row justify-between items-center mb-4">
+          <View className="flex-row justify-between items-center mb-3">
             <Text className="text-lg font-bold text-[#181114]">
               Featured Gallery
             </Text>
-            <Text className="text-primary text-sm font-bold">View All</Text>
+            <Pressable onPress={() => setShowGallery(true)}>
+              <Text className="text-primary text-sm font-bold">View All</Text>
+            </Pressable>
           </View>
-          <View className="gap-2">
-            <View className="w-full aspect-[21/9] rounded-xl overflow-hidden shadow-sm">
-              <Image
-                source={{ uri: GALLERY[0] }}
-                className="h-full w-full"
-                resizeMode="cover"
-              />
-            </View>
-            <View className="flex-row gap-3 my-2">
-              <Pressable className="h-12 w-12 items-center justify-center rounded-xl border border-gray-200 bg-white">
-                <MaterialIcons name="chat-bubble" size={20} color="#6B7280" />
-              </Pressable>
-            </View>
-            <View className="flex-row gap-2">
-              <View className="flex-1 aspect-square rounded-xl overflow-hidden shadow-sm">
+          <View className="flex-row gap-2">
+            {GALLERY.map((item, index) => (
+              <View key={index} className="flex-1 aspect-square rounded-xl overflow-hidden">
                 <Image
-                  source={{ uri: GALLERY[1] }}
+                  source={{ uri: item.uri }}
                   className="h-full w-full"
                   resizeMode="cover"
                 />
               </View>
-              <View className="flex-1 aspect-square rounded-xl overflow-hidden shadow-sm">
-                <Image
-                  source={{ uri: GALLERY[2] }}
-                  className="h-full w-full"
-                  resizeMode="cover"
-                />
-                <View className="absolute inset-0 items-center justify-center bg-black/40">
-                  <Text className="text-white font-bold text-xl">+24</Text>
-                </View>
-              </View>
-            </View>
+            ))}
           </View>
         </View>
 
@@ -369,6 +360,77 @@ export default function VendorDetailed({
           </ScrollView>
         </View>
       </ScrollView>
+
+      <Modal
+        visible={showGallery}
+        animationType="slide"
+        onRequestClose={() => setShowGallery(false)}
+      >
+        <SafeAreaView className="flex-1 bg-[#f5f5f5]">
+          {/* Header */}
+          <View className="flex-row items-center justify-between px-4 py-3 bg-[#f5f5f5]">
+            <Text className="text-lg font-bold text-[#181114]">Gallery</Text>
+            <Pressable
+              onPress={() => setShowGallery(false)}
+              className="h-8 w-8 items-center justify-center rounded-full bg-gray-200"
+            >
+              <MaterialIcons name="close" size={20} color="#181114" />
+            </Pressable>
+          </View>
+
+          {/* Filter tabs */}
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            className="flex-grow-0"
+            contentContainerClassName="px-4 pb-3 gap-2 flex-row"
+          >
+            {GALLERY_FILTERS.map((filter) => (
+              <Pressable
+                key={filter}
+                onPress={() => setActiveFilter(filter)}
+                className={`px-4 py-2 rounded-full border ${
+                  activeFilter === filter
+                    ? "bg-primary border-primary"
+                    : "bg-white border-gray-200"
+                }`}
+              >
+                <Text
+                  className={`text-sm font-semibold ${
+                    activeFilter === filter ? "text-white" : "text-gray-500"
+                  }`}
+                >
+                  {filter}
+                </Text>
+              </Pressable>
+            ))}
+          </ScrollView>
+
+          {/* Photo grid */}
+          <FlatList
+            data={
+              activeFilter === "All Photos"
+                ? GALLERY
+                : GALLERY.filter((item) => item.category === activeFilter)
+            }
+            numColumns={2}
+            keyExtractor={(_, index) => String(index)}
+            contentContainerStyle={{ paddingHorizontal: 16, gap: 8 }}
+            columnWrapperStyle={{ gap: 8 }}
+            renderItem={({ item }) => (
+              <Image
+                source={{ uri: item.uri }}
+                style={{
+                  width: TILE_SIZE,
+                  height: TILE_SIZE,
+                  borderRadius: 16,
+                }}
+                resizeMode="cover"
+              />
+            )}
+          />
+        </SafeAreaView>
+      </Modal>
     </>
   );
 }
