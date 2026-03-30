@@ -15,7 +15,7 @@ import {
   Image,
   ScrollView,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -95,6 +95,9 @@ export default function GuestEventDetails() {
       isArrivalPickupRequired: boolean | null;
       isDeparturePickupRequired: boolean | null;
       notes: string | null;
+      assigned_room: string | null;
+      arrival_info: string | null;
+      departure_info: string | null;
     } | null;
     user_detail: {
       id: number;
@@ -109,11 +112,10 @@ export default function GuestEventDetails() {
    * responses[0] is the only entry when isFamily === false.
    */
   const myGuestRecord = !isFamily ? (responses[0]?.event_guest ?? null) : null;
+  console.log('This is the data in the has rsvp in the data   ', myGuestRecord)
   const hasRsvped = isFamily ? true : myGuestRecord !== null;
 
-  /**
-   * Family invite: derive member list and confirmed count from responses.
-   */
+
   const familyMembers = responses.map((r) => ({
     id: r.user_detail.id.toString(),
     name: r.user_detail.username,
@@ -153,6 +155,9 @@ export default function GuestEventDetails() {
         rawIsDeparturePickupRequired:
           me.event_guest?.isDeparturePickupRequired ?? null,
         rawNotes: me.event_guest?.notes ?? null,
+        rawAssignedRoom: me.event_guest?.assigned_room ?? null,
+        rawArrivalInfo: me.event_guest?.arrival_info ?? null,
+        rawDepartureInfo: me.event_guest?.departure_info ?? null,
       });
     }
     router.push(`/(protected)/(client-stack)/events/${eventId}/(guest)/rsvp`);
@@ -198,7 +203,7 @@ export default function GuestEventDetails() {
         <Section
           title="Event Highlights"
           action="View Full Itinerary"
-          onAction={() => {}}
+          onAction={() => { }}
         >
           <EventHighlightTimeline highlights={DEFAULT_HIGHLIGHTS} />
         </Section>
@@ -208,46 +213,86 @@ export default function GuestEventDetails() {
           <ServiceGrid services={DEFAULT_SERVICES} />
         </Section>
 
+
+
         {/* ── RSVP section ── */}
         <View className="px-5 py-5">
           {isFamily ? (
-            <FamilyRsvpCard
-              familyName={familyName}
-              members={familyMembers}
-              confirmedCount={confirmedCount}
-              onManage={() =>
-                router.push(
-                  `/(protected)/(client-stack)/events/${eventId}/(guest)/family-rsvp`
-                )
-              }
-            />
+            <View className="gap-4">
+              <FamilyRsvpCard
+                familyName={familyName}
+                members={familyMembers}
+                confirmedCount={confirmedCount}
+                onEdit={() =>
+                  router.push(
+                    `/(protected)/(client-stack)/events/${eventId}/(guest)/family-rsvp`
+                  )
+                }
+                onView={() =>
+                  router.push(
+                    `/(protected)/(client-stack)/events/${eventId}/(guest)/family-responce`
+                  )
+                }
+              />
+
+            </View>
           ) : (
-            <View className="bg-white rounded-xl p-5 border border-slate-100 shadow-sm gap-3">
-              <View className="flex-row items-center gap-2">
-                <Ionicons
-                  name={hasRsvped ? "checkmark-circle" : "mail-outline"}
-                  size={20}
-                  color={hasRsvped ? "#16a34a" : "#ee2b8c"}
-                />
-                <Text className="text-lg font-bold text-slate-900">
-                  {hasRsvped ? "Your RSVP" : "RSVP to this Event"}
-                </Text>
+            <View className="bg-white rounded-md p-6 border border-slate-100 shadow-sm gap-4">
+              <View className="flex-row items-center gap-3">
+                <View
+                  className={`w-10 h-10 rounded-full items-center justify-center ${hasRsvped ? "bg-green-100" : "bg-pink-100"
+                    }`}
+                >
+                  <Ionicons
+                    name={hasRsvped ? "checkmark-circle" : "mail"}
+                    size={22}
+                    color={hasRsvped ? "#16a34a" : "#ee2b8c"}
+                  />
+                </View>
+                <View>
+                  <Text className="text-lg font-extrabold text-slate-900 leading-tight">
+                    {hasRsvped ? "Your RSVP" : "Invitation"}
+                  </Text>
+                  <Text className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
+                    {hasRsvped ? "Confirmed" : "Action Required"}
+                  </Text>
+                </View>
               </View>
-              <Text className="text-sm text-slate-500">
+
+              <Text className="text-sm text-slate-500 leading-relaxed">
                 {hasRsvped
-                  ? "You have already responded. You can update your RSVP anytime."
-                  : "Let the host know if you'll be attending and share your travel details."}
+                  ? "Your response has been recorded. You can update your travel and accommodation details at any time."
+                  : "We'd be honored to have you join us for this special occasion. Please confirm your attendance."}
               </Text>
-              <TouchableOpacity
-                className="w-full py-3 mt-1 rounded-lg items-center justify-center"
-                style={{ backgroundColor: "#ee2b8c" }}
-                activeOpacity={0.85}
-                onPress={handleIndividualRsvp}
-              >
-                <Text className="text-white font-bold text-base">
-                  {hasRsvped ? "Edit Your RSVP" : "Complete Your RSVP"}
-                </Text>
-              </TouchableOpacity>
+
+              <View className="flex-row gap-3">
+                <TouchableOpacity
+                  className="flex-1 py-3.5 rounded-md items-center justify-center bg-primary shadow-lg shadow-primary/20 active:scale-[0.98]"
+                  activeOpacity={0.8}
+                  onPress={handleIndividualRsvp}
+                >
+                  <Text className="text-white font-bold text-sm">
+                    {hasRsvped ? "Edit RSVP" : "Confirm Attendance"}
+                  </Text>
+                </TouchableOpacity>
+
+                {(responses[0]?.event_guest?.assigned_room ||
+                  responses[0]?.event_guest?.isArrivalPickupRequired ||
+                  responses[0]?.event_guest?.isDeparturePickupRequired ||
+                  responses[0]?.event_guest?.notes ||
+                  responses[0]?.event_guest?.arrival_info ||
+                  responses[0]?.event_guest?.departure_info) && (
+                    <TouchableOpacity
+                      className="flex-1 py-3.5 rounded-md items-center justify-center bg-slate-50 border border-slate-200 active:bg-slate-100 active:scale-[0.98]"
+                      activeOpacity={0.8}
+                      onPress={handleIndividualRsvp}
+                    >
+                      <Text className="text-slate-600 font-bold text-sm">
+                        View Data
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+              </View>
             </View>
           )}
         </View>
