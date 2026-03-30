@@ -104,16 +104,16 @@ export default function ChecklistScreen() {
 
       <View className="gap-4 px-4 mt-2">
         {/* Header skeleton */}
-        <View className="rounded-2xl p-8 bg-white shadow-sm">
-          <View className="h-8 w-3/4 bg-surface-container-highest rounded-lg mb-3 animate-pulse" />
+        <View className="rounded-md p-8 bg-white shadow-sm">
+          <View className="h-8 w-3/4 bg-surface-container-highest rounded-md mb-3 animate-pulse" />
           <View className="h-4 w-1/2 bg-surface-container-highest rounded mb-6 animate-pulse" />
-          <View className="h-3 w-full bg-surface-container-highest rounded-full animate-pulse" />
+          <View className="h-3 w-full bg-surface-container-highest rounded-md animate-pulse" />
         </View>
 
         {[1, 2, 3, 4].map((i) => (
-          <View key={i} className="bg-white rounded-xl p-4 shadow-sm">
+          <View key={i} className="bg-white rounded-md p-4 shadow-sm">
             <View className="flex-row items-center gap-3">
-              <View className="w-6 h-6 rounded-full bg-surface-container-highest animate-pulse" />
+              <View className="w-6 h-6 rounded-md bg-surface-container-highest animate-pulse" />
               <View className="flex-1 h-4 bg-surface-container-highest rounded animate-pulse" />
             </View>
           </View>
@@ -128,7 +128,7 @@ export default function ChecklistScreen() {
       className="flex-1 p-1"
     >
       <View className=" gap-4 px-4 mt-2">
-        <View className=" relative overflow-hidden rounded-2xl p-8 bg-white shadow-sm">
+        <View className=" relative overflow-hidden rounded-md p-8 bg-white shadow-sm">
           <View className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full -mr-20 -mt-20" />
           <View className="relative z-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
             <View>
@@ -160,7 +160,7 @@ export default function ChecklistScreen() {
 
         <View className="flex-row gap-2 w-full md:w-auto">
           <Pressable
-            className="flex-row items-center gap-2 bg-primary px-6 py-3 rounded-xl 
+            className="flex-row items-center gap-2 bg-primary px-6 py-3 rounded-md 
                      shadow-lg shadow-primary/20 active:scale-95 transition-all"
             onPress={() => {
               if (parsedEventId) {
