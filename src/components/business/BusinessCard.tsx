@@ -1,4 +1,5 @@
-import { Business, BusinessCategory } from "@/src/constants/business";
+import { Business } from "@/src/constants/business";
+import { getBusinessIcon } from "@/src/constants/business-icons";
 import { MaterialIcons } from "@expo/vector-icons";
 import React from "react";
 import { Image, Platform, Text, TouchableOpacity, View } from "react-native";
@@ -20,29 +21,6 @@ const shadowStyle = Platform.select({
   default: {},
 });
 
-const CATEGORY_ICONS: Record<
-  BusinessCategory,
-  keyof typeof MaterialIcons.glyphMap
-> = {
-  photography: "photo-camera",
-  videography: "videocam",
-  decor: "palette",
-  catering: "restaurant",
-  music: "music-note",
-  venue: "location-city",
-  makeup: "face",
-  florist: "local-florist",
-  "wedding-planning": "event",
-  other: "storefront",
-};
-
-function getIcon(
-  category?: BusinessCategory
-): keyof typeof MaterialIcons.glyphMap {
-  if (!category) return "storefront";
-  return CATEGORY_ICONS[category];
-}
-
 function formatViews(n: number): string {
   return n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(n);
 }
@@ -52,8 +30,8 @@ const BusinessCard = React.memo(function BusinessCard({
   onPress,
   onMorePress,
 }: BusinessCardProps) {
-  const isActive = business.status === "active";
-  const coverUri = business.coverImageUrl ?? business.imageUrl;
+  const isActive = business.is_verified;
+  const coverUri = business.cover ?? business.avatar ?? undefined;
 
   return (
     <TouchableOpacity
@@ -63,13 +41,13 @@ const BusinessCard = React.memo(function BusinessCard({
       onPress={onPress}
     >
       {/* ── Cover image ── */}
-      <View style={{ aspectRatio: 16 / 7 }}>
+      <View className="w-full aspect-[4/3] bg-gray-200">
         <Image
-          source={{ uri: coverUri }}
+          source={coverUri ? { uri: coverUri } : require("@/assets/images/screen.png")}
           className="w-full h-full"
           resizeMode="cover"
         />
-        <View className="absolute inset-0 bg-black/35" />
+        <View className="absolute inset-0 bg-black/20" />
 
         {/* Status badge */}
         <View
@@ -81,7 +59,7 @@ const BusinessCard = React.memo(function BusinessCard({
             <View className="w-1.5 h-1.5 rounded-full bg-white" />
           )}
           <Text className="text-white text-[10px] font-bold tracking-wide">
-            {isActive ? "Active" : "Pending Verification"}
+            {isActive ? "Verified" : "Pending Verification"}
           </Text>
         </View>
       </View>
@@ -92,7 +70,7 @@ const BusinessCard = React.memo(function BusinessCard({
         <View className="flex-row items-center gap-2.5 mb-1.5">
           <View className="w-8 h-8 rounded-lg bg-primary/10 items-center justify-center">
             <MaterialIcons
-              name={getIcon(business.category)}
+              name={getBusinessIcon(business.category ?? undefined)}
               size={16}
               color="#ee2b8c"
             />
@@ -101,7 +79,7 @@ const BusinessCard = React.memo(function BusinessCard({
             className="flex-1 text-base font-bold text-[#181114] tracking-tight"
             numberOfLines={1}
           >
-            {business.name}
+            {business.business_name}
           </Text>
           <TouchableOpacity
             className="p-1"
@@ -123,10 +101,10 @@ const BusinessCard = React.memo(function BusinessCard({
               {business.location ?? "Location not set"}
             </Text>
           </View>
-          {business.priceTier && (
+          {business.price_starting_from != null && (
             <View className="bg-gray-100 rounded-full px-2.5 py-0.5 ml-2">
               <Text className="text-[11px] font-bold text-[#594048]">
-                {business.priceTier}
+                From {business.price_starting_from.toLocaleString()}
               </Text>
             </View>
           )}
