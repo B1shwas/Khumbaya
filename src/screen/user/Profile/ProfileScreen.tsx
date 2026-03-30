@@ -87,8 +87,9 @@ export default function ProfileScreen() {
         <Text className="text-2xl font-bold mt-4 text-gray-900">
           {user?.username || "User"}
         </Text>
-
+        {user?.email && !user?.email.startsWith("guest_") && (
         <Text className="text-gray-500 text-sm">{user?.email}</Text>
+        )}
         <Text className="text-gray-500 text-sm">{user?.phone}</Text>
       </View>
 
