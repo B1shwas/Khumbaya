@@ -3,9 +3,11 @@ import {
   addBudgetCategory,
   addExpenseToCategory,
   addPayment,
+  deleteBudgetCategory,
   getBudgetSummary,
   getCategoryDetails,
   getExpenseById,
+  updateBudgetCategory,
 } from "../services/budgetService";
 
 export const useBudgetSummary = (
@@ -21,12 +23,16 @@ export const useBudgetSummary = (
   });
 };
 
-export const useCategoryDetails = (categoryId: number) => {
+export const useCategoryDetails = (
+  categoryId: number,
+  options?: { enabled?: boolean }
+) => {
   return useQuery({
     queryKey: ["category-details", categoryId],
     queryFn: () => getCategoryDetails(categoryId),
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
+    enabled: categoryId > 0 && options?.enabled !== false,
   });
 };
 
@@ -38,6 +44,43 @@ export const useBudgetCategoryMutation = (eventId: number) => {
     mutationFn: (payload: { name: string; allocatedBudget: number }) =>
       addBudgetCategory(eventId, payload),
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["budget-summary", eventId] });
+    },
+  });
+};
+
+export const useUpdateCategoryMutation = (
+  categoryId: number,
+  eventId: number
+) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationKey: ["update-budget-category", categoryId],
+    mutationFn: (payload: { name: string; allocatedBudget: number }) =>
+      updateBudgetCategory(categoryId, payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["category-details", categoryId],
+      });
+      queryClient.invalidateQueries({ queryKey: ["budget-summary", eventId] });
+    },
+  });
+};
+
+export const useDeleteCategoryMutation = (
+  categoryId: number,
+  eventId: number
+) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationKey: ["delete-budget-category", categoryId],
+    mutationFn: () => deleteBudgetCategory(categoryId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["category-details", categoryId],
+      });
       queryClient.invalidateQueries({ queryKey: ["budget-summary", eventId] });
     },
   });

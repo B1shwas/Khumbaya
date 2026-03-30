@@ -1,8 +1,13 @@
 import { Text } from "@/src/components/ui/Text";
-import { useBudgetCategoryMutation } from "@/src/features/budget/hooks/use-budget";
+import {
+  useBudgetCategoryMutation,
+  useCategoryDetails,
+  useUpdateCategoryMutation,
+} from "@/src/features/budget/hooks/use-budget";
 import { budgetCategoryFormSchema } from "@/src/features/budget/schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
   ActivityIndicator,
@@ -30,14 +35,24 @@ const categoryData = CATEGORIES.map((cat) => ({
   value: cat.id,
 }));
 
-export default function AddBudgetItemScreen() {
+export default function AddBudgetItemScreen({
+  editMode = false,
+}: {
+  editMode?: boolean;
+}) {
   const router = useRouter();
-  const { eventId } = useLocalSearchParams();
+  const { eventId, categoryId } = useLocalSearchParams();
+
+  const { data: categoryData, isLoading: isCategoryLoading } =
+    useCategoryDetails(Number(categoryId || 0), {
+      enabled: editMode && !!categoryId,
+    });
 
   const {
     control,
     handleSubmit,
     formState: { errors },
+    setValue,
   } = useForm({
     resolver: zodResolver(budgetCategoryFormSchema),
     defaultValues: {
@@ -46,7 +61,30 @@ export default function AddBudgetItemScreen() {
     },
   });
 
-  const mutation = useBudgetCategoryMutation(Number(eventId || 0));
+  // Pre-fill form with fetched category data in edit mode
+  useEffect(() => {
+    if (editMode && categoryData) {
+      setValue("name", categoryData.name);
+      setValue("allocatedBudget", categoryData.allocatedBudget.toString());
+    }
+  }, [editMode, categoryData, setValue]);
+
+  const addMutation = useBudgetCategoryMutation(Number(eventId || 0));
+  const updateMutation = useUpdateCategoryMutation(
+    Number(categoryId || 0),
+    Number(eventId || 0)
+  );
+
+  const mutation = editMode ? updateMutation : addMutation;
+
+  // Show loading state while fetching category data in edit mode
+  if (editMode && isCategoryLoading) {
+    return (
+      <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+        <ActivityIndicator size="large" color="#ee2b8c" />
+      </View>
+    );
+  }
 
   const onSubmit = async (data: any) => {
     if (!eventId) {
@@ -54,21 +92,35 @@ export default function AddBudgetItemScreen() {
       return;
     }
 
+    if (editMode && !categoryId) {
+      Alert.alert("Error", "Category ID is missing");
+      return;
+    }
+
     try {
       await mutation.mutateAsync({
         name: data.name,
-        allocatedBudget: data.allocatedBudget,
+        allocatedBudget: parseFloat(data.allocatedBudget),
       });
 
-      Alert.alert("Success", "Budget category created successfully!", [
-        {
-          text: "OK",
-          onPress: () => router.back(),
-        },
-      ]);
+      Alert.alert(
+        "Success",
+        editMode
+          ? "Budget category updated successfully!"
+          : "Budget category created successfully!",
+        [
+          {
+            text: "OK",
+            onPress: () => router.back(),
+          },
+        ]
+      );
     } catch (error: any) {
       const errorMessage =
-        error?.message || "Failed to create budget category. Please try again.";
+        error?.message ||
+        (editMode
+          ? "Failed to update budget category. Please try again."
+          : "Failed to create budget category. Please try again.");
       Alert.alert("Error", errorMessage);
     }
   };
@@ -150,7 +202,7 @@ export default function AddBudgetItemScreen() {
             <ActivityIndicator color="white" />
           ) : (
             <Text className="text-white text-base" variant="h2">
-              Add Budget Category
+              {editMode ? "Save changes" : "Add Category"}
             </Text>
           )}
         </TouchableOpacity>

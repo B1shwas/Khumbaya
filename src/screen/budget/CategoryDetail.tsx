@@ -1,10 +1,17 @@
 import { InfoIcon } from "@/src/components/ui/InfoIcon";
 import { Text } from "@/src/components/ui/Text";
-import { useCategoryDetails } from "@/src/features/budget/hooks/use-budget";
+import {
+  useCategoryDetails,
+  useDeleteCategoryMutation,
+} from "@/src/features/budget/hooks/use-budget";
 import { MaterialIcons } from "@expo/vector-icons";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { Stack, useLocalSearchParams, useRouter } from "expo-router";
+import { useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
+  Modal,
+  Pressable,
   ScrollView,
   TouchableOpacity,
   View,
@@ -37,10 +44,64 @@ export default function CategoryDetailsScreen() {
   const router = useRouter();
   const { eventId, categoryId } = useLocalSearchParams();
   const { data, isLoading } = useCategoryDetails(Number(categoryId));
+  const deleteMutation = useDeleteCategoryMutation(
+    Number(categoryId || 0),
+    Number(eventId || 0)
+  );
+
+  const [menuVisible, setMenuVisible] = useState(false);
 
   const handleAddExpensePress = () => {
     router.push(
       `/(protected)/(client-stack)/events/${eventId}/(organizer)/${categoryId}/add-expense`
+    );
+  };
+
+  const handleEditCategory = () => {
+    setMenuVisible(false);
+    router.push({
+      pathname:
+        `/(protected)/(client-stack)/events/${eventId}/(organizer)/edit-budget-category` as any,
+      params: {
+        categoryId: categoryId,
+      },
+    });
+  };
+
+  const handleDeleteCategory = () => {
+    setMenuVisible(false);
+    Alert.alert(
+      "Delete Category",
+      "Are you sure you want to delete this category? This action cannot be undone.",
+      [
+        {
+          text: "Cancel",
+          onPress: () => {},
+          style: "cancel",
+        },
+        {
+          text: "Delete",
+          onPress: async () => {
+            try {
+              await deleteMutation.mutateAsync();
+              Alert.alert("Success", "Category deleted successfully!", [
+                {
+                  text: "OK",
+                  onPress: () => {
+                    router.back();
+                  },
+                },
+              ]);
+            } catch (error: any) {
+              const errorMessage =
+                error?.message ||
+                "Failed to delete category. Please try again.";
+              Alert.alert("Error", errorMessage);
+            }
+          },
+          style: "destructive",
+        },
+      ]
     );
   };
 
@@ -56,38 +117,72 @@ export default function CategoryDetailsScreen() {
 
   return (
     <View className="flex-1 bg-[#f8f6f7]">
+      <Stack.Screen
+        options={{
+          headerRight: () => (
+            <TouchableOpacity
+              onPress={() => setMenuVisible(true)}
+              className="pr-4"
+              activeOpacity={0.7}
+            >
+              <MaterialIcons name="more-vert" size={24} color="#181114" />
+            </TouchableOpacity>
+          ),
+        }}
+      />
+      <Modal
+        visible={menuVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setMenuVisible(false)}
+      >
+        <Pressable
+          className="flex-1 bg-black/50"
+          onPress={() => setMenuVisible(false)}
+        >
+          <View className="absolute bottom-0 bg-white shadow-lg w-full pb-4">
+            <TouchableOpacity
+              onPress={handleEditCategory}
+              className="flex-row items-center gap-3 px-5 py-4 border-b border-gray-100"
+            >
+              <MaterialIcons name="edit" size={20} color="#181114" />
+              <Text className="text-[#181114]" variant="h2">
+                Edit Category
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={handleDeleteCategory}
+              className="flex-row items-center gap-3 px-5 py-4"
+            >
+              <MaterialIcons name="delete" size={20} color="#ee2b8c" />
+              <Text className="text-[#ee2b8c]" variant="h2">
+                Delete Category
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </Pressable>
+      </Modal>
+
       <ScrollView
         className="flex-1"
         contentContainerClassName="pb-24"
         showsVerticalScrollIndicator={false}
       >
         <View className="mx-5 mt-5 bg-white rounded-md p-6 shadow-sm border border-gray-100 overflow-hidden">
-          {/* Header */}
-          <View className="flex-row justify-between items-start mb-6">
-            <View>
-              <Text
-                className="text-[10px]  text-secondary mb-2 uppercase tracking-widest"
-                variant="h2"
-              >
-                Category
-              </Text>
-              <Text className="text-2xl text-[#181114]" variant="h1">
-                {categoryData?.name}
-              </Text>
-            </View>
-            <View className="text-right">
-              <Text
-                className="text-[10px] text-gray-400 mb-1 uppercase tracking-widest"
-                variant="h2"
-              >
-                Allocated
-              </Text>
-              <Text className="text-base text-[#181114]" variant="h2">
-                Rs. {categoryData.allocatedBudget.toLocaleString()}
-              </Text>
-            </View>
+          {/* Allocated Budget Header */}
+          <View className="mb-6 py-3 border-b border-gray-100">
+            <Text
+              className="text-[10px] text-gray-400 mb-1 uppercase tracking-widest"
+              variant="h2"
+            >
+              Allocated Budget
+            </Text>
+            <Text className="text-2xl text-[#181114] font-bold" variant="h1">
+              Rs. {categoryData.allocatedBudget.toLocaleString()}
+            </Text>
           </View>
 
+          {/* Stats Section */}
           <View className="flex-row gap-4 justify-between p-4 bg-[#f8f6f7] rounded-md">
             <View className="items-center flex-1">
               <View className="flex-row items-center gap-1.5 mb-1">

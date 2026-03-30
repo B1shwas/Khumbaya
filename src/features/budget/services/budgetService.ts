@@ -46,6 +46,19 @@ export const getExpenseById = async (expenseId: number) => {
   return response.data.data;
 };
 
+export const updateBudgetCategory = async (
+  categoryId: number,
+  payload: z.infer<typeof budgetCategoryFormSchema>
+) => {
+  const response = await api.patch(`/budget-category/${categoryId}`, payload);
+  return response.data.data;
+};
+
+export const deleteBudgetCategory = async (categoryId: number) => {
+  const response = await api.delete(`/budget-category/${categoryId}`);
+  return response.data.data;
+};
+
 export const addPayment = async (
   expenseId: number,
   payload: {

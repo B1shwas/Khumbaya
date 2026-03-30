@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router as expoRouter, Stack, useLocalSearchParams } from "expo-router";
-import { Settings, } from "lucide-react-native";
+import { Settings } from "lucide-react-native";
 import { Platform, Pressable, TouchableOpacity } from "react-native";
 
 const headerBackButton = () => (
@@ -72,7 +72,7 @@ export default function OrganizerEventDetailLayout() {
       <Stack.Screen name="timeline" options={{ title: "Timeline" }} />
       <Stack.Screen name="vendor" options={{ title: "Vendors" }} />
       <Stack.Screen name="sub-event" options={{ title: "Sub Events" }} />
-      <Stack.Screen name="tasklist" options={{ headerShown:false }} />
+      <Stack.Screen name="tasklist" options={{ headerShown: false }} />
       <Stack.Screen name="edit-event" options={{ title: "Event Details" }} />
       <Stack.Screen
         name="subevent-create"
@@ -84,7 +84,7 @@ export default function OrganizerEventDetailLayout() {
           title: "Add Event Member",
           presentation: Platform.OS === "ios" ? "formSheet" : "modal",
           animation: "fade_from_bottom",
-          
+
           headerRight: () => null,
         }}
       />
@@ -105,6 +105,10 @@ export default function OrganizerEventDetailLayout() {
       <Stack.Screen
         name="[categoryId]/[expenseId]/add-payment"
         options={{ title: "Add Payment" }}
+      />
+      <Stack.Screen
+        name="edit-budget-category"
+        options={{ title: "Edit Category" }}
       />
     </Stack>
   );
