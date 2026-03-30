@@ -37,3 +37,15 @@ export const expenseFormSchema = z.object({
 });
 
 export type ExpenseFormData = z.infer<typeof expenseFormSchema>;
+
+export const setBudgetSchema = z.object({
+  budget: z
+    .string()
+    .min(1, "Budget is required")
+    .transform((val) => parseFloat(val))
+    .refine((val) => !isNaN(val) && val > 0, {
+      message: "Budget must be a positive number",
+    }),
+});
+
+export type SetBudgetFormData = z.infer<typeof setBudgetSchema>;

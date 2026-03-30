@@ -20,7 +20,6 @@ export const addBudgetCategory = async (
 
 export const getCategoryDetails = async (categoryId: number) => {
   const response = await api.get(`/budget-category/${categoryId}`);
-  console.log("🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀", response.data.data);
   return response.data.data;
 };
 
@@ -37,6 +36,29 @@ export const addExpenseToCategory = async (
 ) => {
   const response = await api.post(
     `/budget-category/${categoryId}/expense/create`,
+    payload
+  );
+  return response.data.data;
+};
+
+export const getExpenseById = async (expenseId: number) => {
+  const response = await api.get(`/expense/${expenseId}`);
+  return response.data.data;
+};
+
+export const addPayment = async (
+  expenseId: number,
+  payload: {
+    name: string;
+    amount: number;
+    paidOn: string;
+    mode: string;
+    status: string;
+    notes?: string;
+  }
+) => {
+  const response = await api.post(
+    `/expense/${expenseId}/payment/create`,
     payload
   );
   return response.data.data;

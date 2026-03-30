@@ -1,4 +1,9 @@
+import {
+  CountryOption,
+  CountryPickerModal,
+} from "@/src/components/ui/CountryPhone";
 import { Text } from "@/src/components/ui/Text";
+import { COUNTRY_DATA } from "@/src/constants/countrydata";
 import { useInviteGuest } from "@/src/features/guests/api/use-guests";
 import { Ionicons } from "@expo/vector-icons";
 import * as Contacts from "expo-contacts";
@@ -8,7 +13,9 @@ import {
   ActivityIndicator,
   Alert,
   FlatList,
+  Image,
   Pressable,
+  Switch,
   TextInput,
   TouchableOpacity,
   View,
@@ -39,6 +46,68 @@ export default function ContactPickerScreen() {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [isLoadingContacts, setIsLoadingContacts] = useState(true);
   const [isInviting, setIsInviting] = useState(false);
+  const [inviteWithFamily, setInviteWithFamily] = useState(true);
+  const [selectedCountry, setSelectedCountry] = useState<CountryOption>(
+    COUNTRY_DATA[0]
+  );
+  const [pickerVisible, setPickerVisible] = useState(false);
+
+  const normalizePhone = useCallback((raw: string) => {
+    const trimmed = raw.trim();
+    if (!trimmed) return "";
+    const cleaned = trimmed.replace(/[^\d+]/g, "");
+    if (!cleaned) return "";
+    if (cleaned.startsWith("00")) {
+      return `+${cleaned.slice(2).replace(/\D/g, "")}`;
+    }
+    if (cleaned.startsWith("+")) {
+      return `+${cleaned.slice(1).replace(/\D/g, "")}`;
+    }
+    return cleaned.replace(/\D/g, "");
+  }, []);
+
+  const buildPhoneWithCountry = useCallback(
+    (digits: string) => {
+      const stripped = digits.replace(/^0+/, "");
+      return `+${selectedCountry.dialCode}-${stripped}`;
+    },
+    [selectedCountry.dialCode]
+  );
+
+  const formatPhoneWithCountryDash = useCallback(
+    (phone: string) => {
+      if (!phone.startsWith("+")) return phone;
+      const normalized = phone.replace(/[\s-]/g, "");
+
+      if (normalized.startsWith("+977")) {
+        const rest = normalized.slice(4);
+        return `+977-${rest}`;
+      }
+
+      const country = selectedCountry.dialCode;
+      if (normalized.startsWith(`+${country}`)) {
+        const rest = normalized.slice(country.length + 1);
+        return `+${country}-${rest}`;
+      }
+      return phone;
+    },
+    [selectedCountry.dialCode]
+  );
+
+  const confirmCountryCode = useCallback(
+    (name: string) =>
+      new Promise<boolean>((resolve) => {
+        Alert.alert(
+          "Missing country code",
+          `${name} has no country code. Use +${selectedCountry.dialCode}?`,
+          [
+            { text: "Skip", style: "cancel", onPress: () => resolve(false) },
+            { text: "Use", onPress: () => resolve(true) },
+          ]
+        );
+      }),
+    [selectedCountry.dialCode]
+  );
 
   useEffect(() => {
     (async () => {
@@ -110,14 +179,32 @@ export default function ContactPickerScreen() {
 
     for (const contact of selectedContacts) {
       try {
+        const normalizedPhone = normalizePhone(contact.phone);
+        if (!normalizedPhone) {
+          failed.push(contact.name);
+          continue;
+        }
+
+        let finalPhone = normalizedPhone;
+
+        if (!normalizedPhone.startsWith("+")) {
+          const shouldAdd = await confirmCountryCode(contact.name);
+          if (!shouldAdd) {
+            failed.push(contact.name);
+            continue;
+          }
+          finalPhone = buildPhoneWithCountry(normalizedPhone);
+        } else {
+          finalPhone = formatPhoneWithCountryDash(normalizedPhone);
+        }
+
         await inviteGuestMutation.mutateAsync({
           eventId,
           payload: {
             invitation_name: contact.name,
-            phone: contact.phone,
-            eventId,
+            phone: finalPhone,
             fullName: contact.name,
-            isFamily: false,
+            isFamily: inviteWithFamily,
             role: "Guest",
             category: "Friend",
             status: "pending",
@@ -145,7 +232,18 @@ export default function ContactPickerScreen() {
         [{ text: "OK", onPress: () => router.back() }]
       );
     }
-  }, [eventId, selected, contacts, inviteGuestMutation, router]);
+  }, [
+    eventId,
+    selected,
+    contacts,
+    inviteGuestMutation,
+    router,
+    normalizePhone,
+    confirmCountryCode,
+    buildPhoneWithCountry,
+    formatPhoneWithCountryDash,
+    inviteWithFamily,
+  ]);
 
   const renderItem = useCallback(
     ({ item }: { item: ContactItem }) => {
@@ -230,6 +328,47 @@ export default function ContactPickerScreen() {
         </View>
       </View>
 
+      {/* Family toggle + country code */}
+      <View className="px-5 pb-3" style={{ gap: 10 }}>
+        <View className="flex-row items-center justify-between rounded-xl border border-gray-200 bg-white px-4 py-3">
+          <View>
+            <Text className="text-sm font-semibold text-slate-800">
+              Invite with family
+            </Text>
+            <Text className="text-xs text-slate-500">
+              Allow guest to bring family
+            </Text>
+          </View>
+          <Switch
+            value={inviteWithFamily}
+            onValueChange={setInviteWithFamily}
+            trackColor={{ false: "#cbd5e1", true: "#ee2b8c" }}
+            thumbColor="#ffffff"
+          />
+        </View>
+
+        <View className="flex-row items-center justify-between rounded-xl border border-gray-200 bg-white px-4 py-3">
+          <View className="flex-row items-center gap-2">
+            <Image
+              source={selectedCountry.image}
+              style={{ width: 26, height: 18, borderRadius: 3 }}
+              resizeMode="cover"
+            />
+            <Text className="text-sm font-semibold text-slate-800">
+              +{selectedCountry.dialCode}
+            </Text>
+          </View>
+          <TouchableOpacity onPress={() => setPickerVisible(true)}>
+            <Text className="text-xs font-semibold text-[#EE2B8C]">
+              Change
+            </Text>
+          </TouchableOpacity>
+        </View>
+        <Text className="text-[11px] text-slate-500">
+          Used when a contact has no country code.
+        </Text>
+      </View>
+
       {/* Contact List */}
       {isLoadingContacts ? (
         <View className="flex-1 items-center justify-center">
@@ -300,6 +439,13 @@ export default function ContactPickerScreen() {
           </TouchableOpacity>
         </View>
       )}
+
+      <CountryPickerModal
+        visible={pickerVisible}
+        selected={selectedCountry}
+        onClose={() => setPickerVisible(false)}
+        onSelect={(country) => setSelectedCountry(country)}
+      />
     </SafeAreaView>
   );
 }

@@ -178,6 +178,11 @@ export default function CategoryDetailsScreen() {
                 key={expense.id}
                 activeOpacity={0.7}
                 className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex-row items-start gap-4"
+                onPress={() => {
+                  router.push(
+                    `/(protected)/(client-stack)/events/${eventId}/(organizer)/${categoryId}/${expense.id}`
+                  );
+                }}
               >
                 <View className="flex-1">
                   <View className="flex-row justify-between items-start mb-2">
@@ -202,7 +207,9 @@ export default function CategoryDetailsScreen() {
                         Contract:
                       </Text>
                       <Text className="text-xs text-[#181114] " variant="h2">
-                        Rs. {expense.contractAmount.toLocaleString()}
+                        {expense.contractAmount
+                          ? `Rs. ${expense.contractAmount.toLocaleString()}`
+                          : "Not done"}
                       </Text>
                     </View>
                     <Text
@@ -236,7 +243,9 @@ export default function CategoryDetailsScreen() {
         onPress={handleAddExpensePress}
       >
         <MaterialIcons name="add" size={24} color="#fff" />
-        <Text className="text-white text-xs  tracking-tight">Add Expense</Text>
+        <Text className="text-white text-xs  tracking-tight" variant="h2">
+          Add Expense
+        </Text>
       </TouchableOpacity>
     </View>
   );

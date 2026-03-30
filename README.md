@@ -42,6 +42,13 @@ To learn more about developing your project with Expo, look at the following res
 - [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
 - [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
 
+## Contact import formatting
+
+When importing guests from contacts, phone numbers are normalized and formatted as:
+
+- With country code: `+<country>-<number>` (example: `+977-9812345678`)
+- Without country code: the app will prompt to apply the selected country code.
+
 ## Join the community
 
 Join our community of developers creating universal apps.

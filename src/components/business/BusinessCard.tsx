@@ -2,23 +2,14 @@ import { Business, BusinessCategory } from "@/src/constants/business";
 import { MaterialIcons } from "@expo/vector-icons";
 import React from "react";
 import { Image, Platform, Text, TouchableOpacity, View } from "react-native";
-
+import { shadowStyle } from "@/src/utils/helper";
 interface BusinessCardProps {
   business: Business;
   onPress?: () => void;
   onMorePress?: () => void;
 }
 
-const shadowStyle = Platform.select({
-  ios: {
-    shadowColor: "#000",
-    shadowOpacity: 0.07,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 2 },
-  },
-  android: { elevation: 3 },
-  default: {},
-});
+
 
 const CATEGORY_ICONS: Record<
   BusinessCategory,

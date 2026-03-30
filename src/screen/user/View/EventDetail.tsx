@@ -91,7 +91,7 @@ const EventDetail = () => {
       name: "Checklist",
       icon: "checkmark-circle-outline",
       color: "#EC4899",
-      route: `./checklist`,
+      route: `./tasklist`,
     }
   ];
 

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Platform } from "react-native";
 
 type PasswordStrength = "weak" | "medium" | "strong" | "very-strong";
 export const calculatePasswordStrength = (pwd: string): PasswordStrength => {
@@ -89,11 +90,43 @@ export const formatTimeRange = (
   const endText = endDateTime ? formatTime(endDateTime) : "";
 
   if (startText && endText) return `${startText} — ${endText}`;
-  if (startText) return `${startText} — ${fallbackText}`;
-  if (endText) return `${fallbackText} — ${endText}`;
+  if (startText) return startText;
+  if (endText) return endText;
   return fallbackText;
 };
 
+type ChecklistDueMeta = {
+  label: string;
+  badgeClassName: string;
+  textClassName: string;
+};
+
+export const getChecklistDueMeta = (
+  dateValue?: string | null
+): ChecklistDueMeta | null => {
+  if (!dateValue) return null;
+  const dateKey = getDateKey(dateValue);
+  if (!dateKey) return null;
+  const todayKey = getDateKey(new Date().toISOString());
+  if (dateKey !== todayKey) return null;
+
+  return {
+    label: "Due Today",
+    badgeClassName: "bg-orange-50",
+    textClassName: "text-orange-500",
+  };
+};
+
+export  const formatShort = (date: Date) =>
+  date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+  });
+
+export const formatDayOnly = (date: Date) =>
+  date.toLocaleDateString("en-US", {
+    day: "numeric",
+  });
 type SubEventStatusMeta = {
   label: string;
   badgeClassName: string;
@@ -110,7 +143,7 @@ export const getSubEventStatusMeta = (
   switch (normalized) {
     case "ongoing":
       return {
-        label: "Happening now",
+      label: "Happening now",
         badgeClassName: "bg-pink-500 text-white",
         dotClassName:
           "bg-pink-500 text-white ring-1 ring-pink-200 border-2 border-[#f8f6f7]",
@@ -168,3 +201,14 @@ export function useDebounce<T>(value: T, delay: number): T {
 
   return debouncedValue;
 }
+
+export const shadowStyle = Platform.select({
+  ios: {
+    shadowColor: "#000",
+    shadowOpacity: 0.07,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+  },
+  android: { elevation: 3 },
+  default: {},
+});

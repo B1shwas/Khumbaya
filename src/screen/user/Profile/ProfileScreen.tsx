@@ -73,8 +73,7 @@ export default function ProfileScreen() {
 
 
 
-    <ScrollView showsVerticalScrollIndicator={false} className="px-2  bg-white pb-11">
-      {/* PROFILE */}
+    <ScrollView showsVerticalScrollIndicator={false} className="px-2 bg-white pb-11">
       <View className="items-center bg-white py-6">
         <AvatarPicker
           name={user?.username || "User"}
@@ -83,15 +82,13 @@ export default function ProfileScreen() {
           showEditButton={true}
           showName={false}
         />
-
         <Text className="text-2xl font-bold mt-4 text-gray-900">
           {user?.username || "User"}
         </Text>
-
+        {user?.email && !user?.email.startsWith("guest_")}&&
         <Text className="text-gray-500 text-sm">{user?.email}</Text>
         <Text className="text-gray-500 text-sm">{user?.phone}</Text>
       </View>
-
       <View className="mx-6 bg-white rounded-2xl p-1 flex-row shadow-sm">
         <ToggleButton
           title=" Business"
@@ -104,17 +101,11 @@ export default function ProfileScreen() {
           onPress={() => setTab("info")}
         />
       </View>
-
       {tab === "account" ? <Account /> : <Info />}
-
-
     </ScrollView>
-
   </>
   );
 }
-
-/* ---------- Toggle ---------- */
 
 const ToggleButton = ({ title, active, onPress }: ToggleButtonProps) => {
   return (

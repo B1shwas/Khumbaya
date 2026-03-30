@@ -1,5 +1,9 @@
 import { DatePicker } from "@/components/nativewindui/DatePicker";
-import { EVENT_TYPES, EVENT_TYPE_TO_BACKEND, type EventType } from "@/src/constants/event";
+import {
+  EVENT_TYPES,
+  EVENT_TYPE_TO_BACKEND,
+  type EventType,
+} from "@/src/constants/event";
 import { CREATEEVENT } from "@/src/features/events/api/events.service";
 import { useCreateEvent } from "@/src/features/events/hooks/use-event";
 import { Ionicons } from "@expo/vector-icons";
@@ -100,7 +104,6 @@ export default function EventCreate() {
       type: EVENT_TYPE_TO_BACKEND[formData.eventType as EventType],
       startDateTime: selectedDateTime,
       endDateTime: selectedEndDateTime,
-      budget: 0,
       theme: "Classic",
       parentId: undefined,
       role: "Organizer",
@@ -110,7 +113,6 @@ export default function EventCreate() {
         "https://images.unsplash.com/photo-1519741497674-611481863552?w=1200&q=80",
     };
 
-   
     createEvent(payload, {
       onSuccess: () => {
         router.push("/(protected)/(client-tabs)/events");

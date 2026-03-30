@@ -54,10 +54,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         AsyncStorage.getItem("user"),
       ]);
       let user = userString ? JSON.parse(userString) : null;
-    
+
       if (token) {
         try {
-
           set({ token, user, isLoading: true });
           const profileData = await getUserProfile();
 
@@ -65,7 +64,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             id: profileData.id,
             email: profileData.email,
             username: profileData.username,
-            phone:profileData.phone ?? "",
+            phone: profileData.phone ?? "",
           };
 
           set({ token, user, isLoading: false });
@@ -143,7 +142,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       });
       console.log(response.data);
 
-      const userData = response.data
+      const userData = response.data;
       const actualUserData = userData.data || userData;
       await AsyncStorage.setItem("user", JSON.stringify(actualUserData));
       set({ user: actualUserData, isProfileLoading: false });
