@@ -1,36 +1,38 @@
-import { useCreateBusiness } from "@/src/features/business";
+import { useGetBusinessById, useUpdateBusiness } from "@/src/features/business";
 import { MaterialIcons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
-import { useRouter } from "expo-router";
-import { useEffect, useRef, useState } from "react";
-import type { ScrollView as ScrollViewType } from "react-native";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useEffect, useState } from "react";
 import { Text } from "@/src/components/ui/Text";
 import {
+  ActivityIndicator,
   Alert,
   Image,
   KeyboardAvoidingView,
-  Platform,
   ScrollView,
   Switch,
   TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Dropdown } from "react-native-element-dropdown";
 import {
   VENDOR_TO_CATEGORY,
   VENDOR_CATEGORIES,
   CATEGORY_OPTIONS,
   CATEGORY_FIELDS,
+  CATEGORY_TO_VENDOR,
   type FieldConfig,
   type FormState,
 } from "./business-form-constants";
 
-// ─── Main screen ──────────────────────────────────────────────────────────────
-
-export default function CreateBusinessScreen() {
+export default function EditBusinessScreen() {
   const router = useRouter();
-  const createBusiness = useCreateBusiness();
+  const { businessId } = useLocalSearchParams<{ businessId: string }>();
+  const { data: business, isLoading } = useGetBusinessById(businessId ?? "");
+  const updateBusiness = useUpdateBusiness();
+
   const [form, setForm] = useState<FormState>({
     businessName: "",
     description: "",
@@ -41,13 +43,33 @@ export default function CreateBusinessScreen() {
     categoryDetails: {},
   });
   const [coverImage, setCoverImage] = useState<string | null>(null);
-  const scrollRef = useRef<ScrollViewType>(null);
+  const [initialized, setInitialized] = useState(false);
 
+  // Pre-populate form when business data loads
   useEffect(() => {
-    if (form.vendorCategoryId) {
-      setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 150);
+    if (business && !initialized) {
+      const vendorSlug = business.category
+        ? CATEGORY_TO_VENDOR[business.category] ?? ""
+        : "";
+
+      // Split location into city and country (assumes "City, Country" format)
+      const locationParts = (business.location ?? "").split(", ");
+      const city = locationParts[0] ?? "";
+      const country = locationParts[1] ?? "";
+
+      setForm({
+        businessName: business.business_name ?? "",
+        description: business.description ?? "",
+        city,
+        country,
+        vendorType: "",
+        vendorCategoryId: vendorSlug,
+        categoryDetails: {},
+      });
+      setCoverImage(business.cover ?? null);
+      setInitialized(true);
     }
-  }, [form.vendorCategoryId]);
+  }, [business, initialized]);
 
   const updateCategoryDetail = (key: string, value: string | boolean) =>
     setForm((prev) => ({
@@ -61,11 +83,7 @@ export default function CreateBusinessScreen() {
       return;
     }
     if (!form.vendorCategoryId) {
-      Alert.alert("Required", "Please select a category.");
-      return;
-    }
-    if (form.vendorCategoryId === "venues" && !form.vendorType) {
-      Alert.alert("Required", "Please select a venue type.");
+      Alert.alert("Required", "Please select a vendor type.");
       return;
     }
 
@@ -73,23 +91,28 @@ export default function CreateBusinessScreen() {
       .filter(Boolean)
       .join(", ");
 
-    createBusiness.mutate(
+    updateBusiness.mutate(
       {
-        business_name: form.businessName.trim(),
-        description: form.description.trim() || undefined,
-        category: VENDOR_TO_CATEGORY[form.vendorCategoryId],
-        coverImageUri: coverImage ?? undefined,
-        location: location || undefined,
-        categoryDetails: form.categoryDetails,
+        id: businessId!,
+        payload: {
+          business_name: form.businessName.trim(),
+          description: form.description.trim() || undefined,
+          category: VENDOR_TO_CATEGORY[form.vendorCategoryId] ?? undefined,
+          coverImageUri: coverImage ?? undefined,
+          location: location || undefined,
+          categoryDetails: Object.keys(form.categoryDetails).length > 0
+            ? form.categoryDetails
+            : undefined,
+        },
       },
       {
         onSuccess: () => {
-          Alert.alert("Success", "Business created!", [
+          Alert.alert("Success", "Business updated!", [
             { text: "OK", onPress: () => router.back() },
           ]);
         },
         onError: () => {
-          Alert.alert("Error", "Failed to create business. Please try again.");
+          Alert.alert("Error", "Failed to update business. Please try again.");
         },
       }
     );
@@ -243,6 +266,27 @@ export default function CreateBusinessScreen() {
     );
   };
 
+  // ─── Loading state ─────────────────────────────────────────────────────────
+
+  if (isLoading) {
+    return (
+      <SafeAreaView className="flex-1 bg-[#f8f6f7] items-center justify-center">
+        <ActivityIndicator color="#ee2b8c" />
+      </SafeAreaView>
+    );
+  }
+
+  if (!business) {
+    return (
+      <SafeAreaView className="flex-1 bg-[#f8f6f7] items-center justify-center">
+        <MaterialIcons name="storefront" size={48} color="#d1d5db" />
+        <Text variant="h2" className="text-[#594048] mt-3 text-base">
+          Business not found
+        </Text>
+      </SafeAreaView>
+    );
+  }
+
   // ─── JSX ──────────────────────────────────────────────────────────────────────
 
   const activeCategory = VENDOR_CATEGORIES.find(
@@ -253,18 +297,13 @@ export default function CreateBusinessScreen() {
     : null;
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
-      className="flex-1 bg-[#f8f6f7]"
-    >
+    <KeyboardAvoidingView behavior="padding" className="flex-1 bg-[#f8f6f7]">
       <ScrollView
-        ref={scrollRef}
         className="flex-1"
         contentContainerStyle={{
           paddingHorizontal: 24,
           paddingTop: 24,
-          paddingBottom: 32,
+          paddingBottom: 24,
         }}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
@@ -410,14 +449,14 @@ export default function CreateBusinessScreen() {
             </View>
           )}
 
-          {/* Security-specific fields */}
+          {/* Category-specific fields */}
           {activeFields && activeFields.length > 0 && (
             <View className="gap-6">
               {activeFields.map(renderCategoryField)}
             </View>
           )}
 
-          {/* City + Country — at the bottom */}
+          {/* City + Country */}
           <View className="flex-row gap-4">
             <View className="flex-1">
               <Text variant="h1" className="text-[11px] text-[#594048] uppercase tracking-widest ml-1 mb-1.5">
@@ -466,30 +505,32 @@ export default function CreateBusinessScreen() {
             </View>
           </View>
         </View>
+      </ScrollView>
 
-        {/* Submit — inside scroll so it's reachable at the end */}
+      {/* Sticky Submit */}
+      <SafeAreaView edges={["bottom"]} className="px-6 pb-4 bg-[#f8f6f7]/95">
         <TouchableOpacity
           activeOpacity={0.85}
           onPress={handleSubmit}
-          disabled={createBusiness.isPending}
-          className="w-full bg-[#ee2b8c] rounded-2xl py-5 flex-row items-center justify-center gap-3 mt-8"
+          disabled={updateBusiness.isPending}
+          className="w-full bg-[#ee2b8c] rounded-2xl py-5 flex-row items-center justify-center gap-3"
           style={{
             shadowColor: "#ee2b8c",
             shadowOpacity: 0.25,
             shadowRadius: 12,
             shadowOffset: { width: 0, height: 4 },
             elevation: 6,
-            opacity: createBusiness.isPending ? 0.6 : 1,
+            opacity: updateBusiness.isPending ? 0.6 : 1,
           }}
         >
           <Text className="text-white font-extrabold text-[18px] tracking-tight">
-            {createBusiness.isPending ? "Creating..." : "Create Business"}
+            {updateBusiness.isPending ? "Saving..." : "Save Changes"}
           </Text>
-          {!createBusiness.isPending && (
-            <MaterialIcons name="arrow-forward" size={22} color="white" />
+          {!updateBusiness.isPending && (
+            <MaterialIcons name="check" size={22} color="white" />
           )}
         </TouchableOpacity>
-      </ScrollView>
+      </SafeAreaView>
     </KeyboardAvoidingView>
   );
 }
