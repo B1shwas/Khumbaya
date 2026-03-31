@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  bulkUpdateTodoStatusApi,
   createTodoApi,
   deleteTodoApi,
   getTodoByIdApi,
@@ -21,6 +22,9 @@ export const useTodosByEventId = (eventId: number | null) => {
     queryKey: ["todos", "event", eventId],
     queryFn: () => getTodosByEventIdApi(eventId as number),
     enabled: typeof eventId === "number",
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+    select: (data) => data.items,
   });
 };
 
@@ -29,6 +33,8 @@ export const useTodoById = (id: number | null) => {
     queryKey: ["todo", id],
     queryFn: () => getTodoByIdApi(id as number),
     enabled: typeof id === "number",
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
   });
 };
 
@@ -71,6 +77,7 @@ export const useUpdateTodo = () => {
     },
   });
 };
+
 export const useDeleteTodo = () => {
   const queryClient = useQueryClient();
 
@@ -93,4 +100,38 @@ export const useDeleteTodo = () => {
       queryClient.invalidateQueries({ queryKey: ["todos", "event"] });
     },
   });
-}
+};
+
+export const useBulkUpdateTodoStatus = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (updates: Array<{ todoId: number; isDone: boolean; status: string }>) =>
+      bulkUpdateTodoStatusApi(updates),
+    onMutate: async (updates) => {
+      await queryClient.cancelQueries({ queryKey: ["todos"] });
+
+      const previousTodos = queryClient.getQueryData(["todos"]);
+
+      queryClient.setQueryData(["todos"], (old: any) => {
+        if (!old) return old;
+        const list = Array.isArray(old) ? old : (old as any).data;
+        const newList = list.map((t: TodoColumn) => {
+          const update = updates.find((u) => u.todoId === t.id);
+          return update ? { ...t, isDone: update.isDone, status: update.status } : t;
+        });
+        return Array.isArray(old) ? newList : { ...old, data: newList };
+      });
+
+      return { previousTodos };
+    },
+    onError: (_err, _variables, context) => {
+      if (context?.previousTodos) {
+        queryClient.setQueryData(["todos"], context.previousTodos);
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["todos"] });
+    },
+  });
+};

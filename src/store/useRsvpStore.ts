@@ -10,6 +10,9 @@ export interface RsvpDraft {
   rawAccommodation: boolean | null;
   rawIsArrivalPickupRequired: boolean | null;
   rawIsDeparturePickupRequired: boolean | null;
+  rawAssignedRoom: string | null;
+  rawArrivalInfo: string | null;
+  rawDepartureInfo: string | null;
   rawNotes: string | null;
 }
 

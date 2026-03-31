@@ -104,9 +104,14 @@ export default function AddExpenseScreen({
         nextDueDate: data.nextDueDate || undefined,
         notes: data.notes || undefined,
       };
+<<<<<<< HEAD
 
       const mutation = editMode ? updateMutation : expenseMutation;
       await mutation.mutateAsync(payload);
+=======
+console.log('this isjwhrkjw😂😂😂😂😂😂😂😂😂😂😂😂😂😂😂😂h ',payload);
+      await expenseMutation.mutateAsync(payload);
+>>>>>>> e65fe29 (todo optimization to support the multiple person and the people assignement into the data)
 
       const action = editMode ? "updated" : "created";
       Alert.alert("Success", `Expense ${action} successfully!`, [

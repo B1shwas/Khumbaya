@@ -18,6 +18,9 @@ export interface MemberRsvpCardProp {
   rawAccommodation: boolean | null;
   rawIsArrivalPickupRequired: boolean | null;
   rawIsDeparturePickupRequired: boolean | null;
+  rawAssignedRoom: string | null;
+  rawArrivalInfo: string | null;
+  rawDepartureInfo: string | null;
 }
 
 function deriveStatus(event_guest: EventGuest | null): RSVPStatus {
@@ -73,5 +76,8 @@ export function mapToMemberRsvp(
       item.event_guest?.isArrivalPickupRequired ?? null,
     rawIsDeparturePickupRequired:
       item.event_guest?.isDeparturePickupRequired ?? null,
+    rawAssignedRoom: item.event_guest?.assigned_room ?? null,
+    rawArrivalInfo: item.event_guest?.arrival_info ?? null,
+    rawDepartureInfo: item.event_guest?.departure_info ?? null,
   };
 }
