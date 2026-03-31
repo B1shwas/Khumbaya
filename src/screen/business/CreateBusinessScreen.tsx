@@ -56,7 +56,7 @@ export default function CreateBusinessScreen() {
     }));
 
   const handleSubmit = () => {
-    if (!form.businessName.trim()) {
+    if (form?.businessName?.trim()) {
       Alert.alert("Required", "Please enter a business name.");
       return;
     }

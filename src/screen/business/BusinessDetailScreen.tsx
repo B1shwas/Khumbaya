@@ -4,7 +4,6 @@ import {
   BusinessRequest,
   BusinessReview,
   MOCK_SERVICE_ATTRIBUTE,
-  MOCK_VENUE_ATTRIBUTES,
   OtherServiceAttribute,
   VenueAttribute
 } from "@/src/constants/business";
@@ -806,14 +805,14 @@ function ServiceDetailsSection({ service }: { service: OtherServiceAttribute }) 
 export default function BusinessDetailsScreen() {
   const router = useRouter();
   const { businessId } = useLocalSearchParams<{ businessId: string }>();
-  const { data: business, isLoading } = useGetBusinessById(businessId ?? "");
+  const { data: businessWithAttribute, isLoading } = useGetBusinessById(businessId ?? "");
   const deleteBusiness = useDeleteBusiness();
 
   const handleDelete = () => {
-    if (!business) return;
+    if (!businessWithAttribute) return;
     Alert.alert(
       "Delete Business",
-      `Are you sure you want to delete "${business.business_name}"? This action cannot be undone.`,
+      `Are you sure you want to delete "${businessWithAttribute.business_information.business_name}"? This action cannot be undone.`,
       [
         { text: "Cancel", style: "cancel" },
         {
@@ -844,7 +843,7 @@ export default function BusinessDetailsScreen() {
     );
   }
 
-  if (!business) {
+  if (!businessWithAttribute) {
     return (
       <SafeAreaView className="flex-1 bg-[#f8f6f7] items-center justify-center">
         <MaterialIcons name="storefront" size={48} color="#d1d5db" />
@@ -862,31 +861,31 @@ export default function BusinessDetailsScreen() {
         showsVerticalScrollIndicator={false}
       >
         <HeroSection
-          business={business}
+          business={businessWithAttribute.business_information}
           onEditPress={() => router.push(`/business/edit/${businessId}`)}
         />
 
         <View className="px-4 gap-4 mt-4">
-          <StatsRow business={business} />
-          <ActiveRequestsSection requests={business.requests ?? []} />
+          <StatsRow business={businessWithAttribute.business_information} />
+          <ActiveRequestsSection requests={businessWithAttribute.business_information.requests ?? []} />
 
           {/* Category-specific details (from constants) */}
-          {business.category === "Venue" && (
+          {businessWithAttribute.business_information.category === "Venue" && (
             <VenueDetailsSection
-              venues={MOCK_VENUE_ATTRIBUTES}
+              venues={businessWithAttribute.venue_information}
               onEditVenue={(venue) =>
                 Alert.alert("Edit Venue", `Editing: ${venue.venue_type ?? "Venue"}`)
               }
               onAddVenue={() => Alert.alert("Add Venue", "Open add venue form")}
             />
           )}
-          {business.category !== "Venue" && business.category != null && (
+          {businessWithAttribute.business_information.category !== "Venue" && businessWithAttribute.business_information.category != null && (
             <ServiceDetailsSection service={MOCK_SERVICE_ATTRIBUTE} />
           )}
 
           {/* <PortfolioGrid portfolio={business.portfolio ?? []} /> */}
-          <AvailabilityCalendar dates={business.availabilityDates} />
-          <LatestReviewSection reviews={business.reviews ?? []} />
+          <AvailabilityCalendar dates={businessWithAttribute.business_information.availabilityDates} />
+          <LatestReviewSection reviews={businessWithAttribute.business_information.reviews ?? []} />
 
           {/* Danger Zone */}
           <View className="flex-row items-center justify-between rounded-2xl border border-red-200 bg-red-50 p-4">
