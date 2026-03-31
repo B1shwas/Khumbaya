@@ -4,6 +4,8 @@ import {
   BusinessRequest,
   BusinessReview,
   BusinessService,
+  VenueAttribute,
+  OtherServiceAttribute,
 } from "@/src/constants/business";
 
 export type {
@@ -12,6 +14,8 @@ export type {
   BusinessRequest,
   BusinessReview,
   BusinessService,
+  VenueAttribute,
+  OtherServiceAttribute,
 };
 
 export interface CreateBusinessPayload {

@@ -6,6 +6,7 @@ package-lock.json
 package-lock*
 pnpm-lock.yaml
 .agent
+.claude
 pnpm-lock*
 # Expo
 .expo/

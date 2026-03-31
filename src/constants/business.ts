@@ -40,6 +40,47 @@ export interface BusinessReview {
   date: string;
 }
 
+// ─── Category-specific attribute schemas ──────────────────────────────────────
+
+export interface VenueAttribute {
+  id: number;
+  business_id: number;
+  venue_type: string | null;
+  capacity: number | null;
+  area_sqft: number | null;
+  min_booking_hours: number | null;
+  max_booking_hours: number | null;
+  has_catering: boolean;
+  has_av_equipment: boolean;
+  is_outDoor: boolean;
+  price_per_hour: number | null;
+  parking: boolean;
+  rooms_available: number | null;
+  valet_available: boolean;
+  alcohol_allowed: boolean;
+  sound_limit_db: number | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface OtherServiceAttribute {
+  id: number;
+  business_id: number;
+  artist_type: string | null;
+  styles_specialized: string | null;
+  max_bookings_per_day: number | null;
+  advance_amount: number | null;
+  uses_own_material: boolean;
+  travel_charges: number | null;
+  portfolio_link: string | null;
+  available_for_destination: boolean;
+  customization_available: boolean;
+  serves_veg: boolean;
+  min_order: number | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface Business {
   id: number;
   business_name: string;
@@ -85,3 +126,85 @@ export interface Business {
   };
 }
 
+// ─── Mock constants for category-specific details ─────────────────────────────
+
+export const MOCK_VENUE_ATTRIBUTES: VenueAttribute[] = [
+  {
+    id: 1,
+    business_id: 1,
+    venue_type: "Banquet Hall",
+    capacity: 500,
+    area_sqft: 4200,
+    min_booking_hours: 4,
+    max_booking_hours: 12,
+    has_catering: true,
+    has_av_equipment: true,
+    is_outDoor: false,
+    price_per_hour: 8000,
+    parking: true,
+    rooms_available: 8,
+    valet_available: true,
+    alcohol_allowed: true,
+    sound_limit_db: 85,
+    createdAt: "2024-01-01T00:00:00.000Z",
+    updatedAt: "2024-01-01T00:00:00.000Z",
+  },
+  {
+    id: 2,
+    business_id: 1,
+    venue_type: "Lawn / Garden",
+    capacity: 800,
+    area_sqft: 9000,
+    min_booking_hours: 6,
+    max_booking_hours: 16,
+    has_catering: true,
+    has_av_equipment: false,
+    is_outDoor: true,
+    price_per_hour: 12000,
+    parking: true,
+    rooms_available: 2,
+    valet_available: false,
+    alcohol_allowed: false,
+    sound_limit_db: 70,
+    createdAt: "2024-01-01T00:00:00.000Z",
+    updatedAt: "2024-01-01T00:00:00.000Z",
+  },
+  {
+    id: 3,
+    business_id: 1,
+    venue_type: "Rooftop Terrace",
+    capacity: 200,
+    area_sqft: 2800,
+    min_booking_hours: 3,
+    max_booking_hours: 8,
+    has_catering: false,
+    has_av_equipment: true,
+    is_outDoor: true,
+    price_per_hour: 6500,
+    parking: false,
+    rooms_available: null,
+    valet_available: true,
+    alcohol_allowed: true,
+    sound_limit_db: null,
+    createdAt: "2024-01-01T00:00:00.000Z",
+    updatedAt: "2024-01-01T00:00:00.000Z",
+  },
+];
+
+export const MOCK_SERVICE_ATTRIBUTE: OtherServiceAttribute = {
+  id: 1,
+  business_id: 1,
+  artist_type: "Traditional & Contemporary",
+  styles_specialized: "Bridal, Editorial, SFX",
+  max_bookings_per_day: 3,
+  advance_amount: 5000,
+  uses_own_material: true,
+  travel_charges: 500,
+  portfolio_link: "https://portfolio.example.com",
+  available_for_destination: true,
+  customization_available: true,
+  serves_veg: false,
+  min_order: null,
+  createdAt: "2024-01-01T00:00:00.000Z",
+  updatedAt: "2024-01-01T00:00:00.000Z",
+};

@@ -4,6 +4,10 @@ import {
   BusinessRequest,
   BusinessReview,
   BusinessService,
+  VenueAttribute,
+  OtherServiceAttribute,
+  MOCK_VENUE_ATTRIBUTES,
+  MOCK_SERVICE_ATTRIBUTE,
 } from "@/src/constants/business";
 import { getBusinessIcon } from "@/src/constants/business-icons";
 import { useGetBusinessById, useDeleteBusiness } from "@/src/features/business";
@@ -552,6 +556,299 @@ function LatestReviewSection({ reviews }: { reviews: BusinessReview[] }) {
 }
 
 
+// ─── Venue Details ────────────────────────────────────────────────────────────
+
+function AmenityChip({
+  icon,
+  label,
+  active,
+}: {
+  icon: keyof typeof MaterialIcons.glyphMap;
+  label: string;
+  active: boolean;
+}) {
+  if (!active) return null;
+  return (
+    <View className="flex-row items-center gap-1 bg-primary/10 rounded-full px-2.5 py-1">
+      <MaterialIcons name={icon} size={12} color="#ee2b8c" />
+      <Text className="text-[10px] text-primary">{label}</Text>
+    </View>
+  );
+}
+
+function VenueCard({ venue, onEdit }: { venue: VenueAttribute; onEdit: () => void }) {
+  const amenities: Array<{
+    icon: keyof typeof MaterialIcons.glyphMap;
+    label: string;
+    active: boolean;
+  }> = [
+    { icon: "restaurant", label: "Catering", active: venue.has_catering },
+    { icon: "tv", label: "AV Equipment", active: venue.has_av_equipment },
+    { icon: "wb-sunny", label: "Outdoor", active: venue.is_outDoor },
+    { icon: "local-parking", label: "Parking", active: venue.parking },
+    { icon: "directions-car", label: "Valet", active: venue.valet_available },
+    { icon: "local-bar", label: "Alcohol Allowed", active: venue.alcohol_allowed },
+  ];
+  const activeAmenities = amenities.filter((a) => a.active);
+
+  return (
+    <View
+      className="bg-white rounded-2xl border border-gray-100 p-4 mb-3"
+      style={shadowStyle}
+    >
+      {/* Top row: venue type + price + edit */}
+      <View className="flex-row items-center justify-between mb-3">
+        <View className="flex-row items-center gap-2 flex-1">
+          <View className="w-9 h-9 rounded-xl bg-primary/10 items-center justify-center">
+            <MaterialIcons name="meeting-room" size={18} color="#ee2b8c" />
+          </View>
+          <View>
+            <Text variant="h1" className="text-sm text-[#181114]">
+              {venue.venue_type ?? "Venue"}
+            </Text>
+            {venue.capacity != null && (
+              <Text className="text-[10px] text-[#594048]">
+                Up to {venue.capacity} guests
+              </Text>
+            )}
+          </View>
+        </View>
+        <View className="flex-row items-center gap-2">
+          {venue.price_per_hour != null && (
+            <View className="items-end">
+              <Text variant="h1" className="text-primary text-base">
+                ₹{venue.price_per_hour.toLocaleString()}
+              </Text>
+              <Text className="text-[10px] text-gray-400">per hour</Text>
+            </View>
+          )}
+          <TouchableOpacity
+            onPress={onEdit}
+            activeOpacity={0.75}
+            className="w-8 h-8 rounded-full bg-gray-100 items-center justify-center"
+          >
+            <MaterialIcons name="edit" size={15} color="#594048" />
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      {/* Stats grid */}
+      <View className="flex-row gap-2 mb-3">
+        {venue.area_sqft != null && (
+          <View className="flex-1 bg-gray-50 rounded-xl p-2.5 items-center">
+            <MaterialIcons name="straighten" size={16} color="#594048" />
+            <Text variant="h1" className="text-xs text-[#181114] mt-1">
+              {venue.area_sqft.toLocaleString()} sqft
+            </Text>
+            <Text className="text-[9px] text-gray-400">Area</Text>
+          </View>
+        )}
+        {venue.rooms_available != null && (
+          <View className="flex-1 bg-gray-50 rounded-xl p-2.5 items-center">
+            <MaterialIcons name="hotel" size={16} color="#594048" />
+            <Text variant="h1" className="text-xs text-[#181114] mt-1">
+              {venue.rooms_available}
+            </Text>
+            <Text className="text-[9px] text-gray-400">Rooms</Text>
+          </View>
+        )}
+        {(venue.min_booking_hours != null || venue.max_booking_hours != null) && (
+          <View className="flex-1 bg-gray-50 rounded-xl p-2.5 items-center">
+            <MaterialIcons name="schedule" size={16} color="#594048" />
+            <Text variant="h1" className="text-xs text-[#181114] mt-1">
+              {venue.min_booking_hours ?? "—"}–{venue.max_booking_hours ?? "—"}h
+            </Text>
+            <Text className="text-[9px] text-gray-400">Booking Hrs</Text>
+          </View>
+        )}
+        {venue.sound_limit_db != null && (
+          <View className="flex-1 bg-gray-50 rounded-xl p-2.5 items-center">
+            <MaterialIcons name="volume-up" size={16} color="#594048" />
+            <Text variant="h1" className="text-xs text-[#181114] mt-1">
+              {venue.sound_limit_db} dB
+            </Text>
+            <Text className="text-[9px] text-gray-400">Sound Limit</Text>
+          </View>
+        )}
+      </View>
+
+      {/* Amenity chips */}
+      {activeAmenities.length > 0 && (
+        <View className="flex-row flex-wrap gap-1.5 pt-2 border-t border-gray-100">
+          {activeAmenities.map((a) => (
+            <AmenityChip key={a.label} icon={a.icon} label={a.label} active />
+          ))}
+        </View>
+      )}
+    </View>
+  );
+}
+
+function VenueDetailsSection({
+  venues,
+  onEditVenue,
+  onAddVenue,
+}: {
+  venues: VenueAttribute[];
+  onEditVenue: (venue: VenueAttribute) => void;
+  onAddVenue: () => void;
+}) {
+  return (
+    <View>
+      <View className="flex-row items-center justify-between mb-3">
+        <View className="flex-row items-center gap-2">
+          <Text variant="h1" className="text-base text-[#181114]">Venues</Text>
+          {venues.length > 0 && (
+            <View className="bg-primary/10 rounded-full px-2.5 py-1">
+              <Text className="text-[11px] text-primary">{venues.length} listed</Text>
+            </View>
+          )}
+        </View>
+        <TouchableOpacity
+          onPress={onAddVenue}
+          activeOpacity={0.8}
+          className="flex-row items-center gap-1 bg-primary/10 rounded-full px-3 py-1.5"
+        >
+          <MaterialIcons name="add" size={14} color="#ee2b8c" />
+          <Text variant="h1" className="text-primary text-xs">Add Venue</Text>
+        </TouchableOpacity>
+      </View>
+
+      {venues.length === 0 ? (
+        <TouchableOpacity
+          onPress={onAddVenue}
+          activeOpacity={0.8}
+          className="bg-white rounded-2xl border border-dashed border-primary/40 py-10 items-center justify-center gap-2"
+        >
+          <View className="w-12 h-12 rounded-full bg-primary/10 items-center justify-center">
+            <MaterialIcons name="add-business" size={24} color="#ee2b8c" />
+          </View>
+          <Text variant="h1" className="text-sm text-[#181114]">Add your first venue</Text>
+          <Text className="text-xs text-gray-400">Tap to add capacity, pricing & amenities</Text>
+        </TouchableOpacity>
+      ) : (
+        venues.map((v) => (
+          <VenueCard key={v.id} venue={v} onEdit={() => onEditVenue(v)} />
+        ))
+      )}
+    </View>
+  );
+}
+
+// ─── Service Details ──────────────────────────────────────────────────────────
+
+function InfoRow({
+  icon,
+  label,
+  value,
+}: {
+  icon: keyof typeof MaterialIcons.glyphMap;
+  label: string;
+  value: string | number;
+}) {
+  return (
+    <View className="flex-row items-center gap-3 py-3 border-b border-gray-50">
+      <View className="w-8 h-8 rounded-xl bg-primary/10 items-center justify-center">
+        <MaterialIcons name={icon} size={16} color="#ee2b8c" />
+      </View>
+      <Text className="text-xs text-[#594048] flex-1">{label}</Text>
+      <Text variant="h1" className="text-xs text-[#181114] text-right max-w-[50%]" numberOfLines={1}>
+        {value}
+      </Text>
+    </View>
+  );
+}
+
+function BoolBadge({ label, value }: { label: string; value: boolean }) {
+  return (
+    <View
+      className={`flex-row items-center gap-1.5 rounded-xl px-3 py-2 ${
+        value ? "bg-emerald-50 border border-emerald-200" : "bg-gray-50 border border-gray-200"
+      }`}
+    >
+      <MaterialIcons
+        name={value ? "check-circle" : "cancel"}
+        size={14}
+        color={value ? "#059669" : "#9ca3af"}
+      />
+      <Text
+        className={`text-[11px] ${value ? "text-emerald-700" : "text-gray-400"}`}
+      >
+        {label}
+      </Text>
+    </View>
+  );
+}
+
+type InfoRowItem = {
+  icon: keyof typeof MaterialIcons.glyphMap;
+  label: string;
+  value: string | number | null | undefined;
+};
+
+function ServiceDetailsSection({ service }: { service: OtherServiceAttribute }) {
+  const allRows: InfoRowItem[] = [
+    { icon: "person", label: "Artist Type", value: service.artist_type },
+    { icon: "palette", label: "Styles Specialized", value: service.styles_specialized },
+    { icon: "event-available", label: "Max Bookings / Day", value: service.max_bookings_per_day },
+    {
+      icon: "payments",
+      label: "Advance Amount",
+      value: service.advance_amount != null ? `₹${service.advance_amount.toLocaleString()}` : null,
+    },
+    {
+      icon: "flight-takeoff",
+      label: "Travel Charges",
+      value: service.travel_charges != null ? `₹${service.travel_charges.toLocaleString()}` : null,
+    },
+    {
+      icon: "shopping-bag",
+      label: "Minimum Order",
+      value: service.min_order != null ? `₹${service.min_order.toLocaleString()}` : null,
+    },
+  ];
+  const infoRows = allRows.filter(
+    (r): r is InfoRowItem & { value: string | number } => r.value != null
+  );
+
+  const boolFlags = [
+    { label: "Uses Own Material", value: service.uses_own_material },
+    { label: "Available for Destination", value: service.available_for_destination },
+    { label: "Customization Available", value: service.customization_available },
+    { label: "Serves Veg", value: service.serves_veg },
+  ];
+
+  return (
+    <View
+      className="bg-white rounded-2xl border border-gray-100 p-4"
+      style={shadowStyle}
+    >
+      <View className="flex-row items-center gap-2 mb-1">
+        <MaterialIcons name="miscellaneous-services" size={18} color="#ee2b8c" />
+        <Text variant="h1" className="text-base text-[#181114]">Service Details</Text>
+      </View>
+
+      {infoRows.map((r) => (
+        <InfoRow key={r.label} icon={r.icon} label={r.label} value={r.value} />
+      ))}
+
+      {service.portfolio_link != null && (
+        <InfoRow
+          icon="link"
+          label="Portfolio"
+          value={service.portfolio_link}
+        />
+      )}
+
+      <View className="flex-row flex-wrap gap-2 mt-3 pt-3 border-t border-gray-100">
+        {boolFlags.map((f) => (
+          <BoolBadge key={f.label} label={f.label} value={f.value} />
+        ))}
+      </View>
+    </View>
+  );
+}
+
 // ─── Main Screen ──────────────────────────────────────────────────────────────
 
 export default function BusinessDetailsScreen() {
@@ -620,6 +917,21 @@ export default function BusinessDetailsScreen() {
         <View className="px-4 gap-4 mt-4">
           <StatsRow business={business} />
           <ActiveRequestsSection requests={business.requests ?? []} />
+
+          {/* Category-specific details (from constants) */}
+          {business.category === "Venue" && (
+            <VenueDetailsSection
+              venues={MOCK_VENUE_ATTRIBUTES}
+              onEditVenue={(venue) =>
+                Alert.alert("Edit Venue", `Editing: ${venue.venue_type ?? "Venue"}`)
+              }
+              onAddVenue={() => Alert.alert("Add Venue", "Open add venue form")}
+            />
+          )}
+          {business.category !== "Venue" && business.category != null && (
+            <ServiceDetailsSection service={MOCK_SERVICE_ATTRIBUTE} />
+          )}
+
           <PortfolioGrid portfolio={business.portfolio ?? []} />
           <ServicesSection services={business.services ?? []} />
           <AvailabilityCalendar dates={business.availabilityDates} />
