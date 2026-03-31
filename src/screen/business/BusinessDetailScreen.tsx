@@ -3,14 +3,13 @@ import {
   Business,
   BusinessRequest,
   BusinessReview,
-  BusinessService,
-  VenueAttribute,
-  OtherServiceAttribute,
-  MOCK_VENUE_ATTRIBUTES,
   MOCK_SERVICE_ATTRIBUTE,
+  MOCK_VENUE_ATTRIBUTES,
+  OtherServiceAttribute,
+  VenueAttribute
 } from "@/src/constants/business";
 import { getBusinessIcon } from "@/src/constants/business-icons";
-import { useGetBusinessById, useDeleteBusiness } from "@/src/features/business";
+import { useDeleteBusiness, useGetBusinessById } from "@/src/features/business";
 import { MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -359,50 +358,6 @@ function PortfolioGrid({ portfolio }: { portfolio: string[] }) {
 
 // ─── Services ─────────────────────────────────────────────────────────────────
 
-function ServiceCard({ service }: { service: BusinessService }) {
-  return (
-    <View
-      className="bg-gray-50 rounded-xl p-3 border border-gray-100 w-full"
-    >
-      <View className="flex flex-row items-center  justify-between mb-2">
-
-      <View className="w-12 h-12 rounded-full bg-primary/10 items-center justify-center mb-2">
-        <MaterialIcons
-          name={service.iconName as keyof typeof MaterialIcons.glyphMap}
-          size={20}
-          color="#ee2b8c"
-          />
-          </View>
-      <Text variant="h2" className="text-xs text-primary mt-0.5">
-        {service.price}
-      </Text>
-      </View>
-      <Text variant="h1" className="text-sm text-[#181114]" numberOfLines={1}>
-        {service.title}
-      </Text>
-      <Text className="text-xs text-[#594048] mt-1" numberOfLines={2}>
-        {service.description}
-      </Text>
-    </View>
-  );
-}
-
-function ServicesSection({ services }: { services: BusinessService[] }) {
-  if (services.length === 0) return null;
-
-  return (
-    <View
-      className="bg-white rounded-2xl border border-gray-100 p-4"
-    >
-      <Text variant="h1" className="text-base text-[#181114] mb-3">Services</Text>
-      <View className="flex-row flex-wrap gap-3">
-        {services.map((service) => (
-          <ServiceCard key={service.id} service={service} />
-        ))}
-      </View>
-    </View>
-  );
-}
 
 // ─── Availability Calendar ────────────────────────────────────────────────────
 
@@ -460,19 +415,17 @@ function AvailabilityCalendar({
             return (
               <View key={di} style={{ flex: 1, alignItems: "center" }}>
                 <View
-                  className={`w-7 h-7 rounded-full items-center justify-center ${
-                    isBooked
-                      ? "bg-primary"
-                      : isPending
+                  className={`w-7 h-7 rounded-full items-center justify-center ${isBooked
+                    ? "bg-primary"
+                    : isPending
                       ? "bg-amber-400"
                       : "bg-transparent"
-                  }`}
+                    }`}
                 >
                   <Text
                     variant="h2"
-                    className={`text-xs ${
-                      isBooked || isPending ? "text-white" : "text-[#181114]"
-                    }`}
+                    className={`text-xs ${isBooked || isPending ? "text-white" : "text-[#181114]"
+                      }`}
                   >
                     {day}
                   </Text>
@@ -582,13 +535,13 @@ function VenueCard({ venue, onEdit }: { venue: VenueAttribute; onEdit: () => voi
     label: string;
     active: boolean;
   }> = [
-    { icon: "restaurant", label: "Catering", active: venue.has_catering },
-    { icon: "tv", label: "AV Equipment", active: venue.has_av_equipment },
-    { icon: "wb-sunny", label: "Outdoor", active: venue.is_outDoor },
-    { icon: "local-parking", label: "Parking", active: venue.parking },
-    { icon: "directions-car", label: "Valet", active: venue.valet_available },
-    { icon: "local-bar", label: "Alcohol Allowed", active: venue.alcohol_allowed },
-  ];
+      { icon: "restaurant", label: "Catering", active: venue.has_catering },
+      { icon: "tv", label: "AV Equipment", active: venue.has_av_equipment },
+      { icon: "wb-sunny", label: "Outdoor", active: venue.is_outDoor },
+      { icon: "local-parking", label: "Parking", active: venue.parking },
+      { icon: "directions-car", label: "Valet", active: venue.valet_available },
+      { icon: "local-bar", label: "Alcohol Allowed", active: venue.alcohol_allowed },
+    ];
   const activeAmenities = amenities.filter((a) => a.active);
 
   return (
@@ -637,7 +590,7 @@ function VenueCard({ venue, onEdit }: { venue: VenueAttribute; onEdit: () => voi
         {venue.area_sqft != null && (
           <View className="flex-1 bg-gray-50 rounded-xl p-2.5 items-center">
             <MaterialIcons name="straighten" size={16} color="#594048" />
-            <Text variant="h1" className="text-xs text-[#181114] mt-1">
+            <Text variant="h1" className="text-xs  text-[#181114] mt-1">
               {venue.area_sqft.toLocaleString()} sqft
             </Text>
             <Text className="text-[9px] text-gray-400">Area</Text>
@@ -762,9 +715,8 @@ function InfoRow({
 function BoolBadge({ label, value }: { label: string; value: boolean }) {
   return (
     <View
-      className={`flex-row items-center gap-1.5 rounded-xl px-3 py-2 ${
-        value ? "bg-emerald-50 border border-emerald-200" : "bg-gray-50 border border-gray-200"
-      }`}
+      className={`flex-row items-center gap-1.5 rounded-xl px-3 py-2 ${value ? "bg-emerald-50 border border-emerald-200" : "bg-gray-50 border border-gray-200"
+        }`}
     >
       <MaterialIcons
         name={value ? "check-circle" : "cancel"}
@@ -932,8 +884,7 @@ export default function BusinessDetailsScreen() {
             <ServiceDetailsSection service={MOCK_SERVICE_ATTRIBUTE} />
           )}
 
-          <PortfolioGrid portfolio={business.portfolio ?? []} />
-          <ServicesSection services={business.services ?? []} />
+          {/* <PortfolioGrid portfolio={business.portfolio ?? []} /> */}
           <AvailabilityCalendar dates={business.availabilityDates} />
           <LatestReviewSection reviews={business.reviews ?? []} />
 

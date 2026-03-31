@@ -126,6 +126,11 @@ export interface Business {
     pending: number[];
   };
 }
+export interface BusinessWithAttribute {
+  business_information: Business,
+  venue_information: VenueAttribute,
+  vendor_services_information: OtherServiceAttribute
+}
 
 // ─── Mock constants for category-specific details ─────────────────────────────
 
