@@ -1,18 +1,19 @@
-export type BusinessCategory =
-  | "Venue"
-  | "Photographers & Videographer"
-  | "Makeup Artist"
-  | "Bridal Grooming"
-  | "Mehendi Artist"
-  | "Wedding Planners & Decorator"
-  | "Music & Entertainment"
-  | "Invites & Gift"
-  | "Food & Catering"
-  | "Pre Wedding Shoot"
-  | "Bridal Wear"
-  | "Jewelry & Accessories"
-  | "Security Guard"
-  | "Baraat";
+export enum BusinessCategory {
+  Venue = "Venue",
+  PhotographerVideographer = "Photographers & Videographer",
+  MakeupArtist = "Makeup Artist",
+  BridalGrooming = "Bridal Grooming",
+  MehendiArtist = "Mehendi Artist",
+  WeddingPlannersDecorator = "Wedding Planners & Decorator",
+  MusicEntertainment = "Music & Entertainment",
+  InvitesGift = "Invites & Gift",
+  FoodCatering = "Food & Catering",
+  PreWeddingShoot = "Pre Wedding Shoot",
+  BridalWear = "Bridal Wear",
+  JewelryAccessories = "Jewelry & Accessories",
+  SecurityGuard = "Security Guard",
+  Baraat = "Baraat"
+}
 
 export interface BusinessService {
   id: string;

@@ -1,34 +1,8 @@
 import { BusinessCategory } from "@/src/constants/business";
 import { MaterialIcons } from "@expo/vector-icons";
 
-// ─── Vendor → BusinessCategory mapping ───────────────────────────────────────
-
-export const VENDOR_TO_CATEGORY: Record<string, BusinessCategory> = {
-  venues: "Venue",
-  photographers: "Photographers & Videographer",
-  makeup: "Makeup Artist",
-  "planning-decor": "Wedding Planners & Decorator",
-  "music-dance": "Music & Entertainment",
-  food: "Food & Catering",
-  "pre-wedding": "Pre Wedding Shoot",
-  "bridal-wear": "Bridal Wear",
-  jewelry: "Jewelry & Accessories",
-  "bridal-grooming": "Bridal Grooming",
-  security: "Security Guard",
-  "invites-gifts": "Invites & Gift",
-  mehendi: "Mehendi Artist",
-  baraat: "Baraat",
-};
-
-// Reverse mapping: BusinessCategory → vendor slug
-export const CATEGORY_TO_VENDOR: Record<string, string> = Object.fromEntries(
-  Object.entries(VENDOR_TO_CATEGORY).map(([k, v]) => [v, k])
-);
-
-// ─── Vendor category data ────────────────────────────────────────────────────
-
 export interface VendorCategory {
-  value: string;
+  value: BusinessCategory;
   name: string;
   icon: keyof typeof MaterialIcons.glyphMap;
   subtypes?: string[];
@@ -36,96 +10,90 @@ export interface VendorCategory {
 
 export const VENDOR_CATEGORIES: VendorCategory[] = [
   {
-    value: "venues",
-    name: "Venues",
+    value: BusinessCategory.Venue,
+    name: "Venue",
     icon: "location-city",
     subtypes: [
-      "Banquet Halls",
+      "Banquet Hall",
       "Marriage Garden / Lawns",
       "Wedding Resorts",
-      "Small Function / Party Halls",
-      "Destination Wedding Venues",
-      "Kalyana Mandapams",
-      "4 Star & Above Wedding Hotels",
-      "Wedding Farmhouses",
+      "Small Function / Party Hall",
+      "Destination Wedding Venue",
+      "Kalyana Mandapam",
+      "4 Star & Above Wedding Hotel",
+      "Wedding Farmhouse",
     ],
   },
   {
-    value: "photographers",
-    name: "Photographers",
+    value: BusinessCategory.PhotographerVideographer,
+    name: "Photographer & Videographer",
     icon: "photo-camera",
   },
   {
-    value: "makeup",
-    name: "Makeup / Bridal Makeup Artists",
+    value: BusinessCategory.MakeupArtist,
+    name: "Makeup Artist",
     icon: "face",
   },
   {
-    value: "planning-decor",
+    value: BusinessCategory.WeddingPlannersDecorator,
     name: "Planning & Decor",
     icon: "auto-awesome",
-    subtypes: ["Wedding Planners", "Decorators", "Mehendi Artists"],
+    subtypes: ["Wedding Planners", "Decorators"],
   },
   {
-    value: "music-dance",
-    name: "Music & Dance",
+    value: BusinessCategory.MehendiArtist,
+    name: "Mehendi Artist",
+    icon: "brush",
+  },
+  {
+    value: BusinessCategory.MusicEntertainment,
+    name: "Music & Entertainment",
     icon: "music-note",
-    subtypes: ["DJs", "Wedding Entertainment"],
+    subtypes: ["DJs", "Live Bands", "Wedding Entertainment"],
   },
   {
-    value: "invites-gifts",
-    name: "Invites & Gifts",
+    value: BusinessCategory.InvitesGift,
+    name: "Invite & Gift",
     icon: "card-giftcard",
-    subtypes: [
-      "Invitations",
-      "Favors",
-      "Invitation Gifts",
-      "Mehndi Favors",
-    ],
+    subtypes: ["Invitations", "Favors", "Gifting Solutions"],
   },
   {
-    value: "food",
-    name: "Food",
+    value: BusinessCategory.FoodCatering,
+    name: "Food & Catering",
     icon: "restaurant",
-    subtypes: ["Catering Services", "Cake", "Chaat & Food Stalls"],
+    subtypes: ["Catering Services", "Bakery / Cakes", "Food Stalls"],
   },
   {
-    value: "pre-wedding",
+    value: BusinessCategory.PreWeddingShoot,
     name: "Pre Wedding Shoot",
     icon: "camera-roll",
   },
   {
-    value: "bridal-wear",
+    value: BusinessCategory.BridalWear,
     name: "Bridal Wear",
     icon: "checkroom",
-    subtypes: [
-      "Bridal Lehengas",
-      "Kanjeevaram / Silk Sarees",
-      "Cocktail Gowns",
-      "Trousseau Sarees",
-      "Bridal Lehenga on Rent",
-    ],
+    subtypes: ["Lehengas", "Sarees", "Gowns", "Rentals"],
   },
   {
-    value: "jewelry",
-    name: "Jewelry & Accessories",
+    value: BusinessCategory.JewelryAccessories,
+    name: "Jewelry & Accessory",
     icon: "diamond",
-    subtypes: [
-      "Jewelry",
-      "Flower Jewelry",
-      "Bridal Jewelry on Rent",
-      "Accessories",
-    ],
+    subtypes: ["Jewelry", "Accessory", "Rentals"],
   },
   {
-    value: "bridal-grooming",
+    value: BusinessCategory.BridalGrooming,
     name: "Bridal Grooming",
     icon: "spa",
   },
   {
-    value: "security",
+    value: BusinessCategory.SecurityGuard,
     name: "Security Guard",
     icon: "security",
+  },
+  {
+    value: BusinessCategory.Baraat,
+    name: "Baraat",
+    icon: "directions-bus",
   },
 ];
 
@@ -158,7 +126,6 @@ export const CATEGORY_FIELDS: Record<string, FieldConfig[]> = {
   ],
 };
 
-// ─── Form state ───────────────────────────────────────────────────────────────
 
 export interface FormState {
   businessName: string;
@@ -166,6 +133,6 @@ export interface FormState {
   city: string;
   country: string;
   vendorType: string;
-  vendorCategoryId: string;
+  vendorCategoryId: BusinessCategory | "";
   categoryDetails: Record<string, string | boolean>;
 }

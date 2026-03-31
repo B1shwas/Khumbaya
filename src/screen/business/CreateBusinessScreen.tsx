@@ -1,10 +1,11 @@
+import { Text } from "@/src/components/ui/Text";
+import { BusinessCategory } from "@/src/constants/business";
 import { useCreateBusiness } from "@/src/features/business";
 import { MaterialIcons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import type { ScrollView as ScrollViewType } from "react-native";
-import { Text } from "@/src/components/ui/Text";
 import {
   Alert,
   Image,
@@ -18,10 +19,9 @@ import {
 } from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
 import {
-  VENDOR_TO_CATEGORY,
-  VENDOR_CATEGORIES,
-  CATEGORY_OPTIONS,
   CATEGORY_FIELDS,
+  CATEGORY_OPTIONS,
+  VENDOR_CATEGORIES,
   type FieldConfig,
   type FormState,
 } from "./business-form-constants";
@@ -64,7 +64,7 @@ export default function CreateBusinessScreen() {
       Alert.alert("Required", "Please select a category.");
       return;
     }
-    if (form.vendorCategoryId === "venues" && !form.vendorType) {
+    if (form.vendorCategoryId === BusinessCategory.Venue && !form.vendorType) {
       Alert.alert("Required", "Please select a venue type.");
       return;
     }
@@ -77,7 +77,7 @@ export default function CreateBusinessScreen() {
       {
         business_name: form.businessName.trim(),
         description: form.description.trim() || undefined,
-        category: VENDOR_TO_CATEGORY[form.vendorCategoryId],
+        category: form.vendorCategoryId,
         coverImageUri: coverImage ?? undefined,
         location: location || undefined,
         categoryDetails: form.categoryDetails,

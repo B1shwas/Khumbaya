@@ -1,9 +1,9 @@
+import { Text } from "@/src/components/ui/Text";
 import { useGetBusinessById, useUpdateBusiness } from "@/src/features/business";
 import { MaterialIcons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { Text } from "@/src/components/ui/Text";
 import {
   ActivityIndicator,
   Alert,
@@ -15,14 +15,12 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { Dropdown } from "react-native-element-dropdown";
+import { SafeAreaView } from "react-native-safe-area-context";
 import {
-  VENDOR_TO_CATEGORY,
-  VENDOR_CATEGORIES,
-  CATEGORY_OPTIONS,
   CATEGORY_FIELDS,
-  CATEGORY_TO_VENDOR,
+  CATEGORY_OPTIONS,
+  VENDOR_CATEGORIES,
   type FieldConfig,
   type FormState,
 } from "./business-form-constants";
@@ -48,9 +46,6 @@ export default function EditBusinessScreen() {
   // Pre-populate form when business data loads
   useEffect(() => {
     if (business && !initialized) {
-      const vendorSlug = business.category
-        ? CATEGORY_TO_VENDOR[business.category] ?? ""
-        : "";
 
       // Split location into city and country (assumes "City, Country" format)
       const locationParts = (business.location ?? "").split(", ");
@@ -63,7 +58,7 @@ export default function EditBusinessScreen() {
         city,
         country,
         vendorType: "",
-        vendorCategoryId: vendorSlug,
+        vendorCategoryId: business.category ?? "",
         categoryDetails: {},
       });
       setCoverImage(business.cover ?? null);
@@ -97,7 +92,7 @@ export default function EditBusinessScreen() {
         payload: {
           business_name: form.businessName.trim(),
           description: form.description.trim() || undefined,
-          category: VENDOR_TO_CATEGORY[form.vendorCategoryId] ?? undefined,
+          category: form.vendorCategoryId || undefined,
           coverImageUri: coverImage ?? undefined,
           location: location || undefined,
           categoryDetails: Object.keys(form.categoryDetails).length > 0
