@@ -1,12 +1,12 @@
 import { InfoIcon } from "@/src/components/ui/InfoIcon";
 import { Text } from "@/src/components/ui/Text";
-import { deleteExpense } from "@/src/features/budget/services/budgetService";
 import {
   useCategoryDetails,
   useDeleteCategoryMutation,
 } from "@/src/features/budget/hooks/use-budget";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { deleteExpense } from "@/src/features/budget/services/budgetService";
 import { MaterialIcons } from "@expo/vector-icons";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
 import {
@@ -371,7 +371,11 @@ export default function CategoryDetailsScreen() {
                       </Text>
                     </View>
                   </View>
-                  <MaterialIcons name="chevron-right" size={24} color="#d1d5db" />
+                  <MaterialIcons
+                    name="chevron-right"
+                    size={24}
+                    color="#d1d5db"
+                  />
                 </TouchableOpacity>
 
                 <View className="flex-row justify-end items-center gap-3 mt-3">

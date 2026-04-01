@@ -398,12 +398,18 @@ export default function AddExpenseScreen({
               <TouchableOpacity
                 onPress={handleSubmit(onSubmit)}
                 disabled={
-                  editMode ? updateMutation.isPending : expenseMutation.isPending
+                  editMode
+                    ? updateMutation.isPending
+                    : expenseMutation.isPending
                 }
                 className="h-16 bg-[#ee2b8c] rounded-md flex items-center justify-center mt-2"
                 activeOpacity={0.8}
               >
-                {(editMode ? updateMutation.isPending : expenseMutation.isPending) ? (
+                {(
+                  editMode
+                    ? updateMutation.isPending
+                    : expenseMutation.isPending
+                ) ? (
                   <MaterialIcons
                     name="hourglass-empty"
                     size={24}

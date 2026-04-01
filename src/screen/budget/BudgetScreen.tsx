@@ -2,10 +2,10 @@ import { BudgetStatsGrid, CategoryCard } from "@/src/components/budget";
 import { Text } from "@/src/components/ui/Text";
 import { SetBudgetForm } from "@/src/features/budget/components";
 import { useBudgetSummary } from "@/src/features/budget/hooks/use-budget";
-import { useEventById } from "@/src/features/events/hooks/use-event";
 import { deleteBudgetCategory } from "@/src/features/budget/services/budgetService";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useEventById } from "@/src/features/events/hooks/use-event";
 import { MaterialIcons } from "@expo/vector-icons";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
@@ -38,7 +38,9 @@ export default function EventBudgetScreen() {
   const deleteCategoryMutation = useMutation({
     mutationFn: (categoryId: number) => deleteBudgetCategory(categoryId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["budget-summary", Number(eventId)] });
+      queryClient.invalidateQueries({
+        queryKey: ["budget-summary", Number(eventId)],
+      });
     },
   });
 
@@ -50,7 +52,8 @@ export default function EventBudgetScreen() {
 
   const handleEditCategory = (categoryId: number) => {
     router.push({
-      pathname: `/(protected)/(client-stack)/events/${eventId}/(organizer)/edit-budget-category` as any,
+      pathname:
+        `/(protected)/(client-stack)/events/${eventId}/(organizer)/edit-budget-category` as any,
       params: { categoryId: categoryId.toString() },
     });
   };
@@ -70,7 +73,8 @@ export default function EventBudgetScreen() {
               Alert.alert("Success", "Category deleted successfully.");
             } catch (error: any) {
               const message =
-                error?.message || "Failed to delete category. Please try again.";
+                error?.message ||
+                "Failed to delete category. Please try again.";
               Alert.alert("Error", message);
             }
           },

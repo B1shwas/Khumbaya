@@ -1,9 +1,9 @@
 import { BudgetStatsGrid } from "@/src/components/budget";
 import { Text } from "@/src/components/ui/Text";
 import {
-  useExpenseById,
   useDeleteExpenseMutation,
   useDeletePaymentMutation,
+  useExpenseById,
 } from "@/src/features/budget/hooks/use-budget";
 import { MaterialIcons } from "@expo/vector-icons";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
@@ -158,8 +158,7 @@ export default function ExpenseDetailScreen() {
               ]);
             } catch (error: any) {
               const errorMessage =
-                error?.message ||
-                "Failed to delete expense. Please try again.";
+                error?.message || "Failed to delete expense. Please try again.";
               Alert.alert("Error", errorMessage);
             }
           },
