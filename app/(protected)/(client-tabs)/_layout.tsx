@@ -19,6 +19,7 @@ const TAB_BAR_HIDDEN_ROUTES = [
   "/profile/analytics",
   "/business/create",
   "/business/edit",
+  "/business/add-venue",
 ];
 
 export default function ClientTabsLayout() {

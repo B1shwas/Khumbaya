@@ -889,9 +889,11 @@ export default function BusinessDetailsScreen() {
             <VenueDetailsSection
               venues={businessWithAttribute.venue_information}
               onEditVenue={(venue) =>
-                Alert.alert("Edit Venue", `Editing: ${venue.venue_type ?? "Venue"}`)
+                router.push(`/business/add-venue?businessId=${businessId}&venueId=${venue.id}`)
               }
-              onAddVenue={() => Alert.alert("Add Venue", "Open add venue form")}
+              onAddVenue={() =>
+                router.push(`/business/add-venue?businessId=${businessId}`)
+              }
             />
           )}
           {businessWithAttribute.business_information.category !== "Venue" && businessWithAttribute.business_information.category != null && (

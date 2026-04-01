@@ -2,6 +2,7 @@ import api from "@/src/api/axios";
 import { Business, BusinessWithAttribute } from "@/src/constants/business";
 import {
   CreateBusinessPayload,
+  CreateVenuePayload,
   UpdateBusinessPayload,
   UpdateBusinessServicePayload,
   UpdateBusinessVenuePayload,
@@ -53,6 +54,15 @@ export const updateBusinessVenueApi = async (
 };
 
 
+
+export const createVenueApi = async (
+  businessId: string,
+  payload: CreateVenuePayload
+): Promise<BusinessWithAttribute> => {
+  console.log("/business/venue/${businessId}:", businessId, "and payload:", payload);
+  const response = await api.post(`/business/venue/${businessId}`, payload);
+  return response.data.data;
+};
 
 export const deleteBusinessApi = async (id: number | string): Promise<void> => {
   console.log("deleteBusinessApi called with id:", id);

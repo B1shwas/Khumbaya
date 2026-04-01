@@ -40,6 +40,12 @@ export default function BusinessLayout() {
         name="edit/[businessId]"
         options={{ title: "Edit Business" }}
       />
+      <Stack.Screen
+        name="add-venue"
+        options={({ route }) => ({
+          title: (route.params as any)?.venueId ? "Edit Venue" : "Add Venue",
+        })}
+      />
     </Stack>
   );
 }
