@@ -270,7 +270,7 @@ export const useDeletePaymentMutation = (
 
   return useMutation({
     mutationKey: ["delete-payment", paymentId],
-    mutationFn: () => deletePayment(paymentId),
+    mutationFn: (id: number) => deletePayment(id),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["expense-details", expenseId],
