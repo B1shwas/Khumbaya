@@ -1,9 +1,11 @@
 import { InfoIcon } from "@/src/components/ui/InfoIcon";
 import { Text } from "@/src/components/ui/Text";
+import { deleteExpense } from "@/src/features/budget/services/budgetService";
 import {
   useCategoryDetails,
   useDeleteCategoryMutation,
 } from "@/src/features/budget/hooks/use-budget";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { MaterialIcons } from "@expo/vector-icons";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
@@ -48,6 +50,19 @@ export default function CategoryDetailsScreen() {
     Number(categoryId || 0),
     Number(eventId || 0)
   );
+
+  const queryClient = useQueryClient();
+  const expenseDeleteMutation = useMutation({
+    mutationFn: (expenseId: number) => deleteExpense(expenseId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["category-details", Number(categoryId)],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["budget-summary", Number(eventId)],
+      });
+    },
+  });
 
   const [menuVisible, setMenuVisible] = useState(false);
 
@@ -96,6 +111,44 @@ export default function CategoryDetailsScreen() {
               const errorMessage =
                 error?.message ||
                 "Failed to delete category. Please try again.";
+              Alert.alert("Error", errorMessage);
+            }
+          },
+          style: "destructive",
+        },
+      ]
+    );
+  };
+
+  const handleEditExpense = (expenseId: number) => {
+    router.push({
+      pathname: `/(protected)/(client-stack)/events/${eventId}/(organizer)/edit-expense`,
+      params: {
+        expenseId: expenseId.toString(),
+        categoryId: categoryId,
+        eventId: eventId,
+      },
+    } as any);
+  };
+
+  const handleDeleteExpense = (expenseId: number) => {
+    Alert.alert(
+      "Delete Expense",
+      "Are you sure you want to delete this expense? This action cannot be undone.",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Delete",
+          onPress: async () => {
+            try {
+              await expenseDeleteMutation.mutateAsync(expenseId);
+              Alert.alert("Success", "Expense deleted successfully!");
+            } catch (error: any) {
+              const errorMessage =
+                error?.message || "Failed to delete expense. Please try again.";
               Alert.alert("Error", errorMessage);
             }
           },
@@ -269,54 +322,81 @@ export default function CategoryDetailsScreen() {
         {categoryData?.expenses && categoryData.expenses.length > 0 ? (
           <View className="px-5 gap-3">
             {categoryData.expenses.map((expense: Expense) => (
-              <TouchableOpacity
+              <View
                 key={expense.id}
-                activeOpacity={0.7}
-                className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex-row items-start gap-4"
-                onPress={() => {
-                  router.push(
-                    `/(protected)/(client-stack)/events/${eventId}/(organizer)/${categoryId}/${expense.id}`
-                  );
-                }}
+                className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100"
               >
-                <View className="flex-1">
-                  <View className="flex-row justify-between items-start mb-2">
-                    <Text
-                      className="text-base text-[#181114] flex-1"
-                      variant="h2"
-                    >
-                      {expense.name}
-                    </Text>
-                  </View>
-                  <View className="gap-1">
-                    <View className="flex-row gap-2">
-                      <Text className="text-xs text-gray-500" variant="h2">
-                        Est:
-                      </Text>
-                      <Text className="text-xs text-[#181114]" variant="h2">
-                        Rs. {expense.estimatedCost.toLocaleString()}
-                      </Text>
-                    </View>
-                    <View className="flex-row gap-2">
-                      <Text className="text-xs text-gray-500" variant="h2">
-                        Contract:
-                      </Text>
-                      <Text className="text-xs text-[#181114] " variant="h2">
-                        {expense.contractAmount
-                          ? `Rs. ${expense.contractAmount.toLocaleString()}`
-                          : "Not done"}
+                <TouchableOpacity
+                  activeOpacity={0.7}
+                  className="flex-row items-start gap-4"
+                  onPress={() => {
+                    router.push(
+                      `/(protected)/(client-stack)/events/${eventId}/(organizer)/${categoryId}/${expense.id}`
+                    );
+                  }}
+                >
+                  <View className="flex-1">
+                    <View className="flex-row justify-between items-start mb-2">
+                      <Text
+                        className="text-base text-[#181114] flex-1"
+                        variant="h2"
+                      >
+                        {expense.name}
                       </Text>
                     </View>
-                    <Text
-                      className="text-[10px] text-gray-400 mt-1"
-                      variant="h2"
-                    >
-                      Due {new Date(expense.nextDueDate).toLocaleDateString()}
-                    </Text>
+                    <View className="gap-1">
+                      <View className="flex-row gap-2">
+                        <Text className="text-xs text-gray-500" variant="h2">
+                          Est:
+                        </Text>
+                        <Text className="text-xs text-[#181114]" variant="h2">
+                          Rs. {expense.estimatedCost.toLocaleString()}
+                        </Text>
+                      </View>
+                      <View className="flex-row gap-2">
+                        <Text className="text-xs text-gray-500" variant="h2">
+                          Contract:
+                        </Text>
+                        <Text className="text-xs text-[#181114] " variant="h2">
+                          {expense.contractAmount
+                            ? `Rs. ${expense.contractAmount.toLocaleString()}`
+                            : "Not done"}
+                        </Text>
+                      </View>
+                      <Text
+                        className="text-[10px] text-gray-400 mt-1"
+                        variant="h2"
+                      >
+                        Due {new Date(expense.nextDueDate).toLocaleDateString()}
+                      </Text>
+                    </View>
                   </View>
+                  <MaterialIcons name="chevron-right" size={24} color="#d1d5db" />
+                </TouchableOpacity>
+
+                <View className="flex-row justify-end items-center gap-3 mt-3">
+                  <TouchableOpacity
+                    onPress={() => handleEditExpense(expense.id)}
+                    className="flex-row items-center gap-1 px-3 py-1.5 bg-blue-100 rounded-full"
+                    activeOpacity={0.7}
+                  >
+                    <MaterialIcons name="edit" size={16} color="#2563eb" />
+                    <Text className="text-xs text-blue-700" variant="h2">
+                      Edit
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => handleDeleteExpense(expense.id)}
+                    className="flex-row items-center gap-1 px-3 py-1.5 bg-red-100 rounded-full"
+                    activeOpacity={0.7}
+                  >
+                    <MaterialIcons name="delete" size={16} color="#dc2626" />
+                    <Text className="text-xs text-red-700" variant="h2">
+                      Delete
+                    </Text>
+                  </TouchableOpacity>
                 </View>
-                <MaterialIcons name="chevron-right" size={24} color="#d1d5db" />
-              </TouchableOpacity>
+              </View>
             ))}
           </View>
         ) : (

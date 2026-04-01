@@ -3,12 +3,15 @@ import { Text } from "@/src/components/ui/Text";
 import { SetBudgetForm } from "@/src/features/budget/components";
 import { useBudgetSummary } from "@/src/features/budget/hooks/use-budget";
 import { useEventById } from "@/src/features/events/hooks/use-event";
+import { deleteBudgetCategory } from "@/src/features/budget/services/budgetService";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   ScrollView,
   TextInput,
   TouchableOpacity,
@@ -31,9 +34,48 @@ export default function EventBudgetScreen() {
     { enabled: hasBudget }
   );
 
+  const queryClient = useQueryClient();
+  const deleteCategoryMutation = useMutation({
+    mutationFn: (categoryId: number) => deleteBudgetCategory(categoryId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["budget-summary", Number(eventId)] });
+    },
+  });
+
   const handleAddPress = () => {
     router.push(
       `/(protected)/(client-stack)/events/${eventId}/(organizer)/addBudgetItem`
+    );
+  };
+
+  const handleEditCategory = (categoryId: number) => {
+    router.push({
+      pathname: `/(protected)/(client-stack)/events/${eventId}/(organizer)/edit-budget-category` as any,
+      params: { categoryId: categoryId.toString() },
+    });
+  };
+
+  const handleDeleteCategory = (categoryId: number) => {
+    Alert.alert(
+      "Delete Category",
+      "Are you sure you want to delete this category? This action cannot be undone.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await deleteCategoryMutation.mutateAsync(categoryId);
+              Alert.alert("Success", "Category deleted successfully.");
+            } catch (error: any) {
+              const message =
+                error?.message || "Failed to delete category. Please try again.";
+              Alert.alert("Error", message);
+            }
+          },
+        },
+      ]
     );
   };
 
@@ -169,6 +211,8 @@ export default function EventBudgetScreen() {
                     `/(protected)/(client-stack)/events/${eventId}/(organizer)/${cat.id}`
                   );
                 }}
+                onEdit={() => handleEditCategory(cat.id)}
+                onDelete={() => handleDeleteCategory(cat.id)}
               />
             ))}
           </View>

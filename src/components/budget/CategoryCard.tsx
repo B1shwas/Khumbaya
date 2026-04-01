@@ -9,6 +9,8 @@ interface CategoryCardProps {
   spend: number;
   icon?: string;
   onPress?: () => void;
+  onEdit?: () => void;
+  onDelete?: () => void;
 }
 
 const CATEGORY_ICONS: Record<
@@ -75,6 +77,8 @@ export function CategoryCard({
   allocatedBudget,
   spend,
   onPress,
+  onEdit,
+  onDelete,
 }: CategoryCardProps) {
   const percentage = allocatedBudget > 0 ? (spend / allocatedBudget) * 100 : 0;
   const statusColor = getStatusColor(percentage);
@@ -107,11 +111,30 @@ export function CategoryCard({
           </View>
         </View>
 
-        {/* Right: Status Badge */}
-        <View className={`px-3 py-1.5 rounded-lg ${statusColor.bg}`}>
-          <Text className={`text-xs font-bold ${statusColor.text}`}>
-            {Math.min(Math.round(percentage), 100)}%
-          </Text>
+        <View className="flex-row items-center gap-2">
+          <View className={`px-3 py-1.5 rounded-lg ${statusColor.bg}`}>
+            <Text className={`text-xs font-bold ${statusColor.text}`}>
+              {Math.min(Math.round(percentage), 100)}%
+            </Text>
+          </View>
+          {onEdit && (
+            <TouchableOpacity
+              onPress={onEdit}
+              className="p-2 bg-blue-100 rounded-full"
+              activeOpacity={0.7}
+            >
+              <MaterialIcons name="edit" size={16} color="#2563eb" />
+            </TouchableOpacity>
+          )}
+          {onDelete && (
+            <TouchableOpacity
+              onPress={onDelete}
+              className="p-2 bg-red-100 rounded-full"
+              activeOpacity={0.7}
+            >
+              <MaterialIcons name="delete" size={16} color="#dc2626" />
+            </TouchableOpacity>
+          )}
         </View>
       </View>
 

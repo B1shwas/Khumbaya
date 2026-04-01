@@ -3,6 +3,7 @@ import { Text } from "@/src/components/ui/Text";
 import {
   useExpenseById,
   useDeleteExpenseMutation,
+  useDeletePaymentMutation,
 } from "@/src/features/budget/hooks/use-budget";
 import { MaterialIcons } from "@expo/vector-icons";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
@@ -56,6 +57,13 @@ export default function ExpenseDetailScreen() {
     Number(eventId || 0)
   );
 
+  const deletePaymentMutation = useDeletePaymentMutation(
+    0, // paymentId is set when delete is triggered
+    Number(expenseId || 0),
+    Number(categoryId || 0),
+    Number(eventId || 0)
+  );
+
   let remainingBalance,
     dueBalance,
     percentPaid = null;
@@ -85,6 +93,43 @@ export default function ExpenseDetailScreen() {
         eventId: eventId,
       },
     });
+  };
+
+  const handleEditPayment = (paymentId: number) => {
+    router.push({
+      pathname:
+        `/(protected)/(client-stack)/events/${eventId}/(organizer)/edit-payment` as any,
+      params: {
+        paymentId: paymentId.toString(),
+        expenseId: expenseId,
+        categoryId: categoryId,
+        eventId: eventId,
+      },
+    });
+  };
+
+  const handleDeletePayment = (paymentId: number) => {
+    Alert.alert(
+      "Delete Payment",
+      "Are you sure you want to delete this payment? This action cannot be undone.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await deletePaymentMutation.mutateAsync(paymentId);
+              Alert.alert("Success", "Payment deleted successfully.");
+            } catch (error: any) {
+              const errorMessage =
+                error?.message || "Failed to delete payment. Please try again.";
+              Alert.alert("Error", errorMessage);
+            }
+          },
+        },
+      ]
+    );
   };
 
   const handleDeleteExpense = () => {
@@ -264,9 +309,8 @@ export default function ExpenseDetailScreen() {
           {data.payments.length > 0 ? (
             <View className="gap-3">
               {data.payments.map((payment: Payment) => (
-                <TouchableOpacity
+                <View
                   key={payment.id}
-                  activeOpacity={0.7}
                   className="bg-white rounded-md p-5 shadow-sm border border-gray-100"
                 >
                   <View className="flex-row items-center justify-between">
@@ -311,7 +355,30 @@ export default function ExpenseDetailScreen() {
                       </View>
                     </View>
                   </View>
-                </TouchableOpacity>
+
+                  <View className="flex-row justify-end items-center gap-2 mt-3">
+                    <TouchableOpacity
+                      onPress={() => handleEditPayment(payment.id)}
+                      className="flex-row items-center gap-1 px-3 py-1.5 bg-blue-100 rounded-full"
+                      activeOpacity={0.7}
+                    >
+                      <MaterialIcons name="edit" size={16} color="#2563eb" />
+                      <Text className="text-xs text-blue-700" variant="h2">
+                        Edit
+                      </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={() => handleDeletePayment(payment.id)}
+                      className="flex-row items-center gap-1 px-3 py-1.5 bg-red-100 rounded-full"
+                      activeOpacity={0.7}
+                    >
+                      <MaterialIcons name="delete" size={16} color="#dc2626" />
+                      <Text className="text-xs text-red-700" variant="h2">
+                        Delete
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
               ))}
             </View>
           ) : (
