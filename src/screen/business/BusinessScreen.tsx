@@ -1,5 +1,6 @@
 import { BusinessCard, CreateBusinessButton } from "@/src/components/business";
 import { useGetBusinessList } from "@/src/features/business";
+import { useAuthStore } from "@/src/store/AuthStore";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useCallback, useState } from "react";
@@ -7,7 +8,8 @@ import { ActivityIndicator, RefreshControl, ScrollView, Text, View } from "react
 
 export default function BusinessScreen() {
   const router = useRouter();
-  const { data: businesses, isLoading, isError, refetch } = useGetBusinessList();
+  const { user } = useAuthStore();
+  const { data: businesses, isLoading, isError, refetch } = useGetBusinessList(user?.id);
   const [refreshing, setRefreshing] = useState(false);
 
   const onRefresh = useCallback(async () => {

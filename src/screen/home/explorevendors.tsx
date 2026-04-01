@@ -2,24 +2,61 @@ import { CategoryChip } from "@/src/components/onboarding/CategoryChip";
 import { FloatLoginBanner } from "@/src/components/onboarding/FloatLoginBanner";
 import { HeaderExploreVendor } from "@/src/components/onboarding/HeaderExploreVendor";
 import { VendorCard } from "@/src/components/onboarding/VendorCard";
-import { ONBOARDING_VENDORS } from "@/src/constants/vendors";
-
-const CATEGORIES = [
-  "Venues", "Photographers", "Makeup", "Planning & Decor",
-  "Music & Dance", "Invites & Gifts", "Food", "Pre Wedding Shoot",
-  "Bridal Wear", "Jewelry & Accessories", "Bridal Grooming", "Security",
-];
+import { BusinessCategory } from "@/src/constants/business";
+import { useGetBusinessList } from "@/src/features/business/hooks/use-business";
 import { useAuthStore } from "@/src/store/AuthStore";
-import { useState } from "react";
+import type { Vendor } from "@/src/utils/type/vendor";
+import { useMemo, useState } from "react";
 import { ScrollView, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+
+const CATEGORIES = Object.values(BusinessCategory);
+const CATEGORY_LABELS: Record<BusinessCategory, string> = {
+  [BusinessCategory.Venue]: "Venue",
+  [BusinessCategory.PhotographerVideographer]: "Video Photographer",
+  [BusinessCategory.MakeupArtist]: "Makeup Artist",
+  [BusinessCategory.BridalGrooming]: "Bridal Grooming",
+  [BusinessCategory.MehendiArtist]: "Mehendi Artist",
+  [BusinessCategory.WeddingPlannersDecorator]: "Wedding Planners & Decorator",
+  [BusinessCategory.MusicEntertainment]: "Music & Entertainment",
+  [BusinessCategory.InvitesGift]: "Invites & Gift",
+  [BusinessCategory.FoodCatering]: "Food & Catering",
+  [BusinessCategory.PreWeddingShoot]: "Pre Wedding Shoot",
+  [BusinessCategory.BridalWear]: "Bridal Wear",
+  [BusinessCategory.JewelryAccessories]: "Jewelry & Accessories",
+  [BusinessCategory.SecurityGuard]: "Security Guard",
+  [BusinessCategory.Baraat]: "Baraat",
+};
+
+const DEFAULT_VENDOR_IMAGE =
+  "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&w=1200&q=80";
 
 export default function ExploreVendors() {
   const [activeCategory, setActiveCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const { user } = useAuthStore();
+  const { data: businesses = [] } = useGetBusinessList();
 
-  const filteredVendors = ONBOARDING_VENDORS.filter((vendor) => {
+  const vendorsFromQuery = useMemo<Vendor[]>(() => {
+    return businesses.map((business) => ({
+      id: String(business.id),
+      name: business.business_name,
+      category: business.category ?? "Other",
+      rating: business.rating ?? 0,
+      reviews: business.totalBookings ?? 0,
+      priceLevel:
+        business.price_starting_from != null
+          ? `From रु ${business.price_starting_from}`
+          : "$",
+      location:
+        [business.city, business.country].filter(Boolean).join(", ") ||
+        business.location ||
+        "Location not specified",
+      image: business.cover || business.avatar || DEFAULT_VENDOR_IMAGE,
+    }));
+  }, [businesses]);
+
+  const filteredVendors = vendorsFromQuery.filter((vendor) => {
     const matchesSearch = vendor.name
       .toLowerCase()
       .includes(searchQuery.toLowerCase());
@@ -50,7 +87,7 @@ export default function ExploreVendors() {
           {CATEGORIES.map((category) => (
             <CategoryChip
               key={category}
-              label={category}
+              label={CATEGORY_LABELS[category]}
               isActive={activeCategory === category}
               onPress={() => setActiveCategory(category)}
             />

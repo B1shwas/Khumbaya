@@ -5,13 +5,20 @@ import {
   getBusinessByIdApi,
   getBusinessListApi,
   updateBusinessApi,
+  updateBusinessServiceApi,
+  updateBusinessVenueApi,
 } from "../api";
-import { UpdateBusinessPayload, CreateBusinessPayload } from "../types";
+import {
+  CreateBusinessPayload,
+  UpdateBusinessPayload,
+  UpdateBusinessServicePayload,
+  UpdateBusinessVenuePayload,
+} from "../types";
 
-export const useGetBusinessList = () => {
+export const useGetBusinessList = (userId?: number) => {
   return useQuery({
-    queryKey: ["business/list"],
-    queryFn: getBusinessListApi,
+    queryKey: ["business/list", userId],
+    queryFn: () => getBusinessListApi(userId),
     staleTime: 5 * 60 * 1000,
     gcTime: 30 * 60 * 1000,
   });
@@ -55,6 +62,62 @@ export const useDeleteBusiness = () => {
     mutationFn: (id: string) => deleteBusinessApi(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["business/list"] });
+    },
+  });
+};
+
+export const useUpdateBusinessService = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      serviceId,
+      payload,
+      businessId,
+    }: {
+      serviceId: number;
+      payload: UpdateBusinessServicePayload;
+      businessId?: string | number;
+    }) => updateBusinessServiceApi(serviceId, payload),
+    onSuccess: (data, variables) => {
+      const resolvedBusinessId =
+        data?.business_information?.id ?? variables.businessId;
+
+      queryClient.invalidateQueries({ queryKey: ["business/list"] });
+
+      if (resolvedBusinessId) {
+        queryClient.invalidateQueries({
+          queryKey: ["business", String(resolvedBusinessId)],
+        });
+      }
+    },
+  });
+};
+
+export const useUpdateBusinessVenue = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      venueId,
+      payload,
+      businessId,
+    }: {
+      venueId: number;
+      payload: UpdateBusinessVenuePayload;
+      businessId?: string | number;
+    }) => updateBusinessVenueApi(venueId, payload),
+    onSuccess: (data, variables) => {
+      const resolvedBusinessId =
+        data?.business_information?.id ?? variables.businessId;
+
+      queryClient.invalidateQueries({ queryKey: ["business/list"] });
+
+      if (resolvedBusinessId) {
+        queryClient.invalidateQueries({
+          queryKey: ["business", String(resolvedBusinessId)],
+        });
+      }
     },
   });
 };

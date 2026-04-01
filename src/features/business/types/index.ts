@@ -26,3 +26,11 @@ export interface CreateBusinessPayload {
 }
 
 export interface UpdateBusinessPayload extends Partial<CreateBusinessPayload> { }
+
+export type UpdateBusinessServicePayload = Partial<
+  Omit<OtherServiceAttribute, "id" | "business_id" | "createdAt" | "updatedAt">
+>;
+
+export type UpdateBusinessVenuePayload = Partial<
+  Omit<VenueAttribute, "id" | "business_id" | "createdAt" | "updatedAt">
+>;
