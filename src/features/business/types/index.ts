@@ -4,8 +4,8 @@ import {
   BusinessRequest,
   BusinessReview,
   BusinessService,
-  VenueAttribute,
   OtherServiceAttribute,
+  VenueAttribute,
 } from "@/src/constants/business";
 
 export type {
@@ -13,9 +13,7 @@ export type {
   BusinessCategory,
   BusinessRequest,
   BusinessReview,
-  BusinessService,
-  VenueAttribute,
-  OtherServiceAttribute,
+  BusinessService, OtherServiceAttribute, VenueAttribute
 };
 
 export interface CreateBusinessPayload {
@@ -23,8 +21,8 @@ export interface CreateBusinessPayload {
   category: BusinessCategory;
   description?: string;
   location?: string;
-  coverImageUri?: string;
+  cover?: string;
   categoryDetails?: Record<string, string | boolean>;
 }
 
-export interface UpdateBusinessPayload extends Partial<CreateBusinessPayload> {}
+export interface UpdateBusinessPayload extends Partial<CreateBusinessPayload> { }

@@ -1,5 +1,6 @@
 import { Text } from "@/src/components/ui/Text";
 import { BusinessCategory } from "@/src/constants/business";
+import { photos } from "@/src/constants/gallery";
 import { useCreateBusiness } from "@/src/features/business";
 import { MaterialIcons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
@@ -56,7 +57,7 @@ export default function CreateBusinessScreen() {
     }));
 
   const handleSubmit = () => {
-    if (form?.businessName?.trim()) {
+    if (!form?.businessName?.trim()) {
       Alert.alert("Required", "Please enter a business name.");
       return;
     }
@@ -78,7 +79,7 @@ export default function CreateBusinessScreen() {
         business_name: form.businessName.trim(),
         description: form.description.trim() || undefined,
         category: form.vendorCategoryId,
-        coverImageUri: coverImage ?? undefined,
+        cover: coverImage ?? photos[Math.floor(((Math.random() * 1000) % 6) + 1)].url,
         location: location || undefined,
         categoryDetails: form.categoryDetails,
       },

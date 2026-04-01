@@ -1,5 +1,6 @@
 import { Text } from "@/src/components/ui/Text";
 import { useGetBusinessById, useUpdateBusiness } from "@/src/features/business";
+import { useBusinessDraftStore } from "@/src/features/business/store/useBusiness";
 import { MaterialIcons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -30,6 +31,9 @@ export default function EditBusinessScreen() {
   const { businessId } = useLocalSearchParams<{ businessId: string }>();
   const { data: business, isLoading } = useGetBusinessById(businessId ?? "");
   const updateBusiness = useUpdateBusiness();
+  const draftBusiness = useBusinessDraftStore((state) => state.business);
+  const clearBusinessDraft = useBusinessDraftStore((state) => state.clearBusiness);
+  const businessInfo = draftBusiness ?? business?.business_information ?? null;
 
   const [form, setForm] = useState<FormState>({
     businessName: "",
@@ -43,28 +47,34 @@ export default function EditBusinessScreen() {
   const [coverImage, setCoverImage] = useState<string | null>(null);
   const [initialized, setInitialized] = useState(false);
 
+  useEffect(() => {
+    return () => {
+      clearBusinessDraft();
+    };
+  }, [clearBusinessDraft]);
+
   // Pre-populate form when business data loads
   useEffect(() => {
-    if (business && !initialized) {
+    if (businessInfo && !initialized) {
 
       // Split location into city and country (assumes "City, Country" format)
-      const locationParts = (business.location ?? "").split(", ");
+      const locationParts = (businessInfo.location ?? "").split(", ");
       const city = locationParts[0] ?? "";
       const country = locationParts[1] ?? "";
 
       setForm({
-        businessName: business.business_name ?? "",
-        description: business.description ?? "",
+        businessName: businessInfo.business_name ?? "",
+        description: businessInfo.description ?? "",
         city,
         country,
         vendorType: "",
-        vendorCategoryId: business.category ?? "",
+        vendorCategoryId: businessInfo.category ?? "",
         categoryDetails: {},
       });
-      setCoverImage(business.cover ?? null);
+      setCoverImage(businessInfo.cover ?? null);
       setInitialized(true);
     }
-  }, [business, initialized]);
+  }, [businessInfo, initialized]);
 
   const updateCategoryDetail = (key: string, value: string | boolean) =>
     setForm((prev) => ({
@@ -93,7 +103,7 @@ export default function EditBusinessScreen() {
           business_name: form.businessName.trim(),
           description: form.description.trim() || undefined,
           category: form.vendorCategoryId || undefined,
-          coverImageUri: coverImage ?? undefined,
+          cover: coverImage ?? undefined,
           location: location || undefined,
           categoryDetails: Object.keys(form.categoryDetails).length > 0
             ? form.categoryDetails
@@ -271,7 +281,7 @@ export default function EditBusinessScreen() {
     );
   }
 
-  if (!business) {
+  if (!businessInfo) {
     return (
       <SafeAreaView className="flex-1 bg-[#f8f6f7] items-center justify-center">
         <MaterialIcons name="storefront" size={48} color="#d1d5db" />
