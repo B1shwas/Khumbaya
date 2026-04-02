@@ -1,9 +1,9 @@
 import { Business } from "@/src/constants/business";
 import { getBusinessIcon } from "@/src/constants/business-icons";
+import { shadowStyle } from "@/src/utils/helper";
 import { MaterialIcons } from "@expo/vector-icons";
 import React from "react";
-import { Image, Platform, Text, TouchableOpacity, View } from "react-native";
-import { shadowStyle } from "@/src/utils/helper";
+import { Image, Text, TouchableOpacity, View } from "react-native";
 interface BusinessCardProps {
   business: Business;
   onPress?: () => void;
@@ -27,15 +27,15 @@ const BusinessCard = React.memo(function BusinessCard({
   return (
     <TouchableOpacity
       activeOpacity={0.85}
-      className="bg-white rounded-2xl overflow-hidden"
+      className="bg-white rounded-md overflow-hidden"
       style={shadowStyle}
       onPress={onPress}
     >
       {/* ── Cover image ── */}
-      <View className="w-full aspect-[4/3] bg-gray-200">
+      <View className="w-full  bg-black">
         <Image
           source={coverUri ? { uri: coverUri } : require("@/assets/images/screen.png")}
-          className="w-full h-full"
+          className="w-full h-32"
           resizeMode="cover"
         />
         <View className="absolute inset-0 bg-black/20" />

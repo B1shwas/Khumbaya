@@ -2,6 +2,7 @@
 private*
 # dependencies
 node_modules/
+.github*
 package-lock.json
 package-lock*
 pnpm-lock.yaml

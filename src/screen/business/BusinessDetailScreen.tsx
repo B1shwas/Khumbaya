@@ -9,9 +9,11 @@ import {
 } from "@/src/constants/business";
 import { getBusinessIcon } from "@/src/constants/business-icons";
 import { useDeleteBusiness, useGetBusinessById } from "@/src/features/business";
+import { useBusinessDraftStore } from "@/src/features/business/store/useBusiness";
 import { MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { useEffect } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -529,6 +531,7 @@ function AmenityChip({
 }
 
 function VenueCard({ venue, onEdit }: { venue: VenueAttribute; onEdit: () => void }) {
+  //pills
   const amenities: Array<{
     icon: keyof typeof MaterialIcons.glyphMap;
     label: string;
@@ -595,33 +598,33 @@ function VenueCard({ venue, onEdit }: { venue: VenueAttribute; onEdit: () => voi
             <Text className="text-[9px] text-gray-400">Area</Text>
           </View>
         )}
-        {venue.rooms_available != null && (
-          <View className="flex-1 bg-gray-50 rounded-xl p-2.5 items-center">
-            <MaterialIcons name="hotel" size={16} color="#594048" />
-            <Text variant="h1" className="text-xs text-[#181114] mt-1">
-              {venue.rooms_available}
-            </Text>
-            <Text className="text-[9px] text-gray-400">Rooms</Text>
-          </View>
-        )}
-        {(venue.min_booking_hours != null || venue.max_booking_hours != null) && (
-          <View className="flex-1 bg-gray-50 rounded-xl p-2.5 items-center">
-            <MaterialIcons name="schedule" size={16} color="#594048" />
-            <Text variant="h1" className="text-xs text-[#181114] mt-1">
-              {venue.min_booking_hours ?? "—"}–{venue.max_booking_hours ?? "—"}h
-            </Text>
-            <Text className="text-[9px] text-gray-400">Booking Hrs</Text>
-          </View>
-        )}
-        {venue.sound_limit_db != null && (
-          <View className="flex-1 bg-gray-50 rounded-xl p-2.5 items-center">
-            <MaterialIcons name="volume-up" size={16} color="#594048" />
-            <Text variant="h1" className="text-xs text-[#181114] mt-1">
-              {venue.sound_limit_db} dB
-            </Text>
-            <Text className="text-[9px] text-gray-400">Sound Limit</Text>
-          </View>
-        )}
+
+        <View className="flex-1 bg-gray-50 rounded-xl p-2.5 items-center">
+          <MaterialIcons name="hotel" size={16} color="#594048" />
+          <Text variant="h1" className="text-xs text-[#181114] mt-1">
+            {venue.rooms_available != null ? venue.rooms_available : "—"}
+          </Text>
+          <Text className="text-[9px] text-gray-400">Rooms</Text>
+        </View>
+
+
+        <View className="flex-1 bg-gray-50 rounded-xl p-2.5 items-center">
+          <MaterialIcons name="schedule" size={16} color="#594048" />
+          <Text variant="h1" className="text-xs text-[#181114] mt-1">
+            {venue.min_booking_hours != null ? `${venue.min_booking_hours}h` : "4h"} - {venue.max_booking_hours != null ? `${venue.max_booking_hours}h` : "24h"}
+          </Text>
+          <Text className="text-[9px] text-gray-400">Booking Hrs</Text>
+        </View>
+
+
+        <View className="flex-1 bg-gray-50 rounded-xl p-2.5 items-center">
+          <MaterialIcons name="volume-up" size={16} color="#594048" />
+          <Text variant="h1" className="text-xs text-[#181114] mt-1">
+            {venue.sound_limit_db != null ? `${venue.sound_limit_db} dB` : "N/A"}
+          </Text>
+          <Text className="text-[9px] text-gray-400">Sound Limit</Text>
+        </View>
+
       </View>
 
       {/* Amenity chips */}
@@ -679,8 +682,8 @@ function VenueDetailsSection({
           <Text className="text-xs text-gray-400">Tap to add capacity, pricing & amenities</Text>
         </TouchableOpacity>
       ) : (
-        venues.map((v) => (
-          <VenueCard key={v.id} venue={v} onEdit={() => onEditVenue(v)} />
+        venues.map((v, index) => (
+          <VenueCard key={index} venue={v} onEdit={() => onEditVenue(v)} />
         ))
       )}
     </View>
@@ -807,6 +810,18 @@ export default function BusinessDetailsScreen() {
   const { businessId } = useLocalSearchParams<{ businessId: string }>();
   const { data: businessWithAttribute, isLoading } = useGetBusinessById(businessId ?? "");
   const deleteBusiness = useDeleteBusiness();
+  const setBusinessDraft = useBusinessDraftStore((state) => state.setBusiness);
+  const clearBusinessDraft = useBusinessDraftStore((state) => state.clearBusiness);
+
+  useEffect(() => {
+    clearBusinessDraft();
+  }, [clearBusinessDraft]);
+
+  const handleEditPress = () => {
+    if (!businessWithAttribute?.business_information) return;
+    setBusinessDraft(businessWithAttribute.business_information);
+    router.push(`/business/edit/${businessId}`);
+  };
 
   const handleDelete = () => {
     if (!businessWithAttribute) return;
@@ -832,6 +847,24 @@ export default function BusinessDetailsScreen() {
           },
         },
       ]
+    );
+  };
+
+  const handleEditVenuePress = (venue: VenueAttribute) => {
+    if (!businessWithAttribute?.business_information?.id || !venue?.id) return;
+    router.push({
+      pathname: "/business/venue/edit/[businessId]/[venueId]",
+      params: {
+        businessId: String(businessWithAttribute.business_information.id),
+        venueId: String(venue.id),
+      },
+    });
+  };
+
+  const handleAddVenuePress = () => {
+    if (!businessWithAttribute?.business_information?.id) return;
+    router.push(
+      `/business/venue/create/${String(businessWithAttribute.business_information.id)}` as never
     );
   };
 
@@ -862,7 +895,7 @@ export default function BusinessDetailsScreen() {
       >
         <HeroSection
           business={businessWithAttribute.business_information}
-          onEditPress={() => router.push(`/business/edit/${businessId}`)}
+          onEditPress={handleEditPress}
         />
 
         <View className="px-4 gap-4 mt-4">
@@ -873,10 +906,8 @@ export default function BusinessDetailsScreen() {
           {businessWithAttribute.business_information.category === "Venue" && (
             <VenueDetailsSection
               venues={businessWithAttribute.venue_information}
-              onEditVenue={(venue) =>
-                Alert.alert("Edit Venue", `Editing: ${venue.venue_type ?? "Venue"}`)
-              }
-              onAddVenue={() => Alert.alert("Add Venue", "Open add venue form")}
+              onEditVenue={handleEditVenuePress}
+              onAddVenue={handleAddVenuePress}
             />
           )}
           {businessWithAttribute.business_information.category !== "Venue" && businessWithAttribute.business_information.category != null && (
