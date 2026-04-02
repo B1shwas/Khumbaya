@@ -850,6 +850,24 @@ export default function BusinessDetailsScreen() {
     );
   };
 
+  const handleEditVenuePress = (venue: VenueAttribute) => {
+    if (!businessWithAttribute?.business_information?.id || !venue?.id) return;
+    router.push({
+      pathname: "/business/venue/edit/[businessId]/[venueId]",
+      params: {
+        businessId: String(businessWithAttribute.business_information.id),
+        venueId: String(venue.id),
+      },
+    });
+  };
+
+  const handleAddVenuePress = () => {
+    if (!businessWithAttribute?.business_information?.id) return;
+    router.push(
+      `/business/venue/create/${String(businessWithAttribute.business_information.id)}` as never
+    );
+  };
+
   if (isLoading) {
     return (
       <SafeAreaView className="flex-1 bg-[#f8f6f7] items-center justify-center">
@@ -888,10 +906,8 @@ export default function BusinessDetailsScreen() {
           {businessWithAttribute.business_information.category === "Venue" && (
             <VenueDetailsSection
               venues={businessWithAttribute.venue_information}
-              onEditVenue={(venue) =>
-                Alert.alert("Edit Venue", `Editing: ${venue.venue_type ?? "Venue"}`)
-              }
-              onAddVenue={() => Alert.alert("Add Venue", "Open add venue form")}
+              onEditVenue={handleEditVenuePress}
+              onAddVenue={handleAddVenuePress}
             />
           )}
           {businessWithAttribute.business_information.category !== "Venue" && businessWithAttribute.business_information.category != null && (
