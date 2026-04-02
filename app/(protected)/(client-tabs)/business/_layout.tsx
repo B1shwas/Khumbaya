@@ -25,8 +25,8 @@ export default function BusinessLayout() {
       }}
     >
       <Stack.Screen
-        name="index"
-        options={{ title: "Business Detail" }}
+        name="list"
+        options={{ title: "Business List" }}
       />
       <Stack.Screen
         name="create"
@@ -36,18 +36,7 @@ export default function BusinessLayout() {
         name="[businessId]"
         options={{ title: "Business Details" }}
       />
-      <Stack.Screen
-        name="edit/[businessId]"
-        options={{ title: "Edit Business" }}
-      />
-      <Stack.Screen
-        name="venue/create/[businessId]"
-        options={{ title: "Create Venue" }}
-      />
-      <Stack.Screen
-        name="venue/edit/[businessId]/[venueId]"
-        options={{ title: "Edit Venue" }}
-      />
+    
     </Stack>
   );
 }
