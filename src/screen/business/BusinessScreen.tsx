@@ -75,7 +75,7 @@ export default function BusinessScreen() {
               <BusinessCard
                 key={business.id}
                 business={business}
-                onPress={() => router.push(`/business/${business.id}`)}
+                onPress={() => router.push(`/business/${business.id}/detailed` )}
               />
             ))}
           </View>

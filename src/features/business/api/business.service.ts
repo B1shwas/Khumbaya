@@ -1,6 +1,7 @@
 import api from "@/src/api/axios";
 import { Business, BusinessWithAttribute } from "@/src/constants/business";
 import {
+  CreateBusinessVenuePayload,
   CreateBusinessPayload,
   UpdateBusinessPayload,
   UpdateBusinessServicePayload,
@@ -21,8 +22,6 @@ export const createBusinessApi = async (
 
 export const getBusinessByIdApi = async (id: number | string): Promise<BusinessWithAttribute> => {
   const response = await api.get(`/business/${id}`);
-  console.log("getBusinessByIdApi response:", response.data);
-
   return response.data.data;
 };
 
@@ -31,7 +30,6 @@ export const updateBusinessApi = async (
   payload: UpdateBusinessPayload
 ): Promise<BusinessWithAttribute> => {
   const response = await api.patch(`/business/${id}`, payload);
-  console.log("updateBusinessApi response:", response.data);
   return response.data.data;
 };
 
@@ -52,10 +50,13 @@ export const updateBusinessVenueApi = async (
   return response.data.data;
 };
 
-
+export const createBusinessVenueApi = async (
+  params: CreateBusinessVenuePayload
+): Promise<BusinessWithAttribute> => {
+  const response = await api.post(`/business/${params.business_id}/venue`, params);
+  return response.data.data;
+};
 
 export const deleteBusinessApi = async (id: number | string): Promise<void> => {
-  console.log("deleteBusinessApi called with id:", id);
-
   await api.delete(`/business/${id}`);
 };

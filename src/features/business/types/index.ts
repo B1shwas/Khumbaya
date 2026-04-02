@@ -34,3 +34,7 @@ export type UpdateBusinessServicePayload = Partial<
 export type UpdateBusinessVenuePayload = Partial<
   Omit<VenueAttribute, "id" | "business_id" | "createdAt" | "updatedAt">
 >;
+
+export type CreateBusinessVenuePayload = {
+  business_id: number | string;
+} & UpdateBusinessVenuePayload;
