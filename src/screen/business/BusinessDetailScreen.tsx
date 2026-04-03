@@ -12,8 +12,8 @@ import { useDeleteBusiness, useGetBusinessById } from "@/src/features/business";
 import { useBusinessDraftStore } from "@/src/features/business/store/useBusiness";
 import { MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect } from "react";
+import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
+import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -21,7 +21,9 @@ import {
   FlatList,
   Image,
   Platform,
+  Pressable,
   ScrollView,
+  StyleSheet,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -42,10 +44,8 @@ const shadowStyle = Platform.select({
 
 function HeroSection({
   business,
-  onEditPress,
 }: {
   business: Business;
-  onEditPress: () => void;
 }) {
   return (
     <View style={{ height: 210 }} className="w-full">
@@ -66,16 +66,6 @@ function HeroSection({
           bottom: 0,
         }}
       />
-
-      {/* Edit button */}
-      <TouchableOpacity
-        onPress={onEditPress}
-        activeOpacity={0.8}
-        className="absolute top-3 right-3 flex-row items-center gap-1 px-3 py-1.5 rounded-full border border-white/40 bg-black/30"
-      >
-        <MaterialIcons name="edit" size={13} color="white" />
-        <Text variant="h1" className="text-white text-xs">Edit Profile</Text>
-      </TouchableOpacity>
 
       {/* Bottom info */}
       <View className="absolute bottom-0 left-0 right-0 px-4 pb-4">
@@ -807,11 +797,13 @@ function ServiceDetailsSection({ service }: { service: OtherServiceAttribute }) 
 
 export default function BusinessDetailsScreen() {
   const router = useRouter();
+  const navigation = useNavigation();
   const { businessId } = useLocalSearchParams<{ businessId: string }>();
   const { data: businessWithAttribute, isLoading } = useGetBusinessById(businessId ?? "");
   const deleteBusiness = useDeleteBusiness();
   const setBusinessDraft = useBusinessDraftStore((state) => state.setBusiness);
   const clearBusinessDraft = useBusinessDraftStore((state) => state.clearBusiness);
+  const [menuVisible, setMenuVisible] = useState(false);
 
   useEffect(() => {
     clearBusinessDraft();
@@ -822,6 +814,19 @@ export default function BusinessDetailsScreen() {
     setBusinessDraft(businessWithAttribute.business_information);
     router.push(`/business/edit/${businessId}`);
   };
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <Pressable
+          onPress={() => setMenuVisible((v) => !v)}
+          style={{ padding: 4, marginRight: 12 }}
+        >
+          <MaterialIcons name="more-vert" size={20} color="#181114" />
+        </Pressable>
+      ),
+    });
+  }, []);
 
   const handleDelete = () => {
     if (!businessWithAttribute) return;
@@ -895,7 +900,6 @@ export default function BusinessDetailsScreen() {
       >
         <HeroSection
           business={businessWithAttribute.business_information}
-          onEditPress={handleEditPress}
         />
 
         <View className="px-4 gap-4 mt-4">
@@ -940,6 +944,48 @@ export default function BusinessDetailsScreen() {
           </View>
         </View>
       </ScrollView>
+
+      {/* Dropdown menu overlay */}
+      {menuVisible && (
+        <>
+          <Pressable
+            style={StyleSheet.absoluteFillObject}
+            onPress={() => setMenuVisible(false)}
+          />
+          <View
+            style={{
+              position: "absolute",
+              top: 8,
+              right: 12,
+              backgroundColor: "white",
+              borderRadius: 12,
+              minWidth: 160,
+              elevation: 8,
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.15,
+              shadowRadius: 8,
+              overflow: "hidden",
+            }}
+          >
+            <Pressable
+              onPress={() => { setMenuVisible(false); handleEditPress(); }}
+              style={({ pressed }) => ({
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 8,
+                paddingHorizontal: 16,
+                paddingVertical: 12,
+                backgroundColor: pressed ? "#f3f4f6" : "white",
+              })}
+            >
+              <MaterialIcons name="edit" size={16} color="#374151" />
+              <Text className="text-gray-700 text-sm">Edit Profile</Text>
+            </Pressable>
+          </View>
+        </>
+      )}
     </View>
   );
 }
