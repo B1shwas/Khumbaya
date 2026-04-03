@@ -102,9 +102,9 @@ export function TransferOwnerShipPage() {
           <Text className="text-slate-900 text-sm font-jakarta-bold uppercase mb-3">
             Member List
           </Text>
-          <Text className="text-sm text-slate-600 mb-3">
+          {/* <Text className="text-sm text-slate-600 mb-3">
             {totalMembers} member(s) managing this event
-          </Text>
+          </Text> */}
 
           {memberLoading ? (
             <View className="p-4 rounded-md border border-slate-200 bg-slate-50">
