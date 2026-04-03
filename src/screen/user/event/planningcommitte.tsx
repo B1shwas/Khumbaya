@@ -89,7 +89,7 @@ export function TransferOwnerShipPage() {
         </View>
 
         <View className="flex gap-2 pb-10">
-          <TouchableOpacity
+          {/* <TouchableOpacity
             onPress={openAddMemberModal}
             activeOpacity={0.8}
             className="h-12 px-4 rounded-md bg-primary flex-row items-center justify-center gap-2"
@@ -98,7 +98,7 @@ export function TransferOwnerShipPage() {
             <Text className="text-white font-jakarta-bold text-sm">
               Add Event Member
             </Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
           <Text className="text-slate-900 text-sm font-jakarta-bold uppercase mb-3">
             Member List
           </Text>
