@@ -1,14 +1,10 @@
-import { MaterialIcons } from "@expo/vector-icons";
 import { Stack, useRouter } from "expo-router";
-import { Pressable } from "react-native";
-
 export default function BusinessDetailedLayout() {
   const router = useRouter();
   return (
     <Stack
       screenOptions={{
         headerShown: false,
-       
       }}
     >
       <Stack.Screen
@@ -19,8 +15,6 @@ export default function BusinessDetailedLayout() {
         name="edit"
         options={{ title: "Edit Business" }}
       />
-     
-    
     </Stack>
   );
 }

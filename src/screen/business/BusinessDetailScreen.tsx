@@ -1,7 +1,7 @@
 import { HeroSection } from "@/src/components/business/[businessId]/Hero";
 import ServiceDetailsSection from "@/src/components/business/[businessId]/ServiceDetailsScreen";
-import VenueDetailsSection from "@/src/components/business/[businessId]/VenueDetailsSection";
 import { StatsRow } from "@/src/components/business/[businessId]/stats/StatsRow";
+import VenueDetailsSection from "@/src/components/business/[businessId]/VenueDetailsSection";
 import { Text } from "@/src/components/ui/Text";
 import {
   BusinessRequest,
@@ -13,92 +13,23 @@ import { useDeleteBusiness, useGetBusinessById } from "@/src/features/business";
 import { useBusinessDraftStore } from "@/src/features/business/store/useBusiness";
 import { shadowStyle } from "@/src/utils/helper";
 import { MaterialIcons } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
   Image,
-  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 // ─── Hero ────────────────────────────────────────────────────────────────────
 
-function HeroSection({
-  business,
-}: {
-  business: Business;
-}) {
-  return (
-    <View style={{ height: 210 }} className="w-full">
-      <Image
-        source={{ uri: business.cover ?? business.avatar ?? undefined }}
-        style={{ width: "100%", height: "100%", position: "absolute" }}
-        resizeMode="cover"
-      />
-      <LinearGradient
-        colors={["transparent", "rgba(0,0,0,0.82)"]}
-        start={{ x: 0, y: 0.25 }}
-        end={{ x: 0, y: 1 }}
-        style={{
-          position: "absolute",
-          left: 0,
-          right: 0,
-          top: 0,
-          bottom: 0,
-        }}
-      />
 
-      {/* Bottom info */}
-      <View className="absolute bottom-0 left-0 right-0 px-4 pb-4">
-        <View className="flex-row items-end gap-3">
-          <View className="w-14 h-14 rounded-2xl bg-white/20 border-2 border-white/50 items-center justify-center">
-            <MaterialIcons name={getBusinessIcon(business.category ?? undefined)} size={28} color="white" />
-          </View>
-          <View className="flex-1">
-            <Text
-              variant="h1"
-              className="text-white text-lg leading-tight"
-              numberOfLines={1}
-            >
-              {business.business_name}
-            </Text>
-            <View className="flex-row items-center gap-1 mt-0.5">
-              <MaterialIcons
-                name="location-on"
-                size={12}
-                color="rgba(255,255,255,0.75)"
-              />
-              <Text className="text-white/75 text-xs">
-                {business.location ?? "Location not set"}
-              </Text>
-              {business.price_starting_from != null && (
-                <Text className="text-white/60 text-xs ml-2">
-                  From {business.price_starting_from.toLocaleString()}
-                </Text>
-              )}
-            </View>
-            {business.rating !== null && (
-              <View className="flex-row items-center gap-1 mt-0.5">
-                <MaterialIcons name="star" size={12} color="#ee2b8c" />
-                <Text variant="h2" className="text-white text-xs">
-                  {business.rating}
-                </Text>
-              </View>
-            )}
-          </View>
-        </View>
-      </View>
-    </View>
-  );
-}
 
 // ─── Profile Completion ───────────────────────────────────────────────────────
 
@@ -171,38 +102,6 @@ function StatCard({
       >
         {label}
       </Text>
-    </View>
-  );
-}
-
-function StatsRow({ business }: { business: Business }) {
-  const views = business.profileViews ?? 0;
-  const viewsFormatted =
-    views >= 1000 ? `${(views / 1000).toFixed(1)}k` : String(views);
-
-  return (
-    <View className="flex-row gap-3">
-      <StatCard
-        label="Total Bookings"
-        value={String(business.totalBookings ?? 0)}
-        iconName="event-available"
-        iconColor="#ee2b8c"
-        bgColor="#fdf2f8"
-      />
-      <StatCard
-        label="Total Earnings"
-        value={business.totalEarnings ?? "$0"}
-        iconName="payments"
-        iconColor="#059669"
-        bgColor="#d1fae5"
-      />
-      <StatCard
-        label="Profile Views"
-        value={viewsFormatted}
-        iconName="visibility"
-        iconColor="#2563eb"
-        bgColor="#dbeafe"
-      />
     </View>
   );
 }
@@ -449,25 +348,13 @@ export default function BusinessDetailsScreen() {
     if (!businessWithAttribute?.business_information) return;
     setBusinessDraft(businessWithAttribute.business_information);
     router.push({
-      pathname: "/business/[businessId]/edit",
+      pathname: "/(protected)/(client-tabs)/business/[businessId]/edit" as never,
       params: {
         businessId: String(businessWithAttribute.business_information.id),
       },
     });
   };
 
-  useEffect(() => {
-    navigation.setOptions({
-      headerRight: () => (
-        <Pressable
-          onPress={() => setMenuVisible((v) => !v)}
-          style={{ padding: 4, marginRight: 12 }}
-        >
-          <MaterialIcons name="more-vert" size={20} color="#181114" />
-        </Pressable>
-      ),
-    });
-  }, []);
 
   const handleDelete = () => {
     if (!businessWithAttribute) return;
@@ -567,7 +454,8 @@ export default function BusinessDetailsScreen() {
         contentContainerStyle={{ paddingBottom: 40 }}
         showsVerticalScrollIndicator={false}
       >
-        <HeroSection
+        <HeroSection 
+        onEditPress={handleEditPress}
           business={businessWithAttribute.business_information}
         />
 
@@ -640,46 +528,7 @@ export default function BusinessDetailsScreen() {
       </ScrollView>
 
       {/* Dropdown menu overlay */}
-      {menuVisible && (
-        <>
-          <Pressable
-            style={StyleSheet.absoluteFillObject}
-            onPress={() => setMenuVisible(false)}
-          />
-          <View
-            style={{
-              position: "absolute",
-              top: 8,
-              right: 12,
-              backgroundColor: "white",
-              borderRadius: 12,
-              minWidth: 160,
-              elevation: 8,
-              shadowColor: "#000",
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.15,
-              shadowRadius: 8,
-              overflow: "hidden",
-            }}
-          >
-            <Pressable
-              onPress={() => { setMenuVisible(false); handleEditPress(); }}
-              style={({ pressed }) => ({
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: 8,
-                paddingHorizontal: 16,
-                paddingVertical: 12,
-                backgroundColor: pressed ? "#f3f4f6" : "white",
-              })}
-            >
-              <MaterialIcons name="edit" size={16} color="#374151" />
-              <Text className="text-gray-700 text-sm">Edit Profile</Text>
-            </Pressable>
-          </View>
-        </>
-      )}
+    
     </View>
   );
 }
