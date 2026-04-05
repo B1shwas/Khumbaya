@@ -4,9 +4,9 @@ import { formatDate, getChecklistDueMeta } from "@/src/utils/helper";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useState } from "react";
 import {
-  Image,
-  Pressable,
-  View
+    Image,
+    Pressable,
+    View
 } from "react-native";
 
 export type ChecklistTask = TodoColumn;
@@ -71,6 +71,29 @@ const ChecklistTaskItem = ({
         </Text>
 
         <View className="flex-row flex-wrap items-center gap-x-4 gap-y-2 mb-4">
+          {task.category ? (
+            <View
+              className={`flex-row items-center px-2.5 py-1 rounded-full border ${task.isDone
+                  ? "bg-gray-100 border-gray-200"
+                  : "bg-primary/5 border-primary/20"
+                }`}
+            >
+              <MaterialIcons
+                name="label-outline"
+                size={14}
+                color={task.isDone ? "#94a3b8" : "#ee2b8c"}
+              />
+              <Text
+                className={`text-xs font-jakarta-bold ml-1.5 ${task.isDone
+                    ? "text-text-disabled"
+                    : "text-primary"
+                  }`}
+              >
+                {task.category}
+              </Text>
+            </View>
+          ) : null}
+
           {isUrgent ? (
             <View className="flex-row items-center bg-orange-50 px-2.5 py-1 rounded-full border border-orange-100">
               <MaterialIcons name="schedule" size={14} color="#ea580c" />

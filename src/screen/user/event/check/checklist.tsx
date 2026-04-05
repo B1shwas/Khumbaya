@@ -1,8 +1,10 @@
 import { MaterialIcons } from "@expo/vector-icons";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { useCallback, useEffect, useMemo } from "react";
+import { Stack, useLocalSearchParams, useRouter } from "expo-router";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Alert, Pressable, ScrollView, Text, View } from "react-native";
 
+import { CategoryChip } from "@/src/components/onboarding/CategoryChip";
+import { TODO_ALL_CATEGORY, TODO_CATEGORIES, type TodoCategoryFilter } from "@/src/constants/todo";
 import { useBulkUpdateTodoStatus, useDeleteTodo, useTodosByEventId } from "@/src/features/todo/hooks/useTodo";
 import { useTodoDraftStore, useTodoListStore } from "@/src/features/todo/store";
 import type { TodoColumn } from "@/src/features/todo/type";
@@ -16,6 +18,7 @@ export type ChecklistTask = TodoColumn;
 export default function ChecklistScreen() {
   const router = useRouter();
   const { eventId } = useLocalSearchParams<{ eventId?: string | string[] }>();
+  const [selectedCategory, setSelectedCategory] = useState<TodoCategoryFilter>(TODO_ALL_CATEGORY);
 
   const { clearDraft } = useChecklistDraftStore();
   const { clearTodoDetail, setTodoDetail } = useTodoDraftStore();
@@ -90,14 +93,28 @@ export default function ChecklistScreen() {
   }, [clearDraft, clearTodoDetail]);
 
 
-  const completedCount = useMemo(
-    () => todos.filter((task) => task.isDone).length,
-    [todos]
+
+
+  const availableCategories = useMemo(
+    () => [TODO_ALL_CATEGORY, ...TODO_CATEGORIES] as TodoCategoryFilter[],
+    []
   );
-  const completionPercent = useMemo(() => {
-    if (!todos.length) return 0;
-    return Math.round((completedCount / todos.length) * 100);
-  }, [completedCount, todos.length]);
+
+  const filteredTodos = useMemo(() => {
+    if (selectedCategory === TODO_ALL_CATEGORY) return todos;
+    return todos.filter((todo) => todo.category === selectedCategory);
+  }, [selectedCategory, todos]);
+
+  const handleCreateTask = useCallback(() => {
+    if (parsedEventId) {
+      clearTodoDetail();
+      clearDraft();
+      router.push({
+        pathname: "/(protected)/(client-stack)/events/[eventId]/(organizer)/tasklist/detail",
+        params: { eventId: parsedEventId },
+      });
+    }
+  }, [clearDraft, clearTodoDetail, parsedEventId, router]);
 
   if (isLoading) {
     return (
@@ -122,84 +139,87 @@ export default function ChecklistScreen() {
 
     );
   }
-  return (
+  return (<>
+    <Stack.Screen
+      options={{
+        title: "Checklist",
+        headerRight: () => (
+          <Pressable
+            onPress={handleCreateTask}
+            className="flex-row items-center justify-center gap-1 bg-primary px-2 py-2 rounded-md -right-1 top-1"
+          >
+            <MaterialIcons name="add" size={16} color="white" />
+            <Text className="text-white font-semibold text-sm">Add Task</Text>
+          </Pressable>
+        ),
+      }}
+    />
     <ScrollView
       showsVerticalScrollIndicator={true}
       className="flex-1 p-1"
     >
       <View className=" gap-4 px-4 mt-2">
-        <View className=" relative overflow-hidden rounded-md p-8 bg-white shadow-sm">
-          <View className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full -mr-20 -mt-20" />
-          <View className="relative z-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
-            <View>
-              <Text className="text-3xl font-extrabold tracking-tight text-on-surface mb-2">
-                Gala Night Preparation
-              </Text>
-              <Text className="text-on-surface-variant font-medium">
-                Keep track of every detail for the grand opening.
-              </Text>
-            </View>
-            <View className="w-full md:w-80">
-              <View className="flex-row justify-between items-end mb-3">
-                <Text className="text-sm font-bold text-primary">
-                  Task Completion
-                </Text>
-                <Text className="text-2xl font-extrabold text-on-surface">
-                  {completionPercent}%
-                </Text>
-              </View>
-              <View className="h-3 w-full bg-surface-container-highest rounded-full overflow-hidden">
-                <View
-                  className="h-full bg-primary rounded-full shadow-[0_0_12px_rgba(238,43,140,0.4)]"
-                  style={{ width: `${completionPercent}%` }}
-                />
-              </View>
-            </View>
+
+        <View className="gap-3">
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
+            {availableCategories.map((category) => (
+              <CategoryChip
+                key={category}
+                label={category}
+                isActive={selectedCategory === category}
+                onPress={() => setSelectedCategory(category)}
+              />
+            ))}
+          </ScrollView>
+        </View>
+
+
+        {filteredTodos.length === 0 ? (
+          <View className="bg-white rounded-xl p-6 items-center border border-border">
+            <MaterialIcons name="playlist-add-check-circle" size={40} color="#cbd5e1" />
+            <Text className="text-base font-semibold text-text-secondary mt-3">
+              {selectedCategory === TODO_ALL_CATEGORY
+                ? "No tasks yet"
+                : `No tasks in ${selectedCategory}`}
+            </Text>
+            <Text className="text-sm text-text-tertiary mt-1 text-center">
+              Start by creating your first todo for this event.
+            </Text>
+
+            <Pressable
+              onPress={handleCreateTask}
+              className="mt-4 flex-row items-center gap-2 bg-primary px-4 py-2.5 rounded-md"
+            >
+              <MaterialIcons name="add" size={16} color="white" />
+              <Text className="text-white font-semibold">Create Todo</Text>
+            </Pressable>
           </View>
-        </View>
-
-        <View className="flex-row gap-2 w-full md:w-auto">
-          <Pressable
-            className="flex-row items-center gap-2 bg-primary px-6 py-3 rounded-md 
-                     shadow-lg shadow-primary/20 active:scale-95 transition-all"
-            onPress={() => {
-              if (parsedEventId) {
+        ) : (
+          filteredTodos.map((task) => (
+            <ChecklistTaskItem
+              key={task.id}
+              task={task}
+              isDeleting={isDeletingTodo}
+              onToggleComplete={() => handleToggleComplete(task)}
+              onDeletePress={() => handleDeleteTask(task)}
+              onEditPress={() => {
+                if (!parsedEventId) {
+                  return;
+                }
+                if (task) {
+                  setTodoDetail(task);
+                }
                 router.push({
-                  pathname: "/(protected)/(client-stack)/events/[eventId]/(organizer)/tasklist/detail",
-                  params: { eventId: parsedEventId }
+                  pathname:
+                    "/(protected)/(client-stack)/events/[eventId]/(organizer)/tasklist/detail",
+                  params: { eventId: parsedEventId, taskId: task.id },
                 });
-              }
-            }}
-          >
-            <MaterialIcons name="add" size={20} color="white" />
-            <Text className="text-white font-bold text-base">New Task</Text>
-          </Pressable>
-        </View>
-
-
-        {todos.map((task) => (
-          <ChecklistTaskItem
-            key={task.id}
-            task={task}
-            isDeleting={isDeletingTodo}
-            onToggleComplete={() => handleToggleComplete(task)}
-            onDeletePress={() => handleDeleteTask(task)}
-            onEditPress={() => {
-              if (!parsedEventId) {
-                return;
-              }
-              if (task) {
-                setTodoDetail(task);
-              }
-              router.push({
-                pathname:
-                  "/(protected)/(client-stack)/events/[eventId]/(organizer)/tasklist/detail",
-                params: { eventId: parsedEventId, taskId: task.id },
-              });
-            }}
-          />
-        ))}
+              }}
+            />
+          ))
+        )}
       </View>
     </ScrollView>
+  </>
   );
 }

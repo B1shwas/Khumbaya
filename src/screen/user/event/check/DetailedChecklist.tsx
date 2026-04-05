@@ -1,4 +1,5 @@
 import { Text } from "@/src/components/ui/Text";
+import { isTodoCategory, TODO_CATEGORY_OPTIONS, type TodoCategory } from "@/src/constants/todo";
 import { useGetEventOwner } from "@/src/features/events/hooks/use-event";
 import { useCreateTodo, useDeleteTodo, useTodoById, useUpdateTodo } from "@/src/features/todo/hooks/useTodo";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -35,6 +36,7 @@ export default function DetailedChecklist() {
   // Form State
   const [title, setTitle] = useState("");
   const [taskDetails, setTaskDetails] = useState("");
+  const [category, setCategory] = useState<TodoCategory | "">("");
   const [dueDate, setDueDate] = useState<Date | null>(null);
   const [assignedTo, setAssignedTo] = useState<number | null>(null);
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -45,6 +47,8 @@ export default function DetailedChecklist() {
     if (isEditMode && todoData) {
       setTitle(todoData.title || "");
       setTaskDetails(todoData.task || "");
+      const existingCategory = todoData.category
+      setCategory(existingCategory && isTodoCategory(existingCategory) ? existingCategory : "");
       setDueDate(todoData.dueDate ? new Date(todoData.dueDate) : null);
       setAssignedTo(todoData.assigned_to || null);
     }
@@ -60,6 +64,7 @@ export default function DetailedChecklist() {
       eventId: parsedEventId,
       title: title.trim(),
       task: taskDetails.trim(),
+      category: category || null,
       dueDate: dueDate ? dueDate.toISOString() : null,
       assigned_to: assignedTo ?? undefined,
     };
@@ -69,7 +74,7 @@ export default function DetailedChecklist() {
         { id: parsedTaskId, payload, eventId: parsedEventId },
         {
           onSuccess: () => {
-            Alert.alert("Success", "Task updated successfully");
+            // Alert.alert("Success", "Task updated successfully");
             router.back();
           },
           onError: (error) => {
@@ -82,7 +87,7 @@ export default function DetailedChecklist() {
         { ...payload, task: payload.task || "" },
         {
           onSuccess: () => {
-            Alert.alert("Success", "Task created successfully");
+            // Alert.alert("Success", "Task created successfully");
             router.back();
           },
           onError: (error) => {
@@ -150,14 +155,14 @@ export default function DetailedChecklist() {
           </View>
 
           {/* Form Card */}
-          <View className="bg-white rounded-3xl p-6 shadow-sm border border-border gap-6 mb-8">
+          <View className="bg-white rounded-md p-6 shadow-sm border border-border gap-6 mb-8">
             {/* Title Input */}
             <View className="gap-2">
               <Text className="text-sm font-jakarta-semibold text-text-secondary ml-1">
                 Task Title
               </Text>
               <TextInput
-                className="w-full h-14 bg-surface-secondary px-4 rounded-xl text-text-primary border border-border focus:border-primary"
+                className="w-full h-14 bg-surface-secondary px-4 rounded-md text-text-primary border border-border focus:border-primary"
                 placeholder="e.g., Book the caterer"
                 placeholderTextColor="#94a3b8"
                 value={title}
@@ -171,7 +176,7 @@ export default function DetailedChecklist() {
                 Description
               </Text>
               <TextInput
-                className="w-full bg-surface-secondary px-4 py-3 rounded-xl text-text-primary border border-border focus:border-primary"
+                className="w-full bg-surface-secondary px-4 py-3 rounded-md text-text-primary border border-border focus:border-primary"
                 placeholder="Add more details about this task..."
                 placeholderTextColor="#94a3b8"
                 value={taskDetails}
@@ -179,6 +184,34 @@ export default function DetailedChecklist() {
                 multiline
                 numberOfLines={4}
                 textAlignVertical="top"
+              />
+            </View>
+
+            {/* Category Dropdown */}
+            <View className="gap-2">
+              <Text className="text-sm font-jakarta-semibold text-text-secondary ml-1">
+                Category
+              </Text>
+              <Dropdown
+                style={{
+                  height: 56,
+                  backgroundColor: "#f8fafc",
+                  borderRadius: 12,
+                  paddingHorizontal: 16,
+                  borderWidth: 1,
+                  borderColor: "#e2e8f0",
+                }}
+                placeholderStyle={{ color: "#94a3b8", fontSize: 14 }}
+                selectedTextStyle={{ color: "#1e293b", fontSize: 14, fontWeight: "600" }}
+                data={TODO_CATEGORY_OPTIONS}
+                labelField="label"
+                valueField="value"
+                placeholder="Select category"
+                value={category || null}
+                onChange={(item: { value: TodoCategory }) => setCategory(item.value)}
+                renderLeftIcon={() => (
+                  <MaterialIcons name="label-outline" size={20} color="#64748b" style={{ marginRight: 8 }} />
+                )}
               />
             </View>
 
@@ -221,7 +254,7 @@ export default function DetailedChecklist() {
                     setPickerMode("date");
                     setShowDatePicker(true);
                   }}
-                  className="flex-1 h-14 bg-surface-secondary px-4 rounded-xl border border-border flex-row items-center justify-between"
+                  className="flex-1 h-14 bg-surface-secondary px-4 rounded-md border border-border flex-row items-center justify-between"
                 >
                   <View className="flex-row items-center">
                     <MaterialIcons name="calendar-today" size={20} color="#64748b" />
@@ -236,7 +269,7 @@ export default function DetailedChecklist() {
                     setPickerMode("time");
                     setShowDatePicker(true);
                   }}
-                  className="flex-1 h-14 bg-surface-secondary px-4 rounded-xl border border-border flex-row items-center justify-between"
+                  className="flex-1 h-14 bg-surface-secondary px-4 rounded-md border border-border flex-row items-center justify-between"
                 >
                   <View className="flex-row items-center">
                     <MaterialIcons name="access-time" size={20} color="#64748b" />
