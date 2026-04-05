@@ -43,7 +43,7 @@ interface CategoryDetailsData {
 export default function CategoryDetailsScreen() {
   const router = useRouter();
   const { eventId, categoryId } = useLocalSearchParams();
-  const { data, isLoading } = useCategoryDetails(Number(categoryId));
+  const { data, isLoading, isError } = useCategoryDetails(Number(categoryId));
   const deleteMutation = useDeleteCategoryMutation(
     Number(categoryId || 0),
     Number(eventId || 0)
@@ -113,7 +113,17 @@ export default function CategoryDetailsScreen() {
     );
   }
 
-  const categoryData = data as CategoryDetailsData;
+  const categoryData = data as CategoryDetailsData | undefined;
+
+  if (isError || !categoryData) {
+    return (
+      <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+        <Text variant="body" style={{ color: "#6B7280" }}>
+          Failed to load category details.
+        </Text>
+      </View>
+    );
+  }
 
   return (
     <View className="flex-1 bg-[#f8f6f7]">

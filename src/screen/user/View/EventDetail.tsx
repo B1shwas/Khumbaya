@@ -56,7 +56,7 @@ const EventDetail = () => {
       name: "Hotel Management",
       icon: "bed-outline",
       color: "#F59E0B",
-      route: `./hotel-management`,
+      route: `./hotel`,
     },
     {
       id: "guests",
