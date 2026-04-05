@@ -3,6 +3,7 @@ import api from "@/src/api/axios";
 export interface InviteGuestPayload {
   fullName: string;
   invitation_name: string;
+  isDraft: boolean;
   phone: string;
   isFamily: boolean;
   role: string;
