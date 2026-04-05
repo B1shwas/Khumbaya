@@ -15,23 +15,13 @@ export type BudgetCategoryFormData = z.infer<typeof budgetCategoryFormSchema>;
 
 export const expenseFormSchema = z.object({
   name: z.string().min(1, "Expense name is required").max(255),
-  estimatedCost: z
+  allocatedAmount: z
     .string()
-    .min(1, "Estimated cost is required")
+    .min(1, "Allocated amount is required")
     .refine((val) => {
       const num = parseFloat(val);
       return !isNaN(num) && num > 0;
-    }, "Estimated cost must be a positive number"),
-  contractAmount: z
-    .string()
-    .optional()
-    .or(z.literal(""))
-    .refine((val) => {
-      if (!val) return true;
-      const num = parseFloat(val);
-      return !isNaN(num) && num > 0;
-    }, "Contract amount must be a positive number"),
-  businessId: z.string().max(255).optional().or(z.literal("")),
+    }, "Allocated amount must be a positive number"),
   nextDueDate: z.string().optional().or(z.literal("")),
   notes: z.string().max(1000).optional().or(z.literal("")),
 });

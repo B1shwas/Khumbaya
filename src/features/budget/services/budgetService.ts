@@ -27,9 +27,7 @@ export const addExpenseToCategory = async (
   categoryId: number,
   payload: {
     name: string;
-    estimatedCost: number;
-    contractAmount?: number;
-    businessId?: string;
+    allocatedAmount: number;
     nextDueDate?: string;
     notes?: string;
   }
@@ -85,10 +83,8 @@ export const addPayment = async (
 export const updateExpense = async (
   expenseId: number,
   payload: {
-    name: string;
-    estimatedCost: number;
-    contractAmount?: number;
-    businessId?: string;
+    name?: string;
+    allocatedAmount?: number;
     nextDueDate?: string;
     notes?: string;
   }

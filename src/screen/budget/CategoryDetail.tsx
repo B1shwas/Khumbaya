@@ -19,11 +19,14 @@ import {
 
 interface Expense {
   id: number;
+  categoryId: number;
   name: string;
-  estimatedCost: number;
-  contractAmount: number;
-  businessName: string;
+  businessId: string | null;
+  allocatedAmount: number;
   nextDueDate: string;
+  notes: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 interface CategoryDetailsData {
@@ -31,12 +34,12 @@ interface CategoryDetailsData {
   name: string;
   eventId: number;
   allocatedBudget: number;
-  estimatedTotal: number;
-  spend: number;
+  allocated: number;
+  spent: number;
   pending: number;
-  budgetBalance: number;
-  createdAt: Date;
-  updatedAt: Date;
+  remaining: number;
+  createdAt: string;
+  updatedAt: string;
   expenses: Expense[];
 }
 
@@ -203,7 +206,7 @@ export default function CategoryDetailsScreen() {
                 variant="h2"
                 style={{ flexShrink: 1 }}
               >
-                Rs. {categoryData.spend.toLocaleString()}
+                Rs. {categoryData.spent.toLocaleString()}
               </Text>
             </View>
 
@@ -236,24 +239,24 @@ export default function CategoryDetailsScreen() {
                   className="text-[10px] text-gray-500 uppercase"
                   variant="h2"
                 >
-                  Balance
+                  Remaining
                 </Text>
                 <InfoIcon
-                  title="Balance"
+                  title="Remaining"
                   description="Amount remaining in this category that hasn't been spent or allocated."
                   iconStyle="!text-gray-400"
                 />
               </View>
               <Text
                 className={`text-sm text-center ${
-                  categoryData.budgetBalance >= 0
+                  categoryData.remaining >= 0
                     ? "text-emerald-600"
                     : "text-red-600"
                 }`}
                 style={{ flexShrink: 1 }}
                 variant="h2"
               >
-                Rs. {Math.abs(categoryData.budgetBalance).toLocaleString()}
+                Rs. {Math.abs(categoryData.remaining).toLocaleString()}
               </Text>
             </View>
           </View>
@@ -291,22 +294,22 @@ export default function CategoryDetailsScreen() {
                   <View className="gap-1">
                     <View className="flex-row gap-2">
                       <Text className="text-xs text-gray-500" variant="h2">
-                        Est:
+                        Allocated:
                       </Text>
                       <Text className="text-xs text-[#181114]" variant="h2">
-                        Rs. {expense.estimatedCost.toLocaleString()}
+                        Rs. {expense.allocatedAmount.toLocaleString()}
                       </Text>
                     </View>
-                    <View className="flex-row gap-2">
-                      <Text className="text-xs text-gray-500" variant="h2">
-                        Contract:
-                      </Text>
-                      <Text className="text-xs text-[#181114] " variant="h2">
-                        {expense.contractAmount
-                          ? `Rs. ${expense.contractAmount.toLocaleString()}`
-                          : "Not done"}
-                      </Text>
-                    </View>
+                    {expense.notes && (
+                      <View className="flex-row gap-2">
+                        <Text className="text-xs text-gray-500" variant="h2">
+                          Notes:
+                        </Text>
+                        <Text className="text-xs text-[#181114] " variant="h2">
+                          {expense.notes}
+                        </Text>
+                      </View>
+                    )}
                     <Text
                       className="text-[10px] text-gray-400 mt-1"
                       variant="h2"

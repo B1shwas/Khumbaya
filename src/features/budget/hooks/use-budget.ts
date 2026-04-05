@@ -98,9 +98,7 @@ export const useExpenseMutation = (categoryId: number, eventId: number) => {
     mutationKey: ["add-expense", categoryId],
     mutationFn: (payload: {
       name: string;
-      estimatedCost: number;
-      contractAmount?: number;
-      businessId?: string;
+      allocatedAmount: number;
       nextDueDate?: string;
       notes?: string;
     }) => addExpenseToCategory(categoryId, payload),
@@ -184,9 +182,7 @@ export const useUpdateExpenseMutation = (
     mutationKey: ["update-expense", expenseId],
     mutationFn: (payload: {
       name: string;
-      estimatedCost: number;
-      contractAmount?: number;
-      businessId?: string;
+      allocatedAmount?: number;
       nextDueDate?: string;
       notes?: string;
     }) => updateExpense(expenseId, payload),

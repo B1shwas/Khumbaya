@@ -60,10 +60,8 @@ export default function EventBudgetScreen() {
   const data = budgetData;
   const totalBudget = data.summary?.totalBudget || 0;
   const totalAllocated = data.summary?.totalAllocated || 0;
-  const totalSpent = data.summary?.totalSpent || 0;
-  const totalPending = data.summary?.totalPending || 0;
-  const totalEstimated = data.summary?.totalEstimated || 0;
-  const totalRemaining = data.summary?.totalRemaining || 0;
+  const totalSpent = data.summary?.totalSpend || 0;
+  const totalRemaining = data.summary?.remaining || 0;
 
   const filteredCategories = data.categories.filter((cat: any) =>
     cat.name.toLowerCase().includes(search.toLowerCase())
@@ -123,9 +121,8 @@ export default function EventBudgetScreen() {
             <BudgetStatsGrid
               variant="budget"
               stats={[
-                { label: "Estimated", value: totalEstimated },
+                { label: "Allocated", value: totalAllocated },
                 { label: "Spent", value: totalSpent },
-                { label: "Pending", value: totalPending },
                 { label: "Remaining", value: totalRemaining },
               ]}
             />
@@ -163,7 +160,7 @@ export default function EventBudgetScreen() {
                 id={cat.id}
                 name={cat.name}
                 allocatedBudget={cat.allocatedBudget}
-                spend={cat.spend}
+                spend={cat.spent}
                 onPress={() => {
                   router.push(
                     `/(protected)/(client-stack)/events/${eventId}/(organizer)/${cat.id}`

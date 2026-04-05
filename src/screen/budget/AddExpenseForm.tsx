@@ -63,9 +63,7 @@ export default function AddExpenseScreen({
     resolver: zodResolver(expenseFormSchema),
     defaultValues: {
       name: "",
-      estimatedCost: "",
-      contractAmount: "",
-      businessId: "",
+      allocatedAmount: "",
       nextDueDate: "",
       notes: "",
     },
@@ -76,9 +74,10 @@ export default function AddExpenseScreen({
   useEffect(() => {
     if (editMode && expenseData) {
       setValue("name", expenseData.name);
-      setValue("estimatedCost", expenseData.estimatedCost?.toString() || "");
-      setValue("contractAmount", expenseData.contractAmount?.toString() || "");
-      setValue("businessId", expenseData.businessId || "");
+      setValue(
+        "allocatedAmount",
+        expenseData.allocatedAmount?.toString() || ""
+      );
       setValue("nextDueDate", expenseData.nextDueDate || "");
       setValue("notes", expenseData.notes || "");
     }
@@ -96,11 +95,7 @@ export default function AddExpenseScreen({
     try {
       const payload = {
         name: data.name,
-        estimatedCost: parseFloat(data.estimatedCost),
-        contractAmount: data.contractAmount
-          ? parseFloat(data.contractAmount)
-          : undefined,
-        businessId: data.businessId || undefined,
+        allocatedAmount: parseFloat(data.allocatedAmount),
         nextDueDate: data.nextDueDate || undefined,
         notes: data.notes || undefined,
       };
@@ -192,14 +187,14 @@ export default function AddExpenseScreen({
               </View>
 
               <View className="gap-6">
-                {/* Estimated Cost */}
+                {/* Allocated Amount */}
                 <View className="gap-2">
                   <Text className="text-sm text-gray-600 ml-1" variant="h2">
-                    Estimated Cost
+                    Allocated Amount
                   </Text>
                   <Controller
                     control={control}
-                    name="estimatedCost"
+                    name="allocatedAmount"
                     render={({ field: { onChange, value } }) => (
                       <View>
                         <View className="relative">
@@ -218,99 +213,12 @@ export default function AddExpenseScreen({
                             onChangeText={onChange}
                           />
                         </View>
-                        {errors.estimatedCost && (
+                        {errors.allocatedAmount && (
                           <Text
                             className="text-xs text-red-500 mt-1"
                             variant="h2"
                           >
-                            {errors.estimatedCost.message}
-                          </Text>
-                        )}
-                      </View>
-                    )}
-                  />
-                </View>
-
-                {/* Contract Amount */}
-                <View className="gap-2">
-                  <View className="flex-row items-center gap-1">
-                    <Text className="text-sm text-gray-600 ml-1" variant="h2">
-                      Contract Amount
-                    </Text>
-                    <Text className="text-[10px] text-gray-400" variant="h2">
-                      (Optional)
-                    </Text>
-                  </View>
-                  <Controller
-                    control={control}
-                    name="contractAmount"
-                    render={({ field: { onChange, value } }) => (
-                      <View>
-                        <View className="relative">
-                          <Text
-                            className="absolute left-4 top-3.5 text-sm text-gray-600"
-                            variant="h2"
-                          >
-                            Rs.
-                          </Text>
-                          <TextInput
-                            className="w-full h-14 bg-[#f8f6f7] pl-12 pr-4 rounded-md text-[#181114] border border-gray-100"
-                            placeholder="0.00"
-                            placeholderTextColor="#999"
-                            keyboardType="decimal-pad"
-                            value={value || ""}
-                            onChangeText={onChange}
-                          />
-                        </View>
-                        {errors.contractAmount && (
-                          <Text
-                            className="text-xs text-red-500 mt-1"
-                            variant="h2"
-                          >
-                            {errors.contractAmount.message}
-                          </Text>
-                        )}
-                      </View>
-                    )}
-                  />
-                </View>
-
-                {/* Business Name */}
-                <View className="gap-2">
-                  <View className="flex-row items-center gap-1">
-                    <Text className="text-sm text-gray-600 ml-1" variant="h2">
-                      Business Name
-                    </Text>
-                    <Text className="text-[10px] text-gray-400" variant="h2">
-                      (Optional)
-                    </Text>
-                  </View>
-                  <Controller
-                    control={control}
-                    name="businessId"
-                    render={({ field: { onChange, value } }) => (
-                      <View>
-                        <View className="relative">
-                          <TextInput
-                            className="w-full h-14 bg-[#f8f6f7] px-4 rounded-md text-[#181114] border border-gray-100"
-                            placeholder="Search businesses..."
-                            placeholderTextColor="#999"
-                            value={value}
-                            onChangeText={onChange}
-                          />
-                          <MaterialIcons
-                            name="search"
-                            size={20}
-                            color="#999"
-                            style={{ position: "absolute", right: 16, top: 12 }}
-                          />
-                        </View>
-                        {errors.businessId && (
-                          <Text
-                            className="text-xs text-red-500 mt-1"
-                            variant="h2"
-                          >
-                            {errors.businessId.message}
+                            {errors.allocatedAmount.message}
                           </Text>
                         )}
                       </View>
