@@ -27,32 +27,37 @@ const addMemberButton = (eventId: string) => (
 );
 
 export default function OrganizerEventDetailLayout() {
-  const params = useLocalSearchParams<{ eventId?: string | string[] }>();
-  const eventId = Array.isArray(params.eventId)
-    ? params.eventId[0]
-    : params.eventId;
-
   return (
     <Stack
       screenOptions={{
-        animation: "slide_from_right",
-        headerShown: true,
-        headerTitleAlign: "center",
-        headerTitleStyle: {
-          fontFamily: "PlusJakartaSans-Bold",
-          fontSize: 18,
-        },
         headerLeft: headerBackButton,
-        headerRight: eventId ? () => addMemberButton(eventId) : undefined,
       }}
     >
+      {/* Index Screen */}
       <Stack.Screen
         name="index"
-        options={{ title: "Settings", animation: "flip" }}
+        options={{
+          title: "Settings",
+          animation: "flip",
+          headerRight: () => {
+            const params = useLocalSearchParams<{
+              eventId?: string | string[];
+            }>();
+            const eventId = Array.isArray(params.eventId)
+              ? params.eventId[0]
+              : params.eventId;
+            return eventId ? addMemberButton(eventId) : null;
+          },
+        }}
       />
+
+      {/* Transfer Ownership Screen */}
       <Stack.Screen
         name="transfer-ownership"
-        options={{ title: "Collaboration", animation: "flip" }}
+        options={{
+          title: "Collaboration",
+          animation: "flip",
+        }}
       />
     </Stack>
   );
