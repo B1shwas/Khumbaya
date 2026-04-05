@@ -41,10 +41,11 @@ export default function AddPaymentScreen({
 }: AddPaymentScreenProps) {
   const router = useRouter();
   const { eventId, categoryId, expenseId, paymentId } = useLocalSearchParams();
+  const isEditMode = editMode || !!paymentId;
 
   const { data: paymentData, isLoading: isPaymentLoading } = usePaymentById(
     Number(paymentId || 0),
-    { enabled: editMode && !!paymentId }
+    { enabled: isEditMode && !!paymentId }
   );
 
   const { control, handleSubmit, setValue, reset } = useForm<PaymentFormData>({
@@ -74,7 +75,7 @@ export default function AddPaymentScreen({
   );
 
   useEffect(() => {
-    if (editMode && paymentData) {
+    if (isEditMode && paymentData) {
       setValue("amount", paymentData.amount?.toString() || "");
       setValue("paymentName", paymentData.name || "");
       setValue("paymentMode", paymentData.mode || "bank_transfer");
@@ -86,7 +87,7 @@ export default function AddPaymentScreen({
         setValue("paidOn", date);
       }
     }
-  }, [editMode, paymentData, setValue]);
+  }, [isEditMode, paymentData, setValue]);
 
   const paymentModes = [
     { label: "Bank Transfer", value: "bank_transfer" },
@@ -115,9 +116,7 @@ export default function AddPaymentScreen({
       notes: data.notes || undefined,
     };
 
-    const mutation = editMode ? updateMutation : { mutate: createPayment };
-
-    if (editMode) {
+    if (isEditMode) {
       updateMutation.mutate(paymentPayload, {
         onSuccess: () => {
           Alert.alert("Success", "Payment updated successfully");
@@ -148,7 +147,7 @@ export default function AddPaymentScreen({
     }
   };
 
-  if (editMode && isPaymentLoading) {
+  if (isEditMode && isPaymentLoading) {
     return (
       <View className="flex-1 bg-[#f8f6f7] items-center justify-center">
         <ActivityIndicator size="large" color="#ee2b8c" />
@@ -169,10 +168,10 @@ export default function AddPaymentScreen({
         <View className="flex-row items-center gap-3 px-5 pt-4 pb-6">
           <View className="flex-1">
             <Text variant="h1" className="text-[#181114] text-2xl">
-              {editMode ? "Update Payment" : "Record Payment"}
+              {isEditMode ? "Update Payment" : "Record Payment"}
             </Text>
             <Text variant="caption" className="text-gray-500">
-              {editMode
+              {isEditMode
                 ? "Make changes to your payment details."
                 : "Log a new transaction for your expenses."}
             </Text>

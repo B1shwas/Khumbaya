@@ -2,6 +2,7 @@ import { BudgetStatsGrid } from "@/src/components/budget";
 import { Text } from "@/src/components/ui/Text";
 import {
   useDeleteExpenseMutation,
+  useDeletePaymentMutation,
   useExpenseById,
 } from "@/src/features/budget/hooks/use-budget";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -50,10 +51,18 @@ export default function ExpenseDetailScreen() {
   const { eventId, categoryId, expenseId } = useLocalSearchParams();
   const { data, isLoading } = useExpenseById(Number(expenseId));
   const [menuVisible, setMenuVisible] = useState(false);
+  const [paymentModalVisible, setPaymentModalVisible] = useState(false);
+  const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null);
   const deleteMutation = useDeleteExpenseMutation(
     Number(expenseId || 0),
     Number(categoryId || 0),
     Number(eventId || 0)
+  );
+  const deletePaymentMutation = useDeletePaymentMutation(
+    selectedPayment?.id || 0,
+    Number(expenseId),
+    Number(categoryId),
+    Number(eventId)
   );
 
   let remainingBalance,
@@ -66,6 +75,53 @@ export default function ExpenseDetailScreen() {
   const handleAddPaymentPress = () => {
     router.push(
       `/(protected)/(client-stack)/events/${eventId}/(organizer)/${categoryId}/${expenseId}/add-payment`
+    );
+  };
+
+  const handlePaymentPress = (payment: Payment) => {
+    setSelectedPayment(payment);
+    setPaymentModalVisible(true);
+  };
+
+  const handleEditPayment = () => {
+    if (!selectedPayment) return;
+    setPaymentModalVisible(false);
+    router.push({
+      pathname:
+        `/(protected)/(client-stack)/events/${eventId}/(organizer)/${categoryId}/${expenseId}/add-payment` as any,
+      params: {
+        paymentId: selectedPayment.id.toString(),
+      },
+    });
+  };
+
+  const handleDeletePayment = () => {
+    if (!selectedPayment) return;
+    Alert.alert(
+      "Delete Payment",
+      "Are you sure you want to delete this payment? This action cannot be undone.",
+      [
+        {
+          text: "Cancel",
+          onPress: () => {},
+          style: "cancel",
+        },
+        {
+          text: "Delete",
+          onPress: async () => {
+            try {
+              await deletePaymentMutation.mutateAsync();
+              setPaymentModalVisible(false);
+              Alert.alert("Success", "Payment deleted successfully!");
+            } catch (error: any) {
+              const errorMessage =
+                error?.message || "Failed to delete payment. Please try again.";
+              Alert.alert("Error", errorMessage);
+            }
+          },
+          style: "destructive",
+        },
+      ]
     );
   };
 
@@ -173,6 +229,106 @@ export default function ExpenseDetailScreen() {
           </View>
         </Pressable>
       </Modal>
+
+      <Modal
+        visible={paymentModalVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setPaymentModalVisible(false)}
+      >
+        <Pressable
+          className="flex-1 bg-black/50"
+          onPress={() => setPaymentModalVisible(false)}
+        >
+          <View className="flex-1 items-center justify-center px-6">
+            <Pressable
+              className="bg-white rounded-3xl p-6 w-full"
+              onPress={() => {}}
+            >
+              <Text className="text-[#181114] text-lg mb-4" variant="h1">
+                {selectedPayment?.name}
+              </Text>
+
+              <View className="gap-4 mb-6 bg-gray-50 p-4 rounded-2xl">
+                <View className="flex-row justify-between">
+                  <Text className="text-gray-600" variant="h2">
+                    Amount
+                  </Text>
+                  <Text className="text-[#181114] " variant="h2">
+                    Rs. {selectedPayment?.amount?.toLocaleString()}
+                  </Text>
+                </View>
+
+                <View className="flex-row justify-between">
+                  <Text className="text-gray-600" variant="h2">
+                    Paid On
+                  </Text>
+                  <Text className="text-[#181114]" variant="h2">
+                    {selectedPayment?.paidOn
+                      ? new Date(selectedPayment.paidOn).toLocaleDateString()
+                      : "N/A"}
+                  </Text>
+                </View>
+
+                <View className="flex-row justify-between">
+                  <Text className="text-gray-600" variant="h2">
+                    Mode
+                  </Text>
+                  <Text className="text-[#181114]" variant="h2">
+                    {selectedPayment?.mode === "bank_transfer"
+                      ? "Bank Transfer"
+                      : selectedPayment?.mode?.replace(/_/g, " ")}
+                  </Text>
+                </View>
+
+                <View className="flex-row justify-between">
+                  <Text className="text-gray-600" variant="h2">
+                    Status
+                  </Text>
+                  <View className="bg-emerald-100 px-3 py-1 rounded-md">
+                    <Text className="text-emerald-700 text-xs" variant="h2">
+                      {selectedPayment?.status?.toUpperCase()}
+                    </Text>
+                  </View>
+                </View>
+
+                {selectedPayment?.notes && (
+                  <View>
+                    <Text className="text-gray-600 mb-1" variant="h2">
+                      Notes
+                    </Text>
+                    <Text className="text-[#181114]" variant="h2">
+                      {selectedPayment.notes}
+                    </Text>
+                  </View>
+                )}
+              </View>
+
+              <View className="flex-row gap-3">
+                <TouchableOpacity
+                  onPress={handleEditPayment}
+                  className="flex-1 h-12 bg-[#ee2b8c] rounded-md items-center justify-center flex-row gap-2"
+                >
+                  <MaterialIcons name="edit" size={20} color="white" />
+                  <Text className="text-white" variant="h2">
+                    Edit
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={handleDeletePayment}
+                  className="flex-1 h-12 bg-red-500 rounded-md items-center justify-center flex-row gap-2"
+                >
+                  <MaterialIcons name="delete" size={20} color="white" />
+                  <Text className="text-white" variant="h2">
+                    Delete
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </Pressable>
+          </View>
+        </Pressable>
+      </Modal>
+
       <ScrollView
         className="flex-1"
         contentContainerClassName="pb-24"
@@ -251,6 +407,7 @@ export default function ExpenseDetailScreen() {
                   key={payment.id}
                   activeOpacity={0.7}
                   className="bg-white rounded-md p-5 shadow-sm border border-gray-100"
+                  onPress={() => handlePaymentPress(payment)}
                 >
                   <View className="flex-row items-center justify-between">
                     <View className="flex-row items-center gap-4 flex-1">
