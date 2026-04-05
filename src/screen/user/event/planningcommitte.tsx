@@ -13,7 +13,9 @@ import { ScrollView, TouchableOpacity, View } from "react-native";
 export function TransferOwnerShipPage() {
   const params = useLocalSearchParams();
   const eventId = useMemo(() => {
-    const raw = Array.isArray(params.eventId) ? params.eventId[0] : params.eventId;
+    const raw = Array.isArray(params.eventId)
+      ? params.eventId[0]
+      : params.eventId;
     return raw ?? "";
   }, [params.eventId]);
 
