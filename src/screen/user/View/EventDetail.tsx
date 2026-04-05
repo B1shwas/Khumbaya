@@ -6,14 +6,21 @@ import {
   useGetEventWithRole,
 } from "@/src/features/events/hooks/use-event";
 import { useEventStore } from "@/src/features/events/store/useEventStore";
+import { Ionicons } from "@expo/vector-icons";
 import {
   RelativePathString,
   useLocalSearchParams,
   useRouter,
 } from "expo-router";
 import { useEffect, useState } from "react";
-import { Alert, Pressable, ScrollView, Text, TouchableOpacity, View } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import {
+  Alert,
+  Pressable,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import EventDetailHero from "./EventDetailHero";
 
 const EventDetail = () => {
@@ -26,30 +33,28 @@ const EventDetail = () => {
     (e: Event) => String(e.id) === String(eventId)
   );
 
-  const event =
-    foundEvent ??
-    ({
-      id: eventId ?? "0",
-      title: "Event Details",
-      date: "—",
-      location: "—",
-      venue: "—",
-      imageUrl: "",
-      role: "Organizer" as const,
-      status: "upcoming" as const,
-      time: "",
-      startDateTime: "",
-      endDateTime: "",
+  const event = foundEvent ?? {
+    id: eventId ?? "0",
+    title: "Event Details",
+    date: "—",
+    location: "—",
+    venue: "—",
+    imageUrl: "",
+    role: "Organizer" as const,
+    status: "upcoming" as const,
+    time: "",
+    startDateTime: "",
+    endDateTime: "",
 
-      days: 0,
-      hours: 0,
-      minutes: 0,
-      guests: { confirmed: 0, total: 0 },
-      budget: { spent: 0, total: 0 },
-      tasks: { pending: 0 },
-      vendors: { booked: 0, pending: 0 },
-      nextTask: "",
-    } );
+    days: 0,
+    hours: 0,
+    minutes: 0,
+    guests: { confirmed: 0, total: 0 },
+    budget: { spent: 0, total: 0 },
+    tasks: { pending: 0 },
+    vendors: { booked: 0, pending: 0 },
+    nextTask: "",
+  };
 
   const eventIdNumber = Number(event.id);
   const { mutate: deleteEvent } = useDeleteEvent(
@@ -82,7 +87,10 @@ const EventDetail = () => {
         onPress: () => {
           deleteEvent(undefined, {
             onSuccess: () => {
-              Alert.alert("Event deleted", "The event was removed successfully.");
+              Alert.alert(
+                "Event deleted",
+                "The event was removed successfully."
+              );
               router.push("/(protected)/(client-stack)/events");
             },
             onError: (error: any) => {
@@ -144,7 +152,7 @@ const EventDetail = () => {
       icon: "checkmark-circle-outline",
       color: "#EC4899",
       route: `./tasklist`,
-    }
+    },
   ];
 
   return (
@@ -157,8 +165,8 @@ const EventDetail = () => {
         status={event.status}
         title={event.title}
         // date={event.date}
-        startDateTime= {event.startDateTime}
-         endDateTime= {event.endDateTime}
+        startDateTime={event.startDateTime}
+        endDateTime={event.endDateTime}
         location={event.location}
       />
 
@@ -167,7 +175,14 @@ const EventDetail = () => {
         {menuVisible && (
           <Pressable
             onPress={handleCloseMenu}
-            style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, zIndex: 10 }}
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              zIndex: 10,
+            }}
           />
         )}
 
@@ -232,7 +247,9 @@ const EventDetail = () => {
             description="Add Event Organizers and Collaborators"
             iconstring="person"
             onPress={() => {
-              router.push("./settings/transfer-ownership" as RelativePathString);
+              router.push(
+                "./settings/transfer-ownership" as RelativePathString
+              );
             }}
           />
         </View>
