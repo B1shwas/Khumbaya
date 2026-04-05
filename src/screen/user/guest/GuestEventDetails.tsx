@@ -155,12 +155,12 @@ export default function GuestEventDetails() {
         rawIsDeparturePickupRequired:
           me.event_guest?.isDeparturePickupRequired ?? null,
         rawNotes: me.event_guest?.notes ?? null,
-        rawAssignedRoom: me.event_guest?.assigned_room ?? null,
-        rawArrivalInfo: me.event_guest?.arrival_info ?? null,
-        rawDepartureInfo: me.event_guest?.departure_info ?? null,
+        rawAssignedRoom: null,
+        rawArrivalInfo:  null,
+        rawDepartureInfo: null,
       });
     }
-    router.push(`/(protected)/(client-stack)/events/${eventId}/(guest)/guest-details`);
+    router.push(`/(protected)/(client-stack)/events/${eventId}/(guest)/rsvp`);
   };
 
   return (
