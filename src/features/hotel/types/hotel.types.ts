@@ -27,14 +27,11 @@ export interface HotelWithAllocations extends Hotel {
 }
 
 export interface AcceptedGuestWithRoom {
-  guestId: number;
-  userId: number;
-  name: string;
-  phone: string;
-  photo: string | null;
-  roomNumber: string | null;
-  roomType: string | null;
-  hotelId: number | null;
-  hotelName: string | null;
-  notes: string | null;
+  assigned_room: string | null;
+  user: {
+    id: number;
+    username: string;
+    phone: string;
+    photo: string | null;
+  };
 }

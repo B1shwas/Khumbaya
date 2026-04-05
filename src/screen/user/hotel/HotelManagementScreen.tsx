@@ -1,25 +1,21 @@
+import { useGetHotelManagement } from "@/src/features/hotel/api/use-hotel";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams } from "expo-router";
 import { useMemo, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
-  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useGetInvitationsForEvent } from "@/src/features/guests/api/use-guests";
-import type { GuestDetailInterface } from "@/src/features/guests/types";
-import { useGetHotelsForEvent } from "@/src/features/hotel/api/use-hotel";
 
 interface GuestRow {
   guestId: number;
   guestName: string;
   roomNumber: string;
-  roomType: string | null;
   phone: string;
 }
 
@@ -38,36 +34,40 @@ function getInitials(name: string): string {
 
 function GuestRowItem({ guest }: { guest: GuestRow }) {
   return (
-    <View style={styles.guestRow}>
-      <View style={styles.guestAvatar}>
-        <Text style={styles.guestAvatarText}>{getInitials(guest.guestName)}</Text>
+    <View className="flex-row items-center py-2.5">
+      <View className="w-[38px] h-[38px] rounded-full bg-pink-100 items-center justify-center mr-2.5">
+        <Text className="font-jakarta-bold text-[13px] text-primary">
+          {getInitials(guest.guestName)}
+        </Text>
       </View>
-      <View style={styles.guestInfo}>
-        <Text style={styles.guestName}>{guest.guestName}</Text>
-        <View style={styles.roomRow}>
+      <View className="flex-1">
+        <Text className="font-jakarta-semibold text-sm text-[#181114] mb-0.5">
+          {guest.guestName}
+        </Text>
+        <View className="flex-row items-center gap-1">
           {guest.roomNumber ? (
             <>
               <Ionicons name="bed-outline" size={12} color="#9CA3AF" />
-              <Text style={styles.roomLabel}>Room {guest.roomNumber}</Text>
-              {guest.roomType ? (
-                <>
-                  <Text style={styles.roomDot}>·</Text>
-                  <Text style={styles.roomType}>{guest.roomType}</Text>
-                </>
-              ) : null}
+              <Text className="font-jakarta text-xs text-gray-500">
+                Room {guest.roomNumber}
+              </Text>
             </>
           ) : (
-            <Text style={styles.roomUnassigned}>Room not assigned</Text>
+            <Text className="font-jakarta text-xs text-gray-300 italic">
+              Room not assigned
+            </Text>
           )}
         </View>
       </View>
       {guest.roomNumber ? (
-        <View style={styles.roomBadge}>
-          <Text style={styles.roomBadgeText}>{guest.roomNumber}</Text>
+        <View className="bg-blue-50 px-2.5 py-1 rounded-lg">
+          <Text className="font-jakarta-bold text-xs text-blue-500">
+            {guest.roomNumber}
+          </Text>
         </View>
       ) : (
-        <View style={styles.roomBadgePending}>
-          <Text style={styles.roomBadgePendingText}>—</Text>
+        <View className="bg-gray-100 px-2.5 py-1 rounded-lg">
+          <Text className="font-jakarta-bold text-xs text-gray-400">—</Text>
         </View>
       )}
     </View>
@@ -78,27 +78,33 @@ function HotelCard({ hotel }: { hotel: HotelGroup }) {
   const [expanded, setExpanded] = useState(true);
 
   return (
-    <View style={styles.hotelCard}>
+    <View className="bg-white rounded-2xl overflow-hidden shadow-sm">
       <TouchableOpacity
-        style={styles.hotelHeader}
+        className="flex-row items-center p-4"
         onPress={() => setExpanded(!expanded)}
         activeOpacity={0.8}
       >
-        <View style={styles.hotelIconWrap}>
+        <View className="w-12 h-12 rounded-xl bg-pink-100 items-center justify-center mr-3">
           <Ionicons name="business" size={22} color="#ee2b8c" />
         </View>
-        <View style={styles.hotelMeta}>
-          <Text style={styles.hotelName}>{hotel.hotelName}</Text>
+        <View className="flex-1">
+          <Text className="font-jakarta-bold text-[15px] text-[#181114] mb-0.5">
+            {hotel.hotelName}
+          </Text>
           {hotel.location ? (
-            <View style={styles.locationRow}>
+            <View className="flex-row items-center gap-1">
               <Ionicons name="location-outline" size={12} color="#9CA3AF" />
-              <Text style={styles.locationText}>{hotel.location}</Text>
+              <Text className="font-jakarta text-xs text-gray-400">
+                {hotel.location}
+              </Text>
             </View>
           ) : null}
         </View>
-        <View style={styles.hotelStats}>
-          <Text style={styles.statCount}>{hotel.guests.length}</Text>
-          <Text style={styles.statLabel}>guests</Text>
+        <View className="items-center bg-gray-50 px-3 py-1.5 rounded-xl">
+          <Text className="font-jakarta-bold text-base text-[#181114]">
+            {hotel.guests.length}
+          </Text>
+          <Text className="font-jakarta text-[10px] text-gray-500">guests</Text>
         </View>
         <Ionicons
           name={expanded ? "chevron-up" : "chevron-down"}
@@ -108,14 +114,16 @@ function HotelCard({ hotel }: { hotel: HotelGroup }) {
         />
       </TouchableOpacity>
 
-      {expanded && <View style={styles.divider} />}
+      {expanded && <View className="h-px bg-gray-100 mx-4" />}
 
       {expanded && (
-        <View style={styles.guestList}>
+        <View className="px-4 pb-3 pt-1">
           {hotel.guests.map((guest, index) => (
             <View key={guest.guestId}>
               <GuestRowItem guest={guest} />
-              {index < hotel.guests.length - 1 && <View style={styles.guestDivider} />}
+              {index < hotel.guests.length - 1 && (
+                <View className="h-px bg-gray-100" />
+              )}
             </View>
           ))}
         </View>
@@ -130,54 +138,20 @@ export default function HotelManagementScreen() {
 
   const [searchText, setSearchText] = useState("");
 
-  const { data: invitations, isLoading: loadingGuests } = useGetInvitationsForEvent(numericEventId);
-  const { data: hotels, isLoading: loadingHotels } = useGetHotelsForEvent(numericEventId);
+  const { data: hotelGuests = [], isLoading } = useGetHotelManagement(numericEventId);
 
-  const isLoading = loadingGuests || loadingHotels;
-
-  // Filter only accepted guests
-  const acceptedGuests: GuestDetailInterface[] = useMemo(() => {
-    if (!invitations) return [];
-return invitations.filter(
-      (g: GuestDetailInterface) =>
-        String(g.event_guest.status ?? "").trim().toLowerCase() === "accepted"
-    );
-  }, [invitations]);
-
-  // Group accepted guests by hotel
-  // Uses event_guest.assigned_room as room number and matches to hotels list
   const hotelGroups: HotelGroup[] = useMemo(() => {
-    if (!acceptedGuests.length) return [];
+    if (!hotelGuests.length) return [];
 
-    // Build hotel lookup from hotels API (if available)
-    const hotelMap = new Map<number, { name: string; location: string }>();
-    if (hotels) {
-      hotels.forEach((h) => hotelMap.set(h.id, { name: h.name, location: h.location }));
-    }
+    const ungrouped: GuestRow[] = hotelGuests
+      .filter((g) => g?.user)
+      .map((g) => ({
+        guestId: g.user.id,
+        guestName: g.user.username,
+        roomNumber: g.assigned_room ?? "",
+        phone: g.user.phone,
+      }));
 
-    // Group guests by their assigned hotel (using assigned_room field)
-    // If backend provides hotelId on event_guest in future, use that
-    const ungrouped: GuestRow[] = acceptedGuests.map((g) => ({
-      guestId: g.event_guest.id,
-      guestName: g.user_detail.username,
-      roomNumber: g.event_guest.assigned_room ?? "",
-      roomType: null,
-      phone: g.user_detail.phone,
-    }));
-
-    // If hotels data exists, map guests to hotels via allocations
-    // For now: guests with a room → grouped under their hotel; guests without → "Unassigned"
-    if (hotels && hotels.length > 0) {
-      // Return one card per hotel with their guests (backend will provide allocation mapping)
-      return hotels.map((hotel) => ({
-        hotelId: String(hotel.id),
-        hotelName: hotel.name,
-        location: hotel.location,
-        guests: ungrouped, // TODO: filter by hotel allocation when backend ready
-      })).filter((h) => h.guests.length > 0);
-    }
-
-    // Fallback: single group showing all accepted guests with their room info
     const withRoom = ungrouped.filter((g) => g.roomNumber);
     const withoutRoom = ungrouped.filter((g) => !g.roomNumber);
 
@@ -199,7 +173,7 @@ return invitations.filter(
       });
     }
     return groups;
-  }, [acceptedGuests, hotels]);
+  }, [hotelGuests]);
 
   const filteredGroups = useMemo(() => {
     const query = searchText.trim().toLowerCase();
@@ -209,8 +183,7 @@ return invitations.filter(
         const matchedGuests = hotel.guests.filter(
           (g) =>
             g.guestName.toLowerCase().includes(query) ||
-            g.roomNumber.toLowerCase().includes(query) ||
-            (g.roomType ?? "").toLowerCase().includes(query)
+            g.roomNumber.toLowerCase().includes(query)
         );
         if (hotel.hotelName.toLowerCase().includes(query)) return hotel;
         if (matchedGuests.length > 0) return { ...hotel, guests: matchedGuests };
@@ -220,20 +193,20 @@ return invitations.filter(
   }, [hotelGroups, searchText]);
 
   const totalGuests = hotelGroups.reduce((sum, h) => sum + h.guests.length, 0);
-  const totalHotels = hotels?.length ?? 0;
+  const totalHotels = hotelGroups.length;
   const totalRooms = hotelGroups.reduce(
     (sum, h) => sum + h.guests.filter((g) => g.roomNumber).length,
     0
   );
 
   return (
-    <SafeAreaView style={styles.container} edges={[]}>
+    <SafeAreaView className="flex-1 bg-gray-100" edges={[]}>
       {/* Search */}
-      <View style={styles.searchSection}>
-        <View style={styles.searchBox}>
+      <View className="px-4 pt-3 pb-2">
+        <View className="flex-row items-center bg-gray-200/50 rounded-xl px-3.5 h-12">
           <Ionicons name="search-outline" size={18} color="#9CA3AF" style={{ marginRight: 8 }} />
           <TextInput
-            style={styles.searchInput}
+            className="flex-1 text-sm text-gray-900 font-jakarta"
             placeholder="Search guest, hotel or room..."
             placeholderTextColor="#9CA3AF"
             value={searchText}
@@ -248,40 +221,40 @@ return invitations.filter(
       </View>
 
       {/* Summary bar */}
-      <View style={styles.summaryBar}>
-        <View style={styles.summaryItem}>
-          <Text style={styles.summaryNumber}>{totalHotels}</Text>
-          <Text style={styles.summaryLabel}>Hotels</Text>
+      <View className="flex-row bg-white mx-4 mb-3 rounded-2xl py-3.5 shadow-sm">
+        <View className="flex-1 items-center">
+          <Text className="font-jakarta-bold text-xl text-primary">{totalHotels}</Text>
+          <Text className="font-jakarta text-[11px] text-gray-500 mt-0.5">Hotels</Text>
         </View>
-        <View style={styles.summaryDivider} />
-        <View style={styles.summaryItem}>
-          <Text style={styles.summaryNumber}>{totalGuests}</Text>
-          <Text style={styles.summaryLabel}>Accepted</Text>
+        <View className="w-px bg-gray-200 my-1" />
+        <View className="flex-1 items-center">
+          <Text className="font-jakarta-bold text-xl text-primary">{totalGuests}</Text>
+          <Text className="font-jakarta text-[11px] text-gray-500 mt-0.5">Accepted</Text>
         </View>
-        <View style={styles.summaryDivider} />
-        <View style={styles.summaryItem}>
-          <Text style={styles.summaryNumber}>{totalRooms}</Text>
-          <Text style={styles.summaryLabel}>Rooms</Text>
+        <View className="w-px bg-gray-200 my-1" />
+        <View className="flex-1 items-center">
+          <Text className="font-jakarta-bold text-xl text-primary">{totalRooms}</Text>
+          <Text className="font-jakarta text-[11px] text-gray-500 mt-0.5">Rooms</Text>
         </View>
       </View>
 
       {isLoading ? (
-        <View style={styles.loadingState}>
+        <View className="flex-1 items-center justify-center gap-3">
           <ActivityIndicator size="large" color="#ee2b8c" />
-          <Text style={styles.loadingText}>Loading hotel data...</Text>
+          <Text className="font-jakarta text-sm text-gray-400">Loading hotel data...</Text>
         </View>
       ) : (
         <FlatList
           data={filteredGroups}
           keyExtractor={(item) => item.hotelId}
           renderItem={({ item }) => <HotelCard hotel={item} />}
-          contentContainerStyle={styles.listContent}
+          contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 100, gap: 12 }}
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={
-            <View style={styles.emptyState}>
+            <View className="items-center pt-16 gap-3">
               <Ionicons name="business-outline" size={48} color="#D1D5DB" />
-              <Text style={styles.emptyText}>
-                {acceptedGuests.length === 0
+              <Text className="font-jakarta text-sm text-gray-400">
+                {hotelGuests.length === 0
                   ? "No accepted guests yet."
                   : "No hotel bookings found."}
               </Text>
@@ -292,237 +265,3 @@ return invitations.filter(
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#F3F4F6",
-  },
-  searchSection: {
-    paddingHorizontal: 16,
-    paddingTop: 12,
-    paddingBottom: 8,
-  },
-  searchBox: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "rgba(209,213,219,0.5)",
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    height: 48,
-  },
-  searchInput: {
-    flex: 1,
-    fontSize: 14,
-    color: "#111827",
-    fontFamily: "PlusJakartaSans-Regular",
-  },
-  summaryBar: {
-    flexDirection: "row",
-    backgroundColor: "#fff",
-    marginHorizontal: 16,
-    marginBottom: 12,
-    borderRadius: 14,
-    paddingVertical: 14,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  summaryItem: {
-    flex: 1,
-    alignItems: "center",
-  },
-  summaryNumber: {
-    fontFamily: "PlusJakartaSans-Bold",
-    fontSize: 20,
-    color: "#ee2b8c",
-  },
-  summaryLabel: {
-    fontFamily: "PlusJakartaSans-Regular",
-    fontSize: 11,
-    color: "#6B7280",
-    marginTop: 2,
-  },
-  summaryDivider: {
-    width: 1,
-    backgroundColor: "#E5E7EB",
-    marginVertical: 4,
-  },
-  listContent: {
-    paddingHorizontal: 16,
-    paddingBottom: 100,
-    gap: 12,
-  },
-  hotelCard: {
-    backgroundColor: "#fff",
-    borderRadius: 16,
-    overflow: "hidden",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
-    elevation: 3,
-  },
-  hotelHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 16,
-  },
-  hotelIconWrap: {
-    width: 48,
-    height: 48,
-    borderRadius: 12,
-    backgroundColor: "#FCE7F3",
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 12,
-  },
-  hotelMeta: {
-    flex: 1,
-  },
-  hotelName: {
-    fontFamily: "PlusJakartaSans-Bold",
-    fontSize: 15,
-    color: "#181114",
-    marginBottom: 3,
-  },
-  locationRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 3,
-  },
-  locationText: {
-    fontFamily: "PlusJakartaSans-Regular",
-    fontSize: 12,
-    color: "#9CA3AF",
-  },
-  hotelStats: {
-    alignItems: "center",
-    backgroundColor: "#F9FAFB",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 10,
-  },
-  statCount: {
-    fontFamily: "PlusJakartaSans-Bold",
-    fontSize: 16,
-    color: "#181114",
-  },
-  statLabel: {
-    fontFamily: "PlusJakartaSans-Regular",
-    fontSize: 10,
-    color: "#6B7280",
-  },
-  divider: {
-    height: 1,
-    backgroundColor: "#F3F4F6",
-    marginHorizontal: 16,
-  },
-  guestList: {
-    paddingHorizontal: 16,
-    paddingBottom: 12,
-    paddingTop: 4,
-  },
-  guestRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 10,
-  },
-  guestAvatar: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: "#FCE7F3",
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 10,
-  },
-  guestAvatarText: {
-    fontFamily: "PlusJakartaSans-Bold",
-    fontSize: 13,
-    color: "#ee2b8c",
-  },
-  guestInfo: {
-    flex: 1,
-  },
-  guestName: {
-    fontFamily: "PlusJakartaSans-SemiBold",
-    fontSize: 14,
-    color: "#181114",
-    marginBottom: 2,
-  },
-  roomRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-  },
-  roomLabel: {
-    fontFamily: "PlusJakartaSans-Regular",
-    fontSize: 12,
-    color: "#6B7280",
-  },
-  roomDot: {
-    color: "#D1D5DB",
-    fontSize: 12,
-  },
-  roomType: {
-    fontFamily: "PlusJakartaSans-Regular",
-    fontSize: 12,
-    color: "#9CA3AF",
-  },
-  roomUnassigned: {
-    fontFamily: "PlusJakartaSans-Regular",
-    fontSize: 12,
-    color: "#D1D5DB",
-    fontStyle: "italic",
-  },
-  roomBadge: {
-    backgroundColor: "#EFF6FF",
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 8,
-  },
-  roomBadgeText: {
-    fontFamily: "PlusJakartaSans-Bold",
-    fontSize: 12,
-    color: "#3B82F6",
-  },
-  roomBadgePending: {
-    backgroundColor: "#F3F4F6",
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 8,
-  },
-  roomBadgePendingText: {
-    fontFamily: "PlusJakartaSans-Bold",
-    fontSize: 12,
-    color: "#9CA3AF",
-  },
-  guestDivider: {
-    height: 1,
-    backgroundColor: "#F3F4F6",
-  },
-  loadingState: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 12,
-  },
-  loadingText: {
-    fontFamily: "PlusJakartaSans-Regular",
-    fontSize: 14,
-    color: "#9CA3AF",
-  },
-  emptyState: {
-    alignItems: "center",
-    paddingTop: 60,
-    gap: 12,
-  },
-  emptyText: {
-    fontFamily: "PlusJakartaSans-Regular",
-    fontSize: 14,
-    color: "#9CA3AF",
-  },
-});
