@@ -8,6 +8,8 @@ interface EventDetailHeroProps {
   status?: string;
   title?: string;
   date?: string;
+  startDateTime?: string;
+  endDateTime?: string;
   location?: string;
   days?: number;
   hours?: number;
@@ -22,6 +24,8 @@ const EventDetailHero = ({
   status = "upcoming",
   title = "Event Details",
   date = "—",
+  startDateTime,
+  endDateTime,
   location = "—",
   days = 0,
   hours = 0,
@@ -32,6 +36,8 @@ const EventDetailHero = ({
     status,
     title,
     date,
+    startDateTime,
+    endDateTime,
     location,
     days,
     hours,
@@ -65,7 +71,12 @@ const EventDetailHero = ({
               <View className="flex flex-row gap-3">
                 <Ionicons name="calendar" size={18} color="white" />
                 <Text className="text-sm font-medium text-white">
-                  {event.date}
+                  {event.startDateTime
+                    ? new Date(event.startDateTime).toLocaleDateString()
+                    : "—"}
+                  {event.endDateTime
+                    ? ` - ${new Date(event.endDateTime).toLocaleDateString()}`
+                    : ""}
                 </Text>
               </View>
               <View className="flex flex-row gap-3">
