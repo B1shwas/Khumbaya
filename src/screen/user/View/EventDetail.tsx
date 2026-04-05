@@ -104,7 +104,9 @@ const EventDetail = () => {
         imageUrl={event.imageUrl}
         status={event.status}
         title={event.title}
-        date={event.date}
+        // date={event.date}
+        startDateTime= {event.startDateTime}
+         endDateTime= {event.endDateTime}
         location={event.location}
       />
 
