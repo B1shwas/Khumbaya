@@ -152,26 +152,35 @@ export default function HotelManagementScreen() {
         phone: g.user.phone,
       }));
 
-    const withRoom = ungrouped.filter((g) => g.roomNumber);
-    const withoutRoom = ungrouped.filter((g) => !g.roomNumber);
+    // Group by room name
+    const roomMap = new Map<string, GuestRow[]>();
+    for (const g of ungrouped) {
+      const key = g.roomNumber || "__unassigned__";
+      if (!roomMap.has(key)) roomMap.set(key, []);
+      roomMap.get(key)!.push(g);
+    }
 
     const groups: HotelGroup[] = [];
-    if (withRoom.length > 0) {
+    roomMap.forEach((guests, key) => {
+      if (key === "__unassigned__") return;
       groups.push({
-        hotelId: "assigned",
-        hotelName: "Assigned Guests",
+        hotelId: key,
+        hotelName: `Room: ${key}`,
         location: "",
-        guests: withRoom,
+        guests,
       });
-    }
-    if (withoutRoom.length > 0) {
+    });
+
+    const unassigned = roomMap.get("__unassigned__");
+    if (unassigned) {
       groups.push({
         hotelId: "unassigned",
-        hotelName: "Pending Room Assignment",
+        hotelName: "Room Not Assigned",
         location: "",
-        guests: withoutRoom,
+        guests: unassigned,
       });
     }
+
     return groups;
   }, [hotelGuests]);
 
@@ -193,11 +202,8 @@ export default function HotelManagementScreen() {
   }, [hotelGroups, searchText]);
 
   const totalGuests = hotelGroups.reduce((sum, h) => sum + h.guests.length, 0);
-  const totalHotels = hotelGroups.length;
-  const totalRooms = hotelGroups.reduce(
-    (sum, h) => sum + h.guests.filter((g) => g.roomNumber).length,
-    0
-  );
+  const totalRooms = hotelGroups.filter((h) => h.hotelId !== "unassigned").length;
+  const totalUnassigned = hotelGroups.find((h) => h.hotelId === "unassigned")?.guests.length ?? 0;
 
   return (
     <SafeAreaView className="flex-1 bg-gray-100" edges={[]}>
@@ -223,8 +229,8 @@ export default function HotelManagementScreen() {
       {/* Summary bar */}
       <View className="flex-row bg-white mx-4 mb-3 rounded-2xl py-3.5 shadow-sm">
         <View className="flex-1 items-center">
-          <Text className="font-jakarta-bold text-xl text-primary">{totalHotels}</Text>
-          <Text className="font-jakarta text-[11px] text-gray-500 mt-0.5">Hotels</Text>
+          <Text className="font-jakarta-bold text-xl text-primary">{totalRooms}</Text>
+          <Text className="font-jakarta text-[11px] text-gray-500 mt-0.5">Rooms</Text>
         </View>
         <View className="w-px bg-gray-200 my-1" />
         <View className="flex-1 items-center">
@@ -233,8 +239,8 @@ export default function HotelManagementScreen() {
         </View>
         <View className="w-px bg-gray-200 my-1" />
         <View className="flex-1 items-center">
-          <Text className="font-jakarta-bold text-xl text-primary">{totalRooms}</Text>
-          <Text className="font-jakarta text-[11px] text-gray-500 mt-0.5">Rooms</Text>
+          <Text className="font-jakarta-bold text-xl text-primary">{totalUnassigned}</Text>
+          <Text className="font-jakarta text-[11px] text-gray-500 mt-0.5">Unassigned</Text>
         </View>
       </View>
 
