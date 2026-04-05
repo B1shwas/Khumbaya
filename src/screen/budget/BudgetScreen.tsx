@@ -2,13 +2,19 @@ import { BudgetStatsGrid, CategoryCard } from "@/src/components/budget";
 import { Text } from "@/src/components/ui/Text";
 import { SetBudgetForm } from "@/src/features/budget/components";
 import { useBudgetSummary } from "@/src/features/budget/hooks/use-budget";
-import { useEventById } from "@/src/features/events/hooks/use-event";
+import {
+  useEventById,
+  useUpdateEvent,
+} from "@/src/features/events/hooks/use-event";
 import { MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
+  Modal,
+  Pressable,
   ScrollView,
   TextInput,
   TouchableOpacity,
@@ -17,10 +23,15 @@ import {
 
 export default function EventBudgetScreen() {
   const [search, setSearch] = useState("");
+  const [editBudgetVisible, setEditBudgetVisible] = useState(false);
+  const [budgetInput, setBudgetInput] = useState("");
   const router = useRouter();
   const { eventId } = useLocalSearchParams();
 
   const { data: eventData, isLoading: eventLoading } = useEventById(
+    Number(eventId)
+  );
+  const { mutate: updateEvent, isPending: isUpdatingBudget } = useUpdateEvent(
     Number(eventId)
   );
 
@@ -35,6 +46,31 @@ export default function EventBudgetScreen() {
     router.push(
       `/(protected)/(client-stack)/events/${eventId}/(organizer)/addBudgetItem`
     );
+  };
+
+  const handleEditBudget = () => {
+    let totalBudgetValue = 0;
+    if (!budgetLoading && budgetData) {
+      totalBudgetValue = budgetData.summary?.totalBudget || 0;
+    }
+    setBudgetInput(totalBudgetValue.toString());
+    setEditBudgetVisible(true);
+  };
+
+  const handleSaveBudget = async () => {
+    const newBudget = parseFloat(budgetInput);
+    if (isNaN(newBudget) || newBudget <= 0) {
+      Alert.alert("Invalid Budget", "Please enter a valid budget amount");
+      return;
+    }
+
+    try {
+      updateEvent({ budget: newBudget });
+      setEditBudgetVisible(false);
+      Alert.alert("Success", "Budget updated successfully!");
+    } catch (error) {
+      Alert.alert("Error", "Failed to update budget. Please try again.");
+    }
   };
 
   if (eventLoading) {
@@ -69,6 +105,96 @@ export default function EventBudgetScreen() {
 
   return (
     <View className="flex-1 bg-[#f8f6f7]">
+      <Stack.Screen
+        options={{
+          headerRight: () => (
+            <TouchableOpacity
+              onPress={handleEditBudget}
+              className="pr-4"
+              activeOpacity={0.7}
+            >
+              <MaterialIcons name="edit" size={24} color="#181114" />
+            </TouchableOpacity>
+          ),
+        }}
+      />
+
+      <Modal
+        visible={editBudgetVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setEditBudgetVisible(false)}
+      >
+        <Pressable
+          className="flex-1 bg-black/50"
+          onPress={() => setEditBudgetVisible(false)}
+        >
+          <View className="flex-1 items-center justify-center px-6">
+            <Pressable
+              className="bg-white rounded-3xl p-6 w-full"
+              onPress={() => {}}
+            >
+              <Text
+                className="text-[#181114] text-lg font-bold mb-4"
+                variant="h1"
+              >
+                Edit Budget
+              </Text>
+
+              <View className="gap-2 mb-6">
+                <Text className="text-sm text-gray-600 ml-1" variant="h2">
+                  Budget Amount
+                </Text>
+                <View className="relative">
+                  <Text
+                    className="absolute left-4 top-3.5 text-sm text-gray-600"
+                    variant="h2"
+                  >
+                    Rs.
+                  </Text>
+                  <TextInput
+                    className="w-full h-14 bg-[#f8f6f7] pl-12 pr-4 rounded-md text-[#181114] border border-gray-100"
+                    placeholder="0.00"
+                    placeholderTextColor="#999"
+                    keyboardType="decimal-pad"
+                    value={budgetInput}
+                    onChangeText={setBudgetInput}
+                    autoFocus
+                  />
+                </View>
+              </View>
+
+              <View className="flex-row gap-3">
+                <TouchableOpacity
+                  onPress={() => setEditBudgetVisible(false)}
+                  className="flex-1 h-12 bg-gray-100 rounded-md items-center justify-center"
+                >
+                  <Text className="text-[#181114]" variant="h2">
+                    Cancel
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={handleSaveBudget}
+                  disabled={isUpdatingBudget}
+                  className="flex-1 h-12 bg-[#ee2b8c] rounded-md items-center justify-center"
+                >
+                  {isUpdatingBudget ? (
+                    <MaterialIcons
+                      name="hourglass-empty"
+                      size={20}
+                      color="white"
+                    />
+                  ) : (
+                    <Text className="text-white font-bold" variant="h2">
+                      Save
+                    </Text>
+                  )}
+                </TouchableOpacity>
+              </View>
+            </Pressable>
+          </View>
+        </Pressable>
+      </Modal>
       <ScrollView
         className="flex-1"
         contentContainerClassName="pb-32"
