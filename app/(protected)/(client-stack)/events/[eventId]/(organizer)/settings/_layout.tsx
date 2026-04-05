@@ -11,26 +11,8 @@ const headerBackButton = () => (
   </TouchableOpacity>
 );
 
-const addMemberButton = (eventId: string) => (
-  <TouchableOpacity
-    onPress={() =>
-      expoRouter.push({
-        pathname:
-          "/(protected)/(client-stack)/events/[eventId]/(organizer)/addeventmember",
-        params: { eventId },
-      })
-    }
-    style={{ paddingLeft: 8 }}
-  >
-    <Ionicons name="add" size={28} color="#111827" />
-  </TouchableOpacity>
-);
-
 export default function OrganizerEventDetailLayout() {
-  const params = useLocalSearchParams<{ eventId?: string | string[] }>();
-  const eventId = Array.isArray(params.eventId)
-    ? params.eventId[0]
-    : params.eventId;
+  useLocalSearchParams<{ eventId?: string | string[] }>();
 
   return (
     <Stack
@@ -43,7 +25,6 @@ export default function OrganizerEventDetailLayout() {
           fontSize: 18,
         },
         headerLeft: headerBackButton,
-        headerRight: eventId ? () => addMemberButton(eventId) : undefined,
       }}
     >
       <Stack.Screen

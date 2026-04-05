@@ -1,21 +1,26 @@
 import NavigateComponent from "@/src/components/event/NavigateComponent";
 import Row from "@/src/components/ui/RowComponent";
 import { Event } from "@/src/constants/event";
-import { useGetEventWithRole } from "@/src/features/events/hooks/use-event";
+import {
+  useDeleteEvent,
+  useGetEventWithRole,
+} from "@/src/features/events/hooks/use-event";
 import { useEventStore } from "@/src/features/events/store/useEventStore";
 import {
   RelativePathString,
   useLocalSearchParams,
   useRouter,
 } from "expo-router";
-import { useEffect } from "react";
-import { ScrollView, Text, View } from "react-native";
+import { useEffect, useState } from "react";
+import { Alert, Pressable, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import EventDetailHero from "./EventDetailHero";
 
 const EventDetail = () => {
   const { eventId } = useLocalSearchParams<{ eventId: string }>();
   const router = useRouter();
   const { clearEventDraft, setEventDraft } = useEventStore();
+  const [menuVisible, setMenuVisible] = useState(false);
   const { data: found } = useGetEventWithRole();
   const foundEvent = found?.find(
     (e: Event) => String(e.id) === String(eventId)
@@ -45,6 +50,53 @@ const EventDetail = () => {
       vendors: { booked: 0, pending: 0 },
       nextTask: "",
     } );
+
+  const eventIdNumber = Number(event.id);
+  const { mutate: deleteEvent } = useDeleteEvent(
+    Number.isFinite(eventIdNumber) ? eventIdNumber : 0
+  );
+
+  const handleEditFromMenu = () => {
+    setMenuVisible(false);
+    setEventDraft(event as Event);
+    router.push("./edit-event" as RelativePathString);
+  };
+
+  const handleCloseMenu = () => {
+    setMenuVisible(false);
+  };
+
+  const handleDeleteFromMenu = () => {
+    setMenuVisible(false);
+
+    if (!Number.isFinite(eventIdNumber) || eventIdNumber <= 0) {
+      Alert.alert("Delete failed", "Unable to determine current event.");
+      return;
+    }
+
+    Alert.alert("Delete Event", "Are you sure you want to delete this event?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Delete",
+        style: "destructive",
+        onPress: () => {
+          deleteEvent(undefined, {
+            onSuccess: () => {
+              Alert.alert("Event deleted", "The event was removed successfully.");
+              router.push("/(protected)/(client-stack)/events");
+            },
+            onError: (error: any) => {
+              const message =
+                error?.response?.data?.message ||
+                error?.message ||
+                "Failed to delete event.";
+              Alert.alert("Delete failed", message);
+            },
+          });
+        },
+      },
+    ]);
+  };
 
   useEffect(() => {
     clearEventDraft();
@@ -111,9 +163,46 @@ const EventDetail = () => {
       />
 
       {/* Main Navigation Grid */}
-      <View className="  mt-6 px-4 pb-4">
-        {/* dark:text-white removed */}
-        <Text className="text-lg font-bold mb-3">Manage Event</Text>
+      <View className="relative mt-6 px-4 pb-4">
+        {menuVisible && (
+          <Pressable
+            onPress={handleCloseMenu}
+            style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, zIndex: 10 }}
+          />
+        )}
+
+        <View className="relative mb-3 flex-row items-center justify-between z-20">
+          <Text className="text-lg font-bold">Manage Event</Text>
+          <TouchableOpacity
+            onPress={() => setMenuVisible((current) => !current)}
+            className="rounded-full bg-white border border-slate-200 p-2 shadow-sm"
+            activeOpacity={0.8}
+          >
+            <Ionicons name="ellipsis-vertical" size={22} color="#111827" />
+          </TouchableOpacity>
+        </View>
+
+        {menuVisible && (
+          <View className="absolute right-4 top-20 z-30 w-40 rounded-2xl border border-slate-200 bg-white p-2 shadow-xl">
+            <TouchableOpacity
+              onPress={handleEditFromMenu}
+              className="rounded-xl px-3 py-2"
+            >
+              <Text className="text-sm font-semibold text-slate-900">
+                Edit Event
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={handleDeleteFromMenu}
+              className="rounded-xl px-3 py-2"
+            >
+              <Text className="text-sm font-semibold text-red-600">
+                Delete Event
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
         <View className="flex-row flex-wrap gap-3 justify-center">
           {manageActions.map((action) => (
             <NavigateComponent key={action.id} {...action} className="" />
@@ -126,7 +215,7 @@ const EventDetail = () => {
             description="Upload & Share Photos"
             iconstring="images"
             onPress={() => {
-              router.push("./gallery" as RelativePathString)
+              router.push("./gallery" as RelativePathString);
             }}
           />
           <Row
@@ -135,15 +224,15 @@ const EventDetail = () => {
             iconstring="create"
             onPress={() => {
               setEventDraft(event as Event);
-              router.push("./edit-event" as RelativePathString)
+              router.push("./edit-event" as RelativePathString);
             }}
           />
-        <Row
+          <Row
             title="Planning Committee"
             description="Add Event Organizers and Collaborators"
             iconstring="person"
             onPress={() => {
-              router.push("./settings/transfer-ownership" as RelativePathString)
+              router.push("./settings/transfer-ownership" as RelativePathString);
             }}
           />
         </View>

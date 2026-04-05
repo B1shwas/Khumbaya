@@ -5,6 +5,7 @@ import {
   acceptRsvpInvitationApi,
   CREATEEVENT,
   createEventApi,
+  deleteEventApi,
   getCompletedEventsApi,
   getEventById,
   getEventOwners,
@@ -262,6 +263,19 @@ export const useUpdateEvent = (eventId: number) => {
       queryClient.invalidateQueries({ queryKey: ["events/completed"] });
       queryClient.invalidateQueries({ queryKey: ["events/with-role"] });
       queryClient.invalidateQueries({ queryKey: ["budget-summary", eventId] });
+    },
+  });
+};
+
+export const useDeleteEvent = (eventId: number) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => deleteEventApi(eventId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["events/upcoming"] });
+      queryClient.invalidateQueries({ queryKey: ["events/completed"] });
+      queryClient.invalidateQueries({ queryKey: ["events/with-role"] });
+      queryClient.invalidateQueries({ queryKey: ["event", eventId] });
     },
   });
 };
