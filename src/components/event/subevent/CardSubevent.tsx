@@ -1,5 +1,5 @@
 import { SubEvent } from "@/src/constants/event";
-import { formatDate, formatTimeRange } from "@/src/utils/helper";
+import { formatDate, formatTimeRange, shadowStyle } from "@/src/utils/helper";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { Image, Pressable, Text, View } from "react-native";
@@ -131,7 +131,7 @@ export default function SubEventCard({
         ) : null}
         <View className="flex-col items-center z-10">
           <View
-            className={`w-11 h-11 rounded-full items-center justify-center border ${statusMeta.dotClassName}`}
+            className={`w-11 h-11 rounded-md items-center justify-center border ${statusMeta.dotClassName}`}
             style={statusCircleStyle}
           >
             <Ionicons name={statusIcon} size={18} color={statusIconColor} />
@@ -139,7 +139,8 @@ export default function SubEventCard({
         </View>
 
       <Pressable
-        className={`flex-1 bg-white rounded-2xl p-4 ${statusMeta.cardClassName}`}
+      style={shadowStyle}
+        className={`flex-1 bg-white rounded-md p-4 ${statusMeta.cardClassName}`}
         onPress={() => {
           router.push({
             pathname:
@@ -155,7 +156,7 @@ export default function SubEventCard({
             <Text className="text-xs font-bold text-primary uppercase tracking-widest">
               {timeRange}
             </Text>
-            <View className={`px-2 py-1 rounded-lg  ${statusMeta.badgeClassName} `}>
+            <View className={`px-2 py-1 rounded-md  ${statusMeta.badgeClassName} `}>
               <Text className="text-[10px] font-bold uppercase text-white">
                 {statusMeta.label}
               </Text>

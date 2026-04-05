@@ -1,19 +1,31 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Image, Text, TouchableOpacity, View } from "react-native";
+import {
+  ActivityIndicator,
+  Image,
+  Pressable,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { GuestDetailInterface } from "../../features/guests/types";
 
 interface GuestCardProps {
   guest: GuestDetailInterface;
   onPress?: () => void;
   onDelete?: () => void;
+  onDraftPress?: () => void;
+  isDraftActionLoading?: boolean;
 }
 
 export default function GuestCard({
   guest,
   onPress,
   onDelete,
+  onDraftPress,
+  isDraftActionLoading = false,
 }: GuestCardProps) {
   const displayStatus = (guest?.event_guest?.status || "Pending").trim();
+  const isDraft = displayStatus.toLowerCase() === "draft";
 
   const getStatusColor = () => {
     switch (displayStatus.toLowerCase()) {
@@ -61,10 +73,9 @@ export default function GuestCard({
 
   return (
     <View className="mb-3 rounded-2xl bg-white">
-      <TouchableOpacity
+      <Pressable
         onPress={onPress}
         disabled={!onPress}
-        activeOpacity={onPress ? 0.7 : 1}
         className="rounded-2xl"
       >
         <View className="min-h-[86px] flex-row items-center gap-3 px-4 py-3">
@@ -131,7 +142,29 @@ export default function GuestCard({
             ) : null}
           </View>
         </View>
-      </TouchableOpacity>
+      </Pressable>
+
+      {isDraft && onDraftPress ? (
+        <View className="px-4 pb-3">
+          <Pressable
+            onPress={onDraftPress}
+            disabled={isDraftActionLoading}
+      
+            className="h-10 flex-row items-center justify-center rounded-xl border border-[#EE2B8C] bg-[#EE2B8C]/10"
+          >
+            {isDraftActionLoading ? (
+              <ActivityIndicator size="small" color="#EE2B8C" />
+            ) : (
+              <>
+                <Ionicons name="paper-plane-outline" size={16} color="#EE2B8C" />
+                <Text className="ml-2 text-sm font-semibold text-[#EE2B8C]">
+                  Send Invitation
+                </Text>
+              </>
+            )}
+          </Pressable>
+        </View>
+      ) : null}
     </View>
   );
 }
