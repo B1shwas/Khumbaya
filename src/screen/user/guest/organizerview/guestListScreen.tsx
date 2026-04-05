@@ -1,6 +1,8 @@
 import FamilyCard from "@/src/components/guest/FamilyGuestCard";
 import GuestCard from "@/src/components/guest/GuestCard";
+import DraftInvitationCard from "@/src/components/guest/DraftInvitationCard";
 import { Text } from "@/src/components/ui/Text";
+import { useSubmitRsvpResponse } from "@/src/features/events/hooks/use-event";
 import {
   useGetInvitationsForEvent,
   useRemoveInvitation,
@@ -11,18 +13,24 @@ import {
 } from "@/src/features/guests/store/useGuestDetailStore";
 import {
   FamilyGroup,
-  GuestDetailInterface,
   GroupedInvitation,
   groupInvitationsByFamily,
+  GuestDetailInterface,
 } from "@/src/features/guests/types";
 import { cn } from "@/src/utils/cn";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Alert, FlatList, Pressable, TouchableOpacity, View } from "react-native";
+import {
+  Alert,
+  FlatList,
+  Pressable,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { TextInput } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
-type GuestFilterTab = "all" | "accepted" | "pending";
+type GuestFilterTab = "accepted" | "pending" | "draft";
 
 export default function GuestListScreen() {
   const router = useRouter();
@@ -45,9 +53,14 @@ export default function GuestListScreen() {
     (state) => state.clearFamilyGroup
   );
   const { data: invitations, isLoading } = useGetInvitationsForEvent(eventId);
+  const submitRsvpMutation = useSubmitRsvpResponse(eventId ?? 0);
   const removeInvitationMutation = useRemoveInvitation();
+  const [draftAction, setDraftAction] = useState<{
+    userId: number;
+    type: "send" | "delete";
+  } | null>(null);
 
-  const [activeTab, setActiveTab] = useState<GuestFilterTab>("all");
+  const [activeTab, setActiveTab] = useState<GuestFilterTab>("pending");
 
   const openAddGuestScreen = useCallback(() => {
     if (!eventId) return;
@@ -72,7 +85,70 @@ export default function GuestListScreen() {
     });
   };
 
+  const onPressDraftSend = useCallback(
+    async (guest: GuestDetailInterface) => {
+      if (!eventId || !guest?.user_detail?.id) return;
 
+      setDraftAction({ userId: guest.user_detail.id, type: "send" });
+      try {
+        await submitRsvpMutation.mutateAsync({
+          userId: guest.user_detail.id,
+          familyId: guest.event_guest.familyId,
+          status: "pending",
+        });
+      } catch (error: any) {
+        const message =
+          error?.response?.data?.message ||
+          error?.message ||
+          "Failed to move draft to pending.";
+        Alert.alert("Error", message);
+      } finally {
+        setDraftAction(null);
+      }
+    },
+    [eventId, submitRsvpMutation]
+  );
+
+  const onDeleteDraft = useCallback(
+    (guest: GuestDetailInterface) => {
+      if (!eventId || !guest?.user_detail?.id) return;
+
+      const displayName =
+        guest.user_detail.username?.trim() ||
+        guest.user_detail.email ||
+        "this guest";
+
+      Alert.alert(
+        "Delete draft",
+        `Delete ${displayName}'s draft invitation?`,
+        [
+          { text: "Cancel", style: "cancel" },
+          {
+            text: "Delete",
+            style: "destructive",
+            onPress: async () => {
+              setDraftAction({ userId: guest.user_detail.id, type: "delete" });
+              try {
+                await removeInvitationMutation.mutateAsync({
+                  eventId,
+                  guestId: guest.user_detail.id,
+                });
+              } catch (error: any) {
+                const message =
+                  error?.response?.data?.message ||
+                  error?.message ||
+                  "Failed to delete draft invitation.";
+                Alert.alert("Error", message);
+              } finally {
+                setDraftAction(null);
+              }
+            },
+          },
+        ]
+      );
+    },
+    [eventId, removeInvitationMutation]
+  );
 
 
   const onPressFamilyCard = (FamilyData: FamilyGroup) => {
@@ -84,9 +160,9 @@ export default function GuestListScreen() {
     });
   };
   const tabs: { label: string; value: GuestFilterTab }[] = [
-    { label: "All", value: "all" },
-    { label: "Accepted", value: "accepted" },
     { label: "Pending", value: "pending" },
+    { label: "Accepted", value: "accepted" },
+    { label: "Draft", value: "draft" }
   ];
 
   // Group invitations by family
@@ -111,9 +187,10 @@ export default function GuestListScreen() {
             return statuses.some((s) => s === "pending" || s === "invited");
           case "accepted":
             return statuses.some((s) => s === "accepted");
-          case "all":
+          case "draft":
+
+            return statuses.some((s) => s === "draft");
           default:
-            return true;
         }
       } else {
         const status = String(item.data.event_guest.status ?? "pending")
@@ -125,13 +202,24 @@ export default function GuestListScreen() {
             return status === "pending" || status === "invited";
           case "accepted":
             return status === "accepted";
-          case "all":
+          case "draft":
           default:
-            return true;
+            return status === "draft";
         }
       }
     });
   }, [groupedInvitations, activeTab]);
+
+  const draftInvitations = useMemo(() => {
+    if (!invitations) return [];
+
+    return invitations.filter((invitation: GuestDetailInterface) => {
+      const status = String(invitation.event_guest.status ?? "pending")
+        .trim()
+        .toLowerCase();
+      return status === "draft";
+    });
+  }, [invitations]);
 
   useEffect(() => {
     return () => {
@@ -207,6 +295,40 @@ export default function GuestListScreen() {
 
       {isLoading ? (
         <Text>Loading invitations...</Text>
+      ) : activeTab === "draft" ? (
+        <FlatList
+          data={draftInvitations}
+          keyExtractor={(item: GuestDetailInterface) =>
+            `draft-${item.user_detail.id}`
+          }
+          renderItem={({ item }: { item: GuestDetailInterface }) => (
+            <DraftInvitationCard
+              guest={item}
+              onMoveToPending={() => onPressDraftSend(item)}
+              onDeleteDraft={() => onDeleteDraft(item)}
+              isMoving={
+                draftAction?.type === "send" &&
+                draftAction?.userId === item.user_detail.id
+              }
+              isDeleting={
+                draftAction?.type === "delete" &&
+                draftAction?.userId === item.user_detail.id
+              }
+            />
+          )}
+          contentContainerStyle={{ paddingBottom: 20 }}
+          showsVerticalScrollIndicator={false}
+          className="mt-4"
+          ListEmptyComponent={
+            <Text
+              style={{ textAlign: "center", color: "#6B7280", marginTop: 20 }}
+            >
+              {invitations?.length
+                ? "No draft invitations found."
+                : "No guests yet."}
+            </Text>
+          }
+        />
       ) : (
         <FlatList
           data={filteredGroupedInvitations}
@@ -225,7 +347,7 @@ export default function GuestListScreen() {
                   onPress={() => {
                     onPressFamilyCard(item);
                   }}
-                 
+
                 />
               );
             } else {
@@ -235,8 +357,7 @@ export default function GuestListScreen() {
                   onPress={() => {
                     onPressGuestCard(item.data);
                   }}
-            
-               
+                
                 />
               );
             }
@@ -249,8 +370,8 @@ export default function GuestListScreen() {
               style={{ textAlign: "center", color: "#6B7280", marginTop: 20 }}
             >
               {invitations?.length
-                ? `No ${activeTab === "all" ? "" : activeTab} guests found.`
-                : "No guests invited yet."}
+                ? `No ${activeTab} guests found.`
+                : "No guests yet."}
             </Text>
           }
         />
