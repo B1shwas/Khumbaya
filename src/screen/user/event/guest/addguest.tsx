@@ -22,8 +22,7 @@ import {
   ScrollView,
   Switch,
   TextInput,
-  TouchableOpacity,
-  View,
+  View
 } from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
@@ -36,6 +35,7 @@ type AddGuestFormValues = {
 };
 
 type FoundUser = User;
+type SubmitAction = "draft" | "send" | null;
 
 const GUEST_CATEGORIES = [
   { label: "Friend", value: "friend" },
@@ -55,14 +55,10 @@ const AddGuestScreen = () => {
     COUNTRY_DATA[0]
   );
   const [pickerVisible, setPickerVisible] = useState(false);
+  const [activeSubmitAction, setActiveSubmitAction] =
+    useState<SubmitAction>(null);
 
-  const eventId = useMemo(() => {
-    const raw = Array.isArray(params.eventId)
-      ? params.eventId[0]
-      : params.eventId;
-    const parsed = raw ? Number(raw) : NaN;
-    return Number.isFinite(parsed) ? parsed : null;
-  }, [params.eventId]);
+  const eventId =Number(params.eventId);
 
   const { control, handleSubmit, reset, watch, setValue } =
     useForm<AddGuestFormValues>({
@@ -146,10 +142,17 @@ const AddGuestScreen = () => {
     }
   }, [isFindUserError, findUserError]);
 
-  const onValidSubmit = useCallback(
-    async (values: AddGuestFormValues) => {
+  const submitGuest = useCallback(
+    async (
+      values: AddGuestFormValues,
+      isDraft: boolean,
+      submitAction: Exclude<SubmitAction, null>
+    ) => {
+      setActiveSubmitAction(submitAction);
+
       if (!eventId) {
         Alert.alert("Error", "Invalid event id");
+        setActiveSubmitAction(null);
         return;
       }
 
@@ -157,6 +160,7 @@ const AddGuestScreen = () => {
 
       if (!currentPhone) {
         Alert.alert("Error", "Please enter a phone number.");
+        setActiveSubmitAction(null);
         return;
       }
 
@@ -165,21 +169,22 @@ const AddGuestScreen = () => {
       if (!isSearchComplete) {
         Alert.alert(
           "Please wait",
-          "Wait for phone lookup to finish before sending invitation."
+          `Wait for phone lookup to finish before ${
+            isDraft ? "saving draft" : "sending invitation"
+          }.`
         );
+        setActiveSubmitAction(null);
         return;
       }
 
-      const resolvedName = foundUser?.username || values.fullName.trim();
-      const invitationName =
-        values.invitation_name.trim() || resolvedName || currentPhone;
-      const payloadFullName = resolvedName || invitationName;
-
-      if (!payloadFullName) {
+      const resolvedName = foundUser?.username || values.fullName.trim() ||values.phone.trim() || values.invitation_name.trim()  ;
+   
+      if (!resolvedName) {
         Alert.alert(
           "Error",
           "Please enter guest full name or use a phone that matches an existing user."
         );
+        setActiveSubmitAction(null);
         return;
       }
 
@@ -187,18 +192,24 @@ const AddGuestScreen = () => {
         await inviteGuestMutation.mutateAsync({
           eventId,
           payload: {
-            invitation_name: invitationName,
+            invitation_name:  values.invitation_name.trim() || resolvedName || currentPhone,
             phone: fullGuestPhone,
-            fullName: payloadFullName,
+            fullName: values.fullName.trim() ?? resolvedName ,
+            isDraft,
             isFamily: inviteWithFamily,
             role: "Guest",
             category: values.category,
-            status: "pending",
+            status: isDraft ? "draft" : "pending",
             isAccomodation: false,
           },
         });
 
-        Alert.alert("Success", "Guest added successfully!");
+        Alert.alert(
+          "Success",
+          isDraft
+            ? "Guest draft saved successfully!"
+            : "Guest added successfully!"
+        );
         reset();
         router.back();
       } catch (error: any) {
@@ -207,19 +218,35 @@ const AddGuestScreen = () => {
           error?.message ||
           "Failed to add guest. Please try again.";
         Alert.alert("Error", message);
+      } finally {
+        setActiveSubmitAction(null);
       }
     },
     [
       eventId,
       foundUser,
+      fullGuestPhone,
       isFindingUser,
       inviteGuestMutation,
       inviteWithFamily,
+      phoneDigits,
       reset,
       router,
-      shouldSearch,
-      phoneDigits,
     ]
+  );
+
+  const onValidSubmit = useCallback(
+    async (values: AddGuestFormValues) => {
+      await submitGuest(values, false, "send");
+    },
+    [submitGuest]
+  );
+
+  const onValidDraftSubmit = useCallback(
+    async (values: AddGuestFormValues) => {
+      await submitGuest(values, true, "draft");
+    },
+    [submitGuest]
   );
 
   const onInvalidSubmit = useCallback(
@@ -497,29 +524,70 @@ const AddGuestScreen = () => {
             </View>
           </View>
 
-          <View className="mt-8 px-6">
-            <TouchableOpacity
-              className="w-full flex-row items-center justify-center rounded-md bg-[#ee2b8c] py-4"
-              style={{
-                gap: 8,
-                shadowColor: "#ee2b8c",
-                shadowOpacity: 0.3,
-                shadowRadius: 12,
-                elevation: 6,
-              }}
-              activeOpacity={0.9}
-              disabled={
-                inviteGuestMutation.isPending || isFindingUser || !phoneDigits
-              }
-              onPress={handleSubmit(onValidSubmit, onInvalidSubmit)}
-            >
-              <Text className="text-base font-bold text-white">
-                {inviteGuestMutation.isPending
-                  ? "Sending..."
-                  : "Send Invitation"}
-              </Text>
-              <MaterialIcons name="send" size={18} color="#fff" />
-            </TouchableOpacity>
+          <View className="mt-8 px-6 flex-row" style={{ gap: 12 }}>
+            {inviteGuestMutation.isPending ? (
+              activeSubmitAction === "draft" ? (
+                <Pressable
+                  className="flex-1 flex-row items-center justify-center rounded-md border border-[#ee2b8c] bg-white py-4"
+                  style={{ gap: 8 }}
+                  disabled
+                >
+                  <Text className="text-base font-bold text-[#ee2b8c]">
+                    Saving...
+                  </Text>
+                  <MaterialIcons name="drafts" size={18} color="#ee2b8c" />
+                </Pressable>
+              ) : (
+                <Pressable
+                  className="flex-1 flex-row items-center justify-center rounded-md bg-[#ee2b8c] py-4"
+                  style={{
+                    gap: 8,
+                    shadowColor: "#ee2b8c",
+                    shadowOpacity: 0.3,
+                    shadowRadius: 12,
+                    elevation: 6,
+                  }}
+                  disabled
+                >
+                  <Text className="text-base font-bold text-white">
+                    Sending...
+                  </Text>
+                  <MaterialIcons name="send" size={18} color="#fff" />
+                </Pressable>
+              )
+            ) : (
+              <>
+                <Pressable
+                  className="flex-1 flex-row items-center justify-center rounded-md border border-[#ee2b8c] bg-white py-4"
+                  style={{ gap: 8 }}
+                  disabled={isFindingUser || !phoneDigits}
+                  onPress={handleSubmit(onValidDraftSubmit, onInvalidSubmit)}
+                >
+                  <Text className="text-base font-bold text-[#ee2b8c]">
+                    Save Draft
+                  </Text>
+                  <MaterialIcons name="drafts" size={18} color="#ee2b8c" />
+                </Pressable>
+
+                <Pressable
+                  className="flex-1 flex-row items-center justify-center rounded-md bg-[#ee2b8c] py-4"
+                  style={{
+                    gap: 8,
+                    shadowColor: "#ee2b8c",
+                    shadowOpacity: 0.3,
+                    shadowRadius: 12,
+                    elevation: 6,
+                  }}
+                  disabled={isFindingUser || !phoneDigits}
+                  onPress={handleSubmit(onValidSubmit, onInvalidSubmit)}
+                >
+                  <Text className="text-base font-bold text-white">
+                    Send Invitation
+                  </Text>
+                  <MaterialIcons name="send" size={18} color="#fff" />
+                </Pressable>
+              </>
+            )}
           </View>
         </ScrollView>
       </KeyboardAwareScrollView>

@@ -126,7 +126,7 @@ export default function ListSubEvent() {
 
   const renderEmptyState = () => (
     <View className="flex-1 items-center justify-center py-20">
-      <View className="w-20 h-20 rounded-full bg-gray-100 items-center justify-center mb-4">
+      <View className="w-20 h-20 rounded-md bg-gray-100 items-center justify-center mb-4">
         <Ionicons name="layers-outline" size={40} color="#9CA3AF" />
       </View>
       <Text className="text-lg font-semibold text-gray-900 mb-2">
@@ -196,7 +196,7 @@ export default function ListSubEvent() {
                 <TouchableOpacity
                   key={group.key}
                   onPress={() => setSelectedDayKey(group.key)}
-                  className={`mr-3 px-5 py-2.5 rounded-2xl border ${
+                  className={`mr-3 px-5 py-2.5 rounded-md border ${
                     isActive
                       ? "bg-primary border-transparent"
                       : "bg-white border-[#e6dbe0]"
@@ -260,7 +260,7 @@ export default function ListSubEvent() {
             params: { eventId: eventId as string },
           });
         }}
-        className="absolute bottom-6 right-6 flex-row items-center gap-2 bg-primary px-5 py-3 rounded-full shadow-2xl"
+        className="absolute bottom-6 right-6 flex-row items-center gap-2 bg-primary px-5 py-3 rounded-md shadow-2xl"
       >
         <Ionicons name="add-circle" size={20} color="white" />
         <Text className="text-white font-bold tracking-wide">Add Activity</Text>

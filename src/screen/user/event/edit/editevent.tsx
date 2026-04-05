@@ -1,9 +1,9 @@
 import { DatePicker } from "@/components/nativewindui/DatePicker";
 import { Text } from "@/src/components/ui/Text";
 import {
-    EVENT_TYPES,
-    EVENT_TYPE_TO_BACKEND,
-    type Event,
+  EVENT_TYPES,
+  EVENT_TYPE_TO_BACKEND,
+  type Event,
 } from "@/src/constants/event";
 import { useUpdateEvent } from "@/src/features/events/hooks/use-event";
 import { useEventStore } from "@/src/features/events/store/useEventStore";
@@ -14,16 +14,16 @@ import { useRouter } from "expo-router";
 import { useEffect, useMemo } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
-    Alert,
-    Image,
-    KeyboardAvoidingView,
-    Platform,
-    Pressable,
-    ScrollView,
-    Switch,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  Switch,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -53,8 +53,8 @@ const buildInitialForm = (draft?: Event | null): EditEventForm => {
   const today = new Date();
   const normalizedType = draft?.type
     ? (EVENT_TYPE_TO_BACKEND[
-        draft.type as keyof typeof EVENT_TYPE_TO_BACKEND
-      ] ?? draft.type)
+      draft.type as keyof typeof EVENT_TYPE_TO_BACKEND
+    ] ?? draft.type)
     : "";
   return {
     title: draft?.title ?? "",
@@ -83,7 +83,7 @@ type SectionCardProps = {
 
 function SectionCard({ title, icon, children }: SectionCardProps) {
   return (
-    <View className="rounded-2xl bg-white p-5 shadow-sm border border-slate-100">
+    <View className="rounded-md bg-white p-5 shadow-sm border border-slate-100">
       <View className="mb-4 flex-row items-center gap-2">
         <View className="h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-[#ee2b8c] to-[#ff5ca1]">
           <Ionicons name={icon} size={18} color="#ffffff" />
@@ -120,9 +120,8 @@ function LabeledField({
         {label}
       </Text>
       <TextInput
-        className={`w-full rounded-xl border border-slate-200 bg-slate-50 px-4 text-base text-slate-900 ${
-          multiline ? "min-h-[112px] py-3" : "h-14"
-        }`}
+        className={`w-full rounded-md border border-slate-200 bg-slate-50 px-4 text-base text-slate-900 ${multiline ? "min-h-[112px] " : "h-14"
+          }`}
         placeholder={placeholder}
         placeholderTextColor="#94a3b8"
         value={value}
@@ -223,7 +222,7 @@ export default function EditEventScreen() {
 
     const resolvedType =
       EVENT_TYPE_TO_BACKEND[
-        values.eventType as keyof typeof EVENT_TYPE_TO_BACKEND
+      values.eventType as keyof typeof EVENT_TYPE_TO_BACKEND
       ];
 
     const payload = {
@@ -262,7 +261,7 @@ export default function EditEventScreen() {
         className="flex-1"
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
-        
+
 
         <ScrollView
           className="flex-1"
@@ -420,7 +419,7 @@ export default function EditEventScreen() {
                   />
                 </View>
               </View>
-              <View className="h-28 w-full overflow-hidden rounded-xl border border-slate-200">
+              <View className="h-28 w-full overflow-hidden rounded-md border border-slate-200">
                 <Image
                   source={{
                     uri: "https://lh3.googleusercontent.com/aida-public/AB6AXuBsXGKMRLJ35_GbMDcozUWmZ04ZsCUF4hqolXbTjKxMZs4J2_16cNLqghLwwNSosYlDIt01M37Rog9lXSuwinI8iypxPY9Rx2z5Yuy6QOquSaBC_Wb9QgABYz6Mt6I2-PIbrlunei6pFyC_JxcTuGkwrZWJ-aVBQPMILrz8pIKNsA32urrRE8mh16zLRg-aL0JgxW4_aHQs-ns-P7eAEM9HUTcnZGOJiZJ3M4LgNr5lY_SQ5ognJpCZ9_taZa7KMpbjoK_3qfMJvgc",
@@ -513,7 +512,7 @@ export default function EditEventScreen() {
               </TouchableOpacity>
             </View>
 
-            <View className="flex-row items-center justify-between rounded-2xl border border-red-200 bg-red-50 p-4">
+            <View className="flex-row items-center justify-between rounded-md border border-red-200 bg-red-50 p-4">
               <View>
                 <Text className="text-sm font-bold text-red-600">
                   Cancel Event
@@ -524,7 +523,7 @@ export default function EditEventScreen() {
               </View>
               <TouchableOpacity
                 onPress={handleDelete}
-                className="rounded-lg px-4 py-2"
+                className="rounded-md px-4 py-2"
                 activeOpacity={0.8}
               >
                 <Text className="text-xs font-bold uppercase tracking-widest text-red-600">
