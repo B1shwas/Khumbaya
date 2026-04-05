@@ -46,7 +46,7 @@ export const formatTime = (
   const parsed = new Date(dateValue);
   if (Number.isNaN(parsed.getTime())) return "TBD";
 
-  return parsed.toLocaleTimeString("en-US", {
+  return parsed.toLocaleTimeString(undefined, {
     hour: "numeric",
     minute: "2-digit",
   });
