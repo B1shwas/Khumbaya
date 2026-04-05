@@ -44,7 +44,7 @@ export interface BusinessReview {
 // ─── Category-specific attribute schemas ──────────────────────────────────────
 
 export interface VenueAttribute {
-  id: number;
+  venue_id: number;
   business_id: number;
   venue_type: string | null;
   capacity: number | null;
@@ -136,7 +136,7 @@ export interface BusinessWithAttribute {
 
 export const MOCK_VENUE_ATTRIBUTES: VenueAttribute[] = [
   {
-    id: 1,
+    venue_id: 1,
     business_id: 1,
     venue_type: "Banquet Hall",
     capacity: 500,
@@ -156,7 +156,7 @@ export const MOCK_VENUE_ATTRIBUTES: VenueAttribute[] = [
     updatedAt: "2024-01-01T00:00:00.000Z",
   },
   {
-    id: 2,
+    venue_id: 2,
     business_id: 1,
     venue_type: "Lawn / Garden",
     capacity: 800,
@@ -176,7 +176,7 @@ export const MOCK_VENUE_ATTRIBUTES: VenueAttribute[] = [
     updatedAt: "2024-01-01T00:00:00.000Z",
   },
   {
-    id: 3,
+    venue_id: 3,
     business_id: 1,
     venue_type: "Rooftop Terrace",
     capacity: 200,

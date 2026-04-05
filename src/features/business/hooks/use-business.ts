@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  createBusinessVenueApi,
   createBusinessApi,
   deleteBusinessApi,
   getBusinessByIdApi,
@@ -9,6 +10,7 @@ import {
   updateBusinessVenueApi,
 } from "../api";
 import {
+  CreateBusinessVenuePayload,
   CreateBusinessPayload,
   UpdateBusinessPayload,
   UpdateBusinessServicePayload,
@@ -75,7 +77,7 @@ export const useUpdateBusinessService = () => {
       payload,
       businessId,
     }: {
-      serviceId: number;
+      serviceId: number | string;
       payload: UpdateBusinessServicePayload;
       businessId?: string | number;
     }) => updateBusinessServiceApi(serviceId, payload),
@@ -103,13 +105,34 @@ export const useUpdateBusinessVenue = () => {
       payload,
       businessId,
     }: {
-      venueId: number;
+      venueId: number | string;
       payload: UpdateBusinessVenuePayload;
       businessId?: string | number;
     }) => updateBusinessVenueApi(venueId, payload),
     onSuccess: (data, variables) => {
       const resolvedBusinessId =
         data?.business_information?.id ?? variables.businessId;
+
+      queryClient.invalidateQueries({ queryKey: ["business/list"] });
+
+      if (resolvedBusinessId) {
+        queryClient.invalidateQueries({
+          queryKey: ["business", String(resolvedBusinessId)],
+        });
+      }
+    },
+  });
+};
+
+export const useCreateBusinessVenue = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (payload: CreateBusinessVenuePayload) =>
+      createBusinessVenueApi(payload),
+    onSuccess: (data, variables) => {
+      const resolvedBusinessId =
+        data?.business_information?.id ?? variables.business_id;
 
       queryClient.invalidateQueries({ queryKey: ["business/list"] });
 

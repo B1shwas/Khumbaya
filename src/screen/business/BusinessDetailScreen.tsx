@@ -1,115 +1,35 @@
+import { HeroSection } from "@/src/components/business/[businessId]/Hero";
+import ServiceDetailsSection from "@/src/components/business/[businessId]/ServiceDetailsScreen";
+import { StatsRow } from "@/src/components/business/[businessId]/stats/StatsRow";
+import VenueDetailsSection from "@/src/components/business/[businessId]/VenueDetailsSection";
 import { Text } from "@/src/components/ui/Text";
 import {
-  Business,
   BusinessRequest,
   BusinessReview,
-  MOCK_SERVICE_ATTRIBUTE,
   OtherServiceAttribute,
   VenueAttribute
 } from "@/src/constants/business";
-import { getBusinessIcon } from "@/src/constants/business-icons";
 import { useDeleteBusiness, useGetBusinessById } from "@/src/features/business";
 import { useBusinessDraftStore } from "@/src/features/business/store/useBusiness";
+import { shadowStyle } from "@/src/utils/helper";
 import { MaterialIcons } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
-  Dimensions,
-  FlatList,
   Image,
-  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-const shadowStyle = Platform.select({
-  ios: {
-    shadowColor: "#000",
-    shadowOpacity: 0.07,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 2 },
-  },
-  android: { elevation: 2 },
-  default: {},
-});
-
 // ─── Hero ────────────────────────────────────────────────────────────────────
 
-function HeroSection({
-  business,
-}: {
-  business: Business;
-}) {
-  return (
-    <View style={{ height: 210 }} className="w-full">
-      <Image
-        source={{ uri: business.cover ?? business.avatar ?? undefined }}
-        style={{ width: "100%", height: "100%", position: "absolute" }}
-        resizeMode="cover"
-      />
-      <LinearGradient
-        colors={["transparent", "rgba(0,0,0,0.82)"]}
-        start={{ x: 0, y: 0.25 }}
-        end={{ x: 0, y: 1 }}
-        style={{
-          position: "absolute",
-          left: 0,
-          right: 0,
-          top: 0,
-          bottom: 0,
-        }}
-      />
 
-      {/* Bottom info */}
-      <View className="absolute bottom-0 left-0 right-0 px-4 pb-4">
-        <View className="flex-row items-end gap-3">
-          <View className="w-14 h-14 rounded-2xl bg-white/20 border-2 border-white/50 items-center justify-center">
-            <MaterialIcons name={getBusinessIcon(business.category ?? undefined)} size={28} color="white" />
-          </View>
-          <View className="flex-1">
-            <Text
-              variant="h1"
-              className="text-white text-lg leading-tight"
-              numberOfLines={1}
-            >
-              {business.business_name}
-            </Text>
-            <View className="flex-row items-center gap-1 mt-0.5">
-              <MaterialIcons
-                name="location-on"
-                size={12}
-                color="rgba(255,255,255,0.75)"
-              />
-              <Text className="text-white/75 text-xs">
-                {business.location ?? "Location not set"}
-              </Text>
-              {business.price_starting_from != null && (
-                <Text className="text-white/60 text-xs ml-2">
-                  From {business.price_starting_from.toLocaleString()}
-                </Text>
-              )}
-            </View>
-            {business.rating !== null && (
-              <View className="flex-row items-center gap-1 mt-0.5">
-                <MaterialIcons name="star" size={12} color="#ee2b8c" />
-                <Text variant="h2" className="text-white text-xs">
-                  {business.rating}
-                </Text>
-              </View>
-            )}
-          </View>
-        </View>
-      </View>
-    </View>
-  );
-}
 
 // ─── Profile Completion ───────────────────────────────────────────────────────
 
@@ -182,38 +102,6 @@ function StatCard({
       >
         {label}
       </Text>
-    </View>
-  );
-}
-
-function StatsRow({ business }: { business: Business }) {
-  const views = business.profileViews ?? 0;
-  const viewsFormatted =
-    views >= 1000 ? `${(views / 1000).toFixed(1)}k` : String(views);
-
-  return (
-    <View className="flex-row gap-3">
-      <StatCard
-        label="Total Bookings"
-        value={String(business.totalBookings ?? 0)}
-        iconName="event-available"
-        iconColor="#ee2b8c"
-        bgColor="#fdf2f8"
-      />
-      <StatCard
-        label="Total Earnings"
-        value={business.totalEarnings ?? "$0"}
-        iconName="payments"
-        iconColor="#059669"
-        bgColor="#d1fae5"
-      />
-      <StatCard
-        label="Profile Views"
-        value={viewsFormatted}
-        iconName="visibility"
-        iconColor="#2563eb"
-        bgColor="#dbeafe"
-      />
     </View>
   );
 }
@@ -295,62 +183,6 @@ function ActiveRequestsSection({ requests }: { requests: BusinessRequest[] }) {
     </View>
   );
 }
-
-// ─── Portfolio Grid ───────────────────────────────────────────────────────────
-
-function PortfolioGrid({ portfolio }: { portfolio: string[] }) {
-  const screenWidth = Dimensions.get("window").width;
-  const tileSize = (screenWidth - 32 - 4) / 3;
-
-  return (
-    <View
-      className="bg-white rounded-2xl border border-gray-100 overflow-hidden"
-      style={shadowStyle}
-    >
-      <View className="flex-row items-center justify-between px-4 pt-4 pb-3">
-        <Text variant="h1" className="text-base text-[#181114]">Portfolio</Text>
-        <TouchableOpacity
-          activeOpacity={0.85}
-          className="flex-row items-center gap-1 bg-primary/10 rounded-full px-3 py-1.5"
-        >
-          <MaterialIcons name="add-a-photo" size={13} color="#ee2b8c" />
-          <Text variant="h1" className="text-primary text-xs">Add Work</Text>
-        </TouchableOpacity>
-      </View>
-      {portfolio.length === 0 ? (
-        <View className="py-8 items-center mb-2">
-          <MaterialIcons name="photo-library" size={32} color="#d1d5db" />
-          <Text className="text-gray-400 text-sm mt-2">
-            No portfolio photos yet
-          </Text>
-        </View>
-      ) : (
-        <FlatList
-          data={portfolio}
-          numColumns={3}
-          scrollEnabled={false}
-          keyExtractor={(_, index) => `portfolio-${index}`}
-          columnWrapperStyle={{ gap: 2 }}
-          ItemSeparatorComponent={() => <View style={{ height: 2 }} />}
-          renderItem={({ item }) => (
-            <TouchableOpacity activeOpacity={0.85}>
-              <Image
-                source={{ uri: item }}
-                style={{ width: tileSize, height: tileSize }}
-                resizeMode="cover"
-              />
-            </TouchableOpacity>
-          )}
-        />
-      )}
-    </View>
-  );
-}
-
-// ─── Services ─────────────────────────────────────────────────────────────────
-
-
-// ─── Availability Calendar ────────────────────────────────────────────────────
 
 const DAY_LABELS = ["S", "M", "T", "W", "T", "F", "S"];
 
@@ -446,12 +278,10 @@ function AvailabilityCalendar({
   );
 }
 
-// ─── Latest Review ────────────────────────────────────────────────────────────
 
 function LatestReviewSection({ reviews }: { reviews: BusinessReview[] }) {
   if (reviews.length === 0) return null;
   const review = reviews[0];
-
   return (
     <View
       className="bg-white rounded-md border border-gray-100 p-4"
@@ -500,301 +330,6 @@ function LatestReviewSection({ reviews }: { reviews: BusinessReview[] }) {
 }
 
 
-// ─── Venue Details ────────────────────────────────────────────────────────────
-
-function AmenityChip({
-  icon,
-  label,
-  active,
-}: {
-  icon: keyof typeof MaterialIcons.glyphMap;
-  label: string;
-  active: boolean;
-}) {
-  if (!active) return null;
-  return (
-    <View className="flex-row items-center gap-1 bg-primary/10 rounded-full px-2.5 py-1">
-      <MaterialIcons name={icon} size={12} color="#ee2b8c" />
-      <Text className="text-[10px] text-primary">{label}</Text>
-    </View>
-  );
-}
-
-function VenueCard({ venue, onEdit }: { venue: VenueAttribute; onEdit: () => void }) {
-  //pills
-  const amenities: Array<{
-    icon: keyof typeof MaterialIcons.glyphMap;
-    label: string;
-    active: boolean;
-  }> = [
-      { icon: "restaurant", label: "Catering", active: venue.has_catering },
-      { icon: "tv", label: "AV Equipment", active: venue.has_av_equipment },
-      { icon: "wb-sunny", label: "Outdoor", active: venue.is_outDoor },
-      { icon: "local-parking", label: "Parking", active: venue.parking },
-      { icon: "directions-car", label: "Valet", active: venue.valet_available },
-      { icon: "local-bar", label: "Alcohol Allowed", active: venue.alcohol_allowed },
-    ];
-  const activeAmenities = amenities.filter((a) => a.active);
-
-  return (
-    <View
-      className="bg-white rounded-2xl border border-gray-100 p-4 mb-3"
-      style={shadowStyle}
-    >
-      {/* Top row: venue type + price + edit */}
-      <View className="flex-row items-center justify-between mb-3">
-        <View className="flex-row items-center gap-2 flex-1">
-          <View className="w-9 h-9 rounded-xl bg-primary/10 items-center justify-center">
-            <MaterialIcons name="meeting-room" size={18} color="#ee2b8c" />
-          </View>
-          <View>
-            <Text variant="h1" className="text-sm text-[#181114]">
-              {venue.venue_type ?? "Venue"}
-            </Text>
-            {venue.capacity != null && (
-              <Text className="text-[10px] text-[#594048]">
-                Up to {venue.capacity} guests
-              </Text>
-            )}
-          </View>
-        </View>
-        <View className="flex-row items-center gap-2">
-          {venue.price_per_hour != null && (
-            <View className="items-end">
-              <Text variant="h1" className="text-primary text-base">
-                ₹{venue.price_per_hour.toLocaleString()}
-              </Text>
-              <Text className="text-[10px] text-gray-400">per hour</Text>
-            </View>
-          )}
-          <TouchableOpacity
-            onPress={onEdit}
-            activeOpacity={0.75}
-            className="w-8 h-8 rounded-full bg-gray-100 items-center justify-center"
-          >
-            <MaterialIcons name="edit" size={15} color="#594048" />
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      {/* Stats grid */}
-      <View className="flex-row gap-2 mb-3">
-        {venue.area_sqft != null && (
-          <View className="flex-1 bg-gray-50 rounded-xl p-2.5 items-center">
-            <MaterialIcons name="straighten" size={16} color="#594048" />
-            <Text variant="h1" className="text-xs  text-[#181114] mt-1">
-              {venue.area_sqft.toLocaleString()} sqft
-            </Text>
-            <Text className="text-[9px] text-gray-400">Area</Text>
-          </View>
-        )}
-
-        <View className="flex-1 bg-gray-50 rounded-xl p-2.5 items-center">
-          <MaterialIcons name="hotel" size={16} color="#594048" />
-          <Text variant="h1" className="text-xs text-[#181114] mt-1">
-            {venue.rooms_available != null ? venue.rooms_available : "—"}
-          </Text>
-          <Text className="text-[9px] text-gray-400">Rooms</Text>
-        </View>
-
-
-        <View className="flex-1 bg-gray-50 rounded-xl p-2.5 items-center">
-          <MaterialIcons name="schedule" size={16} color="#594048" />
-          <Text variant="h1" className="text-xs text-[#181114] mt-1">
-            {venue.min_booking_hours != null ? `${venue.min_booking_hours}h` : "4h"} - {venue.max_booking_hours != null ? `${venue.max_booking_hours}h` : "24h"}
-          </Text>
-          <Text className="text-[9px] text-gray-400">Booking Hrs</Text>
-        </View>
-
-
-        <View className="flex-1 bg-gray-50 rounded-xl p-2.5 items-center">
-          <MaterialIcons name="volume-up" size={16} color="#594048" />
-          <Text variant="h1" className="text-xs text-[#181114] mt-1">
-            {venue.sound_limit_db != null ? `${venue.sound_limit_db} dB` : "N/A"}
-          </Text>
-          <Text className="text-[9px] text-gray-400">Sound Limit</Text>
-        </View>
-
-      </View>
-
-      {/* Amenity chips */}
-      {activeAmenities.length > 0 && (
-        <View className="flex-row flex-wrap gap-1.5 pt-2 border-t border-gray-100">
-          {activeAmenities.map((a) => (
-            <AmenityChip key={a.label} icon={a.icon} label={a.label} active />
-          ))}
-        </View>
-      )}
-    </View>
-  );
-}
-
-function VenueDetailsSection({
-  venues,
-  onEditVenue,
-  onAddVenue,
-}: {
-  venues: VenueAttribute[];
-  onEditVenue: (venue: VenueAttribute) => void;
-  onAddVenue: () => void;
-}) {
-  return (
-    <View>
-      <View className="flex-row items-center justify-between mb-3">
-        <View className="flex-row items-center gap-2">
-          <Text variant="h1" className="text-base text-[#181114]">Venues</Text>
-          {venues.length > 0 && (
-            <View className="bg-primary/10 rounded-full px-2.5 py-1">
-              <Text className="text-[11px] text-primary">{venues.length} listed</Text>
-            </View>
-          )}
-        </View>
-        <TouchableOpacity
-          onPress={onAddVenue}
-          activeOpacity={0.8}
-          className="flex-row items-center gap-1 bg-primary/10 rounded-full px-3 py-1.5"
-        >
-          <MaterialIcons name="add" size={14} color="#ee2b8c" />
-          <Text variant="h1" className="text-primary text-xs">Add Venue</Text>
-        </TouchableOpacity>
-      </View>
-
-      {venues.length === 0 ? (
-        <TouchableOpacity
-          onPress={onAddVenue}
-          activeOpacity={0.8}
-          className="bg-white rounded-2xl border border-dashed border-primary/40 py-10 items-center justify-center gap-2"
-        >
-          <View className="w-12 h-12 rounded-full bg-primary/10 items-center justify-center">
-            <MaterialIcons name="add-business" size={24} color="#ee2b8c" />
-          </View>
-          <Text variant="h1" className="text-sm text-[#181114]">Add your first venue</Text>
-          <Text className="text-xs text-gray-400">Tap to add capacity, pricing & amenities</Text>
-        </TouchableOpacity>
-      ) : (
-        venues.map((v, index) => (
-          <VenueCard key={index} venue={v} onEdit={() => onEditVenue(v)} />
-        ))
-      )}
-    </View>
-  );
-}
-
-// ─── Service Details ──────────────────────────────────────────────────────────
-
-function InfoRow({
-  icon,
-  label,
-  value,
-}: {
-  icon: keyof typeof MaterialIcons.glyphMap;
-  label: string;
-  value: string | number;
-}) {
-  return (
-    <View className="flex-row items-center gap-3 py-3 border-b border-gray-50">
-      <View className="w-8 h-8 rounded-xl bg-primary/10 items-center justify-center">
-        <MaterialIcons name={icon} size={16} color="#ee2b8c" />
-      </View>
-      <Text className="text-xs text-[#594048] flex-1">{label}</Text>
-      <Text variant="h1" className="text-xs text-[#181114] text-right max-w-[50%]" numberOfLines={1}>
-        {value}
-      </Text>
-    </View>
-  );
-}
-
-function BoolBadge({ label, value }: { label: string; value: boolean }) {
-  return (
-    <View
-      className={`flex-row items-center gap-1.5 rounded-xl px-3 py-2 ${value ? "bg-emerald-50 border border-emerald-200" : "bg-gray-50 border border-gray-200"
-        }`}
-    >
-      <MaterialIcons
-        name={value ? "check-circle" : "cancel"}
-        size={14}
-        color={value ? "#059669" : "#9ca3af"}
-      />
-      <Text
-        className={`text-[11px] ${value ? "text-emerald-700" : "text-gray-400"}`}
-      >
-        {label}
-      </Text>
-    </View>
-  );
-}
-
-type InfoRowItem = {
-  icon: keyof typeof MaterialIcons.glyphMap;
-  label: string;
-  value: string | number | null | undefined;
-};
-
-function ServiceDetailsSection({ service }: { service: OtherServiceAttribute }) {
-  const allRows: InfoRowItem[] = [
-    { icon: "person", label: "Artist Type", value: service.artist_type },
-    { icon: "palette", label: "Styles Specialized", value: service.styles_specialized },
-    { icon: "event-available", label: "Max Bookings / Day", value: service.max_bookings_per_day },
-    {
-      icon: "payments",
-      label: "Advance Amount",
-      value: service.advance_amount != null ? `₹${service.advance_amount.toLocaleString()}` : null,
-    },
-    {
-      icon: "flight-takeoff",
-      label: "Travel Charges",
-      value: service.travel_charges != null ? `₹${service.travel_charges.toLocaleString()}` : null,
-    },
-    {
-      icon: "shopping-bag",
-      label: "Minimum Order",
-      value: service.min_order != null ? `₹${service.min_order.toLocaleString()}` : null,
-    },
-  ];
-  const infoRows = allRows.filter(
-    (r): r is InfoRowItem & { value: string | number } => r.value != null
-  );
-
-  const boolFlags = [
-    { label: "Uses Own Material", value: service.uses_own_material },
-    { label: "Available for Destination", value: service.available_for_destination },
-    { label: "Customization Available", value: service.customization_available },
-    { label: "Serves Veg", value: service.serves_veg },
-  ];
-
-  return (
-    <View
-      className="bg-white rounded-2xl border border-gray-100 p-4"
-      style={shadowStyle}
-    >
-      <View className="flex-row items-center gap-2 mb-1">
-        <MaterialIcons name="miscellaneous-services" size={18} color="#ee2b8c" />
-        <Text variant="h1" className="text-base text-[#181114]">Service Details</Text>
-      </View>
-
-      {infoRows.map((r) => (
-        <InfoRow key={r.label} icon={r.icon} label={r.label} value={r.value} />
-      ))}
-
-      {service.portfolio_link != null && (
-        <InfoRow
-          icon="link"
-          label="Portfolio"
-          value={service.portfolio_link}
-        />
-      )}
-
-      <View className="flex-row flex-wrap gap-2 mt-3 pt-3 border-t border-gray-100">
-        {boolFlags.map((f) => (
-          <BoolBadge key={f.label} label={f.label} value={f.value} />
-        ))}
-      </View>
-    </View>
-  );
-}
-
-// ─── Main Screen ──────────────────────────────────────────────────────────────
-
 export default function BusinessDetailsScreen() {
   const router = useRouter();
   const navigation = useNavigation();
@@ -812,21 +347,14 @@ export default function BusinessDetailsScreen() {
   const handleEditPress = () => {
     if (!businessWithAttribute?.business_information) return;
     setBusinessDraft(businessWithAttribute.business_information);
-    router.push(`/business/edit/${businessId}`);
+    router.push({
+      pathname: "/(protected)/(client-tabs)/business/[businessId]/edit" as never,
+      params: {
+        businessId: String(businessWithAttribute.business_information.id),
+      },
+    });
   };
 
-  useEffect(() => {
-    navigation.setOptions({
-      headerRight: () => (
-        <Pressable
-          onPress={() => setMenuVisible((v) => !v)}
-          style={{ padding: 4, marginRight: 12 }}
-        >
-          <MaterialIcons name="more-vert" size={20} color="#181114" />
-        </Pressable>
-      ),
-    });
-  }, []);
 
   const handleDelete = () => {
     if (!businessWithAttribute) return;
@@ -856,21 +384,49 @@ export default function BusinessDetailsScreen() {
   };
 
   const handleEditVenuePress = (venue: VenueAttribute) => {
-    if (!businessWithAttribute?.business_information?.id || !venue?.id) return;
+    if (!businessWithAttribute?.business_information?.id || !venue?.venue_id) {
+      console.log('This is the venue if of the informarion',venue)
+      return;
+    }
+    console.log("Thgis is the edit venue page in the ui to edit the venue for the business in the section for this 🐮🐮🐮🐮🐮🐮" , {
+      businessId:String(businessWithAttribute.business_information.id),
+      venueId:String(venue.venue_id),
+    });
     router.push({
-      pathname: "/business/venue/edit/[businessId]/[venueId]",
+      pathname: "/business/[businessId]/venue/[venueId]/update",
       params: {
         businessId: String(businessWithAttribute.business_information.id),
-        venueId: String(venue.id),
+        venueId: String(venue.venue_id),
+        mode: "edit",
       },
     });
   };
 
   const handleAddVenuePress = () => {
     if (!businessWithAttribute?.business_information?.id) return;
-    router.push(
-      `/business/venue/create/${String(businessWithAttribute.business_information.id)}` as never
+    router.push({
+      pathname:`/business/[businessId]/venue/create` ,
+      params:{
+        businessId: String(businessWithAttribute.business_information.id),
+        mode:"create",
+
+      }}
     );
+  };
+
+  const handleEditServicePress = (service: OtherServiceAttribute) => {
+    if (!businessWithAttribute?.business_information?.id || !service?.id) {
+      return;
+    }
+
+    router.push({
+      pathname: "/business/[businessId]/service/[serviceId]/update",
+      params: {
+        businessId: String(businessWithAttribute.business_information.id),
+        serviceId: String(service.id),
+        mode: "edit",
+      },
+    });
   };
 
   if (isLoading) {
@@ -898,7 +454,8 @@ export default function BusinessDetailsScreen() {
         contentContainerStyle={{ paddingBottom: 40 }}
         showsVerticalScrollIndicator={false}
       >
-        <HeroSection
+        <HeroSection 
+        onEditPress={handleEditPress}
           business={businessWithAttribute.business_information}
         />
 
@@ -915,7 +472,32 @@ export default function BusinessDetailsScreen() {
             />
           )}
           {businessWithAttribute.business_information.category !== "Venue" && businessWithAttribute.business_information.category != null && (
-            <ServiceDetailsSection service={MOCK_SERVICE_ATTRIBUTE} />
+            <ServiceDetailsSection
+              service={
+                businessWithAttribute.vendor_services_information?.[0] ?? {
+                  id: 0,
+                  business_id: businessWithAttribute.business_information.id,
+                  artist_type: null,
+                  styles_specialized: null,
+                  max_bookings_per_day: null,
+                  advance_amount: null,
+                  uses_own_material: false,
+                  travel_charges: null,
+                  portfolio_link: null,
+                  available_for_destination: false,
+                  customization_available: false,
+                  serves_veg: false,
+                  min_order: null,
+                  createdAt: "",
+                  updatedAt: "",
+                }
+              }
+              onEdit={
+                businessWithAttribute.vendor_services_information?.[0]
+                  ? () => handleEditServicePress(businessWithAttribute.vendor_services_information[0])
+                  : undefined
+              }
+            />
           )}
 
           {/* <PortfolioGrid portfolio={business.portfolio ?? []} /> */}
@@ -946,46 +528,7 @@ export default function BusinessDetailsScreen() {
       </ScrollView>
 
       {/* Dropdown menu overlay */}
-      {menuVisible && (
-        <>
-          <Pressable
-            style={StyleSheet.absoluteFillObject}
-            onPress={() => setMenuVisible(false)}
-          />
-          <View
-            style={{
-              position: "absolute",
-              top: 8,
-              right: 12,
-              backgroundColor: "white",
-              borderRadius: 12,
-              minWidth: 160,
-              elevation: 8,
-              shadowColor: "#000",
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.15,
-              shadowRadius: 8,
-              overflow: "hidden",
-            }}
-          >
-            <Pressable
-              onPress={() => { setMenuVisible(false); handleEditPress(); }}
-              style={({ pressed }) => ({
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: 8,
-                paddingHorizontal: 16,
-                paddingVertical: 12,
-                backgroundColor: pressed ? "#f3f4f6" : "white",
-              })}
-            >
-              <MaterialIcons name="edit" size={16} color="#374151" />
-              <Text className="text-gray-700 text-sm">Edit Profile</Text>
-            </Pressable>
-          </View>
-        </>
-      )}
+    
     </View>
   );
 }
