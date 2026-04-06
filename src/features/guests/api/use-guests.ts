@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   getEventGuest,
+  getGuestRoom,
   getInvitation,
   inviteGuest,
   removeInvitation,
@@ -61,5 +62,13 @@ export const useRemoveInvitation = () => {
       });
       queryClient.invalidateQueries({ queryKey: ["events"] });
     },
+  });
+};
+
+export const useGetGuestRoom = (eventId: number | null  ) => {
+  return useQuery({
+    queryKey: ["event-guest-room", eventId],
+    queryFn: () => getGuestRoom(eventId!),
+    enabled: !!eventId,
   });
 };
