@@ -1,7 +1,7 @@
 import Card from "@/src/components/ui/Card";
 import { Event, EventRole } from "@/src/constants/event";
+import { useThrottledRouter } from "@/src/hooks/useThrottledRouter";
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
 
 import { Image, Pressable, Text, TouchableOpacity, View } from "react-native";
 
@@ -39,11 +39,10 @@ export const Event_WITH_ROLE = ({
   isRequest?: boolean;
   asGuest?: boolean;
 }) => {
-  const router = useRouter();
+  const { push } = useThrottledRouter();
   const roleStyle = roleConfig[event.role as EventRole] ?? defaultRoleStyle;
   const roleLabel = event.role ?? "Unknown";
   const { wrapperClass, textClass } = roleStyle;
-
 
   return (
     <Card className="my-2">
@@ -51,15 +50,11 @@ export const Event_WITH_ROLE = ({
         className="flex-row p-3 rounded-md overflow-hidden"
         onPress={() => {
           if (isRequest && asGuest) {
-            router.push(
-              `/(protected)/(client-stack)/events/${event.id}/(guest)`
-            );
+            push(`/(protected)/(client-stack)/events/${event.id}/(guest)`);
           } else if (isRequest && !asGuest) {
-            router.push(
-              `/(protected)/(client-stack)/events/${event.id}/(vendor)/`
-            );
+            push(`/(protected)/(client-stack)/events/${event.id}/(vendor)/`);
           } else {
-            router.push(`/(protected)/(client-stack)/events/${event.id}`);
+            push(`/(protected)/(client-stack)/events/${event.id}`);
           }
         }}
       >
@@ -112,7 +107,7 @@ export const Event_WITH_ROLE = ({
               <TouchableOpacity
                 className="bg-primary px-3 py-1.5 rounded-full"
                 onPress={() =>
-                  router.push(
+                  push(
                     `/(protected)/(client-stack)/events/${event.id}/(vendor)/`
                   )
                 }

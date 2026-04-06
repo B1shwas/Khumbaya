@@ -2,21 +2,18 @@ import { CompletedEventsTab } from "@/src/components/event/CompletedEvent";
 import { InvitedEventsTab } from "@/src/components/event/InvitedEvent";
 import { UpcomingEventsTab } from "@/src/components/event/UpcomingEvent";
 import { EventTab } from "@/src/constants/event";
+import { useThrottledRouter } from "@/src/hooks/useThrottledRouter";
 import { cn } from "@/src/utils/cn";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import {
-  Pressable,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Pressable, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function EventsPage() {
   const [activeTab, setActiveTab] = useState<EventTab>("upcoming");
   const [mounted, setMounted] = useState(false);
+  const { push } = useThrottledRouter();
 
   useEffect(() => {
     setMounted(true);
@@ -69,7 +66,6 @@ export default function EventsPage() {
         ))}
       </View>
 
-
       {/* Event List */}
       {activeTab === "upcoming" && (
         <View className="flex-1">
@@ -89,7 +85,7 @@ export default function EventsPage() {
       {/* Floating Action Button */}
       <TouchableOpacity
         onPress={() => {
-          router.push("/(protected)/(client-stack)/events/create");
+          push("/(protected)/(client-stack)/events/create");
         }}
         className="absolute bottom-6 right-6 w-14 h-14 bg-primary rounded-full items-center justify-center shadow-lg"
       >
