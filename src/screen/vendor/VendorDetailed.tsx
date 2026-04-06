@@ -941,7 +941,7 @@ export default function VendorDetailed() {
         <View className="bg-white/90 border-t border-gray-200 px-4 py-4">
           <View className="w-full max-w-md self-center">
             <Pressable
-              className="flex-1 rounded-lg bg-primary py-3.5 px-4 items-center justify-center shadow-lg shadow-primary/30 active:scale-[0.98]"
+              className="w-full rounded-lg bg-primary py-3.5 px-4 items-center justify-center shadow-lg shadow-primary/30 active:scale-[0.98]"
               onPress={() =>
                 router.push({
                   pathname: "/(shared)/explore/[vendorId]/enquiryform",
