@@ -144,7 +144,7 @@ export default function SubEventCard({
         onPress={() => {
           router.push({
             pathname:
-              "/(protected)/(client-stack)/events/[eventId]/(organizer)/(subevent)/[subEventId]/subevntdetail",
+              "/(protected)/(client-stack)/events/[eventId]/(organizer)/(subevent)/[subEventId]/sub-event-detail",
             params: {
               eventId,
               subEventId: String(item.id),
