@@ -3,48 +3,43 @@ import Row from "@/src/components/ui/RowComponent";
 import { Event } from "@/src/constants/event";
 import { useGetEventWithRole } from "@/src/features/events/hooks/use-event";
 import { useEventStore } from "@/src/features/events/store/useEventStore";
-import {
-  RelativePathString,
-  useLocalSearchParams,
-  useRouter,
-} from "expo-router";
+import { useThrottledRouter } from "@/src/hooks/useThrottledRouter";
+import { RelativePathString, useLocalSearchParams } from "expo-router";
 import { useEffect } from "react";
 import { ScrollView, Text, View } from "react-native";
 import EventDetailHero from "./EventDetailHero";
 
 const EventDetail = () => {
   const { eventId } = useLocalSearchParams<{ eventId: string }>();
-  const router = useRouter();
+  const { push } = useThrottledRouter();
   const { clearEventDraft, setEventDraft } = useEventStore();
   const { data: found } = useGetEventWithRole();
   const foundEvent = found?.find(
     (e: Event) => String(e.id) === String(eventId)
   );
 
-  const event =
-    foundEvent ??
-    ({
-      id: eventId ?? "0",
-      title: "Event Details",
-      date: "—",
-      location: "—",
-      venue: "—",
-      imageUrl: "",
-      role: "Organizer" as const,
-      status: "upcoming" as const,
-      time: "",
-      startDateTime: "",
-      endDateTime: "",
+  const event = foundEvent ?? {
+    id: eventId ?? "0",
+    title: "Event Details",
+    date: "—",
+    location: "—",
+    venue: "—",
+    imageUrl: "",
+    role: "Organizer" as const,
+    status: "upcoming" as const,
+    time: "",
+    startDateTime: "",
+    endDateTime: "",
 
-      days: 0,
-      hours: 0,
-      minutes: 0,
-      guests: { confirmed: 0, total: 0 },
-      budget: { spent: 0, total: 0 },
-      tasks: { pending: 0 },
-      vendors: { booked: 0, pending: 0 },
-      nextTask: "",
-    } );
+    days: 0,
+    hours: 0,
+    minutes: 0,
+    guests: { confirmed: 0, total: 0 },
+    budget: { spent: 0, total: 0 },
+    tasks: { pending: 0 },
+    vendors: { booked: 0, pending: 0 },
+    nextTask: "",
+  };
 
   useEffect(() => {
     clearEventDraft();
@@ -92,7 +87,7 @@ const EventDetail = () => {
       icon: "checkmark-circle-outline",
       color: "#EC4899",
       route: `./tasklist`,
-    }
+    },
   ];
 
   return (
@@ -105,8 +100,8 @@ const EventDetail = () => {
         status={event.status}
         title={event.title}
         // date={event.date}
-        startDateTime= {event.startDateTime}
-         endDateTime= {event.endDateTime}
+        startDateTime={event.startDateTime}
+        endDateTime={event.endDateTime}
         location={event.location}
       />
 
@@ -126,7 +121,7 @@ const EventDetail = () => {
             description="Upload & Share Photos"
             iconstring="images"
             onPress={() => {
-              router.push("./gallery" as RelativePathString)
+              push("./gallery" as RelativePathString);
             }}
           />
           <Row
@@ -135,15 +130,15 @@ const EventDetail = () => {
             iconstring="create"
             onPress={() => {
               setEventDraft(event as Event);
-              router.push("./edit-event" as RelativePathString)
+              push("./edit-event" as RelativePathString);
             }}
           />
-        <Row
+          <Row
             title="Planning Committee"
             description="Add Event Organizers and Collaborators"
             iconstring="person"
             onPress={() => {
-              router.push("./settings/transfer-ownership" as RelativePathString)
+              push("./settings/transfer-ownership" as RelativePathString);
             }}
           />
         </View>
