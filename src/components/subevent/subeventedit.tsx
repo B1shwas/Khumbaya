@@ -1,13 +1,14 @@
 import { DatePicker } from "@/components/nativewindui/DatePicker";
 import { Text } from "@/src/components/ui/Text";
-import { UpdateSubEventPayload } from "@/src/features/subevent/api/subEvent.service";
+import type { Event } from "@/src/constants/event";
 import {
-//   useDeleteSubEvent,
-  useSubEventById,
-  useUpdateSubEvent,
-} from "@/src/features/subevent/hooks/useSubEvent";
+  // useDeleteEvent,
+  useEventById,
+  useUpdateEvent,
+} from "@/src/features/events/hooks/use-event";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { Controller, useForm } from "react-hook-form";
 import {
   ActivityIndicator,
   Alert,
@@ -20,6 +21,22 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 const PRIMARY = "#ee2b8c";
 
+type SubEventEditForm = {
+  title: string;
+  description: string;
+  location: string;
+  theme: string;
+  budget: string;
+  startDateTime: Date;
+  endDateTime: Date;
+};
+
+const parseDate = (value?: string): Date => {
+  if (!value) return new Date();
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? new Date() : parsed;
+};
+
 export default function SubEventEditScreen() {
   const router = useRouter();
   const { subEventId } = useLocalSearchParams<{
@@ -27,58 +44,56 @@ export default function SubEventEditScreen() {
   }>();
 
   const parsedId = Number(subEventId);
-  const { data: subEvent, isLoading } = useSubEventById(parsedId);
-  const updateSubEvent = useUpdateSubEvent();
-//   const deleteSubEvent = useDeleteSubEvent();
-  const [saving, setSaving] = useState(false);
-//   const [deleting, setDeleting] = useState(false);
+  const { data: subEvent, isLoading } = useEventById(parsedId);
+  const { mutateAsync: updateEventMutate, isPending: isUpdating } =
+    useUpdateEvent(parsedId);
+  // const { mutateAsync: deleteEventMutate, isPending: isDeleting } =
+  //   useDeleteEvent(parsedId);
 
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [location, setLocation] = useState("");
-  const [theme, setTheme] = useState("");
-  const [budget, setBudget] = useState("");
-  const [startDateTime, setStartDateTime] = useState(new Date());
-  const [endDateTime, setEndDateTime] = useState(new Date());
+  const { control, reset, handleSubmit } = useForm<SubEventEditForm>({
+    defaultValues: {
+      title: "",
+      description: "",
+      location: "",
+      theme: "",
+      budget: "",
+      startDateTime: new Date(),
+      endDateTime: new Date(),
+    },
+  });
 
   useEffect(() => {
     if (!subEvent) return;
 
-    setTitle(subEvent.title ?? "");
-    setDescription(subEvent.description ?? "");
-    setLocation(subEvent.location ?? "");
-    setTheme(subEvent.theme ?? "");
-    setBudget(subEvent.budget ? String(subEvent.budget) : "");
-    setStartDateTime(
-      subEvent.startDateTime ? new Date(subEvent.startDateTime) : new Date()
-    );
-    setEndDateTime(
-      subEvent.endDateTime ? new Date(subEvent.endDateTime) : new Date()
-    );
-  }, [subEvent]);
+    reset({
+      title: subEvent.title ?? "",
+      description: subEvent.description ?? "",
+      location: subEvent.location ?? "",
+      theme: subEvent.theme ?? "",
+      budget: subEvent.budget ? String(subEvent.budget) : "",
+      startDateTime: parseDate(subEvent.startDateTime),
+      endDateTime: parseDate(subEvent.endDateTime),
+    });
+  }, [subEvent, reset]);
 
-  const handleSave = async () => {
-    if (!title.trim()) {
+  const handleSave = handleSubmit(async (values) => {
+    if (!values.title.trim()) {
       Alert.alert("Error", "Please enter a sub-event name.");
       return;
     }
 
-    const payload: UpdateSubEventPayload = {
-      title: title.trim(),
-      description: description.trim() || undefined,
-      location: location.trim() || undefined,
-      theme: theme.trim() || undefined,
-      budget: budget ? Number(budget) : undefined,
-      startDateTime: startDateTime.toISOString(),
-      endDateTime: endDateTime.toISOString(),
+    const payload: Partial<Event> = {
+      title: values.title.trim(),
+      description: values.description.trim() || undefined,
+      location: values.location.trim() || undefined,
+      theme: values.theme.trim() || undefined,
+      budget: values.budget ? Number(values.budget) : undefined,
+      startDateTime: values.startDateTime.toISOString(),
+      endDateTime: values.endDateTime.toISOString(),
     };
 
     try {
-      setSaving(true);
-      await updateSubEvent.mutateAsync({
-        subEventId: parsedId,
-        data: payload,
-      });
+      await updateEventMutate(payload);
 
       Alert.alert("Success", "Sub-event updated successfully.", [
         { text: "OK", onPress: () => router.back() },
@@ -86,42 +101,37 @@ export default function SubEventEditScreen() {
     } catch (error) {
       console.error("Error updating sub-event:", error);
       Alert.alert("Error", "Unable to save changes. Please try again.");
-    } finally {
-      setSaving(false);
     }
-  };
+  });
 
-//   const handleDelete = () => {
-//     Alert.alert(
-//       "Delete Sub-Event",
-//       "Are you sure you want to delete this sub-event? This action cannot be undone.",
-//       [
-//         { text: "Cancel", style: "cancel" },
-//         {
-//           text: "Delete",
-//           style: "destructive",
-//           onPress: async () => {
-//             try {
-//               setDeleting(true);
-//               await deleteSubEvent.mutateAsync(parsedId);
-//               Alert.alert("Success", "Sub-event deleted successfully.", [
-//                 { text: "OK", onPress: () => router.back() },
-//               ]);
-//             } catch (error: any) {
-//               console.error("Error deleting sub-event:", error);
-//               const errorMessage =
-//                 error?.response?.data?.message ||
-//                 error?.message ||
-//                 "Unable to delete. Please try again.";
-//               Alert.alert("Error", errorMessage);
-//             } finally {
-//               setDeleting(false);
-//             }
-//           },
-//         },
-//       ]
-//     );
-//   };
+  // const handleDelete = () => {
+  //   Alert.alert(
+  //     "Delete Sub-Event",
+  //     "Are you sure you want to delete this sub-event? This action cannot be undone.",
+  //     [
+  //       { text: "Cancel", style: "cancel" },
+  //       {
+  //         text: "Delete",
+  //         style: "destructive",
+  //         onPress: async () => {
+  //           try {
+  //             await deleteEventMutate();
+  //             Alert.alert("Success", "Sub-event deleted successfully.", [
+  //               { text: "OK", onPress: () => router.back() },
+  //             ]);
+  //           } catch (error: any) {
+  //             console.error("Error deleting sub-event:", error);
+  //             const errorMessage =
+  //               error?.response?.data?.message ||
+  //               error?.message ||
+  //               "Unable to delete. Please try again.";
+  //             Alert.alert("Error", errorMessage);
+  //           }
+  //         },
+  //       },
+  //     ]
+  //   );
+  // };
 
   if (isLoading) {
     return (
@@ -150,11 +160,17 @@ export default function SubEventEditScreen() {
             >
               Name
             </Text>
-            <TextInput
-              value={title}
-              onChangeText={setTitle}
-              placeholder="Sub-event title"
-              className="bg-white rounded-2xl px-4 py-4 border border-gray-200"
+            <Controller
+              control={control}
+              name="title"
+              render={({ field: { value, onChange } }) => (
+                <TextInput
+                  value={value}
+                  onChangeText={onChange}
+                  placeholder="Sub-event title"
+                  className="bg-white rounded-2xl px-4 py-4 border border-gray-200"
+                />
+              )}
             />
           </View>
 
@@ -165,13 +181,19 @@ export default function SubEventEditScreen() {
             >
               Description
             </Text>
-            <TextInput
-              value={description}
-              onChangeText={setDescription}
-              placeholder="Describe the sub-event"
-              multiline
-              numberOfLines={4}
-              className="bg-white rounded-2xl px-4 py-4 border border-gray-200 text-base"
+            <Controller
+              control={control}
+              name="description"
+              render={({ field: { value, onChange } }) => (
+                <TextInput
+                  value={value}
+                  onChangeText={onChange}
+                  placeholder="Describe the sub-event"
+                  multiline
+                  numberOfLines={4}
+                  className="bg-white rounded-2xl px-4 py-4 border border-gray-200 text-base"
+                />
+              )}
             />
           </View>
 
@@ -182,11 +204,17 @@ export default function SubEventEditScreen() {
             >
               Location
             </Text>
-            <TextInput
-              value={location}
-              onChangeText={setLocation}
-              placeholder="Venue or location"
-              className="bg-white rounded-2xl px-4 py-4 border border-gray-200"
+            <Controller
+              control={control}
+              name="location"
+              render={({ field: { value, onChange } }) => (
+                <TextInput
+                  value={value}
+                  onChangeText={onChange}
+                  placeholder="Venue or location"
+                  className="bg-white rounded-2xl px-4 py-4 border border-gray-200"
+                />
+              )}
             />
           </View>
 
@@ -197,11 +225,17 @@ export default function SubEventEditScreen() {
             >
               Theme
             </Text>
-            <TextInput
-              value={theme}
-              onChangeText={setTheme}
-              placeholder="Theme"
-              className="bg-white rounded-2xl px-4 py-4 border border-gray-200"
+            <Controller
+              control={control}
+              name="theme"
+              render={({ field: { value, onChange } }) => (
+                <TextInput
+                  value={value}
+                  onChangeText={onChange}
+                  placeholder="Theme"
+                  className="bg-white rounded-2xl px-4 py-4 border border-gray-200"
+                />
+              )}
             />
           </View>
 
@@ -212,34 +246,52 @@ export default function SubEventEditScreen() {
             >
               Budget
             </Text>
-            <TextInput
-              value={budget}
-              onChangeText={setBudget}
-              keyboardType="numeric"
-              placeholder="Budget amount"
-              className="bg-white rounded-2xl px-4 py-4 border border-gray-200"
+            <Controller
+              control={control}
+              name="budget"
+              render={({ field: { value, onChange } }) => (
+                <TextInput
+                  value={value}
+                  onChangeText={onChange}
+                  keyboardType="numeric"
+                  placeholder="Budget amount"
+                  className="bg-white rounded-2xl px-4 py-4 border border-gray-200"
+                />
+              )}
             />
           </View>
 
           <View>
-            <DatePicker
-              mode="datetime"
-              value={startDateTime}
-              onChange={(_, date) => date && setStartDateTime(date)}
-              materialDateLabel="Start Date"
-              materialTimeLabel="Start Time"
-              materialDateClassName="mb-2"
+            <Controller
+              control={control}
+              name="startDateTime"
+              render={({ field: { value, onChange } }) => (
+                <DatePicker
+                  mode="datetime"
+                  value={value}
+                  onChange={(_, date) => date && onChange(date)}
+                  materialDateLabel="Start Date"
+                  materialTimeLabel="Start Time"
+                  materialDateClassName="mb-2"
+                />
+              )}
             />
           </View>
 
           <View>
-            <DatePicker
-              mode="datetime"
-              value={endDateTime}
-              onChange={(_, date) => date && setEndDateTime(date)}
-              materialDateLabel="End Date"
-              materialTimeLabel="End Time"
-              materialDateClassName="mb-2"
+            <Controller
+              control={control}
+              name="endDateTime"
+              render={({ field: { value, onChange } }) => (
+                <DatePicker
+                  mode="datetime"
+                  value={value}
+                  onChange={(_, date) => date && onChange(date)}
+                  materialDateLabel="End Date"
+                  materialTimeLabel="End Time"
+                  materialDateClassName="mb-2"
+                />
+              )}
             />
           </View>
         </View>
@@ -249,9 +301,9 @@ export default function SubEventEditScreen() {
         <TouchableOpacity
           className="bg-pink-500 py-4 rounded-xl items-center justify-center"
           onPress={handleSave}
-          disabled={saving}
+          disabled={isUpdating}
         >
-          {saving ? (
+          {isUpdating ? (
             <ActivityIndicator size="small" color="white" />
           ) : (
             <Text variant="h2" className="text-white">
@@ -260,13 +312,13 @@ export default function SubEventEditScreen() {
           )}
         </TouchableOpacity>
 
-        {/* Delete button temporarily disabled */}
+        {/* Delete button temporarily disabled until the delete flow is confirmed */}
         {/* <TouchableOpacity
           className="bg-red-500 py-4 rounded-xl items-center justify-center mt-3"
           onPress={handleDelete}
-          disabled={deleting}
+          disabled={isDeleting}
         >
-          {deleting ? (
+          {isDeleting ? (
             <ActivityIndicator size="small" color="white" />
           ) : (
             <Text variant="h2" className="text-white">

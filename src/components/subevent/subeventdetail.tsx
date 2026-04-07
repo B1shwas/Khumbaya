@@ -1,5 +1,5 @@
 import { Text } from "@/src/components/ui/Text";
-import { useSubEventById } from "@/src/features/subevent/hooks/useSubEvent";
+import { useEventById } from "@/src/features/events/hooks/use-event";
 import { formatTime } from "@/src/utils/helper";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams } from "expo-router";
@@ -177,7 +177,7 @@ export default function SubEventDetailScreen() {
   }>();
 
   const parsedId = Number(subEventId);
-  const { data: subEvent, isLoading } = useSubEventById(parsedId);
+  const { data: subEvent, isLoading } = useEventById(parsedId);
 
   if (isLoading) {
     return (
