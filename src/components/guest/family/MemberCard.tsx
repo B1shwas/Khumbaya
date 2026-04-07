@@ -145,7 +145,10 @@ const MemberCard = ({
       <View className="w-full mt-4 pt-4 border-t border-slate-100 flex flex-row gap-2">
         <TouchableOpacity
           className="flex-1 py-2.5 rounded-md items-center justify-center"
-          style={{ backgroundColor: "#ee2b8c" }}
+          style={
+            shadowStyle &&
+            { backgroundColor: "#ee2b8c" }
+          }
           activeOpacity={0.85}
           onPress={onPressRsvp}
         >
@@ -158,21 +161,21 @@ const MemberCard = ({
           </Text>
         </TouchableOpacity>
         {!isOrganizerView && !isPending && (
-        
+
           <Pressable
-            className="flex-1 py-2.5 rounded-md items-center justify-center border border-primary "
+            className="flex-1 py-2.5 bg-white rounded-md items-center justify-center border border-primary "
             style={shadowStyle}
             onPress={onPressDetails}
           >
             <View>
-            <Text variant="h2" className="text-primary text-sm">
-              RSVP details
-            </Text>
+              <Text variant="h2" className="text-primary text-sm">
+                RSVP details
+              </Text>
             </View>
           </Pressable>
         )}
       </View>
-    </Card>
+    </Card >
   );
 };
 export default MemberCard;

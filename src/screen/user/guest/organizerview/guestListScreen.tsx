@@ -37,15 +37,7 @@ type GuestFilterTab = "accepted" | "pending" | "draft";
 export default function GuestListScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
-
-  const eventId = useMemo(() => {
-    const raw = Array.isArray(params.eventId)
-      ? params.eventId[0]
-      : params.eventId;
-    const parsed = raw ? Number(raw) : NaN;
-    return Number.isFinite(parsed) ? parsed : null;
-  }, [params.eventId]);
-
+  const eventId = Number(params.eventId);
   const setGuestDetail = useGuestDetailStore((state) => state.setGuestDetail);
   const clearGuestDetail = useGuestDetailStore(
     (state) => state.clearGuestDetail

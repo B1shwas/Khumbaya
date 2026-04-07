@@ -1,7 +1,6 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { Tabs, usePathname, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { Pressable } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 // Routes where tab bar should be hidden (inner screens)
