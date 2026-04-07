@@ -7,6 +7,7 @@ import {
 } from "@/src/constants/event";
 import { useUpdateEvent } from "@/src/features/events/hooks/use-event";
 import { useEventStore } from "@/src/features/events/store/useEventStore";
+import { shadowStyle } from "@/src/utils/helper";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { DateTimePickerEvent } from "@react-native-community/datetimepicker";
 import { LinearGradient } from "expo-linear-gradient";
@@ -120,7 +121,7 @@ function LabeledField({
         {label}
       </Text>
       <TextInput
-        className={`w-full rounded-md border border-slate-200 bg-slate-50 px-4 text-base text-slate-900 ${multiline ? "min-h-[112px] " : "h-14"
+        className={`w-full rounded-md border border-slate-200 bg-white px-4 text-base text-slate-900 ${multiline ? "min-h-[112px] " : "h-14"
           }`}
         placeholder={placeholder}
         placeholderTextColor="#94a3b8"
@@ -256,20 +257,17 @@ export default function EditEventScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-[#f8f6f7]">
       <KeyboardAvoidingView
         className="flex-1"
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
-
-
         <ScrollView
-          className="flex-1"
+          className="flex-1 "
           contentContainerStyle={{ paddingBottom: 32 }}
           showsVerticalScrollIndicator={false}
         >
-          <View className="px-4 pt-2">
-            <View className="relative h-56 w-full overflow-hidden rounded-2xl">
+          <View className="px-4 ">
+            <View className="relative h-24 w-full overflow-hidden rounded-md">
               <Image
                 source={{
                   uri: "https://lh3.googleusercontent.com/aida-public/AB6AXuBOAnlcfOm-SbS8PZH_0v8eUP911cDeJ61o8WbBJAuIO9sHibeTvP7X8AmuAdoqjRH5H5lxVhH8QPcv3xssrkbNU4ebTPiF95SZrTOI_8iSYf67CtzoUpaJUP1BUw-RPzE1bsPZ6LNFe44iGEPcqpU2aHrZqux1E7HkSrdhWUHIs6U62w8DV_c_vNWmt1lkRU_uygfRbFoGRRRgJ8_l6Qt81nqPp2h4h74elXxwOgHx6Tj8hTriCh50fvjBjuTzs07EBBr6iMa6hRU",
@@ -534,6 +532,5 @@ export default function EditEventScreen() {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-    </SafeAreaView>
   );
 }

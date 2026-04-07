@@ -1,11 +1,11 @@
 import { HeroSection } from "@/src/components/business/[businessId]/Hero";
+import { LatestReviewSection } from "@/src/components/business/[businessId]/LatestReview";
 import ServiceDetailsSection from "@/src/components/business/[businessId]/ServiceDetailsScreen";
 import { StatsRow } from "@/src/components/business/[businessId]/stats/StatsRow";
 import VenueDetailsSection from "@/src/components/business/[businessId]/VenueDetailsSection";
 import { Text } from "@/src/components/ui/Text";
 import {
   BusinessRequest,
-  BusinessReview,
   OtherServiceAttribute,
   VenueAttribute
 } from "@/src/constants/business";
@@ -13,60 +13,18 @@ import { useDeleteBusiness, useGetBusinessById } from "@/src/features/business";
 import { useBusinessDraftStore } from "@/src/features/business/store/useBusiness";
 import { shadowStyle } from "@/src/utils/helper";
 import { MaterialIcons } from "@expo/vector-icons";
-import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useCallback, useEffect } from "react";
 import {
   ActivityIndicator,
   Alert,
   Image,
-  Pressable,
   ScrollView,
-  StyleSheet,
   TouchableOpacity,
   View
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-
 // ─── Hero ────────────────────────────────────────────────────────────────────
-
-
-
-// ─── Profile Completion ───────────────────────────────────────────────────────
-
-// function ProfileCompletionCard({ completion }: { completion: number }) {
-//   return (
-//     <View
-//       className="bg-white rounded-2xl p-4 border border-gray-100"
-//       style={shadowStyle}
-//     >
-//       <View className="flex-row justify-between items-center mb-2">
-//         <Text className="text-sm font-bold text-[#181114]">
-//           Profile Completion
-//         </Text>
-//         <Text className="text-sm font-extrabold text-primary">
-//           {completion}%
-//         </Text>
-//       </View>
-//       <View className="h-2 bg-gray-100 rounded-full overflow-hidden mb-3">
-//         <View
-//           className="h-2 bg-primary rounded-full"
-//           style={{ width: `${completion}%` }}
-//         />
-//       </View>
-//       <Text className="text-xs text-[#594048] mb-3">
-//         Add your services, portfolio photos, and availability to attract more
-//         clients.
-//       </Text>
-//       <TouchableOpacity
-//         activeOpacity={0.85}
-//         className="bg-primary rounded-xl py-2.5 items-center"
-//       >
-//         <Text className="text-white text-sm font-bold">Complete Profile</Text>
-//       </TouchableOpacity>
-//     </View>
-//   );
-// }
-
 // ─── Stats ────────────────────────────────────────────────────────────────────
 
 function StatCard({
@@ -279,66 +237,15 @@ function AvailabilityCalendar({
 }
 
 
-function LatestReviewSection({ reviews }: { reviews: BusinessReview[] }) {
-  if (reviews.length === 0) return null;
-  const review = reviews[0];
-  return (
-    <View
-      className="bg-white rounded-md border border-gray-100 p-4"
-      style={shadowStyle}
-    >
-      <Text variant="h1" className="text-base text-[#181114] mb-3">
-        Latest Review
-      </Text>
-      <View className="flex-row gap-0.5 mb-2">
-        {[1, 2, 3, 4, 5].map((star) => (
-          <MaterialIcons
-            key={star}
-            name="star"
-            size={16}
-            color={star <= review.rating ? "#ee2b8c" : "#e5e7eb"}
-          />
-        ))}
-      </View>
-      <Text className="text-sm text-[#594048] italic mb-3 leading-5">
-        "{review.quote}"
-      </Text>
-      <View className="flex-row items-center justify-between">
-        <View className="flex-row items-center gap-2">
-          <Image
-            source={{ uri: review.reviewerAvatarUrl }}
-            className="w-8 h-8 rounded-full bg-gray-100"
-            resizeMode="cover"
-          />
-          <View>
-            <Text variant="h1" className="text-xs text-[#181114]">
-              {review.reviewerName}
-            </Text>
-            <Text className="text-[10px] text-gray-400">{review.date}</Text>
-          </View>
-        </View>
-        <TouchableOpacity
-          activeOpacity={0.7}
-          className="flex-row items-center gap-1 border border-gray-200 rounded-full px-3 py-1.5"
-        >
-          <MaterialIcons name="reply" size={13} color="#594048" />
-          <Text variant="h2" className="text-xs text-[#594048]">Reply</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
-}
 
 
 export default function BusinessDetailsScreen() {
   const router = useRouter();
-  const navigation = useNavigation();
   const { businessId } = useLocalSearchParams<{ businessId: string }>();
   const { data: businessWithAttribute, isLoading } = useGetBusinessById(businessId ?? "");
   const deleteBusiness = useDeleteBusiness();
   const setBusinessDraft = useBusinessDraftStore((state) => state.setBusiness);
   const clearBusinessDraft = useBusinessDraftStore((state) => state.clearBusiness);
-  const [menuVisible, setMenuVisible] = useState(false);
 
   useEffect(() => {
     clearBusinessDraft();
@@ -356,7 +263,7 @@ export default function BusinessDetailsScreen() {
   };
 
 
-  const handleDelete = () => {
+  const handleDelete = useCallback(() => {
     if (!businessWithAttribute) return;
     Alert.alert(
       "Delete Business",
@@ -381,17 +288,12 @@ export default function BusinessDetailsScreen() {
         },
       ]
     );
-  };
+  }, [businessId, businessWithAttribute, deleteBusiness, router]);
 
-  const handleEditVenuePress = (venue: VenueAttribute) => {
+  const handleEditVenuePress = useCallback((venue: VenueAttribute) => {
     if (!businessWithAttribute?.business_information?.id || !venue?.venue_id) {
-      console.log('This is the venue if of the informarion',venue)
       return;
     }
-    console.log("Thgis is the edit venue page in the ui to edit the venue for the business in the section for this 🐮🐮🐮🐮🐮🐮" , {
-      businessId:String(businessWithAttribute.business_information.id),
-      venueId:String(venue.venue_id),
-    });
     router.push({
       pathname: "/business/[businessId]/venue/[venueId]/update",
       params: {
@@ -400,9 +302,9 @@ export default function BusinessDetailsScreen() {
         mode: "edit",
       },
     });
-  };
+  }, [businessWithAttribute, router]);
 
-  const handleAddVenuePress = () => {
+  const handleAddVenuePress = useCallback(() => {
     if (!businessWithAttribute?.business_information?.id) return;
     router.push({
       pathname:`/business/[businessId]/venue/create` ,
@@ -412,9 +314,9 @@ export default function BusinessDetailsScreen() {
 
       }}
     );
-  };
+  }, [businessWithAttribute, router]);
 
-  const handleEditServicePress = (service: OtherServiceAttribute) => {
+  const handleEditServicePress = useCallback((service: OtherServiceAttribute) => {
     if (!businessWithAttribute?.business_information?.id || !service?.id) {
       return;
     }
@@ -427,7 +329,7 @@ export default function BusinessDetailsScreen() {
         mode: "edit",
       },
     });
-  };
+  }, [businessWithAttribute, router]);
 
   if (isLoading) {
     return (
@@ -471,27 +373,10 @@ export default function BusinessDetailsScreen() {
               onAddVenue={handleAddVenuePress}
             />
           )}
-          {businessWithAttribute.business_information.category !== "Venue" && businessWithAttribute.business_information.category != null && (
+          {businessWithAttribute.vendor_services_information && businessWithAttribute.business_information.category !== "Venue" && businessWithAttribute.business_information.category != null && (
             <ServiceDetailsSection
               service={
-                businessWithAttribute.vendor_services_information?.[0] ?? {
-                  id: 0,
-                  business_id: businessWithAttribute.business_information.id,
-                  artist_type: null,
-                  styles_specialized: null,
-                  max_bookings_per_day: null,
-                  advance_amount: null,
-                  uses_own_material: false,
-                  travel_charges: null,
-                  portfolio_link: null,
-                  available_for_destination: false,
-                  customization_available: false,
-                  serves_veg: false,
-                  min_order: null,
-                  createdAt: "",
-                  updatedAt: "",
-                }
-              }
+                businessWithAttribute.vendor_services_information?.[0]}
               onEdit={
                 businessWithAttribute.vendor_services_information?.[0]
                   ? () => handleEditServicePress(businessWithAttribute.vendor_services_information[0])
@@ -500,11 +385,9 @@ export default function BusinessDetailsScreen() {
             />
           )}
 
-          {/* <PortfolioGrid portfolio={business.portfolio ?? []} /> */}
           <AvailabilityCalendar dates={businessWithAttribute.business_information.availabilityDates} />
           <LatestReviewSection reviews={businessWithAttribute.business_information.reviews ?? []} />
 
-          {/* Danger Zone */}
           <View className="flex-row items-center justify-between rounded-2xl border border-red-200 bg-red-50 p-4">
             <View>
               <Text variant="h1" className="text-sm text-red-600">

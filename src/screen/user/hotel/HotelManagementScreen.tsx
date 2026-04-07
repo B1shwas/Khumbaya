@@ -8,7 +8,6 @@ import {
   ActivityIndicator,
   Modal,
   RefreshControl,
-  ScrollView,
   SectionList,
   Text,
   TextInput,
@@ -26,8 +25,6 @@ type GuestSection = {
   title: string;
   data: Hotel_responce[];
 };
-
-type GroupByOption = "all" | "location" | "category";
 
 function getInitials(name: string): string {
   const parts = name.trim().split(" ");
@@ -96,9 +93,8 @@ export default function HotelManagementScreen() {
   const numericEventId = eventId ? Number(eventId) : null;
 
   const [searchText, setSearchText] = useState("");
-  const [groupBy, setGroupBy] = useState<GroupByOption>("all");
-  const [selectedGroupValue, setSelectedGroupValue] = useState("All");
-  const [isGroupByModalVisible, setIsGroupByModalVisible] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [isCategoryModalVisible, setIsCategoryModalVisible] = useState(false);
 
   const {
     data: guestRooms = [],
@@ -129,49 +125,57 @@ export default function HotelManagementScreen() {
     });
   }, [normalizedGuests, searchText]);
 
-  const getGroupValue = (guest: Hotel_responce) => {
-    if (groupBy === "location") {
-      return guest.user_detail?.location?.trim() || "Unknown location";
-    }
-    if (groupBy === "category") {
-      return guest.user_detail?.relation?.trim() || "Uncategorized";
-    }
-    return "All";
+  const getNormalizedCategory = (category?: string | null) => {
+    return category?.trim().toLowerCase() || "uncategorized";
   };
 
-  const groupedValueStats = useMemo(() => {
-    if (groupBy === "all") return [] as Array<{ label: string; count: number }>;
+  const formatCategoryLabel = (category: string) => {
+    if (category === "vvip") return "VVIP";
+    if (category === "uncategorized") return "Uncategorized";
+    return category.charAt(0).toUpperCase() + category.slice(1);
+  };
 
-    const statsMap = new Map<string, number>();
+  const categoryStats = useMemo(() => {
+    const categoryCountMap = new Map<string, number>();
+
     for (const guest of filteredGuests) {
-      const value = getGroupValue(guest);
-      statsMap.set(value, (statsMap.get(value) ?? 0) + 1);
+      const category = getNormalizedCategory(guest.user_detail?.relation);
+      categoryCountMap.set(category, (categoryCountMap.get(category) ?? 0) + 1);
     }
 
-    return Array.from(statsMap.entries())
-      .map(([label, count]) => ({ label, count }))
-      .sort((a, b) => a.label.localeCompare(b.label));
-  }, [filteredGuests, groupBy]);
+    const preferredOrder = ["friend", "family", "colleague", "vvip", "uncategorized"];
+
+    return Array.from(categoryCountMap.entries())
+      .map(([value, count]) => ({
+        value,
+        label: formatCategoryLabel(value),
+        count,
+      }))
+      .sort((a, b) => {
+        const ai = preferredOrder.indexOf(a.value);
+        const bi = preferredOrder.indexOf(b.value);
+        if (ai === -1 && bi === -1) return a.label.localeCompare(b.label);
+        if (ai === -1) return 1;
+        if (bi === -1) return -1;
+        return ai - bi;
+      });
+  }, [filteredGuests]);
 
   useEffect(() => {
-    setSelectedGroupValue("All");
-  }, [groupBy]);
+    if (selectedCategory === "all") return;
+    const exists = categoryStats.some((item) => item.value === selectedCategory);
+    if (!exists) setSelectedCategory("all");
+  }, [categoryStats, selectedCategory]);
 
-  useEffect(() => {
-    if (groupBy === "all") return;
-    const hasSelected = groupedValueStats.some((v) => v.label === selectedGroupValue);
-    if (selectedGroupValue !== "All" && !hasSelected) {
-      setSelectedGroupValue("All");
-    }
-  }, [groupBy, groupedValueStats, selectedGroupValue]);
+  const guestsAfterCategoryFilter = useMemo(() => {
+    if (selectedCategory === "all") return filteredGuests;
+    return filteredGuests.filter(
+      (guest) => getNormalizedCategory(guest.user_detail?.relation) === selectedCategory
+    );
+  }, [filteredGuests, selectedCategory]);
 
-  const guestsAfterGroupPill = useMemo(() => {
-    if (groupBy === "all" || selectedGroupValue === "All") return filteredGuests;
-    return filteredGuests.filter((guest) => getGroupValue(guest) === selectedGroupValue);
-  }, [filteredGuests, groupBy, selectedGroupValue]);
-
-  const assignedGuests = guestsAfterGroupPill.filter((g) => !!g.user_room);
-  const unassignedGuests = guestsAfterGroupPill.filter((g) => !g.user_room);
+  const assignedGuests = guestsAfterCategoryFilter.filter((g) => !!g.user_room);
+  const unassignedGuests = guestsAfterCategoryFilter.filter((g) => !g.user_room);
 
   const sections: GuestSection[] = [
     { title: "Assigned Rooms", data: assignedGuests },
@@ -180,12 +184,16 @@ export default function HotelManagementScreen() {
 
   const totalGuests = normalizedGuests.length;
   const totalAssigned = normalizedGuests.filter((g) => !!g.user_room).length;
-  const groupByIcon =
-    groupBy === "all"
-      ? "apps-outline"
-      : groupBy === "location"
-      ? "location-outline"
-      : "grid-outline";
+  const selectedCategoryLabel =
+    selectedCategory === "all" ? "All" : formatCategoryLabel(selectedCategory);
+  const categoryPickerOptions = [
+    {
+      value: "all",
+      label: "All",
+      count: filteredGuests.length,
+    },
+    ...categoryStats,
+  ];
   const totalRooms = new Set(
     normalizedGuests
       .map((g) => g.user_room?.trim())
@@ -221,15 +229,22 @@ export default function HotelManagementScreen() {
 
     
           <TouchableOpacity
-            onPress={() => setIsGroupByModalVisible(true)}
+            onPress={() => setIsCategoryModalVisible(true)}
             className="h-12 w-12 bg-white border border-gray-200 rounded-md items-center justify-center"
           >
             <View className="items-center">
-              <Ionicons name={groupByIcon} size={18} color="#374151" />
-              <View className="absolute -right-1 -top-1 w-2.5 h-2.5 rounded-md bg-primary" />
+              <Ionicons name="funnel-outline" size={18} color="#374151" />
+              {selectedCategory !== "all" && (
+                <View className="absolute -right-1 -top-1 w-2.5 h-2.5 rounded-full bg-primary" />
+              )}
             </View>
           </TouchableOpacity>
         </View>
+
+        <Text className="text-[11px] text-gray-500 mt-2 font-jakarta">
+          {selectedCategoryLabel} • {guestsAfterCategoryFilter.length} guest
+          {guestsAfterCategoryFilter.length === 1 ? "" : "s"}
+        </Text>
       </View>
 
       <View className="flex-row bg-white mx-4 mb-3 mt-2 rounded-md py-3.5 shadow-sm">
@@ -248,54 +263,6 @@ export default function HotelManagementScreen() {
           <Text className="font-jakarta text-[11px] text-gray-500 mt-0.5">Assigned</Text>
         </View>
       </View>
-
-      {groupBy !== "all" && groupedValueStats.length > 0 && (
-        <View className="mb-3">
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ paddingHorizontal: 16, gap: 8 }}
-          >
-            <TouchableOpacity
-              onPress={() => setSelectedGroupValue("All")}
-              className={`px-3.5 py-2 rounded-md border ${
-                selectedGroupValue === "All"
-                  ? "bg-primary border-primary"
-                  : "bg-white border-gray-200"
-              }`}
-            >
-              <Text
-                className={`font-jakarta-semibold text-xs ${
-                  selectedGroupValue === "All" ? "text-white" : "text-gray-700"
-                }`}
-              >
-                All ({filteredGuests.length})
-              </Text>
-            </TouchableOpacity>
-
-            {groupedValueStats.map((item) => {
-              const isActive = selectedGroupValue === item.label;
-              return (
-                <TouchableOpacity
-                  key={item.label}
-                  onPress={() => setSelectedGroupValue(item.label)}
-                  className={`px-3.5 py-2 rounded-full border ${
-                    isActive ? "bg-primary border-primary" : "bg-white border-gray-200"
-                  }`}
-                >
-                  <Text
-                    className={`font-jakarta-semibold text-xs ${
-                      isActive ? "text-white" : "text-gray-700"
-                    }`}
-                  >
-                    {item.label} ({item.count})
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
-          </ScrollView>
-        </View>
-      )}
 
       {isLoading ? (
         <View className="flex-1 items-center justify-center gap-3">
@@ -342,114 +309,58 @@ export default function HotelManagementScreen() {
       )}
 
       <Modal
-        visible={isGroupByModalVisible}
+        visible={isCategoryModalVisible}
         transparent
         animationType="fade"
-        onRequestClose={() => setIsGroupByModalVisible(false)}
+        onRequestClose={() => setIsCategoryModalVisible(false)}
       >
         <View className="flex-1 bg-black/35 justify-end">
           <TouchableOpacity
             activeOpacity={1}
-            onPress={() => setIsGroupByModalVisible(false)}
+            onPress={() => setIsCategoryModalVisible(false)}
             className="absolute inset-0"
           />
           <View className="bg-white rounded-t-3xl px-5 pt-5 pb-7">
             <View className="w-10 h-1 bg-gray-200 rounded-full self-center mb-3" />
             <View className="flex-row items-center justify-between mb-4">
               <Text className="font-jakarta-bold text-base text-[#181114]">
-                Organize list
+                Filter by category
               </Text>
-              <TouchableOpacity onPress={() => setIsGroupByModalVisible(false)}>
+              <TouchableOpacity onPress={() => setIsCategoryModalVisible(false)}>
                 <Ionicons name="close" size={20} color="#6B7280" />
               </TouchableOpacity>
             </View>
 
-            <TouchableOpacity
-              onPress={() => {
-                setGroupBy("all");
-                setIsGroupByModalVisible(false);
-              }}
-              className={`flex-row items-center justify-between px-4 py-3.5 rounded-md border mb-2 ${
-                groupBy === "all"
-                  ? "border-primary bg-primary/10"
-                  : "border-gray-200 bg-white"
-              }`}
-            >
-              <View className="flex-row items-center gap-2">
-                <View className="w-8 h-8 rounded-full bg-gray-100 items-center justify-center">
-                  <Ionicons name="apps-outline" size={16} color="#4B5563" />
-                </View>
-                <View>
+            {categoryPickerOptions.map((option) => {
+              const isActive = selectedCategory === option.value;
+              return (
+                <TouchableOpacity
+                  key={option.value}
+                  onPress={() => {
+                    setSelectedCategory(option.value);
+                    setIsCategoryModalVisible(false);
+                  }}
+                  className={`flex-row items-center justify-between px-4 py-3.5 rounded-xl border mb-2 ${
+                    isActive
+                      ? "border-primary bg-primary/10"
+                      : "border-gray-200 bg-white"
+                  }`}
+                >
                   <Text className="font-jakarta-semibold text-sm text-[#181114]">
-                    All
+                    {option.label}
                   </Text>
-                  <Text className="font-jakarta text-[11px] text-gray-500">
-                    Show all guests together
-                  </Text>
-                </View>
-              </View>
-              {groupBy === "all" && (
-                <Ionicons name="checkmark-circle" size={18} color="#ee2b8c" />
-              )}
-            </TouchableOpacity>
 
-            <TouchableOpacity
-              onPress={() => {
-                setGroupBy("location");
-                setIsGroupByModalVisible(false);
-              }}
-              className={`flex-row items-center justify-between px-4 py-3.5 rounded-md border mb-2 ${
-                groupBy === "location"
-                  ? "border-primary bg-primary/10"
-                  : "border-gray-200 bg-white"
-              }`}
-            >
-              <View className="flex-row items-center gap-2">
-                <View className="w-8 h-8 rounded-full bg-gray-100 items-center justify-center">
-                  <Ionicons name="location-outline" size={16} color="#4B5563" />
-                </View>
-                <View>
-                  <Text className="font-jakarta-semibold text-sm text-[#181114]">
-                    Location
-                  </Text>
-                  <Text className="font-jakarta text-[11px] text-gray-500">
-                    Group guests by place
-                  </Text>
-                </View>
-              </View>
-              {groupBy === "location" && (
-                <Ionicons name="checkmark-circle" size={18} color="#ee2b8c" />
-              )}
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={() => {
-                setGroupBy("category");
-                setIsGroupByModalVisible(false);
-              }}
-              className={`flex-row items-center justify-between px-4 py-3.5 rounded-md border ${
-                groupBy === "category"
-                  ? "border-primary bg-primary/10"
-                  : "border-gray-200 bg-white"
-              }`}
-            >
-              <View className="flex-row items-center gap-2">
-                <View className="w-8 h-8 rounded-full bg-gray-100 items-center justify-center">
-                  <Ionicons name="grid-outline" size={16} color="#4B5563" />
-                </View>
-                <View>
-                  <Text className="font-jakarta-semibold text-sm text-[#181114]">
-                    Category
-                  </Text>
-                  <Text className="font-jakarta text-[11px] text-gray-500">
-                    Group guests by type
-                  </Text>
-                </View>
-              </View>
-              {groupBy === "category" && (
-                <Ionicons name="checkmark-circle" size={18} color="#ee2b8c" />
-              )}
-            </TouchableOpacity>
+                  <View className="flex-row items-center gap-2">
+                    <Text className="font-jakarta text-xs text-gray-500">
+                      {option.count}
+                    </Text>
+                    {isActive && (
+                      <Ionicons name="checkmark-circle" size={18} color="#ee2b8c" />
+                    )}
+                  </View>
+                </TouchableOpacity>
+              );
+            })}
           </View>
         </View>
       </Modal>
