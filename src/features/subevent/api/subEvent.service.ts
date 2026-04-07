@@ -52,10 +52,32 @@ export const getSubEventsApi = async ({
 
 /**
  * Get a single sub-event by ID
+ * Uses same endpoint as regular event - /event/:id
  */
 export const getSubEventById = async (subEventId: number) => {
-  const response = await api.get(`/sub-event/${subEventId}`);
+  const response = await api.get(`/event/${subEventId}`);
   return response.data.data;
+};
+
+/**
+ * Update an existing sub-event
+ * Uses same endpoint as regular event - /event/:id with PATCH
+ */
+export const updateSubEventApi = async (
+  subEventId: number,
+  data: UpdateSubEventPayload
+) => {
+  const response = await api.patch(`/event/${subEventId}`, data);
+  return response.data;
+};
+
+/**
+ * Delete a sub-event
+ * Uses same endpoint as regular event - /event/:id
+ */
+export const deleteSubEventApi = async (subEventId: number) => {
+  const response = await api.delete(`/event/${subEventId}`);
+  return response.data;
 };
 
 /**
@@ -63,25 +85,6 @@ export const getSubEventById = async (subEventId: number) => {
  */
 export const createSubEventApi = async (data: CreateSubEventPayload) => {
   const response = await api.post(`/event/${data.eventId}/sub-events`, data);
-  return response.data;
-};
-
-/**
- * Update an existing sub-event
- */
-export const updateSubEventApi = async (
-  subEventId: number,
-  data: UpdateSubEventPayload
-) => {
-  const response = await api.patch(`/sub-event/${subEventId}`, data);
-  return response.data;
-};
-
-/**
- * Delete a sub-event
- */
-export const deleteSubEventApi = async (subEventId: number) => {
-  const response = await api.delete(`/sub-event/${subEventId}`);
   return response.data;
 };
 
