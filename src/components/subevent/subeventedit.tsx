@@ -2,6 +2,7 @@ import { DatePicker } from "@/components/nativewindui/DatePicker";
 import { Text } from "@/src/components/ui/Text";
 import { UpdateSubEventPayload } from "@/src/features/subevent/api/subEvent.service";
 import {
+//   useDeleteSubEvent,
   useSubEventById,
   useUpdateSubEvent,
 } from "@/src/features/subevent/hooks/useSubEvent";
@@ -28,7 +29,9 @@ export default function SubEventEditScreen() {
   const parsedId = Number(subEventId);
   const { data: subEvent, isLoading } = useSubEventById(parsedId);
   const updateSubEvent = useUpdateSubEvent();
+//   const deleteSubEvent = useDeleteSubEvent();
   const [saving, setSaving] = useState(false);
+//   const [deleting, setDeleting] = useState(false);
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -87,6 +90,38 @@ export default function SubEventEditScreen() {
       setSaving(false);
     }
   };
+
+//   const handleDelete = () => {
+//     Alert.alert(
+//       "Delete Sub-Event",
+//       "Are you sure you want to delete this sub-event? This action cannot be undone.",
+//       [
+//         { text: "Cancel", style: "cancel" },
+//         {
+//           text: "Delete",
+//           style: "destructive",
+//           onPress: async () => {
+//             try {
+//               setDeleting(true);
+//               await deleteSubEvent.mutateAsync(parsedId);
+//               Alert.alert("Success", "Sub-event deleted successfully.", [
+//                 { text: "OK", onPress: () => router.back() },
+//               ]);
+//             } catch (error: any) {
+//               console.error("Error deleting sub-event:", error);
+//               const errorMessage =
+//                 error?.response?.data?.message ||
+//                 error?.message ||
+//                 "Unable to delete. Please try again.";
+//               Alert.alert("Error", errorMessage);
+//             } finally {
+//               setDeleting(false);
+//             }
+//           },
+//         },
+//       ]
+//     );
+//   };
 
   if (isLoading) {
     return (
@@ -224,6 +259,21 @@ export default function SubEventEditScreen() {
             </Text>
           )}
         </TouchableOpacity>
+
+        {/* Delete button temporarily disabled */}
+        {/* <TouchableOpacity
+          className="bg-red-500 py-4 rounded-xl items-center justify-center mt-3"
+          onPress={handleDelete}
+          disabled={deleting}
+        >
+          {deleting ? (
+            <ActivityIndicator size="small" color="white" />
+          ) : (
+            <Text variant="h2" className="text-white">
+              Delete Sub-Event
+            </Text>
+          )}
+        </TouchableOpacity> */}
       </View>
     </SafeAreaView>
   );
