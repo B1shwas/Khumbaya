@@ -1,8 +1,9 @@
 import { Text } from "@/src/components/ui/Text";
 import { BusinessCategory, OtherServiceAttribute, VenueAttribute } from "@/src/constants/business";
 import { useGetBusinessById } from "@/src/features/business/hooks/use-business";
+import { shadowStyle } from "@/src/utils/helper";
 import { MaterialIcons } from "@expo/vector-icons";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
 import {
   ActivityIndicator,
@@ -19,6 +20,13 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const TILE_SIZE = (SCREEN_WIDTH - 48) / 2;
+
+function truncateHeaderTitle(title?: string | null, maxLength = 28): string {
+  const safeTitle = (title ?? "Vendor Details").trim();
+  if (!safeTitle) return "Vendor Details";
+  if (safeTitle.length <= maxLength) return safeTitle;
+  return `${safeTitle.slice(0, maxLength).trimEnd()}...`;
+}
 
 const FALLBACK_HEADER =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuCkAYir1uyaMJpHYxd3cTDm5UEx_lcVJTxtNY2aX-7SjfphxWwmRyzcN_I9jAgIIpqkB_WoA3q32x9izN6Kr_lfZk_2h8e2QgTa8ySCVzEuaPyt5iGLXvBLYh3Zmyzj9cd9ehQAy-8AIflmKb745Ui3-jn0RoRfgnaTlQuf-Ma27foOExZUSdI-ngacDOkkK56JuW_U6PfIPZug2LybUCfyo33uKUW6vcSNo2nbtsj91MFuVaVvo5d1GpzvmPpd9hv1643KT_ec4KM";
@@ -161,7 +169,7 @@ function VenueDetailModal({
           </Pressable>
           {/* Badge */}
           <View className="absolute bottom-4 left-4 bg-primary px-3 py-1 rounded-full">
-            <Text className="text-white text-[10px] font-bold tracking-widest uppercase">
+            <Text className="text-white text-[10px]  tracking-widest uppercase">
               {venue.is_outDoor ? "Outdoor" : "Indoor"} · {venue.venue_type ?? "Venue"}
             </Text>
           </View>
@@ -170,7 +178,7 @@ function VenueDetailModal({
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 32 }}>
           {/* Title block */}
           <View className="px-5 pt-5 pb-4 bg-white">
-            <Text className="text-2xl font-bold text-[#181114]">
+            <Text className="text-2xl  text-[#181114]">
               {venue.venue_type ?? "Venue Space"}
             </Text>
             <Text className="text-sm text-gray-400 mt-1">
@@ -179,9 +187,9 @@ function VenueDetailModal({
           </View>
 
           {/* Key stats grid */}
-          <View className="mx-4 mt-4 rounded-2xl overflow-hidden border border-gray-100 bg-white" style={{ elevation: 1 }}>
+          <View className="mx-4 mt-4 rounded-md overflow-hidden border border-gray-100 bg-white" style={{ elevation: 1 }}>
             <View className="px-4 pt-4 pb-2">
-              <Text className="text-xs font-bold text-gray-400 uppercase tracking-widest">
+              <Text className="text-xs font-semibold text-gray-400 uppercase tracking-widest">
                 Venue Details
               </Text>
             </View>
@@ -192,19 +200,19 @@ function VenueDetailModal({
                   i < infoRows.length - 1 ? "border-b border-gray-50" : ""
                 }`}
               >
-                <View className="h-9 w-9 rounded-xl bg-primary/10 items-center justify-center mr-3">
+                <View className="h-9 w-9 rounded-md bg-primary/10 items-center justify-center mr-3">
                   <MaterialIcons name={row.icon as any} size={18} color="#ee2b8c" />
                 </View>
                 <Text className="flex-1 text-sm text-gray-500">{row.label}</Text>
-                <Text className="text-sm font-bold text-[#181114]">{row.value}</Text>
+                <Text className="text-sm font-semibold text-[#181114]">{row.value}</Text>
               </View>
             ))}
           </View>
 
           {/* Amenities */}
-          <View className="mx-4 mt-4 rounded-2xl overflow-hidden border border-gray-100 bg-white" style={{ elevation: 1 }}>
+          <View className="mx-4 mt-4 rounded-md overflow-hidden border border-gray-100 bg-white" style={{ elevation: 1 }}>
             <View className="px-4 pt-4 pb-2">
-              <Text className="text-xs font-bold text-gray-400 uppercase tracking-widest">
+              <Text className="text-xs font-semibold text-gray-400 uppercase tracking-widest">
                 Amenities
               </Text>
             </View>
@@ -232,35 +240,35 @@ function VenueDetailModal({
 
           {/* Booking hours info card */}
           <View
-            className="mx-4 mt-4 rounded-2xl overflow-hidden p-4"
+            className="mx-4 mt-4 rounded-md overflow-hidden p-4"
             style={{ backgroundColor: "#1a1a2e" }}
           >
             <View className="flex-row items-center gap-2 mb-3">
               <MaterialIcons name="info-outline" size={18} color="#ee2b8c" />
-              <Text className="text-white font-bold text-sm">Booking Info</Text>
+              <Text className="text-white font-semibold text-sm">Booking Info</Text>
             </View>
             <View className="flex-row gap-4">
-              <View className="flex-1 bg-white/10 rounded-xl p-3">
+              <View className="flex-1 bg-white/10 rounded-md p-3">
                 <Text style={{ color: "rgba(255,255,255,0.5)", fontSize: 10 }} className="uppercase tracking-widest mb-1">
                   Min Hours
                 </Text>
-                <Text className="text-white font-bold text-base">
+                <Text className="text-white font-semibold text-base">
                   {venue.min_booking_hours ?? "—"} hrs
                 </Text>
               </View>
-              <View className="flex-1 bg-white/10 rounded-xl p-3">
+              <View className="flex-1 bg-white/10 rounded-md p-3">
                 <Text style={{ color: "rgba(255,255,255,0.5)", fontSize: 10 }} className="uppercase tracking-widest mb-1">
                   Max Hours
                 </Text>
-                <Text className="text-white font-bold text-base">
+                <Text className="text-white font-semibold text-base">
                   {venue.max_booking_hours ?? "—"} hrs
                 </Text>
               </View>
-              <View className="flex-1 bg-white/10 rounded-xl p-3">
+              <View className="flex-1 bg-white/10 rounded-md p-3">
                 <Text style={{ color: "rgba(255,255,255,0.5)", fontSize: 10 }} className="uppercase tracking-widest mb-1">
                   Per Hour
                 </Text>
-                <Text className="text-white font-bold text-base">
+                <Text className="text-white font-semibold text-base">
                   {venue.price_per_hour ? `₹${venue.price_per_hour}` : "—"}
                 </Text>
               </View>
@@ -304,11 +312,11 @@ function AvailableSpacesSection({
       {/* Section header */}
       <View className="flex-row justify-between items-center px-4 pt-5 pb-3">
         <View>
-          <Text className="text-xl font-bold text-[#181114]">Available Spaces</Text>
+          <Text className="text-xl font-semibold text-[#181114]">Available Spaces</Text>
           <Text className="text-xs text-gray-400 mt-0.5">Select your preferred venue</Text>
         </View>
         <Pressable>
-          <Text className="text-primary text-xs font-bold uppercase tracking-wide">
+          <Text className="text-primary text-xs font-semibold uppercase tracking-wide">
             VIEW ALL →
           </Text>
         </Pressable>
@@ -328,36 +336,19 @@ function AvailableSpacesSection({
           return (
             <View
               key={venue.venue_id}
-              className="mx-4 mb-5 rounded-3xl overflow-hidden bg-white"
-              style={{
-                elevation: 4,
-                shadowColor: "#000",
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.08,
-                shadowRadius: 12,
-              }}
+              className="mx-4 mb-5 rounded-md overflow-hidden bg-white"
+             
             >
-              {/* Image with overlaid info */}
-              <View style={{ height: 200 }}>
+              <View style={{ height: 100 }}>
                 <Image
-                  source={{ uri: image }}
+                  source={{ uri: image.length > 0 ? image : FALLBACK_HEADER }}
                   style={{ width: "100%", height: "100%" }}
                   resizeMode="cover"
                 />
-                {/* Dark scrim at bottom */}
-                <View
-                  style={{
-                    position: "absolute",
-                    bottom: 0,
-                    left: 0,
-                    right: 0,
-                    height: 90,
-                    backgroundColor: "rgba(0,0,0,0.45)",
-                  }}
-                />
+            
                 {/* Badge top-left */}
                 <View className="absolute top-3 left-3 bg-primary px-3 py-1 rounded-full">
-                  <Text className="text-white text-[10px] font-bold tracking-widest">
+                  <Text className="text-white text-[10px] font-semibold tracking-widest">
                     {badge}
                   </Text>
                 </View>
@@ -369,7 +360,7 @@ function AvailableSpacesSection({
                 </View>
                 {/* Title + mini stats on scrim */}
                 <View className="absolute bottom-3 left-4 right-4">
-                  <Text className="text-white text-lg font-bold leading-tight">
+                  <Text className="text-white text-lg font-semibold leading-tight">
                     {venue.venue_type ?? "Venue Space"}
                   </Text>
                   <View className="flex-row gap-4 mt-1">
@@ -418,11 +409,11 @@ function AvailableSpacesSection({
 
                 {/* CTA */}
                 <Pressable
-                  className="rounded-2xl py-3.5 items-center"
+                  className="rounded-md py-3.5 items-center"
                   style={{ backgroundColor: "#1a1a2e" }}
                   onPress={() => setSelectedVenue({ venue, image })}
                 >
-                  <Text className="text-white font-bold text-sm uppercase tracking-widest">
+                  <Text className="text-white font-semibold text-sm uppercase tracking-widest">
                     Explore Space →
                   </Text>
                 </Pressable>
@@ -448,12 +439,12 @@ function AvailableSpacesSection({
 // Shared dark stat tile used in the booking card
 function StatTile({ icon, label, value }: { icon: string; label: string; value: string }) {
   return (
-    <View className="flex-1 rounded-xl p-3" style={{ backgroundColor: "rgba(255,255,255,0.08)" }}>
+    <View className="flex-1 rounded-md p-3" style={{ backgroundColor: "rgba(255,255,255,0.08)" }}>
       <MaterialIcons name={icon as any} size={16} color="#ee2b8c" style={{ marginBottom: 4 }} />
       <Text style={{ color: "rgba(255,255,255,0.5)", fontSize: 9 }} className="uppercase tracking-widest">
         {label}
       </Text>
-      <Text className="text-white font-bold text-sm mt-0.5">{value}</Text>
+      <Text className="text-white font-semibold text-sm mt-0.5">{value}</Text>
     </View>
   );
 }
@@ -482,12 +473,12 @@ function ServiceInfoSection({
   // ── Shared booking card (bottom dark card, always shown) ──────────────────
   const BookingCard = () => (
     <View
-      className="mx-4 mb-4 rounded-2xl overflow-hidden"
+      className="mx-4 mb-4 rounded-md overflow-hidden"
       style={{ backgroundColor: "#1a1a2e" }}
     >
       <View className="flex-row items-center gap-2 px-4 pt-4 pb-3">
         <MaterialIcons name="verified-user" size={20} color="#ee2b8c" />
-        <Text className="text-white font-bold text-base">Booking & Availability</Text>
+        <Text className="text-white font-semibold text-base">Booking & Availability</Text>
       </View>
       <View style={{ height: 1, backgroundColor: "rgba(255,255,255,0.08)" }} />
       <View className="px-4 pt-3 pb-4 flex-row gap-2">
@@ -532,12 +523,12 @@ function ServiceInfoSection({
   ) {
     return (
       <View className="mt-2">
-        <View className="mx-4 mb-3 bg-white rounded-2xl border border-gray-100 overflow-hidden" style={{ elevation: 1 }}>
+        <View className="mx-4 mb-3 bg-white rounded-md border border-gray-100 overflow-hidden" style={{ elevation: 1 }}>
           <View className="flex-row items-center gap-2 px-4 pt-4 pb-2">
             <View className="h-8 w-8 rounded-lg bg-primary/10 items-center justify-center">
               <MaterialIcons name="camera-alt" size={18} color="#ee2b8c" />
             </View>
-            <Text className="font-bold text-[#181114] text-base">Photography Details</Text>
+            <Text className="font-semibold text-[#181114] text-base">Photography Details</Text>
           </View>
           <View className="px-4 pb-4">
             {service.artist_type ? <InfoRow label="Shoot Style" value={service.artist_type} /> : null}
@@ -584,12 +575,12 @@ function ServiceInfoSection({
 
     return (
       <View className="mt-2">
-        <View className="mx-4 mb-3 bg-white rounded-2xl border border-gray-100 overflow-hidden" style={{ elevation: 1 }}>
+        <View className="mx-4 mb-3 bg-white rounded-md border border-gray-100 overflow-hidden" style={{ elevation: 1 }}>
           <View className="flex-row items-center gap-2 px-4 pt-4 pb-2">
             <View className="h-8 w-8 rounded-lg bg-primary/10 items-center justify-center">
               <MaterialIcons name={iconName as any} size={18} color="#ee2b8c" />
             </View>
-            <Text className="font-bold text-[#181114] text-base">{cardTitle}</Text>
+            <Text className="font-semibold text-[#181114] text-base">{cardTitle}</Text>
           </View>
           <View className="px-4 pb-4">
             {service.artist_type ? <InfoRow label="Artist Type" value={service.artist_type} /> : null}
@@ -623,12 +614,12 @@ function ServiceInfoSection({
   if (category === BusinessCategory.WeddingPlannersDecorator) {
     return (
       <View className="mt-2">
-        <View className="mx-4 mb-3 bg-white rounded-2xl border border-gray-100 overflow-hidden" style={{ elevation: 1 }}>
+        <View className="mx-4 mb-3 bg-white rounded-md border border-gray-100 overflow-hidden" style={{ elevation: 1 }}>
           <View className="flex-row items-center gap-2 px-4 pt-4 pb-2">
             <View className="h-8 w-8 rounded-lg bg-primary/10 items-center justify-center">
               <MaterialIcons name="celebration" size={18} color="#ee2b8c" />
             </View>
-            <Text className="font-bold text-[#181114] text-base">Planning & Decor</Text>
+            <Text className="font-semibold text-[#181114] text-base">Planning & Decor</Text>
           </View>
           <View className="px-4 pb-4">
             {service.artist_type ? <InfoRow label="Specialization" value={service.artist_type} /> : null}
@@ -666,12 +657,12 @@ function ServiceInfoSection({
   ) {
     return (
       <View className="mt-2">
-        <View className="mx-4 mb-3 bg-white rounded-2xl border border-gray-100 overflow-hidden" style={{ elevation: 1 }}>
+        <View className="mx-4 mb-3 bg-white rounded-md border border-gray-100 overflow-hidden" style={{ elevation: 1 }}>
           <View className="flex-row items-center gap-2 px-4 pt-4 pb-2">
             <View className="h-8 w-8 rounded-lg bg-primary/10 items-center justify-center">
               <MaterialIcons name="music-note" size={18} color="#ee2b8c" />
             </View>
-            <Text className="font-bold text-[#181114] text-base">
+            <Text className="font-semibold text-[#181114] text-base">
               {category === BusinessCategory.Baraat ? "Baraat Details" : "Entertainment"}
             </Text>
           </View>
@@ -708,12 +699,12 @@ function ServiceInfoSection({
   if (category === BusinessCategory.FoodCatering) {
     return (
       <View className="mt-2">
-        <View className="mx-4 mb-3 bg-white rounded-2xl border border-gray-100 overflow-hidden" style={{ elevation: 1 }}>
+        <View className="mx-4 mb-3 bg-white rounded-md border border-gray-100 overflow-hidden" style={{ elevation: 1 }}>
           <View className="flex-row items-center gap-2 px-4 pt-4 pb-2">
             <View className="h-8 w-8 rounded-lg bg-primary/10 items-center justify-center">
               <MaterialIcons name="restaurant" size={18} color="#ee2b8c" />
             </View>
-            <Text className="font-bold text-[#181114] text-base">Catering Details</Text>
+            <Text className="font-semibold text-[#181114] text-base">Catering Details</Text>
           </View>
           <View className="px-4 pb-4">
             {service.artist_type ? <InfoRow label="Cuisine Type" value={service.artist_type} /> : null}
@@ -761,12 +752,12 @@ function ServiceInfoSection({
 
     return (
       <View className="mt-2">
-        <View className="mx-4 mb-3 bg-white rounded-2xl border border-gray-100 overflow-hidden" style={{ elevation: 1 }}>
+        <View className="mx-4 mb-3 bg-white rounded-md border border-gray-100 overflow-hidden" style={{ elevation: 1 }}>
           <View className="flex-row items-center gap-2 px-4 pt-4 pb-2">
             <View className="h-8 w-8 rounded-lg bg-primary/10 items-center justify-center">
               <MaterialIcons name={icon as any} size={18} color="#ee2b8c" />
             </View>
-            <Text className="font-bold text-[#181114] text-base">{title}</Text>
+            <Text className="font-semibold text-[#181114] text-base">{title}</Text>
           </View>
           <View className="px-4 pb-4">
             {service.artist_type ? <InfoRow label="Specialty" value={service.artist_type} /> : null}
@@ -805,7 +796,7 @@ function ServiceInfoSection({
             <View className="h-8 w-8 rounded-lg bg-primary/10 items-center justify-center">
               <MaterialIcons name="security" size={18} color="#ee2b8c" />
             </View>
-            <Text className="font-bold text-[#181114] text-base">Security Services</Text>
+            <Text className="font-semibold text-[#181114] text-base">Security Services</Text>
           </View>
           <View className="px-4 pb-4">
             {service.artist_type ? <InfoRow label="Guard Type" value={service.artist_type} /> : null}
@@ -832,15 +823,14 @@ function ServiceInfoSection({
     );
   }
 
-  // ── Generic fallback ──────────────────────────────────────────────────────
   return (
     <View className="mt-2">
-      <View className="mx-4 mb-3 bg-white rounded-2xl border border-gray-100 overflow-hidden" style={{ elevation: 1 }}>
+      <View className="mx-4 mb-3 bg-white rounded-md border border-gray-100 overflow-hidden" style={{ elevation: 1 }}>
         <View className="flex-row items-center gap-2 px-4 pt-4 pb-2">
           <View className="h-8 w-8 rounded-lg bg-primary/10 items-center justify-center">
             <MaterialIcons name="palette" size={18} color="#ee2b8c" />
           </View>
-          <Text className="font-bold text-[#181114] text-base">Service Details</Text>
+          <Text className="font-semibold text-[#181114] text-base">Service Details</Text>
         </View>
         <View className="px-4 pb-4">
           {service.artist_type ? <InfoRow label="Specialization" value={service.artist_type} /> : null}
@@ -934,14 +924,37 @@ export default function VendorDetailed() {
   const serviceAttr =
     businessWithAttribute.vendor_services_information?.[0] ?? EMPTY_SERVICE_FALLBACK;
 
+  const headerTitle = truncateHeaderTitle(biz.business_name);
+
+  const handleGoBack = () => {
+    if (router.canGoBack()) {
+      router.back();
+      return;
+    }
+    router.replace("/(shared)/explore/explore" as any);
+  };
+
   return (
     <>
+      <Stack.Screen
+        options={{
+          title: headerTitle,
+          headerBackButtonDisplayMode: "minimal",
+          headerTitleAlign: "center",
+          headerLeft: () => (
+            <Pressable onPress={handleGoBack} className="px-2 py-1">
+              <MaterialIcons name="arrow-back" size={22} color="#181114" />
+            </Pressable>
+          ),
+        }}
+      />
+
       {/* Sticky bottom CTA */}
       <View className="absolute bottom-0 left-0 right-0 z-10 h-24">
-        <View className="bg-white/90 border-t border-gray-200 px-4 py-4">
+        <View className= "px-4 py-4">
           <View className="w-full max-w-md self-center">
             <Pressable
-              className="w-full rounded-lg bg-primary py-3.5 px-4 items-center justify-center shadow-lg shadow-primary/30 active:scale-[0.98]"
+              className="w-full rounded-md bg-primary py-3.5 px-4 items-center justify-center shadow-lg shadow-primary/30 active:scale-[0.98]"
               onPress={() =>
                 router.push({
                   pathname: "/(shared)/explore/[vendorId]/enquiryform",
@@ -949,7 +962,7 @@ export default function VendorDetailed() {
                 })
               }
             >
-              <Text className="text-lg font-bold text-white font-display">Send Enquiry</Text>
+              <Text className="text-lg font-semibold text-white font-display">Send Enquiry</Text>
             </Pressable>
           </View>
         </View>
@@ -967,23 +980,18 @@ export default function VendorDetailed() {
             className="w-full h-[24vh]"
             resizeMode="cover"
           >
-            <View className="flex-row justify-between items-center px-4 pt-4">
-              <Pressable
-                onPress={() => router.back()}
-                className="h-10 w-10 items-center justify-center rounded-full bg-black/30 shadow-sm"
-              >
-                <MaterialIcons name="arrow-back" size={20} color="#ffffff" />
-              </Pressable>
+            <View className="flex-row justify-end items-center px-4 pt-4">
+
               <Pressable className="h-10 w-10 items-center justify-center rounded-full bg-black/30 shadow-sm">
                 <MaterialIcons name="favorite" size={20} color="#ffffff" />
               </Pressable>
             </View>
           </ImageBackground>
-          <View className="h-32 w-32 absolute -bottom-16 left-4 z-20 border-1 rounded-full border-primary bg-primary p-1">
-            <View className="h-full w-full rounded-full border-4 border-white bg-white overflow-hidden shadow-md">
+          <View className="h-32 w-32 absolute  rounded-full -bottom-16 left-4 z-20 border-1  border-primary bg-primary p-1">
+            <View className="h-full w-full  border-4 border-white bg-white overflow-hidden shadow-md rounded-full">
               <Image
                 source={{ uri: avatarImage }}
-                className="h-full w-full"
+                className="h-full w-full roudned-full"
                 resizeMode="cover"
               />
             </View>
@@ -993,13 +1001,13 @@ export default function VendorDetailed() {
         {/* ── Vendor info ───────────────────────────────────────────────────── */}
         <View className="px-4 pt-20 pb-4 bg-white">
           <View className="flex-row justify-between items-start">
-            <Text className="text-2xl font-bold leading-tight tracking-tight text-[#181114] flex-1 mr-2">
+            <Text className="text-2xl font-semibold leading-tight tracking-tight text-[#181114] flex-1 mr-2">
               {biz.business_name}
             </Text>
             <View className="flex gap-2">
               <View className="flex-row items-center gap-1 bg-green-50 px-2 py-1 rounded-full border border-green-100">
                 <MaterialIcons name="verified" size={14} color="#16a34a" />
-                <Text className="text-[10px] font-bold text-green-700 uppercase tracking-wider">
+                <Text className="text-[10px] font-semibold text-green-700 uppercase tracking-wider">
                   {biz.is_verified ? "Verified" : "Unverified"}
                 </Text>
               </View>
@@ -1011,7 +1019,7 @@ export default function VendorDetailed() {
                   }
                 >
                   <MaterialIcons name="compare-arrows" size={18} color="#16a34a" />
-                  <Text className="text-[10px] font-bold text-green-700 uppercase tracking-wider">
+                  <Text className="text-[10px] font-semibold text-green-700 uppercase tracking-wider">
                     Compare
                   </Text>
                 </Pressable>
@@ -1027,7 +1035,7 @@ export default function VendorDetailed() {
           <View className="flex-row items-center gap-3 mt-2">
             <View className="flex-row items-center gap-1 bg-primary/5 px-2 py-1 rounded-md border border-primary/10">
               <MaterialIcons name="star" size={16} color="#ee2b8c" />
-              <Text className="text-sm font-bold text-[#181114]">
+              <Text className="text-sm font-semibold text-[#181114]">
                 {biz.rating ?? "N/A"}
               </Text>
               <Text className="text-xs text-gray-500">
@@ -1035,7 +1043,6 @@ export default function VendorDetailed() {
               </Text>
             </View>
             <View className="h-4 w-px bg-gray-200" />
-            <Text className="text-sm text-primary font-semibold">Top Rated Vendor</Text>
           </View>
 
         </View>
@@ -1044,7 +1051,7 @@ export default function VendorDetailed() {
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          className="bg-white"
+          className=""
           contentContainerClassName="px-4 py-2 gap-2"
         >
           {tags.map((tag) => (
@@ -1059,22 +1066,16 @@ export default function VendorDetailed() {
 
         {/* ── Description ──────────────────────────────────────────────────── */}
         {biz.description ? (
-          <View className="mx-4 mb-2 mt-1 rounded-2xl overflow-hidden border border-gray-100 bg-white"
-            style={{ elevation: 1, shadowColor: "#000", shadowOpacity: 0.04, shadowRadius: 8, shadowOffset: { width: 0, height: 2 } }}
-          >
-            {/* Header bar */}
-            <View className="flex-row items-center gap-2 px-4 pt-4 pb-3 border-b border-gray-50">
-              <View className="h-7 w-7 rounded-lg bg-primary/10 items-center justify-center">
+          <View className="mx-4 mb-2 mt-2">
+            <View className="flex-row items-center gap-2 mb-2">
+              <View className="h-7 w-7 rounded-md bg-primary/10 items-center justify-center">
                 <MaterialIcons name="info-outline" size={15} color="#ee2b8c" />
               </View>
-              <Text className="text-xs font-bold text-gray-400 uppercase tracking-widest">About</Text>
+              <Text className="text-xs font-semibold text-gray-400 uppercase tracking-widest">About</Text>
             </View>
-            {/* Body */}
-            <View className="px-4 py-3">
-              <Text className="text-[#374151] text-sm leading-6">
-                {biz.description}
-              </Text>
-            </View>
+            <Text className="text-[#374151] text-sm leading-6">
+              {biz.description}
+            </Text>
           </View>
         ) : null}
 
@@ -1093,13 +1094,13 @@ export default function VendorDetailed() {
         {/* ── Featured Gallery ──────────────────────────────────────────────── */}
         <View className="px-4 py-6 bg-white">
           <View className="flex-row justify-between items-center mb-3">
-            <Text className="text-lg font-bold text-[#181114]">Featured Gallery</Text>
+            <Text className="text-lg font-semibold text-[#181114]">Featured Gallery</Text>
             <Pressable onPress={() => setShowGallery(true)}>
-              <Text className="text-primary text-sm font-bold">View All</Text>
+              <Text className="text-primary text-sm font-semibold">View All</Text>
             </Pressable>
           </View>
           <View className="gap-2">
-            <View className="w-full aspect-[21/9] rounded-xl overflow-hidden shadow-sm">
+            <View className="w-full aspect-[21/9] rounded-md overflow-hidden shadow-sm">
               <Image
                 source={{ uri: galleryImage0 }}
                 className="h-full w-full"
@@ -1107,19 +1108,19 @@ export default function VendorDetailed() {
               />
             </View>
             <View className="flex-row gap-3 my-2">
-              <Pressable className="h-12 w-12 items-center justify-center rounded-xl border border-gray-200 bg-white">
+              <Pressable className="h-12 w-12 items-center justify-center rounded-md border border-gray-200 bg-white">
                 <MaterialIcons name="chat-bubble" size={20} color="#6B7280" />
               </Pressable>
             </View>
             <View className="flex-row gap-2">
-              <View className="flex-1 aspect-square rounded-xl overflow-hidden shadow-sm">
+              <View className="flex-1 aspect-square rounded-md overflow-hidden shadow-sm">
                 <Image
                   source={{ uri: galleryImage1 }}
                   className="h-full w-full"
                   resizeMode="cover"
                 />
               </View>
-              <View className="flex-1 aspect-square rounded-xl overflow-hidden shadow-sm">
+              <View className="flex-1 aspect-square rounded-md overflow-hidden shadow-sm">
                 <Image
                   source={{ uri: galleryImage2 }}
                   className="h-full w-full"
@@ -1127,7 +1128,7 @@ export default function VendorDetailed() {
                 />
                 {extraCount > 0 && (
                   <View className="absolute inset-0 items-center justify-center bg-black/40">
-                    <Text className="text-white font-bold text-xl">+{extraCount}</Text>
+                    <Text className="text-white font-semibold text-xl">+{extraCount}</Text>
                   </View>
                 )}
               </View>
@@ -1136,15 +1137,15 @@ export default function VendorDetailed() {
         </View>
 
         {/* ── Recent Reviews ────────────────────────────────────────────────── */}
-        <View className="px-4 py-6 bg-white mt-2">
+        <View className="px-4 py-6  mt-2">
           <View className="flex-row justify-between items-baseline mb-4">
             <View className="flex-row items-center gap-2">
-              <Text className="text-lg font-bold text-[#181114]">Recent Reviews</Text>
+              <Text className="text-lg font-semibold text-[#181114]">Recent Reviews</Text>
               <Text className="text-xs text-gray-400 font-medium">
                 {reviews.length} total
               </Text>
             </View>
-            <Text className="text-primary text-sm font-bold">View All</Text>
+            <Text className="text-primary text-sm font-semibold">View All</Text>
           </View>
 
           {reviews.length === 0 ? (
@@ -1161,7 +1162,8 @@ export default function VendorDetailed() {
               {reviews.map((review) => (
                 <View
                   key={review.id}
-                  className="w-80 bg-white border border-gray-100 rounded-2xl p-4 shadow-sm"
+                  className="w-80  rounded-md p-4 "
+                  style={shadowStyle}
                 >
                   <View className="flex-row items-center gap-3 mb-3">
                     <Image
@@ -1170,7 +1172,7 @@ export default function VendorDetailed() {
                       resizeMode="cover"
                     />
                     <View className="flex-1">
-                      <Text className="text-sm font-bold text-[#181114]">
+                      <Text className="text-sm font-semibold text-[#181114]">
                         {review.reviewerName}
                       </Text>
                       <Text className="text-[10px] text-gray-400">{review.date}</Text>
@@ -1204,7 +1206,7 @@ export default function VendorDetailed() {
       >
         <SafeAreaView className="flex-1 bg-[#f5f5f5]">
           <View className="flex-row items-center justify-between px-4 py-3 bg-[#f5f5f5]">
-            <Text className="text-lg font-bold text-[#181114]">Gallery</Text>
+            <Text className="text-lg font-semibold text-[#181114]">Gallery</Text>
             <Pressable
               onPress={() => setShowGallery(false)}
               className="h-8 w-8 items-center justify-center rounded-full bg-gray-200"
@@ -1253,7 +1255,7 @@ export default function VendorDetailed() {
             renderItem={({ item }) => (
               <Image
                 source={{ uri: item.uri }}
-                style={{ width: TILE_SIZE, height: TILE_SIZE, borderRadius: 16 }}
+                style={{ width: TILE_SIZE, height: TILE_SIZE, borderRadius: 8 }}
                 resizeMode="cover"
               />
             )}
