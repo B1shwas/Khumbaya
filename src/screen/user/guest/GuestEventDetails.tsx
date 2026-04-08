@@ -5,9 +5,11 @@ import { Text } from "@/src/components/ui/Text";
 import {
   useEventById,
   useEventResponseWithUser,
+  useSubEventsOfEvent,
 } from "@/src/features/events/hooks/use-event";
 import { useRsvpStore } from "@/src/store/useRsvpStore";
-import { EventHighlight, EventService } from "@/src/types";
+import { EventService } from "@/src/types";
+import { formatDate } from "@/src/utils/helper";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import {
@@ -15,32 +17,11 @@ import {
   Image,
   ScrollView,
   TouchableOpacity,
-  View
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 // this will be replaced by the timelines or we will be creating the highlight (major subevent api)
-const DEFAULT_HIGHLIGHTS: EventHighlight[] = [
-  {
-    id: "1",
-    title: "Welcome Brunch",
-    dateLabel: "Oct 24  •  11:00 AM  •  Poolside Deck",
-    icon: "sparkles-outline",
-  },
-  {
-    id: "2",
-    title: "Sangeet Night",
-    dateLabel: "Oct 25  •  7:00 PM  •  Ballroom",
-    icon: "musical-notes-outline",
-  },
-  {
-    id: "3",
-    title: "Main Ceremony",
-    dateLabel: "Oct 26  •  6:00 PM  •  Royal Gardens",
-    icon: "heart",
-    isFinal: true,
-  },
-];
 
 const DEFAULT_SERVICES: EventService[] = [
   { id: "lodging", label: "Lodging", icon: "bed-outline" },
@@ -79,6 +60,10 @@ const Section = ({
 export default function GuestEventDetails() {
   const router = useRouter();
   const { eventId } = useLocalSearchParams<{ eventId: string }>();
+  const { data: subEvents, isLoading: subEventsLoading } = useSubEventsOfEvent(
+    Number(eventId)
+  );
+
   const setDraft = useRsvpStore((s) => s.setDraft);
 
   const { data: eventDetails, isLoading } = useEventById(Number(eventId));
@@ -112,9 +97,8 @@ export default function GuestEventDetails() {
    * responses[0] is the only entry when isFamily === false.
    */
   const myGuestRecord = !isFamily ? (responses[0]?.event_guest ?? null) : null;
-  console.log('This is the data in the has rsvp in the data   ', myGuestRecord)
+  console.log("This is the data in the has rsvp in the data   ", myGuestRecord);
   const hasRsvped = isFamily ? true : myGuestRecord !== null;
-
 
   const familyMembers = responses.map((r) => ({
     id: r.user_detail.id.toString(),
@@ -128,7 +112,7 @@ export default function GuestEventDetails() {
 
   const familyName = responses[0]?.user_detail?.relation ?? "Your Family";
 
-  if (isLoading || responseLoading) {
+  if (isLoading || subEventsLoading || responseLoading) {
     return (
       <SafeAreaView
         className="flex-1 bg-background-light items-center justify-center"
@@ -156,7 +140,7 @@ export default function GuestEventDetails() {
           me.event_guest?.isDeparturePickupRequired ?? null,
         rawNotes: me.event_guest?.notes ?? null,
         rawAssignedRoom: null,
-        rawArrivalInfo:  null,
+        rawArrivalInfo: null,
         rawDepartureInfo: null,
       });
     }
@@ -189,7 +173,7 @@ export default function GuestEventDetails() {
           <View className="flex-row items-center gap-1.5 mt-2">
             <Ionicons name="calendar-outline" size={14} color="#ee2b8c" />
             <Text variant="caption" className="text-primary">
-              {eventDetails?.date}
+              {formatDate(eventDetails?.startDateTime)}
             </Text>
           </View>
 
@@ -203,17 +187,15 @@ export default function GuestEventDetails() {
         <Section
           title="Event Highlights"
           action="View Full Itinerary"
-          onAction={() => { }}
+          onAction={() => {}}
         >
-          <EventHighlightTimeline highlights={DEFAULT_HIGHLIGHTS} />
+          <EventHighlightTimeline highlights={subEvents} />
         </Section>
 
         {/* ── Services ── */}
         <Section title="Services Offered">
           <ServiceGrid services={DEFAULT_SERVICES} />
         </Section>
-
-
 
         {/* ── RSVP section ── */}
         <View className="px-5 py-5">
@@ -234,14 +216,14 @@ export default function GuestEventDetails() {
                   )
                 }
               />
-
             </View>
           ) : (
             <View className="bg-white rounded-md p-6 border border-slate-100 shadow-sm gap-4">
               <View className="flex-row items-center gap-3">
                 <View
-                  className={`w-10 h-10 rounded-full items-center justify-center ${hasRsvped ? "bg-green-100" : "bg-pink-100"
-                    }`}
+                  className={`w-10 h-10 rounded-full items-center justify-center ${
+                    hasRsvped ? "bg-green-100" : "bg-pink-100"
+                  }`}
                 >
                   <Ionicons
                     name={hasRsvped ? "checkmark-circle" : "mail"}
@@ -282,16 +264,16 @@ export default function GuestEventDetails() {
                   responses[0]?.event_guest?.notes ||
                   responses[0]?.event_guest?.arrival_info ||
                   responses[0]?.event_guest?.departure_info) && (
-                    <TouchableOpacity
-                      className="flex-1 py-3.5 rounded-md items-center justify-center bg-slate-50 border border-slate-200 active:bg-slate-100 active:scale-[0.98]"
-                      activeOpacity={0.8}
-                      onPress={handleIndividualRsvp}
-                    >
-                      <Text className="text-slate-600 font-bold text-sm">
-                        View Data
-                      </Text>
-                    </TouchableOpacity>
-                  )}
+                  <TouchableOpacity
+                    className="flex-1 py-3.5 rounded-md items-center justify-center bg-slate-50 border border-slate-200 active:bg-slate-100 active:scale-[0.98]"
+                    activeOpacity={0.8}
+                    onPress={handleIndividualRsvp}
+                  >
+                    <Text className="text-slate-600 font-bold text-sm">
+                      View Data
+                    </Text>
+                  </TouchableOpacity>
+                )}
               </View>
             </View>
           )}

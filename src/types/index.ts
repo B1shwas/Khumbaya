@@ -51,14 +51,26 @@ export type {
 
 export interface EventHighlight {
   id: string;
-  /** Display title, e.g. "Welcome Brunch" */
   title: string;
-  /** Pre-formatted label, e.g. "Oct 24 • 11:00 AM • Poolside Deck" */
-  dateLabel: string;
-  /** Ionicons icon name */
-  icon: string;
-  /** Renders the filled primary dot (last / main event) */
-  isFinal?: boolean;
+  type: string;
+  theme: string;
+
+  description: string | null;
+  location: string | null;
+  budget: number | null;
+
+  imageUrl: string | null;
+
+  organizer: number;
+  parentId: number | null;
+
+  status: string;
+
+  startDateTime: string;
+  endDateTime: string;
+
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface EventService {
