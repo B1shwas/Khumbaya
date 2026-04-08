@@ -1,9 +1,13 @@
 import { Button } from "@/src/components/ui/Button";
 import { Text } from "@/src/components/ui/Text";
+import { useAddEventVendor } from "@/src/features/business/hooks/use-business";
+import { usegetUpcomingEvents } from "@/src/features/events/hooks/use-event";
+import { Event as AppEvent } from "@/src/constants/event";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import {
+  Alert,
   Animated,
   Dimensions,
   KeyboardAvoidingView,
@@ -22,6 +26,8 @@ interface BookingReqModalProps {
   onClose?: () => void;
   onSubmit?: (formData: FormData) => void;
   asRoute?: boolean; // When true, skips Modal wrapper (for Expo Router transparentModal)
+  vendorId?: string;
+  businessId?: number;
 }
 
 interface FormData {
@@ -31,12 +37,6 @@ interface FormData {
   notes: string;
 }
 
-const MOCK_EVENTS = [
-  { id: "1", label: "Sarah & James Wedding" },
-  { id: "2", label: "Winter Charity Gala 2024" },
-  { id: "3", label: "30th Birthday Celebration" },
-];
-
 const { height: screenHeight } = Dimensions.get("window");
 const DISMISS_THRESHOLD = 100;
 
@@ -45,11 +45,15 @@ export default function BookingReqModal({
   onClose,
   onSubmit,
   asRoute = false,
+  vendorId,
+  businessId,
 }: BookingReqModalProps) {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const pan = useRef(new Animated.ValueXY()).current;
   const opacity = useRef(new Animated.Value(1)).current;
+  const { data: events = [] as AppEvent[], isLoading: eventsLoading } = usegetUpcomingEvents();
+  const { mutateAsync: addEventVendor } = useAddEventVendor();
 
   const handleClose = () => {
     if (onClose) {
@@ -153,19 +157,36 @@ export default function BookingReqModal({
       return;
     }
 
+    if (!vendorId) {
+      Alert.alert("Error", "Vendor not found. Please try again.");
+      return;
+    }
+
     setIsSubmitting(true);
     try {
+      await addEventVendor({
+        eventId: formData.eventId,
+        payload: {
+          vendorId,
+          businessId: businessId!,
+          budget: formData.budget,
+          guests: formData.guests,
+          notes: formData.notes,
+        },
+      });
       onSubmit?.(formData);
       setFormData({ eventId: "", budget: "", guests: "", notes: "" });
       handleClose();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error submitting booking request:", error);
+      const message = error?.message || "Failed to send enquiry. Please try again.";
+      Alert.alert("Error", message);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const selectedEvent = MOCK_EVENTS.find((e) => e.id === formData.eventId);
+  const selectedEvent = events.find((e: AppEvent) => e.id === formData.eventId);
 
   const modalContent = (
     <Animated.View style={{ opacity }} className="flex-1 bg-black/40">
@@ -243,7 +264,7 @@ export default function BookingReqModal({
                         selectedEvent ? "text-text-primary" : "text-gray-400"
                       }`}
                     >
-                      {selectedEvent?.label || "Select an Event"}
+                      {selectedEvent?.title || "Select an Event"}
                     </Text>
                     <MaterialIcons
                       name={showEventDropdown ? "expand-less" : "expand-more"}
@@ -255,17 +276,27 @@ export default function BookingReqModal({
                   {/* Dropdown Menu */}
                   {showEventDropdown && (
                     <View className="absolute top-24 left-6 right-6 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
-                      {MOCK_EVENTS.map((event) => (
-                        <Pressable
-                          key={event.id}
-                          onPress={() => handleEventSelect(event.id)}
-                          className="px-4 py-3 border-b border-gray-100 last:border-b-0"
-                        >
-                          <Text className="text-text-primary">
-                            {event.label}
-                          </Text>
-                        </Pressable>
-                      ))}
+                      {eventsLoading ? (
+                        <View className="px-4 py-3">
+                          <Text className="text-gray-400">Loading events...</Text>
+                        </View>
+                      ) : events.length === 0 ? (
+                        <View className="px-4 py-3">
+                          <Text className="text-gray-400">No events found</Text>
+                        </View>
+                      ) : (
+                        events.map((event: AppEvent) => (
+                          <Pressable
+                            key={event.id}
+                            onPress={() => handleEventSelect(event.id)}
+                            className="px-4 py-3 border-b border-gray-100 last:border-b-0"
+                          >
+                            <Text className="text-text-primary">
+                              {event.title}
+                            </Text>
+                          </Pressable>
+                        ))
+                      )}
                     </View>
                   )}
 

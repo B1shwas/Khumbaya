@@ -945,7 +945,7 @@ export default function VendorDetailed() {
               onPress={() =>
                 router.push({
                   pathname: "/(shared)/explore/[vendorId]/enquiryform",
-                  params: { vendorId: resolvedId },
+                  params: { vendorId: resolvedId, businessId: String(businessWithAttribute?.business_information?.id ?? resolvedId) },
                 })
               }
             >
