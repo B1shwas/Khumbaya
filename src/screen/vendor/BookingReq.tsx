@@ -6,6 +6,7 @@ import { Event as AppEvent } from "@/src/constants/event";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
+import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import {
   Alert,
   Animated,
@@ -55,6 +56,22 @@ export default function BookingReqModal({
   const { data: events = [] as AppEvent[], isLoading: eventsLoading } = usegetUpcomingEvents();
   const { mutateAsync: addEventVendor } = useAddEventVendor();
 
+  const {
+    control,
+    handleSubmit,
+    reset,
+    watch,
+    setValue,
+    formState: { isSubmitting, errors },
+  } = useForm<FormData>({
+    defaultValues: { eventId: "", budget: "", guests: "", notes: "" },
+  });
+
+  const [showEventDropdown, setShowEventDropdown] = useState(false);
+
+  const selectedEventId = watch("eventId");
+  const selectedEvent = events.find((e: AppEvent) => e.id === selectedEventId);
+
   const handleClose = () => {
     if (onClose) {
       onClose();
@@ -62,15 +79,6 @@ export default function BookingReqModal({
       router.back();
     }
   };
-
-  const [formData, setFormData] = useState<FormData>({
-    eventId: "",
-    budget: "",
-    guests: "",
-    notes: "",
-  });
-  const [showEventDropdown, setShowEventDropdown] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Create PanResponder for swipe gestures
   const panResponder = useRef(
@@ -85,8 +93,6 @@ export default function BookingReqModal({
             evt,
             gestureState
           );
-
-          // Fade background as user swipes down
           const opacityValue = Math.max(
             0,
             1 - gestureState.dy / (screenHeight * 0.5)
@@ -96,12 +102,9 @@ export default function BookingReqModal({
       },
       onPanResponderRelease: (evt, gestureState) => {
         if (gestureState.dy > DISMISS_THRESHOLD || gestureState.vy > 0.5) {
-          // Swipe down enough to dismiss
           if (asRoute) {
-            // For Expo Router transparentModal, let router handle the animation
             handleClose();
           } else {
-            // For traditional modal, animate then close
             Animated.parallel([
               Animated.timing(pan.y, {
                 toValue: screenHeight,
@@ -120,7 +123,6 @@ export default function BookingReqModal({
             });
           }
         } else {
-          // Snap back
           Animated.parallel([
             Animated.spring(pan.y, {
               toValue: 0,
@@ -139,7 +141,7 @@ export default function BookingReqModal({
     })
   ).current;
 
-  // Reset when modal visibility changes
+  // Reset animation when modal hides
   useEffect(() => {
     if (!visible) {
       pan.setValue({ x: 0, y: 0 });
@@ -147,46 +149,32 @@ export default function BookingReqModal({
     }
   }, [visible]);
 
-  const handleEventSelect = (eventId: string) => {
-    setFormData((prev) => ({ ...prev, eventId }));
-    setShowEventDropdown(false);
-  };
-
-  const handleSubmit = async () => {
-    if (!formData.eventId || !formData.budget || !formData.guests) {
-      return;
-    }
-
+  const onFormSubmit: SubmitHandler<FormData> = async (data) => {
     if (!vendorId) {
       Alert.alert("Error", "Vendor not found. Please try again.");
       return;
     }
 
-    setIsSubmitting(true);
     try {
       await addEventVendor({
-        eventId: formData.eventId,
+        eventId: data.eventId,
         payload: {
           vendorId,
           businessId: businessId!,
-          budget: formData.budget,
-          guests: formData.guests,
-          notes: formData.notes,
+          budget: data.budget,
+          guests: data.guests,
+          notes: data.notes,
         },
       });
-      onSubmit?.(formData);
-      setFormData({ eventId: "", budget: "", guests: "", notes: "" });
+      onSubmit?.(data);
+      reset();
       handleClose();
     } catch (error: any) {
       console.error("Error submitting booking request:", error);
       const message = error?.message || "Failed to send enquiry. Please try again.";
       Alert.alert("Error", message);
-    } finally {
-      setIsSubmitting(false);
     }
   };
-
-  const selectedEvent = events.find((e: AppEvent) => e.id === formData.eventId);
 
   const modalContent = (
     <Animated.View style={{ opacity }} className="flex-1 bg-black/40">
@@ -198,13 +186,11 @@ export default function BookingReqModal({
         <View className="flex-1 justify-end">
           {/* Modal Container with Swipe Gesture */}
           <Animated.View
-            style={{
-              transform: [{ translateY: pan.y }],
-            }}
+            style={{ transform: [{ translateY: pan.y }] }}
             {...panResponder.panHandlers}
           >
             <View className="bg-white rounded-t-3xl min-h-[85%]">
-              {/* Handle Bar - Swipe Indicator */}
+              {/* Handle Bar */}
               <View className="items-center pt-3 pb-2">
                 <View className="h-1 w-12 bg-gray-300 rounded-full" />
               </View>
@@ -217,11 +203,9 @@ export default function BookingReqModal({
                 >
                   <MaterialIcons name="close" size={24} color="#111827" />
                 </Pressable>
-
                 <Text variant="h2" className="text-text-primary">
                   Request Quote
                 </Text>
-
                 <View className="w-10" />
               </View>
 
@@ -240,77 +224,86 @@ export default function BookingReqModal({
                   >
                     Let the vendor know what you're planning.
                   </Text>
-                  <Text
-                    variant="caption"
-                    className="text-text-secondary text-sm"
-                  >
+                  <Text variant="caption" className="text-text-secondary text-sm">
                     Providing specific details helps vendors give you the most
                     accurate pricing.
                   </Text>
                 </View>
 
                 {/* Event Selection */}
-                <View className="mb-6">
-                  <Text className="text-text-primary text-sm font-semibold mb-2">
-                    Which event is this for?
-                  </Text>
+                <Controller
+                  control={control}
+                  name="eventId"
+                  rules={{ required: "Please select an event" }}
+                  render={() => (
+                    <View className="mb-6">
+                      <Text className="text-text-primary text-sm font-semibold mb-2">
+                        Which event is this for?
+                      </Text>
 
-                  <Pressable
-                    onPress={() => setShowEventDropdown(!showEventDropdown)}
-                    className="h-14 bg-white border border-gray-200 rounded-lg px-4 flex-row items-center justify-between"
-                  >
-                    <Text
-                      className={`text-base ${
-                        selectedEvent ? "text-text-primary" : "text-gray-400"
-                      }`}
-                    >
-                      {selectedEvent?.title || "Select an Event"}
-                    </Text>
-                    <MaterialIcons
-                      name={showEventDropdown ? "expand-less" : "expand-more"}
-                      size={24}
-                      color="#111827"
-                    />
-                  </Pressable>
+                      <Pressable
+                        onPress={() => setShowEventDropdown(!showEventDropdown)}
+                        className={`h-14 bg-white border rounded-lg px-4 flex-row items-center justify-between ${
+                          errors.eventId ? "border-red-400" : "border-gray-200"
+                        }`}
+                      >
+                        <Text
+                          className={`text-base ${
+                            selectedEvent ? "text-text-primary" : "text-gray-400"
+                          }`}
+                        >
+                          {selectedEvent?.title || "Select an Event"}
+                        </Text>
+                        <MaterialIcons
+                          name={showEventDropdown ? "expand-less" : "expand-more"}
+                          size={24}
+                          color="#111827"
+                        />
+                      </Pressable>
 
-                  {/* Dropdown Menu */}
-                  {showEventDropdown && (
-                    <View className="absolute top-24 left-6 right-6 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
-                      {eventsLoading ? (
-                        <View className="px-4 py-3">
-                          <Text className="text-gray-400">Loading events...</Text>
-                        </View>
-                      ) : events.length === 0 ? (
-                        <View className="px-4 py-3">
-                          <Text className="text-gray-400">No events found</Text>
-                        </View>
-                      ) : (
-                        events.map((event: AppEvent) => (
-                          <Pressable
-                            key={event.id}
-                            onPress={() => handleEventSelect(event.id)}
-                            className="px-4 py-3 border-b border-gray-100 last:border-b-0"
-                          >
-                            <Text className="text-text-primary">
-                              {event.title}
-                            </Text>
-                          </Pressable>
-                        ))
+                      {errors.eventId && (
+                        <Text className="text-red-500 text-xs mt-1">
+                          {errors.eventId.message}
+                        </Text>
                       )}
+
+                      {/* Dropdown Menu */}
+                      {showEventDropdown && (
+                        <View className="absolute top-24 left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+                          {eventsLoading ? (
+                            <View className="px-4 py-3">
+                              <Text className="text-gray-400">Loading events...</Text>
+                            </View>
+                          ) : events.length === 0 ? (
+                            <View className="px-4 py-3">
+                              <Text className="text-gray-400">No events found</Text>
+                            </View>
+                          ) : (
+                            events.map((event: AppEvent) => (
+                              <Pressable
+                                key={event.id}
+                                onPress={() => {
+                                  setValue("eventId", event.id, { shouldValidate: true });
+                                  setShowEventDropdown(false);
+                                }}
+                                className="px-4 py-3 border-b border-gray-100 last:border-b-0"
+                              >
+                                <Text className="text-text-primary">{event.title}</Text>
+                              </Pressable>
+                            ))
+                          )}
+                        </View>
+                      )}
+
+                      <Pressable className="mt-3 flex-row items-center gap-1">
+                        <MaterialIcons name="add-circle" size={18} color="#ee2b8c" />
+                        <Text className="text-primary text-sm font-medium">
+                          I haven't created one yet
+                        </Text>
+                      </Pressable>
                     </View>
                   )}
-
-                  <Pressable className="mt-3 flex-row items-center gap-1">
-                    <MaterialIcons
-                      name="add-circle"
-                      size={18}
-                      color="#ee2b8c"
-                    />
-                    <Text className="text-primary text-sm font-medium">
-                      I haven't created one yet
-                    </Text>
-                  </Pressable>
-                </View>
+                />
 
                 {/* Budget & Guests Row */}
                 <View className="flex-row gap-4 mb-6">
@@ -319,21 +312,36 @@ export default function BookingReqModal({
                     <Text className="text-text-primary text-sm font-semibold mb-2">
                       Estimated Budget
                     </Text>
-                    <View className="h-14 bg-white border border-gray-200 rounded-lg px-4 flex-row items-center">
-                      <Text className="text-amber-600 font-semibold mr-1">
-                        $
-                      </Text>
-                      <TextInput
-                        placeholder="0.00"
-                        placeholderTextColor="#9CA3AF"
-                        keyboardType="decimal-pad"
-                        value={formData.budget}
-                        onChangeText={(text) =>
-                          setFormData((prev) => ({ ...prev, budget: text }))
-                        }
-                        className="flex-1 text-text-primary text-base"
-                      />
-                    </View>
+                    <Controller
+                      control={control}
+                      name="budget"
+                      rules={{ required: "Required" }}
+                      render={({ field: { onChange, onBlur, value } }) => (
+                        <>
+                          <View
+                            className={`h-14 bg-white border rounded-lg px-4 flex-row items-center ${
+                              errors.budget ? "border-red-400" : "border-gray-200"
+                            }`}
+                          >
+                            <Text className="text-amber-600 font-semibold mr-1">$</Text>
+                            <TextInput
+                              placeholder="0.00"
+                              placeholderTextColor="#9CA3AF"
+                              keyboardType="decimal-pad"
+                              value={value}
+                              onChangeText={onChange}
+                              onBlur={onBlur}
+                              className="flex-1 text-text-primary text-base"
+                            />
+                          </View>
+                          {errors.budget && (
+                            <Text className="text-red-500 text-xs mt-1">
+                              {errors.budget.message}
+                            </Text>
+                          )}
+                        </>
+                      )}
+                    />
                   </View>
 
                   {/* Guests */}
@@ -341,15 +349,30 @@ export default function BookingReqModal({
                     <Text className="text-text-primary text-sm font-semibold mb-2">
                       Expected Guests
                     </Text>
-                    <TextInput
-                      placeholder="0"
-                      placeholderTextColor="#9CA3AF"
-                      keyboardType="number-pad"
-                      value={formData.guests}
-                      onChangeText={(text) =>
-                        setFormData((prev) => ({ ...prev, guests: text }))
-                      }
-                      className="h-14 bg-white border border-gray-200 rounded-lg px-4 text-text-primary text-base"
+                    <Controller
+                      control={control}
+                      name="guests"
+                      rules={{ required: "Required" }}
+                      render={({ field: { onChange, onBlur, value } }) => (
+                        <>
+                          <TextInput
+                            placeholder="0"
+                            placeholderTextColor="#9CA3AF"
+                            keyboardType="number-pad"
+                            value={value}
+                            onChangeText={onChange}
+                            onBlur={onBlur}
+                            className={`h-14 bg-white border rounded-lg px-4 text-text-primary text-base ${
+                              errors.guests ? "border-red-400" : "border-gray-200"
+                            }`}
+                          />
+                          {errors.guests && (
+                            <Text className="text-red-500 text-xs mt-1">
+                              {errors.guests.message}
+                            </Text>
+                          )}
+                        </>
+                      )}
                     />
                   </View>
                 </View>
@@ -364,17 +387,22 @@ export default function BookingReqModal({
                       Optional
                     </Text>
                   </View>
-                  <TextInput
-                    placeholder="Share specific details, dietary requirements, or special requests..."
-                    placeholderTextColor="#9CA3AF"
-                    multiline
-                    numberOfLines={4}
-                    value={formData.notes}
-                    onChangeText={(text) =>
-                      setFormData((prev) => ({ ...prev, notes: text }))
-                    }
-                    className="bg-white border border-gray-200 rounded-lg p-4 text-text-primary text-base"
-                    textAlignVertical="top"
+                  <Controller
+                    control={control}
+                    name="notes"
+                    render={({ field: { onChange, onBlur, value } }) => (
+                      <TextInput
+                        placeholder="Share specific details, dietary requirements, or special requests..."
+                        placeholderTextColor="#9CA3AF"
+                        multiline
+                        numberOfLines={4}
+                        value={value}
+                        onChangeText={onChange}
+                        onBlur={onBlur}
+                        className="bg-white border border-gray-200 rounded-lg p-4 text-text-primary text-base"
+                        textAlignVertical="top"
+                      />
+                    )}
                   />
                 </View>
 
@@ -392,14 +420,12 @@ export default function BookingReqModal({
                 style={{ paddingBottom: insets.bottom + 16 }}
               >
                 <Button
-                  onPress={handleSubmit}
+                  onPress={handleSubmit(onFormSubmit)}
                   disabled={isSubmitting}
                   className="flex-row items-center justify-center gap-2"
                 >
                   {isSubmitting ? (
-                    <>
-                      <Text className="text-white">Sending...</Text>
-                    </>
+                    <Text className="text-white">Sending...</Text>
                   ) : (
                     <>
                       <Text className="text-white">Send Request</Text>
@@ -415,12 +441,10 @@ export default function BookingReqModal({
     </Animated.View>
   );
 
-  // When used as a route (Expo Router transparentModal), skip Modal wrapper
   if (asRoute) {
     return modalContent;
   }
 
-  // When used as a traditional modal component
   return (
     <Modal visible={visible} animationType="fade" transparent>
       {modalContent}
