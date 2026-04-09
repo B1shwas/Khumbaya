@@ -1,17 +1,19 @@
 import SubEventCard from "@/src/components/event/subevent/CardSubevent";
 import { SubEvent } from "@/src/constants/event";
 import { useSubEventsOfEvent } from "@/src/features/events/hooks/use-event";
-import { formatDayOnly, formatShort, sortByDateTime } from "@/src/utils/helper";
+import { sortByDateTime } from "@/src/utils/helper";
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { formatShort , formatDayOnly } from "@/src/utils/helper";
 import {
-  FlatList,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View,
+    FlatList,
+    ScrollView,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
+
 
 type ParsedSubEvent = {
   item: SubEvent;
@@ -61,37 +63,32 @@ export default function ListSubEvent() {
     return { item, startTime, endTime };
   };
 
-  const groupByDate = (entries: ParsedSubEvent[]): MergedGroup[] => {
+  const mergeOverlapping = (entries: ParsedSubEvent[]): MergedGroup[] => {
     if (entries.length === 0) return [];
 
     const sorted = [...entries].sort((a, b) => a.startTime - b.startTime);
-    const groupsMap = new Map<string, MergedGroup>();
+    const mergedGroups: MergedGroup[] = [];
 
     sorted.forEach((entry) => {
-      const dateValue = new Date(entry.startTime).toISOString().slice(0, 10);
-      const existingGroup = groupsMap.get(dateValue);
-
-      if (existingGroup) {
-        existingGroup.items.push(entry.item);
-        existingGroup.startTime = Math.min(
-          existingGroup.startTime,
-          entry.startTime
-        );
-        existingGroup.endTime = Math.max(existingGroup.endTime, entry.endTime);
+      const lastGroup = mergedGroups[mergedGroups.length - 1];
+      if (!lastGroup || entry.startTime > lastGroup.endTime) {
+        const dateValue = new Date(entry.startTime).toISOString();
+        mergedGroups.push({
+          key: `${dateValue}-${mergedGroups.length + 1}`,
+          dateValue,
+          items: [entry.item],
+          label: "",
+          startTime: entry.startTime,
+          endTime: entry.endTime,
+        });
         return;
       }
 
-      groupsMap.set(dateValue, {
-        key: dateValue,
-        dateValue,
-        items: [entry.item],
-        label: "",
-        startTime: entry.startTime,
-        endTime: entry.endTime,
-      });
+      lastGroup.items.push(entry.item);
+      lastGroup.endTime = Math.max(lastGroup.endTime, entry.endTime);
     });
 
-    return Array.from(groupsMap.values());
+    return mergedGroups;
   };
 
   const dayGroups = useMemo(() => {
@@ -103,9 +100,9 @@ export default function ListSubEvent() {
 
     if (parsedItems.length === 0) return [];
 
-    const groupedByDate = groupByDate(parsedItems);
+    const mergedGroups = mergeOverlapping(parsedItems);
 
-    return groupedByDate.map((group, index) => ({
+    return mergedGroups.map((group, index) => ({
       ...group,
       label: `Day ${index + 1}`,
     }));
@@ -119,11 +116,13 @@ export default function ListSubEvent() {
 
   const filteredSubEvents = useMemo(() => {
     const scopedItems = selectedDayKey
-      ? (dayGroups.find((group) => group.key === selectedDayKey)?.items ?? [])
+      ? dayGroups.find((group) => group.key === selectedDayKey)?.items ?? []
       : subEvents;
 
     return sortByDateTime(scopedItems, (item) => item.startDateTime);
   }, [dayGroups, selectedDayKey, subEvents]);
+
+
 
   const renderEmptyState = () => (
     <View className="flex-1 items-center justify-center py-20">
