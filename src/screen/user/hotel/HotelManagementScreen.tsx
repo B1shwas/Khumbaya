@@ -1,3 +1,4 @@
+import { useSubmitRsvpResponse } from "@/src/features/events/hooks/use-event";
 import { useGetGuestRoom } from "@/src/features/guests/api/use-guests";
 import { User } from "@/src/store/AuthStore";
 import { shadowStyle } from "@/src/utils/helper";
@@ -35,17 +36,38 @@ function getInitials(name: string): string {
   );
 }
 
-function GuestRowItem({ guest }: { guest: Hotel_responce }) {
+function GuestRowItem({
+  guest,
+  onAssignRoom,
+}: {
+  guest: Hotel_responce;
+  onAssignRoom?: (guest: Hotel_responce) => void;
+}) {
   const username = guest.user_detail?.username || "Unknown Guest";
   const room = guest.user_room?.trim();
 
   return (
-    <View className="flex-row items-start  rounded-md px-3.5 py-3  bg-white "
-    
-    style={shadowStyle}
+    <View
+      className="flex-row items-center rounded-md px-3.5 py-3 bg-white"
+      style={shadowStyle}
     >
-      <View className="w-11 h-11 rounded-full bg-pink-100  items-center justify-center mr-3">
-        <Text className="font-jakarta-bold text-[13px]  text-primary">
+      {room ? (
+        <View className="bg-blue-50 rounded-md px-3 py-2 mr-3 min-w-12">
+          <Text className="font-jakarta-semibold text-[12px] text-blue-700 text-center">
+            {room}
+          </Text>
+        </View>
+      ) : (
+        <TouchableOpacity
+          onPress={() => onAssignRoom?.(guest)}
+          className="bg-gray-100 rounded-md px-3 py-2 mr-3 min-w-12 border border-dashed border-gray-300 justify-center items-center"
+        >
+          <Ionicons name="add" size={16} color="#9CA3AF" />
+        </TouchableOpacity>
+      )}
+
+      <View className="w-11 h-11 rounded-full bg-pink-100 items-center justify-center mr-3">
+        <Text className="font-jakarta-bold text-[13px] text-primary">
           {getInitials(username)}
         </Text>
       </View>
@@ -55,35 +77,24 @@ function GuestRowItem({ guest }: { guest: Hotel_responce }) {
           {username}
         </Text>
 
-      <View className="flex-row items-center justify-between gap-1 mt-0.5">
         <View className="flex-row items-center gap-1 mt-1">
           {room ? (
             <>
               <Ionicons name="bed-outline" size={13} color="#9CA3AF" />
-              <Text className="font-jakarta text-xs text-gray-500">Assigned room</Text>
+              <Text className="font-jakarta text-xs text-gray-500">
+                Assigned
+              </Text>
             </>
           ) : (
             <>
               <Ionicons name="alert-circle-outline" size={13} color="#D1D5DB" />
               <Text className="font-jakarta text-xs text-gray-400 italic">
-                Room not assigned
+                Tap to assign
               </Text>
             </>
           )}
         </View>
       </View>
-
-      
-      </View>
-            <View >
-        {!!room && (
-          <View className="mt-1.5 bg-blue-50 rounded-md px-2.5 py-1.5 self-start max-w-full">
-            <Text className="font-jakarta-semibold text-[12px] text-blue-700">
-              {room}
-            </Text>
-          </View>
-        )}
-        </View>
     </View>
   );
 }
@@ -92,9 +103,18 @@ export default function HotelManagementScreen() {
   const { eventId } = useLocalSearchParams<{ eventId: string }>();
   const numericEventId = eventId ? Number(eventId) : null;
 
+  const { mutate: submitRsvpResponse, isPending } = useSubmitRsvpResponse(
+    Number(eventId)
+  );
+
   const [searchText, setSearchText] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [isCategoryModalVisible, setIsCategoryModalVisible] = useState(false);
+  const [roomAssignmentModal, setRoomAssignmentModal] = useState<{
+    visible: boolean;
+    guest: Hotel_responce | null;
+  }>({ visible: false, guest: null });
+  const [newRoom, setNewRoom] = useState("");
 
   const {
     data: guestRooms = [],
@@ -143,7 +163,13 @@ export default function HotelManagementScreen() {
       categoryCountMap.set(category, (categoryCountMap.get(category) ?? 0) + 1);
     }
 
-    const preferredOrder = ["friend", "family", "colleague", "vvip", "uncategorized"];
+    const preferredOrder = [
+      "friend",
+      "family",
+      "colleague",
+      "vvip",
+      "uncategorized",
+    ];
 
     return Array.from(categoryCountMap.entries())
       .map(([value, count]) => ({
@@ -163,24 +189,54 @@ export default function HotelManagementScreen() {
 
   useEffect(() => {
     if (selectedCategory === "all") return;
-    const exists = categoryStats.some((item) => item.value === selectedCategory);
+    const exists = categoryStats.some(
+      (item) => item.value === selectedCategory
+    );
     if (!exists) setSelectedCategory("all");
   }, [categoryStats, selectedCategory]);
 
   const guestsAfterCategoryFilter = useMemo(() => {
     if (selectedCategory === "all") return filteredGuests;
     return filteredGuests.filter(
-      (guest) => getNormalizedCategory(guest.user_detail?.relation) === selectedCategory
+      (guest) =>
+        getNormalizedCategory(guest.user_detail?.relation) === selectedCategory
     );
   }, [filteredGuests, selectedCategory]);
 
   const assignedGuests = guestsAfterCategoryFilter.filter((g) => !!g.user_room);
-  const unassignedGuests = guestsAfterCategoryFilter.filter((g) => !g.user_room);
+  const unassignedGuests = guestsAfterCategoryFilter.filter(
+    (g) => !g.user_room
+  );
+
+  // Group assigned guests by room number
+  const guestsByRoom = new Map<string, Hotel_responce[]>();
+  for (const guest of assignedGuests) {
+    const room = guest.user_room?.trim() || "Unassigned";
+    if (!guestsByRoom.has(room)) {
+      guestsByRoom.set(room, []);
+    }
+    guestsByRoom.get(room)!.push(guest);
+  }
+
+  // Sort rooms naturally (handle numeric and alphanumeric room numbers)
+  const sortedRooms = Array.from(guestsByRoom.keys()).sort((a, b) => {
+    const numA = parseInt(a, 10);
+    const numB = parseInt(b, 10);
+    if (!isNaN(numA) && !isNaN(numB)) {
+      return numA - numB;
+    }
+    return a.localeCompare(b);
+  });
 
   const sections: GuestSection[] = [
-    { title: "Assigned Rooms", data: assignedGuests },
-    { title: "Not Assigned", data: unassignedGuests },
-  ].filter((section) => section.data.length > 0);
+    ...sortedRooms.map((room) => ({
+      title: `Room ${room}`,
+      data: guestsByRoom.get(room)!,
+    })),
+    ...(unassignedGuests.length > 0
+      ? [{ title: "Not Assigned", data: unassignedGuests }]
+      : []),
+  ];
 
   const totalGuests = normalizedGuests.length;
   const totalAssigned = normalizedGuests.filter((g) => !!g.user_room).length;
@@ -203,8 +259,6 @@ export default function HotelManagementScreen() {
   return (
     <SafeAreaView className="flex-1 bg-gray-100" edges={[]}>
       <View className="px-4 pt-3 pb-2">
-        
-
         <View className="flex-row items-center gap-2">
           <View className="flex-1 flex-row items-center bg-white rounded-md px-3.5 h-12">
             <Ionicons
@@ -227,7 +281,6 @@ export default function HotelManagementScreen() {
             )}
           </View>
 
-    
           <TouchableOpacity
             onPress={() => setIsCategoryModalVisible(true)}
             className="h-12 w-12 bg-white border border-gray-200 rounded-md items-center justify-center"
@@ -249,18 +302,30 @@ export default function HotelManagementScreen() {
 
       <View className="flex-row bg-white mx-4 mb-3 mt-2 rounded-md py-3.5 shadow-sm">
         <View className="flex-1 items-center">
-          <Text className="font-jakarta-bold text-xl text-primary">{totalRooms}</Text>
-          <Text className="font-jakarta text-[11px] text-gray-500 mt-0.5">Rooms</Text>
+          <Text className="font-jakarta-bold text-xl text-primary">
+            {totalRooms}
+          </Text>
+          <Text className="font-jakarta text-[11px] text-gray-500 mt-0.5">
+            Rooms
+          </Text>
         </View>
         <View className="w-px bg-gray-200 my-1" />
         <View className="flex-1 items-center">
-          <Text className="font-jakarta-bold text-xl text-primary">{totalGuests}</Text>
-          <Text className="font-jakarta text-[11px] text-gray-500 mt-0.5">Guests</Text>
+          <Text className="font-jakarta-bold text-xl text-primary">
+            {totalGuests}
+          </Text>
+          <Text className="font-jakarta text-[11px] text-gray-500 mt-0.5">
+            Guests
+          </Text>
         </View>
         <View className="w-px bg-gray-200 my-1" />
         <View className="flex-1 items-center">
-          <Text className="font-jakarta-bold text-xl text-primary">{totalAssigned}</Text>
-          <Text className="font-jakarta text-[11px] text-gray-500 mt-0.5">Assigned</Text>
+          <Text className="font-jakarta-bold text-xl text-primary">
+            {totalAssigned}
+          </Text>
+          <Text className="font-jakarta text-[11px] text-gray-500 mt-0.5">
+            Assigned
+          </Text>
         </View>
       </View>
 
@@ -274,8 +339,18 @@ export default function HotelManagementScreen() {
       ) : (
         <SectionList
           sections={sections}
-          keyExtractor={(item, index) => `${item.user_detail?.id ?? "guest"}-${index}`}
-          renderItem={({ item }) => <GuestRowItem guest={item} />}
+          keyExtractor={(item, index) =>
+            `${item.user_detail?.id ?? "guest"}-${index}`
+          }
+          renderItem={({ item }) => (
+            <GuestRowItem
+              guest={item}
+              onAssignRoom={(guest) => {
+                setRoomAssignmentModal({ visible: true, guest });
+                setNewRoom("");
+              }}
+            />
+          )}
           renderSectionHeader={({ section }) => (
             <View className="pt-1 pb-2">
               <Text className="font-jakarta-bold text-sm text-gray-700">
@@ -283,7 +358,11 @@ export default function HotelManagementScreen() {
               </Text>
             </View>
           )}
-          contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 100, gap: 12 }}
+          contentContainerStyle={{
+            paddingHorizontal: 16,
+            paddingBottom: 100,
+            gap: 12,
+          }}
           showsVerticalScrollIndicator={false}
           refreshControl={
             <RefreshControl
@@ -326,7 +405,9 @@ export default function HotelManagementScreen() {
               <Text className="font-jakarta-bold text-base text-[#181114]">
                 Filter by category
               </Text>
-              <TouchableOpacity onPress={() => setIsCategoryModalVisible(false)}>
+              <TouchableOpacity
+                onPress={() => setIsCategoryModalVisible(false)}
+              >
                 <Ionicons name="close" size={20} color="#6B7280" />
               </TouchableOpacity>
             </View>
@@ -355,12 +436,114 @@ export default function HotelManagementScreen() {
                       {option.count}
                     </Text>
                     {isActive && (
-                      <Ionicons name="checkmark-circle" size={18} color="#ee2b8c" />
+                      <Ionicons
+                        name="checkmark-circle"
+                        size={18}
+                        color="#ee2b8c"
+                      />
                     )}
                   </View>
                 </TouchableOpacity>
               );
             })}
+          </View>
+        </View>
+      </Modal>
+
+      <Modal
+        visible={roomAssignmentModal.visible}
+        transparent
+        animationType="fade"
+        onRequestClose={() =>
+          setRoomAssignmentModal({ visible: false, guest: null })
+        }
+      >
+        <View className="flex-1 bg-black/35 justify-center px-4">
+          <TouchableOpacity
+            activeOpacity={1}
+            onPress={() =>
+              setRoomAssignmentModal({ visible: false, guest: null })
+            }
+            className="absolute inset-0"
+          />
+          <View className="bg-white rounded-2xl px-5 py-5">
+            <View className="flex-row items-center justify-between mb-4">
+              <Text className="font-jakarta-bold text-base text-[#181114]">
+                Assign Room
+              </Text>
+              <TouchableOpacity
+                onPress={() =>
+                  setRoomAssignmentModal({ visible: false, guest: null })
+                }
+              >
+                <Ionicons name="close" size={20} color="#6B7280" />
+              </TouchableOpacity>
+            </View>
+
+            {roomAssignmentModal.guest && (
+              <>
+                <View className="mb-4 p-3 bg-gray-50 rounded-lg">
+                  <Text className="font-jakarta text-xs text-gray-500">
+                    Guest
+                  </Text>
+                  <Text className="font-jakarta-semibold text-sm text-[#181114]">
+                    {roomAssignmentModal.guest.user_detail?.username ||
+                      "Unknown"}
+                  </Text>
+                </View>
+
+                <View className="mb-4">
+                  <Text className="font-jakarta text-xs text-gray-500 mb-2">
+                    Room Number
+                  </Text>
+                  <TextInput
+                    className="border border-gray-200 rounded-lg px-4 py-3 font-jakarta text-sm text-[#181114]"
+                    placeholder="e.g., 101, Suite A"
+                    placeholderTextColor="#9CA3AF"
+                    value={newRoom}
+                    onChangeText={setNewRoom}
+                  />
+                </View>
+
+                <View className="gap-2">
+                  <TouchableOpacity
+                    onPress={() => {
+                      if (newRoom.trim()) {
+                        console.log(newRoom);
+                        submitRsvpResponse({
+                          assigned_room: newRoom,
+                          userId: roomAssignmentModal!.guest!.user_detail!.id,
+                          familyId: roomAssignmentModal?.guest?.user_detail
+                            ?.familyId
+                            ? roomAssignmentModal?.guest?.user_detail?.familyId
+                            : undefined,
+                        });
+                        setRoomAssignmentModal({ visible: false, guest: null });
+                        setNewRoom("");
+                        refetch();
+                      }
+                    }}
+                    className="bg-primary rounded-lg py-3 items-center"
+                  >
+                    <Text className="font-jakarta-semibold text-sm text-white">
+                      Assign Room
+                    </Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    onPress={() => {
+                      setRoomAssignmentModal({ visible: false, guest: null });
+                      setNewRoom("");
+                    }}
+                    className="border border-gray-200 rounded-lg py-3 items-center"
+                  >
+                    <Text className="font-jakarta-semibold text-sm text-[#181114]">
+                      Cancel
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </>
+            )}
           </View>
         </View>
       </Modal>

@@ -213,6 +213,9 @@ export const useSubmitRsvpResponse = (eventId: number) => {
       });
       queryClient.invalidateQueries({ queryKey: ["event-guests", eventId] });
       queryClient.invalidateQueries({ queryKey: ["rsvp-invitations"] });
+      queryClient.invalidateQueries({
+        queryKey: ["event-guest-room", eventId],
+      });
     },
   });
 };
