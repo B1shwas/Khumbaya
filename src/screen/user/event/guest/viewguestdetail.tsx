@@ -123,21 +123,20 @@ export default function ViewGuestDetail() {
       ]
     );
   };
+  // let messageForTransportation;
 
-  let messageForTransportation;
-
-  if (
-    guestDetail?.event_guest?.isArrivalPickupRequired &&
-    guestDetail?.event_guest?.isDeparturePickupRequired
-  ) {
-    messageForTransportation = "Pickup and Departure";
-  } else if (guestDetail?.event_guest?.isArrivalPickupRequired) {
-    messageForTransportation = "Arrival Pickup";
-  } else if (guestDetail?.event_guest?.isDeparturePickupRequired) {
-    messageForTransportation = "Departure Pickup";
-  } else {
-    messageForTransportation = "Not Required";
-  }
+  // if (
+  //   guestDetail?.event_guest?.isArrivalPickupRequired &&
+  //   guestDetail?.event_guest?.isDeparturePickupRequired
+  // ) {
+  //   messageForTransportation = "Pickup and Departure";
+  // } else if (guestDetail?.event_guest?.isArrivalPickupRequired) {
+  //   messageForTransportation = "Arrival Pickup";
+  // } else if (guestDetail?.event_guest?.isDeparturePickupRequired) {
+  //   messageForTransportation = "Departure Pickup";
+  // } else {
+  //   messageForTransportation = "Not Required";
+  // }
 
   return (
     <KeyboardAvoidingView
@@ -193,11 +192,11 @@ export default function ViewGuestDetail() {
                   <Text variant="h1" className="text-white text-4xl">
                     {guestDetail?.user_detail.username
                       ? guestDetail.user_detail.username
-                        .split(" ")
-                        .map((n) => n[0])
-                        .join("")
-                        .toUpperCase()
-                        .slice(0, 2)
+                          .split(" ")
+                          .map((n) => n[0])
+                          .join("")
+                          .toUpperCase()
+                          .slice(0, 2)
                       : "US"}
                   </Text>
                 </View>
@@ -211,10 +210,10 @@ export default function ViewGuestDetail() {
                 {guestDetail?.user_detail.username || "User Name"}
               </Text>
               <Text variant="h2" className="text-primary text-sm mt-1">
-                {isConfirmed ? "Confirmed" : "Pending"}{" "}
-                Guest • {guestDetail?.event_guest.role || "VVIP"}
+                {isConfirmed ? "Confirmed" : "Pending"} •{" "}
+                {guestDetail?.event_guest.category || "VVIP"}
               </Text>
-              {/* Only render date/time if both arrival and departure dates exist */}
+              {/*
               {guestDetail?.event_guest.arrival_date_time &&
                 guestDetail?.event_guest.departure_date_time && (
                   <View className="flex-row items-center gap-2 mt-2">
@@ -224,11 +223,11 @@ export default function ViewGuestDetail() {
                           name="calendar-outline"
                           size={14}
                           color="#94A3B8"
-                          className="mr-2 "
+                          className="mr-2"
                         />
                         <Text
                           variant="caption"
-                          className=" text-sm text-center"
+                          className="text-sm text-center"
                         >
                           {formatDate(
                             guestDetail?.event_guest.arrival_date_time || "—"
@@ -252,6 +251,7 @@ export default function ViewGuestDetail() {
                     </View>
                   </View>
                 )}
+              */}
             </LinearGradient>
 
             <View className="flex-row gap-3 px-6 pb-6 border-b border-primary/5">
@@ -300,14 +300,38 @@ export default function ViewGuestDetail() {
                 <View className="bg-slate-50 rounded-2xl px-4">
                   {[
                     {
-                      label: "Arrival Date",
-                      value: `${formatDate(guestDetail?.event_guest.arrival_date_time || "TBD")}`,
+                      label: "Arrival Time",
+                      value: guestDetail?.event_guest?.arrival_date_time
+                        ? formatTime(
+                            guestDetail?.event_guest?.arrival_date_time ??
+                              undefined
+                          )
+                        : "TBD",
                       pill: false,
                     },
-
+                    {
+                      label: "Arrival Date",
+                      value: formatDate(
+                        guestDetail?.event_guest?.arrival_date_time ?? undefined
+                      ),
+                      pill: false,
+                    },
+                    {
+                      label: "Departure Time",
+                      value: guestDetail?.event_guest?.departure_date_time
+                        ? formatTime(
+                            guestDetail?.event_guest?.departure_date_time ??
+                              undefined
+                          )
+                        : "TBD",
+                      pill: false,
+                    },
                     {
                       label: "Departure Date",
-                      value: `${formatDate(guestDetail?.event_guest.departure_date_time || "TBD")}`,
+                      value: formatDate(
+                        guestDetail?.event_guest?.departure_date_time ??
+                          undefined
+                      ),
                       pill: false,
                     },
                     {
@@ -325,15 +349,15 @@ export default function ViewGuestDetail() {
                       value: `${guestDetail?.event_guest.isDeparturePickupRequired ? "Required" : "Not Required"}`,
                       pill: true,
                     },
-                    {
-                      label: "Transport Summary",
-                      value: messageForTransportation,
-                      pill: false,
-                    },
-                    {
-                      label: "Category",
-                      value: guestDetail?.event_guest?.category,
-                    },
+                    //   {
+                    //   label: "Transport Summary",
+                    //   value: messageForTransportation,
+                    //   pill: false,
+                    // },
+                    // {
+                    //   label: "Category",
+                    //   value: guestDetail?.event_guest?.category,
+                    // },
                   ].map((row, i, arr) => (
                     <View
                       key={i}
@@ -353,7 +377,7 @@ export default function ViewGuestDetail() {
                         <Text variant="h2" className="text-slate-900 text-sm">
                           {row.value
                             ? row.value?.charAt(0).toUpperCase() +
-                            row.value?.slice(1)
+                              row.value?.slice(1)
                             : "-"}
                         </Text>
                       )}
@@ -388,116 +412,116 @@ export default function ViewGuestDetail() {
               {(guestDetail?.event_guest?.isAccomodation ||
                 guestDetail?.event_guest?.isArrivalPickupRequired ||
                 guestDetail?.event_guest?.isDeparturePickupRequired) && (
-                  <View>
-                    <View className="flex-row items-center justify-between mb-4">
-                      <View className="flex-row items-center gap-2">
+                <View>
+                  <View className="flex-row items-center justify-between mb-4">
+                    <View className="flex-row items-center gap-2">
+                      <Ionicons
+                        name="shield-checkmark-outline"
+                        size={20}
+                        color="#EE2B8C"
+                      />
+                      <Text
+                        variant="caption"
+                        className="text-xs font-bold uppercase tracking-widest"
+                      >
+                        Host Assignments
+                      </Text>
+                    </View>
+                    <View className="bg-slate-100 px-2 py-0.5 rounded">
+                      <Text
+                        variant="caption"
+                        className="text-[10px] uppercase font-bold"
+                      >
+                        Internal Use
+                      </Text>
+                    </View>
+                  </View>
+
+                  {guestDetail.event_guest.isAccomodation && (
+                    <View className="bg-white border border-slate-200 p-4 rounded-2xl mb-3">
+                      <View className="flex-row items-center gap-2 mb-3">
                         <Ionicons
-                          name="shield-checkmark-outline"
+                          name="bed-outline"
                           size={20}
                           color="#EE2B8C"
                         />
-                        <Text
-                          variant="caption"
-                          className="text-xs font-bold uppercase tracking-widest"
-                        >
-                          Host Assignments
+                        <Text variant="caption" className="text-xs">
+                          Room Assigned
                         </Text>
                       </View>
-                      <View className="bg-slate-100 px-2 py-0.5 rounded">
-                        <Text
-                          variant="caption"
-                          className="text-[10px] uppercase font-bold"
-                        >
-                          Internal Use
-                        </Text>
-                      </View>
+                      <TextInput
+                        value={assignedRoom}
+                        onChangeText={setAssignedRoom}
+                        placeholder="Assign room"
+                        placeholderTextColor="#94a3b8"
+                        className="w-full bg-slate-50 rounded-md p-4 text-sm text-slate-900"
+                      />
                     </View>
+                  )}
 
-                    {guestDetail.event_guest.isAccomodation && (
-                      <View className="bg-white border border-slate-200 p-4 rounded-2xl mb-3">
-                        <View className="flex-row items-center gap-2 mb-3">
-                          <Ionicons
-                            name="bed-outline"
-                            size={20}
-                            color="#EE2B8C"
-                          />
-                          <Text variant="caption" className="text-xs">
-                            Room Assigned
-                          </Text>
-                        </View>
-                        <TextInput
-                          value={assignedRoom}
-                          onChangeText={setAssignedRoom}
-                          placeholder="Assign room"
-                          placeholderTextColor="#94a3b8"
-                          className="w-full bg-slate-50 rounded-md p-4 text-sm text-slate-900"
+                  {guestDetail.event_guest.isArrivalPickupRequired && (
+                    <View className="bg-white border border-slate-200 p-4 rounded-2xl mb-3">
+                      <View className="flex-row items-center gap-2 mb-3">
+                        <Ionicons
+                          name="car-outline"
+                          size={20}
+                          color="#EE2B8C"
                         />
-                      </View>
-                    )}
-
-                    {guestDetail.event_guest.isArrivalPickupRequired && (
-                      <View className="bg-white border border-slate-200 p-4 rounded-2xl mb-3">
-                        <View className="flex-row items-center gap-2 mb-3">
-                          <Ionicons
-                            name="car-outline"
-                            size={20}
-                            color="#EE2B8C"
-                          />
-                          <Text variant="caption" className="text-xs">
-                            Arrival Pickup Assigned
-                          </Text>
-                        </View>
-                        <TextInput
-                          value={arrivalInfo}
-                          onChangeText={setArrivalInfo}
-                          placeholder="Driver / pickup details"
-                          placeholderTextColor="#94a3b8"
-                          className="w-full bg-slate-50 rounded-md p-4 text-sm text-slate-900"
-                        />
-                      </View>
-                    )}
-
-                    {guestDetail.event_guest.isDeparturePickupRequired && (
-                      <View className="bg-white border border-slate-200 p-4 rounded-2xl mb-3">
-                        <View className="flex-row items-center gap-2 mb-3">
-                          <Ionicons
-                            name="car-sport-outline"
-                            size={20}
-                            color="#EE2B8C"
-                          />
-                          <Text variant="caption" className="text-xs">
-                            Departure Pickup Assigned
-                          </Text>
-                        </View>
-                        <TextInput
-                          value={departureInfo}
-                          onChangeText={setDepartureInfo}
-                          placeholder="Driver / departure details"
-                          placeholderTextColor="#94a3b8"
-                          className="w-full bg-slate-50 rounded-md p-4 text-sm text-slate-900"
-                        />
-                      </View>
-                    )}
-
-                    <TouchableOpacity
-                      className="bg-primary py-3 rounded-xl items-center justify-center"
-                      activeOpacity={0.85}
-                      onPress={handleSaveAssignments}
-                      disabled={isPending || !hasAssignmentChanges}
-                      style={{
-                        opacity: isPending || !hasAssignmentChanges ? 0.6 : 1,
-                      }}
-                    >
-                      {isPending ? (
-                        <ActivityIndicator color="#fff" />
-                      ) : (
-                        <Text variant="h2" className="text-white text-sm">
-                          Save Assignments
+                        <Text variant="caption" className="text-xs">
+                          Arrival Pickup Assigned
                         </Text>
-                      )}
-                    </TouchableOpacity>
-                  </View>
-                )}
+                      </View>
+                      <TextInput
+                        value={arrivalInfo}
+                        onChangeText={setArrivalInfo}
+                        placeholder="Driver / pickup details"
+                        placeholderTextColor="#94a3b8"
+                        className="w-full bg-slate-50 rounded-md p-4 text-sm text-slate-900"
+                      />
+                    </View>
+                  )}
+
+                  {guestDetail.event_guest.isDeparturePickupRequired && (
+                    <View className="bg-white border border-slate-200 p-4 rounded-2xl mb-3">
+                      <View className="flex-row items-center gap-2 mb-3">
+                        <Ionicons
+                          name="car-sport-outline"
+                          size={20}
+                          color="#EE2B8C"
+                        />
+                        <Text variant="caption" className="text-xs">
+                          Departure Pickup Assigned
+                        </Text>
+                      </View>
+                      <TextInput
+                        value={departureInfo}
+                        onChangeText={setDepartureInfo}
+                        placeholder="Driver / departure details"
+                        placeholderTextColor="#94a3b8"
+                        className="w-full bg-slate-50 rounded-md p-4 text-sm text-slate-900"
+                      />
+                    </View>
+                  )}
+
+                  <TouchableOpacity
+                    className="bg-primary py-3 rounded-xl items-center justify-center"
+                    activeOpacity={0.85}
+                    onPress={handleSaveAssignments}
+                    disabled={isPending || !hasAssignmentChanges}
+                    style={{
+                      opacity: isPending || !hasAssignmentChanges ? 0.6 : 1,
+                    }}
+                  >
+                    {isPending ? (
+                      <ActivityIndicator color="#fff" />
+                    ) : (
+                      <Text variant="h2" className="text-white text-sm">
+                        Save Assignments
+                      </Text>
+                    )}
+                  </TouchableOpacity>
+                </View>
+              )}
             </View>
           </ScrollView>
         </KeyboardAwareScrollView>
