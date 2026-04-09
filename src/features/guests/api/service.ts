@@ -12,6 +12,25 @@ export interface InviteGuestPayload {
   isAccomodation: boolean;
 }
 
+export interface GuestCategoryOption {
+  label: string;
+  value: string;
+}
+
+export interface CreateGuestCategoryPayload {
+  category_title: string;
+  priority: 1 | 2 | 3;
+}
+
+interface EventGuestCategoryRecord {
+  id: number;
+  category_title: string;
+  eventId: number;
+  priority: number;
+  createdAt: string | null;
+  updatedAt: string | null;
+}
+
 export const inviteGuest = async (
   eventId: number,
   payload: InviteGuestPayload
@@ -24,6 +43,27 @@ export const getEventGuest = async (eventId: number) => {
   const response = await api.get(`/event/guest/${eventId}`);
   return response.data.data;
 };
+
+export const getEventGuestCategories = async (
+  eventId: number
+): Promise<GuestCategoryOption[]> => {
+  const response = await api.get(`/event/${eventId}/guest-category`);
+  const categories = (response.data?.data ?? []) as EventGuestCategoryRecord[];
+
+  return categories.map((item) => ({
+    label: item.category_title,
+    value: item.category_title,
+  }));
+};
+
+export const createEventGuestCategory = async (
+  eventId: number,
+  payload: CreateGuestCategoryPayload
+) => {
+  const response = await api.post(`/event/${eventId}/guest-category`, payload);
+  return response.data;
+};
+
 export const getInvitation = async (eventId: number) => {
   const response = await api.get(`/event/${eventId}/invitation`);
   return response.data.data;

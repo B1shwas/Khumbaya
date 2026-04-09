@@ -4,7 +4,11 @@ import {
 } from "@/src/components/ui/CountryPhone";
 import { Text } from "@/src/components/ui/Text";
 import { COUNTRY_DATA } from "@/src/constants/countrydata";
-import { useInviteGuest } from "@/src/features/guests/api/use-guests";
+import {
+  useCreateEventGuestCategory,
+  useGetEventGuestCategories,
+  useInviteGuest,
+} from "@/src/features/guests/api/use-guests";
 import { useFindUserWithPhone } from "@/src/features/user/api/use-user";
 import { User } from "@/src/store/AuthStore";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
@@ -17,6 +21,7 @@ import {
   Alert,
   Image,
   KeyboardAvoidingView,
+  Modal,
   Platform,
   Pressable,
   ScrollView,
@@ -36,18 +41,19 @@ type AddGuestFormValues = {
 
 type FoundUser = User;
 type SubmitAction = "draft" | "send" | null;
+type CategoryPriority = 1 | 2 | 3;
 
-const GUEST_CATEGORIES = [
-  { label: "Friend", value: "friend" },
-  { label: "Colleague", value: "colleague" },
-  { label: "Family", value: "family" },
-  { label: "VVIP", value: "vvip" },
+const PRIORITY_OPTIONS: Array<{ label: string; value: CategoryPriority }> = [
+  { label: "1", value: 1 },
+  { label: "2", value: 2 },
+  { label: "3", value: 3 },
 ];
 
 const AddGuestScreen = () => {
   const router = useRouter();
   const params = useLocalSearchParams();
   const inviteGuestMutation = useInviteGuest();
+  const createCategoryMutation = useCreateEventGuestCategory();
 
   const [inviteWithFamily, setInviteWithFamily] = useState(true);
   const [autoFilledPhone, setAutoFilledPhone] = useState<string | null>(null);
@@ -57,8 +63,17 @@ const AddGuestScreen = () => {
   const [pickerVisible, setPickerVisible] = useState(false);
   const [activeSubmitAction, setActiveSubmitAction] =
     useState<SubmitAction>(null);
+  const [categoryModalVisible, setCategoryModalVisible] = useState(false);
+  const [newCategoryTitle, setNewCategoryTitle] = useState("");
+  const [newCategoryPriority, setNewCategoryPriority] =
+    useState<CategoryPriority>(1);
 
   const eventId =Number(params.eventId);
+
+  const {
+    data: guestCategories = [],
+    isLoading: isGuestCategoriesLoading,
+  } = useGetEventGuestCategories(eventId || null);
 
   const { control, handleSubmit, reset, watch, setValue } =
     useForm<AddGuestFormValues>({
@@ -252,13 +267,58 @@ const AddGuestScreen = () => {
   const onInvalidSubmit = useCallback(
     (errors: FieldErrors<AddGuestFormValues>) => {
       const firstError =
-        errors.fullName || errors.phone || errors.invitation_name;
+        errors.fullName ||
+        errors.phone ||
+        errors.invitation_name ||
+        errors.category;
       if (firstError?.message) {
         Alert.alert("Error", firstError.message as string);
       }
     },
     []
   );
+
+  const handleCreateCategory = useCallback(async () => {
+    if (!eventId) {
+      Alert.alert("Error", "Invalid event id");
+      return;
+    }
+
+    const trimmedTitle = newCategoryTitle.trim();
+    if (!trimmedTitle) {
+      Alert.alert("Error", "Please enter category type.");
+      return;
+    }
+
+    try {
+      await createCategoryMutation.mutateAsync({
+        eventId,
+        payload: {
+          category_title: trimmedTitle,
+          priority: newCategoryPriority,
+        },
+      });
+
+      setValue("category", trimmedTitle, { shouldValidate: true });
+      setNewCategoryTitle("");
+      setNewCategoryPriority(1);
+      setCategoryModalVisible(false);
+      Alert.alert("Success", "Guest category created successfully.");
+    } catch (error: any) {
+      const message =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Failed to create guest category.";
+      Alert.alert("Error", message);
+    }
+  }, [
+    createCategoryMutation,
+    eventId,
+    newCategoryPriority,
+    newCategoryTitle,
+    setValue,
+  ]);
+
   return (
     <KeyboardAvoidingView
       className="flex-1 "
@@ -271,6 +331,78 @@ const AddGuestScreen = () => {
         onSelect={setSelectedCountry}
         onClose={() => setPickerVisible(false)}
       />
+      <Modal
+        transparent
+        animationType="fade"
+        visible={categoryModalVisible}
+        onRequestClose={() => setCategoryModalVisible(false)}
+      >
+        <View className="flex-1 bg-black/35 items-center justify-center px-6">
+          <View className="w-full rounded-xl bg-white p-5" style={{ gap: 14 }}>
+            <Text className="text-lg font-bold text-[#1a1b3a]">
+              Add Guest Category
+            </Text>
+
+            <View style={{ gap: 8 }}>
+              <Text className="text-xs font-semibold tracking-wide text-[#1a1b3a]">
+                CATEGORY TYPE
+              </Text>
+              <TextInput
+                className="h-12 w-full rounded-md border border-slate-200 bg-white px-3 text-base text-slate-900"
+                placeholder="e.g. friend"
+                placeholderTextColor="#94a3b8"
+                value={newCategoryTitle}
+                onChangeText={setNewCategoryTitle}
+              />
+            </View>
+
+            <View style={{ gap: 8 }}>
+              <Text className="text-xs font-semibold tracking-wide text-[#1a1b3a]">
+                PRIORITY (1-3)
+              </Text>
+              <Dropdown
+                style={{
+                  height: 48,
+                  borderWidth: 1,
+                  borderColor: "#e2e8f0",
+                  borderRadius: 6,
+                  paddingHorizontal: 12,
+                  backgroundColor: "#ffffff",
+                }}
+                placeholderStyle={{ color: "#94a3b8", fontSize: 14 }}
+                selectedTextStyle={{ color: "#1a1b3a", fontSize: 14 }}
+                data={PRIORITY_OPTIONS}
+                labelField="label"
+                valueField="value"
+                placeholder="Select priority"
+                value={newCategoryPriority}
+                onChange={(item: { value: CategoryPriority }) =>
+                  setNewCategoryPriority(item.value)
+                }
+              />
+            </View>
+
+            <View className="flex-row" style={{ gap: 10 }}>
+              <Pressable
+                className="flex-1 items-center justify-center rounded-md border border-slate-200 py-3"
+                onPress={() => setCategoryModalVisible(false)}
+                disabled={createCategoryMutation.isPending}
+              >
+                <Text className="font-semibold text-slate-600">Cancel</Text>
+              </Pressable>
+              <Pressable
+                className="flex-1 items-center justify-center rounded-md bg-[#ee2b8c] py-3"
+                onPress={handleCreateCategory}
+                disabled={createCategoryMutation.isPending}
+              >
+                <Text className="font-semibold text-white">
+                  {createCategoryMutation.isPending ? "Saving..." : "Save"}
+                </Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
       <KeyboardAwareScrollView
         className="flex-1 "
         contentContainerStyle={{
@@ -402,12 +534,32 @@ const AddGuestScreen = () => {
                 ) : null}
 
                 <View style={{ gap: 8 }}>
-                  <Text className="text-sm font-semibold tracking-wide text-[#1a1b3a]">
-                    GUEST CATEGORY
-                  </Text>
+                  <View className="flex-row items-center justify-between">
+                    <Text className="text-sm font-semibold tracking-wide text-[#1a1b3a]">
+                      GUEST CATEGORY
+                    </Text>
+                    <Pressable
+                      onPress={() => setCategoryModalVisible(true)}
+                      className="flex-row items-center"
+                      style={{ gap: 4 }}
+                    >
+                      <MaterialIcons name="add-circle-outline" size={16} color="#ee2b8c" />
+                      <Text className="text-xs font-semibold text-[#ee2b8c]">
+                        Add category
+                      </Text>
+                    </Pressable>
+                  </View>
                   <Controller
                     control={control}
                     name="category"
+                    rules={{
+                      validate: (value) => {
+                        return (
+                          value.trim().length > 0 ||
+                          "Please select guest category"
+                        );
+                      },
+                    }}
                     render={({ field: { onChange, value } }) => (
                       <Dropdown
                         style={{
@@ -420,15 +572,28 @@ const AddGuestScreen = () => {
                         }}
                         placeholderStyle={{ color: "#94a3b8", fontSize: 16 }}
                         selectedTextStyle={{ color: "#1a1b3a", fontSize: 16 }}
-                        data={GUEST_CATEGORIES}
+                        data={guestCategories}
                         labelField="label"
                         valueField="value"
-                        placeholder="Select guest category"
+                        disable={isGuestCategoriesLoading || !guestCategories.length}
+                        placeholder={
+                          isGuestCategoriesLoading
+                            ? "Loading guest categories..."
+                            : guestCategories.length
+                              ? "Select guest category"
+                              : "No guest category available"
+                        }
                         value={value}
                         onChange={(item: any) => onChange(item.value)}
                       />
                     )}
                   />
+
+                  {!isGuestCategoriesLoading && !guestCategories.length ? (
+                    <Text className="text-xs text-slate-500">
+                      Guest categories are unavailable for this event right now.
+                    </Text>
+                  ) : null}
                 </View>
 
                 {shouldSearch && !isFindingUser && !foundUser ? (
