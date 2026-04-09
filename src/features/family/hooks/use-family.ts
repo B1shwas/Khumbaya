@@ -1,11 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   addFamilyMemberApi,
+  AddFamilyMemberPayload,
   createFamilyApi,
   deleteFamilyApi,
   deleteFamilyMemberApi,
-
-  FamilyMemberPayload,
   getFamilyByIdApi,
   getFamilyByUserIdApi,
   getFamilyMembersApi,
@@ -77,7 +76,7 @@ export const useDeleteFamily = () => {
 
 type AddFamilyMemberInput = {
   familyId: number;
-  data: FamilyMemberPayload;
+  data: AddFamilyMemberPayload;
 };
 
 export const useAddFamilyMember = () => {
@@ -107,7 +106,7 @@ export const useGetFamilyMembers = (familyId?: number) => {
 type UpdateFamilyMemberInput = {
   familyId: number;
   memberId: number;
-  data: Partial<FamilyMemberPayload>;
+  data: Partial<AddFamilyMemberPayload>;
 };
 
 export const useUpdateFamilyMember = () => {

@@ -1,0 +1,369 @@
+import { useGetGuestRoom } from "@/src/features/guests/api/use-guests";
+import { User } from "@/src/store/AuthStore";
+import { shadowStyle } from "@/src/utils/helper";
+import { Ionicons } from "@expo/vector-icons";
+import { useLocalSearchParams } from "expo-router";
+import { useEffect, useMemo, useState } from "react";
+import {
+  ActivityIndicator,
+  Modal,
+  RefreshControl,
+  SectionList,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+
+export interface Hotel_responce {
+  user_detail: User | null;
+  user_room: string | null;
+}
+
+type GuestSection = {
+  title: string;
+  data: Hotel_responce[];
+};
+
+function getInitials(name: string): string {
+  const parts = name.trim().split(" ");
+  if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+  return (
+    parts[0].charAt(0).toUpperCase() +
+    parts[parts.length - 1].charAt(0).toUpperCase()
+  );
+}
+
+function GuestRowItem({ guest }: { guest: Hotel_responce }) {
+  const username = guest.user_detail?.username || "Unknown Guest";
+  const room = guest.user_room?.trim();
+
+  return (
+    <View className="flex-row items-start  rounded-md px-3.5 py-3  bg-white "
+    
+    style={shadowStyle}
+    >
+      <View className="w-11 h-11 rounded-full bg-pink-100  items-center justify-center mr-3">
+        <Text className="font-jakarta-bold text-[13px]  text-primary">
+          {getInitials(username)}
+        </Text>
+      </View>
+
+      <View className="flex-1">
+        <Text className="font-jakarta-semibold text-sm text-[#181114]">
+          {username}
+        </Text>
+
+      <View className="flex-row items-center justify-between gap-1 mt-0.5">
+        <View className="flex-row items-center gap-1 mt-1">
+          {room ? (
+            <>
+              <Ionicons name="bed-outline" size={13} color="#9CA3AF" />
+              <Text className="font-jakarta text-xs text-gray-500">Assigned room</Text>
+            </>
+          ) : (
+            <>
+              <Ionicons name="alert-circle-outline" size={13} color="#D1D5DB" />
+              <Text className="font-jakarta text-xs text-gray-400 italic">
+                Room not assigned
+              </Text>
+            </>
+          )}
+        </View>
+      </View>
+
+      
+      </View>
+            <View >
+        {!!room && (
+          <View className="mt-1.5 bg-blue-50 rounded-md px-2.5 py-1.5 self-start max-w-full">
+            <Text className="font-jakarta-semibold text-[12px] text-blue-700">
+              {room}
+            </Text>
+          </View>
+        )}
+        </View>
+    </View>
+  );
+}
+
+export default function HotelManagementScreen() {
+  const { eventId } = useLocalSearchParams<{ eventId: string }>();
+  const numericEventId = eventId ? Number(eventId) : null;
+
+  const [searchText, setSearchText] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [isCategoryModalVisible, setIsCategoryModalVisible] = useState(false);
+
+  const {
+    data: guestRooms = [],
+    isLoading,
+    isRefetching,
+    refetch,
+  } = useGetGuestRoom(numericEventId);
+
+  const normalizedGuests = useMemo(() => {
+    return Array.isArray(guestRooms)
+      ? (guestRooms.filter(Boolean) as Hotel_responce[])
+      : [];
+  }, [guestRooms]);
+
+  const filteredGuests = useMemo(() => {
+    const query = searchText.trim().toLowerCase();
+    if (!query) return normalizedGuests;
+
+    return normalizedGuests.filter((guest) => {
+      const username = guest.user_detail?.username?.toLowerCase() ?? "";
+      const phone = guest.user_detail?.phone?.toLowerCase() ?? "";
+      const room = guest.user_room?.toLowerCase() ?? "";
+      return (
+        username.includes(query) ||
+        phone.includes(query) ||
+        room.includes(query)
+      );
+    });
+  }, [normalizedGuests, searchText]);
+
+  const getNormalizedCategory = (category?: string | null) => {
+    return category?.trim().toLowerCase() || "uncategorized";
+  };
+
+  const formatCategoryLabel = (category: string) => {
+    if (category === "vvip") return "VVIP";
+    if (category === "uncategorized") return "Uncategorized";
+    return category.charAt(0).toUpperCase() + category.slice(1);
+  };
+
+  const categoryStats = useMemo(() => {
+    const categoryCountMap = new Map<string, number>();
+
+    for (const guest of filteredGuests) {
+      const category = getNormalizedCategory(guest.user_detail?.relation);
+      categoryCountMap.set(category, (categoryCountMap.get(category) ?? 0) + 1);
+    }
+
+    const preferredOrder = ["friend", "family", "colleague", "vvip", "uncategorized"];
+
+    return Array.from(categoryCountMap.entries())
+      .map(([value, count]) => ({
+        value,
+        label: formatCategoryLabel(value),
+        count,
+      }))
+      .sort((a, b) => {
+        const ai = preferredOrder.indexOf(a.value);
+        const bi = preferredOrder.indexOf(b.value);
+        if (ai === -1 && bi === -1) return a.label.localeCompare(b.label);
+        if (ai === -1) return 1;
+        if (bi === -1) return -1;
+        return ai - bi;
+      });
+  }, [filteredGuests]);
+
+  useEffect(() => {
+    if (selectedCategory === "all") return;
+    const exists = categoryStats.some((item) => item.value === selectedCategory);
+    if (!exists) setSelectedCategory("all");
+  }, [categoryStats, selectedCategory]);
+
+  const guestsAfterCategoryFilter = useMemo(() => {
+    if (selectedCategory === "all") return filteredGuests;
+    return filteredGuests.filter(
+      (guest) => getNormalizedCategory(guest.user_detail?.relation) === selectedCategory
+    );
+  }, [filteredGuests, selectedCategory]);
+
+  const assignedGuests = guestsAfterCategoryFilter.filter((g) => !!g.user_room);
+  const unassignedGuests = guestsAfterCategoryFilter.filter((g) => !g.user_room);
+
+  const sections: GuestSection[] = [
+    { title: "Assigned Rooms", data: assignedGuests },
+    { title: "Not Assigned", data: unassignedGuests },
+  ].filter((section) => section.data.length > 0);
+
+  const totalGuests = normalizedGuests.length;
+  const totalAssigned = normalizedGuests.filter((g) => !!g.user_room).length;
+  const selectedCategoryLabel =
+    selectedCategory === "all" ? "All" : formatCategoryLabel(selectedCategory);
+  const categoryPickerOptions = [
+    {
+      value: "all",
+      label: "All",
+      count: filteredGuests.length,
+    },
+    ...categoryStats,
+  ];
+  const totalRooms = new Set(
+    normalizedGuests
+      .map((g) => g.user_room?.trim())
+      .filter((room): room is string => !!room)
+  ).size;
+
+  return (
+    <SafeAreaView className="flex-1 bg-gray-100" edges={[]}>
+      <View className="px-4 pt-3 pb-2">
+        
+
+        <View className="flex-row items-center gap-2">
+          <View className="flex-1 flex-row items-center bg-white rounded-md px-3.5 h-12">
+            <Ionicons
+              name="search-outline"
+              size={18}
+              color="#9CA3AF"
+              style={{ marginRight: 8 }}
+            />
+            <TextInput
+              className="flex-1 text-sm text-gray-900 font-jakarta"
+              placeholder="Search by guest, phone, or room..."
+              placeholderTextColor="#9CA3AF"
+              value={searchText}
+              onChangeText={setSearchText}
+            />
+            {searchText.length > 0 && (
+              <TouchableOpacity onPress={() => setSearchText("")}>
+                <Ionicons name="close-circle" size={18} color="#9CA3AF" />
+              </TouchableOpacity>
+            )}
+          </View>
+
+    
+          <TouchableOpacity
+            onPress={() => setIsCategoryModalVisible(true)}
+            className="h-12 w-12 bg-white border border-gray-200 rounded-md items-center justify-center"
+          >
+            <View className="items-center">
+              <Ionicons name="funnel-outline" size={18} color="#374151" />
+              {selectedCategory !== "all" && (
+                <View className="absolute -right-1 -top-1 w-2.5 h-2.5 rounded-full bg-primary" />
+              )}
+            </View>
+          </TouchableOpacity>
+        </View>
+
+        <Text className="text-[11px] text-gray-500 mt-2 font-jakarta">
+          {selectedCategoryLabel} • {guestsAfterCategoryFilter.length} guest
+          {guestsAfterCategoryFilter.length === 1 ? "" : "s"}
+        </Text>
+      </View>
+
+      <View className="flex-row bg-white mx-4 mb-3 mt-2 rounded-md py-3.5 shadow-sm">
+        <View className="flex-1 items-center">
+          <Text className="font-jakarta-bold text-xl text-primary">{totalRooms}</Text>
+          <Text className="font-jakarta text-[11px] text-gray-500 mt-0.5">Rooms</Text>
+        </View>
+        <View className="w-px bg-gray-200 my-1" />
+        <View className="flex-1 items-center">
+          <Text className="font-jakarta-bold text-xl text-primary">{totalGuests}</Text>
+          <Text className="font-jakarta text-[11px] text-gray-500 mt-0.5">Guests</Text>
+        </View>
+        <View className="w-px bg-gray-200 my-1" />
+        <View className="flex-1 items-center">
+          <Text className="font-jakarta-bold text-xl text-primary">{totalAssigned}</Text>
+          <Text className="font-jakarta text-[11px] text-gray-500 mt-0.5">Assigned</Text>
+        </View>
+      </View>
+
+      {isLoading ? (
+        <View className="flex-1 items-center justify-center gap-3">
+          <ActivityIndicator size="large" color="#ee2b8c" />
+          <Text className="font-jakarta text-sm text-gray-400">
+            Loading guest rooms...
+          </Text>
+        </View>
+      ) : (
+        <SectionList
+          sections={sections}
+          keyExtractor={(item, index) => `${item.user_detail?.id ?? "guest"}-${index}`}
+          renderItem={({ item }) => <GuestRowItem guest={item} />}
+          renderSectionHeader={({ section }) => (
+            <View className="pt-1 pb-2">
+              <Text className="font-jakarta-bold text-sm text-gray-700">
+                {section.title} ({section.data.length})
+              </Text>
+            </View>
+          )}
+          contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 100, gap: 12 }}
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={isRefetching}
+              onRefresh={refetch}
+              tintColor="#ee2b8c"
+              colors={["#ee2b8c"]}
+            />
+          }
+          stickySectionHeadersEnabled={false}
+          ItemSeparatorComponent={() => <View className="h-2.5" />}
+          ListEmptyComponent={
+            <View className="items-center pt-16 gap-3">
+              <Ionicons name="business-outline" size={48} color="#D1D5DB" />
+              <Text className="font-jakarta text-sm text-gray-400">
+                {normalizedGuests.length === 0
+                  ? "No guests found for this event yet."
+                  : "No matches found for your search."}
+              </Text>
+            </View>
+          }
+        />
+      )}
+
+      <Modal
+        visible={isCategoryModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setIsCategoryModalVisible(false)}
+      >
+        <View className="flex-1 bg-black/35 justify-end">
+          <TouchableOpacity
+            activeOpacity={1}
+            onPress={() => setIsCategoryModalVisible(false)}
+            className="absolute inset-0"
+          />
+          <View className="bg-white rounded-t-3xl px-5 pt-5 pb-7">
+            <View className="w-10 h-1 bg-gray-200 rounded-full self-center mb-3" />
+            <View className="flex-row items-center justify-between mb-4">
+              <Text className="font-jakarta-bold text-base text-[#181114]">
+                Filter by category
+              </Text>
+              <TouchableOpacity onPress={() => setIsCategoryModalVisible(false)}>
+                <Ionicons name="close" size={20} color="#6B7280" />
+              </TouchableOpacity>
+            </View>
+
+            {categoryPickerOptions.map((option) => {
+              const isActive = selectedCategory === option.value;
+              return (
+                <TouchableOpacity
+                  key={option.value}
+                  onPress={() => {
+                    setSelectedCategory(option.value);
+                    setIsCategoryModalVisible(false);
+                  }}
+                  className={`flex-row items-center justify-between px-4 py-3.5 rounded-xl border mb-2 ${
+                    isActive
+                      ? "border-primary bg-primary/10"
+                      : "border-gray-200 bg-white"
+                  }`}
+                >
+                  <Text className="font-jakarta-semibold text-sm text-[#181114]">
+                    {option.label}
+                  </Text>
+
+                  <View className="flex-row items-center gap-2">
+                    <Text className="font-jakarta text-xs text-gray-500">
+                      {option.count}
+                    </Text>
+                    {isActive && (
+                      <Ionicons name="checkmark-circle" size={18} color="#ee2b8c" />
+                    )}
+                  </View>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        </View>
+      </Modal>
+    </SafeAreaView>
+  );
+}

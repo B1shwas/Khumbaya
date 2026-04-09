@@ -15,10 +15,25 @@ export type {
   BusinessReview,
   BusinessService, OtherServiceAttribute, VenueAttribute
 };
-
+export enum BusinessCategoryEnum {
+  Venue = "Venue",
+  PhotographerVideographer = "Photographers & Videographer",
+  MakeupArtist = "Makeup Artist",
+  BridalGrooming = "Bridal Grooming",
+  MehendiArtist = "Mehendi Artist",
+  WeddingPlannersDecorator = "Wedding Planners & Decorator",
+  MusicEntertainment = "Music & Entertainment",
+  InvitesGift = "Invites & Gift",
+  FoodCatering = "Food & Catering",
+  PreWeddingShoot = "Pre Wedding Shoot",
+  BridalWear = "Bridal Wear",
+  JewelryAccessories = "Jewelry & Accessories",
+  SecurityGuard = "Security Guard",
+  Baraat = "Baraat"
+}
 export interface CreateBusinessPayload {
   business_name: string;
-  category: BusinessCategory;
+category: BusinessCategory;
   description?: string;
   location?: string;
   cover?: string;

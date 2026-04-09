@@ -6,6 +6,7 @@ import {
   useEventById,
   useUpdateEvent,
 } from "@/src/features/events/hooks/use-event";
+import { useThrottledRouter } from "@/src/hooks/useThrottledRouter";
 import { MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
@@ -48,14 +49,16 @@ export default function EventBudgetScreen() {
     );
   };
 
-  const handleEditBudget = () => {
-    let totalBudgetValue = 0;
-    if (!budgetLoading && budgetData) {
-      totalBudgetValue = budgetData.summary?.totalBudget || 0;
-    }
-    setBudgetInput(totalBudgetValue.toString());
-    setEditBudgetVisible(true);
-  };
+  const { push } = useThrottledRouter();
+
+  // const handleEditBudget = () => {
+  //   let totalBudgetValue = 0;
+  //   if (!budgetLoading && budgetData) {
+  //     totalBudgetValue = budgetData.summary?.totalBudget || 0;
+  //   }
+  //   setBudgetInput(totalBudgetValue.toString());
+  //   setEditBudgetVisible(true);
+  // };
 
   const handleSaveBudget = async () => {
     const newBudget = parseFloat(budgetInput);
@@ -109,7 +112,11 @@ export default function EventBudgetScreen() {
         options={{
           headerRight: () => (
             <TouchableOpacity
-              onPress={handleEditBudget}
+              onPress={() =>
+                push(
+                  "/(protected)/(client-stack)/events/[eventId]/(organizer)/edit-event"
+                )
+              }
               className="pr-4"
               activeOpacity={0.7}
             >
