@@ -20,6 +20,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 export interface Hotel_responce {
   user_detail: User | null;
   user_room: string | null;
+  category: string | null;
 }
 
 type GuestSection = {
@@ -159,7 +160,7 @@ export default function HotelManagementScreen() {
     const categoryCountMap = new Map<string, number>();
 
     for (const guest of filteredGuests) {
-      const category = getNormalizedCategory(guest.user_detail?.relation);
+      const category = getNormalizedCategory(guest.category);
       categoryCountMap.set(category, (categoryCountMap.get(category) ?? 0) + 1);
     }
 
@@ -198,8 +199,7 @@ export default function HotelManagementScreen() {
   const guestsAfterCategoryFilter = useMemo(() => {
     if (selectedCategory === "all") return filteredGuests;
     return filteredGuests.filter(
-      (guest) =>
-        getNormalizedCategory(guest.user_detail?.relation) === selectedCategory
+      (guest) => getNormalizedCategory(guest.category) === selectedCategory
     );
   }, [filteredGuests, selectedCategory]);
 
