@@ -464,7 +464,7 @@ function ServiceInfoSection({
   const BookingCard = () => (
     <View
       className="mx-4 mb-4 rounded-2xl overflow-hidden bg-white"
-      style={{ borderWidth: 1, borderColor: "#f0f0f4", elevation: 2, shadowColor: "#000", shadowOpacity: 0.06, shadowRadius: 8, shadowOffset: { width: 0, height: 2 } }}
+      style={[{ borderWidth: 1, borderColor: "#f0f0f4" }, shadowStyle]}
     >
       <View className="flex-row items-center gap-2 px-4 pt-4 pb-3">
         <MaterialIcons name="verified-user" size={20} color="#ee2b8c" />
