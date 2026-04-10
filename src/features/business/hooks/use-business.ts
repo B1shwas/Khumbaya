@@ -165,10 +165,20 @@ export const useAddEventVendor = () => {
 };
 
 export const useGetEventBusiness = (eventId: string | number) => {
+  return useGetBusinessByEventId(eventId);
+};
+
+export const useGetBusinessByEventId = (
+  eventId: string | number | null | undefined
+) => {
+  const hasValidEventId =
+    (typeof eventId === "number" && !Number.isNaN(eventId)) ||
+    (typeof eventId === "string" && eventId.trim().length > 0);
+
   return useQuery({
     queryKey: ["event-business", eventId],
-    queryFn: () => getEventBusinessApi(eventId),
-    enabled: !!eventId,
+    queryFn: () => getEventBusinessApi(eventId as string | number),
+    enabled: hasValidEventId,
     staleTime: 5 * 60 * 1000,
     gcTime: 30 * 60 * 1000,
   });

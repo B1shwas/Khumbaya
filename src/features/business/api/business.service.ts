@@ -81,7 +81,19 @@ export const addEventVendorApi = async (
   return response.data.data;
 };
 
-export const getEventBusinessApi = async (eventId: string | number): Promise<any[]> => {
+export const getEventBusinessApi = async (
+  eventId: string | number
+): Promise<Business[]> => {
   const response = await api.get(`/business/event/${eventId}/vendor`);
-  return response.data.data;
+  const payload = response.data?.data;
+
+  if (Array.isArray(payload)) {
+    return payload;
+  }
+
+  if (Array.isArray(payload?.items)) {
+    return payload.items;
+  }
+
+  return [];
 };
