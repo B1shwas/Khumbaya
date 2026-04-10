@@ -1,6 +1,7 @@
+import { useGetBusinessByEventId } from "@/src/features/business/hooks/use-business";
 import { Ionicons } from "@expo/vector-icons";
-import { router, type RelativePathString } from "expo-router";
-import { useState } from "react";
+import { router, useLocalSearchParams, type RelativePathString } from "expo-router";
+import { useMemo, useState } from "react";
 import {
   Image,
   ScrollView,
@@ -22,86 +23,15 @@ interface Vendor {
   imageUrl?: string;
 }
 
-const vendorsData: Vendor[] = [
-  {
-    id: "1",
-    name: "Floral Dreams Studio",
-    category: "Florist",
-    status: "booked",
-    contact: "+91 98765 43210",
-    price: "₹50,000",
-    rating: 4.9,
-    imageUrl:
-      "https://images.unsplash.com/photo-1459411552884-841db9b3cc2a?w=800&q=80",
-  },
-  {
-    id: "2",
-    name: "Crown Catering",
-    category: "Catering",
-    status: "booked",
-    contact: "+91 98765 43211",
-    price: "₹1,500/plate",
-    rating: 4.7,
-    imageUrl:
-      "https://images.unsplash.com/photo-1555244162-803834f70033?w=800&q=80",
-  },
-  {
-    id: "3",
-    name: "Elite Photography",
-    category: "Photography",
-    status: "booked",
-    contact: "+91 98765 43212",
-    price: "₹75,000",
-    rating: 4.8,
-    imageUrl:
-      "https://images.unsplash.com/photo-1519741497674-611481863552?w=800&q=80",
-  },
-  {
-    id: "4",
-    name: "DJ Wave Sounds",
-    category: "DJ/Music",
-    status: "pending",
-    contact: "+91 98765 43213",
-    price: "₹25,000",
-    rating: 4.6,
-    imageUrl:
-      "https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?w=800&q=80",
-  },
-  {
-    id: "5",
-    name: "Royal Decorations",
-    category: "Decoration",
-    status: "pending",
-    contact: "+91 98765 43214",
-    price: "₹1,00,000",
-    rating: 4.5,
-    imageUrl:
-      "https://images.unsplash.com/photo-1519225421980-715cb0202128?w=800&q=80",
-  },
-  {
-    id: "6",
-    name: "Sweet Tooth Cakes",
-    category: "Cake",
-    status: "available",
-    contact: "+91 98765 43215",
-    price: "₹5,000",
-    rating: 4.9,
-    imageUrl:
-      "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=800&q=80",
-  },
-];
-
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case "booked":
-      return "bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400";
-    case "pending":
-      return "bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400";
-    case "available":
-      return "bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400";
-    default:
-      return "bg-gray-100 text-gray-600";
+const mapBusinessStatusToVendorStatus = (status: unknown): Vendor["status"] => {
+  const normalized = String(status ?? "").toLowerCase();
+  if (normalized.includes("pending") || normalized.includes("request")) {
+    return "pending";
   }
+  if (normalized.includes("available") || normalized.includes("open")) {
+    return "available";
+  }
+  return "booked";
 };
 
 const VendorCard = ({ vendor }: { vendor: Vendor }) => (
@@ -185,9 +115,33 @@ const VendorCard = ({ vendor }: { vendor: Vendor }) => (
 );
 
 export default function EventVendorsPage() {
+  const { eventId } = useLocalSearchParams<{ eventId?: string }>();
   const [activeTab, setActiveTab] = useState<
     "all" | "booked" | "pending" | "available"
   >("all");
+
+  const {
+    data: eventBusinesses = [],
+    isLoading,
+    isError,
+  } = useGetBusinessByEventId(eventId);
+
+  const vendorsData = useMemo<Vendor[]>(() => {
+    return eventBusinesses.map((business: any) => ({
+      id: String(business?.id ?? ""),
+      name: business?.business_name ?? "Unnamed Vendor",
+      category: business?.category ?? "General",
+      status: mapBusinessStatusToVendorStatus(business?.status),
+      contact: business?.contact_phone ?? business?.whatsapp_number ?? undefined,
+      price:
+        typeof business?.price_starting_from === "number"
+          ? `₹${business.price_starting_from}`
+          : undefined,
+      rating:
+        typeof business?.rating === "number" ? business.rating : undefined,
+      imageUrl: business?.avatar ?? business?.cover ?? undefined,
+    }));
+  }, [eventBusinesses]);
 
   const filteredVendors = vendorsData.filter((vendor) => {
     if (activeTab === "all") return true;
@@ -250,11 +204,36 @@ export default function EventVendorsPage() {
         contentContainerStyle={styles.vendorList}
         showsVerticalScrollIndicator={false}
       >
+        {!eventId && (
+          <View style={styles.emptyState}>
+            <Ionicons name="warning-outline" size={48} color="#F59E0B" />
+            <Text style={styles.emptyTitle}>Event not found</Text>
+            <Text style={styles.emptySubtitle}>
+              Open this page from an event to load vendors.
+            </Text>
+          </View>
+        )}
+
+        {isLoading && !!eventId && (
+          <View style={styles.emptyState}>
+            <Ionicons name="sync-outline" size={48} color="#9CA3AF" />
+            <Text style={styles.emptyTitle}>Loading vendors...</Text>
+          </View>
+        )}
+
+        {isError && !!eventId && (
+          <View style={styles.emptyState}>
+            <Ionicons name="alert-circle-outline" size={48} color="#EF4444" />
+            <Text style={styles.emptyTitle}>Could not load vendors</Text>
+            <Text style={styles.emptySubtitle}>Please try again.</Text>
+          </View>
+        )}
+
         {filteredVendors.map((vendor) => (
           <VendorCard key={vendor.id} vendor={vendor} />
         ))}
 
-        {filteredVendors.length === 0 && (
+        {filteredVendors.length === 0 && !!eventId && !isLoading && !isError && (
           <View style={styles.emptyState}>
             <Ionicons name="storefront-outline" size={64} color="#D1D5DB" />
             <Text style={styles.emptyTitle}>No vendors found</Text>

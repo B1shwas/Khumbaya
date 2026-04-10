@@ -1,8 +1,8 @@
 import api from "@/src/api/axios";
 import { Business, BusinessWithAttribute } from "@/src/constants/business";
 import {
-  CreateBusinessVenuePayload,
   CreateBusinessPayload,
+  CreateBusinessVenuePayload,
   UpdateBusinessPayload,
   UpdateBusinessServicePayload,
   UpdateBusinessVenuePayload,
@@ -84,7 +84,7 @@ export const addEventVendorApi = async (
 export const getEventBusinessApi = async (
   eventId: string | number
 ): Promise<Business[]> => {
-  const response = await api.get(`/business/event/${eventId}/vendor`);
+  const response = await api.get(`/event/vendor/${eventId}/`);
   const payload = response.data?.data;
 
   if (Array.isArray(payload)) {
