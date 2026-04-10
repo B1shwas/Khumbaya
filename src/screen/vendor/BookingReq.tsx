@@ -3,6 +3,7 @@ import { Text } from "@/src/components/ui/Text";
 import { Event as AppEvent } from "@/src/constants/event";
 import { useAddEventVendor } from "@/src/features/business/hooks/use-business";
 import { usegetUpcomingEvents } from "@/src/features/events/hooks/use-event";
+import { useAuthStore } from "@/src/store/AuthStore";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
@@ -51,8 +52,10 @@ export default function BookingReqModal({
   const insets = useSafeAreaInsets();
   const pan = useRef(new Animated.ValueXY()).current;
   const opacity = useRef(new Animated.Value(1)).current;
-  const { data: events = [] as AppEvent[], isLoading: eventsLoading } = usegetUpcomingEvents();
-  const { mutateAsync: addEventVendor } = useAddEventVendor();
+  const { data: events = [] as AppEvent[], isLoading: eventsLoading } =
+    usegetUpcomingEvents();
+  const { user } = useAuthStore();
+  const { mutateAsync: addEventVendor } = useAddEventVendor(user!.id);
 
   const {
     control,
@@ -173,7 +176,8 @@ export default function BookingReqModal({
       );
     } catch (error: any) {
       console.error("Error submitting booking request:", error);
-      const message = error?.message || "Failed to send enquiry. Please try again.";
+      const message =
+        error?.message || "Failed to send enquiry. Please try again.";
       Alert.alert("Error", message);
     }
   };
@@ -226,7 +230,10 @@ export default function BookingReqModal({
                   >
                     Let the vendor know what you're planning.
                   </Text>
-                  <Text variant="caption" className="text-text-secondary text-sm">
+                  <Text
+                    variant="caption"
+                    className="text-text-secondary text-sm"
+                  >
                     Providing specific details helps vendors give you the most
                     accurate pricing.
                   </Text>
@@ -245,17 +252,23 @@ export default function BookingReqModal({
 
                       <Pressable
                         onPress={() => setShowEventDropdown(!showEventDropdown)}
-                        className={`h-14 bg-white border rounded-lg px-4 flex-row items-center justify-between ${errors.eventId ? "border-red-400" : "border-gray-200"
-                          }`}
+                        className={`h-14 bg-white border rounded-lg px-4 flex-row items-center justify-between ${
+                          errors.eventId ? "border-red-400" : "border-gray-200"
+                        }`}
                       >
                         <Text
-                          className={`text-base ${selectedEvent ? "text-text-primary" : "text-gray-400"
-                            }`}
+                          className={`text-base ${
+                            selectedEvent
+                              ? "text-text-primary"
+                              : "text-gray-400"
+                          }`}
                         >
                           {selectedEvent?.title || "Select an Event"}
                         </Text>
                         <MaterialIcons
-                          name={showEventDropdown ? "expand-less" : "expand-more"}
+                          name={
+                            showEventDropdown ? "expand-less" : "expand-more"
+                          }
                           size={24}
                           color="#111827"
                         />
@@ -272,23 +285,31 @@ export default function BookingReqModal({
                         <View className="absolute top-24 left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
                           {eventsLoading ? (
                             <View className="px-4 py-3">
-                              <Text className="text-gray-400">Loading events...</Text>
+                              <Text className="text-gray-400">
+                                Loading events...
+                              </Text>
                             </View>
                           ) : events.length === 0 ? (
                             <View className="px-4 py-3">
-                              <Text className="text-gray-400">No events found</Text>
+                              <Text className="text-gray-400">
+                                No events found
+                              </Text>
                             </View>
                           ) : (
                             events.map((event: AppEvent) => (
                               <Pressable
                                 key={event.id}
                                 onPress={() => {
-                                  setValue("eventId", event.id, { shouldValidate: true });
+                                  setValue("eventId", event.id, {
+                                    shouldValidate: true,
+                                  });
                                   setShowEventDropdown(false);
                                 }}
                                 className="px-4 py-3 border-b border-gray-100 last:border-b-0"
                               >
-                                <Text className="text-text-primary">{event.title}</Text>
+                                <Text className="text-text-primary">
+                                  {event.title}
+                                </Text>
                               </Pressable>
                             ))
                           )}
@@ -296,7 +317,11 @@ export default function BookingReqModal({
                       )}
 
                       <Pressable className="mt-3 flex-row items-center gap-1">
-                        <MaterialIcons name="add-circle" size={18} color="#ee2b8c" />
+                        <MaterialIcons
+                          name="add-circle"
+                          size={18}
+                          color="#ee2b8c"
+                        />
                         <Text className="text-primary text-sm font-medium">
                           I haven't created one yet
                         </Text>
@@ -319,10 +344,15 @@ export default function BookingReqModal({
                       render={({ field: { onChange, onBlur, value } }) => (
                         <>
                           <View
-                            className={`h-14 bg-white border rounded-lg px-4 flex-row items-center ${errors.budget ? "border-red-400" : "border-gray-200"
-                              }`}
+                            className={`h-14 bg-white border rounded-lg px-4 flex-row items-center ${
+                              errors.budget
+                                ? "border-red-400"
+                                : "border-gray-200"
+                            }`}
                           >
-                            <Text className="text-amber-600 font-semibold mr-1">$</Text>
+                            <Text className="text-amber-600 font-semibold mr-1">
+                              $
+                            </Text>
                             <TextInput
                               placeholder="0.00"
                               placeholderTextColor="#9CA3AF"
@@ -361,8 +391,11 @@ export default function BookingReqModal({
                             value={value}
                             onChangeText={onChange}
                             onBlur={onBlur}
-                            className={`h-14 bg-white border rounded-lg px-4 text-text-primary text-base ${errors.guests ? "border-red-400" : "border-gray-200"
-                              }`}
+                            className={`h-14 bg-white border rounded-lg px-4 text-text-primary text-base ${
+                              errors.guests
+                                ? "border-red-400"
+                                : "border-gray-200"
+                            }`}
                           />
                           {errors.guests && (
                             <Text className="text-red-500 text-xs mt-1">

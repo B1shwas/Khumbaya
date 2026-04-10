@@ -8,6 +8,8 @@ import {
   getBusinessByIdApi,
   getBusinessListApi,
   getEventBusinessApi,
+  getEventOfBusiness,
+  getUserBusiness,
   updateBusinessApi,
   updateBusinessServiceApi,
   updateBusinessVenueApi,
@@ -52,8 +54,13 @@ export const useCreateBusiness = () => {
 export const useUpdateBusiness = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, payload }: { id: string; payload: UpdateBusinessPayload }) =>
-      updateBusinessApi(id, payload),
+    mutationFn: ({
+      id,
+      payload,
+    }: {
+      id: string;
+      payload: UpdateBusinessPayload;
+    }) => updateBusinessApi(id, payload),
     onSuccess: (_data, { id }) => {
       queryClient.invalidateQueries({ queryKey: ["business/list"] });
       queryClient.invalidateQueries({ queryKey: ["business", id] });
@@ -148,7 +155,7 @@ export const useCreateBusinessVenue = () => {
   });
 };
 
-export const useAddEventVendor = () => {
+export const useAddEventVendor = (userId: number) => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({
@@ -160,6 +167,7 @@ export const useAddEventVendor = () => {
     }) => addEventVendorApi(eventId, payload),
     onSuccess: (_data, { eventId }) => {
       queryClient.invalidateQueries({ queryKey: ["event-business", eventId] });
+      queryClient.invalidateQueries({ queryKey: ["business-event", userId] });
     },
   });
 };
@@ -179,6 +187,29 @@ export const useGetBusinessByEventId = (
     queryKey: ["event-business", eventId],
     queryFn: () => getEventBusinessApi(eventId as string | number),
     enabled: hasValidEventId,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+  });
+};
+
+export const useGetEventOfBusiness = async (
+  businessIds: number[],
+  userId: number
+) => {
+  return useQuery({
+    queryKey: ["business-event", userId],
+    queryFn: () => getEventOfBusiness(businessIds),
+    enabled: businessIds.length > 0,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+  });
+};
+
+export const useGetUserBusiness = (userId: number) => {
+  return useQuery({
+    queryKey: ["user-business", userId],
+    queryFn: () => getUserBusiness(),
+    enabled: !!userId,
     staleTime: 5 * 60 * 1000,
     gcTime: 30 * 60 * 1000,
   });

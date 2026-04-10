@@ -8,8 +8,12 @@ import {
   UpdateBusinessVenuePayload,
 } from "../types";
 
-export const getBusinessListApi = async (userId?: number): Promise<Business[]> => {
-  const response = await api.get(`/business${userId ? `?userId=${userId}` : ''}`);
+export const getBusinessListApi = async (
+  userId?: number
+): Promise<Business[]> => {
+  const response = await api.get(
+    `/business${userId ? `?userId=${userId}` : ""}`
+  );
   return response.data.data.items;
 };
 
@@ -20,7 +24,9 @@ export const createBusinessApi = async (
   return response.data.data;
 };
 
-export const getBusinessByIdApi = async (id: number | string): Promise<BusinessWithAttribute> => {
+export const getBusinessByIdApi = async (
+  id: number | string
+): Promise<BusinessWithAttribute> => {
   const response = await api.get(`/business/${id}`);
   return response.data.data;
 };
@@ -36,8 +42,7 @@ export const updateBusinessApi = async (
 export const sendEnquiry = async (params: any, businessId: number) => {
   const response = await api.patch(`/business/${businessId}`, params);
   return response.data.data ?? response.data;
-
-}
+};
 export const updateBusinessServiceApi = async (
   serviceId: number | string,
   params: UpdateBusinessServicePayload
@@ -57,7 +62,10 @@ export const updateBusinessVenueApi = async (
 export const createBusinessVenueApi = async (
   params: CreateBusinessVenuePayload
 ): Promise<BusinessWithAttribute> => {
-  const response = await api.post(`/business/${params.business_id}/venue`, params);
+  const response = await api.post(
+    `/business/${params.business_id}/venue`,
+    params
+  );
   return response.data.data;
 };
 
@@ -96,4 +104,16 @@ export const getEventBusinessApi = async (
   }
 
   return [];
+};
+
+export const getEventOfBusiness = async (businessIds: number[]) => {
+  const response = await api.get(
+    `/business/event?businessIds=${businessIds.join(",")}`
+  );
+  return response.data?.data ?? [];
+};
+
+export const getUserBusiness = async () => {
+  const response = await api.get("/my/businesses");
+  return response.data?.data;
 };
