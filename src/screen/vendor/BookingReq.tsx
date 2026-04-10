@@ -159,6 +159,7 @@ export default function BookingReqModal({
         payload: {
           vendorId,
           budget: data.budget,
+          status: "draft",
           guests: data.guests,
           notes: data.notes,
         },
