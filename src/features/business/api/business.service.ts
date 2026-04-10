@@ -106,11 +106,17 @@ export const getEventBusinessApi = async (
   return [];
 };
 
-export const getEventOfBusiness = async (businessIds: number[]) => {
+export const getEventOfBusiness = async (
+  businessId: number[],
+  status?: string
+) => {
+  const businessIdString = businessId.join(",");
   const response = await api.get(
-    `/business/event?businessIds=${businessIds.join(",")}`
+    `/business/events/${businessIdString}${status ? `?status=${status}` : ""}`
   );
-  return response.data?.data ?? [];
+
+  console.log("🐽🐽🐽🐽🐽🐽🐽🐽", response.data.data);
+  return response.data.data;
 };
 
 export const getUserBusiness = async () => {

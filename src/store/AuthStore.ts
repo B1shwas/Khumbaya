@@ -62,7 +62,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         try {
           set({ token, user, isLoading: true });
           const profileData = await getUserProfile();
-          const business = await getUserBusiness();
+          const businessData = await getUserBusiness();
+          const business = businessData.map((b: any) => b.id);
 
           user = {
             id: profileData.id,

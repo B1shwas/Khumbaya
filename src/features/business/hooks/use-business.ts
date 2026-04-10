@@ -192,12 +192,22 @@ export const useGetBusinessByEventId = (
   });
 };
 
-export const useGetEventOfBusiness = async (
+export const useGetEventOfBusiness = (
   businessIds: number[],
   userId: number
 ) => {
   return useQuery({
     queryKey: ["business-event", userId],
+    queryFn: () => getEventOfBusiness(businessIds),
+    enabled: businessIds.length > 0,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+  });
+};
+
+export const useGetVendorEventInvitations = (businessIds: number[]) => {
+  return useQuery({
+    queryKey: ["vendor-event-invitations", businessIds],
     queryFn: () => getEventOfBusiness(businessIds),
     enabled: businessIds.length > 0,
     staleTime: 5 * 60 * 1000,
