@@ -1,8 +1,8 @@
 import { Button } from "@/src/components/ui/Button";
 import { Text } from "@/src/components/ui/Text";
+import { Event as AppEvent } from "@/src/constants/event";
 import { useAddEventVendor } from "@/src/features/business/hooks/use-business";
 import { usegetUpcomingEvents } from "@/src/features/events/hooks/use-event";
-import { Event as AppEvent } from "@/src/constants/event";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
@@ -166,7 +166,11 @@ export default function BookingReqModal({
       });
       onSubmit?.(data);
       reset();
-      handleClose();
+      Alert.alert(
+        "Enquiry Sent!",
+        "Your enquiry has been sent successfully.",
+        [{ text: "OK", onPress: handleClose }]
+      );
     } catch (error: any) {
       console.error("Error submitting booking request:", error);
       const message = error?.message || "Failed to send enquiry. Please try again.";
