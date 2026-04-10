@@ -81,7 +81,8 @@ const AddGuestScreen = () => {
         fullName: "",
         invitation_name: "",
         phone: "",
-        category: "",
+        // category: "",
+        category: "friend",
       },
     });
 
