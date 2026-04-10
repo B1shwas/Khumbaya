@@ -1,10 +1,14 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  createEventGuestCategory,
+  type CreateGuestCategoryPayload,
   getEventGuest,
+  getEventGuestCategories,
   getGuestRoom,
   getInvitation,
   inviteGuest,
   removeInvitation,
+  type GuestCategoryOption,
   type InviteGuestPayload,
 } from "./service";
 
@@ -21,6 +25,35 @@ export const useGetInvitationsForEvent = (eventId: number | null) => {
     queryKey: ["event-invitations", eventId],
     queryFn: () => getInvitation(eventId!),
     enabled: !!eventId,
+  });
+};
+
+export const useGetEventGuestCategories = (
+  eventId: number | null
+) => {
+  return useQuery<GuestCategoryOption[]>({
+    queryKey: ["event-guest-categories", eventId],
+    queryFn: () => getEventGuestCategories(eventId!),
+    enabled: !!eventId,
+  });
+};
+
+export const useCreateEventGuestCategory = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      eventId,
+      payload,
+    }: {
+      eventId: number;
+      payload: CreateGuestCategoryPayload;
+    }) => createEventGuestCategory(eventId, payload),
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ["event-guest-categories", variables.eventId],
+      });
+    },
   });
 };
 

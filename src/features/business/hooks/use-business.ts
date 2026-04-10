@@ -8,6 +8,9 @@ import {
   updateBusinessApi,
   updateBusinessServiceApi,
   updateBusinessVenueApi,
+  addEventVendorApi,
+  getEventBusinessApi,
+  AddEventVendorPayload,
 } from "../api";
 import {
   CreateBusinessVenuePayload,
@@ -142,5 +145,31 @@ export const useCreateBusinessVenue = () => {
         });
       }
     },
+  });
+};
+
+export const useAddEventVendor = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      eventId,
+      payload,
+    }: {
+      eventId: string | number;
+      payload: AddEventVendorPayload;
+    }) => addEventVendorApi(eventId, payload),
+    onSuccess: (_data, { eventId }) => {
+      queryClient.invalidateQueries({ queryKey: ["event-business", eventId] });
+    },
+  });
+};
+
+export const useGetEventBusiness = (eventId: string | number) => {
+  return useQuery({
+    queryKey: ["event-business", eventId],
+    queryFn: () => getEventBusinessApi(eventId),
+    enabled: !!eventId,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
   });
 };

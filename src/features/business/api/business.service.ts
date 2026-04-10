@@ -60,3 +60,25 @@ export const createBusinessVenueApi = async (
 export const deleteBusinessApi = async (id: number | string): Promise<void> => {
   await api.delete(`/business/${id}`);
 };
+
+export interface AddEventVendorPayload {
+  vendorId: string | number;
+  businessId: number;
+  budget?: string;
+  guests?: string;
+  notes?: string;
+  status?: string;
+}
+
+export const addEventVendorApi = async (
+  eventId: string | number,
+  payload: AddEventVendorPayload
+): Promise<any> => {
+  const response = await api.post(`/business/event/${eventId}/vendor`, payload);
+  return response.data.data;
+};
+
+export const getEventBusinessApi = async (eventId: string | number): Promise<any[]> => {
+  const response = await api.get(`/business/event/${eventId}/vendor`);
+  return response.data.data;
+};
