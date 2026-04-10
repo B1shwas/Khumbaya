@@ -308,16 +308,16 @@ function AvailableSpacesSection({
   ];
 
   return (
-    <View className="bg-white mt-2 pb-2">
+    <View className="bg-white mt-2 pb-0">
       {/* Section header */}
       <View className="flex-row justify-between items-center px-4 pt-5 pb-3">
         <View>
           <Text className="text-xl font-semibold text-[#181114]">Available Spaces</Text>
           <Text className="text-xs text-gray-400 mt-0.5">Select your preferred venue</Text>
         </View>
-        <Pressable>
+        <Pressable onPress={() => venues.length > 0 && setSelectedVenue({ venue: venues[0], image: portfolio[0] ?? coverFallback ?? FALLBACK_HEADER })}>
           <Text className="text-primary text-xs font-semibold uppercase tracking-wide">
-            VIEW ALL →
+            VIEW →
           </Text>
         </Pressable>
       </View>
@@ -334,10 +334,10 @@ function AvailableSpacesSection({
           const activeAmenities = AMENITIES.filter((a) => venue[a.key] === true);
 
           return (
-            <View
+            <Pressable
               key={venue.venue_id}
               className="mx-4 mb-5 rounded-md overflow-hidden bg-white"
-             
+              onPress={() => setSelectedVenue({ venue, image })}
             >
               <View style={{ height: 100 }}>
                 <Image
@@ -407,18 +407,8 @@ function AvailableSpacesSection({
                   </ScrollView>
                 )}
 
-                {/* CTA */}
-                <Pressable
-                  className="rounded-md py-3.5 items-center"
-                  style={{ backgroundColor: "#1a1a2e" }}
-                  onPress={() => setSelectedVenue({ venue, image })}
-                >
-                  <Text className="text-white font-semibold text-sm uppercase tracking-widest">
-                    Explore Space →
-                  </Text>
-                </Pressable>
               </View>
-            </View>
+            </Pressable>
           );
         })
       )}
@@ -1090,9 +1080,8 @@ export default function VendorDetailed() {
           <ServiceInfoSection service={serviceAttr} category={biz.category} />
         )}
 
-
         {/* ── Featured Gallery ──────────────────────────────────────────────── */}
-        <View className="px-4 py-6 bg-white">
+        <View className="px-4 py-3 bg-white">
           <View className="flex-row justify-between items-center mb-3">
             <Text className="text-lg font-semibold text-[#181114]">Featured Gallery</Text>
             <Pressable onPress={() => setShowGallery(true)}>
