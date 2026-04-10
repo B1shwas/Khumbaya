@@ -33,7 +33,11 @@ export const updateBusinessApi = async (
   return response.data.data;
 };
 
+export const sendEnquiry = async (params: any, businessId: number) => {
+  const response = await api.patch(`/business/${businessId}`, params);
+  return response.data.data ?? response.data;
 
+}
 export const updateBusinessServiceApi = async (
   serviceId: number | string,
   params: UpdateBusinessServicePayload
@@ -62,8 +66,7 @@ export const deleteBusinessApi = async (id: number | string): Promise<void> => {
 };
 
 export interface AddEventVendorPayload {
-  vendorId: string | number;
-  businessId: number;
+  vendorId: number;
   budget?: string;
   guests?: string;
   notes?: string;
@@ -74,7 +77,7 @@ export const addEventVendorApi = async (
   eventId: string | number,
   payload: AddEventVendorPayload
 ): Promise<any> => {
-  const response = await api.post(`/business/event/${eventId}/vendor`, payload);
+  const response = await api.post(`/vendor/event/${eventId}`, payload);
   return response.data.data;
 };
 

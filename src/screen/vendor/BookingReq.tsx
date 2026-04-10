@@ -27,8 +27,7 @@ interface BookingReqModalProps {
   onClose?: () => void;
   onSubmit?: (formData: FormData) => void;
   asRoute?: boolean; // When true, skips Modal wrapper (for Expo Router transparentModal)
-  vendorId?: string;
-  businessId?: number;
+  vendorId?: number;
 }
 
 interface FormData {
@@ -47,7 +46,6 @@ export default function BookingReqModal({
   onSubmit,
   asRoute = false,
   vendorId,
-  businessId,
 }: BookingReqModalProps) {
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -160,7 +158,6 @@ export default function BookingReqModal({
         eventId: data.eventId,
         payload: {
           vendorId,
-          businessId: businessId!,
           budget: data.budget,
           guests: data.guests,
           notes: data.notes,
@@ -243,14 +240,12 @@ export default function BookingReqModal({
 
                       <Pressable
                         onPress={() => setShowEventDropdown(!showEventDropdown)}
-                        className={`h-14 bg-white border rounded-lg px-4 flex-row items-center justify-between ${
-                          errors.eventId ? "border-red-400" : "border-gray-200"
-                        }`}
+                        className={`h-14 bg-white border rounded-lg px-4 flex-row items-center justify-between ${errors.eventId ? "border-red-400" : "border-gray-200"
+                          }`}
                       >
                         <Text
-                          className={`text-base ${
-                            selectedEvent ? "text-text-primary" : "text-gray-400"
-                          }`}
+                          className={`text-base ${selectedEvent ? "text-text-primary" : "text-gray-400"
+                            }`}
                         >
                           {selectedEvent?.title || "Select an Event"}
                         </Text>
@@ -319,9 +314,8 @@ export default function BookingReqModal({
                       render={({ field: { onChange, onBlur, value } }) => (
                         <>
                           <View
-                            className={`h-14 bg-white border rounded-lg px-4 flex-row items-center ${
-                              errors.budget ? "border-red-400" : "border-gray-200"
-                            }`}
+                            className={`h-14 bg-white border rounded-lg px-4 flex-row items-center ${errors.budget ? "border-red-400" : "border-gray-200"
+                              }`}
                           >
                             <Text className="text-amber-600 font-semibold mr-1">$</Text>
                             <TextInput
@@ -362,9 +356,8 @@ export default function BookingReqModal({
                             value={value}
                             onChangeText={onChange}
                             onBlur={onBlur}
-                            className={`h-14 bg-white border rounded-lg px-4 text-text-primary text-base ${
-                              errors.guests ? "border-red-400" : "border-gray-200"
-                            }`}
+                            className={`h-14 bg-white border rounded-lg px-4 text-text-primary text-base ${errors.guests ? "border-red-400" : "border-gray-200"
+                              }`}
                           />
                           {errors.guests && (
                             <Text className="text-red-500 text-xs mt-1">
