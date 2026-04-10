@@ -8,13 +8,33 @@ interface FamilyCardProps {
   onDelete?: () => void;
 }
 
+const getFamilyEffectiveStatus = (
+  members: { event_guest: { status?: string } }[]
+): string => {
+  const hasAccepted = members.some(
+    (m) => m.event_guest.status?.toLowerCase() === "accepted"
+  );
+  if (hasAccepted) return "accepted";
+
+  const hasPendingOrInvited = members.some((m) => {
+    const status = m.event_guest.status?.toLowerCase() ?? "";
+    return status === "pending" || status === "invited";
+  });
+  if (hasPendingOrInvited) return "pending";
+
+  return "declined";
+};
+
 export default function FamilyCard({
   family,
   onPress,
   onDelete,
 }: FamilyCardProps) {
-  const primaryGuest = family.primaryMember;
-  const displayStatus = (primaryGuest.event_guest.status || "Pending").trim();
+  const members = family.members;
+  const primaryMember = members[0];
+  const effectiveStatus = getFamilyEffectiveStatus(members);
+  const displayStatus =
+    effectiveStatus.charAt(0).toUpperCase() + effectiveStatus.slice(1);
 
   const getStatusColor = () => {
     switch (displayStatus.toLowerCase()) {
@@ -66,9 +86,9 @@ export default function FamilyCard({
         <View className="min-h-[86px] flex-row items-center gap-3 px-4 py-3">
           {/* Avatar with member count badge */}
           <View className="relative">
-            {primaryGuest.user_detail.photo ? (
+            {primaryMember.user_detail.photo ? (
               <Image
-                source={{ uri: primaryGuest.user_detail.photo }}
+                source={{ uri: primaryMember.user_detail.photo }}
                 className="h-12 w-12 rounded-full"
               />
             ) : (
