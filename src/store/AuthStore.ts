@@ -4,6 +4,7 @@ import { create } from "zustand";
 import axios from "../api/axios";
 import { getUserBusiness } from "../features/business";
 import { getUserProfile } from "../features/user/api/user.service";
+import { clearQueryCache } from "./queryClientManager";
 
 export type User = {
   id: number;
@@ -126,6 +127,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       AsyncStorage.removeItem("user"),
     ]);
     set({ token: null, user: null });
+    // Clear React Query cache on logout
+    clearQueryCache();
   },
 
   isAuthenticated: () => Boolean(get().token),

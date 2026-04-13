@@ -9,8 +9,10 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "react-native-reanimated";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import "./global.css";
+import { setQueryClient } from "@/src/store/queryClientManager";
 
 const queryClient = new QueryClient();
+setQueryClient(queryClient);
 
 SplashScreen.preventAutoHideAsync();
 
