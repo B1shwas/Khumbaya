@@ -57,7 +57,7 @@ export default function OrganizerEventDetailLayout() {
           animation: "slide_from_left",
         }}
       />
-      <Stack.Screen name="budget" options={{ title: "Budget" }} />
+      <Stack.Screen name="budget" options={{ headerShown: false }} />
       <Stack.Screen
         name="addBudgetItem"
         options={{ title: "Add Budget Item" }}
@@ -71,7 +71,7 @@ export default function OrganizerEventDetailLayout() {
       <Stack.Screen name="hotel" options={{ headerShown: false }} />
       <Stack.Screen name="addguest" options={{ title: "Add Guest" }} />
       <Stack.Screen name="timeline" options={{ title: "Timeline" }} />
-      <Stack.Screen name="vendor" options={{ title: "Vendors" }} />
+      <Stack.Screen name="vendor" options={{ title: "Vendors" }} />{" "}
       <Stack.Screen name="(subevent)" options={{ headerShown: false }} />
       <Stack.Screen name="tasklist" options={{ headerShown: false }} />
       <Stack.Screen name="edit-event" options={{ title: "Event Details" }} />
@@ -90,23 +90,6 @@ export default function OrganizerEventDetailLayout() {
         }}
       />
       <Stack.Screen name="settings" options={{ headerShown: false }} />
-
-      <Stack.Screen
-        name="[categoryId]/index"
-        options={{ title: "Category Details" }}
-      />
-      <Stack.Screen
-        name="[categoryId]/add-expense"
-        options={{ title: "New Expense" }}
-      />
-      <Stack.Screen
-        name="[categoryId]/[expenseId]/index"
-        options={{ title: "Expense Details" }}
-      />
-      <Stack.Screen
-        name="[categoryId]/[expenseId]/add-payment"
-        options={{ title: "Add Payment" }}
-      />
       <Stack.Screen
         name="edit-budget-category"
         options={{ title: "Edit Category" }}
