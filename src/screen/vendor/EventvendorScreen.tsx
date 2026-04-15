@@ -1,5 +1,6 @@
 import { MaterialIcons } from "@expo/vector-icons";
-import { router } from "expo-router";
+import { useGetBusinessByEventId } from "@/src/features/business/hooks/use-business";
+import { router, useLocalSearchParams } from "expo-router";
 import { useMemo, useState } from "react";
 import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -27,48 +28,12 @@ interface VendorEvent {
 const VENDOR_AVATAR_URL =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuA00Hs8VhRrrpBnJhbiFmtCHPy-0GRUdkAhXCdIgim1CrXK4EeXlbQera8jpP9eqJMXftmmD010atQVIcwCokiygOfiQf2n4xFknXGPdJlzAsijaeR72HJqUCXMCV2dI1LMbOtIPEdWXGOtGPvghtZruL_wPrDusl7GN5kEm4nyCGmw7-WPJPtAAFXhq2Dd3A7gJxmC6YSFwpLQvpGJfWL3LWYaUwAr88L_wBwwUWR593u11gRbyeXI68PIBdqYplmnBv2hbW_RcdA";
 
-const events: VendorEvent[] = [
-  {
-    id: "1",
-    month: "Nov",
-    day: "14",
-    title: "Sangeet Night",
-    couple: "Priya & Raj",
-    location: "Hotel Grand, NY",
-    category: "DJ",
-    status: "Confirmed",
-    section: "This Month",
-  },
-  {
-    id: "2",
-    month: "Dec",
-    day: "02",
-    title: "Church Wedding",
-    couple: "Sarah & Mike",
-    location: "St. Mary's Cathedral",
-    category: "Florist",
-    status: "Pending",
-    section: "This Month",
-  },
-  {
-    id: "3",
-    month: "Jan",
-    day: "20",
-    title: "Reception Dinner",
-    couple: "Aisha & Omar",
-    location: "TBD",
-    category: "Catering",
-    status: "New",
-    section: "Next Year",
-  },
-];
-
 const statusStyles: Record<
   VendorEventStatus,
   { badge: string; text: string; ring: string }
 > = {
   Confirmed: {
-    badge: "bg-green-50",
+    badge: "bg-green-50",z
     text: "text-green-700",
     ring: "ring-green-600/20",
   },
@@ -97,10 +62,80 @@ const statusStyles: Record<
 const tabs: VendorEventTab[] = ["Upcoming", "Requests", "Completed"];
 
 export default function EventvendorScreen() {
+  const { eventId } = useLocalSearchParams<{ eventId?: string }>();
   const [activeTab, setActiveTab] = useState<VendorEventTab>("Upcoming");
+  const {
+    data: businesses = [],
+    isLoading,
+    isError,
+  } = useGetBusinessByEventId(eventId);
+
+  const events = useMemo<VendorEvent[]>(() => {
+    const now = new Date();
+
+    return businesses.map((business: any) => {
+      const createdAtDate = business?.createdAt
+        ? new Date(business.createdAt)
+        : undefined;
+      const isValidDate =
+        !!createdAtDate && !Number.isNaN(createdAtDate.getTime());
+
+      const rawStatus = String(business?.status ?? "").toLowerCase();
+
+      const status: VendorEventStatus = rawStatus.includes("completed")
+        ? "Completed"
+        : rawStatus.includes("request")
+          ? "Request"
+          : rawStatus.includes("new")
+            ? "New"
+            : rawStatus.includes("pending")
+              ? "Pending"
+              : business?.is_verified
+                ? "Confirmed"
+                : "Pending";
+
+      const section: VendorEvent["section"] =
+        isValidDate && createdAtDate.getFullYear() > now.getFullYear()
+          ? "Next Year"
+          : "This Month";
+
+      return {
+        id: String(business?.id ?? ""),
+        month: isValidDate
+          ? createdAtDate.toLocaleString("en-US", { month: "short" })
+          : "--",
+        day: isValidDate
+          ? String(createdAtDate.getDate()).padStart(2, "0")
+          : "--",
+        title: business?.business_name ?? "Unnamed Business",
+        couple: business?.description ?? "Vendor Partner",
+        location: business?.location ?? "Location unavailable",
+        category: business?.category ?? "General",
+        status,
+        section,
+      };
+    });
+  }, [businesses]);
+
+  const filteredEvents = useMemo(() => {
+    if (activeTab === "Requests") {
+      return events.filter(
+        (event) =>
+          event.status === "Pending" ||
+          event.status === "Request" ||
+          event.status === "New"
+      );
+    }
+
+    if (activeTab === "Completed") {
+      return events.filter((event) => event.status === "Completed");
+    }
+
+    return events.filter((event) => event.status !== "Completed");
+  }, [activeTab, events]);
 
   const sections = useMemo(() => {
-    const grouped = events.reduce<Record<string, VendorEvent[]>>(
+    const grouped = filteredEvents.reduce<Record<string, VendorEvent[]>>(
       (acc, event) => {
         if (!acc[event.section]) {
           acc[event.section] = [];
@@ -112,7 +147,7 @@ export default function EventvendorScreen() {
     );
 
     return Object.entries(grouped);
-  }, []);
+  }, [filteredEvents]);
 
   return (
     // NOTE: dark: classes are intentionally omitted from className per request.
@@ -183,6 +218,23 @@ export default function EventvendorScreen() {
           contentContainerClassName="gap-4 px-4 pb-24 pt-2"
           showsVerticalScrollIndicator={false}
         >
+          {!eventId ? (
+            <View className="rounded-xl border border-amber-200 bg-amber-50 p-3">
+              <Text className="text-sm font-medium text-amber-800">
+                Event ID is missing. Open this screen with an eventId to load
+                event businesses.
+              </Text>
+            </View>
+          ) : null}
+
+          {isError ? (
+            <View className="rounded-xl border border-red-200 bg-red-50 p-3">
+              <Text className="text-sm font-medium text-red-700">
+                Couldn&apos;t load businesses for this event.
+              </Text>
+            </View>
+          ) : null}
+
           {sections.map(([sectionTitle, sectionEvents]) => (
             <View key={sectionTitle} className="gap-4">
               {/* NOTE: dark:text-gray-400 omitted. */}
@@ -200,9 +252,11 @@ export default function EventvendorScreen() {
                     accessibilityRole="button"
                     accessibilityLabel={`Open ${event.title}`}
                     onPress={() =>
-                      router.push(
-                        `/(protected)/(vendor-tabs)/events/${event.id}`
-                      )
+                      router.push({
+                        pathname:
+                          "/(protected)/(client-stack)/events/[eventId]/(vendor)",
+                        params: { eventId: event.id },
+                      })
                     }
                   >
                     <View className="flex-row items-start gap-4">
@@ -306,15 +360,25 @@ export default function EventvendorScreen() {
             </View>
           ))}
 
-          {/* Loading State / Empty Space filler */}
-          <View className="items-center justify-center py-6 opacity-50">
-            {/* NOTE: dark:text-gray-500 omitted. */}
-            <View className="flex-row items-center gap-2">
-              <View className="h-2 w-2 rounded-full bg-primary/40" />
-              <View className="h-2 w-2 rounded-full bg-primary/40" />
-              <View className="h-2 w-2 rounded-full bg-primary/40" />
+          {!isLoading && !!eventId && !isError && events.length === 0 ? (
+            <View className="items-center justify-center rounded-xl border border-gray-200 bg-white py-8">
+              <Text className="text-sm font-medium text-gray-500">
+                No businesses are linked to this event yet.
+              </Text>
             </View>
-          </View>
+          ) : null}
+
+          {/* Loading State / Empty Space filler */}
+          {isLoading ? (
+            <View className="items-center justify-center py-6 opacity-50">
+              {/* NOTE: dark:text-gray-500 omitted. */}
+              <View className="flex-row items-center gap-2">
+                <View className="h-2 w-2 rounded-full bg-primary/40" />
+                <View className="h-2 w-2 rounded-full bg-primary/40" />
+                <View className="h-2 w-2 rounded-full bg-primary/40" />
+              </View>
+            </View>
+          ) : null}
         </ScrollView>
       </View>
     </SafeAreaView>

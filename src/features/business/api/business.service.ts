@@ -1,15 +1,19 @@
 import api from "@/src/api/axios";
 import { Business, BusinessWithAttribute } from "@/src/constants/business";
 import {
-  CreateBusinessVenuePayload,
   CreateBusinessPayload,
+  CreateBusinessVenuePayload,
   UpdateBusinessPayload,
   UpdateBusinessServicePayload,
   UpdateBusinessVenuePayload,
 } from "../types";
 
-export const getBusinessListApi = async (userId?: number): Promise<Business[]> => {
-  const response = await api.get(`/business${userId ? `?userId=${userId}` : ''}`);
+export const getBusinessListApi = async (
+  userId?: number
+): Promise<Business[]> => {
+  const response = await api.get(
+    `/business${userId ? `?userId=${userId}` : ""}`
+  );
   return response.data.data.items;
 };
 
@@ -20,7 +24,9 @@ export const createBusinessApi = async (
   return response.data.data;
 };
 
-export const getBusinessByIdApi = async (id: number | string): Promise<BusinessWithAttribute> => {
+export const getBusinessByIdApi = async (
+  id: number | string
+): Promise<BusinessWithAttribute> => {
   const response = await api.get(`/business/${id}`);
   return response.data.data;
 };
@@ -33,7 +39,10 @@ export const updateBusinessApi = async (
   return response.data.data;
 };
 
-
+export const sendEnquiry = async (params: any, businessId: number) => {
+  const response = await api.patch(`/business/${businessId}`, params);
+  return response.data.data ?? response.data;
+};
 export const updateBusinessServiceApi = async (
   serviceId: number | string,
   params: UpdateBusinessServicePayload
@@ -53,7 +62,10 @@ export const updateBusinessVenueApi = async (
 export const createBusinessVenueApi = async (
   params: CreateBusinessVenuePayload
 ): Promise<BusinessWithAttribute> => {
-  const response = await api.post(`/business/${params.business_id}/venue`, params);
+  const response = await api.post(
+    `/business/${params.business_id}/venue`,
+    params
+  );
   return response.data.data;
 };
 
@@ -62,8 +74,7 @@ export const deleteBusinessApi = async (id: number | string): Promise<void> => {
 };
 
 export interface AddEventVendorPayload {
-  vendorId: string | number;
-  businessId: number;
+  vendorId: number;
   budget?: string;
   guests?: string;
   notes?: string;
@@ -74,11 +85,41 @@ export const addEventVendorApi = async (
   eventId: string | number,
   payload: AddEventVendorPayload
 ): Promise<any> => {
-  const response = await api.post(`/business/event/${eventId}/vendor`, payload);
+  const response = await api.post(`/vendor/event/${eventId}`, payload);
   return response.data.data;
 };
 
-export const getEventBusinessApi = async (eventId: string | number): Promise<any[]> => {
-  const response = await api.get(`/business/event/${eventId}/vendor`);
+export const getEventBusinessApi = async (
+  eventId: string | number
+): Promise<Business[]> => {
+  const response = await api.get(`/event/vendor/${eventId}/`);
+  const payload = response.data?.data;
+
+  if (Array.isArray(payload)) {
+    return payload;
+  }
+
+  if (Array.isArray(payload?.items)) {
+    return payload.items;
+  }
+
+  return [];
+};
+
+export const getEventOfBusiness = async (
+  businessId: number[],
+  status?: string
+) => {
+  const businessIdString = businessId.join(",");
+  const response = await api.get(
+    `/business/events/${businessIdString}${status ? `?status=${status}` : ""}`
+  );
+
+  console.log("🐽🐽🐽🐽🐽🐽🐽🐽", response.data.data);
   return response.data.data;
+};
+
+export const getUserBusiness = async () => {
+  const response = await api.get("/my/businesses");
+  return response.data?.data;
 };

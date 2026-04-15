@@ -16,7 +16,7 @@ type ApiErrorData = {
 
 api.interceptors.request.use(
   async (config: InternalAxiosRequestConfig) => {
-    const token = useAuthStore.getState().token; 
+    const token = useAuthStore.getState().token;
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -30,12 +30,13 @@ api.interceptors.request.use(
     return config;
   },
   (error: AxiosError<ApiErrorData>) => {
-      const message = error.response?.data?.message?.split(":").slice(1).join(":").trim()
-      || error.response?.data?.error 
-      || error.message 
-      || "Something went wrong";
+    const message =
+      error.response?.data?.message?.split(":").slice(1).join(":").trim() ||
+      error.response?.data?.error ||
+      error.message ||
+      "Something went wrong";
     return Promise.reject({
-        ...error,
+      ...error,
       message,
       isAxiosError: true,
     });
@@ -59,7 +60,7 @@ api.interceptors.response.use(
       useAuthStore.getState().clearAuth();
     }
 
-     const message =
+    const message =
       error.response?.data?.message?.split(":").slice(1).join(":").trim() ||
       error.response?.data?.error ||
       error.message ||

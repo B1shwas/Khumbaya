@@ -56,7 +56,7 @@ export default function CategoryDetailsScreen() {
 
   const handleAddExpensePress = () => {
     router.push(
-      `/(protected)/(client-stack)/events/${eventId}/(organizer)/${categoryId}/add-expense`
+      `/(protected)/(client-stack)/events/${eventId}/(organizer)/budget/${categoryId}/add-expense`
     );
   };
 
@@ -288,7 +288,7 @@ export default function CategoryDetailsScreen() {
                 className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex-row items-start gap-4"
                 onPress={() => {
                   router.push(
-                    `/(protected)/(client-stack)/events/${eventId}/(organizer)/${categoryId}/${expense.id}`
+                    `/(protected)/(client-stack)/events/${eventId}/(organizer)/budget/${categoryId}/${expense.id}`
                   );
                 }}
               >

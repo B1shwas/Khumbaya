@@ -1,4 +1,5 @@
 import { useAuthStore } from "@/src/store/AuthStore";
+import { setQueryClient } from "@/src/store/queryClientManager";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useFonts } from "expo-font";
 import { Stack, useRouter, useSegments } from "expo-router";
@@ -11,6 +12,7 @@ import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import "./global.css";
 
 const queryClient = new QueryClient();
+setQueryClient(queryClient);
 
 SplashScreen.preventAutoHideAsync();
 

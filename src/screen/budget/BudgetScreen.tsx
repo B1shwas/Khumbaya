@@ -296,7 +296,7 @@ export default function EventBudgetScreen() {
                 spend={cat.spent}
                 onPress={() => {
                   router.push(
-                    `/(protected)/(client-stack)/events/${eventId}/(organizer)/${cat.id}`
+                    `/(protected)/(client-stack)/events/${eventId}/(organizer)/budget/${cat.id}`
                   );
                 }}
               />

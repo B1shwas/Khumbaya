@@ -2,7 +2,9 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as SecureStore from "expo-secure-store";
 import { create } from "zustand";
 import axios from "../api/axios";
+import { getUserBusiness } from "../features/business";
 import { getUserProfile } from "../features/user/api/user.service";
+import { clearQueryCache } from "./queryClientManager";
 
 export type User = {
   id: number;
@@ -33,6 +35,7 @@ type AuthState = {
   user: User | null;
   isLoading: boolean;
   isProfileLoading: boolean;
+  business: number[];
   setAuth: (token: string, user: User | null) => Promise<void>;
   updateUser: (userData: Partial<User>) => void;
   clearAuth: () => Promise<void>;
@@ -46,6 +49,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   isLoading: true,
   isProfileLoading: false,
+  business: [],
 
   hydrate: async () => {
     try {
@@ -59,6 +63,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         try {
           set({ token, user, isLoading: true });
           const profileData = await getUserProfile();
+          const businessData = await getUserBusiness();
+          const business = businessData.map((b: any) => b.id);
 
           user = {
             id: profileData.id,
@@ -67,7 +73,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             phone: profileData.phone ?? "",
           };
 
-          set({ token, user, isLoading: false });
+          set({ token, user, isLoading: false, business: business ?? [] });
           console.log("✅ Token validated successfully");
         } catch (validationError) {
           // Token is invalid or expired → clear auth
@@ -121,6 +127,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       AsyncStorage.removeItem("user"),
     ]);
     set({ token: null, user: null });
+    // Clear React Query cache on logout
+    clearQueryCache();
   },
 
   isAuthenticated: () => Boolean(get().token),
