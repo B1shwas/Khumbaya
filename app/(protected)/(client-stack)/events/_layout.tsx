@@ -5,34 +5,28 @@ export default function ClientStackLayout() {
   const menuItems = [
     {
       icon: User,
-      label: 'Profile',
-      onPress: () => router.push('/profile'),
+      label: "Profile",
+      onPress: () => router.push("/profile"),
     },
     {
       icon: Settings,
-      label: 'Settings',
-      onPress: () => router.push('/profile'),
+      label: "Settings",
+      onPress: () => router.push("/profile"),
     },
     {
       icon: HelpCircle,
-      label: 'Help & Support',
-      onPress: () => router.push('/profile'),
+      label: "Help & Support",
+      onPress: () => router.push("/profile"),
     },
     {
       icon: LogOut,
-      label: 'Logout',
+      label: "Logout",
       onPress: async () => {
         // await clearAuth();
-        router.replace('/(onboarding)');
+        router.replace("/(onboarding)");
       },
       danger: true,
     },
   ];
-  return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="index" />
-      <Stack.Screen name="[eventId]" />
-    </Stack>
-  );
+  return <Stack screenOptions={{ headerShown: false }} />;
 }
-

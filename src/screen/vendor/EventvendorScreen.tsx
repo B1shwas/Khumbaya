@@ -33,7 +33,7 @@ const statusStyles: Record<
   { badge: string; text: string; ring: string }
 > = {
   Confirmed: {
-    badge: "bg-green-50",z
+    badge: "bg-green-50",
     text: "text-green-700",
     ring: "ring-green-600/20",
   },
@@ -251,13 +251,10 @@ export default function EventvendorScreen() {
                     activeOpacity={0.8}
                     accessibilityRole="button"
                     accessibilityLabel={`Open ${event.title}`}
-                    onPress={() =>
-                      router.push({
-                        pathname:
-                          "/(protected)/(client-stack)/events/[eventId]/(vendor)",
-                        params: { eventId: event.id },
-                      })
-                    }
+                    onPress={() => {
+                      const vendorId = event.id;
+                      router.push(`/events/vendors/${vendorId}` as any);
+                    }}
                   >
                     <View className="flex-row items-start gap-4">
                       {/* Date Block */}
