@@ -126,8 +126,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       SecureStore.deleteItemAsync("token"),
       AsyncStorage.removeItem("user"),
     ]);
-    set({ token: null, user: null });
-    // Clear React Query cache on logout
+    set({ token: null, user: null, business: [] });
     clearQueryCache();
   },
 

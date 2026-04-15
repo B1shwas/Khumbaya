@@ -17,7 +17,7 @@ import {
 interface LoginResponse {
   id: number;
   token: string;
-  user:User
+  user: User;
 }
 
 export function useLogin() {
@@ -25,7 +25,10 @@ export function useLogin() {
 
   return useMutation({
     mutationFn: async (credentials: UserLoginType) => {
-       console.log('The informatin of the user trying to login is ',credentials);
+      console.log(
+        "The informatin of the user trying to login is ",
+        credentials
+      );
       const { data } = await api.post<ResponseFormat<LoginResponse>>(
         "user/login",
         credentials
@@ -34,7 +37,9 @@ export function useLogin() {
     },
     onSuccess: async (data) => {
       useAuthStore.getState().setAuth(data.token, null);
-      queryClient.invalidateQueries(); // clear all queries to ensure fresh data after login
+      queryClient.invalidateQueries();
+      const { hydrate } = useAuthStore.getState();
+      await hydrate();
     },
   });
 }
@@ -49,6 +54,8 @@ export function useSignup() {
     onSuccess: async (data) => {
       useAuthStore.getState().setAuth(data.token, null);
       queryClient.invalidateQueries();
+      const { hydrate } = useAuthStore.getState();
+      await hydrate();
     },
   });
 }
@@ -154,19 +161,22 @@ export function useFindUserWithPhone(
   });
 }
 
-export function useResetPasswordMutation(){
+export function useResetPasswordMutation() {
   return useMutation({
-    mutationFn: async (data:{userId:number , newPassword:string} )=>{
-      const user = await resetPasswordApi({userId:data.userId , newPassword:data.newPassword});
+    mutationFn: async (data: { userId: number; newPassword: string }) => {
+      const user = await resetPasswordApi({
+        userId: data.userId,
+        newPassword: data.newPassword,
+      });
       return user;
-    }
-  })
+    },
+  });
 }
-export function  usefindUserMutation(){
-   
-    return useMutation({
-      mutationFn: async (phoneNumber: string) => {
-        const user = await getFindUserWithPhone(phoneNumber);
-        return user;
-      }
-    });}
+export function usefindUserMutation() {
+  return useMutation({
+    mutationFn: async (phoneNumber: string) => {
+      const user = await getFindUserWithPhone(phoneNumber);
+      return user;
+    },
+  });
+}
