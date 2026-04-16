@@ -1,16 +1,20 @@
 import { DatePicker } from "@/components/nativewindui/DatePicker/DatePicker.android";
+import { CountryOption, CountryPickerModal } from "@/src/components/ui/CountryPhone";
+import { COUNTRY_DATA } from "@/src/constants/countrydata";
 import { AddFamilyMemberPayload } from "@/src/features/family/api/family.service";
 import {
   useAddFamilyMember,
   useUpdateFamilyMember,
 } from "@/src/features/family/hooks/use-family";
 import { useFindUserWithPhone } from "@/src/features/user/api/use-user";
-import { Ionicons } from "@expo/vector-icons";
-import React from "react";
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
   ActivityIndicator,
   Alert,
+  Image,
+  Pressable,
   TextInput,
   TouchableOpacity,
   View,
@@ -46,6 +50,9 @@ export default function AddFamilyMemberForm({
 
   const isPending = isAdding || isUpdating;
 
+  const [selectedCountry, setSelectedCountry] = useState<CountryOption>(COUNTRY_DATA[0]);
+  const [pickerVisible, setPickerVisible] = useState(false);
+
   const {
     control,
     handleSubmit,
@@ -54,7 +61,7 @@ export default function AddFamilyMemberForm({
     formState: { errors },
   } = useForm<AddFamilyMemberPayload>({
     defaultValues: {
-      phone: initialData?.phone || "",
+      phone: "",
       username: initialData?.username || "",
       email: initialData?.email || "",
       relation: initialData?.relation || "",
@@ -68,14 +75,16 @@ export default function AddFamilyMemberForm({
   );
 
   const watchedPhone = watch("phone") ?? "";
-  const shouldSearchUserByPhone = !isEditMode && watchedPhone.length > 0;
+  const digits = watchedPhone.replace(/\D/g, "");
+  const fullPhonePayload = digits || "";
+  const shouldSearchUserByPhone = !isEditMode && digits.length > 0;
 
   const {
     data: userWithPhone,
     isFetching: isFindingUser,
     error: findUserError,
     isError: isFindUserError,
-  } = useFindUserWithPhone(watchedPhone, {
+  } = useFindUserWithPhone(digits, {
     enabled: shouldSearchUserByPhone,
     debounceMs: 1000,
   });
@@ -91,6 +100,19 @@ export default function AddFamilyMemberForm({
   // Button disabled if: pending, searching, no family, or user already in another family
   const isButtonDisabled =
     isPending || isFindingUser || !familyId || hasExistingFamily;
+
+  React.useEffect(() => {
+    if (isEditMode && initialData?.phone) {
+      const match = initialData.phone.match(/^\+(\d+)-(.+)$/);
+      if (match) {
+        const found = COUNTRY_DATA.find((c) => c.dialCode === match[1]);
+        if (found) setSelectedCountry(found);
+        setValue("phone", match[2]);
+      } else {
+        setValue("phone", initialData.phone.replace(/\D/g, ""));
+      }
+    }
+  }, [initialData?.phone]);
 
   React.useEffect(() => {
     if (!isEditMode && isMatchedUser && foundUser) {
@@ -133,7 +155,7 @@ export default function AddFamilyMemberForm({
         username: values.username?.trim(),
         relation: values.relation?.trim(),
         dob: values.dob,
-        phone: values.phone || undefined,
+        phone: fullPhonePayload || undefined,
         foodPreference: values.foodPreference || undefined,
         email: values.email?.trim() || undefined,
       }
@@ -141,8 +163,10 @@ export default function AddFamilyMemberForm({
     const payload = {
       username: values.username?.trim(),
       relation: values.relation?.trim(),
-      dob: values.dob,
-      phone: values.phone || undefined,
+      dob: values.dob instanceof Date
+        ? values.dob.toISOString().slice(0, 10)
+        : values.dob,
+      phone: fullPhonePayload || undefined,
       foodPreference: values.foodPreference || undefined,
       email: values.email?.trim() || undefined,
     };
@@ -236,21 +260,49 @@ export default function AddFamilyMemberForm({
         <Text className="text-xs font-jakarta-bold uppercase tracking-wide text-text-tertiary mb-1.5 ml-1">
           Phone Number (Optional)
         </Text>
-        <Controller
-          control={control}
-          name="phone"
-          render={({ field: { value, onChange } }) => (
-            <TextInput
-              className={`w-full bg-background rounded-sm px-4 py-3 text-sm text-text-primary border ${
-                errors.phone ? "border-red-500" : "border-border"
-              }`}
-              placeholder="9761890004"
-              placeholderTextColor="#9CA3AF"
-              value={value}
-              onChangeText={onChange}
+        <View className={`h-14 flex-row items-center rounded-sm border overflow-hidden ${
+          errors.phone ? "border-red-500" : "border-border"
+        }`}>
+          {/* Country trigger */}
+          <Pressable
+            onPress={() => setPickerVisible(true)}
+            className="h-full flex-row items-center gap-1.5 px-3 border-r border-border"
+          >
+            <Image
+              source={selectedCountry.image}
+              style={{ width: 26, height: 18, borderRadius: 3 }}
+              resizeMode="cover"
             />
-          )}
+            <Text className="text-sm font-medium text-text-primary">
+              +{selectedCountry.dialCode}
+            </Text>
+            <MaterialIcons name="arrow-drop-down" size={18} color="#9ca3af" />
+          </Pressable>
+
+          {/* Digits input */}
+          <Controller
+            control={control}
+            name="phone"
+            render={({ field: { value, onChange } }) => (
+              <TextInput
+                className="flex-1 px-4 py-3 text-sm text-text-primary bg-background"
+                placeholder="9761890004"
+                placeholderTextColor="#9CA3AF"
+                keyboardType="phone-pad"
+                value={value}
+                onChangeText={onChange}
+              />
+            )}
+          />
+        </View>
+
+        <CountryPickerModal
+          visible={pickerVisible}
+          selected={selectedCountry}
+          onSelect={setSelectedCountry}
+          onClose={() => setPickerVisible(false)}
         />
+
         {errors.phone && (
           <Text className="text-xs text-red-500 mt-1 ml-1">
             {errors.phone.message}
@@ -432,7 +484,7 @@ export default function AddFamilyMemberForm({
             ? "Saving..."
             : isEditMode
               ? "Update Member"
-              : "Save & Add Member"}
+              : "Add Member"}
         </Text>
         {!isPending && (
           <Ionicons
