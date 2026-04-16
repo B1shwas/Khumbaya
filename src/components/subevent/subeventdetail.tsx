@@ -2,12 +2,12 @@ import { Text } from "@/src/components/ui/Text";
 import { useEventById } from "@/src/features/events/hooks/use-event";
 import { formatTime } from "@/src/utils/helper";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import {
   ActivityIndicator,
   Image,
   ScrollView,
-  StatusBar,
+  TouchableOpacity,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -16,7 +16,6 @@ const PRIMARY = "#ee2b8c";
 
 /* ---------------- HERO SECTION ---------------- */
 const HeroSection = ({
-  title,
   status,
   imageUrl,
   startDateTime,
@@ -48,8 +47,6 @@ const HeroSection = ({
             </Text>
           </View>
         </View>
-
-        <Text className="text-white text-2xl font-extrabold mb-1">{title}</Text>
 
         {startDateTime && (
           <Text className="text-gray-200 text-xs">
@@ -117,7 +114,7 @@ const MainInfoCard = ({ subEvent }: { subEvent: any }) => {
   };
 
   return (
-    <View className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 mb-4 mt-4">
+    <View className="bg-white rounded-md p-4 shadow-sm border border-slate-100 mb-4 mt-4">
       <View className="flex-row gap-4 mb-6">
         <InfoRow
           icon="calendar-today"
@@ -164,6 +161,7 @@ const DescriptionCard = ({ description }: { description?: string }) => {
         <Text className="text-base font-bold">Description</Text>
       </View>
 
+       
       <Text className="text-gray-600 text-sm leading-relaxed">
         {description}
       </Text>
@@ -172,12 +170,26 @@ const DescriptionCard = ({ description }: { description?: string }) => {
 };
 
 export default function SubEventDetailScreen() {
-  const { subEventId } = useLocalSearchParams<{
+  const router = useRouter();
+  const { subEventId, eventId } = useLocalSearchParams<{
     subEventId: string;
+    eventId: string;
   }>();
 
   const parsedId = Number(subEventId);
+  const parsedEventId = Number(eventId);
   const { data: subEvent, isLoading } = useEventById(parsedId);
+
+  const handleEditEvent = () => {
+    if (!parsedEventId) return;
+    router.push(
+      `/(protected)/(client-stack)/events/${parsedEventId}/(organizer)/edit-event`
+    );
+  };
+
+  const handleBack = () => {
+    router.back();
+  };
 
   if (isLoading) {
     return (
@@ -197,18 +209,40 @@ export default function SubEventDetailScreen() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-[#f8f6f7]">
-      <StatusBar barStyle="light-content" />
+    <SafeAreaView className="flex-1 bg-white">
+      <View className="px-4 py-3 border-b border-slate-100 flex-row items-center">
+        <TouchableOpacity
+          onPress={handleBack}
+          className="w-10 h-10 rounded-full  items-center justify-center"
+          activeOpacity={0.85}
+        >
+          <Ionicons name="arrow-back" size={18} color="#181114" />
+        </TouchableOpacity>
+
+        <Text
+          className="text-base font-extrabold text-[#181114] flex-1 mx-3 text-center"
+          numberOfLines={1}
+        >
+          {subEvent.title || "Sub Event"}
+        </Text>
+
+        <TouchableOpacity
+          onPress={handleEditEvent}
+          className="w-10 h-10 rounded-full bg-primary/10 items-center justify-center"
+          activeOpacity={0.85}
+          disabled={!parsedEventId}
+        >
+          <Ionicons name="create-outline" size={18} color={PRIMARY} />
+        </TouchableOpacity>
+      </View>
 
       <ScrollView showsVerticalScrollIndicator={false}>
         <HeroSection
-          title={subEvent.title}
           status={subEvent.status}
           imageUrl={subEvent.imageUrl}
           startDateTime={subEvent.startDateTime}
           location={subEvent.location}
         />
-
         <View className="px-4">
           <MainInfoCard subEvent={subEvent} />
           <DescriptionCard description={subEvent.description} />

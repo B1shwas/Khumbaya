@@ -227,6 +227,7 @@ export interface RsvpResponsePayload {
   arrival_info?: string | null;
   departure_info?: string | null;
   role?: string;
+  category?: string;
   status?: string;
   familyId?: number;
 }

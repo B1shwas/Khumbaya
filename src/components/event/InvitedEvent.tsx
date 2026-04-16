@@ -79,7 +79,7 @@ const VendorEventCard = ({
 export const InvitedEventsTab = ({ isActive }: InvitedEventsTabProps) => {
   const [refreshing, setRefreshing] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const [activeTab, setActiveTab] = useState<"vendor" | "guest">("vendor");
+  const [activeTab, setActiveTab] = useState<"vendor" | "guest">("guest");
   const { business: businessIds } = useAuthStore();
 
   const {
@@ -117,31 +117,27 @@ export const InvitedEventsTab = ({ isActive }: InvitedEventsTabProps) => {
       {/* Tab Bar */}
       <View className="flex-row border-b border-border px-4">
         <Pressable
-          onPress={() => setActiveTab("vendor")}
-          className={`flex-1 py-3 px-2 items-center justify-center border-b-2 ${
-            activeTab === "vendor" ? "border-primary" : "border-transparent"
-          }`}
+          onPress={() => setActiveTab("guest")}
+          className={`flex-1 py-3 px-2 items-center justify-center border-b-2 ${activeTab === "guest" ? "border-primary" : "border-transparent"
+            }`}
         >
           <Text
-            className={`font-jakarta-semibold text-sm ${
-              activeTab === "vendor" ? "text-primary" : "text-gray-600"
-            }`}
+            className={`font-jakarta-semibold text-sm ${activeTab === "guest" ? "text-primary" : "text-gray-600"
+              }`}
           >
-            Vendor ({vendorInvitations.length})
+            Guest ({invitedEvents.length})
           </Text>
         </Pressable>
         <Pressable
-          onPress={() => setActiveTab("guest")}
-          className={`flex-1 py-3 px-2 items-center justify-center border-b-2 ${
-            activeTab === "guest" ? "border-primary" : "border-transparent"
-          }`}
+          onPress={() => setActiveTab("vendor")}
+          className={`flex-1 py-3 px-2 items-center justify-center border-b-2 ${activeTab === "vendor" ? "border-primary" : "border-transparent"
+            }`}
         >
           <Text
-            className={`font-jakarta-semibold text-sm ${
-              activeTab === "guest" ? "text-primary" : "text-gray-600"
-            }`}
+            className={`font-jakarta-semibold text-sm ${activeTab === "vendor" ? "text-primary" : "text-gray-600"
+              }`}
           >
-            Guest ({invitedEvents.length})
+            Vendor ({vendorInvitations.length})
           </Text>
         </Pressable>
       </View>
@@ -198,7 +194,7 @@ export const InvitedEventsTab = ({ isActive }: InvitedEventsTabProps) => {
               <Event_WITH_ROLE
                 key={event.id}
                 event={event}
-                onPress={() => {}}
+                onPress={() => { }}
                 isRequest
                 asGuest={event.role === "Guest"}
               />
