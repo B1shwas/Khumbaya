@@ -110,12 +110,14 @@ export const getEventOfBusiness = async (
   businessId: number[],
   status?: string
 ) => {
+  if (!businessId || businessId.length === 0) {
+    return [];
+  }
+
   const businessIdString = businessId.join(",");
   const response = await api.get(
     `/business/events/${businessIdString}${status ? `?status=${status}` : ""}`
   );
-
-  console.log("🐽🐽🐽🐽🐽🐽🐽🐽", response.data.data);
   return response.data.data;
 };
 
