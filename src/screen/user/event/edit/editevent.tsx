@@ -77,20 +77,22 @@ const buildInitialForm = (draft?: Event | null): EditEventForm => {
 const PRIMARY = "#ee2b8c";
 
 type SectionCardProps = {
-  title: string;
-  icon: keyof typeof Ionicons.glyphMap;
+  title?: string;
+  icon?: keyof typeof Ionicons.glyphMap;
   children: React.ReactNode;
 };
 
 function SectionCard({ title, icon, children }: SectionCardProps) {
   return (
     <View className="rounded-md bg-white p-5 shadow-sm border border-slate-100">
-      <View className="mb-4 flex-row items-center gap-2">
-        <View className="h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-[#ee2b8c] to-[#ff5ca1]">
-          <Ionicons name={icon} size={18} color="#ffffff" />
+      {title && icon && (
+        <View className="mb-4 flex-row items-center gap-2">
+          <View className="h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-[#ee2b8c] to-[#ff5ca1]">
+            <Ionicons name={icon} size={18} color="#ffffff" />
+          </View>
+          <Text className="text-lg font-bold text-[#181114]">{title}</Text>
         </View>
-        <Text className="text-lg font-bold text-[#181114]">{title}</Text>
-      </View>
+      )}
       <View className="gap-4">{children}</View>
     </View>
   );
@@ -402,7 +404,9 @@ export default function EditEventScreen() {
                     )}
                   />
                 </View>
-                <View className="flex-1">
+                
+              </View>
+              <View className="flex-1">
                   <Controller
                     control={control}
                     name="venue"
@@ -416,8 +420,7 @@ export default function EditEventScreen() {
                     )}
                   />
                 </View>
-              </View>
-              <View className="h-28 w-full overflow-hidden rounded-md border border-slate-200">
+              {/* <View className="h-28 w-full overflow-hidden rounded-md border border-slate-200">
                 <Image
                   source={{
                     uri: "https://lh3.googleusercontent.com/aida-public/AB6AXuBsXGKMRLJ35_GbMDcozUWmZ04ZsCUF4hqolXbTjKxMZs4J2_16cNLqghLwwNSosYlDIt01M37Rog9lXSuwinI8iypxPY9Rx2z5Yuy6QOquSaBC_Wb9QgABYz6Mt6I2-PIbrlunei6pFyC_JxcTuGkwrZWJ-aVBQPMILrz8pIKNsA32urrRE8mh16zLRg-aL0JgxW4_aHQs-ns-P7eAEM9HUTcnZGOJiZJ3M4LgNr5lY_SQ5ognJpCZ9_taZa7KMpbjoK_3qfMJvgc",
@@ -425,10 +428,10 @@ export default function EditEventScreen() {
                   className="h-full w-full"
                   resizeMode="cover"
                 />
-              </View>
+              </View> */}
             </SectionCard>
 
-            <SectionCard title="Aesthetics & Privacy" icon="color-palette">
+            <SectionCard>
               <View className="flex-row gap-4">
                 <View className="flex-1">
                   <Controller
@@ -444,7 +447,7 @@ export default function EditEventScreen() {
                     )}
                   />
                 </View>
-                <View className="flex-1">
+                {/* <View className="flex-1">
                   <Controller
                     control={control}
                     name="dressCode"
@@ -457,15 +460,8 @@ export default function EditEventScreen() {
                       />
                     )}
                   />
-                </View>
-              </View>
-              <ToggleRow
-                title="Public Visibility"
-                description="Visible to all invited guests"
-                value={watch("isPublic")}
-                onChange={(value) => setValue("isPublic", value)}
-              />
-              <View className="gap-2">
+                </View> */}
+                 <View className="gap-2">
                 <Text className="text-sm font-semibold tracking-wide text-[#1a1b3a]">
                   Estimated Budget (INR)
                 </Text>
@@ -489,6 +485,14 @@ export default function EditEventScreen() {
                   />
                 </View>
               </View>
+              </View>
+              <ToggleRow
+                title="Public Visibility"
+                description="Visible to all invited guests"
+                value={watch("isPublic")}
+                onChange={(value) => setValue("isPublic", value)}
+              />
+             
             </SectionCard>
 
             <View className="mt-2">
