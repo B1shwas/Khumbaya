@@ -1,3 +1,2 @@
-import ViewGuestDetail from "@/src/screen/user/event/guest/viewguestdetail";
-
+import ViewGuestDetail from "@/src/screen/user/guest/organizerview/viewguestdetail";
 export default ViewGuestDetail;
