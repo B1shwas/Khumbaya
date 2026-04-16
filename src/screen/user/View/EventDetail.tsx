@@ -68,6 +68,13 @@ const EventDetail = () => {
       route: `./vendor`,
     },
     {
+      id: "catering",
+      name: "Catering",
+      icon: "restaurant",
+      color: "#F43F5E",
+      route: `./catering`,
+    },
+    {
       id: "budget",
       name: "Budget",
       icon: "wallet",

@@ -1,6 +1,11 @@
+import { CategoryChip } from "@/src/components/onboarding/CategoryChip";
 import { Text } from "@/src/components/ui/Text";
 import { useSubmitRsvpResponse } from "@/src/features/events/hooks/use-event";
-import { useRemoveInvitation } from "@/src/features/guests/api/use-guests";
+import {
+  useCreateEventGuestCategory,
+  useGetEventGuestCategories,
+  useRemoveInvitation,
+} from "@/src/features/guests/api/use-guests";
 import { useGuestDetailStore } from "@/src/features/guests/store/useGuestDetailStore";
 import { formatDate, formatTime } from "@/src/utils/helper";
 import { Ionicons } from "@expo/vector-icons";
@@ -11,7 +16,9 @@ import {
   ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
+  Modal,
   Platform,
+  Pressable,
   ScrollView,
   TextInput,
   TouchableOpacity,
@@ -19,6 +26,20 @@ import {
 } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { SafeAreaView } from "react-native-safe-area-context";
+
+type CategoryPriority = 1 | 2 | 3;
+
+const PRIORITY_OPTIONS: Array<{ label: string; value: CategoryPriority }> = [
+  { label: "1", value: 1 },
+  { label: "2", value: 2 },
+  { label: "3", value: 3 },
+];
+
+const formatDisplayValue = (value?: string) => {
+  if (!value) return "-";
+  return value.charAt(0).toUpperCase() + value.slice(1);
+};
+
 export default function ViewGuestDetail() {
   const router = useRouter();
   const guestDetail = useGuestDetailStore((state) => state.guestDraft);
@@ -30,6 +51,12 @@ export default function ViewGuestDetail() {
   const { mutate: submitRsvpResponse, isPending } =
     useSubmitRsvpResponse(eventId);
   const removeInvitationMutation = useRemoveInvitation();
+  const createCategoryMutation = useCreateEventGuestCategory();
+
+  const {
+    data: guestCategories = [],
+    isLoading: isGuestCategoriesLoading,
+  } = useGetEventGuestCategories(eventId || null);
 
   const initialRoom = guestDetail?.event_guest?.assigned_room ?? "";
   const initialArrivalInfo =
@@ -37,23 +64,48 @@ export default function ViewGuestDetail() {
     guestDetail?.event_guest?.pickup_info ??
     "";
   const initialDepartureInfo = guestDetail?.event_guest?.departure_info ?? "";
+  const initialCategory = guestDetail?.event_guest?.category ?? "";
+  const initialNotes = guestDetail?.event_guest?.notes ?? "";
+
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [categoryModalVisible, setCategoryModalVisible] = useState(false);
+  const [newCategoryTitle, setNewCategoryTitle] = useState("");
+  const [newCategoryPriority, setNewCategoryPriority] =
+    useState<CategoryPriority>(1);
   const [assignedRoom, setAssignedRoom] = useState(initialRoom);
   const [arrivalInfo, setArrivalInfo] = useState(initialArrivalInfo);
   const [departureInfo, setDepartureInfo] = useState(initialDepartureInfo);
+  const [category, setCategory] = useState(initialCategory);
+  const [notes, setNotes] = useState(initialNotes);
+
+  const categoryOptions = useMemo(
+    () =>
+      guestCategories.map((item) => ({
+        label: item.label,
+        value: item.value,
+      })),
+    [guestCategories]
+  );
 
   const hasAssignmentChanges = useMemo(() => {
     return (
       assignedRoom.trim() !== initialRoom.trim() ||
       arrivalInfo.trim() !== initialArrivalInfo.trim() ||
-      departureInfo.trim() !== initialDepartureInfo.trim()
+      departureInfo.trim() !== initialDepartureInfo.trim() ||
+      category.trim().toLowerCase() !== initialCategory.trim().toLowerCase() ||
+      notes.trim() !== initialNotes.trim()
     );
   }, [
     assignedRoom,
     arrivalInfo,
     departureInfo,
+    category,
+    notes,
     initialRoom,
     initialArrivalInfo,
     initialDepartureInfo,
+    initialCategory,
+    initialNotes,
   ]);
 
   const handleSaveAssignments = () => {
@@ -76,10 +128,14 @@ export default function ViewGuestDetail() {
       assigned_room: assignedRoom.trim() || null,
       arrival_info: arrivalInfo.trim() || null,
       departure_info: departureInfo.trim() || null,
+      notes: notes.trim(),
+      category: category.trim() || undefined,
+      role: category.trim() || undefined,
     };
 
     submitRsvpResponse(payload, {
       onSuccess: () => {
+        setIsEditMode(false);
         router.back();
       },
     });
@@ -123,20 +179,42 @@ export default function ViewGuestDetail() {
       ]
     );
   };
-  // let messageForTransportation;
 
-  // if (
-  //   guestDetail?.event_guest?.isArrivalPickupRequired &&
-  //   guestDetail?.event_guest?.isDeparturePickupRequired
-  // ) {
-  //   messageForTransportation = "Pickup and Departure";
-  // } else if (guestDetail?.event_guest?.isArrivalPickupRequired) {
-  //   messageForTransportation = "Arrival Pickup";
-  // } else if (guestDetail?.event_guest?.isDeparturePickupRequired) {
-  //   messageForTransportation = "Departure Pickup";
-  // } else {
-  //   messageForTransportation = "Not Required";
-  // }
+  const handleCreateCategory = async () => {
+    if (!eventId) {
+      Alert.alert("Error", "Invalid event id");
+      return;
+    }
+
+    const trimmedTitle = newCategoryTitle.trim();
+    if (!trimmedTitle) {
+      Alert.alert("Error", "Please enter category type.");
+      return;
+    }
+
+    try {
+      await createCategoryMutation.mutateAsync({
+        eventId,
+        payload: {
+          category_title: trimmedTitle,
+          priority: newCategoryPriority,
+        },
+      });
+
+      setCategory(trimmedTitle);
+      setNewCategoryTitle("");
+      setNewCategoryPriority(1);
+      setCategoryModalVisible(false);
+      Alert.alert("Success", "Guest category created successfully.");
+    } catch (error: any) {
+      const message =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Failed to create guest category.";
+      Alert.alert("Error", message);
+    }
+  };
+
 
   return (
     <KeyboardAvoidingView
@@ -145,6 +223,83 @@ export default function ViewGuestDetail() {
       keyboardVerticalOffset={Platform.OS === "ios" ? 16 : 0}
     >
       <SafeAreaView className="flex-1 bg-white" edges={[]}>
+        <Modal
+          transparent
+          animationType="fade"
+          visible={categoryModalVisible}
+          onRequestClose={() => setCategoryModalVisible(false)}
+        >
+          <View className="flex-1 bg-black/35 items-center justify-center px-6">
+            <View className="w-full rounded-xl bg-white p-5" style={{ gap: 14 }}>
+              <Text className="text-lg font-bold text-[#1a1b3a]">
+                Add Guest Category
+              </Text>
+
+              <View style={{ gap: 8 }}>
+                <Text className="text-xs font-semibold tracking-wide text-[#1a1b3a]">
+                  CATEGORY TYPE
+                </Text>
+                <TextInput
+                  className="h-12 w-full rounded-md border border-slate-200 bg-white px-3 text-base text-slate-900"
+                  placeholder="e.g. friend"
+                  placeholderTextColor="#94a3b8"
+                  value={newCategoryTitle}
+                  onChangeText={setNewCategoryTitle}
+                />
+              </View>
+
+              <View style={{ gap: 8 }}>
+                <Text className="text-xs font-semibold tracking-wide text-[#1a1b3a]">
+                  PRIORITY (1-3)
+                </Text>
+                <View className="flex-row" style={{ gap: 8 }}>
+                  {PRIORITY_OPTIONS.map((option) => {
+                    const isActive = newCategoryPriority === option.value;
+                    return (
+                      <Pressable
+                        key={option.value}
+                        className={`flex-1 items-center justify-center rounded-md border py-2.5 ${
+                          isActive
+                            ? "border-primary bg-primary/10"
+                            : "border-slate-200 bg-white"
+                        }`}
+                        onPress={() => setNewCategoryPriority(option.value)}
+                      >
+                        <Text
+                          className={`font-semibold ${
+                            isActive ? "text-primary" : "text-slate-700"
+                          }`}
+                        >
+                          {option.label}
+                        </Text>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+              </View>
+
+              <View className="flex-row" style={{ gap: 10 }}>
+                <Pressable
+                  className="flex-1 items-center justify-center rounded-md border border-slate-200 py-3"
+                  onPress={() => setCategoryModalVisible(false)}
+                  disabled={createCategoryMutation.isPending}
+                >
+                  <Text className="font-semibold text-slate-600">Cancel</Text>
+                </Pressable>
+                <Pressable
+                  className="flex-1 items-center justify-center rounded-md bg-[#ee2b8c] py-3"
+                  onPress={handleCreateCategory}
+                  disabled={createCategoryMutation.isPending}
+                >
+                  <Text className="font-semibold text-white">
+                    {createCategoryMutation.isPending ? "Saving..." : "Save"}
+                  </Text>
+                </Pressable>
+              </View>
+            </View>
+          </View>
+        </Modal>
+
         <KeyboardAwareScrollView
           style={{ flex: 1 }}
           contentContainerStyle={{
@@ -179,6 +334,24 @@ export default function ViewGuestDetail() {
                 </TouchableOpacity>
               ) : null}
 
+              <TouchableOpacity
+                onPress={() => setIsEditMode((prev) => !prev)}
+                className={`absolute ${isConfirmed ? "right-4" : "right-16"} top-4 p-2 rounded-full bg-white`}
+                activeOpacity={0.8}
+                style={{
+                  shadowColor: "#000",
+                  shadowOpacity: 0.12,
+                  shadowRadius: 4,
+                  elevation: 3,
+                }}
+              >
+                <Ionicons
+                  name={isEditMode ? "close-outline" : "create-outline"}
+                  size={18}
+                  color="#EE2B8C"
+                />
+              </TouchableOpacity>
+
               <View className="relative">
                 <View
                   className="w-32 h-32 rounded-full bg-primary border-4 border-white items-center justify-center"
@@ -211,47 +384,8 @@ export default function ViewGuestDetail() {
               </Text>
               <Text variant="h2" className="text-primary text-sm mt-1">
                 {isConfirmed ? "Confirmed" : "Pending"} •{" "}
-                {guestDetail?.event_guest.category || "VVIP"}
+                {category || guestDetail?.event_guest.category || "Guest"}
               </Text>
-              {/*
-              {guestDetail?.event_guest.arrival_date_time &&
-                guestDetail?.event_guest.departure_date_time && (
-                  <View className="flex-row items-center gap-2 mt-2">
-                    <View>
-                      <View className="flex-row items-center">
-                        <Ionicons
-                          name="calendar-outline"
-                          size={14}
-                          color="#94A3B8"
-                          className="mr-2"
-                        />
-                        <Text
-                          variant="caption"
-                          className="text-sm text-center"
-                        >
-                          {formatDate(
-                            guestDetail?.event_guest.arrival_date_time || "—"
-                          )}{" "}
-                          –{" "}
-                          {formatDate(
-                            guestDetail?.event_guest.departure_date_time || "—"
-                          )}
-                        </Text>
-                      </View>
-
-                      <Text variant="caption" className="text-sm text-center">
-                        {formatTime(
-                          guestDetail?.event_guest.arrival_date_time || "TBD"
-                        )}{" "}
-                        –{" "}
-                        {formatTime(
-                          guestDetail?.event_guest.departure_date_time || "TBD"
-                        )}
-                      </Text>
-                    </View>
-                  </View>
-                )}
-              */}
             </LinearGradient>
 
             <View className="flex-row gap-3 px-6 pb-6 border-b border-primary/5">
@@ -299,6 +433,11 @@ export default function ViewGuestDetail() {
                 </View>
                 <View className="bg-slate-50 rounded-2xl px-4">
                   {[
+                    {
+                      label: "Category",
+                      value: category || guestDetail?.event_guest?.category || "Uncategorized",
+                      pill: true,
+                    },
                     {
                       label: "Arrival Time",
                       value: guestDetail?.event_guest?.arrival_date_time
@@ -349,15 +488,7 @@ export default function ViewGuestDetail() {
                       value: `${guestDetail?.event_guest.isDeparturePickupRequired ? "Required" : "Not Required"}`,
                       pill: true,
                     },
-                    //   {
-                    //   label: "Transport Summary",
-                    //   value: messageForTransportation,
-                    //   pill: false,
-                    // },
-                    // {
-                    //   label: "Category",
-                    //   value: guestDetail?.event_guest?.category,
-                    // },
+                 
                   ].map((row, i, arr) => (
                     <View
                       key={i}
@@ -369,21 +500,57 @@ export default function ViewGuestDetail() {
                       {row.pill ? (
                         <View className="bg-primary/10 px-3 py-1 rounded-full">
                           <Text variant="h2" className="text-primary text-xs">
-                            {row.value.charAt(0).toUpperCase() +
-                              row.value.slice(1)}
+                            {formatDisplayValue(row.value)}
                           </Text>
                         </View>
                       ) : (
                         <Text variant="h2" className="text-slate-900 text-sm">
-                          {row.value
-                            ? row.value?.charAt(0).toUpperCase() +
-                              row.value?.slice(1)
-                            : "-"}
+                          {formatDisplayValue(row.value)}
                         </Text>
                       )}
                     </View>
                   ))}
                 </View>
+
+                {isEditMode && (
+                  <View className="mt-3">
+                    <View className="flex-row items-center justify-between mb-2">
+                      <Text variant="caption" className="text-[11px] uppercase text-slate-500">
+                        Edit Category
+                      </Text>
+                      <Pressable
+                        onPress={() => setCategoryModalVisible(true)}
+                        className="flex-row items-center"
+                        style={{ gap: 4 }}
+                      >
+                        <Ionicons name="add-circle-outline" size={16} color="#ee2b8c" />
+                        <Text className="text-xs font-semibold text-[#ee2b8c]">
+                          Add category
+                        </Text>
+                      </Pressable>
+                    </View>
+                    <View className="flex-row flex-wrap gap-2">
+                      {categoryOptions.map((option) => {
+                        const isActive =
+                          category?.toLowerCase() === option.value.toLowerCase();
+                        return (
+                          <CategoryChip
+                            key={option.value}
+                            label={option.label}
+                            isActive={isActive}
+                            onPress={() => setCategory(option.value)}
+                          />
+                        );
+                      })}
+                    </View>
+
+                    {!isGuestCategoriesLoading && !categoryOptions.length ? (
+                      <Text className="text-xs text-slate-500 mt-2">
+                        No guest category found for this event. Use “Add category”.
+                      </Text>
+                    ) : null}
+                  </View>
+                )}
               </View>
 
               <View className="bg-white border border-slate-200 p-4 rounded-2xl mb-3">
@@ -397,7 +564,7 @@ export default function ViewGuestDetail() {
                         Notes
                       </Text>
                       <Text variant="h2" className="text-slate-900 text-sm">
-                        {guestDetail?.event_guest.notes ||
+                        {notes ||
                           "No additional notes"}
                       </Text>
                     </View>
@@ -407,6 +574,19 @@ export default function ViewGuestDetail() {
                     activeOpacity={0.7}
                   ></TouchableOpacity>
                 </View>
+
+                {isEditMode && (
+                  <TextInput
+                    value={notes}
+                    onChangeText={setNotes}
+                    placeholder="Add internal note"
+                    placeholderTextColor="#94a3b8"
+                    multiline
+                    numberOfLines={3}
+                    textAlignVertical="top"
+                    className="w-full mt-3 bg-slate-50 rounded-md p-4 text-sm text-slate-900"
+                  />
+                )}
               </View>
 
               {(guestDetail?.event_guest?.isAccomodation ||
@@ -452,6 +632,7 @@ export default function ViewGuestDetail() {
                       <TextInput
                         value={assignedRoom}
                         onChangeText={setAssignedRoom}
+                        editable={isEditMode}
                         placeholder="Assign room"
                         placeholderTextColor="#94a3b8"
                         className="w-full bg-slate-50 rounded-md p-4 text-sm text-slate-900"
@@ -474,6 +655,7 @@ export default function ViewGuestDetail() {
                       <TextInput
                         value={arrivalInfo}
                         onChangeText={setArrivalInfo}
+                        editable={isEditMode}
                         placeholder="Driver / pickup details"
                         placeholderTextColor="#94a3b8"
                         className="w-full bg-slate-50 rounded-md p-4 text-sm text-slate-900"
@@ -496,6 +678,7 @@ export default function ViewGuestDetail() {
                       <TextInput
                         value={departureInfo}
                         onChangeText={setDepartureInfo}
+                        editable={isEditMode}
                         placeholder="Driver / departure details"
                         placeholderTextColor="#94a3b8"
                         className="w-full bg-slate-50 rounded-md p-4 text-sm text-slate-900"
@@ -507,16 +690,19 @@ export default function ViewGuestDetail() {
                     className="bg-primary py-3 rounded-xl items-center justify-center"
                     activeOpacity={0.85}
                     onPress={handleSaveAssignments}
-                    disabled={isPending || !hasAssignmentChanges}
+                    disabled={isPending || !hasAssignmentChanges || !isEditMode}
                     style={{
-                      opacity: isPending || !hasAssignmentChanges ? 0.6 : 1,
+                      opacity:
+                        isPending || !hasAssignmentChanges || !isEditMode
+                          ? 0.6
+                          : 1,
                     }}
                   >
                     {isPending ? (
                       <ActivityIndicator color="#fff" />
                     ) : (
                       <Text variant="h2" className="text-white text-sm">
-                        Save Assignments
+                        Save Changes
                       </Text>
                     )}
                   </TouchableOpacity>
