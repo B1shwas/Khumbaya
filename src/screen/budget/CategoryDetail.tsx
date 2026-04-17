@@ -226,29 +226,6 @@ export default function CategoryDetailsScreen() {
                   className="text-[10px] text-gray-500 uppercase"
                   variant="h2"
                 >
-                  Pending
-                </Text>
-                <InfoIcon
-                  title="Pending"
-                  description="Total amount that is owed but not yet paid. These are outstanding payments for contracted services."
-                  iconStyle="!text-gray-400"
-                />
-              </View>
-              <Text
-                className="text-sm text-amber-600 text-center"
-                style={{ flexShrink: 1 }}
-                variant="h2"
-              >
-                Rs. {categoryData.pending.toLocaleString()}
-              </Text>
-            </View>
-
-            <View className="items-center flex-1">
-              <View className="flex-row items-center gap-1.5 mb-1">
-                <Text
-                  className="text-[10px] text-gray-500 uppercase"
-                  variant="h2"
-                >
                   Remaining
                 </Text>
                 <InfoIcon
