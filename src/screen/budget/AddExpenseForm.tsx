@@ -140,17 +140,10 @@ export default function AddExpenseScreen({
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
-          <View className="px-6 pt-8">
+          <View className="px-3 ">
             {!editMode && (
               <View className="mb-8">
-                <View>
-                  <Text className="text-3xl text-[#181114]" variant="h1">
-                    Detail your new
-                  </Text>
-                  <Text className="text-3xl text-[#ee2b8c]" variant="h1">
-                    financial commitment.
-                  </Text>
-                </View>
+                
               </View>
             )}
 
