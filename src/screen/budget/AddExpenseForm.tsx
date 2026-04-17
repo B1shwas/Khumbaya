@@ -141,12 +141,6 @@ export default function AddExpenseScreen({
           keyboardShouldPersistTaps="handled"
         >
           <View className="px-3 ">
-            {!editMode && (
-              <View className="mb-8">
-                
-              </View>
-            )}
-
             {/* Form Card */}
             <View className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 gap-6 mb-8">
               {/* Expense Name */}
