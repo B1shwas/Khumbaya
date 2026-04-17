@@ -30,7 +30,6 @@ const defaultRoleStyle = {
 
 export const Event_WITH_ROLE = ({
   event,
-  onPress,
   isRequest,
   asGuest,
 }: {

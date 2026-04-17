@@ -3,7 +3,8 @@ import { usegetUpcomingEvents } from "@/src/features/events/hooks/use-event";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { RefreshControl, ScrollView, Text, View } from "react-native";
+import { RefreshControl, ScrollView, View } from "react-native";
+import { Text } from "../ui/Text";
 import { Event_WITH_ROLE } from "./EventwithRole";
 
 interface UpcomingEventsTabProps {

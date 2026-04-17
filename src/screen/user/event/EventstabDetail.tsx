@@ -5,7 +5,6 @@ import { EventTab } from "@/src/constants/event";
 import { useThrottledRouter } from "@/src/hooks/useThrottledRouter";
 import { cn } from "@/src/utils/cn";
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { Pressable, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -19,8 +18,6 @@ export default function EventsPage() {
     setMounted(true);
   }, []);
 
-  const router = useRouter();
-
   const tabs: { label: string; value: EventTab }[] = [
     { label: "Upcoming", value: "upcoming" },
     { label: "Invited", value: "invited" },
@@ -29,22 +26,24 @@ export default function EventsPage() {
 
   if (!mounted) return null;
   return (
+
     <SafeAreaView className="flex-1 bg-gray-50">
       {/* Header */}
-      <View className="flex-row items-center justify-between px-4 py-3">
-        <Text className="text-xl font-bold text-gray-900">Your Events</Text>
+      <View className="flex-row items-center justify-between px-4 py-3 mb-3">
+        <Text className="text-xl font-bold text-gray-900 ml-4">Your Events</Text>
         <TouchableOpacity
           onPress={() => {
-            router.push("/(protected)/(client-tabs)/profile");
+            push("/(protected)/(client-stack)/events/create");
           }}
-          className="w-9 h-9 rounded-full bg-gray-200 items-center justify-center"
+          className="flex-row items-center gap-1 rounded-sm bg-primary px-3 py-2"
         >
-          <Ionicons name="person-outline" size={20} color="#374151" />
+          <Ionicons name="add" size={16} color="white" />
+          <Text className="text-xs font-jakarta-semibold text-white">Create Event </Text>
         </TouchableOpacity>
       </View>
 
       {/* Tabs */}
-      <View className="flex-row p-1 mb-4 gap-2 bg-background-tertiary !rounded-md">
+      <View className="flex-row p-1 mb-4 gap-2 bg-background-tertiary !rounded-md mx-2">
         {tabs.map((tab) => (
           <Pressable
             key={tab.value}
@@ -82,15 +81,6 @@ export default function EventsPage() {
           <CompletedEventsTab isActive={activeTab === "completed"} />
         </View>
       )}
-      {/* Floating Action Button */}
-      <TouchableOpacity
-        onPress={() => {
-          push("/(protected)/(client-stack)/events/create");
-        }}
-        className="absolute bottom-6 right-6 w-14 h-14 bg-primary rounded-full items-center justify-center shadow-lg"
-      >
-        <Ionicons name="add" size={28} color="white" />
-      </TouchableOpacity>
     </SafeAreaView>
   );
 }

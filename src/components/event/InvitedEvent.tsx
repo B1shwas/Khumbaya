@@ -185,11 +185,7 @@ export const InvitedEventsTab = ({ isActive }: InvitedEventsTabProps) => {
           )
         ) : invitedEvents.length > 0 ? (
           <>
-            <View className="py-4">
-              <Text className="text-base font-bold text-gray-900 mb-3">
-                Guest Invitations
-              </Text>
-            </View>
+      
             {invitedEvents.map((event) => (
               <Event_WITH_ROLE
                 key={event.id}

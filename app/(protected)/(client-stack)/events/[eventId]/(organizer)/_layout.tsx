@@ -76,6 +76,7 @@ export default function OrganizerEventDetailLayout() {
       <Stack.Screen name="(subevent)" options={{ headerShown: false }} />
       <Stack.Screen name="tasklist" options={{ headerShown: false }} />
       <Stack.Screen name="edit-event" options={{ title: "Event Details" }} />
+      <Stack.Screen name="logistics" options={{ headerShown: false }} />
       <Stack.Screen
         name="subevent-create"
         options={{ title: "Create new event" }}

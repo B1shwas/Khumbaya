@@ -1,4 +1,3 @@
-import { CategoryChip } from "@/src/components/onboarding/CategoryChip";
 import { Text } from "@/src/components/ui/Text";
 import { useSubmitRsvpResponse } from "@/src/features/events/hooks/use-event";
 import {
@@ -10,7 +9,7 @@ import { useGuestDetailStore } from "@/src/features/guests/store/useGuestDetailS
 import { formatDate, formatTime } from "@/src/utils/helper";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { useRouter } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import { useMemo, useState } from "react";
 import {
   ActivityIndicator,
@@ -52,7 +51,6 @@ export default function ViewGuestDetail() {
     useSubmitRsvpResponse(eventId);
   const removeInvitationMutation = useRemoveInvitation();
   const createCategoryMutation = useCreateEventGuestCategory();
-
   const {
     data: guestCategories = [],
     isLoading: isGuestCategoriesLoading,
@@ -67,8 +65,8 @@ export default function ViewGuestDetail() {
   const initialCategory = guestDetail?.event_guest?.category ?? "";
   const initialNotes = guestDetail?.event_guest?.notes ?? "";
 
-  const [isEditMode, setIsEditMode] = useState(false);
   const [categoryModalVisible, setCategoryModalVisible] = useState(false);
+  const [isAddingCategory, setIsAddingCategory] = useState(false);
   const [newCategoryTitle, setNewCategoryTitle] = useState("");
   const [newCategoryPriority, setNewCategoryPriority] =
     useState<CategoryPriority>(1);
@@ -76,7 +74,7 @@ export default function ViewGuestDetail() {
   const [arrivalInfo, setArrivalInfo] = useState(initialArrivalInfo);
   const [departureInfo, setDepartureInfo] = useState(initialDepartureInfo);
   const [category, setCategory] = useState(initialCategory);
-  const [notes, setNotes] = useState(initialNotes);
+  const [notes] = useState(initialNotes);
 
   const categoryOptions = useMemo(
     () =>
@@ -108,6 +106,9 @@ export default function ViewGuestDetail() {
     initialNotes,
   ]);
 
+  const headerTitle = guestDetail?.user_detail?.username?.trim() || "Guest Detail";
+  const isSaveDisabled = isPending || !hasAssignmentChanges;
+
   const handleSaveAssignments = () => {
     if (
       !guestDetail?.event_guest ||
@@ -135,7 +136,6 @@ export default function ViewGuestDetail() {
 
     submitRsvpResponse(payload, {
       onSuccess: () => {
-        setIsEditMode(false);
         router.back();
       },
     });
@@ -200,12 +200,12 @@ export default function ViewGuestDetail() {
           priority: newCategoryPriority,
         },
       });
-
       setCategory(trimmedTitle);
       setNewCategoryTitle("");
       setNewCategoryPriority(1);
+      setIsAddingCategory(false);
       setCategoryModalVisible(false);
-      Alert.alert("Success", "Guest category created successfully.");
+      Alert.alert("Success", "Guest category created. Tap Save to apply changes.");
     } catch (error: any) {
       const message =
         error?.response?.data?.message ||
@@ -217,56 +217,94 @@ export default function ViewGuestDetail() {
 
 
   return (
+    <>
+    <Stack.Screen
+      options={{
+        title: headerTitle,
+        headerRight: () =>
+          <Pressable
+            onPress={handleSaveAssignments}
+            disabled={isSaveDisabled}
+            style={{
+             opacity: isSaveDisabled ? 0.5 : 1,
+              paddingVertical: 4,
+       
+            }}
+          >
+            {isPending ? (
+              <ActivityIndicator size="small" color="#EE2B8C" />
+            ) : (
+              <View className="bg-primary/90 rounded-md p-2 px-6">
+                <Text className="text-white font-bold text-sm">Save</Text>
+              </View>
+            )}
+          </Pressable>,
+      }}
+    />
     <KeyboardAvoidingView
       style={{ flex: 1 }}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
       keyboardVerticalOffset={Platform.OS === "ios" ? 16 : 0}
     >
       <SafeAreaView className="flex-1 bg-white" edges={[]}>
+        
         <Modal
           transparent
           animationType="fade"
           visible={categoryModalVisible}
-          onRequestClose={() => setCategoryModalVisible(false)}
+          onRequestClose={() => {
+            setCategoryModalVisible(false);
+            setIsAddingCategory(false);
+          }}
         >
           <View className="flex-1 bg-black/35 items-center justify-center px-6">
-            <View className="w-full rounded-xl bg-white p-5" style={{ gap: 14 }}>
-              <Text className="text-lg font-bold text-[#1a1b3a]">
-                Add Guest Category
-              </Text>
-
-              <View style={{ gap: 8 }}>
-                <Text className="text-xs font-semibold tracking-wide text-[#1a1b3a]">
-                  CATEGORY TYPE
+            <View className="w-full rounded-2xl bg-white p-5" style={{ gap: 14 }}>
+              <View className="flex-row items-center justify-between">
+                <Text className="text-lg font-bold text-[#1a1b3a]">
+                  Select Category
                 </Text>
-                <TextInput
-                  className="h-12 w-full rounded-md border border-slate-200 bg-white px-3 text-base text-slate-900"
-                  placeholder="e.g. friend"
-                  placeholderTextColor="#94a3b8"
-                  value={newCategoryTitle}
-                  onChangeText={setNewCategoryTitle}
-                />
+                <Pressable
+                  onPress={() => setIsAddingCategory((prev) => !prev)}
+                  className="flex-row items-center rounded-full border border-primary/20 px-2.5 py-1"
+                  style={{ gap: 4 }}
+                >
+                  <Ionicons
+                    name={isAddingCategory ? "remove-circle-outline" : "add-circle-outline"}
+                    size={14}
+                    color="#ee2b8c"
+                  />
+                  <Text className="text-xs font-semibold text-primary">
+                    {isAddingCategory ? "Hide Add" : "Add Category"}
+                  </Text>
+                </Pressable>
               </View>
 
-              <View style={{ gap: 8 }}>
-                <Text className="text-xs font-semibold tracking-wide text-[#1a1b3a]">
-                  PRIORITY (1-3)
-                </Text>
-                <View className="flex-row" style={{ gap: 8 }}>
-                  {PRIORITY_OPTIONS.map((option) => {
-                    const isActive = newCategoryPriority === option.value;
+              {isGuestCategoriesLoading ? (
+                <View className="py-6 items-center justify-center">
+                  <ActivityIndicator color="#ee2b8c" />
+                </View>
+              ) : categoryOptions.length ? (
+                <View className="flex-row flex-wrap" style={{ gap: 8 }}>
+                  {categoryOptions.map((option) => {
+                    const isActive =
+                      category?.toLowerCase() === option.value.toLowerCase();
+
                     return (
                       <Pressable
                         key={option.value}
-                        className={`flex-1 items-center justify-center rounded-md border py-2.5 ${
+                        className={`rounded-full px-3 py-1.5 border ${
                           isActive
                             ? "border-primary bg-primary/10"
                             : "border-slate-200 bg-white"
                         }`}
-                        onPress={() => setNewCategoryPriority(option.value)}
+                        onPress={() => {
+                          setCategory(option.value);
+                          setCategoryModalVisible(false);
+                          setIsAddingCategory(false);
+                        }}
                       >
                         <Text
-                          className={`font-semibold ${
+                          className={`text-xs font-semibold ${
                             isActive ? "text-primary" : "text-slate-700"
                           }`}
                         >
@@ -276,26 +314,78 @@ export default function ViewGuestDetail() {
                     );
                   })}
                 </View>
-              </View>
+              ) : (
+                <Text className="text-xs text-slate-500">
+                  No category found for this event. Use “Add Category”.
+                </Text>
+              )}
 
-              <View className="flex-row" style={{ gap: 10 }}>
-                <Pressable
-                  className="flex-1 items-center justify-center rounded-md border border-slate-200 py-3"
-                  onPress={() => setCategoryModalVisible(false)}
-                  disabled={createCategoryMutation.isPending}
-                >
-                  <Text className="font-semibold text-slate-600">Cancel</Text>
-                </Pressable>
-                <Pressable
-                  className="flex-1 items-center justify-center rounded-md bg-[#ee2b8c] py-3"
-                  onPress={handleCreateCategory}
-                  disabled={createCategoryMutation.isPending}
-                >
-                  <Text className="font-semibold text-white">
-                    {createCategoryMutation.isPending ? "Saving..." : "Save"}
-                  </Text>
-                </Pressable>
-              </View>
+              {isAddingCategory && (
+                <View className="border-t border-slate-200 pt-3" style={{ gap: 10 }}>
+                  <View style={{ gap: 8 }}>
+                    <Text className="text-xs font-semibold tracking-wide text-[#1a1b3a]">
+                      CATEGORY TYPE
+                    </Text>
+                    <TextInput
+                      className="h-12 w-full rounded-md border border-slate-200 bg-white px-3 text-base text-slate-900"
+                      placeholder="e.g. friend"
+                      placeholderTextColor="#94a3b8"
+                      value={newCategoryTitle}
+                      onChangeText={setNewCategoryTitle}
+                    />
+                  </View>
+
+                  <View style={{ gap: 8 }}>
+                    <Text className="text-xs font-semibold tracking-wide text-[#1a1b3a]">
+                      PRIORITY (1-3)
+                    </Text>
+                    <View className="flex-row" style={{ gap: 8 }}>
+                      {PRIORITY_OPTIONS.map((option) => {
+                        const isActive = newCategoryPriority === option.value;
+                        return (
+                          <Pressable
+                            key={option.value}
+                            className={`flex-1 items-center justify-center rounded-md border py-2.5 ${
+                              isActive
+                                ? "border-primary bg-primary/10"
+                                : "border-slate-200 bg-white"
+                            }`}
+                            onPress={() => setNewCategoryPriority(option.value)}
+                          >
+                            <Text
+                              className={`font-semibold ${
+                                isActive ? "text-primary" : "text-slate-700"
+                              }`}
+                            >
+                              {option.label}
+                            </Text>
+                          </Pressable>
+                        );
+                      })}
+                    </View>
+                  </View>
+
+                  <Pressable
+                    className="items-center justify-center rounded-md bg-[#ee2b8c] py-3"
+                    onPress={handleCreateCategory}
+                    disabled={createCategoryMutation.isPending}
+                  >
+                    <Text className="font-semibold text-white">
+                      {createCategoryMutation.isPending ? "Saving..." : "Save New Category"}
+                    </Text>
+                  </Pressable>
+                </View>
+              )}
+
+              <Pressable
+                className="items-center justify-center rounded-md border border-slate-200 py-2.5"
+                onPress={() => {
+                  setCategoryModalVisible(false);
+                  setIsAddingCategory(false);
+                }}
+              >
+                <Text className="font-semibold text-slate-600">Close</Text>
+              </Pressable>
             </View>
           </View>
         </Modal>
@@ -334,24 +424,6 @@ export default function ViewGuestDetail() {
                 </TouchableOpacity>
               ) : null}
 
-              <TouchableOpacity
-                onPress={() => setIsEditMode((prev) => !prev)}
-                className={`absolute ${isConfirmed ? "right-4" : "right-16"} top-4 p-2 rounded-full bg-white`}
-                activeOpacity={0.8}
-                style={{
-                  shadowColor: "#000",
-                  shadowOpacity: 0.12,
-                  shadowRadius: 4,
-                  elevation: 3,
-                }}
-              >
-                <Ionicons
-                  name={isEditMode ? "close-outline" : "create-outline"}
-                  size={18}
-                  color="#EE2B8C"
-                />
-              </TouchableOpacity>
-
               <View className="relative">
                 <View
                   className="w-32 h-32 rounded-full bg-primary border-4 border-white items-center justify-center"
@@ -386,6 +458,12 @@ export default function ViewGuestDetail() {
                 {isConfirmed ? "Confirmed" : "Pending"} •{" "}
                 {category || guestDetail?.event_guest.category || "Guest"}
               </Text>
+              <View className="flex-row items-center mt-2" style={{ gap: 6 }}>
+                <Ionicons name="call-outline" size={14} color="#64748b" />
+                <Text variant="caption" className="text-slate-500 text-sm">
+                  {guestDetail?.user_detail?.phone?.trim() || "Phone not available"}
+                </Text>
+              </View>
             </LinearGradient>
 
             <View className="flex-row gap-3 px-6 pb-6 border-b border-primary/5">
@@ -435,7 +513,10 @@ export default function ViewGuestDetail() {
                   {[
                     {
                       label: "Category",
-                      value: category || guestDetail?.event_guest?.category || "Uncategorized",
+                      value:
+                        category ||
+                        guestDetail?.event_guest?.category ||
+                        "Uncategorized",
                       pill: true,
                     },
                     {
@@ -498,10 +579,28 @@ export default function ViewGuestDetail() {
                         {row.label}
                       </Text>
                       {row.pill ? (
-                        <View className="bg-primary/10 px-3 py-1 rounded-full">
-                          <Text variant="h2" className="text-primary text-xs">
-                            {formatDisplayValue(row.value)}
-                          </Text>
+                        <View className="flex-row items-center" style={{ gap: 8 }}>
+                          <View className="bg-primary/10 px-3 py-1 rounded-full">
+                            <Text variant="h2" className="text-primary text-xs">
+                              {formatDisplayValue(row.value)}
+                            </Text>
+                          </View>
+
+                          {row.label === "Category" && (
+                            <Pressable
+                              onPress={() => {
+                                setNewCategoryTitle(category || "");
+                                setCategoryModalVisible(true);
+                              }}
+                              className="flex-row items-center rounded-full border border-primary/25 px-2.5 py-1"
+                              style={{ gap: 4 }}
+                            >
+                              <Ionicons name="create-outline" size={13} color="#EE2B8C" />
+                              <Text className="text-[11px] font-semibold text-primary">
+                                Edit
+                              </Text>
+                            </Pressable>
+                          )}
                         </View>
                       ) : (
                         <Text variant="h2" className="text-slate-900 text-sm">
@@ -511,46 +610,6 @@ export default function ViewGuestDetail() {
                     </View>
                   ))}
                 </View>
-
-                {isEditMode && (
-                  <View className="mt-3">
-                    <View className="flex-row items-center justify-between mb-2">
-                      <Text variant="caption" className="text-[11px] uppercase text-slate-500">
-                        Edit Category
-                      </Text>
-                      <Pressable
-                        onPress={() => setCategoryModalVisible(true)}
-                        className="flex-row items-center"
-                        style={{ gap: 4 }}
-                      >
-                        <Ionicons name="add-circle-outline" size={16} color="#ee2b8c" />
-                        <Text className="text-xs font-semibold text-[#ee2b8c]">
-                          Add category
-                        </Text>
-                      </Pressable>
-                    </View>
-                    <View className="flex-row flex-wrap gap-2">
-                      {categoryOptions.map((option) => {
-                        const isActive =
-                          category?.toLowerCase() === option.value.toLowerCase();
-                        return (
-                          <CategoryChip
-                            key={option.value}
-                            label={option.label}
-                            isActive={isActive}
-                            onPress={() => setCategory(option.value)}
-                          />
-                        );
-                      })}
-                    </View>
-
-                    {!isGuestCategoriesLoading && !categoryOptions.length ? (
-                      <Text className="text-xs text-slate-500 mt-2">
-                        No guest category found for this event. Use “Add category”.
-                      </Text>
-                    ) : null}
-                  </View>
-                )}
               </View>
 
               <View className="bg-white border border-slate-200 p-4 rounded-2xl mb-3">
@@ -575,18 +634,7 @@ export default function ViewGuestDetail() {
                   ></TouchableOpacity>
                 </View>
 
-                {isEditMode && (
-                  <TextInput
-                    value={notes}
-                    onChangeText={setNotes}
-                    placeholder="Add internal note"
-                    placeholderTextColor="#94a3b8"
-                    multiline
-                    numberOfLines={3}
-                    textAlignVertical="top"
-                    className="w-full mt-3 bg-slate-50 rounded-md p-4 text-sm text-slate-900"
-                  />
-                )}
+             
               </View>
 
               {(guestDetail?.event_guest?.isAccomodation ||
@@ -632,7 +680,7 @@ export default function ViewGuestDetail() {
                       <TextInput
                         value={assignedRoom}
                         onChangeText={setAssignedRoom}
-                        editable={isEditMode}
+                       
                         placeholder="Assign room"
                         placeholderTextColor="#94a3b8"
                         className="w-full bg-slate-50 rounded-md p-4 text-sm text-slate-900"
@@ -655,7 +703,7 @@ export default function ViewGuestDetail() {
                       <TextInput
                         value={arrivalInfo}
                         onChangeText={setArrivalInfo}
-                        editable={isEditMode}
+                      
                         placeholder="Driver / pickup details"
                         placeholderTextColor="#94a3b8"
                         className="w-full bg-slate-50 rounded-md p-4 text-sm text-slate-900"
@@ -678,7 +726,7 @@ export default function ViewGuestDetail() {
                       <TextInput
                         value={departureInfo}
                         onChangeText={setDepartureInfo}
-                        editable={isEditMode}
+                        
                         placeholder="Driver / departure details"
                         placeholderTextColor="#94a3b8"
                         className="w-full bg-slate-50 rounded-md p-4 text-sm text-slate-900"
@@ -686,26 +734,7 @@ export default function ViewGuestDetail() {
                     </View>
                   )}
 
-                  <TouchableOpacity
-                    className="bg-primary py-3 rounded-xl items-center justify-center"
-                    activeOpacity={0.85}
-                    onPress={handleSaveAssignments}
-                    disabled={isPending || !hasAssignmentChanges || !isEditMode}
-                    style={{
-                      opacity:
-                        isPending || !hasAssignmentChanges || !isEditMode
-                          ? 0.6
-                          : 1,
-                    }}
-                  >
-                    {isPending ? (
-                      <ActivityIndicator color="#fff" />
-                    ) : (
-                      <Text variant="h2" className="text-white text-sm">
-                        Save Changes
-                      </Text>
-                    )}
-                  </TouchableOpacity>
+              
                 </View>
               )}
             </View>
@@ -713,5 +742,6 @@ export default function ViewGuestDetail() {
         </KeyboardAwareScrollView>
       </SafeAreaView>
     </KeyboardAvoidingView>
+    </>
   );
 }

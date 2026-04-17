@@ -94,7 +94,13 @@ const EventDetail = () => {
       icon: "checkmark-circle-outline",
       color: "#EC4899",
       route: `./tasklist`,
-    },
+    }, {
+      id: "logistics",
+      name: "logistics",
+      icon: "cube-outline",  // or "cube" for filled
+      color: "#10B981",
+      route: "./logistics"
+    }
   ];
 
   return (

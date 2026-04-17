@@ -23,7 +23,7 @@ import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view
 
 const PRIMARY = "#ee2b8c";
 
-type AttendanceValue = "yes" | "no" | "maybe";
+type AttendanceValue = "yes" | "no";
 
 interface RSVPFormValues {
   attendance: AttendanceValue;
@@ -80,12 +80,7 @@ export const RSVPFormContent = ({
 
   const { control, handleSubmit, watch, setValue } = useForm<RSVPFormValues>({
     defaultValues: {
-      attendance:
-        initialAttendance === "no"
-          ? "no"
-          : initialAttendance === "maybe"
-            ? "maybe"
-            : "yes",
+      attendance: initialAttendance === "no" ? "no" : "yes",
       accommodation: initialAccommodation,
       arrivalDateTime: initialArrival ?? new Date(),
       departureDateTime: initialDeparture ?? new Date(),
@@ -124,9 +119,8 @@ export const RSVPFormContent = ({
         status:
           values.attendance === "yes"
             ? "accepted"
-            : values.attendance === "no"
-              ? "rejected"
-              : "maybe",
+            : "rejected"
+     
       },
       {
         onSuccess: () => {
@@ -148,7 +142,7 @@ export const RSVPFormContent = ({
           </Text>
         </View>
         <View className="flex-row bg-pink-100 p-2 rounded-md">
-          {["yes", "no", "maybe"].map((option) => (
+          {["yes", "no"].map((option) => (
             <TouchableOpacity
               key={option}
               onPress={() =>
@@ -346,9 +340,7 @@ const RSVPForm = () => {
       ? "yes"
       : draft?.rawStatus === "rejected"
         ? "no"
-        : draft?.rawStatus === "maybe"
-          ? "maybe"
-          : "yes";
+        : "yes";
 
   const initialArrival = draft?.rawArrival
     ? new Date(draft.rawArrival)

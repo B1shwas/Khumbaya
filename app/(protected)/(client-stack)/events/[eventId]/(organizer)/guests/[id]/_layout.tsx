@@ -13,8 +13,7 @@ export default function GuestDetailLayout() {
         },
       }}
     >
-     
-      <Stack.Screen name="guest-details" options={{ title: "Guest Details" }} />
+      <Stack.Screen name="guest-details" />
     </Stack>
   );
 }
