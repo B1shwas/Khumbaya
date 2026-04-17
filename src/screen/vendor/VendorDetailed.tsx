@@ -308,16 +308,16 @@ function AvailableSpacesSection({
   ];
 
   return (
-    <View className="bg-white mt-2 pb-2">
+    <View className="bg-white mt-2 pb-0">
       {/* Section header */}
       <View className="flex-row justify-between items-center px-4 pt-5 pb-3">
         <View>
           <Text className="text-xl font-semibold text-[#181114]">Available Spaces</Text>
           <Text className="text-xs text-gray-400 mt-0.5">Select your preferred venue</Text>
         </View>
-        <Pressable>
+        <Pressable onPress={() => venues.length > 0 && setSelectedVenue({ venue: venues[0], image: portfolio[0] ?? coverFallback ?? FALLBACK_HEADER })}>
           <Text className="text-primary text-xs font-semibold uppercase tracking-wide">
-            VIEW ALL →
+            VIEW →
           </Text>
         </Pressable>
       </View>
@@ -334,10 +334,10 @@ function AvailableSpacesSection({
           const activeAmenities = AMENITIES.filter((a) => venue[a.key] === true);
 
           return (
-            <View
+            <Pressable
               key={venue.venue_id}
               className="mx-4 mb-5 rounded-md overflow-hidden bg-white"
-             
+              onPress={() => setSelectedVenue({ venue, image })}
             >
               <View style={{ height: 100 }}>
                 <Image
@@ -407,18 +407,8 @@ function AvailableSpacesSection({
                   </ScrollView>
                 )}
 
-                {/* CTA */}
-                <Pressable
-                  className="rounded-md py-3.5 items-center"
-                  style={{ backgroundColor: "#1a1a2e" }}
-                  onPress={() => setSelectedVenue({ venue, image })}
-                >
-                  <Text className="text-white font-semibold text-sm uppercase tracking-widest">
-                    Explore Space →
-                  </Text>
-                </Pressable>
               </View>
-            </View>
+            </Pressable>
           );
         })
       )}
@@ -436,15 +426,15 @@ function AvailableSpacesSection({
 
 // ─── ServiceInfoSection ───────────────────────────────────────────────────────
 
-// Shared dark stat tile used in the booking card
+// Shared stat tile used in the booking card
 function StatTile({ icon, label, value }: { icon: string; label: string; value: string }) {
   return (
-    <View className="flex-1 rounded-md p-3" style={{ backgroundColor: "rgba(255,255,255,0.08)" }}>
+    <View className="flex-1 rounded-xl p-3" style={{ backgroundColor: "#f5f5f8" }}>
       <MaterialIcons name={icon as any} size={16} color="#ee2b8c" style={{ marginBottom: 4 }} />
-      <Text style={{ color: "rgba(255,255,255,0.5)", fontSize: 9 }} className="uppercase tracking-widest">
+      <Text style={{ color: "#9ca3af", fontSize: 9 }} className="uppercase tracking-widest">
         {label}
       </Text>
-      <Text className="text-white font-semibold text-sm mt-0.5">{value}</Text>
+      <Text className="text-[#181114] font-semibold text-sm mt-0.5">{value}</Text>
     </View>
   );
 }
@@ -473,14 +463,14 @@ function ServiceInfoSection({
   // ── Shared booking card (bottom dark card, always shown) ──────────────────
   const BookingCard = () => (
     <View
-      className="mx-4 mb-4 rounded-md overflow-hidden"
-      style={{ backgroundColor: "#1a1a2e" }}
+      className="mx-4 mb-4 rounded-2xl overflow-hidden bg-white"
+      style={[{ borderWidth: 1, borderColor: "#f0f0f4" }, shadowStyle]}
     >
       <View className="flex-row items-center gap-2 px-4 pt-4 pb-3">
         <MaterialIcons name="verified-user" size={20} color="#ee2b8c" />
-        <Text className="text-white font-semibold text-base">Booking & Availability</Text>
+        <Text className="text-[#181114] font-semibold text-base">Booking & Availability</Text>
       </View>
-      <View style={{ height: 1, backgroundColor: "rgba(255,255,255,0.08)" }} />
+      <View style={{ height: 1, backgroundColor: "#f0f0f4" }} />
       <View className="px-4 pt-3 pb-4 flex-row gap-2">
         <StatTile
           icon="payments"
@@ -501,15 +491,15 @@ function ServiceInfoSection({
       {/* Feature flags row */}
       <View className="flex-row gap-2 px-4 pb-4">
         {service.available_for_destination && (
-          <View className="flex-row items-center gap-1 bg-white/10 rounded-full px-3 py-1">
+          <View className="flex-row items-center gap-1 bg-primary/10 rounded-full px-3 py-1">
             <MaterialIcons name="flight" size={11} color="#ee2b8c" />
-            <Text style={{ color: "rgba(255,255,255,0.8)", fontSize: 10 }}>Destination Events</Text>
+            <Text style={{ color: "#ee2b8c", fontSize: 10 }}>Destination Events</Text>
           </View>
         )}
         {service.customization_available && (
-          <View className="flex-row items-center gap-1 bg-white/10 rounded-full px-3 py-1">
+          <View className="flex-row items-center gap-1 bg-primary/10 rounded-full px-3 py-1">
             <MaterialIcons name="tune" size={11} color="#ee2b8c" />
-            <Text style={{ color: "rgba(255,255,255,0.8)", fontSize: 10 }}>Customizable</Text>
+            <Text style={{ color: "#ee2b8c", fontSize: 10 }}>Customizable</Text>
           </View>
         )}
       </View>
@@ -949,28 +939,9 @@ export default function VendorDetailed() {
         }}
       />
 
-      {/* Sticky bottom CTA */}
-      <View className="absolute bottom-0 left-0 right-0 z-10 h-24">
-        <View className= "px-4 py-4">
-          <View className="w-full max-w-md self-center">
-            <Pressable
-              className="w-full rounded-md bg-primary py-3.5 px-4 items-center justify-center shadow-lg shadow-primary/30 active:scale-[0.98]"
-              onPress={() =>
-                router.push({
-                  pathname: "/(shared)/explore/[vendorId]/enquiryform",
-                  params: { vendorId: resolvedId, businessId: String(businessWithAttribute?.business_information?.id ?? resolvedId) },
-                })
-              }
-            >
-              <Text className="text-lg font-semibold text-white font-display">Send Enquiry</Text>
-            </Pressable>
-          </View>
-        </View>
-      </View>
-
       <ScrollView
         className="flex-1"
-        contentContainerClassName="pb-32"
+        contentContainerClassName="pb-8"
         showsVerticalScrollIndicator={false}
       >
         {/* ── Header image + avatar ─────────────────────────────────────────── */}
@@ -1090,9 +1061,8 @@ export default function VendorDetailed() {
           <ServiceInfoSection service={serviceAttr} category={biz.category} />
         )}
 
-
         {/* ── Featured Gallery ──────────────────────────────────────────────── */}
-        <View className="px-4 py-6 bg-white">
+        <View className="px-4 py-3 bg-white">
           <View className="flex-row justify-between items-center mb-3">
             <Text className="text-lg font-semibold text-[#181114]">Featured Gallery</Text>
             <Pressable onPress={() => setShowGallery(true)}>
@@ -1195,6 +1165,21 @@ export default function VendorDetailed() {
               ))}
             </ScrollView>
           )}
+        </View>
+
+        {/* ── Send Enquiry CTA ──────────────────────────────────────────────── */}
+        <View className="px-4 py-6">
+          <Pressable
+            className="w-full rounded-md bg-primary py-3.5 px-4 items-center justify-center shadow-lg shadow-primary/30 active:scale-[0.98]"
+            onPress={() =>
+              router.push({
+                pathname: "/(shared)/explore/[vendorId]/enquiryform",
+                params: { vendorId: resolvedId, businessId: String(businessWithAttribute?.business_information?.id ?? resolvedId) },
+              })
+            }
+          >
+            <Text className="text-lg font-semibold text-white font-display">Send Enquiry</Text>
+          </Pressable>
         </View>
       </ScrollView>
 

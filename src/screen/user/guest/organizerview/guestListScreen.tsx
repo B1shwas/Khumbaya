@@ -66,7 +66,8 @@ export default function GuestListScreen() {
   ];
 
   const getNormalizedCategory = useCallback(
-    (category?: string | null) => category?.trim().toLowerCase() || "uncategorized",
+    (category?: string | null) =>
+      category?.trim().toLowerCase() || "uncategorized",
     []
   );
 
@@ -140,16 +141,38 @@ export default function GuestListScreen() {
 
   useEffect(() => {
     if (selectedCategory === "all") return;
-    const exists = categoryStats.some((item) => item.value === selectedCategory);
+    const exists = categoryStats.some(
+      (item) => item.value === selectedCategory
+    );
     if (!exists) setSelectedCategory("all");
   }, [categoryStats, selectedCategory]);
 
   const matchesSelectedCategory = useCallback(
     (guest: GuestDetailInterface) => {
       if (selectedCategory === "all") return true;
-      return getNormalizedCategory(guest.event_guest.category) === selectedCategory;
+      return (
+        getNormalizedCategory(guest.event_guest.category) === selectedCategory
+      );
     },
     [getNormalizedCategory, selectedCategory]
+  );
+
+  const getFamilyEffectiveStatus = useCallback(
+    (members: GuestDetailInterface[]): string => {
+      const hasAccepted = members.some(
+        (m) => m.event_guest.status?.toLowerCase() === "accepted"
+      );
+      if (hasAccepted) return "accepted";
+
+      const hasPendingOrInvited = members.some((m) => {
+        const status = m.event_guest.status?.toLowerCase() ?? "";
+        return status === "pending" || status === "invited";
+      });
+      if (hasPendingOrInvited) return "pending";
+
+      return "declined";
+    },
+    []
   );
 
   const groupedInvitations = useMemo(() => {
@@ -160,14 +183,10 @@ export default function GuestListScreen() {
   const filteredGroupedInvitations = useMemo(() => {
     return groupedInvitations.filter((item: GroupedInvitation) => {
       if (item.type === "family") {
-        const statusMatch = item.members.some((member) => {
-          const status = String(member.event_guest.status ?? "pending")
-            .trim()
-            .toLowerCase();
-          return matchesTabStatus(status, activeTab);
-        });
+        const effectiveStatus = getFamilyEffectiveStatus(item.members);
+        const matchesStatus = matchesTabStatus(effectiveStatus, activeTab);
 
-        if (!statusMatch) return false;
+        if (!matchesStatus) return false;
         return item.members.some((member) => matchesSelectedCategory(member));
       }
 
@@ -177,7 +196,13 @@ export default function GuestListScreen() {
       if (!matchesTabStatus(status, activeTab)) return false;
       return matchesSelectedCategory(item.data);
     });
-  }, [groupedInvitations, activeTab, matchesSelectedCategory, matchesTabStatus]);
+  }, [
+    groupedInvitations,
+    activeTab,
+    matchesSelectedCategory,
+    matchesTabStatus,
+    getFamilyEffectiveStatus,
+  ]);
 
   const draftInvitations = useMemo(() => {
     return tabFilteredInvitations.filter((invitation: GuestDetailInterface) => {
@@ -194,9 +219,7 @@ export default function GuestListScreen() {
       : tabFilteredInvitations.filter(matchesSelectedCategory).length;
 
   const selectedCategoryLabel =
-    selectedCategory === "all"
-      ? "All"
-      : formatCategoryLabel(selectedCategory);
+    selectedCategory === "all" ? "All" : formatCategoryLabel(selectedCategory);
 
   const categoryPickerOptions = useMemo(
     () => [
@@ -342,7 +365,9 @@ export default function GuestListScreen() {
               onPress={() => setActiveTab(tab.value)}
               className={cn(
                 "flex-1 items-center pb-3 pt-2 border-b-2",
-                activeTab === tab.value ? "border-primary" : "border-transparent"
+                activeTab === tab.value
+                  ? "border-primary"
+                  : "border-transparent"
               )}
             >
               <Text
@@ -397,7 +422,9 @@ export default function GuestListScreen() {
       ) : activeTab === "draft" ? (
         <FlatList
           data={draftInvitations}
-          keyExtractor={(item: GuestDetailInterface) => `draft-${item.user_detail.id}`}
+          keyExtractor={(item: GuestDetailInterface) =>
+            `draft-${item.user_detail.id}`
+          }
           renderItem={({ item }: { item: GuestDetailInterface }) => (
             <DraftInvitationCard
               guest={item}
@@ -417,7 +444,9 @@ export default function GuestListScreen() {
           showsVerticalScrollIndicator={false}
           className="mt-4"
           ListEmptyComponent={
-            <Text style={{ textAlign: "center", color: "#6B7280", marginTop: 20 }}>
+            <Text
+              style={{ textAlign: "center", color: "#6B7280", marginTop: 20 }}
+            >
               {invitations?.length
                 ? "No draft invitations found."
                 : "No guests yet."}
@@ -457,8 +486,12 @@ export default function GuestListScreen() {
           showsVerticalScrollIndicator={false}
           className="mt-4"
           ListEmptyComponent={
-            <Text style={{ textAlign: "center", color: "#6B7280", marginTop: 20 }}>
-              {invitations?.length ? `No ${activeTab} guests found.` : "No guests yet."}
+            <Text
+              style={{ textAlign: "center", color: "#6B7280", marginTop: 20 }}
+            >
+              {invitations?.length
+                ? `No ${activeTab} guests found.`
+                : "No guests yet."}
             </Text>
           }
         />
@@ -468,7 +501,6 @@ export default function GuestListScreen() {
         visible={isCategoryModalVisible}
         transparent
         allowSwipeDismissal
-        
         animationType="fade"
         onRequestClose={() => setIsCategoryModalVisible(false)}
       >
@@ -485,7 +517,9 @@ export default function GuestListScreen() {
               <Text className="font-jakarta-bold text-base text-[#181114]">
                 Filter by category
               </Text>
-              <TouchableOpacity onPress={() => setIsCategoryModalVisible(false)}>
+              <TouchableOpacity
+                onPress={() => setIsCategoryModalVisible(false)}
+              >
                 <Ionicons name="close" size={20} color="#6B7280" />
               </TouchableOpacity>
             </View>
@@ -514,7 +548,11 @@ export default function GuestListScreen() {
                       {option.count}
                     </Text>
                     {isActive && (
-                      <Ionicons name="checkmark-circle" size={18} color="#ee2b8c" />
+                      <Ionicons
+                        name="checkmark-circle"
+                        size={18}
+                        color="#ee2b8c"
+                      />
                     )}
                   </View>
                 </TouchableOpacity>

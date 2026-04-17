@@ -1,3 +1,4 @@
+import { formatDate } from "@/src/utils/helper";
 import { Ionicons } from "@expo/vector-icons";
 
 import { LinearGradient } from "expo-linear-gradient";
@@ -73,10 +74,10 @@ const EventDetailHero = ({
                 <Text className="text-sm font-medium text-white">
                   {/* {event.date} */}
                    {event.startDateTime
-                    ? new Date(event.startDateTime).toLocaleDateString()
+                    ?  formatDate(event.startDateTime)
                     : "—"}
                   {event.endDateTime
-                    ? ` - ${new Date(event.endDateTime).toLocaleDateString()}`
+                    ? ` - ${formatDate(event.endDateTime)}`
                     : ""}
                 </Text>
               </View>

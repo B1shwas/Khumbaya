@@ -1,5 +1,4 @@
 import { Stack } from "expo-router";
-import SubEventEditButton from "../../../../../../../src/components/event/subevent/SubEventEditButton";
 
 export default function SubEventLayout() {
   return (
@@ -11,15 +10,7 @@ export default function SubEventLayout() {
     >
       <Stack.Screen
         name="[subEventId]/sub-event-detail"
-        options={({ route }: any) => ({
-          title: "Sub Event Detail",
-          headerRight: () => (
-            <SubEventEditButton
-              eventId={route.params?.eventId as string | undefined}
-              subEventId={route.params?.subEventId as string | undefined}
-            />
-          ),
-        })}
+        options={{ headerShown: false }}
       />
       <Stack.Screen
         name="[subEventId]/edit-sub-event"

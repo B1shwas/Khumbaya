@@ -19,7 +19,7 @@ export type AddFamilyMemberPayload = {
   username: string;
   email: string | undefined;
   relation: string;
-  dob: Date;
+  dob: Date | string;
   foodPreference: string;
 };
 

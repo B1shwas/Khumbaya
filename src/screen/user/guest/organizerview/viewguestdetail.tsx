@@ -1,17 +1,23 @@
 import { Text } from "@/src/components/ui/Text";
 import { useSubmitRsvpResponse } from "@/src/features/events/hooks/use-event";
-import { useRemoveInvitation } from "@/src/features/guests/api/use-guests";
+import {
+  useCreateEventGuestCategory,
+  useGetEventGuestCategories,
+  useRemoveInvitation,
+} from "@/src/features/guests/api/use-guests";
 import { useGuestDetailStore } from "@/src/features/guests/store/useGuestDetailStore";
 import { formatDate, formatTime } from "@/src/utils/helper";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { useRouter } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import { useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
+  Modal,
   Platform,
+  Pressable,
   ScrollView,
   TextInput,
   TouchableOpacity,
@@ -19,6 +25,20 @@ import {
 } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { SafeAreaView } from "react-native-safe-area-context";
+
+type CategoryPriority = 1 | 2 | 3;
+
+const PRIORITY_OPTIONS: Array<{ label: string; value: CategoryPriority }> = [
+  { label: "1", value: 1 },
+  { label: "2", value: 2 },
+  { label: "3", value: 3 },
+];
+
+const formatDisplayValue = (value?: string) => {
+  if (!value) return "-";
+  return value.charAt(0).toUpperCase() + value.slice(1);
+};
+
 export default function ViewGuestDetail() {
   const router = useRouter();
   const guestDetail = useGuestDetailStore((state) => state.guestDraft);
@@ -30,6 +50,11 @@ export default function ViewGuestDetail() {
   const { mutate: submitRsvpResponse, isPending } =
     useSubmitRsvpResponse(eventId);
   const removeInvitationMutation = useRemoveInvitation();
+  const createCategoryMutation = useCreateEventGuestCategory();
+  const {
+    data: guestCategories = [],
+    isLoading: isGuestCategoriesLoading,
+  } = useGetEventGuestCategories(eventId || null);
 
   const initialRoom = guestDetail?.event_guest?.assigned_room ?? "";
   const initialArrivalInfo =
@@ -37,24 +62,52 @@ export default function ViewGuestDetail() {
     guestDetail?.event_guest?.pickup_info ??
     "";
   const initialDepartureInfo = guestDetail?.event_guest?.departure_info ?? "";
+  const initialCategory = guestDetail?.event_guest?.category ?? "";
+  const initialNotes = guestDetail?.event_guest?.notes ?? "";
+
+  const [categoryModalVisible, setCategoryModalVisible] = useState(false);
+  const [isAddingCategory, setIsAddingCategory] = useState(false);
+  const [newCategoryTitle, setNewCategoryTitle] = useState("");
+  const [newCategoryPriority, setNewCategoryPriority] =
+    useState<CategoryPriority>(1);
   const [assignedRoom, setAssignedRoom] = useState(initialRoom);
   const [arrivalInfo, setArrivalInfo] = useState(initialArrivalInfo);
   const [departureInfo, setDepartureInfo] = useState(initialDepartureInfo);
+  const [category, setCategory] = useState(initialCategory);
+  const [notes] = useState(initialNotes);
+
+  const categoryOptions = useMemo(
+    () =>
+      guestCategories.map((item) => ({
+        label: item.label,
+        value: item.value,
+      })),
+    [guestCategories]
+  );
 
   const hasAssignmentChanges = useMemo(() => {
     return (
       assignedRoom.trim() !== initialRoom.trim() ||
       arrivalInfo.trim() !== initialArrivalInfo.trim() ||
-      departureInfo.trim() !== initialDepartureInfo.trim()
+      departureInfo.trim() !== initialDepartureInfo.trim() ||
+      category.trim().toLowerCase() !== initialCategory.trim().toLowerCase() ||
+      notes.trim() !== initialNotes.trim()
     );
   }, [
     assignedRoom,
     arrivalInfo,
     departureInfo,
+    category,
+    notes,
     initialRoom,
     initialArrivalInfo,
     initialDepartureInfo,
+    initialCategory,
+    initialNotes,
   ]);
+
+  const headerTitle = guestDetail?.user_detail?.username?.trim() || "Guest Detail";
+  const isSaveDisabled = isPending || !hasAssignmentChanges;
 
   const handleSaveAssignments = () => {
     if (
@@ -76,6 +129,9 @@ export default function ViewGuestDetail() {
       assigned_room: assignedRoom.trim() || null,
       arrival_info: arrivalInfo.trim() || null,
       departure_info: departureInfo.trim() || null,
+      notes: notes.trim(),
+      category: category.trim() || undefined,
+      role: category.trim() || undefined,
     };
 
     submitRsvpResponse(payload, {
@@ -123,28 +179,217 @@ export default function ViewGuestDetail() {
       ]
     );
   };
-  // let messageForTransportation;
 
-  // if (
-  //   guestDetail?.event_guest?.isArrivalPickupRequired &&
-  //   guestDetail?.event_guest?.isDeparturePickupRequired
-  // ) {
-  //   messageForTransportation = "Pickup and Departure";
-  // } else if (guestDetail?.event_guest?.isArrivalPickupRequired) {
-  //   messageForTransportation = "Arrival Pickup";
-  // } else if (guestDetail?.event_guest?.isDeparturePickupRequired) {
-  //   messageForTransportation = "Departure Pickup";
-  // } else {
-  //   messageForTransportation = "Not Required";
-  // }
+  const handleCreateCategory = async () => {
+    if (!eventId) {
+      Alert.alert("Error", "Invalid event id");
+      return;
+    }
+
+    const trimmedTitle = newCategoryTitle.trim();
+    if (!trimmedTitle) {
+      Alert.alert("Error", "Please enter category type.");
+      return;
+    }
+
+    try {
+      await createCategoryMutation.mutateAsync({
+        eventId,
+        payload: {
+          category_title: trimmedTitle,
+          priority: newCategoryPriority,
+        },
+      });
+      setCategory(trimmedTitle);
+      setNewCategoryTitle("");
+      setNewCategoryPriority(1);
+      setIsAddingCategory(false);
+      setCategoryModalVisible(false);
+      Alert.alert("Success", "Guest category created. Tap Save to apply changes.");
+    } catch (error: any) {
+      const message =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Failed to create guest category.";
+      Alert.alert("Error", message);
+    }
+  };
+
 
   return (
+    <>
+    <Stack.Screen
+      options={{
+        title: headerTitle,
+        headerRight: () =>
+          <Pressable
+            onPress={handleSaveAssignments}
+            disabled={isSaveDisabled}
+            style={{
+             opacity: isSaveDisabled ? 0.5 : 1,
+              paddingVertical: 4,
+       
+            }}
+          >
+            {isPending ? (
+              <ActivityIndicator size="small" color="#EE2B8C" />
+            ) : (
+              <View className="bg-primary/90 rounded-md p-2 px-6">
+                <Text className="text-white font-bold text-sm">Save</Text>
+              </View>
+            )}
+          </Pressable>,
+      }}
+    />
     <KeyboardAvoidingView
       style={{ flex: 1 }}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
       keyboardVerticalOffset={Platform.OS === "ios" ? 16 : 0}
     >
       <SafeAreaView className="flex-1 bg-white" edges={[]}>
+        
+        <Modal
+          transparent
+          animationType="fade"
+          visible={categoryModalVisible}
+          onRequestClose={() => {
+            setCategoryModalVisible(false);
+            setIsAddingCategory(false);
+          }}
+        >
+          <View className="flex-1 bg-black/35 items-center justify-center px-6">
+            <View className="w-full rounded-2xl bg-white p-5" style={{ gap: 14 }}>
+              <View className="flex-row items-center justify-between">
+                <Text className="text-lg font-bold text-[#1a1b3a]">
+                  Select Category
+                </Text>
+                <Pressable
+                  onPress={() => setIsAddingCategory((prev) => !prev)}
+                  className="flex-row items-center rounded-full border border-primary/20 px-2.5 py-1"
+                  style={{ gap: 4 }}
+                >
+                  <Ionicons
+                    name={isAddingCategory ? "remove-circle-outline" : "add-circle-outline"}
+                    size={14}
+                    color="#ee2b8c"
+                  />
+                  <Text className="text-xs font-semibold text-primary">
+                    {isAddingCategory ? "Hide Add" : "Add Category"}
+                  </Text>
+                </Pressable>
+              </View>
+
+              {isGuestCategoriesLoading ? (
+                <View className="py-6 items-center justify-center">
+                  <ActivityIndicator color="#ee2b8c" />
+                </View>
+              ) : categoryOptions.length ? (
+                <View className="flex-row flex-wrap" style={{ gap: 8 }}>
+                  {categoryOptions.map((option) => {
+                    const isActive =
+                      category?.toLowerCase() === option.value.toLowerCase();
+
+                    return (
+                      <Pressable
+                        key={option.value}
+                        className={`rounded-full px-3 py-1.5 border ${
+                          isActive
+                            ? "border-primary bg-primary/10"
+                            : "border-slate-200 bg-white"
+                        }`}
+                        onPress={() => {
+                          setCategory(option.value);
+                          setCategoryModalVisible(false);
+                          setIsAddingCategory(false);
+                        }}
+                      >
+                        <Text
+                          className={`text-xs font-semibold ${
+                            isActive ? "text-primary" : "text-slate-700"
+                          }`}
+                        >
+                          {option.label}
+                        </Text>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+              ) : (
+                <Text className="text-xs text-slate-500">
+                  No category found for this event. Use “Add Category”.
+                </Text>
+              )}
+
+              {isAddingCategory && (
+                <View className="border-t border-slate-200 pt-3" style={{ gap: 10 }}>
+                  <View style={{ gap: 8 }}>
+                    <Text className="text-xs font-semibold tracking-wide text-[#1a1b3a]">
+                      CATEGORY TYPE
+                    </Text>
+                    <TextInput
+                      className="h-12 w-full rounded-md border border-slate-200 bg-white px-3 text-base text-slate-900"
+                      placeholder="e.g. friend"
+                      placeholderTextColor="#94a3b8"
+                      value={newCategoryTitle}
+                      onChangeText={setNewCategoryTitle}
+                    />
+                  </View>
+
+                  <View style={{ gap: 8 }}>
+                    <Text className="text-xs font-semibold tracking-wide text-[#1a1b3a]">
+                      PRIORITY (1-3)
+                    </Text>
+                    <View className="flex-row" style={{ gap: 8 }}>
+                      {PRIORITY_OPTIONS.map((option) => {
+                        const isActive = newCategoryPriority === option.value;
+                        return (
+                          <Pressable
+                            key={option.value}
+                            className={`flex-1 items-center justify-center rounded-md border py-2.5 ${
+                              isActive
+                                ? "border-primary bg-primary/10"
+                                : "border-slate-200 bg-white"
+                            }`}
+                            onPress={() => setNewCategoryPriority(option.value)}
+                          >
+                            <Text
+                              className={`font-semibold ${
+                                isActive ? "text-primary" : "text-slate-700"
+                              }`}
+                            >
+                              {option.label}
+                            </Text>
+                          </Pressable>
+                        );
+                      })}
+                    </View>
+                  </View>
+
+                  <Pressable
+                    className="items-center justify-center rounded-md bg-[#ee2b8c] py-3"
+                    onPress={handleCreateCategory}
+                    disabled={createCategoryMutation.isPending}
+                  >
+                    <Text className="font-semibold text-white">
+                      {createCategoryMutation.isPending ? "Saving..." : "Save New Category"}
+                    </Text>
+                  </Pressable>
+                </View>
+              )}
+
+              <Pressable
+                className="items-center justify-center rounded-md border border-slate-200 py-2.5"
+                onPress={() => {
+                  setCategoryModalVisible(false);
+                  setIsAddingCategory(false);
+                }}
+              >
+                <Text className="font-semibold text-slate-600">Close</Text>
+              </Pressable>
+            </View>
+          </View>
+        </Modal>
+
         <KeyboardAwareScrollView
           style={{ flex: 1 }}
           contentContainerStyle={{
@@ -211,47 +456,14 @@ export default function ViewGuestDetail() {
               </Text>
               <Text variant="h2" className="text-primary text-sm mt-1">
                 {isConfirmed ? "Confirmed" : "Pending"} •{" "}
-                {guestDetail?.event_guest.category || "VVIP"}
+                {category || guestDetail?.event_guest.category || "Guest"}
               </Text>
-              {/*
-              {guestDetail?.event_guest.arrival_date_time &&
-                guestDetail?.event_guest.departure_date_time && (
-                  <View className="flex-row items-center gap-2 mt-2">
-                    <View>
-                      <View className="flex-row items-center">
-                        <Ionicons
-                          name="calendar-outline"
-                          size={14}
-                          color="#94A3B8"
-                          className="mr-2"
-                        />
-                        <Text
-                          variant="caption"
-                          className="text-sm text-center"
-                        >
-                          {formatDate(
-                            guestDetail?.event_guest.arrival_date_time || "—"
-                          )}{" "}
-                          –{" "}
-                          {formatDate(
-                            guestDetail?.event_guest.departure_date_time || "—"
-                          )}
-                        </Text>
-                      </View>
-
-                      <Text variant="caption" className="text-sm text-center">
-                        {formatTime(
-                          guestDetail?.event_guest.arrival_date_time || "TBD"
-                        )}{" "}
-                        –{" "}
-                        {formatTime(
-                          guestDetail?.event_guest.departure_date_time || "TBD"
-                        )}
-                      </Text>
-                    </View>
-                  </View>
-                )}
-              */}
+              <View className="flex-row items-center mt-2" style={{ gap: 6 }}>
+                <Ionicons name="call-outline" size={14} color="#64748b" />
+                <Text variant="caption" className="text-slate-500 text-sm">
+                  {guestDetail?.user_detail?.phone?.trim() || "Phone not available"}
+                </Text>
+              </View>
             </LinearGradient>
 
             <View className="flex-row gap-3 px-6 pb-6 border-b border-primary/5">
@@ -299,6 +511,14 @@ export default function ViewGuestDetail() {
                 </View>
                 <View className="bg-slate-50 rounded-2xl px-4">
                   {[
+                    {
+                      label: "Category",
+                      value:
+                        category ||
+                        guestDetail?.event_guest?.category ||
+                        "Uncategorized",
+                      pill: true,
+                    },
                     {
                       label: "Arrival Time",
                       value: guestDetail?.event_guest?.arrival_date_time
@@ -349,15 +569,7 @@ export default function ViewGuestDetail() {
                       value: `${guestDetail?.event_guest.isDeparturePickupRequired ? "Required" : "Not Required"}`,
                       pill: true,
                     },
-                    //   {
-                    //   label: "Transport Summary",
-                    //   value: messageForTransportation,
-                    //   pill: false,
-                    // },
-                    // {
-                    //   label: "Category",
-                    //   value: guestDetail?.event_guest?.category,
-                    // },
+                 
                   ].map((row, i, arr) => (
                     <View
                       key={i}
@@ -367,18 +579,32 @@ export default function ViewGuestDetail() {
                         {row.label}
                       </Text>
                       {row.pill ? (
-                        <View className="bg-primary/10 px-3 py-1 rounded-full">
-                          <Text variant="h2" className="text-primary text-xs">
-                            {row.value.charAt(0).toUpperCase() +
-                              row.value.slice(1)}
-                          </Text>
+                        <View className="flex-row items-center" style={{ gap: 8 }}>
+                          <View className="bg-primary/10 px-3 py-1 rounded-full">
+                            <Text variant="h2" className="text-primary text-xs">
+                              {formatDisplayValue(row.value)}
+                            </Text>
+                          </View>
+
+                          {row.label === "Category" && (
+                            <Pressable
+                              onPress={() => {
+                                setNewCategoryTitle(category || "");
+                                setCategoryModalVisible(true);
+                              }}
+                              className="flex-row items-center rounded-full border border-primary/25 px-2.5 py-1"
+                              style={{ gap: 4 }}
+                            >
+                              <Ionicons name="create-outline" size={13} color="#EE2B8C" />
+                              <Text className="text-[11px] font-semibold text-primary">
+                                Edit
+                              </Text>
+                            </Pressable>
+                          )}
                         </View>
                       ) : (
                         <Text variant="h2" className="text-slate-900 text-sm">
-                          {row.value
-                            ? row.value?.charAt(0).toUpperCase() +
-                              row.value?.slice(1)
-                            : "-"}
+                          {formatDisplayValue(row.value)}
                         </Text>
                       )}
                     </View>
@@ -397,7 +623,7 @@ export default function ViewGuestDetail() {
                         Notes
                       </Text>
                       <Text variant="h2" className="text-slate-900 text-sm">
-                        {guestDetail?.event_guest.notes ||
+                        {notes ||
                           "No additional notes"}
                       </Text>
                     </View>
@@ -407,6 +633,8 @@ export default function ViewGuestDetail() {
                     activeOpacity={0.7}
                   ></TouchableOpacity>
                 </View>
+
+             
               </View>
 
               {(guestDetail?.event_guest?.isAccomodation ||
@@ -452,6 +680,7 @@ export default function ViewGuestDetail() {
                       <TextInput
                         value={assignedRoom}
                         onChangeText={setAssignedRoom}
+                       
                         placeholder="Assign room"
                         placeholderTextColor="#94a3b8"
                         className="w-full bg-slate-50 rounded-md p-4 text-sm text-slate-900"
@@ -474,6 +703,7 @@ export default function ViewGuestDetail() {
                       <TextInput
                         value={arrivalInfo}
                         onChangeText={setArrivalInfo}
+                      
                         placeholder="Driver / pickup details"
                         placeholderTextColor="#94a3b8"
                         className="w-full bg-slate-50 rounded-md p-4 text-sm text-slate-900"
@@ -496,6 +726,7 @@ export default function ViewGuestDetail() {
                       <TextInput
                         value={departureInfo}
                         onChangeText={setDepartureInfo}
+                        
                         placeholder="Driver / departure details"
                         placeholderTextColor="#94a3b8"
                         className="w-full bg-slate-50 rounded-md p-4 text-sm text-slate-900"
@@ -503,23 +734,7 @@ export default function ViewGuestDetail() {
                     </View>
                   )}
 
-                  <TouchableOpacity
-                    className="bg-primary py-3 rounded-xl items-center justify-center"
-                    activeOpacity={0.85}
-                    onPress={handleSaveAssignments}
-                    disabled={isPending || !hasAssignmentChanges}
-                    style={{
-                      opacity: isPending || !hasAssignmentChanges ? 0.6 : 1,
-                    }}
-                  >
-                    {isPending ? (
-                      <ActivityIndicator color="#fff" />
-                    ) : (
-                      <Text variant="h2" className="text-white text-sm">
-                        Save Assignments
-                      </Text>
-                    )}
-                  </TouchableOpacity>
+              
                 </View>
               )}
             </View>
@@ -527,5 +742,6 @@ export default function ViewGuestDetail() {
         </KeyboardAwareScrollView>
       </SafeAreaView>
     </KeyboardAvoidingView>
+    </>
   );
 }

@@ -1,20 +1,22 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  createBusinessVenueApi,
+  addEventVendorApi,
+  AddEventVendorPayload,
   createBusinessApi,
+  createBusinessVenueApi,
   deleteBusinessApi,
   getBusinessByIdApi,
   getBusinessListApi,
+  getEventBusinessApi,
+  getEventOfBusiness,
+  getUserBusiness,
   updateBusinessApi,
   updateBusinessServiceApi,
   updateBusinessVenueApi,
-  addEventVendorApi,
-  getEventBusinessApi,
-  AddEventVendorPayload,
 } from "../api";
 import {
-  CreateBusinessVenuePayload,
   CreateBusinessPayload,
+  CreateBusinessVenuePayload,
   UpdateBusinessPayload,
   UpdateBusinessServicePayload,
   UpdateBusinessVenuePayload,
@@ -52,8 +54,13 @@ export const useCreateBusiness = () => {
 export const useUpdateBusiness = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, payload }: { id: string; payload: UpdateBusinessPayload }) =>
-      updateBusinessApi(id, payload),
+    mutationFn: ({
+      id,
+      payload,
+    }: {
+      id: string;
+      payload: UpdateBusinessPayload;
+    }) => updateBusinessApi(id, payload),
     onSuccess: (_data, { id }) => {
       queryClient.invalidateQueries({ queryKey: ["business/list"] });
       queryClient.invalidateQueries({ queryKey: ["business", id] });
@@ -148,7 +155,7 @@ export const useCreateBusinessVenue = () => {
   });
 };
 
-export const useAddEventVendor = () => {
+export const useAddEventVendor = (userId: number) => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({
@@ -160,15 +167,59 @@ export const useAddEventVendor = () => {
     }) => addEventVendorApi(eventId, payload),
     onSuccess: (_data, { eventId }) => {
       queryClient.invalidateQueries({ queryKey: ["event-business", eventId] });
+      queryClient.invalidateQueries({ queryKey: ["business-event", userId] });
     },
   });
 };
 
 export const useGetEventBusiness = (eventId: string | number) => {
+  return useGetBusinessByEventId(eventId);
+};
+
+export const useGetBusinessByEventId = (
+  eventId: string | number | null | undefined
+) => {
+  const hasValidEventId =
+    (typeof eventId === "number" && !Number.isNaN(eventId)) ||
+    (typeof eventId === "string" && eventId.trim().length > 0);
+
   return useQuery({
     queryKey: ["event-business", eventId],
-    queryFn: () => getEventBusinessApi(eventId),
-    enabled: !!eventId,
+    queryFn: () => getEventBusinessApi(eventId as string | number),
+    enabled: hasValidEventId,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+  });
+};
+
+export const useGetEventOfBusiness = (
+  businessIds: number[],
+  userId: number
+) => {
+  return useQuery({
+    queryKey: ["business-event", userId],
+    queryFn: () => getEventOfBusiness(businessIds),
+    enabled: businessIds.length > 0,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+  });
+};
+
+export const useGetVendorEventInvitations = (businessIds: number[]) => {
+  return useQuery({
+    queryKey: ["vendor-event-invitations", businessIds],
+    queryFn: () => getEventOfBusiness(businessIds),
+    enabled: businessIds.length > 0,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+  });
+};
+
+export const useGetUserBusiness = (userId: number) => {
+  return useQuery({
+    queryKey: ["user-business", userId],
+    queryFn: () => getUserBusiness(),
+    enabled: !!userId,
     staleTime: 5 * 60 * 1000,
     gcTime: 30 * 60 * 1000,
   });

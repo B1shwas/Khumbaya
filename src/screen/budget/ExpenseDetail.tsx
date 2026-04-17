@@ -74,7 +74,7 @@ export default function ExpenseDetailScreen() {
 
   const handleAddPaymentPress = () => {
     router.push(
-      `/(protected)/(client-stack)/events/${eventId}/(organizer)/${categoryId}/${expenseId}/add-payment`
+      `/(protected)/(client-stack)/events/${eventId}/(organizer)/budget/${categoryId}/${expenseId}/add-payment`
     );
   };
 
@@ -88,7 +88,7 @@ export default function ExpenseDetailScreen() {
     setPaymentModalVisible(false);
     router.push({
       pathname:
-        `/(protected)/(client-stack)/events/${eventId}/(organizer)/${categoryId}/${expenseId}/add-payment` as any,
+        `/(protected)/(client-stack)/events/${eventId}/(organizer)/budget/${categoryId}/${expenseId}/add-payment` as any,
       params: {
         paymentId: selectedPayment.id.toString(),
       },
