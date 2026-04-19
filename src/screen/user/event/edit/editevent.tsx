@@ -5,7 +5,7 @@ import {
   EVENT_TYPE_TO_BACKEND,
   type Event,
 } from "@/src/constants/event";
-import { useUpdateEvent } from "@/src/features/events/hooks/use-event";
+import { useEventById, useUpdateEvent } from "@/src/features/events/hooks/use-event";
 import { useEventStore } from "@/src/features/events/store/useEventStore";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { DateTimePickerEvent } from "@react-native-community/datetimepicker";
@@ -170,12 +170,15 @@ export default function EditEventScreen() {
   const router = useRouter();
   const { eventDraft } = useEventStore();
   const eventId = eventDraft?.id ? Number(eventDraft.id) : NaN;
+  const { data: fullEvent } = useEventById(Number.isFinite(eventId) ? eventId : 0);
   const { mutate: updateEvent, isPending: isUpdating } = useUpdateEvent(
     Number.isFinite(eventId) ? eventId : 0
   );
+  const draft = (fullEvent ?? eventDraft) as Event | null;
   const defaultValues = useMemo(
-    () => buildInitialForm(eventDraft),
-    [eventDraft]
+    () => buildInitialForm(draft),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [fullEvent]
   );
   const { control, setValue, watch, reset, handleSubmit } =
     useForm<EditEventForm>({
@@ -183,8 +186,8 @@ export default function EditEventScreen() {
     });
 
   useEffect(() => {
-    reset(buildInitialForm(eventDraft));
-  }, [eventDraft, reset]);
+    if (fullEvent) reset(buildInitialForm(fullEvent as Event));
+  }, [fullEvent, reset]);
 
   const startDateTime = watch("startDateTime");
   const endDateTime = watch("endDateTime");
@@ -432,7 +435,7 @@ export default function EditEventScreen() {
 
           <SectionCard>
             <View className="flex-row gap-4">
-              <View className="flex-1">
+              <View className="flex-1 gap-4">
                 <Controller
                   control={control}
                   name="theme"
@@ -445,20 +448,18 @@ export default function EditEventScreen() {
                     />
                   )}
                 />
-                <View className="flex-1">
-                  <Controller
-                    control={control}
-                    name="dressCode"
-                    render={({ field: { value, onChange } }) => (
-                      <LabeledField
-                        label="Dress Code"
-                        placeholder="classical"
-                        value={value}
-                        onChangeText={onChange}
-                      />
-                    )}
-                  />
-                </View>
+                <Controller
+                  control={control}
+                  name="dressCode"
+                  render={({ field: { value, onChange } }) => (
+                    <LabeledField
+                      label="Dress Code"
+                      placeholder="classical"
+                      value={value}
+                      onChangeText={onChange}
+                    />
+                  )}
+                />
               </View>
               <View className="gap-2">
                 <Text className="text-sm font-semibold tracking-wide text-[#1a1b3a]">

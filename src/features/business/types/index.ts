@@ -33,11 +33,13 @@ export enum BusinessCategoryEnum {
 }
 export interface CreateBusinessPayload {
   business_name: string;
-category: BusinessCategory;
+  category: BusinessCategory;
   description?: string;
   location?: string;
   cover?: string;
   categoryDetails?: Record<string, string | boolean>;
+  contact_phone?: string;
+  email?: string;
 }
 
 export interface UpdateBusinessPayload extends Partial<CreateBusinessPayload> { }

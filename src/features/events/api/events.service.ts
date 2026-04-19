@@ -152,7 +152,8 @@ export const getUpcomingEventsApi = async ({
         id: String(mergedItem.id),
         date: formatDate(startDateTime),
         time: formatTime(startDateTime),
-        role: mergedItem.role || "Guest", // Ensure role is explicitly set
+        role: mergedItem.role || "Guest",
+        dressCode: mergedItem.dressCode ?? mergedItem.dress_code ?? null,
       } as Event;
     });
   }

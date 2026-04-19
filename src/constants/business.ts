@@ -102,6 +102,7 @@ export interface Business {
   team_size: number | null;
   service_area: string | null;
   contact_person_name: string | null;
+  email: string | null;
   contact_phone: string | null;
   website_url: string | null;
   instagram_url: string | null;
