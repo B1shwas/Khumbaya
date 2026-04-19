@@ -14,6 +14,7 @@ export const getBusinessListApi = async (
   const response = await api.get(
     `/business${userId ? `?userId=${userId}` : ""}`
   );
+  console.log("The business informartion of the user i🍈🍈🍈🍈🍈🍈s ", response.data.data.items);
   return response.data.data.items;
 };
 
@@ -66,6 +67,7 @@ export const createBusinessVenueApi = async (
     `/business/${params.business_id}/venue`,
     params
   );
+  console.log('this ivenue_typevenue_types te apya🍳🍳🍳🍳🍳🍳🍳load to make the new venue in the system of the vendor business with the ingormation , ', params);
   return response.data.data;
 };
 
@@ -105,6 +107,10 @@ export const getEventBusinessApi = async (
 
   return [];
 };
+export const getMyBusiness = async () => {
+  const response = await api.get("/business/me");
+  return response.data.data ?? response.data;
+}
 
 export const getEventOfBusiness = async (
   businessId: number[],
