@@ -5,7 +5,7 @@ export interface Event {
   startDateTime: string;
   endDateTime: string;
   location: string;
-  dressCode: string | null | undefined;
+  dressCode?: string | null;
   venue: string;
   imageUrl: string;
   role: EventRole;

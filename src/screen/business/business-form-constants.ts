@@ -135,4 +135,6 @@ export interface FormState {
   vendorType: string;
   vendorCategoryId: BusinessCategory | "";
   categoryDetails: Record<string, string | boolean>;
+  email: string;
+  contactPhone: string;
 }
