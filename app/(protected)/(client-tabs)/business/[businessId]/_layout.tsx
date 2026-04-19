@@ -1,10 +1,22 @@
+import { MaterialIcons } from "@expo/vector-icons";
 import { Stack, useRouter } from "expo-router";
+import { Pressable } from "react-native";
+
 export default function BusinessDetailedLayout() {
   const router = useRouter();
   return (
     <Stack
       screenOptions={{
-        headerShown: false,
+        headerShown: true,
+        headerTitleAlign: "center",
+        headerStyle: { backgroundColor: "#ffffff" },
+        headerTitleStyle: { fontSize: 18, fontWeight: "800", color: "#181114" },
+        headerShadowVisible: true,
+        headerLeft: () => (
+          <Pressable onPress={() => router.back()} style={{ marginLeft: 12 }}>
+            <MaterialIcons name="arrow-back" size={24} color="#181114" />
+          </Pressable>
+        ),
       }}
     >
       <Stack.Screen
@@ -13,7 +25,7 @@ export default function BusinessDetailedLayout() {
       />
       <Stack.Screen
         name="edit"
-        options={{ title: "Edit Business" }}
+        options={{ title: "Business Details" }}
       />
     </Stack>
   );
