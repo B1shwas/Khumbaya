@@ -735,7 +735,7 @@ const AddGuestScreen = () => {
                   <MaterialIcons name="drafts" size={18} color="#ee2b8c" />
                 </Pressable>
 
-                <Pressable
+                {/* <Pressable
                   className="flex-1 flex-row items-center justify-center rounded-md bg-[#ee2b8c] py-4"
                   style={{
                     gap: 8,
@@ -751,7 +751,7 @@ const AddGuestScreen = () => {
                     Send Invitation
                   </Text>
                   <MaterialIcons name="send" size={18} color="#fff" />
-                </Pressable>
+                </Pressable> */}
               </>
             )}
           </View>
