@@ -3,8 +3,8 @@ import { useGetBusinessById, useUpdateBusiness } from "@/src/features/business";
 import { useBusinessDraftStore } from "@/src/features/business/store/useBusiness";
 import { MaterialIcons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
+import { useEffect, useLayoutEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -28,6 +28,7 @@ import {
 
 export default function EditBusinessScreen() {
   const router = useRouter();
+  const navigation = useNavigation();
   const { businessId } = useLocalSearchParams<{ businessId: string }>();
   const { data: business, isLoading } = useGetBusinessById(businessId ?? "");
   const updateBusiness = useUpdateBusiness();
@@ -122,6 +123,29 @@ export default function EditBusinessScreen() {
       }
     );
   };
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <TouchableOpacity
+          onPress={handleSubmit}
+          disabled={updateBusiness.isPending}
+          style={{
+            backgroundColor: "#ee2b8c",
+            paddingHorizontal: 18,
+            paddingVertical: 8,
+            borderRadius: 50,
+            marginRight: 12,
+            opacity: updateBusiness.isPending ? 0.6 : 1,
+          }}
+        >
+          <Text className="text-white font-bold text-[15px]">
+            {updateBusiness.isPending ? "Saving..." : "Save"}
+          </Text>
+        </TouchableOpacity>
+      ),
+    });
+  }, [navigation, handleSubmit, updateBusiness.isPending]);
 
   const pickImage = async (
     setter: (uri: string) => void,
@@ -307,7 +331,7 @@ export default function EditBusinessScreen() {
         className="flex-1"
         contentContainerStyle={{
           paddingHorizontal: 24,
-          paddingTop: 24,
+          paddingTop: 12,
           paddingBottom: 24,
         }}
         showsVerticalScrollIndicator={false}
@@ -512,30 +536,6 @@ export default function EditBusinessScreen() {
         </View>
       </ScrollView>
 
-      {/* Sticky Submit */}
-      <SafeAreaView edges={["bottom"]} className="px-6 pb-4 bg-[#f8f6f7]/95">
-        <TouchableOpacity
-          activeOpacity={0.85}
-          onPress={handleSubmit}
-          disabled={updateBusiness.isPending}
-          className="w-full bg-[#ee2b8c] rounded-2xl py-5 flex-row items-center justify-center gap-3"
-          style={{
-            shadowColor: "#ee2b8c",
-            shadowOpacity: 0.25,
-            shadowRadius: 12,
-            shadowOffset: { width: 0, height: 4 },
-            elevation: 6,
-            opacity: updateBusiness.isPending ? 0.6 : 1,
-          }}
-        >
-          <Text className="text-white font-extrabold text-[18px] tracking-tight">
-            {updateBusiness.isPending ? "Saving..." : "Save Changes"}
-          </Text>
-          {!updateBusiness.isPending && (
-            <MaterialIcons name="check" size={22} color="white" />
-          )}
-        </TouchableOpacity>
-      </SafeAreaView>
     </KeyboardAvoidingView>
   );
 }

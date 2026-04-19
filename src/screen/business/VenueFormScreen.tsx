@@ -35,7 +35,7 @@ const VENUE_TYPE_OPTIONS = [
 ].map((label) => ({ label, value: label }));
 
 type VenueFormState = {
-
+  venue_name: string;
   venue_type: string;
   capacity: string;
   area_sqft: string;
@@ -53,6 +53,7 @@ type VenueFormState = {
 };
 
 const EMPTY_FORM: VenueFormState = {
+  venue_name: "",
   venue_type: "",
   capacity: "",
   area_sqft: "",
@@ -75,6 +76,7 @@ function toFormValue(value: number | null) {
 
 function mapVenueToForm(venue: VenueAttribute): VenueFormState {
   return {
+    venue_name: venue.venue_name ?? "",
     venue_type: venue.venue_type ?? "",
     capacity: toFormValue(venue.capacity),
     area_sqft: toFormValue(venue.area_sqft),
@@ -214,6 +216,7 @@ export default function VenueFormScreen() {
     }
 
     const venuePayload = {
+      venue_name: form.venue_name || undefined,
       venue_type: form.venue_type,
       capacity: toNullableNumber(form.capacity),
       area_sqft: toNullableNumber(form.area_sqft),
@@ -304,31 +307,64 @@ export default function VenueFormScreen() {
       keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
       className="flex-1 bg-[#f8f6f7]"
     >
+      <SafeAreaView edges={["top"]} className="bg-[#f8f6f7]">
+        <View className="flex-row items-center justify-between px-4 py-3">
+          <TouchableOpacity onPress={() => router.back()} activeOpacity={0.7} className="p-1">
+            <MaterialIcons name="arrow-back" size={24} color="#181114" />
+          </TouchableOpacity>
+          <Text variant="h1" className="text-[#181114] text-base">
+            {isEditMode ? "Edit Venue" : "Add New Venue"}
+          </Text>
+          <TouchableOpacity
+            activeOpacity={0.85}
+            onPress={handleSubmit(onSubmit)}
+            disabled={isSubmitting}
+            className="bg-[#ee2b8c] rounded-lg px-4 py-2"
+            style={{ opacity: isSubmitting ? 0.7 : 1 }}
+          >
+            <Text className="text-white font-bold text-sm">
+              {isSubmitting ? "Saving..." : isEditMode ? "Save" : "Create"}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
       <ScrollView
         className="flex-1"
-        contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 20, paddingBottom: 24 }}
+        contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 8, paddingBottom: 24 }}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        <View className="bg-white rounded-2xl border border-gray-100 p-4 mb-5">
-          <View className="flex-row items-center gap-2 mb-2">
-            <View className="w-10 h-10 rounded-xl bg-primary/10 items-center justify-center">
-              <MaterialIcons name="meeting-room" size={20} color="#ee2b8c" />
-            </View>
-            <View className="flex-1">
-              <Text variant="h1" className="text-[#181114] text-base">
-                {isEditMode ? "Edit Venue" : "Add New Venue"}
-              </Text>
-              <Text className="text-xs text-[#594048] mt-0.5">
-                {isEditMode
-                  ? "Update complete venue details, pricing and amenities."
-                  : "Quick add with core fields only. You can complete the rest later from edit."}
-              </Text>
-            </View>
-          </View>
-        </View>
-
         <View className="gap-5">
+          <View>
+            <Text
+              variant="h1"
+              className="text-[11px] text-[#594048] uppercase tracking-widest ml-1 mb-1.5"
+            >
+              Venue Name
+            </Text>
+            <Controller
+              control={control}
+              name="venue_name"
+              render={({ field: { value, onChange } }) => (
+                <View className="flex-row items-center bg-white border border-gray-100 rounded-md shadow-sm overflow-hidden">
+                  <MaterialIcons
+                    name="store"
+                    size={18}
+                    color="#9ca3af"
+                    style={{ marginLeft: 14 }}
+                  />
+                  <TextInput
+                    className="flex-1 px-2.5 py-4 text-[#181114] font-semibold text-[15px]"
+                    placeholder="e.g. The Grand Ballroom"
+                    placeholderTextColor="#d1d5db"
+                    value={value}
+                    onChangeText={onChange}
+                  />
+                </View>
+              )}
+            />
+          </View>
+
           <View>
             <Text
               variant="h1"
@@ -646,38 +682,6 @@ export default function VenueFormScreen() {
           )}
         </View>
       </ScrollView>
-
-   <View className="p-4">
-        <TouchableOpacity
-          activeOpacity={0.85}
-          onPress={handleSubmit(onSubmit)}
-          disabled={isSubmitting}
-          className="w-full bg-[#ee2b8c] rounded-md py-5 flex-row items-center justify-center gap-3"
-          style={{
-            shadowColor: "#ee2b8c",
-            shadowOpacity: 0.25,
-            shadowRadius: 12,
-            shadowOffset: { width: 0, height: 4 },
-            elevation: 6,
-            opacity: isSubmitting ? 0.7 : 1,
-          }}
-        >
-          <Text className="text-white font-extrabold text-[17px] tracking-tight">
-            {isSubmitting
-              ? "Saving..."
-              : isEditMode
-                ? "Save Venue Changes"
-                : "Create Venue"}
-          </Text>
-          {!isSubmitting && (
-            <MaterialIcons
-              name={isEditMode ? "check" : "arrow-forward"}
-              size={21}
-              color="white"
-            />
-          )}
-        </TouchableOpacity>
-   </View>
     </KeyboardAvoidingView>
   );
 }
