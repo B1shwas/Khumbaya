@@ -46,6 +46,7 @@ export interface BusinessReview {
 export interface VenueAttribute {
   venue_id: number;
   business_id: number;
+  venue_name: string | null;
   venue_type: string | null;
   capacity: number | null;
   area_sqft: number | null;
@@ -138,6 +139,7 @@ export const MOCK_VENUE_ATTRIBUTES: VenueAttribute[] = [
   {
     venue_id: 1,
     business_id: 1,
+    venue_name: null,
     venue_type: "Banquet Hall",
     capacity: 500,
     area_sqft: 4200,
@@ -158,6 +160,7 @@ export const MOCK_VENUE_ATTRIBUTES: VenueAttribute[] = [
   {
     venue_id: 2,
     business_id: 1,
+    venue_name: null,
     venue_type: "Lawn / Garden",
     capacity: 800,
     area_sqft: 9000,
@@ -178,6 +181,7 @@ export const MOCK_VENUE_ATTRIBUTES: VenueAttribute[] = [
   {
     venue_id: 3,
     business_id: 1,
+    venue_name: null,
     venue_type: "Rooftop Terrace",
     capacity: 200,
     area_sqft: 2800,

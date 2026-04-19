@@ -34,7 +34,7 @@ export default function BusinessLayout() {
       />
       <Stack.Screen
         name="[businessId]"
-        options={{ title: "Business Details" }}
+        options={{ headerShown: false }}
       />
     
     </Stack>
