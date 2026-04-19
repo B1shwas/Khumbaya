@@ -1,11 +1,11 @@
 import { Ionicons } from "@expo/vector-icons";
 import {
-  ActivityIndicator,
-  Image,
-  Pressable,
-  Text,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Image,
+    Pressable,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { GuestDetailInterface } from "../../features/guests/types";
 
@@ -71,13 +71,32 @@ export default function GuestCard({
   const relation = guest.user_detail.relation?.trim();
   const phone = guest.user_detail.phone?.trim();
 
+  const getCheckInStatus = () => {
+    const arrival = guest.event_guest.arrival_date_time;
+    const departure = guest.event_guest.departure_date_time;
+
+    if (departure) return "Checked out";
+    if (arrival) return "Checked in";
+    return "Not checked in";
+  };
+
+  const getCheckInStyles = () => {
+    const status = getCheckInStatus();
+    if (status === "Checked out") {
+      return { backgroundColor: "rgba(239, 68, 68, 0.12)", color: "#DC2626" };
+    }
+    if (status === "Checked in") {
+      return { backgroundColor: "rgba(16, 185, 129, 0.12)", color: "#047857" };
+    }
+    return { backgroundColor: "rgba(107, 114, 128, 0.12)", color: "#4B5563" };
+  };
+
+  const checkInStatus = getCheckInStatus();
+  const checkInStyles = getCheckInStyles();
+
   return (
     <View className="mb-3 rounded-2xl bg-white">
-      <Pressable
-        onPress={onPress}
-        disabled={!onPress}
-        className="rounded-2xl"
-      >
+      <Pressable onPress={onPress} disabled={!onPress} className="rounded-2xl">
         <View className="min-h-[86px] flex-row items-center gap-3 px-4 py-3">
           {guest.user_detail.photo ? (
             <Image
@@ -93,12 +112,27 @@ export default function GuestCard({
           )}
 
           <View className="flex-1">
-            <Text
-              numberOfLines={1}
-              className="text-base font-semibold text-gray-900"
-            >
-              {displayName}
-            </Text>
+            <View className="flex-row items-center justify-between gap-3">
+              <Text
+                numberOfLines={1}
+                className="text-base font-semibold text-gray-900"
+              >
+                {displayName}
+              </Text>
+              <TouchableOpacity
+                activeOpacity={1}
+                className="rounded-full px-3 py-1"
+                style={{ backgroundColor: checkInStyles.backgroundColor }}
+              >
+                <Text
+                  numberOfLines={1}
+                  className="text-[11px] font-semibold"
+                  style={{ color: checkInStyles.color }}
+                >
+                  {checkInStatus}
+                </Text>
+              </TouchableOpacity>
+            </View>
 
             {relation ? (
               <Text numberOfLines={1} className="mt-0.5 text-xs text-gray-500">
@@ -149,14 +183,17 @@ export default function GuestCard({
           <Pressable
             onPress={onDraftPress}
             disabled={isDraftActionLoading}
-      
             className="h-10 flex-row items-center justify-center rounded-xl border border-[#EE2B8C] bg-[#EE2B8C]/10"
           >
             {isDraftActionLoading ? (
               <ActivityIndicator size="small" color="#EE2B8C" />
             ) : (
               <>
-                <Ionicons name="paper-plane-outline" size={16} color="#EE2B8C" />
+                <Ionicons
+                  name="paper-plane-outline"
+                  size={16}
+                  color="#EE2B8C"
+                />
                 <Text className="ml-2 text-sm font-semibold text-[#EE2B8C]">
                   Send Invitation
                 </Text>

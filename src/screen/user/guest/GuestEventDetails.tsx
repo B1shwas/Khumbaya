@@ -194,7 +194,7 @@ export default function GuestEventDetails() {
 
         {/* ── Services ── */}
         <Section title="Services Offered">
-          <ServiceGrid services={DEFAULT_SERVICES} />
+          <ServiceGrid services={DEFAULT_SERVICES} eventId={eventId} />
         </Section>
 
         {/* ── RSVP section ── */}

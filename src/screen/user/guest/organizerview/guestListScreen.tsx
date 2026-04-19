@@ -4,30 +4,30 @@ import GuestCard from "@/src/components/guest/GuestCard";
 import { Text } from "@/src/components/ui/Text";
 import { useSubmitRsvpResponse } from "@/src/features/events/hooks/use-event";
 import {
-  useGetInvitationsForEvent,
-  useRemoveInvitation,
+    useGetInvitationsForEvent,
+    useRemoveInvitation,
 } from "@/src/features/guests/api/use-guests";
 import {
-  useFamilyGuestStore,
-  useGuestDetailStore,
+    useFamilyGuestStore,
+    useGuestDetailStore,
 } from "@/src/features/guests/store/useGuestDetailStore";
 import {
-  type FamilyGroup,
-  type GroupedInvitation,
-  type GuestDetailInterface,
-  groupInvitationsByFamily,
+    type FamilyGroup,
+    type GroupedInvitation,
+    type GuestDetailInterface,
+    groupInvitationsByFamily,
 } from "@/src/features/guests/types";
 import { cn } from "@/src/utils/cn";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  Alert,
-  FlatList,
-  Modal,
-  Pressable,
-  TouchableOpacity,
-  View,
+    Alert,
+    FlatList,
+    Modal,
+    Pressable,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { TextInput } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -57,6 +57,7 @@ export default function GuestListScreen() {
   } | null>(null);
   const [activeTab, setActiveTab] = useState<GuestFilterTab>("pending");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [showOnlyNotCheckedIn, setShowOnlyNotCheckedIn] = useState(false);
   const [isCategoryModalVisible, setIsCategoryModalVisible] = useState(false);
 
   const tabs: { label: string; value: GuestFilterTab }[] = [
@@ -92,6 +93,14 @@ export default function GuestListScreen() {
     []
   );
 
+  const matchesCheckInFilter = useCallback(
+    (invitation: GuestDetailInterface) => {
+      if (!showOnlyNotCheckedIn) return true;
+      return !invitation.event_guest.arrival_date_time;
+    },
+    [showOnlyNotCheckedIn]
+  );
+
   const tabFilteredInvitations = useMemo(() => {
     if (!invitations) return [] as GuestDetailInterface[];
 
@@ -99,9 +108,11 @@ export default function GuestListScreen() {
       const status = String(invitation.event_guest.status ?? "pending")
         .trim()
         .toLowerCase();
-      return matchesTabStatus(status, activeTab);
+      return (
+        matchesTabStatus(status, activeTab) && matchesCheckInFilter(invitation)
+      );
     });
-  }, [invitations, activeTab, matchesTabStatus]);
+  }, [invitations, activeTab, matchesTabStatus, matchesCheckInFilter]);
 
   const categoryStats = useMemo(() => {
     const categoryCountMap = new Map<string, number>();
@@ -183,6 +194,13 @@ export default function GuestListScreen() {
   const filteredGroupedInvitations = useMemo(() => {
     return groupedInvitations.filter((item: GroupedInvitation) => {
       if (item.type === "family") {
+        if (
+          showOnlyNotCheckedIn &&
+          item.members.every((member) => member.event_guest.arrival_date_time)
+        ) {
+          return false;
+        }
+
         const effectiveStatus = getFamilyEffectiveStatus(item.members);
         const matchesStatus = matchesTabStatus(effectiveStatus, activeTab);
 
@@ -194,6 +212,8 @@ export default function GuestListScreen() {
         .trim()
         .toLowerCase();
       if (!matchesTabStatus(status, activeTab)) return false;
+      if (showOnlyNotCheckedIn && item.data.event_guest.arrival_date_time)
+        return false;
       return matchesSelectedCategory(item.data);
     });
   }, [
@@ -202,6 +222,7 @@ export default function GuestListScreen() {
     matchesSelectedCategory,
     matchesTabStatus,
     getFamilyEffectiveStatus,
+    showOnlyNotCheckedIn,
   ]);
 
   const draftInvitations = useMemo(() => {
@@ -523,6 +544,23 @@ export default function GuestListScreen() {
                 <Ionicons name="close" size={20} color="#6B7280" />
               </TouchableOpacity>
             </View>
+
+            <TouchableOpacity
+              onPress={() => setShowOnlyNotCheckedIn((prev) => !prev)}
+              className={cn(
+                "flex-row items-center justify-between px-4 py-3.5 rounded-xl border mb-2",
+                showOnlyNotCheckedIn
+                  ? "border-primary bg-primary/10"
+                  : "border-gray-200 bg-white"
+              )}
+            >
+              <Text className="font-jakarta-semibold text-sm text-[#181114]">
+                Only not checked in
+              </Text>
+              {showOnlyNotCheckedIn ? (
+                <Ionicons name="checkmark-circle" size={18} color="#ee2b8c" />
+              ) : null}
+            </TouchableOpacity>
 
             {categoryPickerOptions.map((option) => {
               const isActive = selectedCategory === option.value;
