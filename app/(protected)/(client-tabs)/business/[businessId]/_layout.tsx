@@ -27,6 +27,14 @@ export default function BusinessDetailedLayout() {
         name="edit"
         options={{ title: "Business Details" }}
       />
+      <Stack.Screen
+        name="venue/create"
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="venue/[venueId]/update"
+        options={{ headerShown: false }}
+      />
     </Stack>
   );
 }
