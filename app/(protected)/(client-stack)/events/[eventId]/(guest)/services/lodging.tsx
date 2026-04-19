@@ -1,21 +1,20 @@
+import { Text } from "@/src/components/ui/Text";
+import { useGetEventGuests, useGetGuestRoom } from "@/src/features/guests/api/use-guests";
+import { formatDate } from "@/src/utils/helper";
+import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import {
-  View,
-  TouchableOpacity,
-  ScrollView,
   ActivityIndicator,
+  ScrollView,
+  TouchableOpacity,
+  View,
 } from "react-native";
-import { Text } from "@/src/components/ui/Text";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
-import { useGetEventGuests } from "@/src/features/guests/api/use-guests";
-import { useGetGuestRoom } from "@/src/features/guests/api/use-guests";
-import { formatDate } from "@/src/utils/helper";
 
 export default function LodgingPage() {
   const router = useRouter();
   const { eventId } = useLocalSearchParams<{ eventId: string }>();
-  const eventIdNum = Number(eventId);
+  const eventIdNum = eventId ? Number(eventId) : null;
 
   const { data: guests, isLoading: guestsLoading } =
     useGetEventGuests(eventIdNum);
@@ -29,14 +28,12 @@ export default function LodgingPage() {
     (guest: any) => guest.event_guest?.isAccomodation === true
   );
 
-  // Get room assignments from roomData
+  // Get room assignments from roomData (API returns array with user_room field)
   const roomAssignments: { [guestId: number]: string } = {};
-  if (roomData?.rooms) {
-    roomData.rooms.forEach((room: any) => {
-      if (room.assignedGuests) {
-        room.assignedGuests.forEach((guestId: number) => {
-          roomAssignments[guestId] = room.name;
-        });
+  if (Array.isArray(roomData)) {
+    roomData.forEach((assignment: any) => {
+      if (assignment?.user_detail?.id && assignment.user_room) {
+        roomAssignments[assignment.user_detail.id] = assignment.user_room;
       }
     });
   }
@@ -44,6 +41,18 @@ export default function LodgingPage() {
   const getGuestRoom = (userId: number) => {
     return roomAssignments[userId] || "Not Assigned";
   };
+
+  const roomOverviewRows = Array.isArray(roomData)
+    ? Object.entries(
+        roomData.reduce((overview: Record<string, number>, item: any) => {
+          const room = item?.user_room?.trim();
+          if (room) {
+            overview[room] = (overview[room] ?? 0) + 1;
+          }
+          return overview;
+        }, {})
+      )
+    : [];
 
   if (isLoading) {
     return (
@@ -96,11 +105,17 @@ export default function LodgingPage() {
               {guestsWithAccommodation.map((guestWithDetail: any) => {
                 const guest = guestWithDetail.user_detail;
                 const eventGuest = guestWithDetail.event_guest;
-                const assignedRoom = getGuestRoom(guest.id);
+                const assignedRoom = guest?.id
+                  ? getGuestRoom(guest.id)
+                  : "Not Assigned";
 
                 return (
                   <View
-                    key={guest.id}
+                    key={
+                      guest?.id ??
+                      guestWithDetail.event_guest?.id ??
+                      Math.random()
+                    }
                     className="bg-white p-4 rounded-md border border-gray-200"
                   >
                     <View className="flex-row items-start gap-3">
@@ -132,12 +147,14 @@ export default function LodgingPage() {
 
                       {/* Accommodation Status */}
                       <View
-                        className={`px-2 py-1 rounded ${eventGuest.isAccomodation ? "bg-green-100" : "bg-gray-100"}`}
+                        className={`px-2 py-1 rounded ${eventGuest?.isAccomodation ? "bg-green-100" : "bg-gray-100"}`}
                       >
                         <Text
-                          className={`text-xs ${eventGuest.isAccomodation ? "text-green-700" : "text-gray-600"}`}
+                          className={`text-xs ${eventGuest?.isAccomodation ? "text-green-700" : "text-gray-600"}`}
                         >
-                          {eventGuest.isAccomodation ? "Lodging" : "No Lodging"}
+                          {eventGuest?.isAccomodation
+                            ? "Lodging"
+                            : "No Lodging"}
                         </Text>
                       </View>
                     </View>
@@ -225,28 +242,27 @@ export default function LodgingPage() {
         </View>
 
         {/* Room Overview */}
-        {roomData?.rooms && roomData.rooms.length > 0 && (
+        {roomOverviewRows.length > 0 && (
           <View className="px-5 pt-5">
             <Text variant="h2" className="text-base font-semibold mb-3">
               Room Overview
             </Text>
             <View className="gap-2">
-              {roomData.rooms.map((room: any) => (
+              {roomOverviewRows.map(([roomName, count]) => (
                 <View
-                  key={room.id}
+                  key={roomName}
                   className="bg-white p-4 rounded-md border border-gray-200 flex-row items-center justify-between"
                 >
                   <View>
-                    <Text className="font-medium">{room.name}</Text>
+                    <Text className="font-medium">{roomName}</Text>
                     <Text className="text-gray-500 text-sm">
-                      Capacity: {room.assignedGuests?.length || 0}/
-                      {room.capacity}
+                      Assigned Guests: {count}
                     </Text>
                   </View>
                   <View className="flex-row items-center gap-2">
                     <Ionicons name="people-outline" size={20} color="#ee2b8c" />
                     <Text className="text-pink-600 font-semibold">
-                      {room.assignedGuests?.length || 0} assigned
+                      {count} assigned
                     </Text>
                   </View>
                 </View>
