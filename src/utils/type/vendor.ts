@@ -7,4 +7,5 @@ export interface Vendor {
   priceLevel: string;
   location: string;
   image: string;
+  city?: string;
 }

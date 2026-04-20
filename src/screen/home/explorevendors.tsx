@@ -34,6 +34,7 @@ const DEFAULT_VENDOR_IMAGE =
 export default function ExploreVendors() {
   const [activeCategory, setActiveCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCity, setSelectedCity] = useState("All");
   const { user } = useAuthStore();
   const { data: businesses = [] } = useGetBusinessList();
 
@@ -53,7 +54,17 @@ export default function ExploreVendors() {
         business.location ||
         "Location not specified",
       image: business.cover || business.avatar || DEFAULT_VENDOR_IMAGE,
+      city: (business.city ?? business.location?.split(",")[0])?.trim() ?? undefined,
     }));
+  }, [businesses]);
+
+  const availableCities = useMemo(() => {
+    const cities = businesses
+      .map((b) => (b.city ?? b.location?.split(",")[0])?.trim())
+      .filter(Boolean) as string[];
+    const unique = Array.from(new Set(cities.map((c) => c.toLowerCase()))).sort();
+    const titled = unique.map((c) => c.charAt(0).toUpperCase() + c.slice(1));
+    return ["All", ...titled];
   }, [businesses]);
 
   const filteredVendors = vendorsFromQuery.filter((vendor) => {
@@ -62,7 +73,10 @@ export default function ExploreVendors() {
       .includes(searchQuery.toLowerCase());
     const matchesCategory =
       activeCategory === "All" || vendor.category === activeCategory;
-    return matchesSearch && matchesCategory;
+    const matchesCity =
+      selectedCity === "All" ||
+      vendor.city?.toLowerCase() === selectedCity.toLowerCase();
+    return matchesSearch && matchesCategory && matchesCity;
   });
 
   return (
@@ -70,6 +84,9 @@ export default function ExploreVendors() {
       <HeaderExploreVendor
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
+        cities={availableCities}
+        selectedCity={selectedCity}
+        onCityChange={setSelectedCity}
       />
 
       <View className="py-3">
