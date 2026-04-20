@@ -35,7 +35,8 @@ export interface CreateBusinessPayload {
   business_name: string;
   category: BusinessCategory;
   description?: string;
-  location?: string;
+  city?: string;
+  country?: string;
   cover?: string;
   categoryDetails?: Record<string, string | boolean>;
   contact_phone?: string;
