@@ -44,6 +44,8 @@ export default function EditBusinessScreen() {
     vendorType: "",
     vendorCategoryId: "",
     categoryDetails: {},
+    email: "",
+    contactPhone: "",
   });
   const [coverImage, setCoverImage] = useState<string | null>(null);
   const [initialized, setInitialized] = useState(false);
@@ -71,6 +73,8 @@ export default function EditBusinessScreen() {
         vendorType: "",
         vendorCategoryId: businessInfo.category ?? "",
         categoryDetails: {},
+        email: businessInfo.email ?? "",
+        contactPhone: businessInfo.contact_phone ?? "",
       });
       setCoverImage(businessInfo.cover ?? null);
       setInitialized(true);
@@ -109,6 +113,8 @@ export default function EditBusinessScreen() {
           categoryDetails: Object.keys(form.categoryDetails).length > 0
             ? form.categoryDetails
             : undefined,
+          email: form.email.trim() || undefined,
+          contact_phone: form.contactPhone.trim() || undefined,
         },
       },
       {
@@ -399,6 +405,43 @@ export default function EditBusinessScreen() {
                 setForm((prev) => ({ ...prev, description: text }))
               }
             />
+          </View>
+
+          {/* Email */}
+          <View>
+            <Text variant="h1" className="text-[11px] text-[#594048] uppercase tracking-widest ml-1 mb-1.5">
+              Email(Optional)
+            </Text>
+            <View className="flex-row items-center bg-white border border-gray-100 rounded-xl shadow-sm overflow-hidden">
+              <MaterialIcons name="email" size={18} color="#9ca3af" style={{ marginLeft: 14 }} />
+              <TextInput
+                className="flex-1 px-2.5 py-4 text-[#181114] font-semibold text-[15px]"
+                placeholder="contact@example.com"
+                placeholderTextColor="#d1d5db"
+                keyboardType="email-address"
+                autoCapitalize="none"
+                value={form.email}
+                onChangeText={(text) => setForm((prev) => ({ ...prev, email: text }))}
+              />
+            </View>
+          </View>
+
+          {/* Phone Number */}
+          <View>
+            <Text variant="h1" className="text-[11px] text-[#594048] uppercase tracking-widest ml-1 mb-1.5">
+              Phone Number(Optional)
+            </Text>
+            <View className="flex-row items-center bg-white border border-gray-100 rounded-xl shadow-sm overflow-hidden">
+              <MaterialIcons name="phone" size={18} color="#9ca3af" style={{ marginLeft: 14 }} />
+              <TextInput
+                className="flex-1 px-2.5 py-4 text-[#181114] font-semibold text-[15px]"
+                placeholder="+977 98XXXXXXXX"
+                placeholderTextColor="#d1d5db"
+                keyboardType="phone-pad"
+                value={form.contactPhone}
+                onChangeText={(text) => setForm((prev) => ({ ...prev, contactPhone: text }))}
+              />
+            </View>
           </View>
 
           {/* Category */}

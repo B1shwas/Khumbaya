@@ -152,7 +152,8 @@ export const getUpcomingEventsApi = async ({
         id: String(mergedItem.id),
         date: formatDate(startDateTime),
         time: formatTime(startDateTime),
-        role: mergedItem.role || "Guest", // Ensure role is explicitly set
+        role: mergedItem.role || "Guest",
+        dressCode: mergedItem.dressCode ?? mergedItem.dress_code ?? null,
       } as Event;
     });
   }
@@ -252,6 +253,11 @@ export const makeEventMember = async (
   const response = await api.post(`/event/${eventId}/member`, data);
   return response.data;
 };
+export const getEventCategory = async () => {
+  const responce = await api.get("/general-category");
+  return responce;
+
+}
 export const getEventOwners = async (eventId: number) => {
   const response = await api.get(`/event/${eventId}/users`);
   return response.data.data;

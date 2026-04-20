@@ -1,7 +1,6 @@
 import { HeroSection } from "@/src/components/business/[businessId]/Hero";
 import { LatestReviewSection } from "@/src/components/business/[businessId]/LatestReview";
 import ServiceDetailsSection from "@/src/components/business/[businessId]/ServiceDetailsScreen";
-import { StatsRow } from "@/src/components/business/[businessId]/stats/StatsRow";
 import VenueDetailsSection from "@/src/components/business/[businessId]/VenueDetailsSection";
 import { Text } from "@/src/components/ui/Text";
 import {
@@ -25,7 +24,6 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 // ─── Hero ────────────────────────────────────────────────────────────────────
-// ─── Stats ────────────────────────────────────────────────────────────────────
 
 function StatCard({
   label,
@@ -362,7 +360,6 @@ export default function BusinessDetailsScreen() {
         />
 
         <View className="px-4 gap-4 mt-4">
-          <StatsRow business={businessWithAttribute.business_information} />
           <ActiveRequestsSection requests={businessWithAttribute.business_information.requests ?? []} />
 
           {/* Category-specific details (from constants) */}

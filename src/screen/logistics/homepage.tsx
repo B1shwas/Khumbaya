@@ -24,7 +24,7 @@ const LogisticsHomepage = () => {
       <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
       <LogisticsHeader title="Logistics" />
 
-      <ScrollView 
+      <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 40 }}
         className="bg-gray-50/50"
@@ -33,45 +33,25 @@ const LogisticsHomepage = () => {
         <View className="px-6 py-6">
           <View className="flex-row justify-between mb-4 items-center">
             <Text className="text-gray-900 font-jakarta-bold text-lg">Operational Overview</Text>
-            <View className="px-2 py-1 bg-pink-50 rounded-md flex-row items-center">
-              <Clock size={12} color="#ee2b8c" />
-              <Text className="text-primary font-jakarta-bold text-[10px] ml-1 uppercase">Live</Text>
-            </View>
           </View>
-          
+
           <View className="flex-row mb-3">
-            <StatCard 
-              label="Active Fleet" 
-              value="24" 
-              icon={Truck} 
-              color="#ee2b8c" 
-              bgColor="bg-pink-50" 
+            <StatCard
+              label="Active Fleet"
+              value="24"
+              icon={Truck}
+              color="#ee2b8c"
+              bgColor="bg-pink-50"
             />
-            <StatCard 
-              label="In Transit" 
-              value="18" 
-              icon={Navigation} 
-              color="#059669" 
-              bgColor="bg-emerald-50" 
-            />
-          </View>
-          
-          <View className="flex-row">
-            <StatCard 
-              label="Maintenance" 
-              value="04" 
-              icon={Settings} 
-              color="#d97706" 
-              bgColor="bg-amber-50" 
-            />
-            <StatCard 
-              label="Pending" 
-              value="02" 
-              icon={Package} 
-              color="#4b5563" 
-              bgColor="bg-gray-100" 
+            <StatCard
+              label="In Transit"
+              value="18"
+              icon={Navigation}
+              color="#059669"
+              bgColor="bg-emerald-50"
             />
           </View>
+
         </View>
 
         {/* Fleet Status Section */}
@@ -84,7 +64,7 @@ const LogisticsHomepage = () => {
           </View>
 
           {BUS_DATA.slice(0, 3).map((bus, index) => (
-            <LogisticsCard 
+            <LogisticsCard
               key={index}
               id={bus.id}
               type={bus.type}
@@ -104,8 +84,8 @@ const LogisticsHomepage = () => {
 
           <View className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
             {RECENT_DELIVERIES.map((delivery, index) => (
-              <View 
-                key={index} 
+              <View
+                key={index}
                 className={`flex-row justify-between items-center py-3 ${index !== RECENT_DELIVERIES.length - 1 ? 'border-b border-gray-50' : ''}`}
               >
                 <View className="flex-row items-center">
@@ -128,7 +108,7 @@ const LogisticsHomepage = () => {
       </ScrollView>
 
       {/* Quick Action FAB */}
-      <TouchableOpacity 
+      <TouchableOpacity
         className="absolute bottom-8 right-6 w-16 h-16 bg-primary rounded-full items-center justify-center shadow-xl shadow-pink-300 z-50"
         activeOpacity={0.8}
       >

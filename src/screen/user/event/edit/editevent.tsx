@@ -5,9 +5,8 @@ import {
   EVENT_TYPE_TO_BACKEND,
   type Event,
 } from "@/src/constants/event";
-import { useUpdateEvent } from "@/src/features/events/hooks/use-event";
+import { useEventById, useUpdateEvent } from "@/src/features/events/hooks/use-event";
 import { useEventStore } from "@/src/features/events/store/useEventStore";
-import { shadowStyle } from "@/src/utils/helper";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { DateTimePickerEvent } from "@react-native-community/datetimepicker";
 import { LinearGradient } from "expo-linear-gradient";
@@ -26,7 +25,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 type EditEventForm = {
   title: string;
@@ -68,7 +66,7 @@ const buildInitialForm = (draft?: Event | null): EditEventForm => {
     city: draft?.location ?? "",
     venue: draft?.venue ?? "",
     theme: draft?.theme ?? "",
-    dressCode: "",
+    dressCode: draft?.dressCode ?? "",
     budget: typeof draft?.budget === "number" ? String(draft?.budget) : "",
     isPublic: true,
   };
@@ -172,12 +170,15 @@ export default function EditEventScreen() {
   const router = useRouter();
   const { eventDraft } = useEventStore();
   const eventId = eventDraft?.id ? Number(eventDraft.id) : NaN;
+  const { data: fullEvent } = useEventById(Number.isFinite(eventId) ? eventId : 0);
   const { mutate: updateEvent, isPending: isUpdating } = useUpdateEvent(
     Number.isFinite(eventId) ? eventId : 0
   );
+  const draft = (fullEvent ?? eventDraft) as Event | null;
   const defaultValues = useMemo(
-    () => buildInitialForm(eventDraft),
-    [eventDraft]
+    () => buildInitialForm(draft),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [fullEvent]
   );
   const { control, setValue, watch, reset, handleSubmit } =
     useForm<EditEventForm>({
@@ -185,8 +186,8 @@ export default function EditEventScreen() {
     });
 
   useEffect(() => {
-    reset(buildInitialForm(eventDraft));
-  }, [eventDraft, reset]);
+    if (fullEvent) reset(buildInitialForm(fullEvent as Event));
+  }, [fullEvent, reset]);
 
   const startDateTime = watch("startDateTime");
   const endDateTime = watch("endDateTime");
@@ -235,6 +236,7 @@ export default function EditEventScreen() {
       startDateTime: values.startDateTime.toISOString(),
       endDateTime: values.endDateTime.toISOString(),
       location: values.city.trim() || undefined,
+      dressCode: values.dressCode || undefined,
       theme: values.theme.trim() || undefined,
       budget: values.budget ? Number(values.budget) : undefined,
     };
@@ -259,168 +261,168 @@ export default function EditEventScreen() {
   };
 
   return (
-      <KeyboardAvoidingView
-        className="flex-1"
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
+    <KeyboardAvoidingView
+      className="flex-1"
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+    >
+      <ScrollView
+        className="flex-1 "
+        contentContainerStyle={{ paddingBottom: 32 }}
+        showsVerticalScrollIndicator={false}
       >
-        <ScrollView
-          className="flex-1 "
-          contentContainerStyle={{ paddingBottom: 32 }}
-          showsVerticalScrollIndicator={false}
-        >
-          <View className="px-4 ">
-            <View className="relative h-24 w-full overflow-hidden rounded-md">
-              <Image
-                source={{
-                  uri: "https://lh3.googleusercontent.com/aida-public/AB6AXuBOAnlcfOm-SbS8PZH_0v8eUP911cDeJ61o8WbBJAuIO9sHibeTvP7X8AmuAdoqjRH5H5lxVhH8QPcv3xssrkbNU4ebTPiF95SZrTOI_8iSYf67CtzoUpaJUP1BUw-RPzE1bsPZ6LNFe44iGEPcqpU2aHrZqux1E7HkSrdhWUHIs6U62w8DV_c_vNWmt1lkRU_uygfRbFoGRRRgJ8_l6Qt81nqPp2h4h74elXxwOgHx6Tj8hTriCh50fvjBjuTzs07EBBr6iMa6hRU",
-                }}
-                className="h-full w-full"
-                resizeMode="cover"
+        <View className="px-4 ">
+          <View className="relative h-24 w-full overflow-hidden rounded-md">
+            <Image
+              source={{
+                uri: "https://lh3.googleusercontent.com/aida-public/AB6AXuBOAnlcfOm-SbS8PZH_0v8eUP911cDeJ61o8WbBJAuIO9sHibeTvP7X8AmuAdoqjRH5H5lxVhH8QPcv3xssrkbNU4ebTPiF95SZrTOI_8iSYf67CtzoUpaJUP1BUw-RPzE1bsPZ6LNFe44iGEPcqpU2aHrZqux1E7HkSrdhWUHIs6U62w8DV_c_vNWmt1lkRU_uygfRbFoGRRRgJ8_l6Qt81nqPp2h4h74elXxwOgHx6Tj8hTriCh50fvjBjuTzs07EBBr6iMa6hRU",
+              }}
+              className="h-full w-full"
+              resizeMode="cover"
+            />
+            {/* Gradient overlay */}
+            <View className="absolute inset-0 overflow-hidden z-10">
+              <LinearGradient
+                colors={["rgba(0,0,0,0.4)", "rgba(0,0,0,0.1)", "transparent"]}
+                start={{ x: 0.5, y: 1 }}
+                end={{ x: 0.5, y: 0 }}
+                style={{ flex: 1 }}
               />
-              {/* Gradient overlay */}
-              <View className="absolute inset-0 overflow-hidden z-10">
-                <LinearGradient
-                  colors={["rgba(0,0,0,0.4)", "rgba(0,0,0,0.1)", "transparent"]}
-                  start={{ x: 0.5, y: 1 }}
-                  end={{ x: 0.5, y: 0 }}
-                  style={{ flex: 1 }}
-                />
-              </View>
-              <Pressable
-                onPress={() => Alert.alert("Cover", "Open image picker here.")}
-                className="absolute inset-0 z-20 items-center justify-center"
-              >
-                <View className="flex-row items-center gap-2 rounded-full border border-white/30 bg-white/20 px-5 py-2">
-                  <MaterialIcons
-                    name="photo-camera"
-                    size={20}
-                    color="#ffffff"
-                  />
-                  <Text className="text-xs font-bold uppercase tracking-wider text-white">
-                    Change Image
-                  </Text>
-                </View>
-              </Pressable>
             </View>
-          </View>
-
-          <View className="mt-6 gap-6 px-4">
-            <SectionCard title="Basic Details" icon="information-circle">
-              <Controller
-                control={control}
-                name="title"
-                render={({ field: { value, onChange } }) => (
-                  <LabeledField
-                    label="Event Title"
-                    placeholder="e.g. Aarav & Ishani's Sangeet Night"
-                    value={value}
-                    onChangeText={onChange}
-                  />
-                )}
-              />
-              <View className="gap-2">
-                <Text className="text-sm font-semibold tracking-wide text-[#1a1b3a]">
-                  Event Type
+            <Pressable
+              onPress={() => Alert.alert("Cover", "Open image picker here.")}
+              className="absolute inset-0 z-20 items-center justify-center"
+            >
+              <View className="flex-row items-center gap-2 rounded-full border border-white/30 bg-white/20 px-5 py-2">
+                <MaterialIcons
+                  name="photo-camera"
+                  size={20}
+                  color="#ffffff"
+                />
+                <Text className="text-xs font-bold uppercase tracking-wider text-white">
+                  Change Image
                 </Text>
-                <View className="flex-row flex-wrap gap-2">
-                  {EVENT_TYPES.map((type) => {
-                    const isSelected = selectedEventType === type;
-                    const chipClassName = isSelected
-                      ? "px-5 py-2.5 rounded-full bg-[#ee2b8c] border border-[#ee2b8c]"
-                      : "px-5 py-2.5 rounded-full bg-white border border-gray-200";
-                    const textClassName = isSelected
-                      ? "font-plusjakartasans-medium text-sm text-white"
-                      : "font-plusjakartasans-medium text-sm text-gray-600";
+              </View>
+            </Pressable>
+          </View>
+        </View>
 
-                    return (
-                      <TouchableOpacity
-                        key={type}
-                        onPress={() => setValue("eventType", type)}
-                        className={chipClassName}
-                      >
-                        <Text className={textClassName}>{type}</Text>
-                      </TouchableOpacity>
-                    );
-                  })}
-                </View>
-              </View>
-              <Controller
-                control={control}
-                name="description"
-                render={({ field: { value, onChange } }) => (
-                  <LabeledField
-                    label="Description"
-                    placeholder="Give guests a quick overview"
-                    value={value}
-                    onChangeText={onChange}
-                    multiline
-                    numberOfLines={4}
-                  />
-                )}
-              />
-            </SectionCard>
+        <View className="mt-6 gap-6 px-4">
+          <SectionCard title="Basic Details" icon="information-circle">
+            <Controller
+              control={control}
+              name="title"
+              render={({ field: { value, onChange } }) => (
+                <LabeledField
+                  label="Event Title"
+                  placeholder="e.g. Aarav & Ishani's Sangeet Night"
+                  value={value}
+                  onChangeText={onChange}
+                />
+              )}
+            />
+            <View className="gap-2">
+              <Text className="text-sm font-semibold tracking-wide text-[#1a1b3a]">
+                Event Type
+              </Text>
+              <View className="flex-row flex-wrap gap-2">
+                {EVENT_TYPES.map((type) => {
+                  const isSelected = selectedEventType === type;
+                  const chipClassName = isSelected
+                    ? "px-5 py-2.5 rounded-full bg-[#ee2b8c] border border-[#ee2b8c]"
+                    : "px-5 py-2.5 rounded-full bg-white border border-gray-200";
+                  const textClassName = isSelected
+                    ? "font-plusjakartasans-medium text-sm text-white"
+                    : "font-plusjakartasans-medium text-sm text-gray-600";
 
-            <SectionCard title="Time & Logistics" icon="calendar">
-              <View className="mt-2 mb-6">
-                <DatePicker
-                  value={startDateTime}
-                  mode="datetime"
-                  onChange={handleStartDateChange}
-                  materialDateLabel="Start date"
-                  materialTimeLabel="Start time"
-                  materialDateLabelClassName="text-xs"
-                />
+                  return (
+                    <TouchableOpacity
+                      key={type}
+                      onPress={() => setValue("eventType", type)}
+                      className={chipClassName}
+                    >
+                      <Text className={textClassName}>{type}</Text>
+                    </TouchableOpacity>
+                  );
+                })}
               </View>
-              <View className="mb-6">
-                <DatePicker
-                  value={endDateTime}
-                  mode="datetime"
-                  onChange={handleEndDateChange}
-                  materialDateLabel="End date"
-                  materialTimeLabel="End time"
-                  materialDateLabelClassName="text-xs"
+            </View>
+            <Controller
+              control={control}
+              name="description"
+              render={({ field: { value, onChange } }) => (
+                <LabeledField
+                  label="Description"
+                  placeholder="Give guests a quick overview"
+                  value={value}
+                  onChangeText={onChange}
+                  multiline
+                  numberOfLines={4}
                 />
-              </View>
+              )}
+            />
+          </SectionCard>
+
+          <SectionCard title="Time & Logistics" icon="calendar">
+            <View className="mt-2 mb-6">
               <DatePicker
-                value={rsvpDeadline}
+                value={startDateTime}
                 mode="datetime"
-                onChange={handleRsvpDateChange}
-                materialDateLabel="RSVP deadline"
-                materialTimeLabel="RSVP time"
+                onChange={handleStartDateChange}
+                materialDateLabel="Start date"
+                materialTimeLabel="Start time"
                 materialDateLabelClassName="text-xs"
               />
-              <View className="flex-row gap-4">
-                <View className="flex-1">
-                  <Controller
-                    control={control}
-                    name="city"
-                    render={({ field: { value, onChange } }) => (
-                      <LabeledField
-                        label="City / Area"
-                        placeholder="Udaipur, Rajasthan"
-                        value={value}
-                        onChangeText={onChange}
-                      />
-                    )}
-                  />
-                </View>
-                
-              </View>
+            </View>
+            <View className="mb-6">
+              <DatePicker
+                value={endDateTime}
+                mode="datetime"
+                onChange={handleEndDateChange}
+                materialDateLabel="End date"
+                materialTimeLabel="End time"
+                materialDateLabelClassName="text-xs"
+              />
+            </View>
+            <DatePicker
+              value={rsvpDeadline}
+              mode="datetime"
+              onChange={handleRsvpDateChange}
+              materialDateLabel="RSVP deadline"
+              materialTimeLabel="RSVP time"
+              materialDateLabelClassName="text-xs"
+            />
+            <View className="flex-row gap-4">
               <View className="flex-1">
-                  <Controller
-                    control={control}
-                    name="venue"
-                    render={({ field: { value, onChange } }) => (
-                      <LabeledField
-                        label="Venue Name"
-                        placeholder="The Leela Palace"
-                        value={value}
-                        onChangeText={onChange}
-                      />
-                    )}
+                <Controller
+                  control={control}
+                  name="city"
+                  render={({ field: { value, onChange } }) => (
+                    <LabeledField
+                      label="City / Area"
+                      placeholder="Udaipur, Rajasthan"
+                      value={value}
+                      onChangeText={onChange}
+                    />
+                  )}
+                />
+              </View>
+
+            </View>
+            <View className="flex-1">
+              <Controller
+                control={control}
+                name="venue"
+                render={({ field: { value, onChange } }) => (
+                  <LabeledField
+                    label="Venue Name"
+                    placeholder="The Leela Palace"
+                    value={value}
+                    onChangeText={onChange}
                   />
-                </View>
-              {/* <View className="h-28 w-full overflow-hidden rounded-md border border-slate-200">
+                )}
+              />
+            </View>
+            {/* <View className="h-28 w-full overflow-hidden rounded-md border border-slate-200">
                 <Image
                   source={{
                     uri: "https://lh3.googleusercontent.com/aida-public/AB6AXuBsXGKMRLJ35_GbMDcozUWmZ04ZsCUF4hqolXbTjKxMZs4J2_16cNLqghLwwNSosYlDIt01M37Rog9lXSuwinI8iypxPY9Rx2z5Yuy6QOquSaBC_Wb9QgABYz6Mt6I2-PIbrlunei6pFyC_JxcTuGkwrZWJ-aVBQPMILrz8pIKNsA32urrRE8mh16zLRg-aL0JgxW4_aHQs-ns-P7eAEM9HUTcnZGOJiZJ3M4LgNr5lY_SQ5ognJpCZ9_taZa7KMpbjoK_3qfMJvgc",
@@ -429,39 +431,37 @@ export default function EditEventScreen() {
                   resizeMode="cover"
                 />
               </View> */}
-            </SectionCard>
+          </SectionCard>
 
-            <SectionCard>
-              <View className="flex-row gap-4">
-                <View className="flex-1">
-                  <Controller
-                    control={control}
-                    name="theme"
-                    render={({ field: { value, onChange } }) => (
-                      <LabeledField
-                        label="Event Theme"
-                        placeholder="Royal Vintage"
-                        value={value}
-                        onChangeText={onChange}
-                      />
-                    )}
-                  />
-                </View>
-                {/* <View className="flex-1">
-                  <Controller
-                    control={control}
-                    name="dressCode"
-                    render={({ field: { value, onChange } }) => (
-                      <LabeledField
-                        label="Dress Code"
-                        placeholder="Ethnic Festive"
-                        value={value}
-                        onChangeText={onChange}
-                      />
-                    )}
-                  />
-                </View> */}
-                 <View className="gap-2">
+          <SectionCard>
+            <View className="flex-row gap-4">
+              <View className="flex-1 gap-4">
+                <Controller
+                  control={control}
+                  name="theme"
+                  render={({ field: { value, onChange } }) => (
+                    <LabeledField
+                      label="Event Theme"
+                      placeholder="Royal Vintage"
+                      value={value}
+                      onChangeText={onChange}
+                    />
+                  )}
+                />
+                <Controller
+                  control={control}
+                  name="dressCode"
+                  render={({ field: { value, onChange } }) => (
+                    <LabeledField
+                      label="Dress Code"
+                      placeholder="classical"
+                      value={value}
+                      onChangeText={onChange}
+                    />
+                  )}
+                />
+              </View>
+              <View className="gap-2">
                 <Text className="text-sm font-semibold tracking-wide text-[#1a1b3a]">
                   Estimated Budget (INR)
                 </Text>
@@ -485,56 +485,56 @@ export default function EditEventScreen() {
                   />
                 </View>
               </View>
-              </View>
-              <ToggleRow
-                title="Public Visibility"
-                description="Visible to all invited guests"
-                value={watch("isPublic")}
-                onChange={(value) => setValue("isPublic", value)}
-              />
-             
-            </SectionCard>
-
-            <View className="mt-2">
-              <TouchableOpacity
-                className="w-full flex-row items-center justify-center rounded-md bg-[#ee2b8c] py-4"
-                style={{
-                  shadowColor: "#ee2b8c",
-                  shadowOpacity: 0.3,
-                  shadowRadius: 12,
-                  elevation: 6,
-                }}
-                activeOpacity={0.9}
-                disabled={isUpdating}
-                onPress={handleUpdate}
-              >
-                <Text className="text-base font-bold text-white">
-                  {isUpdating ? "Saving..." : "Save Changes"}
-                </Text>
-              </TouchableOpacity>
             </View>
+            <ToggleRow
+              title="Public Visibility"
+              description="Visible to all invited guests"
+              value={watch("isPublic")}
+              onChange={(value) => setValue("isPublic", value)}
+            />
 
-            <View className="flex-row items-center justify-between rounded-md border border-red-200 bg-red-50 p-4">
-              <View>
-                <Text className="text-sm font-bold text-red-600">
-                  Cancel Event
-                </Text>
-                <Text className="text-[11px] text-red-400">
-                  This action cannot be undone.
-                </Text>
-              </View>
-              <TouchableOpacity
-                onPress={handleDelete}
-                className="rounded-md px-4 py-2"
-                activeOpacity={0.8}
-              >
-                <Text className="text-xs font-bold uppercase tracking-widest text-red-600">
-                  Delete
-                </Text>
-              </TouchableOpacity>
-            </View>
+          </SectionCard>
+
+          <View className="mt-2">
+            <TouchableOpacity
+              className="w-full flex-row items-center justify-center rounded-md bg-[#ee2b8c] py-4"
+              style={{
+                shadowColor: "#ee2b8c",
+                shadowOpacity: 0.3,
+                shadowRadius: 12,
+                elevation: 6,
+              }}
+              activeOpacity={0.9}
+              disabled={isUpdating}
+              onPress={handleUpdate}
+            >
+              <Text className="text-base font-bold text-white">
+                {isUpdating ? "Saving..." : "Save Changes"}
+              </Text>
+            </TouchableOpacity>
           </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
+
+          <View className="flex-row items-center justify-between rounded-md border border-red-200 bg-red-50 p-4">
+            <View>
+              <Text className="text-sm font-bold text-red-600">
+                Cancel Event
+              </Text>
+              <Text className="text-[11px] text-red-400">
+                This action cannot be undone.
+              </Text>
+            </View>
+            <TouchableOpacity
+              onPress={handleDelete}
+              className="rounded-md px-4 py-2"
+              activeOpacity={0.8}
+            >
+              <Text className="text-xs font-bold uppercase tracking-widest text-red-600">
+                Delete
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }

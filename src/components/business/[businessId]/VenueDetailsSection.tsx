@@ -28,13 +28,13 @@ function VenueCard({ venue, onEdit }: { venue: VenueAttribute; onEdit: () => voi
     label: string;
     active: boolean;
   }> = [
-    { icon: "restaurant", label: "Catering", active: venue.has_catering },
-    { icon: "tv", label: "AV Equipment", active: venue.has_av_equipment },
-    { icon: "wb-sunny", label: "Outdoor", active: venue.is_outDoor },
-    { icon: "local-parking", label: "Parking", active: venue.parking },
-    { icon: "directions-car", label: "Valet", active: venue.valet_available },
-    { icon: "local-bar", label: "Alcohol Allowed", active: venue.alcohol_allowed },
-  ];
+      { icon: "restaurant", label: "Catering", active: venue.has_catering },
+      { icon: "tv", label: "AV Equipment", active: venue.has_av_equipment },
+      { icon: "wb-sunny", label: "Outdoor", active: venue.is_outDoor },
+      { icon: "local-parking", label: "Parking", active: venue.parking },
+      { icon: "directions-car", label: "Valet", active: venue.valet_available },
+      { icon: "local-bar", label: "Alcohol Allowed", active: venue.alcohol_allowed },
+    ];
   const activeAmenities = amenities.filter((a) => a.active);
 
   return (
@@ -49,7 +49,7 @@ function VenueCard({ venue, onEdit }: { venue: VenueAttribute; onEdit: () => voi
           </View>
           <View>
             <Text variant="h1" className="text-sm text-[#181114]">
-              {venue.venue_type ?? "Venue"}
+              {venue.venue_name ?? "Venue"}
             </Text>
             {venue.capacity != null && (
               <Text className="text-[10px] text-[#594048]">

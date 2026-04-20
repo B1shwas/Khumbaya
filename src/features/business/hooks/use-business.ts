@@ -4,6 +4,7 @@ import {
   AddEventVendorPayload,
   createBusinessApi,
   createBusinessVenueApi,
+  getMyBusiness,
   deleteBusinessApi,
   getBusinessByIdApi,
   getBusinessListApi,
@@ -30,6 +31,15 @@ export const useGetBusinessList = (userId?: number) => {
     gcTime: 30 * 60 * 1000,
   });
 };
+export const useGetMyBusiness = () => {
+  return useQuery({
+    queryKey: ["business/me",],
+    queryFn: () => getMyBusiness(),
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+
+  })
+}
 
 export const useGetBusinessById = (id: string) => {
   return useQuery({
@@ -46,7 +56,7 @@ export const useCreateBusiness = () => {
   return useMutation({
     mutationFn: (payload: CreateBusinessPayload) => createBusinessApi(payload),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["business/list"] });
+      queryClient.invalidateQueries({ queryKey: ["business/me"] });
     },
   });
 };

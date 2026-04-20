@@ -361,7 +361,7 @@ export default function HotelManagementScreen() {
           contentContainerStyle={{
             paddingHorizontal: 16,
             paddingBottom: 100,
-            gap: 12,
+            gap: 8,
           }}
           showsVerticalScrollIndicator={false}
           refreshControl={
@@ -421,11 +421,10 @@ export default function HotelManagementScreen() {
                     setSelectedCategory(option.value);
                     setIsCategoryModalVisible(false);
                   }}
-                  className={`flex-row items-center justify-between px-4 py-3.5 rounded-xl border mb-2 ${
-                    isActive
+                  className={`flex-row items-center justify-between px-4 py-3.5 rounded-xl border mb-2 ${isActive
                       ? "border-primary bg-primary/10"
                       : "border-gray-200 bg-white"
-                  }`}
+                    }`}
                 >
                   <Text className="font-jakarta-semibold text-sm text-[#181114]">
                     {option.label}
