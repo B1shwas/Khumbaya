@@ -26,7 +26,7 @@ export default function BusinessLayout() {
     >
       <Stack.Screen
         name="list"
-        
+        options={{ title: "My Businesses" }}
       />
       <Stack.Screen
         name="create"
