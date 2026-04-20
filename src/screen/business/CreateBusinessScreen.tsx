@@ -72,17 +72,14 @@ export default function CreateBusinessScreen() {
       return;
     }
 
-    const location = [form.city.trim(), form.country.trim()]
-      .filter(Boolean)
-      .join(", ");
-
     createBusiness.mutate(
       {
         business_name: form.businessName.trim(),
         description: form.description.trim() || undefined,
         category: form.vendorCategoryId,
         cover: coverImage ?? photos[Math.floor(((Math.random() * 1000) % 6) + 1)].url,
-        location: location || undefined,
+        city: form.city.trim() || undefined,
+        country: form.country.trim() || undefined,
         categoryDetails: form.categoryDetails,
         email: form.email.trim() || undefined,
         contact_phone: form.contactPhone.trim() || undefined,

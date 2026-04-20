@@ -97,10 +97,6 @@ export default function EditBusinessScreen() {
       return;
     }
 
-    const location = [form.city.trim(), form.country.trim()]
-      .filter(Boolean)
-      .join(", ");
-
     updateBusiness.mutate(
       {
         id: businessId!,
@@ -109,7 +105,8 @@ export default function EditBusinessScreen() {
           description: form.description.trim() || undefined,
           category: form.vendorCategoryId || undefined,
           cover: coverImage ?? undefined,
-          location: location || undefined,
+          city: form.city.trim() || undefined,
+          country: form.country.trim() || undefined,
           categoryDetails: Object.keys(form.categoryDetails).length > 0
             ? form.categoryDetails
             : undefined,
