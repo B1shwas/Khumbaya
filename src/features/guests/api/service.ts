@@ -78,3 +78,13 @@ export const removeInvitation = async (eventId: number, guestId: number) => {
   });
   return response.data.data;
 };
+
+export const toggleCheckStatus = async (
+  invitationId: number,
+  action: "checkIn" | "checkOut"
+) => {
+  const response = await api.patch(`/invitation/${invitationId}/check-status`, {
+    action,
+  });
+  return response.data;
+};

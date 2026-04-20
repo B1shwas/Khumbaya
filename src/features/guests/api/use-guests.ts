@@ -8,6 +8,7 @@ import {
   getInvitation,
   inviteGuest,
   removeInvitation,
+  toggleCheckStatus,
   type GuestCategoryOption,
   type InviteGuestPayload,
 } from "./service";
@@ -28,9 +29,7 @@ export const useGetInvitationsForEvent = (eventId: number | null) => {
   });
 };
 
-export const useGetEventGuestCategories = (
-  eventId: number | null
-) => {
+export const useGetEventGuestCategories = (eventId: number | null) => {
   return useQuery<GuestCategoryOption[]>({
     queryKey: ["event-guest-categories", eventId],
     queryFn: () => getEventGuestCategories(eventId!),
@@ -98,10 +97,27 @@ export const useRemoveInvitation = () => {
   });
 };
 
-export const useGetGuestRoom = (eventId: number | null  ) => {
+export const useGetGuestRoom = (eventId: number | null) => {
   return useQuery({
     queryKey: ["event-guest-room", eventId],
     queryFn: () => getGuestRoom(eventId!),
     enabled: !!eventId,
+  });
+};
+
+export const useToggleCheckStatus = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      invitationId,
+      action,
+    }: {
+      invitationId: number;
+      action: "checkIn" | "checkOut";
+    }) => toggleCheckStatus(invitationId, action),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["event-guest-room"] });
+    },
   });
 };

@@ -1,5 +1,8 @@
 import { useSubmitRsvpResponse } from "@/src/features/events/hooks/use-event";
-import { useGetGuestRoom } from "@/src/features/guests/api/use-guests";
+import {
+  useGetGuestRoom,
+  useToggleCheckStatus,
+} from "@/src/features/guests/api/use-guests";
 import { User } from "@/src/store/AuthStore";
 import { shadowStyle } from "@/src/utils/helper";
 import { Ionicons } from "@expo/vector-icons";
@@ -18,9 +21,12 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export interface Hotel_responce {
+  id?: number;
   user_detail: User | null;
   user_room: string | null;
   category: string | null;
+  hasCheckedIn?: boolean;
+  hasCheckedOut?: boolean;
 }
 
 type GuestSection = {
@@ -46,6 +52,7 @@ function GuestRowItem({
 }) {
   const username = guest.user_detail?.username || "Unknown Guest";
   const room = guest.user_room?.trim();
+  const { mutate: toggleCheckStatus, isPending } = useToggleCheckStatus();
 
   return (
     <View
@@ -96,6 +103,26 @@ function GuestRowItem({
           )}
         </View>
       </View>
+
+      <TouchableOpacity
+        onPress={() => {
+          if (!guest.id || isPending) return;
+          const action = guest.hasCheckedOut ? "checkIn" : "checkOut";
+          toggleCheckStatus({ invitationId: guest.id, action });
+        }}
+        disabled={isPending || !guest.id}
+        className={`rounded-md px-2.5 py-1.5 ${
+          guest.hasCheckedOut
+            ? "bg-green-100"
+            : guest.hasCheckedIn
+              ? "bg-red-100"
+              : "bg-gray-100"
+        }`}
+      >
+        <Text className="text-[10px] font-jakarta-semibold">
+          {guest.hasCheckedOut ? "OUT" : guest.hasCheckedIn ? "IN" : "IN"}
+        </Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -104,9 +131,8 @@ export default function HotelManagementScreen() {
   const { eventId } = useLocalSearchParams<{ eventId: string }>();
   const numericEventId = eventId ? Number(eventId) : null;
 
-  const { mutate: submitRsvpResponse, isPending } = useSubmitRsvpResponse(
-    Number(eventId)
-  );
+  const { mutate: submitRsvpResponse, isPending: isSubmittingRoom } =
+    useSubmitRsvpResponse(numericEventId ?? 0);
 
   const [searchText, setSearchText] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
@@ -240,6 +266,10 @@ export default function HotelManagementScreen() {
 
   const totalGuests = normalizedGuests.length;
   const totalAssigned = normalizedGuests.filter((g) => !!g.user_room).length;
+  const totalCheckedIn = normalizedGuests.filter((g) => g.hasCheckedIn).length;
+  const totalCheckedOut = normalizedGuests.filter(
+    (g) => g.hasCheckedOut
+  ).length;
   const selectedCategoryLabel =
     selectedCategory === "all" ? "All" : formatCategoryLabel(selectedCategory);
   const categoryPickerOptions = [
@@ -320,11 +350,20 @@ export default function HotelManagementScreen() {
         </View>
         <View className="w-px bg-gray-200 my-1" />
         <View className="flex-1 items-center">
-          <Text className="font-jakarta-bold text-xl text-primary">
-            {totalAssigned}
+          <Text className="font-jakarta-bold text-xl text-green-600">
+            {totalCheckedIn}
           </Text>
           <Text className="font-jakarta text-[11px] text-gray-500 mt-0.5">
-            Assigned
+            Checked In
+          </Text>
+        </View>
+        <View className="w-px bg-gray-200 my-1" />
+        <View className="flex-1 items-center">
+          <Text className="font-jakarta-bold text-xl text-red-600">
+            {totalCheckedOut}
+          </Text>
+          <Text className="font-jakarta text-[11px] text-gray-500 mt-0.5">
+            Checked Out
           </Text>
         </View>
       </View>
@@ -421,10 +460,11 @@ export default function HotelManagementScreen() {
                     setSelectedCategory(option.value);
                     setIsCategoryModalVisible(false);
                   }}
-                  className={`flex-row items-center justify-between px-4 py-3.5 rounded-xl border mb-2 ${isActive
+                  className={`flex-row items-center justify-between px-4 py-3.5 rounded-xl border mb-2 ${
+                    isActive
                       ? "border-primary bg-primary/10"
                       : "border-gray-200 bg-white"
-                    }`}
+                  }`}
                 >
                   <Text className="font-jakarta-semibold text-sm text-[#181114]">
                     {option.label}
@@ -506,23 +546,47 @@ export default function HotelManagementScreen() {
 
                 <View className="gap-2">
                   <TouchableOpacity
+                    disabled={
+                      !newRoom.trim() ||
+                      numericEventId === null ||
+                      isSubmittingRoom
+                    }
                     onPress={() => {
-                      if (newRoom.trim()) {
-                        console.log(newRoom);
-                        submitRsvpResponse({
-                          assigned_room: newRoom,
-                          userId: roomAssignmentModal!.guest!.user_detail!.id,
-                          familyId: roomAssignmentModal?.guest?.user_detail
-                            ?.familyId
-                            ? roomAssignmentModal?.guest?.user_detail?.familyId
-                            : undefined,
-                        });
-                        setRoomAssignmentModal({ visible: false, guest: null });
-                        setNewRoom("");
-                        refetch();
+                      const guest = roomAssignmentModal.guest;
+                      if (
+                        !guest ||
+                        !guest.user_detail?.id ||
+                        !newRoom.trim() ||
+                        numericEventId === null
+                      ) {
+                        return;
                       }
+
+                      submitRsvpResponse(
+                        {
+                          assigned_room: newRoom.trim(),
+                          userId: guest.user_detail.id,
+                          familyId: guest.user_detail.familyId ?? undefined,
+                        },
+                        {
+                          onSuccess: () => {
+                            setRoomAssignmentModal({
+                              visible: false,
+                              guest: null,
+                            });
+                            setNewRoom("");
+                            refetch();
+                          },
+                        }
+                      );
                     }}
-                    className="bg-primary rounded-lg py-3 items-center"
+                    className={`rounded-lg py-3 items-center ${
+                      !newRoom.trim() ||
+                      numericEventId === null ||
+                      isSubmittingRoom
+                        ? "bg-gray-200"
+                        : "bg-primary"
+                    }`}
                   >
                     <Text className="font-jakarta-semibold text-sm text-white">
                       Assign Room
