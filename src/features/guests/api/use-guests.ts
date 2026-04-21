@@ -1,13 +1,14 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   createEventGuestCategory,
-  type CreateGuestCategoryPayload,
   getEventGuest,
   getEventGuestCategories,
   getGuestRoom,
   getInvitation,
   inviteGuest,
   removeInvitation,
+  toggleCheckStatus,
+  type CreateGuestCategoryPayload,
   type GuestCategoryOption,
   type InviteGuestPayload,
 } from "./service";
@@ -28,9 +29,7 @@ export const useGetInvitationsForEvent = (eventId: number | null) => {
   });
 };
 
-export const useGetEventGuestCategories = (
-  eventId: number | null
-) => {
+export const useGetEventGuestCategories = (eventId: number | null) => {
   return useQuery<GuestCategoryOption[]>({
     queryKey: ["event-guest-categories", eventId],
     queryFn: () => getEventGuestCategories(eventId!),
@@ -98,10 +97,31 @@ export const useRemoveInvitation = () => {
   });
 };
 
-export const useGetGuestRoom = (eventId: number | null  ) => {
+export const useGetGuestRoom = (eventId: number | null) => {
   return useQuery({
     queryKey: ["event-guest-room", eventId],
     queryFn: () => getGuestRoom(eventId!),
     enabled: !!eventId,
+  });
+};
+
+export const useToggleCheckStatus = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      invitationId,
+      action,
+    }: {
+      invitationId: number;
+      action: "checkIn" | "checkOut";
+    }) => toggleCheckStatus(invitationId, action),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["event-guest-room"] });
+      queryClient.invalidateQueries({ queryKey: ["event-invitations"] });
+      queryClient.invalidateQueries({ queryKey: ["event-guests"] });
+      queryClient.invalidateQueries({ queryKey: ["event-responses"] });
+      queryClient.invalidateQueries({ queryKey: ["rsvp-invitations"] });
+    },
   });
 };
