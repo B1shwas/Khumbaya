@@ -57,6 +57,37 @@ export default function GuestCard({
     }
   };
 
+  const checkState = (() => {
+    const arrival = guest.event_guest.arrival_date_time;
+    const departure = guest.event_guest.departure_date_time;
+
+    if (departure) return "Checked Out";
+    if (arrival) return "Checked In";
+    return "Not checked in";
+  })();
+
+  const getCheckStateColor = () => {
+    switch (checkState) {
+      case "Checked In":
+        return "#10B981";
+      case "Checked Out":
+        return "#3B82F6";
+      default:
+        return "#6B7280";
+    }
+  };
+
+  const getCheckStateBgColor = () => {
+    switch (checkState) {
+      case "Checked In":
+        return "rgba(16, 185, 129, 0.12)";
+      case "Checked Out":
+        return "rgba(59, 130, 246, 0.12)";
+      default:
+        return "rgba(107, 114, 128, 0.12)";
+    }
+  };
+
   const initials = guest.user_detail.username
     ? guest.user_detail.username
         .split(" ")
@@ -73,11 +104,7 @@ export default function GuestCard({
 
   return (
     <View className="mb-3 rounded-2xl bg-white">
-      <Pressable
-        onPress={onPress}
-        disabled={!onPress}
-        className="rounded-2xl"
-      >
+      <Pressable onPress={onPress} disabled={!onPress} className="rounded-2xl">
         <View className="min-h-[86px] flex-row items-center gap-3 px-4 py-3">
           {guest.user_detail.photo ? (
             <Image
@@ -119,6 +146,24 @@ export default function GuestCard({
                 paddingHorizontal: 10,
                 paddingVertical: 4,
                 borderRadius: 12,
+                backgroundColor: getCheckStateBgColor(),
+                maxWidth: 140,
+              }}
+            >
+              <Text
+                numberOfLines={1}
+                className="text-xs font-semibold"
+                style={{ color: getCheckStateColor() }}
+              >
+                {checkState}
+              </Text>
+            </View>
+
+            <View
+              style={{
+                paddingHorizontal: 10,
+                paddingVertical: 4,
+                borderRadius: 12,
                 backgroundColor: getStatusBgColor(),
                 maxWidth: 120,
               }}
@@ -149,14 +194,17 @@ export default function GuestCard({
           <Pressable
             onPress={onDraftPress}
             disabled={isDraftActionLoading}
-      
             className="h-10 flex-row items-center justify-center rounded-xl border border-[#EE2B8C] bg-[#EE2B8C]/10"
           >
             {isDraftActionLoading ? (
               <ActivityIndicator size="small" color="#EE2B8C" />
             ) : (
               <>
-                <Ionicons name="paper-plane-outline" size={16} color="#EE2B8C" />
+                <Ionicons
+                  name="paper-plane-outline"
+                  size={16}
+                  color="#EE2B8C"
+                />
                 <Text className="ml-2 text-sm font-semibold text-[#EE2B8C]">
                   Send Invitation
                 </Text>
