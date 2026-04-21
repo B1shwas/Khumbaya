@@ -4,7 +4,7 @@ export interface Vendor {
   category: string;
   rating: number;
   reviews: number;
-  priceLevel: string;
+  priceLevel?: string;
   location: string;
   image: string;
   city?: string;
