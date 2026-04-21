@@ -1,16 +1,16 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  createEventGuestCategory,
-  type CreateGuestCategoryPayload,
-  getEventGuest,
-  getEventGuestCategories,
-  getGuestRoom,
-  getInvitation,
-  inviteGuest,
-  removeInvitation,
-  toggleCheckStatus,
-  type GuestCategoryOption,
-  type InviteGuestPayload,
+    createEventGuestCategory,
+    getEventGuest,
+    getEventGuestCategories,
+    getGuestRoom,
+    getInvitation,
+    inviteGuest,
+    removeInvitation,
+    toggleCheckStatus,
+    type CreateGuestCategoryPayload,
+    type GuestCategoryOption,
+    type InviteGuestPayload,
 } from "./service";
 
 export const useGetEventGuests = (eventId: number | null) => {
@@ -118,6 +118,10 @@ export const useToggleCheckStatus = () => {
     }) => toggleCheckStatus(invitationId, action),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["event-guest-room"] });
+      queryClient.invalidateQueries({ queryKey: ["event-invitations"] });
+      queryClient.invalidateQueries({ queryKey: ["event-guests"] });
+      queryClient.invalidateQueries({ queryKey: ["event-responses"] });
+      queryClient.invalidateQueries({ queryKey: ["rsvp-invitations"] });
     },
   });
 };

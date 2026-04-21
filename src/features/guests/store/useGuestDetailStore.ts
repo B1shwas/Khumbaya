@@ -13,6 +13,8 @@ export const useGuestDetailStore = create<GuestDetailStore>((set) => ({
   clearGuestDetail: () => set({ guestDraft: null }),
 }));
 
+export const { setGuestDetail } = useGuestDetailStore.getState();
+
 interface FamilyGuestStore {
   familyGroup: FamilyGroup | null;
   setFamilyGroup: (familyGroup: FamilyGroup) => void;
