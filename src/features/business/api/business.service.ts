@@ -131,3 +131,19 @@ export const getUserBusiness = async () => {
   const response = await api.get("/my/businesses");
   return response.data?.data;
 };
+
+export interface ReviewPayload {
+  rating: number;
+  quote: string;
+  reviewerName: string;
+  reviewerAvatarUrl: string;
+  date: string;
+}
+
+export const submitVendorReviewApi = async (
+  businessId: number | string,
+  review: ReviewPayload
+): Promise<any> => {
+  const response = await api.patch(`/business/${businessId}`, { reviews: [review] });
+  return response.data.data;
+};

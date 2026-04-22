@@ -1,12 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import {
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function EventSuccessPage() {
@@ -19,53 +13,58 @@ export default function EventSuccessPage() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView className="flex-1 bg-[#f8f6f7]">
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
+        className="flex-1"
+        contentContainerClassName="flex-grow p-5 pt-10"
         showsVerticalScrollIndicator={false}
       >
-        {/* Success Animation Circle */}
-        <View style={styles.successHeroCircle}>
-          <View style={styles.successHeroInner}>
-            <View style={styles.checkmarkContainer}>
-              <Ionicons name="checkmark" size={48} color="white" />
+        {/* Success Hero */}
+        <View className="w-[200px] h-[200px] rounded-full bg-primary self-center mt-5 mb-8 relative items-center justify-center shadow-lg">
+          <View className="w-40 h-40 rounded-full bg-primary items-center justify-center border-4 border-white/30">
+            <View className="w-20 h-20 rounded-full bg-white items-center justify-center">
+              <Ionicons name="checkmark" size={48} color="#ee2b8c" />
             </View>
           </View>
-          <View style={[styles.successFloatIcon, styles.successFloatIcon1]}>
+          <View className="absolute -top-2.5 -right-2.5 w-12 h-12 rounded-full bg-white items-center justify-center shadow">
             <Ionicons name="heart" size={24} color="#ee2b8c" />
           </View>
-          <View style={[styles.successFloatIcon, styles.successFloatIcon2]}>
+          <View className="absolute bottom-7 -left-5 w-12 h-12 rounded-full bg-white items-center justify-center shadow">
             <Ionicons name="star" size={20} color="#F59E0B" />
           </View>
-          <View style={[styles.successFloatIcon, styles.successFloatIcon3]}>
+          <View className="absolute -bottom-1 right-7 w-12 h-12 rounded-full bg-white items-center justify-center shadow">
             <Ionicons name="sparkles" size={18} color="#9333EA" />
           </View>
         </View>
 
-        {/* Success Text Content */}
-        <View style={styles.successTextContent}>
-          <Text style={styles.successTitle}>🎉 Congratulations!</Text>
-          <Text style={styles.successSubtitle}>
+        {/* Text */}
+        <View className="items-center mb-8">
+          <Text className="text-[28px] font-bold text-[#181114] mb-3 text-center">
+            🎉 Congratulations!
+          </Text>
+          <Text className="text-lg font-semibold text-[#181114] mb-2 text-center">
             Your event has been created successfully!
           </Text>
-          <Text style={styles.successDescription}>
+          <Text className="text-sm text-gray-500 text-center max-w-[280px]">
             Your dream celebration is now set up. What's next?
           </Text>
         </View>
 
         {/* Action Options */}
-        <View style={styles.successOptions}>
+        <View className="gap-4 mb-8">
           <TouchableOpacity
-            style={styles.successOptionButton}
+            className="flex-row items-center bg-white rounded-2xl p-4 shadow-sm"
             onPress={handleCreateSubEvent}
             activeOpacity={0.8}
           >
-            <View style={styles.successOptionIconContainer}>
+            <View className="w-14 h-14 rounded-full bg-violet-100 items-center justify-center mr-4">
               <Ionicons name="sparkles" size={28} color="#9333EA" />
             </View>
-            <View style={styles.successOptionTextContainer}>
-              <Text style={styles.successOptionTitle}>Create Sub Event</Text>
-              <Text style={styles.successOptionSubtitle}>
+            <View className="flex-1">
+              <Text className="text-base font-semibold text-[#181114] mb-1">
+                Create Sub Event
+              </Text>
+              <Text className="text-xs text-gray-500">
                 Sangeet, Mehendi, Reception
               </Text>
             </View>
@@ -73,206 +72,42 @@ export default function EventSuccessPage() {
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={styles.successOptionButton}
+            className="flex-row items-center bg-white rounded-2xl p-4 shadow-sm"
             onPress={handleViewEvents}
             activeOpacity={0.8}
           >
-            <View
-              style={[
-                styles.successOptionIconContainer,
-                { backgroundColor: "#ee2b8c20" },
-              ]}
-            >
+            <View className="w-14 h-14 rounded-full bg-primary/10 items-center justify-center mr-4">
               <Ionicons name="calendar" size={28} color="#ee2b8c" />
             </View>
-            <View style={styles.successOptionTextContainer}>
-              <Text style={styles.successOptionTitle}>View My Events</Text>
-              <Text style={styles.successOptionSubtitle}>
-                See all your events
+            <View className="flex-1">
+              <Text className="text-base font-semibold text-[#181114] mb-1">
+                View My Events
               </Text>
+              <Text className="text-xs text-gray-500">See all your events</Text>
             </View>
             <Ionicons name="chevron-forward" size={24} color="#D1D5DB" />
           </TouchableOpacity>
         </View>
 
-        {/* Quick Stats */}
-        <View style={styles.quickStats}>
-          <Text style={styles.quickStatsTitle}>Next Steps</Text>
-          <View style={styles.quickStatItem}>
+        {/* Next Steps */}
+        <View className="bg-white rounded-2xl p-5 shadow-sm">
+          <Text className="text-sm font-semibold text-[#181114] mb-4">
+            Next Steps
+          </Text>
+          <View className="flex-row items-center gap-3 py-2">
             <Ionicons name="people" size={20} color="#6B7280" />
-            <Text style={styles.quickStatText}>Invite your guests</Text>
+            <Text className="text-sm text-gray-500">Invite your guests</Text>
           </View>
-          <View style={styles.quickStatItem}>
+          <View className="flex-row items-center gap-3 py-2">
             <Ionicons name="storefront" size={20} color="#6B7280" />
-            <Text style={styles.quickStatText}>Book vendors</Text>
+            <Text className="text-sm text-gray-500">Book vendors</Text>
           </View>
-          <View style={styles.quickStatItem}>
+          <View className="flex-row items-center gap-3 py-2">
             <Ionicons name="wallet" size={20} color="#6B7280" />
-            <Text style={styles.quickStatText}>Set up your budget</Text>
+            <Text className="text-sm text-gray-500">Set up your budget</Text>
           </View>
         </View>
       </ScrollView>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#f8f6f7",
-  },
-  scrollContent: {
-    flexGrow: 1,
-    padding: 20,
-    paddingTop: 40,
-  },
-  successHeroCircle: {
-    width: 200,
-    height: 200,
-    borderRadius: 100,
-    backgroundColor: "#ee2b8c",
-    alignSelf: "center",
-    marginTop: 20,
-    marginBottom: 32,
-    position: "relative",
-    justifyContent: "center",
-    alignItems: "center",
-    shadowColor: "#ee2b8c",
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.3,
-    shadowRadius: 20,
-    elevation: 10,
-  },
-  successHeroInner: {
-    width: 160,
-    height: 160,
-    borderRadius: 80,
-    backgroundColor: "#ee2b8c",
-    justifyContent: "center",
-    alignItems: "center",
-    borderWidth: 4,
-    borderColor: "rgba(255,255,255,0.3)",
-  },
-  checkmarkContainer: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: "#fff",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  successFloatIcon: {
-    position: "absolute",
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: "white",
-    justifyContent: "center",
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  successFloatIcon1: {
-    top: -10,
-    right: -10,
-  },
-  successFloatIcon2: {
-    bottom: 30,
-    left: -20,
-  },
-  successFloatIcon3: {
-    bottom: -5,
-    right: 30,
-  },
-  successTextContent: {
-    alignItems: "center",
-    marginBottom: 32,
-  },
-  successTitle: {
-    fontSize: 28,
-    fontWeight: "700",
-    color: "#181114",
-    marginBottom: 12,
-    textAlign: "center",
-  },
-  successSubtitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#181114",
-    marginBottom: 8,
-    textAlign: "center",
-  },
-  successDescription: {
-    fontSize: 14,
-    color: "#6B7280",
-    textAlign: "center",
-    maxWidth: 280,
-  },
-  successOptions: {
-    gap: 16,
-    marginBottom: 32,
-  },
-  successOptionButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "white",
-    borderRadius: 16,
-    padding: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  successOptionIconContainer: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: "#9333EA20",
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 16,
-  },
-  successOptionTextContainer: {
-    flex: 1,
-  },
-  successOptionTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#181114",
-    marginBottom: 4,
-  },
-  successOptionSubtitle: {
-    fontSize: 12,
-    color: "#6B7280",
-  },
-  quickStats: {
-    backgroundColor: "white",
-    borderRadius: 16,
-    padding: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  quickStatsTitle: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#181114",
-    marginBottom: 16,
-  },
-  quickStatItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    paddingVertical: 8,
-  },
-  quickStatText: {
-    fontSize: 14,
-    color: "#6B7280",
-  },
-});

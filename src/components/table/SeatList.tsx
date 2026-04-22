@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
 import { Guest, Seat } from "../../utils/tableHelpers";
 
 interface SeatListProps {
@@ -14,7 +14,7 @@ export const SeatList: React.FC<SeatListProps> = ({
   onSeatPress,
 }) => {
   return (
-    <View style={styles.seatsGrid}>
+    <View className="flex-row flex-wrap gap-2 justify-center">
       {seats.map((seat, index) => {
         const guest = guestMap.get(seat.guestId || "") || null;
         const isFirstSeatOfGroup =
@@ -23,32 +23,38 @@ export const SeatList: React.FC<SeatListProps> = ({
         return (
           <TouchableOpacity
             key={seat.id}
-            style={[
-              styles.seatSlot,
-              guest && styles.seatSlotFilled,
-              guest && isFirstSeatOfGroup && styles.seatSlotGroup,
-            ]}
+            className={`w-14 h-14 rounded-lg border items-center justify-center ${
+              isFirstSeatOfGroup
+                ? "border-violet-500 bg-violet-50"
+                : guest
+                ? "border-primary bg-pink-50"
+                : "border-dashed border-gray-300 bg-gray-50"
+            }`}
             onPress={() => onSeatPress?.(seat.id, guest)}
             disabled={!onSeatPress}
           >
             <View
-              style={[
-                styles.seatNumber,
-                guest && styles.seatNumberFilled,
-                isFirstSeatOfGroup && styles.seatNumberGroup,
-              ]}
+              className={`w-7 h-7 rounded-full items-center justify-center ${
+                isFirstSeatOfGroup
+                  ? "bg-violet-500"
+                  : guest
+                  ? "bg-primary"
+                  : "bg-gray-200"
+              }`}
             >
               <Text
-                style={[
-                  styles.seatNumberText,
-                  guest && styles.seatNumberTextFilled,
-                ]}
+                className={`text-xs font-semibold ${
+                  guest ? "text-white" : "text-gray-500"
+                }`}
               >
                 {guest ? guest.name.charAt(0) : index + 1}
               </Text>
             </View>
             {guest && (
-              <Text style={styles.guestName} numberOfLines={1}>
+              <Text
+                className="text-[9px] text-gray-700 mt-0.5 max-w-[52px] text-center"
+                numberOfLines={1}
+              >
                 {guest.name.split(" ")[0]}
               </Text>
             )}
@@ -58,61 +64,3 @@ export const SeatList: React.FC<SeatListProps> = ({
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  seatsGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
-    justifyContent: "center",
-  },
-  seatSlot: {
-    width: 56,
-    height: 56,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: "#E5E7EB",
-    borderStyle: "dashed",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#F9FAFB",
-  },
-  seatSlotFilled: {
-    borderStyle: "solid",
-    borderColor: "#EE2B8C",
-    backgroundColor: "#FDF2F8",
-  },
-  seatSlotGroup: {
-    borderColor: "#8B5CF6",
-    backgroundColor: "#F5F3FF",
-  },
-  seatNumber: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: "#E5E7EB",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  seatNumberFilled: {
-    backgroundColor: "#EE2B8C",
-  },
-  seatNumberGroup: {
-    backgroundColor: "#8B5CF6",
-  },
-  seatNumberText: {
-    fontSize: 12,
-    fontWeight: "600",
-    color: "#6B7280",
-  },
-  seatNumberTextFilled: {
-    color: "#FFFFFF",
-  },
-  guestName: {
-    fontSize: 9,
-    color: "#374151",
-    marginTop: 2,
-    maxWidth: 52,
-    textAlign: "center",
-  },
-});

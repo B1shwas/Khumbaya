@@ -60,11 +60,13 @@ export function VendorCard({ vendor }: { vendor: Vendor }) {
               {vendor.category}
             </Text>
           </View>
-          <View className="bg-success-50 px-2 py-1 rounded">
-            <Text variant="caption" className="text-success-700 font-semibold ">
-              {vendor.priceLevel}
-            </Text>
-          </View>
+          {vendor.priceLevel && (
+            <View className="bg-success-50 px-2 py-1 rounded">
+              <Text variant="caption" className="text-success-700 font-semibold ">
+                {vendor.priceLevel}
+              </Text>
+            </View>
+          )}
         </View>
 
         <View className="flex-row items-center gap-1 mt-1">

@@ -1,12 +1,5 @@
 import { MaterialIcons } from "@expo/vector-icons";
-import {
-  Animated,
-  Image,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { Animated, Image, Pressable, Text, View } from "react-native";
 
 type AvatarPickerProps = {
   name: string;
@@ -52,44 +45,36 @@ export default function AvatarPicker({
     Animated.spring(scale, { toValue: 1, useNativeDriver: true }).start();
 
   return (
-    <View style={styles.container}>
+    <View className="items-center">
       <Pressable
         onPress={onPick}
         onPressIn={onPressIn}
         onPressOut={onPressOut}
-        style={styles.pressable}
+        className="items-center justify-center"
       >
-        <Animated.View
-          style={[styles.avatarWrapper, { transform: [{ scale }] }]}
-        >
+        <Animated.View style={{ position: "relative", transform: [{ scale }] }}>
           <View
-            style={[
-              styles.avatar,
-              {
-                width: dimension,
-                height: dimension,
-                borderRadius: dimension / 2,
-              },
-            ]}
+            className="bg-pink-100 items-center justify-center overflow-hidden"
+            style={{
+              width: dimension,
+              height: dimension,
+              borderRadius: dimension / 2,
+            }}
           >
             {avatarUri ? (
               <Image
                 source={{ uri: avatarUri }}
-                style={[
-                  styles.avatarImage,
-                  {
-                    width: dimension,
-                    height: dimension,
-                    borderRadius: dimension / 2,
-                  },
-                ]}
+                style={{
+                  width: dimension,
+                  height: dimension,
+                  borderRadius: dimension / 2,
+                  resizeMode: "cover",
+                }}
               />
             ) : (
               <Text
-                style={[
-                  styles.avatarInitials,
-                  { fontSize, lineHeight: fontSize * 1.2 },
-                ]}
+                className="text-pink-500 font-bold"
+                style={{ fontSize, lineHeight: fontSize * 1.2 }}
               >
                 {getInitials(name)}
               </Text>
@@ -98,16 +83,14 @@ export default function AvatarPicker({
 
           {showEditButton && (
             <View
-              style={[
-                styles.cameraButton,
-                {
-                  width: cameraButtonSize,
-                  height: cameraButtonSize,
-                  borderRadius: cameraButtonSize / 2,
-                  right: 0,
-                  bottom: 0,
-                },
-              ]}
+              className="absolute bg-pink-500 items-center justify-center shadow-md"
+              style={{
+                width: cameraButtonSize,
+                height: cameraButtonSize,
+                borderRadius: cameraButtonSize / 2,
+                right: 0,
+                bottom: 0,
+              }}
             >
               <MaterialIcons
                 name="camera-alt"
@@ -120,62 +103,13 @@ export default function AvatarPicker({
       </Pressable>
 
       {showName && (
-        <Text style={styles.nameText} numberOfLines={1}>
+        <Text
+          className="mt-3 text-lg font-semibold text-gray-900 max-w-[200px] text-center"
+          numberOfLines={1}
+        >
           {name || "User"}
         </Text>
       )}
-
-      {/* {!showName && <Text style={styles.hintText}>Tap to upload photo</Text>} */}
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    alignItems: "center",
-  },
-  pressable: {
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  avatarWrapper: {
-    position: "relative",
-  },
-  avatar: {
-    backgroundColor: "#fce7f3",
-    alignItems: "center",
-    justifyContent: "center",
-    overflow: "hidden",
-  },
-  avatarImage: {
-    resizeMode: "cover",
-  },
-  avatarInitials: {
-    color: "#ec4899",
-    fontWeight: "700",
-  },
-  cameraButton: {
-    position: "absolute",
-    backgroundColor: "#ec4899",
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  nameText: {
-    marginTop: 12,
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#1f2937",
-    maxWidth: 200,
-    textAlign: "center",
-  },
-  hintText: {
-    marginTop: 8,
-    fontSize: 13,
-    color: "#9ca3af",
-  },
-});

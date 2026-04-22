@@ -48,7 +48,7 @@ export default function ExploreVendors() {
       priceLevel:
         business.price_starting_from != null
           ? `From रु ${business.price_starting_from}`
-          : "$",
+          : undefined,
       location:
         [business.city, business.country].filter(Boolean).join(", ") ||
         business.location ||

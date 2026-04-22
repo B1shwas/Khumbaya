@@ -14,6 +14,8 @@ import {
   updateBusinessApi,
   updateBusinessServiceApi,
   updateBusinessVenueApi,
+  submitVendorReviewApi,
+  ReviewPayload,
 } from "../api";
 import {
   CreateBusinessPayload,
@@ -232,5 +234,15 @@ export const useGetUserBusiness = (userId: number) => {
     enabled: !!userId,
     staleTime: 5 * 60 * 1000,
     gcTime: 30 * 60 * 1000,
+  });
+};
+
+export const useSubmitVendorReview = (businessId: string) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (review: ReviewPayload) => submitVendorReviewApi(businessId, review),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["business", businessId] });
+    },
   });
 };

@@ -1,6 +1,6 @@
 import { SubEventTemplate } from "@/src/constants/subeventTemplates";
 import { Ionicons } from "@expo/vector-icons";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
 
 interface SubEventTemplateCardProps {
   template: SubEventTemplate;
@@ -28,100 +28,46 @@ export default function SubEventTemplateCard({
     return colors[template.id] || "#6B7280";
   };
 
+  const color = getCategoryColor();
+
   return (
     <TouchableOpacity
-      style={[styles.card, isSelected && styles.cardSelected]}
+      className={`bg-white rounded-2xl mb-3 border-2 overflow-hidden ${
+        isSelected ? "border-primary bg-pink-50" : "border-gray-200"
+      }`}
       onPress={() => onSelect(template)}
       activeOpacity={0.7}
     >
-      <View style={styles.cardContent}>
+      <View className="flex-row items-center p-4">
         <View
-          style={[
-            styles.iconContainer,
-            { backgroundColor: getCategoryColor() + "15" },
-          ]}
+          className="w-14 h-14 rounded-2xl items-center justify-center"
+          style={{ backgroundColor: color + "15" }}
         >
-          <Ionicons
-            name={template.icon as any}
-            size={28}
-            color={getCategoryColor()}
-          />
+          <Ionicons name={template.icon as any} size={28} color={color} />
         </View>
 
-        <View style={styles.cardInfo}>
-          <Text style={styles.cardTitle}>{template.name}</Text>
-          <Text style={styles.cardDescription}>{template.description}</Text>
-          <Text style={styles.cardActivities}>
+        <View className="flex-1 ml-3.5">
+          <Text className="font-bold text-base text-[#181114]">
+            {template.name}
+          </Text>
+          <Text className="text-sm text-gray-500 mt-0.5">
+            {template.description}
+          </Text>
+          <Text className="text-xs text-gray-400 mt-1">
             {template.activities.length} activities
           </Text>
         </View>
 
-        <View style={[styles.checkbox, isSelected && styles.checkboxSelected]}>
+        <View
+          className={`w-7 h-7 rounded-full border-2 items-center justify-center ${
+            isSelected
+              ? "bg-primary border-primary"
+              : "bg-transparent border-gray-300"
+          }`}
+        >
           {isSelected && <Ionicons name="checkmark" size={18} color="white" />}
         </View>
       </View>
     </TouchableOpacity>
   );
 }
-
-const styles = StyleSheet.create({
-  card: {
-    backgroundColor: "white",
-    borderRadius: 16,
-    marginBottom: 12,
-    borderWidth: 2,
-    borderColor: "#E5E7EB",
-    overflow: "hidden",
-  },
-  cardSelected: {
-    borderColor: "#ee2b8c",
-    backgroundColor: "#FDF2F8",
-  },
-  cardContent: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 16,
-  },
-  iconContainer: {
-    width: 56,
-    height: 56,
-    borderRadius: 14,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  cardInfo: {
-    flex: 1,
-    marginLeft: 14,
-  },
-  cardTitle: {
-    fontFamily: "PlusJakartaSans-Bold",
-    fontSize: 16,
-    color: "#181114",
-  },
-  cardDescription: {
-    fontFamily: "PlusJakartaSans-Regular",
-    fontSize: 13,
-    color: "#6B7280",
-    marginTop: 2,
-  },
-  cardActivities: {
-    fontFamily: "PlusJakartaSans-Regular",
-    fontSize: 12,
-    color: "#9CA3AF",
-    marginTop: 4,
-  },
-  checkbox: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    borderWidth: 2,
-    borderColor: "#D1D5DB",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "transparent",
-  },
-  checkboxSelected: {
-    backgroundColor: "#ee2b8c",
-    borderColor: "#ee2b8c",
-  },
-});
