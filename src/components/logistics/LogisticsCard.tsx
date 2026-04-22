@@ -1,6 +1,6 @@
+import { Truck, UserPlus } from 'lucide-react-native';
 import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
-import { Truck, MapPin, ChevronRight, UserPlus } from 'lucide-react-native';
+import { Text, TouchableOpacity, View } from 'react-native';
 
 interface LogisticsCardProps {
   id: string;
@@ -8,7 +8,11 @@ interface LogisticsCardProps {
   status: 'En Route' | 'Active' | 'In Service' | 'Idle';
   origin: string;
   destination: string;
+  availabilityStart?:   Date |null;
+  availabilityEnd?:  Date|null;
   onPress?: () => void;
+  onManagePress?: () => void;
+  onAddGuestPress?: () => void;
 }
 
 const getStatusStyles = (status: string) => {
@@ -30,9 +34,19 @@ export const LogisticsCard: React.FC<LogisticsCardProps> = ({
   status,
   origin,
   destination,
+  availabilityStart,
+  availabilityEnd,
   onPress,
+  onManagePress,
+  onAddGuestPress,
 }) => {
   const styles = getStatusStyles(status);
+  const topLine = origin === 'Not set'
+    ? `Start: ${availabilityStart || 'Not set'}`
+    : origin;
+  const bottomLine = destination === 'Not set'
+    ? `End: ${availabilityEnd || 'Not set'}`
+    : destination;
 
   return (
     <TouchableOpacity
@@ -63,16 +77,22 @@ export const LogisticsCard: React.FC<LogisticsCardProps> = ({
           <View className="w-1.5 h-1.5 rounded-full border border-pink-500" />
         </View>
         <View className="flex-1 justify-between h-10">
-          <Text className="text-gray-900 font-jakarta-semibold text-xs" numberOfLines={1}>{origin}</Text>
-          <Text className="text-gray-400 font-jakarta-medium text-xs" numberOfLines={1}>{destination}</Text>
+          <Text className="text-gray-900 font-jakarta-semibold text-xs" numberOfLines={1}>{topLine}</Text>
+          <Text className="text-gray-400 font-jakarta-medium text-xs" numberOfLines={1}>{bottomLine}</Text>
         </View>
       </View>
 
       <View className="flex-row gap-2">
-        <TouchableOpacity className="flex-1 bg-primary h-10 rounded-xl items-center justify-center shadow-lg shadow-pink-200">
+        <TouchableOpacity 
+          className="flex-1 bg-primary h-10 rounded-xl items-center justify-center shadow-lg shadow-pink-200"
+          onPress={onManagePress}
+        >
           <Text className="text-white font-jakarta-bold text-sm">Manage</Text>
         </TouchableOpacity>
-        <TouchableOpacity className="w-10 h-10 bg-gray-50 rounded-xl items-center justify-center border border-gray-100">
+        <TouchableOpacity 
+          className="w-10 h-10 bg-gray-50 rounded-xl items-center justify-center border border-gray-100"
+          onPress={onAddGuestPress}
+        >
           <UserPlus size={18} color="#6b7280" />
         </TouchableOpacity>
       </View>
