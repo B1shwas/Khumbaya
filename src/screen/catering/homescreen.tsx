@@ -1,7 +1,7 @@
 import { Text } from "@/src/components/ui/Text";
 import { MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import {
   Pressable,
@@ -234,8 +234,11 @@ const EventCard = ({ event }: { event: Event }) => {
 
 export default function MealScheduleScreen() {
   const router = useRouter();
+  const { eventId } = useLocalSearchParams();
   const [selectedDate, setSelectedDate] = useState(2); // Mon 26 (index)
-
+  const addClick = () => {
+    router.push(`/(protected)/(client-stack)/events/${eventId}/(organizer)/add-catering`);
+  }
   return (
     <SafeAreaView className="flex-1 bg-background-light" edges={["top", "bottom"]}>
       <StatusBar barStyle="dark-content" />
@@ -269,6 +272,7 @@ export default function MealScheduleScreen() {
             <Pressable
               className="flex-row items-center bg-primary px-4 py-2.5 rounded-md gap-2"
               style={{ ...shadowStyle, shadowColor: "#ee2b8c", shadowOpacity: 0.3 }}
+              onPress={addClick}
             >
               <Text className="text-white font-black text-[15px] tracking-tight">Add</Text>
               <MaterialIcons name="add" size={20} color="white" />

@@ -99,7 +99,7 @@ const EventDetail = () => {
       name: "logistics",
       icon: "cube-outline",  // or "cube" for filled
       color: "#10B981",
-      route: "./logistics"
+      route: "./(logistics)"
     }
   ];
 
