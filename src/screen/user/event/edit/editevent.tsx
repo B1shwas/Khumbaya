@@ -5,12 +5,15 @@ import {
   EVENT_TYPE_TO_BACKEND,
   type Event,
 } from "@/src/constants/event";
-import { useEventById, useUpdateEvent } from "@/src/features/events/hooks/use-event";
+import {
+  useEventById,
+  useUpdateEvent,
+} from "@/src/features/events/hooks/use-event";
 import { useEventStore } from "@/src/features/events/store/useEventStore";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { DateTimePickerEvent } from "@react-native-community/datetimepicker";
 import { LinearGradient } from "expo-linear-gradient";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useMemo } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
@@ -52,8 +55,8 @@ const buildInitialForm = (draft?: Event | null): EditEventForm => {
   const today = new Date();
   const normalizedType = draft?.type
     ? (EVENT_TYPE_TO_BACKEND[
-      draft.type as keyof typeof EVENT_TYPE_TO_BACKEND
-    ] ?? draft.type)
+        draft.type as keyof typeof EVENT_TYPE_TO_BACKEND
+      ] ?? draft.type)
     : "";
   return {
     title: draft?.title ?? "",
@@ -121,8 +124,9 @@ function LabeledField({
         {label}
       </Text>
       <TextInput
-        className={`w-full rounded-md border border-slate-200 bg-white px-4 text-base text-slate-900 ${multiline ? "min-h-[112px] " : "h-14"
-          }`}
+        className={`w-full rounded-md border border-slate-200 bg-white px-4 text-base text-slate-900 ${
+          multiline ? "min-h-[112px] " : "h-14"
+        }`}
         placeholder={placeholder}
         placeholderTextColor="#94a3b8"
         value={value}
@@ -169,10 +173,10 @@ function ToggleRow({ title, description, value, onChange }: ToggleRowProps) {
 export default function EditEventScreen() {
   const router = useRouter();
   const { eventDraft } = useEventStore();
-  const eventId = eventDraft?.id ? Number(eventDraft.id) : NaN;
-  const { data: fullEvent } = useEventById(Number.isFinite(eventId) ? eventId : 0);
+  const { eventId } = useLocalSearchParams();
+  const { data: fullEvent } = useEventById(Number(eventId));
   const { mutate: updateEvent, isPending: isUpdating } = useUpdateEvent(
-    Number.isFinite(eventId) ? eventId : 0
+    Number(eventId)
   );
   const draft = (fullEvent ?? eventDraft) as Event | null;
   const defaultValues = useMemo(
@@ -219,14 +223,15 @@ export default function EditEventScreen() {
   };
 
   const handleUpdate = handleSubmit((values) => {
-    if (!Number.isFinite(eventId)) {
+    console.log(eventId);
+    if (!eventId) {
       Alert.alert("Error", "Missing event id.");
       return;
     }
 
     const resolvedType =
       EVENT_TYPE_TO_BACKEND[
-      values.eventType as keyof typeof EVENT_TYPE_TO_BACKEND
+        values.eventType as keyof typeof EVENT_TYPE_TO_BACKEND
       ];
 
     const payload = {
@@ -255,10 +260,6 @@ export default function EditEventScreen() {
       },
     });
   });
-
-  const handleDelete = () => {
-    Alert.alert("Delete", "Wire this to your delete event flow.");
-  };
 
   return (
     <KeyboardAvoidingView
@@ -293,11 +294,7 @@ export default function EditEventScreen() {
               className="absolute inset-0 z-20 items-center justify-center"
             >
               <View className="flex-row items-center gap-2 rounded-full border border-white/30 bg-white/20 px-5 py-2">
-                <MaterialIcons
-                  name="photo-camera"
-                  size={20}
-                  color="#ffffff"
-                />
+                <MaterialIcons name="photo-camera" size={20} color="#ffffff" />
                 <Text className="text-xs font-bold uppercase tracking-wider text-white">
                   Change Image
                 </Text>
@@ -406,7 +403,6 @@ export default function EditEventScreen() {
                   )}
                 />
               </View>
-
             </View>
             <View className="flex-1">
               <Controller
@@ -492,7 +488,6 @@ export default function EditEventScreen() {
               value={watch("isPublic")}
               onChange={(value) => setValue("isPublic", value)}
             />
-
           </SectionCard>
 
           <View className="mt-2">
@@ -510,26 +505,6 @@ export default function EditEventScreen() {
             >
               <Text className="text-base font-bold text-white">
                 {isUpdating ? "Saving..." : "Save Changes"}
-              </Text>
-            </TouchableOpacity>
-          </View>
-
-          <View className="flex-row items-center justify-between rounded-md border border-red-200 bg-red-50 p-4">
-            <View>
-              <Text className="text-sm font-bold text-red-600">
-                Cancel Event
-              </Text>
-              <Text className="text-[11px] text-red-400">
-                This action cannot be undone.
-              </Text>
-            </View>
-            <TouchableOpacity
-              onPress={handleDelete}
-              className="rounded-md px-4 py-2"
-              activeOpacity={0.8}
-            >
-              <Text className="text-xs font-bold uppercase tracking-widest text-red-600">
-                Delete
               </Text>
             </TouchableOpacity>
           </View>

@@ -15,12 +15,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 const PRIMARY = "#ee2b8c";
 
 /* ---------------- HERO SECTION ---------------- */
-const HeroSection = ({
-  status,
-  imageUrl,
-  startDateTime,
-  location,
-}: any) => (
+const HeroSection = ({ status, imageUrl, startDateTime, location }: any) => (
   <View className="w-full h-80">
     <View className="relative w-full h-full">
       {imageUrl ? (
@@ -161,7 +156,6 @@ const DescriptionCard = ({ description }: { description?: string }) => {
         <Text className="text-base font-bold">Description</Text>
       </View>
 
-       
       <Text className="text-gray-600 text-sm leading-relaxed">
         {description}
       </Text>
@@ -171,19 +165,17 @@ const DescriptionCard = ({ description }: { description?: string }) => {
 
 export default function SubEventDetailScreen() {
   const router = useRouter();
-  const { subEventId, eventId } = useLocalSearchParams<{
+  const { subEventId } = useLocalSearchParams<{
     subEventId: string;
     eventId: string;
   }>();
 
   const parsedId = Number(subEventId);
-  const parsedEventId = Number(eventId);
   const { data: subEvent, isLoading } = useEventById(parsedId);
 
   const handleEditEvent = () => {
-    if (!parsedEventId) return;
     router.push(
-      `/(protected)/(client-stack)/events/${parsedEventId}/(organizer)/edit-event`
+      `/(protected)/(client-stack)/events/${parsedId}/(organizer)/edit-event`
     );
   };
 
@@ -230,7 +222,6 @@ export default function SubEventDetailScreen() {
           onPress={handleEditEvent}
           className="w-10 h-10 rounded-full bg-primary/10 items-center justify-center"
           activeOpacity={0.85}
-          disabled={!parsedEventId}
         >
           <Ionicons name="create-outline" size={18} color={PRIMARY} />
         </TouchableOpacity>
