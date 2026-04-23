@@ -451,18 +451,13 @@ export default function EditEventScreen() {
               />
             </View>
 
-            <View className="rounded-2xl border border-slate-200 bg-white p-4">
-              <View className="flex-row items-center justify-between">
-                <View className="flex-row items-center gap-3">
-                  <View className="h-8 w-8 items-center justify-center rounded-lg bg-[#ee2b8c]/10">
-                    <Ionicons name="time-outline" size={16} color="#ee2b8c" />
-                  </View>
-                  <Text className="text-sm font-semibold text-[#181114]">
-                    RSVP deadline
-                  </Text>
-                </View>
+            <View className="rounded-2xl flex flex-row border border-slate-200 bg-white p-4">
+                  <View>
 
-                <View className="flex-row gap-2">
+                    
+                  </View>
+                  
+               
                   <TouchableOpacity
                     onPress={() => {
                       setRsvpPickerMode("date");
@@ -486,7 +481,7 @@ export default function EditEventScreen() {
                       {formatTime(rsvpDeadline.toISOString())}
                     </Text>
                   </TouchableOpacity>
-                </View>
+               
               </View>
 
               {showRsvpPicker && (
@@ -497,7 +492,7 @@ export default function EditEventScreen() {
                   onChange={handleRsvpDateChange}
                 />
               )}
-            </View>
+         
 
             <View className="flex-row gap-4">
               <View className="flex-1">
