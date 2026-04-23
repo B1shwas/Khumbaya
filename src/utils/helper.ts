@@ -10,6 +10,12 @@ export const calculatePasswordStrength = (pwd: string): PasswordStrength => {
   return "very-strong";
 };
 
+export const parseDate = (value?: string): Date => {
+  if (!value) return new Date();
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? new Date() : parsed;
+};
+
 export const formatDate = (dateValue?: string) => {
   if (!dateValue) return "—";
 
@@ -117,7 +123,7 @@ export const getChecklistDueMeta = (
   };
 };
 
-export  const formatShort = (date: Date) =>
+export const formatShort = (date: Date) =>
   date.toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
@@ -143,7 +149,7 @@ export const getSubEventStatusMeta = (
   switch (normalized) {
     case "ongoing":
       return {
-      label: "Happening now",
+        label: "Happening now",
         badgeClassName: "bg-pink-500 text-white",
         dotClassName:
           "bg-pink-500 text-white ring-1 ring-pink-200 border-2 border-[#f8f6f7]",

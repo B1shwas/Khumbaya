@@ -1,4 +1,3 @@
-import { DatePicker } from "@/components/nativewindui/DatePicker";
 import {
   EVENT_TYPES,
   EVENT_TYPE_TO_BACKEND,
@@ -6,8 +5,11 @@ import {
 } from "@/src/constants/event";
 import { CREATEEVENT } from "@/src/features/events/api/events.service";
 import { useCreateEvent } from "@/src/features/events/hooks/use-event";
+import { formatDate, formatTime } from "@/src/utils/helper";
 import { Ionicons } from "@expo/vector-icons";
-import { DateTimePickerEvent } from "@react-native-community/datetimepicker";
+import DateTimePicker, {
+  DateTimePickerEvent,
+} from "@react-native-community/datetimepicker";
 import { useRouter } from "expo-router";
 
 import { useState } from "react";
@@ -47,45 +49,97 @@ export default function EventCreate() {
   });
 
   const scale = useSharedValue(1);
+  const [showStartPicker, setShowStartPicker] = useState(false);
+  const [showEndPicker, setShowEndPicker] = useState(false);
+  const [pickerMode, setPickerMode] = useState<"date" | "time">("date");
 
-  const handleDateChange = (event: DateTimePickerEvent, pickedDate?: Date) => {
-    if (event.type === "dismissed" || !pickedDate) return;
+  const onStartChange = (event: DateTimePickerEvent, pickedDate?: Date) => {
+    if (event.type === "dismissed") {
+      setShowStartPicker(false);
+      setPickerMode("date");
+      return;
+    }
+
+    if (!pickedDate) return;
+
     const next = new Date(selectedDateTime);
-    next.setFullYear(
-      pickedDate.getFullYear(),
-      pickedDate.getMonth(),
-      pickedDate.getDate()
-    );
-    next.setHours(
-      pickedDate.getHours(),
-      pickedDate.getMinutes(),
-      pickedDate.getSeconds(),
-      0
-    );
-    setSelectedDateTime(next);
-    setFormData((prev) => ({ ...prev, startdateTime: next }));
+    if (pickerMode === "date") {
+      next.setFullYear(
+        pickedDate.getFullYear(),
+        pickedDate.getMonth(),
+        pickedDate.getDate()
+      );
+      setSelectedDateTime(next);
+      setFormData((prev) => ({ ...prev, startdateTime: next }));
+
+      if (Platform.OS === "android") {
+        setShowStartPicker(false);
+        setTimeout(() => {
+          setPickerMode("time");
+          setShowStartPicker(true);
+        }, 0);
+      } else {
+        setPickerMode("time");
+      }
+    } else {
+      next.setHours(
+        pickedDate.getHours(),
+        pickedDate.getMinutes(),
+        pickedDate.getSeconds(),
+        0
+      );
+      setSelectedDateTime(next);
+      setFormData((prev) => ({ ...prev, startdateTime: next }));
+      setShowStartPicker(false);
+      setPickerMode("date");
+    }
   };
 
-  const handleEndDateChange = (
+  const onEndChange = (
     event: DateTimePickerEvent,
     pickedDate?: Date
   ) => {
-    if (event.type === "dismissed" || !pickedDate) return;
+    if (event.type === "dismissed") {
+      setShowEndPicker(false);
+      setPickerMode("date");
+      return;
+    }
+
+    if (!pickedDate) return;
+
     const next = new Date(selectedEndDateTime);
-    next.setFullYear(
-      pickedDate.getFullYear(),
-      pickedDate.getMonth(),
-      pickedDate.getDate()
-    );
-    next.setHours(
-      pickedDate.getHours(),
-      pickedDate.getMinutes(),
-      pickedDate.getSeconds(),
-      0
-    );
-    setEndDateTime(next);
-    setFormData((prev) => ({ ...prev, endDateTime: next }));
+    if (pickerMode === "date") {
+      next.setFullYear(
+        pickedDate.getFullYear(),
+        pickedDate.getMonth(),
+        pickedDate.getDate()
+      );
+      setEndDateTime(next);
+      setFormData((prev) => ({ ...prev, endDateTime: next }));
+
+      if (Platform.OS === "android") {
+        setShowEndPicker(false);
+        setTimeout(() => {
+          setPickerMode("time");
+          setShowEndPicker(true);
+        }, 0);
+      } else {
+        setPickerMode("time");
+      }
+    } else {
+      next.setHours(
+        pickedDate.getHours(),
+        pickedDate.getMinutes(),
+        pickedDate.getSeconds(),
+        0
+      );
+      setEndDateTime(next);
+      setFormData((prev) => ({ ...prev, endDateTime: next }));
+      setShowEndPicker(false);
+      setPickerMode("date");
+    }
   };
+
   const handleSubmit = async () => {
     //validaton in the event creation in this
     if (!formData.name.trim()) {
@@ -95,6 +149,11 @@ export default function EventCreate() {
 
     if (!formData.startdateTime) {
       Alert.alert("Missing event date", "Please select your event date.");
+      return;
+    }
+
+    if (selectedEndDateTime <= selectedDateTime) {
+      Alert.alert("Invalid schedule", "End time must be after start time.");
       return;
     }
 
@@ -234,25 +293,102 @@ export default function EventCreate() {
               })}
             </View>
           </View>
-          <View className="mt-7 mb-7">
-            <DatePicker
-              value={selectedDateTime}
-              mode="datetime"
-              onChange={handleDateChange}
-              materialDateLabel=" start date"
-              materialTimeLabel="start time"
-              materialDateLabelClassName="text-xs"
-            />
-          </View>
-          {/* Toggle Options */}
-          <View>
-            <DatePicker
-              value={selectedEndDateTime}
-              mode="datetime"
-              onChange={handleEndDateChange}
-              materialDateLabel=" End date (optional)"
-              materialTimeLabel="End time (optional)"
-            />
+          <View className="px-4 pt-6">
+            <Text className="font-plusjakartasans-bold text-base text-[#181114] mb-3">
+              Event Schedule
+            </Text>
+
+            <View className="bg-white border border-gray-100 rounded-3xl p-5 shadow-sm">
+              <View className="flex-row items-center justify-between w-full mb-4">
+                <View className="flex-row items-center gap-3">
+                  <View className="w-3 h-3 rounded-full bg-[#ee2b8c]" />
+                  <Text className="font-plusjakartasans-medium text-base text-zinc-700">
+                    Start
+                  </Text>
+                </View>
+
+                <View className="flex-row gap-2">
+                  <TouchableOpacity
+                    onPress={() => {
+                      setPickerMode("date");
+                      setShowStartPicker(true);
+                    }}
+                    className="px-4 py-2 bg-zinc-100 rounded-full"
+                  >
+                    <Text className="font-plusjakartasans-medium text-sm text-zinc-700">
+                      {formatDate(selectedDateTime.toISOString())}
+                    </Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    onPress={() => {
+                      setPickerMode("time");
+                      setShowStartPicker(true);
+                    }}
+                    className="px-4 py-2 bg-zinc-100 rounded-full"
+                  >
+                    <Text className="font-plusjakartasans-medium text-sm text-zinc-700">
+                      {formatTime(selectedDateTime.toISOString())}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+
+              <View className="w-full h-[1px] bg-zinc-100 mb-4" />
+
+              <View className="flex-row items-center justify-between w-full">
+                <View className="flex-row items-center gap-3">
+                  <View className="w-3 h-3 rounded-full border-2 border-[#ee2b8c] bg-white" />
+                  <Text className="font-plusjakartasans-medium text-base text-zinc-700">
+                    End
+                  </Text>
+                </View>
+
+                <View className="flex-row gap-2">
+                  <TouchableOpacity
+                    onPress={() => {
+                      setPickerMode("date");
+                      setShowEndPicker(true);
+                    }}
+                    className="px-4 py-2 bg-zinc-100 rounded-full"
+                  >
+                    <Text className="font-plusjakartasans-medium text-sm text-zinc-700">
+                      {formatDate(selectedEndDateTime.toISOString())}
+                    </Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    onPress={() => {
+                      setPickerMode("time");
+                      setShowEndPicker(true);
+                    }}
+                    className="px-4 py-2 bg-zinc-100 rounded-full"
+                  >
+                    <Text className="font-plusjakartasans-medium text-sm text-zinc-700">
+                      {formatTime(selectedEndDateTime.toISOString())}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+
+            {showStartPicker && (
+              <DateTimePicker
+                value={selectedDateTime}
+                mode={pickerMode}
+                is24Hour={false}
+                onChange={onStartChange}
+              />
+            )}
+
+            {showEndPicker && (
+              <DateTimePicker
+                value={selectedEndDateTime}
+                mode={pickerMode}
+                is24Hour={false}
+                onChange={onEndChange}
+              />
+            )}
           </View>
 
           {/* Bottom spacing for footer */}

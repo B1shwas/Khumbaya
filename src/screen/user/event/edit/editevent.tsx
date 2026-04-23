@@ -1,4 +1,4 @@
-import { DatePicker } from "@/components/nativewindui/DatePicker";
+import { DateTimeRangePicker } from "@/src/components/ui/DateTimeRangePicker";
 import { Text } from "@/src/components/ui/Text";
 import {
   BACKEND_TO_EVENT_TYPE,
@@ -11,24 +11,28 @@ import {
   useUpdateEvent,
 } from "@/src/features/events/hooks/use-event";
 import { useEventStore } from "@/src/features/events/store/useEventStore";
+import { formatDate, formatTime, parseDate } from "@/src/utils/helper";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
-import { DateTimePickerEvent } from "@react-native-community/datetimepicker";
-import { LinearGradient } from "expo-linear-gradient";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect, useMemo } from "react";
+import DateTimePicker, {
+  DateTimePickerEvent,
+} from "@react-native-community/datetimepicker";
+import { Stack, useLocalSearchParams, useRouter } from "expo-router";
+import { useEffect, useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
   Alert,
   Image,
   KeyboardAvoidingView,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
   Platform,
-  Pressable,
   ScrollView,
   Switch,
   TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 type EditEventForm = {
   title: string;
@@ -45,12 +49,8 @@ type EditEventForm = {
   budget: string;
   isPublic: boolean;
 };
+
 //TODO:TYPE mismatch with backend, also some fields are missing, need to confirm with backend team and update accordingly
-const parseDate = (value?: string): Date => {
-  if (!value) return new Date();
-  const parsed = new Date(value);
-  return Number.isNaN(parsed.getTime()) ? new Date() : parsed;
-};
 
 const buildInitialForm = (draft?: Event | null): EditEventForm => {
   const today = new Date();
@@ -84,11 +84,11 @@ type SectionCardProps = {
 
 function SectionCard({ title, icon, children }: SectionCardProps) {
   return (
-    <View className="rounded-md bg-white p-5 shadow-sm border border-slate-100">
+    <View className="rounded-md  p-5 shadow-sm border border-slate-100">
       {title && icon && (
         <View className="mb-4 flex-row items-center gap-2">
           <View className="h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-[#ee2b8c] to-[#ff5ca1]">
-            <Ionicons name={icon} size={18} color="#ffffff" />
+            <Ionicons name={icon} size={18}  />
           </View>
           <Text className="text-lg font-bold text-[#181114]">{title}</Text>
         </View>
@@ -123,9 +123,8 @@ function LabeledField({
         {label}
       </Text>
       <TextInput
-        className={`w-full rounded-md border border-slate-200 bg-white px-4 text-base text-slate-900 ${
-          multiline ? "min-h-[112px] " : "h-14"
-        }`}
+        className={`w-full rounded-md border border-slate-200 bg-white px-4 text-base text-slate-900 ${multiline ? "min-h-[112px] " : "h-14"
+          }`}
         placeholder={placeholder}
         placeholderTextColor="#94a3b8"
         value={value}
@@ -196,29 +195,66 @@ export default function EditEventScreen() {
   const endDateTime = watch("endDateTime");
   const rsvpDeadline = watch("rsvpDeadline");
   const selectedEventType = watch("eventType");
+  const currentTitle = watch("title");
+  const [isTitlePinned, setIsTitlePinned] = useState(false);
+  const [showRsvpPicker, setShowRsvpPicker] = useState(false);
+  const [rsvpPickerMode, setRsvpPickerMode] = useState<"date" | "time">(
+    "date"
+  );
 
-  const handleStartDateChange = (
-    event: DateTimePickerEvent,
-    pickedDate?: Date
-  ) => {
-    if (event.type === "dismissed" || !pickedDate) return;
-    setValue("startDateTime", pickedDate);
-  };
-
-  const handleEndDateChange = (
-    event: DateTimePickerEvent,
-    pickedDate?: Date
-  ) => {
-    if (event.type === "dismissed" || !pickedDate) return;
-    setValue("endDateTime", pickedDate);
+  const handleRangeChange = (range: {
+    startDateTime: Date;
+    endDateTime: Date;
+  }) => {
+    setValue("startDateTime", range.startDateTime, {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
+    setValue("endDateTime", range.endDateTime, {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
   };
 
   const handleRsvpDateChange = (
     event: DateTimePickerEvent,
     pickedDate?: Date
   ) => {
-    if (event.type === "dismissed" || !pickedDate) return;
-    setValue("rsvpDeadline", pickedDate);
+    if (event.type === "dismissed") {
+      setShowRsvpPicker(false);
+      return;
+    }
+
+    if (!pickedDate) return;
+
+    const next = new Date(rsvpDeadline);
+    if (rsvpPickerMode === "date") {
+      next.setFullYear(
+        pickedDate.getFullYear(),
+        pickedDate.getMonth(),
+        pickedDate.getDate()
+      );
+    } else {
+      next.setHours(
+        pickedDate.getHours(),
+        pickedDate.getMinutes(),
+        pickedDate.getSeconds(),
+        0
+      );
+    }
+
+    setValue("rsvpDeadline", next, {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
+    setShowRsvpPicker(false);
+  };
+
+  const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const shouldPinTitle = event.nativeEvent.contentOffset.y > 56;
+    if (shouldPinTitle !== isTitlePinned) {
+      setIsTitlePinned(shouldPinTitle);
+    }
   };
 
   const handleUpdate = handleSubmit((values) => {
@@ -228,9 +264,22 @@ export default function EditEventScreen() {
       return;
     }
 
+    if (values.endDateTime <= values.startDateTime) {
+      Alert.alert("Invalid schedule", "End time must be after start time.");
+      return;
+    }
+
+    if (values.rsvpDeadline > values.startDateTime) {
+      Alert.alert(
+        "Invalid RSVP deadline",
+        "RSVP deadline should be before event start time."
+      );
+      return;
+    }
+
     const resolvedType =
       EVENT_TYPE_TO_BACKEND[
-        values.eventType as keyof typeof EVENT_TYPE_TO_BACKEND
+      values.eventType as keyof typeof EVENT_TYPE_TO_BACKEND
       ];
 
     const payload = {
@@ -262,61 +311,91 @@ export default function EditEventScreen() {
   });
 
   return (
-    <KeyboardAvoidingView
-      className="flex-1"
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-    >
-      <ScrollView
-        className="flex-1 "
-        contentContainerStyle={{ paddingBottom: 32 }}
-        showsVerticalScrollIndicator={false}
-      >
-        <View className="px-4 ">
-          <View className="relative h-24 w-full overflow-hidden rounded-md">
-            <Image
-              source={{
-                uri: "https://lh3.googleusercontent.com/aida-public/AB6AXuBOAnlcfOm-SbS8PZH_0v8eUP911cDeJ61o8WbBJAuIO9sHibeTvP7X8AmuAdoqjRH5H5lxVhH8QPcv3xssrkbNU4ebTPiF95SZrTOI_8iSYf67CtzoUpaJUP1BUw-RPzE1bsPZ6LNFe44iGEPcqpU2aHrZqux1E7HkSrdhWUHIs6U62w8DV_c_vNWmt1lkRU_uygfRbFoGRRRgJ8_l6Qt81nqPp2h4h74elXxwOgHx6Tj8hTriCh50fvjBjuTzs07EBBr6iMa6hRU",
-              }}
-              className="h-full w-full"
-              resizeMode="cover"
-            />
-            {/* Gradient overlay */}
-            <View className="absolute inset-0 overflow-hidden z-10">
-              <LinearGradient
-                colors={["rgba(0,0,0,0.4)", "rgba(0,0,0,0.1)", "transparent"]}
-                start={{ x: 0.5, y: 1 }}
-                end={{ x: 0.5, y: 0 }}
-                style={{ flex: 1 }}
-              />
-            </View>
-            <Pressable
-              onPress={() => Alert.alert("Cover", "Open image picker here.")}
-              className="absolute inset-0 z-20 items-center justify-center"
+    <SafeAreaView className="flex-1 bg-[#f8f6f7]" edges={["top", "bottom"]}>
+      <Stack.Screen
+        options={{
+          headerShown: true,
+          headerTitle: isTitlePinned
+            ? currentTitle?.trim() || "Untitled event"
+            : "Edit event",
+          headerTitleAlign: "center",
+          headerShadowVisible: false,
+          headerStyle: { backgroundColor: "#f8f6f7" },
+          headerTintColor: "#ee2b8c",
+          headerLeft: () => (
+            <TouchableOpacity
+              onPress={() => router.back()}
+              className="flex-row items-center"
+              activeOpacity={0.8}
             >
-              <View className="flex-row items-center gap-2 rounded-full border border-white/30 bg-white/20 px-5 py-2">
-                <MaterialIcons name="photo-camera" size={20} color="#ffffff" />
-                <Text className="text-xs font-bold uppercase tracking-wider text-white">
-                  Change Image
-                </Text>
-              </View>
-            </Pressable>
-          </View>
-        </View>
+              <Ionicons name="chevron-back" size={22} color="#ee2b8c" />
+            </TouchableOpacity>
+          ),
+          headerRight: () => (
+            <TouchableOpacity
+              onPress={handleUpdate}
+              disabled={isUpdating}
+              activeOpacity={0.8}
+              className="px-1"
+            >
+              <Text className="text-sm font-bold text-[#ee2b8c]">
+                {isUpdating ? "Saving..." : "Save"}
+              </Text>
+            </TouchableOpacity>
+          ),
+        }}
+      />
 
-        <View className="mt-6 gap-6 px-4">
-          <SectionCard title="Basic Details" icon="information-circle">
-            <Controller
-              control={control}
-              name="title"
-              render={({ field: { value, onChange } }) => (
-                <LabeledField
-                  label="Event Title"
-                  placeholder="e.g. Aarav & Ishani's Sangeet Night"
-                  value={value}
-                  onChangeText={onChange}
+      <KeyboardAvoidingView
+        className="flex-1"
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+      >
+        <ScrollView
+          className="flex-1 "
+          contentContainerStyle={{ paddingBottom: 32 }}
+          showsVerticalScrollIndicator={false}
+          onScroll={handleScroll}
+          scrollEventThrottle={16}
+        >
+          <View className="bg-[#f8f6f7] px-4 pt-1 pb-2">
+            <View className="flex-row items-center gap-3">
+              <TouchableOpacity
+                onPress={() => Alert.alert("Cover", "Open image picker here.")}
+                className="relative h-14 w-14 overflow-hidden rounded-full border border-slate-200 bg-slate-100"
+                activeOpacity={0.85}
+              >
+                <Image
+                  source={{
+                    uri: "https://lh3.googleusercontent.com/aida-public/AB6AXuBOAnlcfOm-SbS8PZH_0v8eUP911cDeJ61o8WbBJAuIO9sHibeTvP7X8AmuAdoqjRH5H5lxVhH8QPcv3xssrkbNU4ebTPiF95SZrTOI_8iSYf67CtzoUpaJUP1BUw-RPzE1bsPZ6LNFe44iGEPcqpU2aHrZqux1E7HkSrdhWUHIs6U62w8DV_c_vNWmt1lkRU_uygfRbFoGRRRgJ8_l6Qt81nqPp2h4h74elXxwOgHx6Tj8hTriCh50fvjBjuTzs07EBBr6iMa6hRU",
+                  }}
+                  className="h-full w-full"
+                  resizeMode="cover"
                 />
-              )}
-            />
+                <View className="absolute z-30 bottom-0 right-0 h-5 w-5 items-center justify-center rounded-full border border-white bg-[#ee2b8c]">
+                  <MaterialIcons name="photo-camera" size={10} color="#ffffff" />
+                </View>
+              </TouchableOpacity>
+
+              <View className="flex-1">
+                <Controller
+                  control={control}
+                  name="title"
+                  render={({ field: { value, onChange } }) => (
+                    <TextInput
+                      className=" px-0 text-xl font-bold text-[#181114]"
+                      placeholder="Enter event title"
+                      placeholderTextColor="#94a3b8"
+                      value={value}
+                      onChangeText={onChange}
+                    />
+                  )}
+                />
+              </View>
+            </View>
+          </View>
+
+          <View className="mt-4 gap-6 px-4">
+            <SectionCard title="Basic Details" icon="information-circle">
             <View className="gap-2">
               <Text className="text-sm font-semibold tracking-wide text-[#1a1b3a]">
                 Event Type
@@ -357,37 +436,69 @@ export default function EditEventScreen() {
                 />
               )}
             />
-          </SectionCard>
+            </SectionCard>
 
-          <SectionCard title="Time & Logistics" icon="calendar">
-            <View className="mt-2 mb-6">
-              <DatePicker
-                value={startDateTime}
-                mode="datetime"
-                onChange={handleStartDateChange}
-                materialDateLabel="Start date"
-                materialTimeLabel="Start time"
-                materialDateLabelClassName="text-xs"
+            <SectionCard title="Time & Logistics" icon="calendar">
+            <View className="gap-2">
+              <Text className="text-sm font-semibold tracking-wide text-[#1a1b3a]">
+                Event Schedule
+              </Text>
+              <DateTimeRangePicker
+                value={{ startDateTime, endDateTime }}
+                onChange={handleRangeChange}
+                startLabel="Start"
+                endLabel="End"
               />
             </View>
-            <View className="mb-6">
-              <DatePicker
-                value={endDateTime}
-                mode="datetime"
-                onChange={handleEndDateChange}
-                materialDateLabel="End date"
-                materialTimeLabel="End time"
-                materialDateLabelClassName="text-xs"
-              />
+
+            <View className="rounded-2xl border border-slate-200 bg-white p-4">
+              <View className="flex-row items-center justify-between">
+                <View className="flex-row items-center gap-3">
+                  <View className="h-8 w-8 items-center justify-center rounded-lg bg-[#ee2b8c]/10">
+                    <Ionicons name="time-outline" size={16} color="#ee2b8c" />
+                  </View>
+                  <Text className="text-sm font-semibold text-[#181114]">
+                    RSVP deadline
+                  </Text>
+                </View>
+
+                <View className="flex-row gap-2">
+                  <TouchableOpacity
+                    onPress={() => {
+                      setRsvpPickerMode("date");
+                      setShowRsvpPicker(true);
+                    }}
+                    className="rounded-full bg-zinc-100 px-4 py-2"
+                  >
+                    <Text className="text-sm font-medium text-zinc-700">
+                      {formatDate(rsvpDeadline.toISOString())}
+                    </Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    onPress={() => {
+                      setRsvpPickerMode("time");
+                      setShowRsvpPicker(true);
+                    }}
+                    className="rounded-full bg-zinc-100 px-4 py-2"
+                  >
+                    <Text className="text-sm font-medium text-zinc-700">
+                      {formatTime(rsvpDeadline.toISOString())}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+
+              {showRsvpPicker && (
+                <DateTimePicker
+                  value={rsvpDeadline}
+                  mode={rsvpPickerMode}
+                  is24Hour={false}
+                  onChange={handleRsvpDateChange}
+                />
+              )}
             </View>
-            <DatePicker
-              value={rsvpDeadline}
-              mode="datetime"
-              onChange={handleRsvpDateChange}
-              materialDateLabel="RSVP deadline"
-              materialTimeLabel="RSVP time"
-              materialDateLabelClassName="text-xs"
-            />
+
             <View className="flex-row gap-4">
               <View className="flex-1">
                 <Controller
@@ -427,9 +538,9 @@ export default function EditEventScreen() {
                   resizeMode="cover"
                 />
               </View> */}
-          </SectionCard>
+            </SectionCard>
 
-          <SectionCard>
+            <SectionCard>
             <View className="flex-row gap-4">
               <View className="flex-1 gap-4">
                 <Controller
@@ -461,7 +572,7 @@ export default function EditEventScreen() {
                 <Text className="text-sm font-semibold tracking-wide text-[#1a1b3a]">
                   Estimated Budget (INR)
                 </Text>
-                <View className="flex-row items-center rounded-md border border-slate-200 bg-white px-4 h-14">
+                <View className="flex-row items-center rounded-md border border-slate-200  px-4 h-14">
                   <Text className="text-base font-semibold text-slate-400">
                     ₹
                   </Text>
@@ -488,28 +599,11 @@ export default function EditEventScreen() {
               value={watch("isPublic")}
               onChange={(value) => setValue("isPublic", value)}
             />
-          </SectionCard>
+            </SectionCard>
 
-          <View className="mt-2">
-            <TouchableOpacity
-              className="w-full flex-row items-center justify-center rounded-md bg-[#ee2b8c] py-4"
-              style={{
-                shadowColor: "#ee2b8c",
-                shadowOpacity: 0.3,
-                shadowRadius: 12,
-                elevation: 6,
-              }}
-              activeOpacity={0.9}
-              disabled={isUpdating}
-              onPress={handleUpdate}
-            >
-              <Text className="text-base font-bold text-white">
-                {isUpdating ? "Saving..." : "Save Changes"}
-              </Text>
-            </TouchableOpacity>
           </View>
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
