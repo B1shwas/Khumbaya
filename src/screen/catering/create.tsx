@@ -1,290 +1,313 @@
-import { Ionicons, MaterialIcons } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
-import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import { DatePicker } from "@/components/nativewindui/DatePicker";
+import { MaterialIcons } from "@expo/vector-icons";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { Controller, useForm } from "react-hook-form";
 import {
-    KeyboardAvoidingView,
-    Platform,
-    Pressable,
-    ScrollView,
-    StatusBar,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StatusBar,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
+import { Dropdown } from "react-native-element-dropdown";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Text } from "../../components/ui/Text";
-import { cn } from "../../utils/cn";
+import { useCreateCateringMutation } from "../../features/catering";
 import { shadowStyle } from "../../utils/helper";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+// ─── Types & Constants ────────────────────────────────────────────────────────
 
-type MealType = "Breakfast" | "Lunch" | "High Tea" | "Dinner" | "Late Night";
-
-interface MealOption {
-    type: MealType;
-    icon: keyof typeof MaterialIcons.glyphMap;
-    color: string;
+interface CateringFormData {
+  name: string;
+  mealType: string;
+  perPlatePrice: string;
+  startDateTime: Date;
+  endDateTime: Date;
 }
 
-const MEAL_OPTIONS: MealOption[] = [
-    { type: "Breakfast", icon: "breakfast-dining", color: "#f59e0b" },
-    { type: "Lunch", icon: "lunch-dining", color: "#10b981" },
-    { type: "High Tea", icon: "local-cafe", color: "#8b5cf6" },
-    { type: "Dinner", icon: "dinner-dining", color: "#ee2b8c" },
-    { type: "Late Night", icon: "nightlife", color: "#6366f1" },
+const MEAL_TYPE_OPTIONS = [
+  { label: "Breakfast", value: "Breakfast" },
+  { label: "Lunch", value: "Lunch" },
+  { label: "High Tea", value: "High Tea" },
+  { label: "Dinner", value: "Dinner" },
+  { label: "Late Night", value: "Late Night" },
 ];
 
-// ─── Sub-components ────────────────────────────────────────────────────────────
-
-const FormSection = ({ title, children, icon }: { title: string; children: React.ReactNode; icon: keyof typeof Ionicons.glyphMap }) => (
-    <View className="mb-8">
-        <View className="flex-row items-center mb-4 px-1">
-            <View className="w-8 h-8 rounded-md bg-primary/10 items-center justify-center mr-3">
-                <Ionicons name={icon} size={18} color="#ee2b8c" />
-            </View>
-            <Text className="text-lg font-bold text-on-surface tracking-tight">{title}</Text>
-        </View>
-        <View className="bg-white rounded-md p-5 border border-white/40" style={shadowStyle}>
-            {children}
-        </View>
-    </View>
-);
-
-const CustomInput = ({
-    label,
-    placeholder,
-    value,
-    onChangeText,
-    keyboardType = "default",
-    icon
-}: {
-    label: string;
-    placeholder: string;
-    value: string;
-    onChangeText: (text: string) => void;
-    keyboardType?: "default" | "numeric" | "email-address" | "phone-pad";
-    icon?: keyof typeof MaterialIcons.glyphMap;
-}) => (
-    <View className="mb-5 last:mb-0">
-        <Text className="text-[11px] font-bold text-muted-light uppercase tracking-widest mb-2 ml-1">
-            {label}
-        </Text>
-        <View className="flex-row items-center bg-background-light/50 border border-outline-variant/50 rounded-md px-4 py-3.5 focus:border-primary/50">
-            {icon && <MaterialIcons name={icon} size={20} color="#896175" className="mr-3" />}
-            <TextInput
-                placeholder={placeholder}
-                placeholderTextColor="#896175"
-                className="flex-1 text-[16px] font-medium text-on-surface"
-                value={value}
-                onChangeText={onChangeText}
-                keyboardType={keyboardType}
-            />
-        </View>
-    </View>
-);
-
-// ─── Main Screen ───────────────────────────────────────────────────────────────
-
 export default function CreateCateringScreen() {
-    const router = useRouter();
-    const [selectedMeal, setSelectedMeal] = useState<MealType>("Lunch");
-    const [pax, setPax] = useState("");
-    const [title, setTitle] = useState("");
-    const [vendor, setVendor] = useState("");
-    const [notes, setNotes] = useState("");
+  const router = useRouter();
+  const params = useLocalSearchParams();
+  const eventId = parseInt(params.eventId as string, 10);
 
-    const handleSave = () => {
-        // Implement save logic here
-        console.log("Saving catering plan...");
-        router.back();
-    };
+  // Form hook
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<CateringFormData>({
+    defaultValues: {
+      name: "",
+      mealType: "Lunch",
+      perPlatePrice: "",
+      startDateTime: new Date(),
+      endDateTime: new Date(Date.now() + 3600000),
+    },
+  });
 
-    return (
-        <SafeAreaView className="flex-1 bg-background-light" edges={["top", "bottom"]}>
-            <StatusBar barStyle="dark-content" />
-            <KeyboardAvoidingView
-                behavior={Platform.OS === "ios" ? "padding" : "height"}
-                className="flex-1"
-            >
-                <ScrollView
-                    className="flex-1"
-                    showsVerticalScrollIndicator={false}
-                    contentContainerStyle={{ paddingBottom: 40 }}
-                >
-                    {/* Header */}
-                    <LinearGradient
-                        colors={["rgba(238,43,140,0.1)", "transparent"]}
-                        className="px-6 pt-6 pb-12 rounded-b-[40px]"
-                    >
-                        <View className="flex-row items-center justify-between mb-8">
-                            <Pressable
-                                onPress={() => router.back()}
-                                className="w-10 h-10 rounded-full bg-white items-center justify-center "
-                            >
-                                <MaterialIcons name="arrow-back-ios" size={18} color="#ee2b8c" style={{ marginLeft: 6 }} />
-                            </Pressable>
-                            <View className="bg-white/60 px-4 py-2 rounded-full border border-white/40">
-                                <Text className="text-[12px] font-black text-primary uppercase tracking-widest">
-                                    Setup Mode
-                                </Text>
-                            </View>
-                        </View>
+  // API mutation
+  const createCateringMutation = useCreateCateringMutation(eventId);
 
-                        <View>
-                            <Text className="text-3xl font-black text-on-surface tracking-tighter mb-2">
-                                Add Catering
-                            </Text>
-                            <Text className="text-muted-light font-medium text-lg leading-6">
-                                Design a premium culinary experience for your guests.
-                            </Text>
-                        </View>
-                    </LinearGradient>
+  const onSubmit = async (data: CateringFormData) => {
+    try {
+      // Validate dates
+      if (data.endDateTime <= data.startDateTime) {
+        Alert.alert("Error", "End time must be after start time");
+        return;
+      }
 
-                    {/* Form Content */}
-                    <View className="px-6 -mt-8">
+      await createCateringMutation.mutateAsync({
+        name: data.name,
+        per_plate_price: data.perPlatePrice,
+        startDateTime: data.startDateTime.toISOString(),
+        endDateTime: data.endDateTime.toISOString(),
+        meal_type: data.mealType,
+      });
 
-                        {/* Meal Type Selection */}
-                        <View className="mb-8">
-                            <Text className="text-lg font-bold text-on-surface tracking-tight mb-4 px-1">
-                                Meal Selection
-                            </Text>
-                            <ScrollView
-                                horizontal
-                                showsHorizontalScrollIndicator={false}
-                                contentContainerStyle={{ gap: 12, paddingRight: 20 }}
-                                className="py-1"
-                            >
-                                {MEAL_OPTIONS.map((option) => {
-                                    const isSelected = selectedMeal === option.type;
-                                    return (
-                                        <Pressable
-                                            key={option.type}
-                                            onPress={() => setSelectedMeal(option.type)}
-                                            className={cn(
-                                                "items-center justify-center p-4 rounded-[24px] min-w-[90px] border bg-white",
-                                                isSelected ? "bg-primary border-primary" : "bg-white border-outline-variant/30"
-                                            )}
-                                            style={isSelected ? { ...shadowStyle, shadowColor: "#ee2b8c", shadowOpacity: 0.3 } : shadowStyle}
-                                        >
-                                            <View
-                                                className={cn(
-                                                    "w-12 h-12 rounded-md items-center justify-center mb-2",
-                                                    isSelected ? "bg-white/20" : "bg-background-light"
-                                                )}
-                                            >
-                                                <MaterialIcons
-                                                    name={option.icon}
-                                                    size={24}
-                                                    color={isSelected ? "white" : option.color}
-                                                />
-                                            </View>
-                                            <Text
-                                                className={cn(
-                                                    "text-[12px] font-black uppercase tracking-tighter",
-                                                    isSelected ? "text-white" : "text-on-surface-variant"
-                                                )}
-                                            >
-                                                {option.type}
-                                            </Text>
-                                        </Pressable>
-                                    );
-                                })}
-                            </ScrollView>
-                        </View>
+      Alert.alert("Success", "Catering plan created successfully!", [
+        {
+          text: "OK",
+          onPress: () => router.back(),
+        },
+      ]);
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Failed to create catering plan";
+      Alert.alert("Error", errorMessage);
+    }
+  };
 
-                        {/* Event Details */}
-                        <FormSection title="Event Details" icon="calendar-outline">
-                            <CustomInput
-                                label="Plan Title"
-                                placeholder="e.g. Wedding Reception Dinner"
-                                value={title}
-                                onChangeText={setTitle}
-                                icon="title"
+  return (
+    <SafeAreaView
+      className="flex-1 bg-background-light"
+      edges={["top", "bottom"]}
+    >
+      <StatusBar barStyle="dark-content" />
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        className="flex-1"
+      >
+        <ScrollView
+          className="flex-1"
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: 40 }}
+        >
+          {/* Form Content */}
+          <View className="px-6 py-6">
+            {/* Plan Name */}
+            <View className="mb-6">
+              <Text className="text-sm font-bold text-on-surface mb-3">
+                Plan Name
+              </Text>
+              <Controller
+                control={control}
+                name="name"
+                rules={{
+                  required: "Plan name is required",
+                  maxLength: {
+                    value: 255,
+                    message: "Name must be less than 255 characters",
+                  },
+                }}
+                render={({ field: { value, onChange } }) => (
+                  <View>
+                    <TextInput
+                      placeholder="e.g., Wedding Reception Dinner"
+                      placeholderTextColor="#896175"
+                      className="bg-background-light border border-outline-variant/50 rounded-lg px-4 py-3 text-base font-medium text-on-surface"
+                      value={value}
+                      onChangeText={onChange}
+                    />
+                    {errors.name && (
+                      <Text className="text-red-500 text-xs mt-2">
+                        {errors.name.message}
+                      </Text>
+                    )}
+                  </View>
+                )}
+              />
+            </View>
+
+            {/* Meal Type Dropdown */}
+            <View className="mb-6">
+              <Text className="text-sm font-bold text-on-surface mb-3">
+                Meal Type
+              </Text>
+              <Controller
+                control={control}
+                name="mealType"
+                rules={{ required: "Meal type is required" }}
+                render={({ field: { value, onChange } }) => (
+                  <View>
+                    <Dropdown
+                      style={{
+                        height: 50,
+                        borderWidth: 1,
+                        borderColor: "#e5e7eb",
+                        borderRadius: 8,
+                        paddingHorizontal: 16,
+                        backgroundColor: "#fafbfc",
+                      }}
+                      data={MEAL_TYPE_OPTIONS}
+                      labelField="label"
+                      valueField="value"
+                      placeholder="Select meal type"
+                      value={value}
+                      onChange={(item) => onChange(item.value)}
+                      selectedTextStyle={{
+                        color: "#ee2b8c",
+                        fontSize: 16,
+                        fontWeight: "600",
+                      }}
+                      placeholderStyle={{ color: "#896175", fontSize: 16 }}
+                      itemTextStyle={{ color: "#1a1a1a", fontSize: 16 }}
+                      activeColor="#fdf2f8"
+                      renderItem={(item) => (
+                        <View className="flex-row items-center justify-between px-4 py-3">
+                          <Text className="text-base font-medium text-on-surface">
+                            {item.label}
+                          </Text>
+                          {value === item.value && (
+                            <MaterialIcons
+                              name="check"
+                              size={20}
+                              color="#ee2b8c"
                             />
-                            <CustomInput
-                                label="Select Vendor"
-                                placeholder="Search for catering vendors..."
-                                value={vendor}
-                                onChangeText={setVendor}
-                                icon="restaurant"
-                            />
-                        </FormSection>
-
-                        {/* Logistics */}
-                        <FormSection title="Logistics" icon="people-outline">
-                            <CustomInput
-                                label="Guest Count (Pax)"
-                                placeholder="Total number of guests"
-                                value={pax}
-                                onChangeText={setPax}
-                                keyboardType="numeric"
-                                icon="group"
-                            />
-                            <View className="mb-2">
-                                <Text className="text-[11px] font-bold text-muted-light uppercase tracking-widest mb-2 ml-1">
-                                    Timeline
-                                </Text>
-                                <Pressable
-                                    className="flex-row items-center bg-background-light/50 border border-outline-variant/50 rounded-md px-4 py-3.5"
-                                >
-                                    <MaterialIcons name="schedule" size={20} color="#896175" className="mr-3" />
-                                    <Text className="flex-1 text-[16px] font-medium text-muted-light">
-                                        Select Start & End Time
-                                    </Text>
-                                    <MaterialIcons name="arrow-drop-down" size={24} color="#896175" />
-                                </Pressable>
-                            </View>
-                        </FormSection>
-
-                        {/* Menu & Notes */}
-                        <FormSection title="Menu & Notes" icon="document-text-outline">
-                            <View>
-                                <Text className="text-[11px] font-bold text-muted-light uppercase tracking-widest mb-2 ml-1">
-                                    Special Instructions
-                                </Text>
-                                <TextInput
-                                    multiline
-                                    numberOfLines={4}
-                                    placeholder="Dieters, Allergies, or Menu details..."
-                                    placeholderTextColor="#896175"
-                                    className="bg-background-light/50 border border-outline-variant/50 rounded-md px-4 py-4 min-h-[120px] text-[16px] font-medium text-on-surface"
-                                    style={{ textAlignVertical: "top" }}
-                                    value={notes}
-                                    onChangeText={setNotes}
-                                />
-                            </View>
-                        </FormSection>
-
-                        {/* Action Button */}
-                        <TouchableOpacity
-                            onPress={handleSave}
-                            activeOpacity={0.8}
-                            className="mt-4 mb-10 overflow-hidden rounded-md bg-white"
-                            style={{ ...shadowStyle, shadowColor: "#ee2b8c", shadowOpacity: 0.4 }}
-                        >
-                            <LinearGradient
-                                colors={["#ee2b8c", "#d11d73"]}
-                                start={{ x: 0, y: 0 }}
-                                end={{ x: 1, y: 0 }}
-                                className="py-5 items-center flex-row justify-center"
-                            >
-                                <Text className="text-white text-lg font-black tracking-tight mr-2">
-                                    Create Catering Plan
-                                </Text>
-                                <MaterialIcons name="check-circle" size={20} color="white" />
-                            </LinearGradient>
-                        </TouchableOpacity>
-
-                        {/* Footer Tag */}
-                        <View className="items-center pb-8">
-                            <Text className="text-[10px] font-black text-muted-light uppercase tracking-[4px]">
-                                Powered by Khumbaya
-                            </Text>
+                          )}
                         </View>
+                      )}
+                    />
+                    {errors.mealType && (
+                      <Text className="text-red-500 text-xs mt-2">
+                        {errors.mealType.message}
+                      </Text>
+                    )}
+                  </View>
+                )}
+              />
+            </View>
+
+            {/* Per Plate Price */}
+            <View className="mb-6">
+              <Text className="text-sm font-bold text-on-surface mb-3">
+                Per Plate Price
+              </Text>
+              <Controller
+                control={control}
+                name="perPlatePrice"
+                rules={{
+                  required: "Price is required",
+                  pattern: {
+                    value: /^\d+(\.\d{1,2})?$/,
+                    message: "Invalid price format (e.g., 50 or 50.99)",
+                  },
+                }}
+                render={({ field: { value, onChange } }) => (
+                  <View>
+                    <View className="flex-row items-center bg-background-light border border-outline-variant/50 rounded-lg px-4 py-3">
+                      <MaterialIcons
+                        name="attach-money"
+                        size={20}
+                        color="#896175"
+                      />
+                      <TextInput
+                        placeholder="0.00"
+                        placeholderTextColor="#896175"
+                        className="flex-1 ml-2 text-base font-medium text-on-surface"
+                        value={value}
+                        onChangeText={onChange}
+                        keyboardType="decimal-pad"
+                      />
                     </View>
-                </ScrollView>
-            </KeyboardAvoidingView>
-        </SafeAreaView>
-    );
+                    {errors.perPlatePrice && (
+                      <Text className="text-red-500 text-xs mt-2">
+                        {errors.perPlatePrice.message}
+                      </Text>
+                    )}
+                  </View>
+                )}
+              />
+            </View>
+
+            {/* Start Date & Time */}
+            <View className="mb-6">
+              <Text className="text-sm font-bold text-on-surface mb-3">
+                Start Date & Time
+              </Text>
+              <Controller
+                control={control}
+                name="startDateTime"
+                rules={{ required: "Start date is required" }}
+                render={({ field: { value, onChange } }) => (
+                  <DatePicker
+                    value={value}
+                    mode="datetime"
+                    onChange={(_event, date) => {
+                      if (date) onChange(date);
+                    }}
+                    materialDateLabel="Start Date"
+                    materialTimeLabel="Start Time"
+                  />
+                )}
+              />
+            </View>
+
+            {/* End Date & Time */}
+            <View className="mb-6">
+              <Text className="text-sm font-bold text-on-surface mb-3">
+                End Date & Time
+              </Text>
+              <Controller
+                control={control}
+                name="endDateTime"
+                rules={{ required: "End date is required" }}
+                render={({ field: { value, onChange } }) => (
+                  <DatePicker
+                    value={value}
+                    mode="datetime"
+                    onChange={(_event, date) => {
+                      if (date) onChange(date);
+                    }}
+                    materialDateLabel="End Date"
+                    materialTimeLabel="End Time"
+                  />
+                )}
+              />
+            </View>
+
+            {/* Submit Button */}
+            <TouchableOpacity
+              onPress={handleSubmit(onSubmit)}
+              disabled={createCateringMutation.isPending}
+              activeOpacity={0.8}
+              className="mt-8 rounded-lg bg-primary py-4 items-center justify-center overflow-hidden"
+              style={shadowStyle}
+            >
+              {createCateringMutation.isPending ? (
+                <ActivityIndicator color="white" size="small" />
+              ) : (
+                <Text className="text-white text-base font-black tracking-tight">
+                  Create Catering Plan
+                </Text>
+              )}
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
+  );
 }

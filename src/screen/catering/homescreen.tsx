@@ -1,226 +1,115 @@
 import { Text } from "@/src/components/ui/Text";
 import { MaterialIcons } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
-import { useRouter, useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
 import {
-  Pressable,
+  ActivityIndicator,
+  RefreshControl,
   ScrollView,
   StatusBar,
   TouchableOpacity,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { cn } from "../../utils/cn";
+import type { CateringColumn } from "../../features/catering";
+import { useCateringList } from "../../features/catering";
 import { shadowStyle } from "../../utils/helper";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-interface DateItem {
-  day: string;
-  date: number;
-  disabled?: boolean;
-}
-
-interface Event {
-  id: string;
-  time: string;
-  title: string;
-  vendor: string;
-  vendorIcon: keyof typeof MaterialIcons.glyphMap;
-  pax: string;
-  isActive?: boolean;
-  isCompleted?: boolean;
-}
-
-// ─── Data ─────────────────────────────────────────────────────────────────────
-
-const DATES: DateItem[] = [
-  { day: "Sat", date: 24 },
-  { day: "Sun", date: 25 },
-  { day: "Mon", date: 26 },
-  { day: "Tue", date: 27 },
-  { day: "Wed", date: 28 },
-  { day: "Thu", date: 29, disabled: true },
-];
-
-const EVENTS: Event[] = [
-  {
-    id: "1",
-    time: "08:30 – 09:30 AM",
-    title: "Executive Breakfast Briefing",
-    vendor: "Luminary Pastries",
-    vendorIcon: "business-center",
-    pax: "50 Pax",
-  },
-  {
-    id: "2",
-    time: "12:15 – 02:00 PM",
-    title: "Board of Directors Luncheon",
-    vendor: "Atelier Culinary",
-    vendorIcon: "restaurant",
-    pax: "15 Pax",
-  },
-  {
-    id: "3",
-    time: "07:00 – 10:00 PM",
-    title: "Annual Gala Reception",
-    vendor: "Velvet Signature",
-    vendorIcon: "local-bar",
-    pax: "250 Pax",
-    isActive: true,
-  },
-  {
-    id: "4",
-    time: "10:30 PM – 01:00 AM",
-    title: "Post-Gala Breakdown & Clean",
-    vendor: "Elite Staffing",
-    vendorIcon: "cleaning-services",
-    pax: "12 Staff",
-    isCompleted: true,
-  },
-];
-
-// ─── Sub-components ────────────────────────────────────────────────────────────
-
-const DateChip = ({
-  item,
-  isSelected,
+const CateringCard = ({
+  catering,
   onPress,
 }: {
-  item: DateItem;
-  isSelected: boolean;
+  catering: CateringColumn;
   onPress: () => void;
-}) => (
-  <Pressable
-    onPress={onPress}
-    disabled={item.disabled}
-    className={cn(
-      "flex flex-col items-center justify-center min-w-[60px] py-3 px-2 rounded-md mr-2.5 mb-2",
-      isSelected ? "bg-primary" : "bg-white",
-      item.disabled ? "opacity-30" : "opacity-100"
-    )}
-    style={!isSelected ? shadowStyle : { elevation: 4, shadowColor: "#ee2b8c", shadowOpacity: 0.2, shadowRadius: 4, shadowOffset: { width: 0, height: 2 } }}
-  >
-    <Text
-      className={cn(
-        "text-[10px] font-bold uppercase tracking-widest mb-0.5",
-        isSelected ? "text-white/80" : "text-muted-light"
-      )}
-    >
-      {item.day}
-    </Text>
-    <Text
-      className={cn(
-        "text-lg font-black",
-        isSelected ? "text-white" : "text-on-surface"
-      )}
-    >
-      {item.date}
-    </Text>
-  </Pressable>
-);
+}) => {
+  const startTime = new Date(catering.startDateTime).toLocaleTimeString(
+    "en-US",
+    {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    }
+  );
+  const endTime = new Date(catering.endDateTime).toLocaleTimeString("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  });
 
-const EventCard = ({ event }: { event: Event }) => {
-  if (event.isActive) {
-    return (
-      <TouchableOpacity
-        activeOpacity={0.9}
-        className="mb-4 rounded-xl overflow-hidden"
-        style={shadowStyle}
-      >
-        <LinearGradient
-          colors={["#ee2b8c", "#d11d73"]}
-          className="p-4"
-        >
-          <View className="flex-row justify-between items-center mb-3">
-            <View className="bg-white/20 px-2.5 py-1 rounded-lg">
-              <Text className="text-[11px] font-bold text-white">{event.time}</Text>
-            </View>
-            <View className="flex-row items-center bg-white/30 px-2 py-0.5 rounded-md">
-              <View className="w-1.5 h-1.5 rounded-full bg-white mr-1.5" />
-              <Text className="text-[10px] font-black text-white uppercase tracking-tighter">Live</Text>
-            </View>
-          </View>
+  const getMealIcon = (
+    mealType: string
+  ): keyof typeof MaterialIcons.glyphMap => {
+    const mealIconMap: Record<string, keyof typeof MaterialIcons.glyphMap> = {
+      Breakfast: "breakfast-dining",
+      Lunch: "lunch-dining",
+      "High Tea": "local-cafe",
+      Dinner: "dinner-dining",
+      "Late Night": "nightlife",
+    };
+    return mealIconMap[mealType] || "restaurant";
+  };
 
-          <Text className="text-lg font-bold text-white mb-3 leading-6">
-            {event.title}
-          </Text>
-
-          <View className="flex-row items-center justify-between border-t border-white/10 pt-3">
-            <View className="flex-row items-center gap-4">
-              <View className="flex-row items-center gap-1.5">
-                <MaterialIcons name={event.vendorIcon} size={14} color="rgba(255,255,255,0.8)" />
-                <Text className="text-[12px] font-medium text-white/90">
-                  {event.vendor}
-                </Text>
-              </View>
-              <View className="flex-row items-center gap-1.5">
-                <MaterialIcons name="group" size={14} color="rgba(255,255,255,0.8)" />
-                <Text className="text-[12px] font-bold text-white">
-                  {event.pax}
-                </Text>
-              </View>
-            </View>
-            <MaterialIcons name="arrow-forward-ios" size={14} color="white" />
-          </View>
-        </LinearGradient>
-      </TouchableOpacity>
-    );
-  }
+  const getMealColor = (mealType: string): string => {
+    const mealColorMap: Record<string, string> = {
+      Breakfast: "#f59e0b",
+      Lunch: "#10b981",
+      "High Tea": "#8b5cf6",
+      Dinner: "#ee2b8c",
+      "Late Night": "#6366f1",
+    };
+    return mealColorMap[mealType] || "#896175";
+  };
 
   return (
     <TouchableOpacity
-      className={cn(
-        "bg-white rounded-xl p-4 mb-4 border border-outline-variant/30",
-        event.isCompleted ? "opacity-60" : "opacity-100"
-      )}
+      onPress={onPress}
+      className="bg-white rounded-xl p-4 mb-4 border border-outline-variant/30"
       activeOpacity={0.7}
       style={shadowStyle}
     >
       <View className="flex-row justify-between items-center mb-3">
         <View className="bg-surface-container-high px-2.5 py-1 rounded-lg">
           <Text className="text-[11px] font-bold text-on-surface-variant">
-            {event.time}
+            {startTime} – {endTime}
           </Text>
         </View>
-        {event.isCompleted && (
+        {catering.vendorId && (
           <View className="flex-row items-center gap-1 px-2 py-0.5 bg-green-50 rounded-md">
             <MaterialIcons name="check" size={12} color="#15803d" />
-            <Text className="text-[10px] font-black text-green-700 uppercase">Success</Text>
+            <Text className="text-[10px] font-black text-green-700 uppercase">
+              Assigned
+            </Text>
           </View>
         )}
       </View>
 
-      <Text
-        className={cn(
-          "text-[16px] font-bold mb-3",
-          event.isCompleted ? "text-on-surface-variant line-through opacity-70" : "text-on-surface"
-        )}
-      >
-        {event.title}
+      <Text className="text-[16px] font-bold mb-3 text-on-surface">
+        {catering.name}
       </Text>
 
       <View className="flex-row items-center justify-between border-t border-outline-variant/30 pt-3">
-        <View className="flex-row items-center gap-4">
+        <View className="flex-row items-center gap-4 flex-1">
           <View className="flex-row items-center gap-1.5">
-            <MaterialIcons
-              name={event.vendorIcon}
-              size={14}
-              color="#896175"
-            />
+            <View
+              className="w-6 h-6 rounded-md items-center justify-center"
+              style={{
+                backgroundColor: getMealColor(catering.meal_type) + "20",
+              }}
+            >
+              <MaterialIcons
+                name={getMealIcon(catering.meal_type)}
+                size={14}
+                color={getMealColor(catering.meal_type)}
+              />
+            </View>
             <Text className="text-[12px] font-medium text-muted-light">
-              {event.vendor}
+              {catering.meal_type}
             </Text>
           </View>
           <View className="flex-row items-center gap-1.5">
-            <MaterialIcons
-              name="group"
-              size={14}
-              color="#896175"
-            />
-            <Text className="text-[12px] font-medium text-muted-light">
-              {event.pax}
+            <MaterialIcons name="attach-money" size={14} color="#896175" />
+            <Text className="text-[12px] font-bold text-on-surface">
+              ${catering.per_plate_price}/plate
             </Text>
           </View>
         </View>
@@ -230,103 +119,175 @@ const EventCard = ({ event }: { event: Event }) => {
   );
 };
 
-// ─── Main Screen ───────────────────────────────────────────────────────────────
-
-export default function MealScheduleScreen() {
+export default function CateringListScreen() {
   const router = useRouter();
   const { eventId } = useLocalSearchParams();
-  const [selectedDate, setSelectedDate] = useState(2); // Mon 26 (index)
-  const addClick = () => {
-    router.push(`/(protected)/(client-stack)/events/${eventId}/(organizer)/add-catering`);
+
+  const [page, setPage] = useState(1);
+
+  const {
+    data: cateringData,
+    isLoading,
+    error,
+    refetch,
+  } = useCateringList(page, 10, Number(eventId), {
+    enabled: !!Number(eventId),
+  });
+
+  const handleAddClick = () => {
+    router.push(
+      `/(protected)/(client-stack)/events/${eventId}/(organizer)/catering/add`
+    );
+  };
+
+  const handleCateringPress = (cateringId: number) => {
+    router.push(
+      `/(protected)/(client-stack)/events/${eventId}/(organizer)/catering/${cateringId}`
+    );
+  };
+
+  if (isLoading && !cateringData) {
+    return (
+      <SafeAreaView className="flex-1 bg-background-light items-center justify-center">
+        <ActivityIndicator size="large" color="#ee2b8c" />
+      </SafeAreaView>
+    );
   }
+
+  if (error) {
+    return (
+      <SafeAreaView className="flex-1 bg-background-light px-4 items-center justify-center">
+        <MaterialIcons name="error" size={48} color="#ee2b8c" />
+        <Text className="text-center text-on-surface font-bold text-lg mt-4">
+          Failed to load catering
+        </Text>
+        <TouchableOpacity
+          onPress={() => refetch()}
+          className="mt-4 px-6 py-3 bg-primary rounded-md"
+        >
+          <Text className="text-white font-bold">Retry</Text>
+        </TouchableOpacity>
+      </SafeAreaView>
+    );
+  }
+
   return (
-    <SafeAreaView className="flex-1 bg-background-light" edges={["top", "bottom"]}>
+    <SafeAreaView
+      className="flex-1 bg-background-light"
+      edges={["top", "bottom"]}
+    >
       <StatusBar barStyle="dark-content" />
 
       <ScrollView
         className="flex-1"
-        stickyHeaderIndices={[0]}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={isLoading}
+            onRefresh={() => refetch()}
+            tintColor="#ee2b8c"
+          />
+        }
       >
-        {/* ── Sticky Top Navigation Bar ── */}
-        <View className="bg-background-light px-4 py-2 border-b border-outline-variant/30 shadow-sm">
-          <View className="flex-row items-center justify-between h-14 w-full">
-            {/* Left: Back Button */}
-            <Pressable
-              onPress={() => router.back()}
-            >
-              <MaterialIcons name="arrow-back-ios" size={18} color="#ee2b8c" style={{ marginLeft: 6 }} />
-            </Pressable>
-
-            {/* Center: Title (Absolute) */}
-            <View
-              className="absolute left-0 right-0 items-center justify-center pointer-events-none -z-10"
-              style={{ paddingBottom: 2 }} // Optical adjustment
-            >
-              <Text className="text-xl text-on-surface tracking-tighter font-black text-center">
-                Catering
-              </Text>
-            </View>
-
-            {/* Right: Add Button */}
-            <Pressable
-              className="flex-row items-center bg-primary px-4 py-2.5 rounded-md gap-2"
-              style={{ ...shadowStyle, shadowColor: "#ee2b8c", shadowOpacity: 0.3 }}
-              onPress={addClick}
-            >
-              <Text className="text-white font-black text-[15px] tracking-tight">Add</Text>
-              <MaterialIcons name="add" size={20} color="white" />
-            </Pressable>
-          </View>
-        </View>
-
-        {/* ── Date Selection Strip ── */}
-        <View className="px-4 py-4 border-b border-outline-variant/30 gap-4">
-          <View className="px-4">
-            <Pressable
-              className="flex flex-row gap-4 items-center justify-center h-[50px] rounded-md bg-white border border-outline-variant/60"
-              style={shadowStyle}
-            >
-              <MaterialIcons name="calendar-today" size={18} color="#ee2b8c" />
-              <Text className="text-on-surface-variant text-md font-bold">Select Date</Text>
-            </Pressable>
-          </View>
-
-          <View className="flex-row items-center">
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{ paddingRight: 20, marginLeft: 10 }}
-            >
-              {DATES.map((item, index) => (
-                <DateChip
-                  key={item.date}
-                  item={item}
-                  isSelected={selectedDate === index}
-                  onPress={() => !item.disabled && setSelectedDate(index)}
-                />
-              ))}
-            </ScrollView>
-          </View>
-        </View>
-
-        {/* ── Event List Content ── */}
-        <View className="px-4 pt-6">
-          {/* Section Header */}
-
-
-          {/* Event Cards */}
-          {EVENTS.map((event) => (
-            <EventCard key={event.id} event={event} />
-          ))}
-
-          {/* Subtle Footer */}
-          <View className="items-center py-10">
-            <View className="w-12 h-1.5 rounded-full bg-outline-variant/50 mb-4" />
-            <Text className="text-[11px] font-black text-muted-light uppercase tracking-[4px] text-center">
-              Khumbaya Management
+        {/* ── Content ── */}
+        <View className="px-4 pt-6 pb-10">
+          {/* Section Header with Item Count */}
+          <View className="flex-row items-center justify-between mb-4">
+            <Text className="text-[14px] font-bold text-muted-light uppercase tracking-widest">
+              Upcoming Plans
             </Text>
+            {cateringData?.items && (
+              <View className="bg-primary/10 px-2.5 py-1 rounded-full">
+                <Text className="text-[12px] font-bold text-primary">
+                  {cateringData.items.length} Plans
+                </Text>
+              </View>
+            )}
           </View>
+
+          {/* Catering Cards */}
+          {cateringData?.items && cateringData.items.length > 0 ? (
+            cateringData.items.map((catering) => (
+              <CateringCard
+                key={catering.id}
+                catering={catering}
+                onPress={() => handleCateringPress(catering.id)}
+              />
+            ))
+          ) : (
+            <View className="items-center justify-center py-12">
+              <MaterialIcons
+                name="event-note"
+                size={48}
+                color="#896175"
+                style={{ opacity: 0.3 }}
+              />
+              <Text className="text-center text-muted-light font-medium mt-4 text-lg">
+                No catering plans yet
+              </Text>
+              <Text className="text-center text-muted-light text-sm mt-2">
+                Add your first catering plan to get started
+              </Text>
+              <TouchableOpacity
+                onPress={handleAddClick}
+                className="mt-6 bg-primary px-6 py-3 rounded-md"
+                style={shadowStyle}
+              >
+                <Text className="text-white font-bold">Create First Plan</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+
+          {/* Pagination (if applicable) */}
+          {cateringData && cateringData.totalPages > 1 && (
+            <View className="flex-row items-center justify-center gap-4 my-6">
+              <TouchableOpacity
+                onPress={() => setPage(Math.max(1, page - 1))}
+                disabled={page === 1}
+                className={`px-4 py-2 rounded-md ${
+                  page === 1
+                    ? "bg-surface-container opacity-50"
+                    : "bg-surface-container"
+                }`}
+              >
+                <Text
+                  className={
+                    page === 1
+                      ? "text-muted-light font-bold"
+                      : "text-on-surface font-bold"
+                  }
+                >
+                  Previous
+                </Text>
+              </TouchableOpacity>
+
+              <Text className="text-sm font-bold text-muted-light">
+                {page} / {cateringData.totalPages}
+              </Text>
+
+              <TouchableOpacity
+                onPress={() =>
+                  setPage(Math.min(cateringData.totalPages, page + 1))
+                }
+                disabled={page === cateringData.totalPages}
+                className={`px-4 py-2 rounded-md ${
+                  page === cateringData.totalPages
+                    ? "bg-surface-container opacity-50"
+                    : "bg-surface-container"
+                }`}
+              >
+                <Text
+                  className={
+                    page === cateringData.totalPages
+                      ? "text-muted-light font-bold"
+                      : "text-on-surface font-bold"
+                  }
+                >
+                  Next
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
       </ScrollView>
     </SafeAreaView>
