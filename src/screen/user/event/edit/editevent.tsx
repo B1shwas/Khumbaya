@@ -1,6 +1,7 @@
 import { DatePicker } from "@/components/nativewindui/DatePicker";
 import { Text } from "@/src/components/ui/Text";
 import {
+  BACKEND_TO_EVENT_TYPE,
   EVENT_TYPES,
   EVENT_TYPE_TO_BACKEND,
   type Event,
@@ -54,9 +55,7 @@ const parseDate = (value?: string): Date => {
 const buildInitialForm = (draft?: Event | null): EditEventForm => {
   const today = new Date();
   const normalizedType = draft?.type
-    ? (EVENT_TYPE_TO_BACKEND[
-        draft.type as keyof typeof EVENT_TYPE_TO_BACKEND
-      ] ?? draft.type)
+    ? (BACKEND_TO_EVENT_TYPE[draft.type] ?? draft.type)
     : "";
   return {
     title: draft?.title ?? "",
@@ -65,7 +64,7 @@ const buildInitialForm = (draft?: Event | null): EditEventForm => {
     description: draft?.description ?? "",
     startDateTime: parseDate(draft?.startDateTime) ?? today,
     endDateTime: parseDate(draft?.endDateTime) ?? today,
-    rsvpDeadline: today,
+    rsvpDeadline: parseDate(draft?.rsvpDeadline) ?? today,
     city: draft?.location ?? "",
     venue: draft?.venue ?? "",
     theme: draft?.theme ?? "",
@@ -244,6 +243,7 @@ export default function EditEventScreen() {
       dressCode: values.dressCode || undefined,
       theme: values.theme.trim() || undefined,
       budget: values.budget ? Number(values.budget) : undefined,
+      rsvpDeadline: values.rsvpDeadline.toISOString(),
     };
 
     updateEvent(payload as any, {

@@ -13,6 +13,7 @@ export interface CREATEEVENT {
   location?: string;
   role?: string;
   imageUrl?: string;
+  rsvpDeadline?: string;
 }
 export interface MakeEventMemberType {
   userId: number;
@@ -36,6 +37,7 @@ export interface EVENT {
   updatedAt?: string;
   imageUrl?: string;
   eventMembershipId?: number;
+  rsvpDeadline?: string;
 }
 
 interface InvitationRecord {

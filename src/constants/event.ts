@@ -20,6 +20,7 @@ export interface Event {
   organizer?: number;
   createdAt?: string; //cmt out if neces
   updatedAt?: string; //cmt out if neces
+  rsvpDeadline?: string;
 }
 
 // SubEvent extends Event since backend handles both event and subevent as one
@@ -53,4 +54,12 @@ export const EVENT_TYPE_TO_BACKEND: Record<EventType, string> = {
   Reception: "RECEPTION",
   Nikkah: "NIKKAH",
   Other: "OTHER",
+};
+
+export const BACKEND_TO_EVENT_TYPE: Record<string, EventType> = {
+  WEDDING: "Wedding",
+  ENGAGEMENT: "Engagement",
+  RECEPTION: "Reception",
+  NIKKAH: "Nikkah",
+  OTHER: "Other",
 };
