@@ -105,7 +105,7 @@ export const useGetGuestRoom = (eventId: number | null) => {
   });
 };
 
-export const useUpdateGuestCheckIn = () => {
+export const useUpdateGuestCheckIn = (p0: number) => {
   const queryClient = useQueryClient();
 
   return useMutation({

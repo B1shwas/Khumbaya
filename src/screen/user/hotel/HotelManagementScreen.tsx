@@ -33,6 +33,8 @@ type GuestSection = {
   title: string;
   data: Hotel_responce[];
   roomKey: string | null;
+  guestCount: number;
+  checkedIn: boolean;
 };
 
 function getInitials(name: string): string {
@@ -109,14 +111,17 @@ function GuestRowItem({
       {/* Check‑in button */}
       <TouchableOpacity
         onPress={() => onToggleCheckIn?.(guest)}
-        className={`ml-2 px-3 py-1.5 rounded-full ${
+        className={`ml-2 px-3 py-1.5 rounded-full flex-row items-center justify-center ${
           guest.checked_in ? "bg-green-100" : "bg-gray-100"
         }`}
       >
+        {guest.checked_in && (
+          <Ionicons name="checkmark-circle" size={14} color="#047857" />
+        )}
         <Text
           className={`text-xs font-jakarta-semibold ${
             guest.checked_in ? "text-green-700" : "text-gray-500"
-          }`}
+          } ${guest.checked_in ? "ml-1" : ""}`}
         >
           {guest.checked_in ? "Checked In" : "Check In"}
         </Text>
@@ -303,15 +308,28 @@ export default function HotelManagementScreen() {
   }, [guestsByRoom]);
 
   const sections: GuestSection[] = useMemo(() => {
-    const roomSections = sortedRooms.map((room) => ({
-      title: `Room ${room}`,
-      data: expandedRooms.has(room) ? guestsByRoom.get(room) || [] : [],
-      roomKey: room,
-    }));
+    const roomSections = sortedRooms.map((room) => {
+      const roomGuests = guestsByRoom.get(room) || [];
+      return {
+        title: `Room ${room}`,
+        data: expandedRooms.has(room) ? roomGuests : [],
+        roomKey: room,
+        guestCount: roomGuests.length,
+        checkedIn: roomGuests.some((g) => g.checked_in === true),
+      };
+    });
 
     const unassignedSection =
       unassignedGuests.length > 0
-        ? [{ title: "Not Assigned", data: unassignedGuests, roomKey: null }]
+        ? [
+            {
+              title: "Not Assigned",
+              data: unassignedGuests,
+              roomKey: null,
+              guestCount: unassignedGuests.length,
+              checkedIn: unassignedGuests.some((g) => g.checked_in === true),
+            },
+          ]
         : [];
 
     return [...roomSections, ...unassignedSection];
@@ -434,13 +452,9 @@ export default function HotelManagementScreen() {
           renderSectionHeader={({ section }) => {
             const isRoom = section.roomKey !== null;
             const roomNumber = section.roomKey;
-            const guestsInRoom = isRoom
-              ? guestsByRoom.get(roomNumber as string) || []
-              : [];
 
             // Room check‑in status: true if ANY guest has checked_in === true
-            const isRoomCheckedIn =
-              isRoom && guestsInRoom.some((g) => g.checked_in === true);
+            const isRoomCheckedIn = isRoom && section.checkedIn;
 
             return (
               <TouchableOpacity
@@ -450,7 +464,7 @@ export default function HotelManagementScreen() {
               >
                 <View className="flex-row items-center gap-2">
                   <Text className="font-jakarta-bold text-sm text-gray-700">
-                    {section.title} ({section.data.length})
+                    {section.title} ({section.guestCount})
                   </Text>
                   {isRoom && (
                     <View className="flex-row items-center gap-1">
