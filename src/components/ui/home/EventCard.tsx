@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router, type RelativePathString } from "expo-router";
 import React, { useCallback } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Text, View } from "react-native";
 import ImageCard from "./ImageCard";
 
 interface EventCardProps {
@@ -26,64 +26,27 @@ const EventCard = React.memo(
         imageUrl={imageUrl}
         onPress={handlePress}
         badge={
-          <View style={styles.dateBadge}>
-            <Text style={styles.dateText}>{date}</Text>
+          <View className="absolute top-3 right-3 px-2 py-1 rounded-md bg-white/90">
+            <Text className="text-xs font-bold text-gray-900">{date}</Text>
           </View>
         }
       >
-        <Text style={styles.title} numberOfLines={1}>
+        <Text className="text-base font-bold text-gray-900 mb-2" numberOfLines={1}>
           {title}
         </Text>
-        <View style={styles.metaRow}>
-          <View style={styles.metaItem}>
+        <View className="flex-row items-center gap-4">
+          <View className="flex-row items-center gap-1">
             <Ionicons name="time" size={14} color="#896175" />
-            <Text style={styles.metaText}>{time}</Text>
+            <Text className="text-xs text-gray-500">{time}</Text>
           </View>
-          <View style={styles.metaItem}>
+          <View className="flex-row items-center gap-1">
             <Ionicons name="location" size={14} color="#896175" />
-            <Text style={styles.metaText}>{location}</Text>
+            <Text className="text-xs text-gray-500">{location}</Text>
           </View>
         </View>
       </ImageCard>
     );
   }
 );
-
-const styles = StyleSheet.create({
-  dateBadge: {
-    position: "absolute",
-    top: 12,
-    right: 12,
-    backgroundColor: "rgba(255, 255, 255, 0.9)",
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
-  },
-  dateText: {
-    fontSize: 12,
-    fontWeight: "700",
-    color: "#1f2937",
-  },
-  title: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#1f2937",
-    marginBottom: 8,
-  },
-  metaRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 16,
-  },
-  metaItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-  },
-  metaText: {
-    fontSize: 12,
-    color: "#6b7280",
-  },
-});
 
 export default EventCard;

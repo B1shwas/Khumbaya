@@ -211,6 +211,54 @@ export default function MenuManagementScreen() {
         </TouchableOpacity>
       </View>
 
+      <Text
+        className={cn(
+          "text-[16px] font-bold mb-3",
+          event.isCompleted ? "text-on-surface-variant line-through opacity-70" : "text-on-surface"
+        )}
+      >
+        {event.title}
+      </Text>
+
+      <View className="flex-row items-center justify-between border-t border-outline-variant/30 pt-3">
+        <View className="flex-row items-center gap-4">
+          <View className="flex-row items-center gap-1.5">
+            <MaterialIcons
+              name={event.vendorIcon}
+              size={14}
+              color="#896175"
+            />
+            <Text className="text-[12px] font-medium text-muted-light">
+              {event.vendor}
+            </Text>
+          </View>
+          <View className="flex-row items-center gap-1.5">
+            <MaterialIcons
+              name="group"
+              size={14}
+              color="#896175"
+            />
+            <Text className="text-[12px] font-medium text-muted-light">
+              {event.pax}
+            </Text>
+          </View>
+        </View>
+        <MaterialIcons name="chevron-right" size={18} color="#896175" />
+      </View>
+    </TouchableOpacity>
+  );
+};
+
+// ─── Main Screen ───────────────────────────────────────────────────────────────
+
+export default function MealScheduleScreen() {
+  const router = useRouter();
+  const [selectedDate, setSelectedDate] = useState(2); // Mon 26 (index)
+
+  return (
+    <SafeAreaView className="flex-1 bg-background-light" edges={["top", "bottom"]}>
+      <StatusBar barStyle="dark-content" />
+
       <ScrollView
         className="flex-1"
         contentContainerStyle={{
@@ -237,16 +285,15 @@ export default function MenuManagementScreen() {
             </Text>
           </View>
 
-          <Text className="text-[28px] font-extrabold tracking-tight text-[#181114] leading-tight">
-            Morning Culinary Experience
-          </Text>
-
-          <Text className="text-[#594048] font-medium text-[15px]">
-            Provided by{" "}
-            <Text className="font-bold text-[#ee2b8c]">
-              Luminary Pastries & Coffee
-            </Text>
-          </Text>
+            {/* Right: Add Button */}
+            <Pressable
+              className="flex-row items-center bg-primary px-4 py-2.5 rounded-md gap-2"
+              style={{ ...shadowStyle, shadowColor: "#ee2b8c", shadowOpacity: 0.3 }}
+            >
+              <Text className="text-white font-black text-[15px] tracking-tight">Add</Text>
+              <MaterialIcons name="add" size={20} color="white" />
+            </Pressable>
+          </View>
         </View>
 
         <View

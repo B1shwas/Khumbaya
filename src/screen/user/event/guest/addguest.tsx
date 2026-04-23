@@ -11,6 +11,8 @@ import {
 } from "@/src/features/guests/api/use-guests";
 import { useFindUserWithPhone } from "@/src/features/user/api/use-user";
 import { User } from "@/src/store/AuthStore";
+
+import { shadowStyle } from "@/src/utils/helper";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -68,7 +70,7 @@ const AddGuestScreen = () => {
   const [newCategoryPriority, setNewCategoryPriority] =
     useState<CategoryPriority>(1);
 
-  const eventId =Number(params.eventId);
+  const eventId = Number(params.eventId);
 
   const {
     data: guestCategories = [],
@@ -82,7 +84,7 @@ const AddGuestScreen = () => {
         invitation_name: "",
         phone: "",
         category: "",
-      
+
       },
     });
 
@@ -152,8 +154,8 @@ const AddGuestScreen = () => {
       Alert.alert(
         "Error",
         maybeResponse.response?.data?.message ||
-          maybeResponse.message ||
-          "Failed to find user with this phone number."
+        maybeResponse.message ||
+        "Failed to find user with this phone number."
       );
     }
   }, [isFindUserError, findUserError]);
@@ -185,16 +187,15 @@ const AddGuestScreen = () => {
       if (!isSearchComplete) {
         Alert.alert(
           "Please wait",
-          `Wait for phone lookup to finish before ${
-            isDraft ? "saving draft" : "sending invitation"
+          `Wait for phone lookup to finish before ${isDraft ? "saving draft" : "sending invitation"
           }.`
         );
         setActiveSubmitAction(null);
         return;
       }
 
-      const resolvedName = foundUser?.username || values.fullName.trim() ||values.phone.trim() || values.invitation_name.trim()  ;
-   
+      const resolvedName = foundUser?.username || values.fullName.trim() || values.phone.trim() || values.invitation_name.trim();
+
       if (!resolvedName) {
         Alert.alert(
           "Error",
@@ -208,9 +209,9 @@ const AddGuestScreen = () => {
         await inviteGuestMutation.mutateAsync({
           eventId,
           payload: {
-            invitation_name:  values.invitation_name.trim() || resolvedName || currentPhone,
+            invitation_name: values.invitation_name.trim() || resolvedName || currentPhone,
             phone: fullGuestPhone,
-            fullName: values.fullName.trim() ?? resolvedName ,
+            fullName: values.fullName.trim() ?? resolvedName,
             isDraft,
             isFamily: inviteWithFamily,
             role: "Guest",
@@ -723,35 +724,34 @@ const AddGuestScreen = () => {
               )
             ) : (
               <>
+
                 <Pressable
                   className="flex-1 flex-row items-center justify-center rounded-md border border-[#ee2b8c] bg-white py-4"
-                  style={{ gap: 8 }}
-                  disabled={isFindingUser || !phoneDigits}
-                  onPress={handleSubmit(onValidDraftSubmit, onInvalidSubmit)}
-                >
-                  <Text className="text-base font-bold text-[#ee2b8c]">
-                    Save Draft
-                  </Text>
-                  <MaterialIcons name="drafts" size={18} color="#ee2b8c" />
-                </Pressable>
-
-                {/* <Pressable
-                  className="flex-1 flex-row items-center justify-center rounded-md bg-[#ee2b8c] py-4"
                   style={{
                     gap: 8,
-                    shadowColor: "#ee2b8c",
-                    shadowOpacity: 0.3,
-                    shadowRadius: 12,
-                    elevation: 6,
+                    ...shadowStyle
                   }}
                   disabled={isFindingUser || !phoneDigits}
                   onPress={handleSubmit(onValidSubmit, onInvalidSubmit)}
                 >
-                  <Text className="text-base font-bold text-white">
+                  <Text className="text-base font-bold text-primary">
                     Send Invitation
                   </Text>
-                  <MaterialIcons name="send" size={18} color="#fff" />
-                </Pressable> */}
+                  <MaterialIcons name="send" size={18} color="#ee2b8c" />
+                </Pressable>
+
+                <Pressable
+                  className="flex-1 flex-row items-center justify-center rounded-md bg-[#ee2b8c] py-4"
+                  style={{ gap: 8, ...shadowStyle }}
+                  disabled={isFindingUser || !phoneDigits}
+                  onPress={handleSubmit(onValidDraftSubmit, onInvalidSubmit)}
+                >
+                  <Text className="text-base font-bold text-white">
+                    Save Draft
+                  </Text>
+                  <MaterialIcons name="drafts" size={18} color="white" />
+                </Pressable>
+
               </>
             )}
           </View>

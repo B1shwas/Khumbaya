@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
-import { Alert, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Alert, Image, Text, TouchableOpacity, View } from "react-native";
 
 interface ImageUploadProps {
   value?: string;
@@ -64,18 +64,9 @@ export default function ImageUpload({
       "Select Image",
       "Choose an option",
       [
-        {
-          text: "Take Photo",
-          onPress: takePhoto,
-        },
-        {
-          text: "Choose from Library",
-          onPress: pickImage,
-        },
-        {
-          text: "Cancel",
-          style: "cancel",
-        },
+        { text: "Take Photo", onPress: takePhoto },
+        { text: "Choose from Library", onPress: pickImage },
+        { text: "Cancel", style: "cancel" },
       ],
       { cancelable: true }
     );
@@ -84,106 +75,50 @@ export default function ImageUpload({
   const removeImage = () => {
     Alert.alert("Remove Image", "Are you sure you want to remove this image?", [
       { text: "Cancel", style: "cancel" },
-      {
-        text: "Remove",
-        style: "destructive",
-        onPress: () => onChange(""),
-      },
+      { text: "Remove", style: "destructive", onPress: () => onChange("") },
     ]);
   };
 
   return (
-    <View style={styles.container}>
-      {label && <Text style={styles.label}>{label}</Text>}
+    <View className="mb-4">
+      {label && (
+        <Text className="text-sm font-medium text-gray-700 mb-2">{label}</Text>
+      )}
 
       <TouchableOpacity
-        style={[styles.uploadButton, error && styles.uploadButtonError]}
+        className={`border-2 border-dashed rounded-xl overflow-hidden ${
+          error ? "border-red-300" : "border-gray-200"
+        }`}
         onPress={value ? removeImage : showOptions}
       >
         {value ? (
-          <View style={styles.imageContainer}>
-            <Image source={{ uri: value }} style={styles.image} />
-            <View style={styles.imageOverlay}>
+          <View className="relative">
+            <Image
+              source={{ uri: value }}
+              className="w-full h-48"
+              resizeMode="cover"
+            />
+            <View className="absolute bottom-0 left-0 right-0 bg-black/50 p-2 items-center">
               <Ionicons name="camera" size={20} color="white" />
-              <Text style={styles.changeText}>Tap to change</Text>
+              <Text className="text-white text-xs mt-0.5">Tap to change</Text>
             </View>
           </View>
         ) : (
-          <View style={styles.placeholder}>
+          <View className="items-center justify-center p-6 bg-gray-50">
             <Ionicons name="camera-outline" size={32} color="#9CA3AF" />
-            <Text style={styles.placeholderText}>{placeholder}</Text>
-            {hint && <Text style={styles.hintText}>{hint}</Text>}
+            <Text className="mt-2 text-sm text-gray-500 font-medium">
+              {placeholder}
+            </Text>
+            {hint && (
+              <Text className="mt-1 text-xs text-gray-400">{hint}</Text>
+            )}
           </View>
         )}
       </TouchableOpacity>
 
-      {error && <Text style={styles.errorText}>{error}</Text>}
+      {error && (
+        <Text className="mt-1 text-xs text-red-500">{error}</Text>
+      )}
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    marginBottom: 16,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: "500",
-    color: "#374151",
-    marginBottom: 8,
-  },
-  uploadButton: {
-    borderWidth: 2,
-    borderColor: "#E5E7EB",
-    borderStyle: "dashed",
-    borderRadius: 12,
-    overflow: "hidden",
-  },
-  uploadButtonError: {
-    borderColor: "#FCA5A5",
-  },
-  placeholder: {
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 24,
-    backgroundColor: "#F9FAFB",
-  },
-  placeholderText: {
-    marginTop: 8,
-    fontSize: 14,
-    color: "#6B7280",
-    fontWeight: "500",
-  },
-  hintText: {
-    marginTop: 4,
-    fontSize: 12,
-    color: "#9CA3AF",
-  },
-  imageContainer: {
-    position: "relative",
-  },
-  image: {
-    width: "100%",
-    height: 200,
-    resizeMode: "cover",
-  },
-  imageOverlay: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    padding: 8,
-    alignItems: "center",
-  },
-  changeText: {
-    color: "white",
-    fontSize: 12,
-    marginTop: 2,
-  },
-  errorText: {
-    marginTop: 4,
-    fontSize: 12,
-    color: "#EF4444",
-  },
-});

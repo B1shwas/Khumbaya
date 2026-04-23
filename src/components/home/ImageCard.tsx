@@ -1,6 +1,5 @@
 import React, { useCallback } from "react";
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { router } from "expo-router";
+import { Image, TouchableOpacity, View } from "react-native";
 
 interface ImageCardProps {
   imageUrl: string;
@@ -21,49 +20,22 @@ const ImageCard = React.memo(
     return (
       <TouchableOpacity
         testID={testID}
-        style={styles.card}
+        className="w-72 bg-white rounded-xl overflow-hidden mr-4 shadow-sm"
         onPress={handlePress}
         activeOpacity={0.8}
       >
-        <View style={styles.imageContainer}>
+        <View className="h-36 w-full relative">
           <Image
             source={{ uri: imageUrl }}
-            style={styles.image}
+            className="w-full h-full"
             resizeMode="cover"
           />
           {badge}
         </View>
-        <View style={styles.content}>{children}</View>
+        <View className="p-4">{children}</View>
       </TouchableOpacity>
     );
   }
 );
-
-const styles = StyleSheet.create({
-  card: {
-    width: 280,
-    backgroundColor: "white",
-    borderRadius: 12,
-    overflow: "hidden",
-    marginRight: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  imageContainer: {
-    height: 144,
-    width: "100%",
-    position: "relative",
-  },
-  image: {
-    width: "100%",
-    height: "100%",
-  },
-  content: {
-    padding: 16,
-  },
-});
 
 export default ImageCard;

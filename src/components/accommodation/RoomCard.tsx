@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
 import { Room, getRoomTypeIcon, isRoomFull } from "../../types/accommodation";
 
 interface RoomCardProps {
@@ -39,15 +39,13 @@ export const RoomCard: React.FC<RoomCardProps> = ({
 
   return (
     <TouchableOpacity
-      style={[
-        styles.card,
-        isSelected && styles.cardSelected,
-        isFull && styles.cardFull,
-      ]}
+      className={`bg-white rounded-2xl p-4 flex-row items-center mb-3 border-2 shadow-sm ${
+        isSelected ? "border-emerald-500 bg-emerald-50" : "border-transparent"
+      } ${isFull ? "opacity-60" : ""}`}
       onPress={() => onSelect(room.id)}
       activeOpacity={0.8}
     >
-      <View style={styles.iconContainer}>
+      <View className="w-14 h-14 rounded-xl bg-pink-100 items-center justify-center mr-3">
         <Ionicons
           name={getRoomTypeIcon(room.type) as any}
           size={32}
@@ -55,69 +53,76 @@ export const RoomCard: React.FC<RoomCardProps> = ({
         />
       </View>
 
-      <View style={styles.info}>
-        <Text style={[styles.name, isFull && styles.textMuted]}>
+      <View className="flex-1">
+        <Text
+          className={`text-base font-bold mb-0.5 ${
+            isFull ? "text-gray-400" : "text-gray-900"
+          }`}
+        >
           {room.name}
         </Text>
-        <Text style={[styles.type, isFull && styles.textMuted]}>
+        <Text
+          className={`text-xs mb-2 ${isFull ? "text-gray-400" : "text-gray-500"}`}
+        >
           {room.type.charAt(0).toUpperCase() + room.type.slice(1)} • Up to{" "}
           {room.capacity} guests
         </Text>
 
-        <View style={styles.amenitiesContainer}>
+        <View className="flex-row flex-wrap gap-1 mb-2">
           {room.amenities.slice(0, 3).map((amenity, index) => (
-            <View key={index} style={styles.amenityBadge}>
-              <Text style={styles.amenityText}>{amenity}</Text>
+            <View key={index} className="bg-gray-100 px-2 py-0.5 rounded">
+              <Text className="text-[10px] text-gray-500">{amenity}</Text>
             </View>
           ))}
           {room.amenities.length > 3 && (
-            <Text style={styles.moreAmenities}>
+            <Text className="text-[10px] text-gray-400 self-center">
               +{room.amenities.length - 3}
             </Text>
           )}
         </View>
 
-        <View style={styles.bottomRow}>
-          <View style={styles.occupancyContainer}>
-            <View style={styles.occupancyBar}>
+        <View className="flex-row items-center justify-between">
+          <View className="flex-row items-center gap-2 flex-1">
+            <View className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
               <View
-                style={[
-                  styles.occupancyFill,
-                  {
-                    width: `${occupancyPercent}%`,
-                    backgroundColor: getOccupancyColor(),
-                  },
-                ]}
+                className="h-full rounded-full"
+                style={{
+                  width: `${occupancyPercent}%`,
+                  backgroundColor: getOccupancyColor(),
+                }}
               />
             </View>
             <Text
-              style={[styles.occupancyText, { color: getOccupancyColor() }]}
+              className="text-xs font-semibold min-w-[45px] text-right"
+              style={{ color: getOccupancyColor() }}
             >
               {room.available} / {room.capacity}
             </Text>
           </View>
 
-          <Text style={styles.price}>
+          <Text className="text-base font-bold text-primary ml-2">
             ${room.pricePerNight}
-            <Text style={styles.priceUnit}>/night</Text>
+            <Text className="text-xs font-normal text-gray-400">/night</Text>
           </Text>
         </View>
 
-        {/* Assigned Guests/Family Section */}
         {assignedGuests.length > 0 && (
-          <View style={styles.assignedGuestsContainer}>
-            <Text style={styles.assignedGuestsTitle}>
+          <View className="mt-3 pt-3 border-t border-gray-200">
+            <Text className="text-xs font-semibold text-gray-500 mb-2">
               {onAssignMember ? "Assigned Members:" : "Assigned Guests:"}
             </Text>
-            <View style={styles.guestChips}>
+            <View className="flex-row flex-wrap gap-1.5">
               {assignedGuests.map((guestId) => (
-                <View key={guestId} style={styles.guestChip}>
-                  <Text style={styles.guestChipText}>
+                <View
+                  key={guestId}
+                  className="flex-row items-center gap-1 bg-pink-100 px-2.5 py-1 rounded-xl"
+                >
+                  <Text className="text-xs text-pink-900">
                     {getMemberName
                       ? getMemberName(guestId)
                       : getGuestName
-                        ? getGuestName(guestId)
-                        : `Guest ${guestId}`}
+                      ? getGuestName(guestId)
+                      : `Guest ${guestId}`}
                   </Text>
                   {(onRemoveMember || onRemoveGuest) && (
                     <TouchableOpacity
@@ -139,10 +144,9 @@ export const RoomCard: React.FC<RoomCardProps> = ({
           </View>
         )}
 
-        {/* Add Guest/Member Button */}
         {(onAssignGuest || onAssignMember) && !isFull && (
           <TouchableOpacity
-            style={styles.addGuestButton}
+            className="flex-row items-center justify-center gap-1.5 mt-3 py-2 rounded-lg border border-dashed border-primary"
             onPress={() => {
               if (onAssignMember) {
                 onAssignMember(room.id);
@@ -152,17 +156,17 @@ export const RoomCard: React.FC<RoomCardProps> = ({
             }}
           >
             <Ionicons name="person-add" size={16} color="#ee2b8c" />
-            <Text style={styles.addGuestText}>
+            <Text className="text-xs font-semibold text-primary">
               {onAssignMember ? "Assign Member" : "Assign Guest"}
             </Text>
           </TouchableOpacity>
         )}
       </View>
 
-      <View style={styles.statusContainer}>
+      <View className="ml-2">
         {isFull ? (
-          <View style={styles.statusFull}>
-            <Text style={styles.statusText}>FULL</Text>
+          <View className="bg-red-100 px-2 py-1 rounded-md">
+            <Text className="text-[10px] font-bold text-red-500">FULL</Text>
           </View>
         ) : (
           <Ionicons
@@ -175,175 +179,3 @@ export const RoomCard: React.FC<RoomCardProps> = ({
     </TouchableOpacity>
   );
 };
-
-const styles = StyleSheet.create({
-  card: {
-    backgroundColor: "white",
-    borderRadius: 16,
-    padding: 16,
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 12,
-    borderWidth: 2,
-    borderColor: "transparent",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  cardSelected: {
-    borderColor: "#10B981",
-    backgroundColor: "#F0FDF4",
-  },
-  cardFull: {
-    opacity: 0.6,
-  },
-  iconContainer: {
-    width: 56,
-    height: 56,
-    borderRadius: 12,
-    backgroundColor: "#FCE7F3",
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 12,
-  },
-  info: {
-    flex: 1,
-  },
-  name: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#1f2937",
-    marginBottom: 2,
-  },
-  type: {
-    fontSize: 12,
-    color: "#6b7280",
-    marginBottom: 8,
-  },
-  textMuted: {
-    color: "#9CA3AF",
-  },
-  amenitiesContainer: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 4,
-    marginBottom: 8,
-  },
-  amenityBadge: {
-    backgroundColor: "#f3f4f6",
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 4,
-  },
-  amenityText: {
-    fontSize: 10,
-    color: "#6b7280",
-  },
-  moreAmenities: {
-    fontSize: 10,
-    color: "#9CA3AF",
-    alignSelf: "center",
-  },
-  bottomRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  occupancyContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    flex: 1,
-  },
-  occupancyBar: {
-    flex: 1,
-    height: 6,
-    backgroundColor: "#f3f4f6",
-    borderRadius: 3,
-    overflow: "hidden",
-  },
-  occupancyFill: {
-    height: "100%",
-    borderRadius: 3,
-  },
-  occupancyText: {
-    fontSize: 12,
-    fontWeight: "600",
-    minWidth: 45,
-    textAlign: "right",
-  },
-  price: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#ee2b8c",
-  },
-  priceUnit: {
-    fontSize: 12,
-    fontWeight: "400",
-    color: "#9CA3AF",
-  },
-  statusContainer: {
-    marginLeft: 8,
-  },
-  statusFull: {
-    backgroundColor: "#FEE2E2",
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
-  },
-  statusText: {
-    fontSize: 10,
-    fontWeight: "700",
-    color: "#EF4444",
-  },
-  // Guest assignment styles
-  assignedGuestsContainer: {
-    marginTop: 12,
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: "#E5E7EB",
-  },
-  assignedGuestsTitle: {
-    fontSize: 12,
-    fontWeight: "600",
-    color: "#6b7280",
-    marginBottom: 8,
-  },
-  guestChips: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 6,
-  },
-  guestChip: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    backgroundColor: "#FCE7F3",
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  guestChipText: {
-    fontSize: 12,
-    color: "#831843",
-  },
-  addGuestButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 6,
-    marginTop: 12,
-    paddingVertical: 8,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: "#ee2b8c",
-    borderStyle: "dashed",
-  },
-  addGuestText: {
-    fontSize: 12,
-    fontWeight: "600",
-    color: "#ee2b8c",
-  },
-});
