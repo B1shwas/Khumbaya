@@ -75,7 +75,7 @@ export default function OrganizerEventDetailLayout() {
       <Stack.Screen name="vendor" options={{ title: "Vendors" }} />{" "}
       <Stack.Screen name="(subevent)" options={{ headerShown: false }} />
       <Stack.Screen name="tasklist" options={{ headerShown: false }} />
-      <Stack.Screen name="edit-event" options={{ title: "Event Details" }} />
+      <Stack.Screen name="edit-event" options={{ headerShown:false }}/>
       <Stack.Screen name="(logistics)" options={{ headerShown: false }} />
       <Stack.Screen name="add-catering" options={{ headerShown: false }} />
       <Stack.Screen

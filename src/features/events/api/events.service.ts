@@ -230,6 +230,8 @@ export interface RsvpResponsePayload {
   arrival_info?: string | null;
   departure_info?: string | null;
   role?: string;
+  hasCheckedIn?: boolean;
+  hasCheckedOut?: boolean;
   category?: string;
   status?: string;
   familyId?: number;

@@ -8,7 +8,7 @@ interface BusinessDraftStore {
 }
 
 export const useBusinessDraftStore = create<BusinessDraftStore>((set) => ({
-  business: null,
+business: null,
   setBusiness: (business) => set({ business }),
   clearBusiness: () => set({ business: null }),
 }));
