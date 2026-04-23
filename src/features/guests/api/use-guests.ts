@@ -10,6 +10,7 @@ import {
   removeInvitation,
   type GuestCategoryOption,
   type InviteGuestPayload,
+  updateGuestCheckIn,
 } from "./service";
 
 export const useGetEventGuests = (eventId: number | null) => {
@@ -28,9 +29,7 @@ export const useGetInvitationsForEvent = (eventId: number | null) => {
   });
 };
 
-export const useGetEventGuestCategories = (
-  eventId: number | null
-) => {
+export const useGetEventGuestCategories = (eventId: number | null) => {
   return useQuery<GuestCategoryOption[]>({
     queryKey: ["event-guest-categories", eventId],
     queryFn: () => getEventGuestCategories(eventId!),
@@ -98,10 +97,55 @@ export const useRemoveInvitation = () => {
   });
 };
 
-export const useGetGuestRoom = (eventId: number | null  ) => {
+export const useGetGuestRoom = (eventId: number | null) => {
   return useQuery({
     queryKey: ["event-guest-room", eventId],
     queryFn: () => getGuestRoom(eventId!),
     enabled: !!eventId,
+  });
+};
+
+export const useUpdateGuestCheckIn = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      invitationId,
+      action,
+    }: {
+      invitationId: number;
+      action: "checkIn" | "checkOut";
+    }) => updateGuestCheckIn({ invitationId, action }),
+    onMutate: async ({ invitationId, action }) => {
+      await queryClient.cancelQueries({
+        queryKey: ["event-guest-room"],
+      });
+
+      const previousGuests = queryClient.getQueryData<any[]>([
+        "event-guest-room",
+      ]);
+
+      queryClient.setQueryData<any[]>(
+        ["event-guest-room"],
+        (old) =>
+          old?.map((g: any) =>
+            g.invitationId === invitationId
+              ? { ...g, checked_in: action === "checkIn" }
+              : g
+          ) ?? []
+      );
+
+      return { previousGuests };
+    },
+    onError: (_err, _variables, context) => {
+      if (context?.previousGuests) {
+        queryClient.setQueryData(["event-guest-room"], context.previousGuests);
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["event-guest-room"],
+      });
+    },
   });
 };

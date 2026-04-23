@@ -68,10 +68,10 @@ export const getInvitation = async (eventId: number) => {
   const response = await api.get(`/event/${eventId}/invitation`);
   return response.data.data;
 };
-export const getGuestRoom = async(eventId:number)=>{
+export const getGuestRoom = async (eventId: number) => {
   const responce = await api.get(`event/${eventId}/hotel-management`);
-  return responce.data.data?? responce.data;
-}
+  return responce.data.data ?? responce.data;
+};
 export const removeInvitation = async (eventId: number, guestId: number) => {
   const response = await api.delete(`/event/${eventId}/invitation`, {
     data: { userId: guestId },
@@ -79,6 +79,15 @@ export const removeInvitation = async (eventId: number, guestId: number) => {
   return response.data.data;
 };
 
-
-
-
+export const updateGuestCheckIn = async ({
+  invitationId,
+  action,
+}: {
+  invitationId: number;
+  action: "checkIn" | "checkOut";
+}) => {
+  const response = await api.patch(`/invitation/${invitationId}/check-status`, {
+    action,
+  });
+  return response.data;
+};

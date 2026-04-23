@@ -1,5 +1,8 @@
 import { useSubmitRsvpResponse } from "@/src/features/events/hooks/use-event";
-import { useGetGuestRoom } from "@/src/features/guests/api/use-guests";
+import {
+  useGetGuestRoom,
+  useUpdateGuestCheckIn,
+} from "@/src/features/guests/api/use-guests";
 import { User } from "@/src/store/AuthStore";
 import { shadowStyle } from "@/src/utils/helper";
 import { Ionicons } from "@expo/vector-icons";
@@ -18,14 +21,18 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export interface Hotel_responce {
+  id: number;
   user_detail: User | null;
   user_room: string | null;
   category: string | null;
+  checked_in: boolean;
+  invitationId?: number;
 }
 
 type GuestSection = {
   title: string;
   data: Hotel_responce[];
+  roomKey: string | null;
 };
 
 function getInitials(name: string): string {
@@ -40,9 +47,11 @@ function getInitials(name: string): string {
 function GuestRowItem({
   guest,
   onAssignRoom,
+  onToggleCheckIn,
 }: {
   guest: Hotel_responce;
   onAssignRoom?: (guest: Hotel_responce) => void;
+  onToggleCheckIn?: (guest: Hotel_responce) => void;
 }) {
   const username = guest.user_detail?.username || "Unknown Guest";
   const room = guest.user_room?.trim();
@@ -96,6 +105,22 @@ function GuestRowItem({
           )}
         </View>
       </View>
+
+      {/* Check‑in button */}
+      <TouchableOpacity
+        onPress={() => onToggleCheckIn?.(guest)}
+        className={`ml-2 px-3 py-1.5 rounded-full ${
+          guest.checked_in ? "bg-green-100" : "bg-gray-100"
+        }`}
+      >
+        <Text
+          className={`text-xs font-jakarta-semibold ${
+            guest.checked_in ? "text-green-700" : "text-gray-500"
+          }`}
+        >
+          {guest.checked_in ? "Checked In" : "Check In"}
+        </Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -104,9 +129,9 @@ export default function HotelManagementScreen() {
   const { eventId } = useLocalSearchParams<{ eventId: string }>();
   const numericEventId = eventId ? Number(eventId) : null;
 
-  const { mutate: submitRsvpResponse, isPending } = useSubmitRsvpResponse(
-    Number(eventId)
-  );
+  const { mutate: submitRsvpResponse } = useSubmitRsvpResponse(Number(eventId));
+
+  const { mutate: updateCheckIn } = useUpdateGuestCheckIn(numericEventId!);
 
   const [searchText, setSearchText] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
@@ -116,6 +141,47 @@ export default function HotelManagementScreen() {
     guest: Hotel_responce | null;
   }>({ visible: false, guest: null });
   const [newRoom, setNewRoom] = useState("");
+  const [expandedRooms, setExpandedRooms] = useState<Set<string>>(new Set());
+
+  const toggleRoom = (room: string | null) => {
+    if (!room) return;
+    setExpandedRooms((prev) => {
+      const next = new Set(prev);
+      if (next.has(room)) next.delete(room);
+      else next.add(room);
+      return next;
+    });
+  };
+
+  const handleToggleCheckIn = (guest: Hotel_responce) => {
+    const invitationId = getInvitationIdFromGuest(guest);
+
+    if (!invitationId) {
+      console.warn("Cannot toggle check-in: invitationId is undefined", guest);
+      return;
+    }
+
+    const action = guest.checked_in ? "checkOut" : "checkIn";
+
+    updateCheckIn({
+      invitationId,
+      action,
+    });
+  };
+
+  const getInvitationIdFromGuest = (guest: any): number | undefined => {
+    // Handle both old API response (with invitationId) and new API response (with id)
+    if (
+      typeof guest.invitationId !== "undefined" &&
+      guest.invitationId !== null
+    ) {
+      return guest.invitationId;
+    }
+    // Fallback to id field if invitationId is not present
+    return typeof guest.id !== "undefined" && guest.id !== null
+      ? guest.id
+      : undefined;
+  };
 
   const {
     data: guestRooms = [],
@@ -126,7 +192,10 @@ export default function HotelManagementScreen() {
 
   const normalizedGuests = useMemo(() => {
     return Array.isArray(guestRooms)
-      ? (guestRooms.filter(Boolean) as Hotel_responce[])
+      ? (guestRooms.filter(Boolean) as any[]).map((guest) => ({
+          ...guest,
+          checked_in: guest.checked_in ?? guest.hasCheckedIn ?? false,
+        }))
       : [];
   }, [guestRooms]);
 
@@ -209,34 +278,44 @@ export default function HotelManagementScreen() {
   );
 
   // Group assigned guests by room number
-  const guestsByRoom = new Map<string, Hotel_responce[]>();
-  for (const guest of assignedGuests) {
-    const room = guest.user_room?.trim() || "Unassigned";
-    if (!guestsByRoom.has(room)) {
-      guestsByRoom.set(room, []);
+  const guestsByRoom = useMemo(() => {
+    const map = new Map<string, Hotel_responce[]>();
+    for (const guest of assignedGuests) {
+      const room = guest.user_room?.trim() || "Unassigned";
+      if (!map.has(room)) {
+        map.set(room, []);
+      }
+      map.get(room)!.push(guest);
     }
-    guestsByRoom.get(room)!.push(guest);
-  }
+    return map;
+  }, [assignedGuests]);
 
   // Sort rooms naturally (handle numeric and alphanumeric room numbers)
-  const sortedRooms = Array.from(guestsByRoom.keys()).sort((a, b) => {
-    const numA = parseInt(a, 10);
-    const numB = parseInt(b, 10);
-    if (!isNaN(numA) && !isNaN(numB)) {
-      return numA - numB;
-    }
-    return a.localeCompare(b);
-  });
+  const sortedRooms = useMemo(() => {
+    return Array.from(guestsByRoom.keys()).sort((a, b) => {
+      const numA = parseInt(a, 10);
+      const numB = parseInt(b, 10);
+      if (!isNaN(numA) && !isNaN(numB)) {
+        return numA - numB;
+      }
+      return a.localeCompare(b);
+    });
+  }, [guestsByRoom]);
 
-  const sections: GuestSection[] = [
-    ...sortedRooms.map((room) => ({
+  const sections: GuestSection[] = useMemo(() => {
+    const roomSections = sortedRooms.map((room) => ({
       title: `Room ${room}`,
-      data: guestsByRoom.get(room)!,
-    })),
-    ...(unassignedGuests.length > 0
-      ? [{ title: "Not Assigned", data: unassignedGuests }]
-      : []),
-  ];
+      data: expandedRooms.has(room) ? guestsByRoom.get(room) || [] : [],
+      roomKey: room,
+    }));
+
+    const unassignedSection =
+      unassignedGuests.length > 0
+        ? [{ title: "Not Assigned", data: unassignedGuests, roomKey: null }]
+        : [];
+
+    return [...roomSections, ...unassignedSection];
+  }, [sortedRooms, guestsByRoom, expandedRooms, unassignedGuests]);
 
   const totalGuests = normalizedGuests.length;
   const totalAssigned = normalizedGuests.filter((g) => !!g.user_room).length;
@@ -349,15 +428,72 @@ export default function HotelManagementScreen() {
                 setRoomAssignmentModal({ visible: true, guest });
                 setNewRoom("");
               }}
+              onToggleCheckIn={handleToggleCheckIn}
             />
           )}
-          renderSectionHeader={({ section }) => (
-            <View className="pt-1 pb-2">
-              <Text className="font-jakarta-bold text-sm text-gray-700">
-                {section.title} ({section.data.length})
-              </Text>
-            </View>
-          )}
+          renderSectionHeader={({ section }) => {
+            const isRoom = section.roomKey !== null;
+            const roomNumber = section.roomKey;
+            const guestsInRoom = isRoom
+              ? guestsByRoom.get(roomNumber as string) || []
+              : [];
+
+            // Room check‑in status: true if ANY guest has checked_in === true
+            const isRoomCheckedIn =
+              isRoom && guestsInRoom.some((g) => g.checked_in === true);
+
+            return (
+              <TouchableOpacity
+                onPress={() => isRoom && toggleRoom(roomNumber as string)}
+                className="flex-row items-center justify-between pt-1 pb-2"
+                activeOpacity={0.7}
+              >
+                <View className="flex-row items-center gap-2">
+                  <Text className="font-jakarta-bold text-sm text-gray-700">
+                    {section.title} ({section.data.length})
+                  </Text>
+                  {isRoom && (
+                    <View className="flex-row items-center gap-1">
+                      {isRoomCheckedIn ? (
+                        <>
+                          <Ionicons
+                            name="checkmark-circle"
+                            size={14}
+                            color="#10B981"
+                          />
+                          <Text className="text-xs text-green-600 font-jakarta">
+                            Checked in
+                          </Text>
+                        </>
+                      ) : (
+                        <>
+                          <Ionicons
+                            name="time-outline"
+                            size={14}
+                            color="#9CA3AF"
+                          />
+                          <Text className="text-xs text-gray-400 font-jakarta">
+                            Not checked in
+                          </Text>
+                        </>
+                      )}
+                    </View>
+                  )}
+                </View>
+                {isRoom && (
+                  <Ionicons
+                    name={
+                      expandedRooms.has(roomNumber as string)
+                        ? "chevron-up"
+                        : "chevron-down"
+                    }
+                    size={18}
+                    color="#6B7280"
+                  />
+                )}
+              </TouchableOpacity>
+            );
+          }}
           contentContainerStyle={{
             paddingHorizontal: 16,
             paddingBottom: 100,
@@ -421,10 +557,11 @@ export default function HotelManagementScreen() {
                     setSelectedCategory(option.value);
                     setIsCategoryModalVisible(false);
                   }}
-                  className={`flex-row items-center justify-between px-4 py-3.5 rounded-xl border mb-2 ${isActive
+                  className={`flex-row items-center justify-between px-4 py-3.5 rounded-xl border mb-2 ${
+                    isActive
                       ? "border-primary bg-primary/10"
                       : "border-gray-200 bg-white"
-                    }`}
+                  }`}
                 >
                   <Text className="font-jakarta-semibold text-sm text-[#181114]">
                     {option.label}
