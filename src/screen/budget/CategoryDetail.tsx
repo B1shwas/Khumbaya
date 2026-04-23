@@ -132,6 +132,7 @@ export default function CategoryDetailsScreen() {
     <View className="flex-1 bg-[#f8f6f7]">
       <Stack.Screen
         options={{
+          headerTitle: `${categoryData.name}`,
           headerRight: () => (
             <TouchableOpacity
               onPress={() => setMenuVisible(true)}
@@ -188,7 +189,7 @@ export default function CategoryDetailsScreen() {
               className="text-[10px] text-gray-400 mb-1 uppercase tracking-widest"
               variant="h2"
             >
-              Allocated Budget
+              Total Budget
             </Text>
             <Text className="text-2xl text-[#181114] font-bold" variant="h1">
               Rs. {categoryData.allocatedBudget.toLocaleString()}
