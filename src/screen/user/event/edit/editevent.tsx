@@ -17,7 +17,7 @@ import DateTimePicker, {
   DateTimePickerEvent,
 } from "@react-native-community/datetimepicker";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
   Alert,
@@ -84,11 +84,11 @@ type SectionCardProps = {
 
 function SectionCard({ title, icon, children }: SectionCardProps) {
   return (
-    <View className="rounded-md  p-5 shadow-sm border border-slate-100">
+    <View className="rounded-md  px-2 shadow-sm border border-slate-100">
       {title && icon && (
         <View className="mb-4 flex-row items-center gap-2">
           <View className="h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-[#ee2b8c] to-[#ff5ca1]">
-            <Ionicons name={icon} size={18}  />
+            <Ionicons name={icon} size={18} />
           </View>
           <Text className="text-lg font-bold text-[#181114]">{title}</Text>
         </View>
@@ -123,7 +123,7 @@ function LabeledField({
         {label}
       </Text>
       <TextInput
-        className={`w-full rounded-md border border-slate-200 bg-white px-4 text-base text-slate-900 ${multiline ? "min-h-[112px] " : "h-14"
+        className={`w-full rounded-md border border-slate-200 bg-white text-base text-slate-900 ${multiline ? "min-h-[108px] px-3 py-3" : "h-14 px-4"
           }`}
         placeholder={placeholder}
         placeholderTextColor="#94a3b8"
@@ -132,6 +132,7 @@ function LabeledField({
         multiline={multiline}
         numberOfLines={numberOfLines}
         keyboardType={keyboardType}
+        textAlignVertical={multiline ? "top" : "center"}
       />
     </View>
   );
@@ -170,6 +171,7 @@ function ToggleRow({ title, description, value, onChange }: ToggleRowProps) {
 
 export default function EditEventScreen() {
   const router = useRouter();
+  const titleInputRef = useRef<TextInput>(null);
   const { eventDraft } = useEventStore();
   const { eventId } = useLocalSearchParams();
   const { data: fullEvent } = useEventById(Number(eventId));
@@ -285,7 +287,7 @@ export default function EditEventScreen() {
     const payload = {
       title: values.title.trim(),
       description: values.description.trim(),
-      type: resolvedType,
+      type: resolvedType as keyof typeof EVENT_TYPE_TO_BACKEND,
       startDateTime: values.startDateTime.toISOString(),
       endDateTime: values.endDateTime.toISOString(),
       location: values.city.trim() || undefined,
@@ -294,8 +296,9 @@ export default function EditEventScreen() {
       budget: values.budget ? Number(values.budget) : undefined,
       rsvpDeadline: values.rsvpDeadline.toISOString(),
     };
+    console.log("This is the payload of the event in the event section", payload);
 
-    updateEvent(payload as any, {
+    updateEvent(payload, {
       onSuccess: () => {
         Alert.alert("Success", "Event updated successfully.");
         router.back();
@@ -381,13 +384,24 @@ export default function EditEventScreen() {
                   control={control}
                   name="title"
                   render={({ field: { value, onChange } }) => (
-                    <TextInput
-                      className=" px-0 text-xl font-bold text-[#181114]"
-                      placeholder="Enter event title"
-                      placeholderTextColor="#94a3b8"
-                      value={value}
-                      onChangeText={onChange}
-                    />
+                    <View className="flex-row items-center gap-2">
+                      <TextInput
+                        ref={titleInputRef}
+                        className="flex-1 px-0 text-xl font-bold text-[#181114]"
+                        placeholder="Enter event title"
+                        placeholderTextColor="#94a3b8"
+                        value={value}
+                        onChangeText={onChange}
+                      />
+                      <TouchableOpacity
+                        onPress={() => titleInputRef.current?.focus()}
+                        activeOpacity={0.75}
+                        className="h-7 w-7 items-center justify-center rounded-full"
+                        hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
+                      >
+                        <MaterialIcons name="edit" size={14} color="#a1a1aa" />
+                      </TouchableOpacity>
+                    </View>
                   )}
                 />
               </View>
@@ -396,121 +410,121 @@ export default function EditEventScreen() {
 
           <View className="mt-4 gap-6 px-4">
             <SectionCard title="Basic Details" icon="information-circle">
-            <View className="gap-2">
-              <Text className="text-sm font-semibold tracking-wide text-[#1a1b3a]">
-                Event Type
-              </Text>
-              <View className="flex-row flex-wrap gap-2">
-                {EVENT_TYPES.map((type) => {
-                  const isSelected = selectedEventType === type;
-                  const chipClassName = isSelected
-                    ? "px-5 py-2.5 rounded-full bg-[#ee2b8c] border border-[#ee2b8c]"
-                    : "px-5 py-2.5 rounded-full bg-white border border-gray-200";
-                  const textClassName = isSelected
-                    ? "font-plusjakartasans-medium text-sm text-white"
-                    : "font-plusjakartasans-medium text-sm text-gray-600";
+              <View className="gap-2">
+                <Text className="text-sm font-semibold tracking-wide text-[#1a1b3a]">
+                  Event Type
+                </Text>
+                <View className="flex-row flex-wrap gap-2">
+                  {EVENT_TYPES.map((type) => {
+                    const isSelected = selectedEventType === type;
+                    const chipClassName = isSelected
+                      ? "px-5 py-2.5 rounded-full bg-[#ee2b8c] border border-[#ee2b8c]"
+                      : "px-5 py-2.5 rounded-full bg-white border border-gray-200";
+                    const textClassName = isSelected
+                      ? "font-plusjakartasans-medium text-sm text-white"
+                      : "font-plusjakartasans-medium text-sm text-gray-600";
 
-                  return (
-                    <TouchableOpacity
-                      key={type}
-                      onPress={() => setValue("eventType", type)}
-                      className={chipClassName}
-                    >
-                      <Text className={textClassName}>{type}</Text>
-                    </TouchableOpacity>
-                  );
-                })}
+                    return (
+                      <TouchableOpacity
+                        key={type}
+                        onPress={() => setValue("eventType", type)}
+                        className={chipClassName}
+                      >
+                        <Text className={textClassName}>{type}</Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
               </View>
-            </View>
-            <Controller
-              control={control}
-              name="description"
-              render={({ field: { value, onChange } }) => (
-                <LabeledField
-                  label="Description"
-                  placeholder="Give guests a quick overview"
-                  value={value}
-                  onChangeText={onChange}
-                  multiline
-                  numberOfLines={4}
-                />
-              )}
-            />
+              <Controller
+                control={control}
+                name="description"
+                render={({ field: { value, onChange } }) => (
+                  <LabeledField
+                    label="Description"
+                    placeholder="Give guests a quick overview"
+                    value={value}
+                    onChangeText={onChange}
+                    multiline
+                    numberOfLines={4}
+                  />
+                )}
+              />
             </SectionCard>
 
-            <SectionCard title="Time & Logistics" icon="calendar">
-            <View className="gap-2">
-              <Text className="text-sm font-semibold tracking-wide text-[#1a1b3a]">
-                Event Schedule
-              </Text>
-              <DateTimeRangePicker
-                value={{ startDateTime, endDateTime }}
-                onChange={handleRangeChange}
-                startLabel="Start"
-                endLabel="End"
-              />
-            </View>
-
-            <View className="rounded-2xl flex flex-row border border-slate-200 bg-white p-4">
-                  <View>
-
-                    
+            <SectionCard title="Event Schedule" icon="calendar">
+              <View className="gap-2">
+                <DateTimeRangePicker
+                  value={{ startDateTime, endDateTime }}
+                  onChange={handleRangeChange}
+                  startLabel="Start"
+                  endLabel="End"
+                />
+              </View>
+            </SectionCard>
+            <SectionCard title="RSVP Deadline" icon="time">
+              <View className="gap-2">
+                <View className="flex-row gap-4">
+                  <View className="flex-1 gap-2">
+                    <Text className="text-md font-semibold uppercase tracking-wide text-zinc-500">
+                      Date
+                    </Text>
+                    <TouchableOpacity
+                      onPress={() => {
+                        setRsvpPickerMode("date");
+                        setShowRsvpPicker(true);
+                      }}
+                      className="rounded-md border border-zinc-300 bg-white px-4 py-3"
+                    >
+                      <Text className="text-md font-semibold text-black">
+                        {formatDate(rsvpDeadline.toISOString())}
+                      </Text>
+                    </TouchableOpacity>
                   </View>
-                  
-               
-                  <TouchableOpacity
-                    onPress={() => {
-                      setRsvpPickerMode("date");
-                      setShowRsvpPicker(true);
-                    }}
-                    className="rounded-full bg-zinc-100 px-4 py-2"
-                  >
-                    <Text className="text-sm font-medium text-zinc-700">
-                      {formatDate(rsvpDeadline.toISOString())}
+
+                  <View className="flex-1 gap-2">
+                    <Text className="text-md font-semibold uppercase tracking-wide text-zinc-500">
+                      Time
                     </Text>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    onPress={() => {
-                      setRsvpPickerMode("time");
-                      setShowRsvpPicker(true);
-                    }}
-                    className="rounded-full bg-zinc-100 px-4 py-2"
-                  >
-                    <Text className="text-sm font-medium text-zinc-700">
-                      {formatTime(rsvpDeadline.toISOString())}
-                    </Text>
-                  </TouchableOpacity>
-               
+                    <TouchableOpacity
+                      onPress={() => {
+                        setRsvpPickerMode("time");
+                        setShowRsvpPicker(true);
+                      }}
+                      className="rounded-md border border-zinc-300 bg-white px-4 py-3"
+                    >
+                      <Text className="text-md font-semibold text-black">
+                        {formatTime(rsvpDeadline.toISOString())}
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
               </View>
+            </SectionCard>
 
-              {showRsvpPicker && (
-                <DateTimePicker
-                  value={rsvpDeadline}
-                  mode={rsvpPickerMode}
-                  is24Hour={false}
-                  onChange={handleRsvpDateChange}
-                />
-              )}
-         
 
-            <View className="flex-row gap-4">
-              <View className="flex-1">
-                <Controller
-                  control={control}
-                  name="city"
-                  render={({ field: { value, onChange } }) => (
-                    <LabeledField
-                      label="City / Area"
-                      placeholder="Udaipur, Rajasthan"
-                      value={value}
-                      onChangeText={onChange}
-                    />
-                  )}
-                />
-              </View>
-            </View>
-            <View className="flex-1">
+            {showRsvpPicker && (
+              <DateTimePicker
+                value={rsvpDeadline}
+                mode={rsvpPickerMode}
+                is24Hour={false}
+                onChange={handleRsvpDateChange}
+              />
+            )}
+
+            <SectionCard title="Location" icon="location">
+              <Controller
+                control={control}
+                name="city"
+                render={({ field: { value, onChange } }) => (
+                  <LabeledField
+                    label="City / Area"
+                    placeholder="Udaipur, Rajasthan"
+                    value={value}
+                    onChangeText={onChange}
+                  />
+                )}
+              />
               <Controller
                 control={control}
                 name="venue"
@@ -523,7 +537,7 @@ export default function EditEventScreen() {
                   />
                 )}
               />
-            </View>
+            </SectionCard>
             {/* <View className="h-28 w-full overflow-hidden rounded-md border border-slate-200">
                 <Image
                   source={{
@@ -533,67 +547,66 @@ export default function EditEventScreen() {
                   resizeMode="cover"
                 />
               </View> */}
-            </SectionCard>
 
             <SectionCard>
-            <View className="flex-row gap-4">
-              <View className="flex-1 gap-4">
-                <Controller
-                  control={control}
-                  name="theme"
-                  render={({ field: { value, onChange } }) => (
-                    <LabeledField
-                      label="Event Theme"
-                      placeholder="Royal Vintage"
-                      value={value}
-                      onChangeText={onChange}
-                    />
-                  )}
-                />
-                <Controller
-                  control={control}
-                  name="dressCode"
-                  render={({ field: { value, onChange } }) => (
-                    <LabeledField
-                      label="Dress Code"
-                      placeholder="classical"
-                      value={value}
-                      onChangeText={onChange}
-                    />
-                  )}
-                />
-              </View>
-              <View className="gap-2">
-                <Text className="text-sm font-semibold tracking-wide text-[#1a1b3a]">
-                  Estimated Budget (INR)
-                </Text>
-                <View className="flex-row items-center rounded-md border border-slate-200  px-4 h-14">
-                  <Text className="text-base font-semibold text-slate-400">
-                    ₹
-                  </Text>
+              <View className="flex-row gap-4">
+                <View className="flex-1 gap-4">
                   <Controller
                     control={control}
-                    name="budget"
+                    name="theme"
                     render={({ field: { value, onChange } }) => (
-                      <TextInput
-                        className="flex-1 px-3 text-base font-semibold text-slate-900"
-                        placeholder="1500000"
-                        placeholderTextColor="#94a3b8"
+                      <LabeledField
+                        label="Event Theme"
+                        placeholder="Royal Vintage"
                         value={value}
                         onChangeText={onChange}
-                        keyboardType="numeric"
+                      />
+                    )}
+                  />
+                  <Controller
+                    control={control}
+                    name="dressCode"
+                    render={({ field: { value, onChange } }) => (
+                      <LabeledField
+                        label="Dress Code"
+                        placeholder="classical"
+                        value={value}
+                        onChangeText={onChange}
                       />
                     )}
                   />
                 </View>
+                <View className="gap-2">
+                  <Text className="text-sm font-semibold tracking-wide text-[#1a1b3a]">
+                    Estimated Budget (INR)
+                  </Text>
+                  <View className="flex-row items-center rounded-md border border-slate-200  px-4 h-14">
+                    <Text className="text-base font-semibold text-slate-400">
+                      ₹
+                    </Text>
+                    <Controller
+                      control={control}
+                      name="budget"
+                      render={({ field: { value, onChange } }) => (
+                        <TextInput
+                          className="flex-1 px-3 text-base font-semibold text-slate-900"
+                          placeholder="1500000"
+                          placeholderTextColor="#94a3b8"
+                          value={value}
+                          onChangeText={onChange}
+                          keyboardType="numeric"
+                        />
+                      )}
+                    />
+                  </View>
+                </View>
               </View>
-            </View>
-            <ToggleRow
-              title="Public Visibility"
-              description="Visible to all invited guests"
-              value={watch("isPublic")}
-              onChange={(value) => setValue("isPublic", value)}
-            />
+              <ToggleRow
+                title="Public Visibility"
+                description="Visible to all invited guests"
+                value={watch("isPublic")}
+                onChange={(value) => setValue("isPublic", value)}
+              />
             </SectionCard>
 
           </View>
