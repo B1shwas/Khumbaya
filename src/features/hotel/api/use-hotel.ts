@@ -1,10 +1,16 @@
-import { useQuery } from "@tanstack/react-query";
-import { getHotelManagement } from "./service";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toggleCheckin_out, ToggleCheckin_outType } from "./service";
 
-export const useGetHotelManagement = (eventId: number | null) => {
-  return useQuery({
-    queryKey: ["hotel-management", eventId],
-    queryFn: () => getHotelManagement(eventId!),
-    enabled: !!eventId,
+export const useToggleCheckin_out = (eventId: number) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      invitationId,
+      action
+    }: ToggleCheckin_outType) => toggleCheckin_out({ invitationId, action }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["event-guest-room", eventId] });
+    },
   });
 };
+

@@ -1,32 +1,61 @@
 import { useSubmitRsvpResponse } from "@/src/features/events/hooks/use-event";
 import { useGetGuestRoom } from "@/src/features/guests/api/use-guests";
-import { User } from "@/src/store/AuthStore";
 import { shadowStyle } from "@/src/utils/helper";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import {
-    ActivityIndicator,
-    FlatList,
-    Modal,
-    RefreshControl,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  FlatList,
+  Modal,
+  RefreshControl,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-export interface Hotel_responce {
-  user_detail: User | null;
+interface Hotel_responce {
+  user_detail: {
+    id?: number;
+    username?: string;
+    phone?: string;
+    familyId?: number;
+  } | null;
   user_room: string | null;
   category: string | null;
+  invitationId: number;
+ 
+  hasCheckedIn?: boolean | null;
+  hasCheckedOut?: boolean | null;
 }
 
 type RoomCard = {
   room: string;
   guests: Hotel_responce[];
+  status: "checked-in" | "checked-out" | "pending";
 };
+
+function getGuestStatus(
+  guest: Hotel_responce
+): "checked-in" | "checked-out" | "pending" {
+  if (guest.hasCheckedOut) return "checked-out";
+  if (guest.hasCheckedIn) return "checked-in";
+  return "pending";
+}
+
+function getRoomStatus(
+  guests: Hotel_responce[]
+): "checked-in" | "checked-out" | "pending" {
+  if (guests.some((guest) => getGuestStatus(guest) === "checked-out")) {
+    return "checked-out";
+  }
+  if (guests.some((guest) => getGuestStatus(guest) === "checked-in")) {
+    return "checked-in";
+  }
+  return "pending";
+}
 
 function getInitials(name: string): string {
   const parts = name.trim().split(" ");
@@ -70,15 +99,33 @@ function RoomCardItem({
               {item.guests.length} Guest{item.guests.length === 1 ? "" : "s"}
             </Text>
           </View>
+
+          {item.status === "checked-in" && (
+            <View className="px-2.5 py-1 rounded-full bg-green-100 border border-green-200">
+              <Text className="font-jakarta-bold text-[10px] text-green-700">
+                Checked In
+              </Text>
+            </View>
+          )}
+
+          {item.status === "checked-out" && (
+            <View className="px-2.5 py-1 rounded-full bg-amber-100 border border-amber-200">
+              <Text className="font-jakarta-bold text-[10px] text-amber-700">
+                Checked Out
+              </Text>
+            </View>
+          )}
         </View>
 
-        <TouchableOpacity
-          disabled={isPending}
-          onPress={() => onCheckIn(item.room)}
-          className={`px-4 py-2 rounded-md ${isPending ? "bg-primary/60" : "bg-primary"}`}
-        >
-          <Text className="font-jakarta-bold text-[12px] text-white">Check In</Text>
-        </TouchableOpacity>
+        {item.status !== "checked-in" && (
+          <TouchableOpacity
+            disabled={isPending}
+            onPress={() => onCheckIn(item.room)}
+            className={`px-4 py-2 rounded-md ${isPending ? "bg-primary/60" : "bg-primary"}`}
+          >
+            <Text className="font-jakarta-bold text-[12px] text-white">Check In</Text>
+          </TouchableOpacity>
+        )}
       </View>
 
       <View className="flex-row flex-wrap">
@@ -168,6 +215,14 @@ export default function HotelManagementScreen() {
   const [searchText, setSearchText] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [isCategoryModalVisible, setIsCategoryModalVisible] = useState(false);
+  const [roomCheckInModal, setRoomCheckInModal] = useState<{
+    visible: boolean;
+    room: string | null;
+    guests: Hotel_responce[];
+  }>({ visible: false, room: null, guests: [] });
+  const [activeCheckinUserId, setActiveCheckinUserId] = useState<number | null>(
+    null
+  );
   const [roomAssignmentModal, setRoomAssignmentModal] = useState<{
     visible: boolean;
     guest: Hotel_responce | null;
@@ -285,6 +340,7 @@ export default function HotelManagementScreen() {
     return sortedRooms.map((room) => ({
       room,
       guests: guestsByRoom.get(room) ?? [],
+      status: getRoomStatus(guestsByRoom.get(room) ?? []),
     }));
   }, [guestsAfterCategoryFilter]);
 
@@ -400,9 +456,17 @@ export default function HotelManagementScreen() {
               item={item}
               isPending={isPending}
               onCheckIn={(room) => {
-                // Hook up to backend check-in endpoint when available.
-                // Keeping this button in place to match grouped card UX.
-                console.log(`Check in tapped for room ${room}`);
+                const roomGuests = roomCards.find(
+                  (roomCard) => roomCard.room === room
+                )?.guests;
+
+                if (!roomGuests?.length) return;
+
+                setRoomCheckInModal({
+                  visible: true,
+                  room,
+                  guests: roomGuests,
+                });
               }}
             />
           )}
@@ -453,6 +517,187 @@ export default function HotelManagementScreen() {
           }
         />
       )}
+
+      <Modal
+        visible={roomCheckInModal.visible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => {
+          setRoomCheckInModal({ visible: false, room: null, guests: [] });
+        }}
+      >
+        <View className="flex-1 bg-black/35 justify-end">
+          <TouchableOpacity
+            activeOpacity={1}
+            onPress={() => {
+              setRoomCheckInModal({ visible: false, room: null, guests: [] });
+            }}
+            className="absolute inset-0"
+          />
+
+          <View className="bg-white rounded-t-3xl px-5 pt-5 pb-7 max-h-[78%]">
+            <View className="w-10 h-1 bg-gray-200 rounded-full self-center mb-3" />
+            <View className="flex-row items-center justify-between mb-4">
+              <View>
+                <Text className="font-jakarta-bold text-base text-[#181114]">
+                  Room Check In
+                </Text>
+                <Text className="font-jakarta text-xs text-gray-500 mt-1">
+                  Room {roomCheckInModal.room || "-"} • {roomCheckInModal.guests.length} guest
+                  {roomCheckInModal.guests.length === 1 ? "" : "s"}
+                </Text>
+              </View>
+              <TouchableOpacity
+                onPress={() => {
+                  setRoomCheckInModal({ visible: false, room: null, guests: [] });
+                }}
+              >
+                <Ionicons name="close" size={20} color="#6B7280" />
+              </TouchableOpacity>
+            </View>
+
+            {roomCheckInModal.guests.length === 0 ? (
+              <View className="items-center justify-center py-10">
+                <Text className="font-jakarta text-sm text-gray-400">
+                  No guests available in this room.
+                </Text>
+              </View>
+            ) : (
+              <FlatList
+                data={roomCheckInModal.guests}
+                keyExtractor={(guest, idx) =>
+                  String(guest.invitationId ?? guest.user_detail?.id ?? idx)
+                }
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={{ gap: 10, paddingBottom: 8 }}
+                renderItem={({ item: guest, index }) => {
+                  const username =
+                    guest.user_detail?.username || `Guest ${index + 1}`;
+                  const isCurrentGuestPending =
+                    isPending && activeCheckinUserId === guest.user_detail?.id;
+                  const guestStatus = getGuestStatus(guest);
+                  const actionType =
+                    guestStatus === "checked-in"
+                      ? "check-out"
+                      : guestStatus === "pending"
+                        ? "check-in"
+                        : "none";
+
+                  return (
+                    <View
+                      className="bg-white border border-gray-100 rounded-xl px-3.5 py-3"
+                      style={shadowStyle}
+                    >
+                      <View className="flex-row items-center justify-between gap-3">
+                        <View className="flex-row items-center gap-2 flex-1">
+                          <View className="w-10 h-10 rounded-full bg-pink-100 items-center justify-center">
+                            <Text className="font-jakarta-bold text-[12px] text-primary">
+                              {getInitials(username)}
+                            </Text>
+                          </View>
+
+                          <View className="flex-1">
+                            <Text
+                              className="font-jakarta-semibold text-sm text-[#181114]"
+                              numberOfLines={1}
+                            >
+                              {username}
+                            </Text>
+
+                            <View className="flex-row items-center gap-2 mt-1">
+                              <Text className="font-jakarta text-[11px] text-gray-500">
+                                Invitation ID: {guest.invitationId}
+                              </Text>
+
+                              {guestStatus === "checked-in" && (
+                                <View className="px-2 py-0.5 rounded-full bg-green-100 border border-green-200">
+                                  <Text className="font-jakarta-bold text-[9px] text-green-700">
+                                    Checked In
+                                  </Text>
+                                </View>
+                              )}
+
+                              {guestStatus === "checked-out" && (
+                                <View className="px-2 py-0.5 rounded-full bg-amber-100 border border-amber-200">
+                                  <Text className="font-jakarta-bold text-[9px] text-amber-700">
+                                    Checked Out
+                                  </Text>
+                                </View>
+                              )}
+                            </View>
+                          </View>
+                        </View>
+
+                        {actionType === "none" ? (
+                          <View className="px-3 py-2 rounded-md bg-amber-100 border border-amber-200">
+                            <Text className="font-jakarta-bold text-[11px] text-amber-700">
+                              Checked Out
+                            </Text>
+                          </View>
+                        ) : (
+                          <TouchableOpacity
+                            disabled={
+                              isCurrentGuestPending ||
+                              !guest.user_detail?.id
+                            }
+                            onPress={() => {
+                              if (!guest.user_detail?.id || !numericEventId) return;
+
+                              setActiveCheckinUserId(guest.user_detail.id);
+
+                              submitRsvpResponse(
+                                {
+                                  userId: guest.user_detail.id,
+                                  familyId: guest.user_detail.familyId
+                                    ? guest.user_detail.familyId
+                                    : undefined,
+                                  hasCheckedIn: actionType === "check-in",
+                                  hasCheckedOut: actionType === "check-out",
+                                },
+                                {
+                                  onSuccess: () => {
+                                    setRoomCheckInModal({
+                                      visible: false,
+                                      room: null,
+                                      guests: [],
+                                    });
+                                    refetch();
+                                  },
+                                  onError: (error) => {
+                                    console.error("Status update failed:", error);
+                                  },
+                                  onSettled: () => {
+                                    setActiveCheckinUserId(null);
+                                  },
+                                }
+                              );
+                            }}
+                            className={`px-3.5 py-2 rounded-md ${
+                              isCurrentGuestPending
+                                ? "bg-primary/60"
+                                : actionType === "check-out"
+                                  ? "bg-amber-500"
+                                  : "bg-primary"
+                            }`}
+                          >
+                            {isCurrentGuestPending ? (
+                              <ActivityIndicator size="small" color="#ffffff" />
+                            ) : (
+                              <Text className="font-jakarta-bold text-[12px] text-white">
+                                {actionType === "check-out" ? "Check Out" : "Check In"}
+                              </Text>
+                            )}
+                          </TouchableOpacity>
+                        )}
+                      </View>
+                    </View>
+                  );
+                }}
+              />
+            )}
+          </View>
+        </View>
+      </Modal>
 
       <Modal
         visible={isCategoryModalVisible}
@@ -578,7 +823,7 @@ export default function HotelManagementScreen() {
                       const roomValue = newRoom.trim();
                       if (roomValue && roomAssignmentModal.guest?.user_detail?.id) {
                         submitRsvpResponse({
-                          assigned_room: roomValue,
+                          assigned_room: roomValue, 
                           userId: roomAssignmentModal.guest.user_detail.id,
                           familyId: roomAssignmentModal.guest.user_detail.familyId
                             ? roomAssignmentModal.guest.user_detail.familyId
