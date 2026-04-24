@@ -23,6 +23,14 @@ export default function ProfileLayout() {
       <Stack.Screen name="family-members" />
 
       <Stack.Screen
+        name="(screens)/edit-profile"
+        options={{
+          headerTitle: "My Profile",
+          headerTitleAlign: "center",
+        }}
+      />
+
+      <Stack.Screen
         name="family-options"
         options={{
           presentation: "formSheet",
