@@ -3,7 +3,7 @@ import { Redirect } from "expo-router";
 
 export default function Index() {
   const { token } = useAuthStore();
-
+  // console.log(token)
   if (token) {
     return <Redirect href="/(protected)/(client-tabs)/home" />;
   }

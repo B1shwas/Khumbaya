@@ -1,4 +1,4 @@
-import { useAuthStore } from "@/src/store/AuthStore";
+﻿import { useAuthStore } from "@/src/store/AuthStore";
 import { setQueryClient } from "@/src/store/queryClientManager";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useFonts } from "expo-font";
@@ -34,6 +34,7 @@ function RootNavigation() {
 
     // Route based purely on token presence (source of truth)
     if (token && inAuthGroup) {
+      // console.log(token)
       // Has token, but in onboarding → redirect to protected
       router.replace("/(protected)/(client-tabs)/home");
     } else if (!token && !inAuthGroup) {
@@ -72,6 +73,8 @@ export default function RootLayout() {
     Montserrat: require("../assets/fonts/Montserrat-Regular.ttf"),
   });
 
+  const { token, isLoading } = useAuthStore();
+
   useEffect(() => {
     if (fontsLoaded) {
       useAuthStore
@@ -83,6 +86,12 @@ export default function RootLayout() {
         });
     }
   }, [fontsLoaded]);
+
+  useEffect(() => {
+    if (!isLoading) {
+      console.log("Current auth token:", token);
+    }
+  }, [token, isLoading]);
 
   if (!fontsLoaded && useAuthStore.getState().isLoading) {
     return null;
