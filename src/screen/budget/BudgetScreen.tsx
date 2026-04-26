@@ -255,8 +255,8 @@ export default function EventBudgetScreen() {
               variant="budget"
               stats={[
                 { label: "Allocated", value: totalAllocated },
-                { label: "Spent", value: totalSpent },
                 { label: "Remaining", value: totalRemaining },
+                { label: "Spent", value: totalSpent },
               ]}
             />
           </LinearGradient>
