@@ -50,7 +50,6 @@ const MenuItemCard = ({
             <View className="w-2 h-2 rounded-full bg-green-500" />
           </View>
         )}
-        <Text className="text-xs text-muted-light">{item.type}</Text>
       </View>
     </View>
   </TouchableOpacity>
@@ -263,7 +262,7 @@ export default function CateringDetailsScreen() {
                   key={category}
                   category={category}
                   items={groupedMenus[category]}
-                  onItemPress={() => {}}
+                  onItemPress={() => { }}
                 />
               ))}
               <Text className="text-xs text-muted-light mt-2">

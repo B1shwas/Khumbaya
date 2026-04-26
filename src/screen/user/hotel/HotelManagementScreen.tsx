@@ -26,7 +26,7 @@ interface Hotel_responce {
   user_room: string | null;
   category: string | null;
   invitationId: number;
- 
+
   hasCheckedIn?: boolean | null;
   hasCheckedOut?: boolean | null;
 }
@@ -216,10 +216,10 @@ export default function HotelManagementScreen() {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [isCategoryModalVisible, setIsCategoryModalVisible] = useState(false);
   const [roomCheckInModal, setRoomCheckInModal] = useState<{
-    visible: boolean;
     room: string | null;
     guests: Hotel_responce[];
-  }>({ visible: false, room: null, guests: [] });
+    status: "pending" | "checkedIn" | "checkedOut"
+  }>({ status: "pending", room: null, guests: [] });
   const [activeCheckinUserId, setActiveCheckinUserId] = useState<number | null>(
     null
   );
@@ -672,13 +672,12 @@ export default function HotelManagementScreen() {
                                 }
                               );
                             }}
-                            className={`px-3.5 py-2 rounded-md ${
-                              isCurrentGuestPending
-                                ? "bg-primary/60"
-                                : actionType === "check-out"
-                                  ? "bg-amber-500"
-                                  : "bg-primary"
-                            }`}
+                            className={`px-3.5 py-2 rounded-md ${isCurrentGuestPending
+                              ? "bg-primary/60"
+                              : actionType === "check-out"
+                                ? "bg-amber-500"
+                                : "bg-primary"
+                              }`}
                           >
                             {isCurrentGuestPending ? (
                               <ActivityIndicator size="small" color="#ffffff" />
@@ -733,11 +732,10 @@ export default function HotelManagementScreen() {
                     setSelectedCategory(option.value);
                     setIsCategoryModalVisible(false);
                   }}
-                  className={`flex-row items-center justify-between px-4 py-3.5 rounded-xl border mb-2 ${
-                    isActive
-                      ? "border-primary bg-primary/10"
-                      : "border-gray-200 bg-white"
-                  }`}
+                  className={`flex-row items-center justify-between px-4 py-3.5 rounded-xl border mb-2 ${isActive
+                    ? "border-primary bg-primary/10"
+                    : "border-gray-200 bg-white"
+                    }`}
                 >
                   <Text className="font-jakarta-semibold text-sm text-[#181114]">
                     {option.label}
@@ -823,7 +821,7 @@ export default function HotelManagementScreen() {
                       const roomValue = newRoom.trim();
                       if (roomValue && roomAssignmentModal.guest?.user_detail?.id) {
                         submitRsvpResponse({
-                          assigned_room: roomValue, 
+                          assigned_room: roomValue,
                           userId: roomAssignmentModal.guest.user_detail.id,
                           familyId: roomAssignmentModal.guest.user_detail.familyId
                             ? roomAssignmentModal.guest.user_detail.familyId

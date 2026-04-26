@@ -67,7 +67,7 @@ export default function AddMenuScreen() {
       await createMenuMutation.mutateAsync({
         name: data.name,
         description: data.description,
-        type: data.type,
+        type: data.type ?? "Vegetarian",
         menuType: data.menuType,
       });
 
@@ -168,7 +168,7 @@ export default function AddMenuScreen() {
               />
             </View>
 
-            {/* Dish Type */}
+            {/* Dish Type 
             <View className="mb-6">
               <Text className="text-sm font-bold text-on-surface mb-3">
                 Dish Type
@@ -232,6 +232,7 @@ export default function AddMenuScreen() {
                 )}
               />
             </View>
+*/}
 
             {/* Menu Type */}
             <View className="mb-6">
