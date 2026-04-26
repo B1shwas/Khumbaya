@@ -47,18 +47,54 @@ const EventDetail = () => {
 
   const manageActions = [
     {
-      id: "hotel-management",
-      name: "Hotel Management",
-      icon: "bed-outline",
-      color: "#F59E0B",
-      route: `./hotel`,
+      id: "subevents",
+      name: "Sub Events",
+      icon: "layers-outline",
+      color: "#F97316",
+      route: `./(subevent)`,
     },
-    {
+     {
       id: "guests",
       name: "Guest Management",
       icon: "people",
       color: "#8B5CF6",
       route: `./guests`,
+    },
+
+      {
+      id: "budget",
+      name: "Budget",
+      icon: "wallet",
+      color: "#10B981",
+      route: `./budget`,
+    },
+      {
+      id: "checklist",
+      name: "Checklist",
+      icon: "checkmark-circle-outline",
+      color: "#EC4899",
+      route: `./tasklist`,
+    },
+     {
+      id: "catering",
+      name: "Catering",
+      icon: "restaurant",
+      color: "#F43F5E",
+      route: `./catering`,
+    },
+     {
+      id: "hotel-management",
+      name: "Hotel Management",
+      icon: "bed-outline",
+      color: "#F59E0B",
+      route: `./hotel`,
+    },   
+   {
+      id: "logistics",
+      name: "logistics",
+      icon: "cube-outline",  // or "cube" for filled
+      color: "#10B981",
+      route: "./(logistics)"
     },
     {
       id: "vendors",
@@ -67,40 +103,7 @@ const EventDetail = () => {
       color: "#3B82F6",
       route: `./vendor`,
     },
-    {
-      id: "catering",
-      name: "Catering",
-      icon: "restaurant",
-      color: "#F43F5E",
-      route: `./catering`,
-    },
-    {
-      id: "budget",
-      name: "Budget",
-      icon: "wallet",
-      color: "#10B981",
-      route: `./budget`,
-    },
-    {
-      id: "subevents",
-      name: "Sub Events",
-      icon: "layers-outline",
-      color: "#F97316",
-      route: `./(subevent)`,
-    },
-    {
-      id: "checklist",
-      name: "Checklist",
-      icon: "checkmark-circle-outline",
-      color: "#EC4899",
-      route: `./tasklist`,
-    }, {
-      id: "logistics",
-      name: "logistics",
-      icon: "cube-outline",  // or "cube" for filled
-      color: "#10B981",
-      route: "./(logistics)"
-    }
+
   ];
 
   return (
