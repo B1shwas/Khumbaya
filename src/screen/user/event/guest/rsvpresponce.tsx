@@ -6,7 +6,7 @@ import { useRsvpStore } from "@/src/store/useRsvpStore";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { DateTimePickerEvent } from "@react-native-community/datetimepicker";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { CheckSquare, Square } from "lucide-react-native";
+import { CheckSquare, MapPin, Square } from "lucide-react-native";
 import { useForm } from "react-hook-form";
 import {
   ActivityIndicator,
@@ -30,6 +30,8 @@ interface RSVPFormValues {
   accommodation: boolean;
   arrivalDateTime: Date;
   departureDateTime: Date;
+  arrivalLocation: string;
+  departureLocation: string;
   isArrivalPickupRequired: boolean;
   isDeparturePickupRequired: boolean;
   notes: string;
@@ -61,6 +63,8 @@ export const RSVPFormContent = ({
   initialNotes = "",
   initialIsDeparturePickupRequired = false,
   initialIsArrivalPickupRequired = false,
+  initialArrivalInfo = "",
+  initialDepartureInfo = "",
 }: {
   userId: number;
   eventId: number;
@@ -73,6 +77,8 @@ export const RSVPFormContent = ({
   initialNotes?: string;
   initialIsArrivalPickupRequired?: boolean;
   initialIsDeparturePickupRequired?: boolean;
+  initialArrivalInfo?: string;
+  initialDepartureInfo?: string;
 }) => {
   const router = useRouter();
   const clearDraft = useRsvpStore((s) => s.clearDraft);
@@ -84,6 +90,8 @@ export const RSVPFormContent = ({
       accommodation: initialAccommodation,
       arrivalDateTime: initialArrival ?? new Date(),
       departureDateTime: initialDeparture ?? new Date(),
+      arrivalLocation: initialArrivalInfo,
+      departureLocation: initialDepartureInfo,
       isArrivalPickupRequired: initialIsArrivalPickupRequired,
       isDeparturePickupRequired: initialIsDeparturePickupRequired,
       notes: initialNotes,
@@ -97,6 +105,8 @@ export const RSVPFormContent = ({
   const notes = watch("notes");
   const arrivalDateTime = watch("arrivalDateTime");
   const departureDateTime = watch("departureDateTime");
+  const arrivalLocation = watch("arrivalLocation");
+  const departureLocation = watch("departureLocation");
 
   const makeDateHandler =
     (field: "arrivalDateTime" | "departureDateTime") =>
@@ -116,6 +126,8 @@ export const RSVPFormContent = ({
         isAccomodation: values.accommodation,
         isArrivalPickupRequired: values.isArrivalPickupRequired,
         isDeparturePickupRequired: values.isDeparturePickupRequired,
+        arrival_info: values.arrivalLocation.trim() || null,
+        departure_info: values.departureLocation.trim() || null,
         status:
           values.attendance === "yes"
             ? "accepted"
@@ -168,50 +180,24 @@ export const RSVPFormContent = ({
         </View>
       </View>
 
-      {/* Travel Details */}
-      <View>
-        <View className="flex-row items-center gap-2 mb-4">
-          <Icon name="flight_takeoff" />
-          <Text variant="h1" className="text-slate-800">
-            Travel Itinerary
+      {/* Declined message */}
+      {attendance === "no" && (
+        <View
+          className="items-center gap-3 py-8 px-6 rounded-xl border border-slate-200"
+          style={{ backgroundColor: "#f8fafc" }}
+        >
+          <MaterialIcons name="sentiment-dissatisfied" size={40} color="#94a3b8" />
+          <Text variant="h1" className="text-slate-600 text-center">
+            Sorry you can't make it!
+          </Text>
+          <Text className="text-sm text-slate-400 text-center">
+            Your response will be saved. You can always update your RSVP later.
           </Text>
         </View>
-        <View className="gap-4">
-          <View>
-            <Text
-              variant="h2"
-              className="text-xs uppercase tracking-wider text-slate-500 ml-1 mb-1.5"
-            >
-              Arrival Date & Time
-            </Text>
-            <DatePicker
-              value={arrivalDateTime}
-              mode="datetime"
-              onChange={makeDateHandler("arrivalDateTime")}
-              materialDateLabel="Arrival Date"
-              materialTimeLabel="Arrival Time"
-            />
-          </View>
-          <View>
-            <Text
-              variant="h2"
-              className="text-xs uppercase tracking-wider text-slate-500 ml-1 mb-1.5"
-            >
-              Departure Date & Time
-            </Text>
-            <DatePicker
-              value={departureDateTime}
-              mode="datetime"
-              onChange={makeDateHandler("departureDateTime")}
-              materialDateLabel="Departure Date"
-              materialTimeLabel="Departure Time"
-            />
-          </View>
-        </View>
-      </View>
+      )}
 
-      {/* Toggle Options */}
-      <View className="gap-5">
+      {/* Accommodation */}
+      {attendance === "yes" && (
         <View className="flex-row items-center justify-between p-4 bg-pink-50 rounded-md border border-pink-100">
           <View className="flex-row items-center gap-3">
             <Icon name="hotel" />
@@ -233,56 +219,151 @@ export const RSVPFormContent = ({
             thumbColor="#ffffff"
           />
         </View>
+      )}
 
-        <View>
-          <View className="flex-row items-center gap-2 mb-3">
-            <Icon name="directions_car" />
-            <Text variant="h1" className="text-slate-800">
-              Transportation Needed?
-            </Text>
-          </View>
-          <View className="flex-row gap-3">
-            <Pressable
-              onPress={() =>
-                setValue("isArrivalPickupRequired", !arrivalPickup, {
-                  shouldDirty: true,
-                })
-              }
-              className={`flex-1 flex-row items-center gap-3 p-3 bg-slate-50 rounded-md border-2 ${
-                arrivalPickup ? "border-pink-200" : "border-transparent"
-              }`}
-            >
-              {arrivalPickup ? (
-                <CheckSquare size={20} color={PRIMARY} />
-              ) : (
-                <Square size={20} color="#cbd5e1" />
-              )}
-              <Text variant="h2" className="text-sm text-slate-900">
-                Arrival Pickup
-              </Text>
-            </Pressable>
-            <Pressable
-              onPress={() =>
-                setValue("isDeparturePickupRequired", !departureDrop, {
-                  shouldDirty: true,
-                })
-              }
-              className={`flex-1 flex-row items-center gap-3 p-3 bg-slate-50 rounded-md border-2 ${
-                departureDrop ? "border-pink-200" : "border-transparent"
-              }`}
-            >
-              {departureDrop ? (
-                <CheckSquare size={20} color={PRIMARY} />
-              ) : (
-                <Square size={20} color="#cbd5e1" />
-              )}
-              <Text variant="h2" className="text-sm text-slate-900">
-                Departure Drop
-              </Text>
-            </Pressable>
-          </View>
+      {/* Transportation + conditional Travel Details */}
+      {attendance === "yes" && (
+      <View className="gap-4">
+        <View className="flex-row items-center gap-2">
+          <Icon name="directions_car" />
+          <Text variant="h1" className="text-slate-800">
+            Transportation Needed?
+          </Text>
         </View>
+        <View className="flex-row gap-3">
+          <Pressable
+            onPress={() =>
+              setValue("isArrivalPickupRequired", !arrivalPickup, {
+                shouldDirty: true,
+              })
+            }
+            className={`flex-1 flex-row items-center gap-3 p-3 bg-slate-50 rounded-md border-2 ${
+              arrivalPickup ? "border-pink-200" : "border-transparent"
+            }`}
+          >
+            {arrivalPickup ? (
+              <CheckSquare size={20} color={PRIMARY} />
+            ) : (
+              <Square size={20} color="#cbd5e1" />
+            )}
+            <Text variant="h2" className="text-sm text-slate-900">
+              Arrival Pickup
+            </Text>
+          </Pressable>
+          <Pressable
+            onPress={() =>
+              setValue("isDeparturePickupRequired", !departureDrop, {
+                shouldDirty: true,
+              })
+            }
+            className={`flex-1 flex-row items-center gap-3 p-3 bg-slate-50 rounded-md border-2 ${
+              departureDrop ? "border-pink-200" : "border-transparent"
+            }`}
+          >
+            {departureDrop ? (
+              <CheckSquare size={20} color={PRIMARY} />
+            ) : (
+              <Square size={20} color="#cbd5e1" />
+            )}
+            <Text variant="h2" className="text-sm text-slate-900">
+              Departure Drop
+            </Text>
+          </Pressable>
+        </View>
+
+        {/* Arrival details — revealed when Arrival Pickup is ticked */}
+        {arrivalPickup && (
+          <View
+            className="gap-3 p-4 rounded-xl border border-pink-100"
+            style={{ backgroundColor: "#fdf2f8" }}
+          >
+            <View className="flex-row items-center gap-2">
+              <Icon name="flight_land" size={16} />
+              <Text variant="h2" className="text-xs font-semibold text-pink-700 uppercase tracking-wider">
+                Arrival Details
+              </Text>
+            </View>
+            <Text
+              variant="h2"
+              className="text-xs uppercase tracking-wider text-slate-500 ml-1"
+            >
+              Date & Time
+            </Text>
+            <DatePicker
+              value={arrivalDateTime}
+              mode="datetime"
+              onChange={makeDateHandler("arrivalDateTime")}
+              materialDateLabel="Arrival Date"
+              materialTimeLabel="Arrival Time"
+            />
+            <View className="flex-row items-center gap-1.5 ml-1 mt-1">
+              <MapPin size={13} color="#94a3b8" />
+              <Text
+                variant="h2"
+                className="text-xs uppercase tracking-wider text-slate-500"
+              >
+                Location
+              </Text>
+            </View>
+            <TextInput
+              value={arrivalLocation}
+              onChangeText={(val) =>
+                setValue("arrivalLocation", val, { shouldDirty: true })
+              }
+              placeholder="e.g. Kathmandu International Airport, Gate 3"
+              placeholderTextColor="#94a3b8"
+              className="bg-white rounded-md px-4 py-3 text-sm text-slate-900 border border-pink-100"
+            />
+          </View>
+        )}
+
+        {/* Departure details — revealed when Departure Drop is ticked */}
+        {departureDrop && (
+          <View
+            className="gap-3 p-4 rounded-xl border border-pink-100"
+            style={{ backgroundColor: "#fdf2f8" }}
+          >
+            <View className="flex-row items-center gap-2">
+              <Icon name="flight_takeoff" size={16} />
+              <Text variant="h2" className="text-xs font-semibold text-pink-700 uppercase tracking-wider">
+                Departure Details
+              </Text>
+            </View>
+            <Text
+              variant="h2"
+              className="text-xs uppercase tracking-wider text-slate-500 ml-1"
+            >
+              Date & Time
+            </Text>
+            <DatePicker
+              value={departureDateTime}
+              mode="datetime"
+              onChange={makeDateHandler("departureDateTime")}
+              materialDateLabel="Departure Date"
+              materialTimeLabel="Departure Time"
+            />
+            <View className="flex-row items-center gap-1.5 ml-1 mt-1">
+              <MapPin size={13} color="#94a3b8" />
+              <Text
+                variant="h2"
+                className="text-xs uppercase tracking-wider text-slate-500"
+              >
+                Location
+              </Text>
+            </View>
+            <TextInput
+              value={departureLocation}
+              onChangeText={(val) =>
+                setValue("departureLocation", val, { shouldDirty: true })
+              }
+              placeholder="e.g. Tribhuvan International Airport, Terminal 1"
+              placeholderTextColor="#94a3b8"
+              className="bg-white rounded-md px-4 py-3 text-sm text-slate-900 border border-pink-100"
+            />
+          </View>
+        )}
       </View>
+      )}
 
       {/* Dietary Notes */}
       <View>
@@ -405,6 +486,9 @@ const RSVPForm = () => {
             initialNotes={draft?.rawNotes ?? ""}
             initialIsArrivalPickupRequired={initialIsArrivalPickupRequired}
             initialIsDeparturePickupRequired={initialIsDeparturePickupRequired}
+            initialArrivalInfo={draft?.rawArrivalInfo ?? ""}
+            initialDepartureInfo={draft?.rawDepartureInfo ?? ""}
+    
           />
         </ScrollView>
       </KeyboardAwareScrollView>
