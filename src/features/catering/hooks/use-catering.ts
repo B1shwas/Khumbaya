@@ -1,206 +1,102 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-    createCateringApi,
-    createCateringMenuApi,
-    deleteCateringApi,
-    deleteMenuApi,
-    getCateringByIdApi,
-    getCateringMenuApi,
-    getCateringsByEventIdApi,
-    updateCateringApi,
-    updateMenuApi,
-} from "../api/catering.service";
-import {
-    CreateCateringPayload,
-    CreateMenuPayload,
-    UpdateCateringPayload,
-    UpdateMenuPayload,
-} from "../types/catering.types";
+  createCatering,
+  deleteCatering,
+  getCateringById,
+  getCateringList,
+  updateCatering,
+} from "../services/cateringService";
+import { CreateCateringPayload, UpdateCateringPayload } from "../types";
 
-export const useGetCateringsByEventId = (
-  eventId?: string | number,
-  page = 1,
-  limit = 10
+export const useCateringList = (
+  page: number = 1,
+  limit: number = 10,
+  eventId?: number,
+  options?: { enabled?: boolean }
 ) => {
   return useQuery({
-    queryKey: ["catering/event", eventId, page, limit],
-    queryFn: () =>
-      getCateringsByEventIdApi(eventId as string | number, page, limit),
-    enabled: !!eventId,
+    queryKey: ["catering-list", page, limit, eventId],
+    queryFn: () => getCateringList(page, limit, eventId),
     staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+    enabled: options?.enabled !== false,
   });
 };
 
-export const useGetCateringById = (cateringId?: string | number) => {
+/**
+ * Hook to fetch specific catering plan by ID
+ */
+export const useCateringById = (
+  cateringId: number,
+  options?: { enabled?: boolean }
+) => {
   return useQuery({
-    queryKey: ["catering", cateringId],
-    queryFn: () => getCateringByIdApi(cateringId as string | number),
-    enabled: !!cateringId,
+    queryKey: ["catering-detail", cateringId],
+    queryFn: () => getCateringById(cateringId),
     staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+    enabled: cateringId > 0 && options?.enabled !== false,
   });
 };
 
-export const useGetCateringMenu = (cateringId?: string | number) => {
-  return useQuery({
-    queryKey: ["catering", cateringId, "menu"],
-    queryFn: () => getCateringMenuApi(cateringId as string | number),
-    enabled: !!cateringId,
-    staleTime: 5 * 60 * 1000,
-  });
-};
-
-export const useCreateCatering = () => {
+/**
+ * Hook to create a new catering plan
+ */
+export const useCreateCateringMutation = (eventId: number) => {
   const queryClient = useQueryClient();
+
   return useMutation({
-    mutationFn: ({
-      eventId,
-      payload,
-    }: {
-      eventId: string | number;
-      payload: CreateCateringPayload;
-    }) => createCateringApi(eventId, payload),
-    onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["catering/event"] });
+    mutationKey: ["create-catering", eventId],
+    mutationFn: (payload: CreateCateringPayload) =>
+      createCatering(eventId, payload),
+    onSuccess: () => {
+      // Invalidate catering list queries for this event
       queryClient.invalidateQueries({
-        queryKey: ["catering/event", String(variables.eventId)],
+        queryKey: ["catering-list"],
       });
     },
   });
 };
 
-export const useUpdateCatering = () => {
+/**
+ * Hook to update catering plan
+ */
+export const useUpdateCateringMutation = (cateringId: number) => {
   const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: ({
-      cateringId,
-      payload,
-      eventId,
-    }: {
-      cateringId: string | number;
-      eventId?: string | number;
-      payload: UpdateCateringPayload;
-    }) => updateCateringApi(cateringId, payload),
-    onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({
-        queryKey: ["catering", String(variables.cateringId)],
-      });
-      queryClient.invalidateQueries({ queryKey: ["catering/event"] });
-      if (variables.eventId) {
-        queryClient.invalidateQueries({
-          queryKey: ["catering/event", String(variables.eventId)],
-        });
-      }
-    },
-  });
-};
 
-export const useDeleteCatering = () => {
-  const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({
-      cateringId,
-      eventId,
-    }: {
-      cateringId: string | number;
-      eventId?: string | number;
-    }) => deleteCateringApi(cateringId),
-    onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["catering/event"] });
-      if (variables.eventId) {
-        queryClient.invalidateQueries({
-          queryKey: ["catering/event", String(variables.eventId)],
-        });
-      }
-    },
-  });
-};
-
-export const useCreateCateringMenu = () => {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: ({
-      cateringId,
-      payload,
-      eventId,
-    }: {
-      cateringId: string | number;
-      eventId?: string | number;
-      payload: CreateMenuPayload;
-    }) => createCateringMenuApi(cateringId, payload),
-    onSuccess: (_data, variables) => {
+    mutationKey: ["update-catering", cateringId],
+    mutationFn: (payload: UpdateCateringPayload) =>
+      updateCatering(cateringId, payload),
+    onSuccess: () => {
+      // Invalidate catering detail and list queries
       queryClient.invalidateQueries({
-        queryKey: ["catering", String(variables.cateringId), "menu"],
+        queryKey: ["catering-detail", cateringId],
       });
       queryClient.invalidateQueries({
-        queryKey: ["catering", String(variables.cateringId)],
+        queryKey: ["catering-list"],
       });
-      if (variables.eventId) {
-        queryClient.invalidateQueries({
-          queryKey: ["catering/event", String(variables.eventId)],
-        });
-      }
     },
   });
 };
 
-export const useUpdateMenu = () => {
+/**
+ * Hook to delete catering plan
+ */
+export const useDeleteCateringMutation = () => {
   const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: ({
-      menuId,
-      payload,
-      eventId,
-      cateringId,
-    }: {
-      menuId: string | number;
-      cateringId?: string | number;
-      eventId?: string | number;
-      payload: UpdateMenuPayload;
-    }) => updateMenuApi(menuId, payload),
-    onSuccess: (_data, variables) => {
-      if (variables.cateringId) {
-        queryClient.invalidateQueries({
-          queryKey: ["catering", String(variables.cateringId), "menu"],
-        });
-        queryClient.invalidateQueries({
-          queryKey: ["catering", String(variables.cateringId)],
-        });
-      }
-      if (variables.eventId) {
-        queryClient.invalidateQueries({
-          queryKey: ["catering/event", String(variables.eventId)],
-        });
-      }
-    },
-  });
-};
 
-export const useDeleteMenu = () => {
-  const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({
-      menuId,
-      cateringId,
-      eventId,
-    }: {
-      menuId: string | number;
-      cateringId?: string | number;
-      eventId?: string | number;
-    }) => deleteMenuApi(menuId),
-    onSuccess: (_data, variables) => {
-      if (variables.cateringId) {
-        queryClient.invalidateQueries({
-          queryKey: ["catering", String(variables.cateringId), "menu"],
-        });
-        queryClient.invalidateQueries({
-          queryKey: ["catering", String(variables.cateringId)],
-        });
-      }
-      if (variables.eventId) {
-        queryClient.invalidateQueries({
-          queryKey: ["catering/event", String(variables.eventId)],
-        });
-      }
+    mutationKey: ["delete-catering"],
+    mutationFn: (cateringId: number) => deleteCatering(cateringId),
+    onSuccess: (_data, cateringId) => {
+      // Invalidate catering detail and list queries
+      queryClient.invalidateQueries({
+        queryKey: ["catering-detail", cateringId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["catering-list"],
+      });
     },
   });
 };

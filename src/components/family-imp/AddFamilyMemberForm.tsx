@@ -31,8 +31,8 @@ const FOOD_PREFERENCES = [
 
 interface AddFamilyMemberFormProps {
   familyId: number;
-  memberId: number;
-  initialData: any;
+  memberId?: number;
+  initialData?: any;
   onSuccess: any;
 }
 
@@ -76,7 +76,7 @@ export default function AddFamilyMemberForm({
 
   const watchedPhone = watch("phone") ?? "";
   const digits = watchedPhone.replace(/\D/g, "");
-  const fullPhonePayload = digits || "";
+  const fullPhonePayload = digits ? `+${selectedCountry.dialCode}-${digits}` : "";
   const shouldSearchUserByPhone = !isEditMode && digits.length > 0;
 
   const {

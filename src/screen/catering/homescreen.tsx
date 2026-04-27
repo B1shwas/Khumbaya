@@ -98,6 +98,10 @@ export default function CateringDashboard() {
     );
   };
 
+  function handleCateringPress(id: any) {
+    throw new Error("Function not implemented.");
+  }
+
   return (
     <SafeAreaView
       className="flex-1 bg-background-light"
@@ -107,8 +111,14 @@ export default function CateringDashboard() {
 
       <ScrollView
         className="flex-1"
-        stickyHeaderIndices={[0]}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={isLoading}
+            onRefresh={() => refetch()}
+            tintColor="#ee2b8c"
+          />
+        }
       >
         <View className="bg-background-light px-4 py-2 border-b border-outline-variant/30 shadow-sm">
           <View className="flex-row items-center justify-between h-14 w-full">
@@ -299,6 +309,90 @@ export default function CateringDashboard() {
             <View className=" mb-4" />
            
           </View>
+
+          {/* Catering Cards */}
+          {cateringData?.items && cateringData.items.length > 0 ? (
+            cateringData.items.map((catering) => (
+              <catering
+                key={catering.id}
+                catering={catering}
+                onPress={() => handleCateringPress(catering.id)}
+              />
+            ))
+          ) : (
+            <View className="items-center justify-center py-12">
+              <MaterialIcons
+                name="event-note"
+                size={48}
+                color="#896175"
+                style={{ opacity: 0.3 }}
+              />
+              <Text className="text-center text-muted-light font-medium mt-4 text-lg">
+                No catering plans yet
+              </Text>
+              <Text className="text-center text-muted-light text-sm mt-2">
+                Add your first catering plan to get started
+              </Text>
+              <TouchableOpacity
+                onPress={handleAddClick}
+                className="mt-6 bg-primary px-6 py-3 rounded-md"
+                style={shadowStyle}
+              >
+                <Text className="text-white font-bold">Create First Plan</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+
+          {/* Pagination (if applicable) */}
+          {cateringData && cateringData.totalPages > 1 && (
+            <View className="flex-row items-center justify-center gap-4 my-6">
+              <TouchableOpacity
+                onPress={() => setPage(Math.max(1, page - 1))}
+                disabled={page === 1}
+                className={`px-4 py-2 rounded-md ${
+                  page === 1
+                    ? "bg-surface-container opacity-50"
+                    : "bg-surface-container"
+                }`}
+              >
+                <Text
+                  className={
+                    page === 1
+                      ? "text-muted-light font-bold"
+                      : "text-on-surface font-bold"
+                  }
+                >
+                  Previous
+                </Text>
+              </TouchableOpacity>
+
+              <Text className="text-sm font-bold text-muted-light">
+                {page} / {cateringData.totalPages}
+              </Text>
+
+              <TouchableOpacity
+                onPress={() =>
+                  setPage(Math.min(cateringData.totalPages, page + 1))
+                }
+                disabled={page === cateringData.totalPages}
+                className={`px-4 py-2 rounded-md ${
+                  page === cateringData.totalPages
+                    ? "bg-surface-container opacity-50"
+                    : "bg-surface-container"
+                }`}
+              >
+                <Text
+                  className={
+                    page === cateringData.totalPages
+                      ? "text-muted-light font-bold"
+                      : "text-on-surface font-bold"
+                  }
+                >
+                  Next
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
       </ScrollView>
     </SafeAreaView>
