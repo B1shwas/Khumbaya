@@ -8,6 +8,7 @@ export type MealType =
   | "Late Night";
 
 export interface CateringColumn {
+  menus: boolean;
   id: number;
   eventId: number;
   vendorId: number | null;

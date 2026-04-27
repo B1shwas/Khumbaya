@@ -1,7 +1,4 @@
-﻿import CateringPlanCard from "@/src/components/catering/CateringPlanCard";
-import { Text } from "@/src/components/ui/Text";
-import { useGetCateringsByEventId } from "@/src/features/catering/hooks/use-catering";
-import { cn } from "@/src/utils/cn";
+﻿import { Text } from "@/src/components/ui/Text";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
@@ -120,6 +117,7 @@ const CateringCard = ({
       </View>
     </TouchableOpacity>
   );
+};
 
 export default function CateringListScreen() {
   const router = useRouter();
@@ -210,7 +208,7 @@ export default function CateringListScreen() {
           {/* Catering Cards */}
           {cateringData?.items && cateringData.items.length > 0 ? (
             cateringData.items.map((catering) => (
-              <catering
+              <CateringCard
                 key={catering.id}
                 catering={catering}
                 onPress={() => handleCateringPress(catering.id)}
@@ -294,5 +292,4 @@ export default function CateringListScreen() {
       </ScrollView>
     </SafeAreaView>
   );
-}
 }

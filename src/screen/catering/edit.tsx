@@ -1,18 +1,18 @@
 import { DatePicker } from "@/components/nativewindui/DatePicker";
 import { Text } from "@/src/components/ui/Text";
 import {
-  useCreateCateringMenu,
-  useGetCateringById,
-  useUpdateCatering,
-  useUpdateMenu,
+  useCateringById,
+  useUpdateCateringMutation,
 } from "@/src/features/catering/hooks/use-catering";
+import { menuService } from "@/src/features/catering/menu";
 import { CateringMenu } from "@/src/features/catering/types/catering.types";
 import { cn } from "@/src/utils/cn";
 import { shadowStyle } from "@/src/utils/helper";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { useQueryClient } from "@tanstack/react-query";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import {
   ActivityIndicator,
@@ -277,16 +277,19 @@ export default function EditCateringScreen() {
 
   const cateringIdValue =
     typeof cateringId === "string" ? cateringId : String(cateringId ?? "");
+  const cateringIdNumber = Number(cateringIdValue);
   const eventIdValue =
     typeof eventId === "string"
       ? eventId
       : Array.isArray(eventId)
-        ? (eventId[0] ?? undefined)
+        ? eventId[0]
         : undefined;
-  const { data, isLoading } = useGetCateringById(cateringIdValue || undefined);
-  const updateCateringMutation = useUpdateCatering();
-  const updateMenuMutation = useUpdateMenu();
-  const createMenuMutation = useCreateCateringMenu();
+  const { data, isLoading } = useCateringById(cateringIdNumber, {
+    enabled: cateringIdNumber > 0,
+  });
+  const updateCateringMutation = useUpdateCateringMutation(cateringIdNumber);
+  const queryClient = useQueryClient();
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (data) {
@@ -302,8 +305,8 @@ export default function EditCateringScreen() {
           ? new Date(data.endDateTime).toISOString()
           : new Date(new Date().getTime() + 4 * 60 * 60 * 1000).toISOString(),
         menuItems:
-          data.menus && data.menus.length > 0
-            ? (data.menus ?? []).map((menu: CateringMenu) => ({
+          Array.isArray(data.menus) && data.menus.length > 0
+            ? (data.menus as CateringMenu[]).map((menu) => ({
                 id: menu.id,
                 name: menu.name,
                 description: menu.description,
@@ -337,10 +340,7 @@ export default function EditCateringScreen() {
     append({ ...DEFAULT_MENU_ITEM });
   };
 
-  const isSaving =
-    updateCateringMutation.status === "pending" ||
-    updateMenuMutation.status === "pending" ||
-    createMenuMutation.status === "pending";
+  const isSaving = saving || updateCateringMutation.status === "pending";
 
   const handleSave = handleSubmit(async (formValues) => {
     if (!eventIdValue || !cateringIdValue) {
@@ -349,18 +349,15 @@ export default function EditCateringScreen() {
 
     const payload = {
       name: formValues.title || "Catering Package",
-      per_plate_price: Number(formValues.pax) || 0,
+      per_plate_price: String(formValues.pax || "0"),
       startDateTime: new Date(formValues.startDateTime).toISOString(),
       endDateTime: new Date(formValues.endDateTime).toISOString(),
       meal_type: formValues.selectedMeal,
     };
 
+    setSaving(true);
     try {
-      await updateCateringMutation.mutateAsync({
-        cateringId: cateringIdValue,
-        payload,
-        eventId: eventIdValue,
-      });
+      await updateCateringMutation.mutateAsync(payload);
 
       const validMenuItems = formValues.menuItems.filter((item) =>
         item.name.trim()
@@ -369,35 +366,30 @@ export default function EditCateringScreen() {
       await Promise.all(
         validMenuItems.map((item) => {
           if (item.id) {
-            return updateMenuMutation.mutateAsync({
-              menuId: item.id,
-              cateringId: cateringIdValue,
-              payload: {
-                name: item.name,
-                description: item.description,
-                type: item.type,
-                menuType: item.menuType,
-              },
-              eventId: eventIdValue,
-            });
-          }
-
-          return createMenuMutation.mutateAsync({
-            cateringId: cateringIdValue,
-            payload: {
+            return menuService.updateMenu(Number(item.id), {
               name: item.name,
               description: item.description,
               type: item.type,
               menuType: item.menuType,
-            },
-            eventId: eventIdValue,
+            });
+          }
+
+          return menuService.createMenu(cateringIdNumber, {
+            name: item.name,
+            description: item.description,
+            type: item.type,
+            menuType: item.menuType,
           });
         })
       );
 
+      queryClient.invalidateQueries({ queryKey: ["menu"], exact: false });
+
       router.back();
     } catch (error) {
       console.error("Failed to update catering", error);
+    } finally {
+      setSaving(false);
     }
   });
 
