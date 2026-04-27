@@ -147,11 +147,9 @@ export default function CateringDetailsScreen() {
   }, [groupedMenus]);
 
   const handleAddMenu = () => {
-    router.push({
-      pathname:
-        "/(protected)/(client-stack)/events/[eventId]/(organizer)/catering/[cateringId]/add-menu",
-      params: { eventId, cateringId },
-    });
+    router.push(
+      `/(protected)/(client-stack)/events/${eventId}/(organizer)/catering/${cateringId}/add-menu`
+    );
   };
 
   if (isLoadingCatering) {
@@ -262,7 +260,7 @@ export default function CateringDetailsScreen() {
                   key={category}
                   category={category}
                   items={groupedMenus[category]}
-                  onItemPress={() => { }}
+                  onItemPress={() => {}}
                 />
               ))}
               <Text className="text-xs text-muted-light mt-2">
