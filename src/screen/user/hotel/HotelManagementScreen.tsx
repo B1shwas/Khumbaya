@@ -24,7 +24,6 @@ interface Hotel_responce {
     familyId?: number;
   } | null;
   user_room: string | null;
-  assigned_room?: string | null;
   category: string | null;
   invitationId: number;
 
@@ -71,10 +70,6 @@ function getShortDisplayName(name: string, maxLength = 18): string {
   const normalized = name.trim();
   if (normalized.length <= maxLength) return normalized;
   return `${normalized.slice(0, maxLength - 1)}…`;
-}
-
-function getGuestRoomValue(guest: Hotel_responce): string {
-  return guest.user_room?.trim() || guest.assigned_room?.trim() || "";
 }
 
 function RoomCardItem({
@@ -128,52 +123,42 @@ function RoomCardItem({
             onPress={() => onCheckIn(item.room)}
             className={`px-4 py-2 rounded-md ${isPending ? "bg-primary/60" : "bg-primary"}`}
           >
-            <Text className="font-jakarta-bold text-[12px] text-white">
-              Check In
-            </Text>
+            <Text className="font-jakarta-bold text-[12px] text-white">Check In</Text>
           </TouchableOpacity>
         )}
       </View>
 
-      <View className="flex-col gap-2">
+      <View className="flex-row flex-wrap">
         {item.guests.slice(0, 4).map((guest, idx) => {
           const username = guest.user_detail?.username || `Guest ${idx + 1}`;
-          const displayName = getShortDisplayName(username, 18);
-          const phone = guest.user_detail?.phone
-            ? guest.user_detail.phone
-            : "Phone unavailable";
-          const guestStatus = getGuestStatus(guest);
-
+          const displayName = getShortDisplayName(username, 14);
           return (
             <View
               key={`${guest.user_detail?.id ?? username}-${idx}`}
-              className="rounded-xl border border-gray-100 bg-gray-50 px-3 py-3"
+              className="w-1/2 pr-2 pb-1.5"
             >
-              <View className="flex-row items-start gap-3">
-                <View className="w-10 h-10 rounded-full bg-pink-100 items-center justify-center">
-                  <Text className="font-jakarta-bold text-[12px] text-primary">
+              <View className="flex-row items-center gap-2">
+                <View className="w-5 h-5 rounded-full bg-pink-100 items-center justify-center">
+                  <Text className="font-jakarta-bold text-[9px] text-primary">
                     {getInitials(username)}
                   </Text>
                 </View>
-
-                <View className="flex-1">
-                  <Text className="font-jakarta-semibold text-sm text-[#181114]">
-                    {displayName}
-                  </Text>
-                  <Text className="font-jakarta text-[11px] text-gray-500 mt-0.5">
-                    {phone}
-                  </Text>
-                </View>
+                <Text
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
+                  className="font-jakarta-semibold text-[12px] text-[#181114] flex-1"
+                >
+                  {displayName}
+                </Text>
               </View>
             </View>
           );
         })}
 
         {item.guests.length > 4 && (
-          <View className="rounded-xl border border-dashed border-gray-200 bg-white px-3 py-2">
-            <Text className="font-jakarta text-[11px] text-gray-500">
-              +{item.guests.length - 4} more guest
-              {item.guests.length - 4 === 1 ? "" : "s"}
+          <View className="w-1/2 pr-2 pb-1.5">
+            <Text className="font-jakarta text-[11px] text-gray-500 ml-7">
+              +{item.guests.length - 4} more
             </Text>
           </View>
         )}
@@ -231,10 +216,10 @@ export default function HotelManagementScreen() {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [isCategoryModalVisible, setIsCategoryModalVisible] = useState(false);
   const [roomCheckInModal, setRoomCheckInModal] = useState<{
-    visible: boolean;
     room: string | null;
     guests: Hotel_responce[];
-  }>({ visible: false, room: null, guests: [] });
+    status: "pending" | "checkedIn" | "checkedOut"
+  }>({ status: "pending", room: null, guests: [] });
   const [activeCheckinUserId, setActiveCheckinUserId] = useState<number | null>(
     null
   );
@@ -243,6 +228,11 @@ export default function HotelManagementScreen() {
     guest: Hotel_responce | null;
   }>({ visible: false, guest: null });
   const [newRoom, setNewRoom] = useState("");
+  const [guestDetailModal, setGuestDetailModal] = useState<{
+    visible: boolean;
+    guest: Hotel_responce | null;
+    room: string | null;
+  }>({ visible: false, guest: null, room: null });
 
   const {
     data: guestRooms = [],
@@ -253,12 +243,7 @@ export default function HotelManagementScreen() {
 
   const normalizedGuests = useMemo(() => {
     return Array.isArray(guestRooms)
-      ? (guestRooms.filter(Boolean) as Hotel_responce[]).map((guest) => ({
-          ...guest,
-          user_room: guest.user_room?.trim()
-            ? guest.user_room.trim()
-            : (guest.assigned_room?.trim() ?? null),
-        }))
+      ? (guestRooms.filter(Boolean) as Hotel_responce[])
       : [];
   }, [guestRooms]);
 
@@ -279,7 +264,7 @@ export default function HotelManagementScreen() {
     return normalizedGuests.filter((guest) => {
       const username = guest.user_detail?.username?.toLowerCase() ?? "";
       const phone = guest.user_detail?.phone?.toLowerCase() ?? "";
-      const room = getGuestRoomValue(guest).toLowerCase();
+      const room = guest.user_room?.toLowerCase() ?? "";
       return (
         username.includes(query) ||
         phone.includes(query) ||
@@ -339,7 +324,7 @@ export default function HotelManagementScreen() {
     const guestsByRoom = new Map<string, Hotel_responce[]>();
 
     for (const guest of guestsAfterCategoryFilter) {
-      const room = getGuestRoomValue(guest);
+      const room = guest.user_room?.trim();
       if (!room) continue;
 
       if (!guestsByRoom.has(room)) {
@@ -365,17 +350,15 @@ export default function HotelManagementScreen() {
   }, [guestsAfterCategoryFilter]);
 
   const unassignedGuests = useMemo(
-    () => guestsAfterCategoryFilter.filter((g) => !getGuestRoomValue(g)),
+    () => guestsAfterCategoryFilter.filter((g) => !g.user_room),
     [guestsAfterCategoryFilter]
   );
 
   const totalGuests = normalizedGuests.length;
-  const totalAssigned = normalizedGuests.filter(
-    (g) => !!getGuestRoomValue(g)
-  ).length;
+  const totalAssigned = normalizedGuests.filter((g) => !!g.user_room).length;
   const totalRooms = new Set(
     normalizedGuests
-      .map((g) => getGuestRoomValue(g))
+      .map((g) => g.user_room?.trim())
       .filter((room): room is string => !!room)
   ).size;
 
@@ -437,9 +420,7 @@ export default function HotelManagementScreen() {
 
       <View className="flex-row bg-white mx-4 mb-3 mt-2 rounded-md py-3.5 shadow-sm">
         <View className="flex-1 items-center">
-          <Text className="font-jakarta-bold text-xl text-primary">
-            {totalRooms}
-          </Text>
+          <Text className="font-jakarta-bold text-xl text-primary">{totalRooms}</Text>
           <Text className="font-jakarta text-[11px] text-gray-500 mt-0.5">
             Rooms
           </Text>
@@ -521,10 +502,7 @@ export default function HotelManagementScreen() {
                     key={`${guest.user_detail?.id ?? "guest"}-${idx}`}
                     guest={guest}
                     onAssignRoom={(selectedGuest) => {
-                      setRoomAssignmentModal({
-                        visible: true,
-                        guest: selectedGuest,
-                      });
+                      setRoomAssignmentModal({ visible: true, guest: selectedGuest });
                       setNewRoom("");
                     }}
                   />
@@ -570,18 +548,13 @@ export default function HotelManagementScreen() {
                   Room Check In
                 </Text>
                 <Text className="font-jakarta text-xs text-gray-500 mt-1">
-                  Room {roomCheckInModal.room || "-"} •{" "}
-                  {roomCheckInModal.guests.length} guest
+                  Room {roomCheckInModal.room || "-"} • {roomCheckInModal.guests.length} guest
                   {roomCheckInModal.guests.length === 1 ? "" : "s"}
                 </Text>
               </View>
               <TouchableOpacity
                 onPress={() => {
-                  setRoomCheckInModal({
-                    visible: false,
-                    room: null,
-                    guests: [],
-                  });
+                  setRoomCheckInModal({ visible: false, room: null, guests: [] });
                 }}
               >
                 <Ionicons name="close" size={20} color="#6B7280" />
@@ -635,11 +608,12 @@ export default function HotelManagementScreen() {
                             >
                               {username}
                             </Text>
-                            <Text className="font-jakarta text-[11px] text-gray-500 mt-0.5">
-                              {guest.user_detail?.phone || "Phone unavailable"}
-                            </Text>
 
                             <View className="flex-row items-center gap-2 mt-1">
+                              <Text className="font-jakarta text-[11px] text-gray-500">
+                                Invitation ID: {guest.invitationId}
+                              </Text>
+
                               {guestStatus === "checked-in" && (
                                 <View className="px-2 py-0.5 rounded-full bg-green-100 border border-green-200">
                                   <Text className="font-jakarta-bold text-[9px] text-green-700">
@@ -647,6 +621,7 @@ export default function HotelManagementScreen() {
                                   </Text>
                                 </View>
                               )}
+
                               {guestStatus === "checked-out" && (
                                 <View className="px-2 py-0.5 rounded-full bg-amber-100 border border-amber-200">
                                   <Text className="font-jakarta-bold text-[9px] text-amber-700">
@@ -657,28 +632,6 @@ export default function HotelManagementScreen() {
                             </View>
                           </View>
                         </View>
-                        {getGuestRoomValue(guest) ? (
-                          <View className="mt-3 p-3 bg-primary/10 border border-primary/20 rounded-xl">
-                            <Text className="font-jakarta text-xs text-primary mb-1">
-                              Assigned room
-                            </Text>
-                            <View className="flex-row items-center justify-between">
-                              <View className="flex-row items-center gap-2">
-                                <Ionicons
-                                  name="bed-outline"
-                                  size={14}
-                                  color="#ee2b8c"
-                                />
-                                <Text className="font-jakarta-bold text-sm text-primary">
-                                  Room {getGuestRoomValue(guest)}
-                                </Text>
-                              </View>
-                              <Text className="font-jakarta text-[11px] text-primary">
-                                {guest.user_detail?.phone || "—"}
-                              </Text>
-                            </View>
-                          </View>
-                        ) : null}
 
                         {actionType === "none" ? (
                           <View className="px-3 py-2 rounded-md bg-amber-100 border border-amber-200">
@@ -689,11 +642,11 @@ export default function HotelManagementScreen() {
                         ) : (
                           <TouchableOpacity
                             disabled={
-                              isCurrentGuestPending || !guest.user_detail?.id
+                              isCurrentGuestPending ||
+                              !guest.user_detail?.id
                             }
                             onPress={() => {
-                              if (!guest.user_detail?.id || !numericEventId)
-                                return;
+                              if (!guest.user_detail?.id || !numericEventId) return;
 
                               setActiveCheckinUserId(guest.user_detail.id);
 
@@ -716,10 +669,7 @@ export default function HotelManagementScreen() {
                                     refetch();
                                   },
                                   onError: (error) => {
-                                    console.error(
-                                      "Status update failed:",
-                                      error
-                                    );
+                                    console.error("Status update failed:", error);
                                   },
                                   onSettled: () => {
                                     setActiveCheckinUserId(null);
@@ -727,21 +677,18 @@ export default function HotelManagementScreen() {
                                 }
                               );
                             }}
-                            className={`px-3.5 py-2 rounded-md ${
-                              isCurrentGuestPending
-                                ? "bg-primary/60"
-                                : actionType === "check-out"
-                                  ? "bg-amber-500"
-                                  : "bg-primary"
-                            }`}
+                            className={`px-3.5 py-2 rounded-md ${isCurrentGuestPending
+                              ? "bg-primary/60"
+                              : actionType === "check-out"
+                                ? "bg-amber-500"
+                                : "bg-primary"
+                              }`}
                           >
                             {isCurrentGuestPending ? (
                               <ActivityIndicator size="small" color="#ffffff" />
                             ) : (
                               <Text className="font-jakarta-bold text-[12px] text-white">
-                                {actionType === "check-out"
-                                  ? "Check Out"
-                                  : "Check In"}
+                                {actionType === "check-out" ? "Check Out" : "Check In"}
                               </Text>
                             )}
                           </TouchableOpacity>
@@ -790,11 +737,10 @@ export default function HotelManagementScreen() {
                     setSelectedCategory(option.value);
                     setIsCategoryModalVisible(false);
                   }}
-                  className={`flex-row items-center justify-between px-4 py-3.5 rounded-xl border mb-2 ${
-                    isActive
-                      ? "border-primary bg-primary/10"
-                      : "border-gray-200 bg-white"
-                  }`}
+                  className={`flex-row items-center justify-between px-4 py-3.5 rounded-xl border mb-2 ${isActive
+                    ? "border-primary bg-primary/10"
+                    : "border-gray-200 bg-white"
+                    }`}
                 >
                   <Text className="font-jakarta-semibold text-sm text-[#181114]">
                     {option.label}
@@ -851,29 +797,14 @@ export default function HotelManagementScreen() {
 
             {roomAssignmentModal.guest && (
               <>
-                <View className="mb-4 p-4 bg-primary/10 border border-primary/20 rounded-2xl">
-                  <Text className="font-jakarta text-xs text-primary mb-2">
-                    Assigned guest
+                <View className="mb-4 p-3 bg-gray-50 rounded-lg">
+                  <Text className="font-jakarta text-xs text-gray-500">
+                    Guest
                   </Text>
-                  <View className="flex-row items-center gap-3 mb-3">
-                    <View className="w-12 h-12 rounded-full bg-primary/20 items-center justify-center">
-                      <Text className="font-jakarta-bold text-base text-primary">
-                        {getInitials(
-                          roomAssignmentModal.guest.user_detail?.username || "G"
-                        )}
-                      </Text>
-                    </View>
-                    <View className="flex-1">
-                      <Text className="font-jakarta-semibold text-sm text-[#181114]">
-                        {roomAssignmentModal.guest.user_detail?.username ||
-                          "Unknown Guest"}
-                      </Text>
-                      <Text className="font-jakarta text-[11px] text-primary mt-0.5">
-                        {roomAssignmentModal.guest.user_detail?.phone ||
-                          "Phone unavailable"}
-                      </Text>
-                    </View>
-                  </View>
+                  <Text className="font-jakarta-semibold text-sm text-[#181114]">
+                    {roomAssignmentModal.guest.user_detail?.username ||
+                      "Unknown"}
+                  </Text>
                 </View>
 
                 <View className="mb-4">
@@ -893,15 +824,11 @@ export default function HotelManagementScreen() {
                   <TouchableOpacity
                     onPress={() => {
                       const roomValue = newRoom.trim();
-                      if (
-                        roomValue &&
-                        roomAssignmentModal.guest?.user_detail?.id
-                      ) {
+                      if (roomValue && roomAssignmentModal.guest?.user_detail?.id) {
                         submitRsvpResponse({
                           assigned_room: roomValue,
                           userId: roomAssignmentModal.guest.user_detail.id,
-                          familyId: roomAssignmentModal.guest.user_detail
-                            .familyId
+                          familyId: roomAssignmentModal.guest.user_detail.familyId
                             ? roomAssignmentModal.guest.user_detail.familyId
                             : undefined,
                         });

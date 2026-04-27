@@ -1,4 +1,5 @@
-﻿import { Text } from "@/src/components/ui/Text";
+﻿import { DatePicker } from "@/components/nativewindui/DatePicker";
+import { Text } from "@/src/components/ui/Text";
 import {
   useCreateCatering,
   useCreateCateringMenu,
@@ -248,10 +249,10 @@ export default function CreateCateringScreen() {
   const [title, setTitle] = useState("");
   const [vendor, setVendor] = useState("");
   const [notes, setNotes] = useState("");
-  const [startDateTime, setStartDateTime] = useState(
-    "2026-06-01T18:00:00.000Z"
+  const [startDateTime, setStartDateTime] = useState<Date>(new Date());
+  const [endDateTime, setEndDateTime] = useState<Date>(
+    new Date(new Date().getTime() + 4 * 60 * 60 * 1000)
   );
-  const [endDateTime, setEndDateTime] = useState("2026-06-01T22:00:00.000Z");
   const [menuItems, setMenuItems] = useState<MenuDraft[]>([DEFAULT_MENU_ITEM]);
 
   const createCateringMutation = useCreateCatering();
@@ -295,8 +296,8 @@ export default function CreateCateringScreen() {
         payload: {
           name: title || "Catering Package",
           per_plate_price: Number(pax) || 0,
-          startDateTime,
-          endDateTime,
+          startDateTime: startDateTime.toISOString(),
+          endDateTime: endDateTime.toISOString(),
           meal_type: selectedMeal,
         },
       });
@@ -394,18 +395,81 @@ export default function CreateCateringScreen() {
             </FormSection>
 
             <FormSection title="Schedule" icon="time-outline">
-              <CustomInput
-                label="Start date & time"
-                placeholder="2026-06-01T18:00:00.000Z"
-                value={startDateTime}
-                onChangeText={setStartDateTime}
-              />
-              <CustomInput
-                label="End date & time"
-                placeholder="2026-06-01T22:00:00.000Z"
-                value={endDateTime}
-                onChangeText={setEndDateTime}
-              />
+              <View className="mb-5">
+                <Text className="text-[11px] font-bold text-muted-light uppercase tracking-widest mb-2 ml-1">
+                  Start date
+                </Text>
+                <DatePicker
+                  mode="date"
+                  value={startDateTime}
+                  onChange={(_event: any, date?: Date) => {
+                    if (date) {
+                      const updated = new Date(startDateTime);
+                      updated.setFullYear(
+                        date.getFullYear(),
+                        date.getMonth(),
+                        date.getDate()
+                      );
+                      setStartDateTime(updated);
+                    }
+                  }}
+                />
+              </View>
+
+              <View className="mb-5">
+                <Text className="text-[11px] font-bold text-muted-light uppercase tracking-widest mb-2 ml-1">
+                  Start time
+                </Text>
+                <DatePicker
+                  mode="time"
+                  value={startDateTime}
+                  onChange={(_event: any, date?: Date) => {
+                    if (date) {
+                      const updated = new Date(startDateTime);
+                      updated.setHours(date.getHours(), date.getMinutes());
+                      setStartDateTime(updated);
+                    }
+                  }}
+                />
+              </View>
+
+              <View className="mb-5">
+                <Text className="text-[11px] font-bold text-muted-light uppercase tracking-widest mb-2 ml-1">
+                  End date
+                </Text>
+                <DatePicker
+                  mode="date"
+                  value={endDateTime}
+                  onChange={(_event: any, date?: Date) => {
+                    if (date) {
+                      const updated = new Date(endDateTime);
+                      updated.setFullYear(
+                        date.getFullYear(),
+                        date.getMonth(),
+                        date.getDate()
+                      );
+                      setEndDateTime(updated);
+                    }
+                  }}
+                />
+              </View>
+
+              <View>
+                <Text className="text-[11px] font-bold text-muted-light uppercase tracking-widest mb-2 ml-1">
+                  End time
+                </Text>
+                <DatePicker
+                  mode="time"
+                  value={endDateTime}
+                  onChange={(_event: any, date?: Date) => {
+                    if (date) {
+                      const updated = new Date(endDateTime);
+                      updated.setHours(date.getHours(), date.getMinutes());
+                      setEndDateTime(updated);
+                    }
+                  }}
+                />
+              </View>
             </FormSection>
 
             <FormSection title="Menu planner" icon="reader-outline">

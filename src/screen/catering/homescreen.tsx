@@ -21,14 +21,19 @@ interface DateItem {
   disabled?: boolean;
 }
 
-const DATES: DateItem[] = [
-  { day: "Sat", date: 24 },
-  { day: "Sun", date: 25 },
-  { day: "Mon", date: 26 },
-  { day: "Tue", date: 27 },
-  { day: "Wed", date: 28 },
-  { day: "Thu", date: 29, disabled: true },
-];
+const getUpcomingDates = (count: number): DateItem[] => {
+  const today = new Date();
+
+  return Array.from({ length: count }, (_, index) => {
+    const date = new Date(today);
+    date.setDate(today.getDate() + index);
+
+    return {
+      day: date.toLocaleDateString("en-US", { weekday: "short" }),
+      date: date.getDate(),
+    };
+  });
+};
 
 const PAGE_SIZE = 10;
 
@@ -57,11 +62,13 @@ const getApiErrorMessage = (error: unknown): string => {
 export default function CateringDashboard() {
   const router = useRouter();
   const { eventId } = useLocalSearchParams();
-  const [selectedDate, setSelectedDate] = useState(2);
+  const [selectedDate, setSelectedDate] = useState(0);
   const [page, setPage] = useState(1);
 
   const eventIdValue =
     typeof eventId === "string" ? eventId : String(eventId ?? "");
+
+  const dates = getUpcomingDates(6);
 
   const { data, isLoading, error, isFetching } = useGetCateringsByEventId(
     eventIdValue || undefined,
@@ -159,21 +166,15 @@ export default function CateringDashboard() {
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={{ paddingRight: 20, marginLeft: 10 }}
             >
-              {DATES.map((item, index) => (
+              {dates.map((item, index) => (
                 <Pressable
                   key={item.date}
-                  onPress={() => !item.disabled && setSelectedDate(index)}
-                  disabled={item.disabled}
+                  onPress={() => setSelectedDate(index)}
                   className={cn(
                     "flex flex-col items-center justify-center min-w-[60px] py-3 px-2 rounded-md mr-2.5 mb-2",
-                    selectedDate === index ? "bg-primary" : "bg-white",
-                    item.disabled ? "opacity-30" : "opacity-100"
+                    selectedDate === index ? "bg-primary" : "bg-white"
                   )}
-                  style={
-                    !item.disabled && selectedDate !== index
-                      ? shadowStyle
-                      : undefined
-                  }
+                  style={selectedDate !== index ? shadowStyle : undefined}
                 >
                   <Text
                     className={cn(
