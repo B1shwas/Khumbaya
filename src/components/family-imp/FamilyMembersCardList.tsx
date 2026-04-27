@@ -119,10 +119,9 @@ export default function FamilyMembersCardList({
               className="text-sm text-gray-600 mt-0.5 capitalize"
               numberOfLines={1}
             >
-              {member.relation}
-              {member.foodPreference
-                ? ` • ${member.foodPreference}`
-                : undefined}
+              {member.id === user?.id
+                ? "Me"
+                : `${member.relation}${member.foodPreference ? ` • ${member.foodPreference}` : ""}`}
             </Text>
           </View>
 
