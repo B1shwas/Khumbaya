@@ -3,6 +3,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Controller, useForm } from "react-hook-form";
 import {
+  Alert,
     KeyboardAvoidingView,
     Platform,
     Pressable,
@@ -17,119 +18,177 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Text } from "../../components/ui/Text";
 import { cn } from "../../utils/cn";
 import { shadowStyle } from "../../utils/helper";
+import { useCreateCateringMutation } from "@/src/features/catering";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+// ─── Types & Constants ────────────────────────────────────────────────────────
 
-type MealType = "Breakfast" | "Lunch" | "High Tea" | "Dinner" | "Late Night";
-
-interface MealOption {
-    type: MealType;
-    icon: keyof typeof MaterialIcons.glyphMap;
-    color: string;
+interface CateringFormData {
+  name: string;
+  mealType: string;
+  perPlatePrice: string;
+  startDateTime: Date;
+  endDateTime: Date;
 }
 
-const MEAL_OPTIONS: MealOption[] = [
-    { type: "Breakfast", icon: "breakfast-dining", color: "#f59e0b" },
-    { type: "Lunch", icon: "lunch-dining", color: "#10b981" },
-    { type: "High Tea", icon: "local-cafe", color: "#8b5cf6" },
-    { type: "Dinner", icon: "dinner-dining", color: "#ee2b8c" },
-    { type: "Late Night", icon: "nightlife", color: "#6366f1" },
+const MEAL_TYPE_OPTIONS = [
+  { label: "Breakfast", value: "Breakfast" },
+  { label: "Lunch", value: "Lunch" },
+  { label: "High Tea", value: "High Tea" },
+  { label: "Dinner", value: "Dinner" },
+  { label: "Late Night", value: "Late Night" },
 ];
 
-// ─── Sub-components ────────────────────────────────────────────────────────────
-
-const FormSection = ({ title, children, icon }: { title: string; children: React.ReactNode; icon: keyof typeof Ionicons.glyphMap }) => (
-    <View className="mb-8">
-        <View className="flex-row items-center mb-4 px-1">
-            <View className="w-8 h-8 rounded-md bg-primary/10 items-center justify-center mr-3">
-                <Ionicons name={icon} size={18} color="#ee2b8c" />
-            </View>
-            <Text className="text-lg font-bold text-on-surface tracking-tight">{title}</Text>
-        </View>
-        <View className="bg-white rounded-md p-5 border border-white/40" style={shadowStyle}>
-            {children}
-        </View>
-    </View>
-);
-
-const CustomInput = ({
-    label,
-    placeholder,
-    value,
-    onChangeText,
-    keyboardType = "default",
-    icon
-}: {
-    label: string;
-    placeholder: string;
-    value: string;
-    onChangeText: (text: string) => void;
-    keyboardType?: "default" | "numeric" | "email-address" | "phone-pad";
-    icon?: keyof typeof MaterialIcons.glyphMap;
-}) => (
-    <View className="mb-5 last:mb-0">
-        <Text className="text-[11px] font-bold text-muted-light uppercase tracking-widest mb-2 ml-1">
-            {label}
-        </Text>
-        <View className="flex-row items-center bg-background-light/50 border border-outline-variant/50 rounded-md px-4 py-3.5 focus:border-primary/50">
-            {icon && <MaterialIcons name={icon} size={20} color="#896175" className="mr-3" />}
-            <TextInput
-                placeholder={placeholder}
-                placeholderTextColor="#896175"
-                className="flex-1 text-[16px] font-medium text-on-surface"
-                value={value}
-                onChangeText={onChangeText}
-                keyboardType={keyboardType}
-            />
-        </View>
-    </View>
-);
-
-// ─── Main Screen ───────────────────────────────────────────────────────────────
-
 export default function CreateCateringScreen() {
-    const router = useRouter();
-    const [selectedMeal, setSelectedMeal] = useState<MealType>("Lunch");
-    const [pax, setPax] = useState("");
-    const [title, setTitle] = useState("");
-    const [vendor, setVendor] = useState("");
-    const [notes, setNotes] = useState("");
+  const router = useRouter();
+  const params = useLocalSearchParams();
+  const eventId = parseInt(params.eventId as string, 10);
 
-    const handleSave = () => {
-        // Implement save logic here
-        console.log("Saving catering plan...");
-        router.back();
-    };
+  // Form hook
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<CateringFormData>({
+    defaultValues: {
+      name: "",
+      mealType: "Lunch",
+      perPlatePrice: "",
+      startDateTime: new Date(),
+      endDateTime: new Date(Date.now() + 3600000),
+    },
+  });
 
-    return (
-        <SafeAreaView className="flex-1 bg-background-light" edges={["top", "bottom"]}>
-            <StatusBar barStyle="dark-content" />
-            <KeyboardAvoidingView
-                behavior={Platform.OS === "ios" ? "padding" : "height"}
-                className="flex-1"
-            >
-                <ScrollView
-                    className="flex-1"
-                    showsVerticalScrollIndicator={false}
-                    contentContainerStyle={{ paddingBottom: 40 }}
-                >
-                    {/* Header */}
-                    <LinearGradient
-                        colors={["rgba(238,43,140,0.1)", "transparent"]}
-                        className="px-6 pt-6 pb-12 rounded-b-[40px]"
-                    >
-                        <View className="flex-row items-center justify-between mb-8">
-                            <Pressable
-                                onPress={() => router.back()}
-                                className="w-10 h-10 rounded-full bg-white items-center justify-center "
-                            >
-                                <MaterialIcons name="arrow-back-ios" size={18} color="#ee2b8c" style={{ marginLeft: 6 }} />
-                            </Pressable>
-                            <View className="bg-white/60 px-4 py-2 rounded-full border border-white/40">
-                                <Text className="text-[12px] font-black text-primary uppercase tracking-widest">
-                                    Setup Mode
-                                </Text>
-                            </View>
+  // API mutation
+  const createCateringMutation = useCreateCateringMutation(eventId);
+
+  const onSubmit = async (data: CateringFormData) => {
+    try {
+      // Validate dates
+      if (data.endDateTime <= data.startDateTime) {
+        Alert.alert("Error", "End time must be after start time");
+        return;
+      }
+
+      await createCateringMutation.mutateAsync({
+        name: data.name,
+        per_plate_price: data.perPlatePrice,
+        startDateTime: data.startDateTime.toISOString(),
+        endDateTime: data.endDateTime.toISOString(),
+        meal_type: data.mealType,
+      });
+
+      Alert.alert("Success", "Catering plan created successfully!", [
+        {
+          text: "OK",
+          onPress: () => router.back(),
+        },
+      ]);
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Failed to create catering plan";
+      Alert.alert("Error", errorMessage);
+    }
+  };
+
+  return (
+    <SafeAreaView
+      className="flex-1 bg-background-light"
+      edges={["top", "bottom"]}
+    >
+      <StatusBar barStyle="dark-content" />
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        className="flex-1"
+      >
+        <ScrollView
+          className="flex-1"
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: 40 }}
+        >
+          {/* Form Content */}
+          <View className="px-6 py-6">
+            {/* Plan Name */}
+            <View className="mb-6">
+              <Text className="text-sm font-bold text-on-surface mb-3">
+                Plan Name
+              </Text>
+              <Controller
+                control={control}
+                name="name"
+                rules={{
+                  required: "Plan name is required",
+                  maxLength: {
+                    value: 255,
+                    message: "Name must be less than 255 characters",
+                  },
+                }}
+                render={({ field: { value, onChange } }) => (
+                  <View>
+                    <TextInput
+                      placeholder="e.g., Wedding Reception Dinner"
+                      placeholderTextColor="#896175"
+                      className="bg-background-light border border-outline-variant/50 rounded-lg px-4 py-3 text-base font-medium text-on-surface"
+                      value={value}
+                      onChangeText={onChange}
+                    />
+                    {errors.name && (
+                      <Text className="text-red-500 text-xs mt-2">
+                        {errors.name.message}
+                      </Text>
+                    )}
+                  </View>
+                )}
+              />
+            </View>
+
+            {/* Meal Type Dropdown */}
+            <View className="mb-6">
+              <Text className="text-sm font-bold text-on-surface mb-3">
+                Meal Type
+              </Text>
+              <Controller
+                control={control}
+                name="mealType"
+                rules={{ required: "Meal type is required" }}
+                render={({ field: { value, onChange } }) => (
+                  <View>
+                    <Dropdown
+                      style={{
+                        height: 50,
+                        borderWidth: 1,
+                        borderColor: "#e5e7eb",
+                        borderRadius: 8,
+                        paddingHorizontal: 16,
+                        backgroundColor: "#fafbfc",
+                      }}
+                      data={MEAL_TYPE_OPTIONS}
+                      labelField="label"
+                      valueField="value"
+                      placeholder="Select meal type"
+                      value={value}
+                      onChange={(item) => onChange(item.value)}
+                      selectedTextStyle={{
+                        color: "#ee2b8c",
+                        fontSize: 16,
+                        fontWeight: "600",
+                      }}
+                      placeholderStyle={{ color: "#896175", fontSize: 16 }}
+                      itemTextStyle={{ color: "#1a1a1a", fontSize: 16 }}
+                      activeColor="#fdf2f8"
+                      renderItem={(item) => (
+                        <View className="flex-row items-center justify-between px-4 py-3">
+                          <Text className="text-base font-medium text-on-surface">
+                            {item.label}
+                          </Text>
+                          {value === item.value && (
+                            <MaterialIcons
+                              name="check"
+                              size={20}
+                              color="#ee2b8c"
+                            />
+                          )}
                         </View>
 
                         <View>
@@ -289,3 +348,4 @@ export default function CreateCateringScreen() {
         </SafeAreaView>
     );
 }
+                
