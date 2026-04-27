@@ -1,39 +1,25 @@
+﻿import CateringPlanCard from "@/src/components/catering/CateringPlanCard";
 import { Text } from "@/src/components/ui/Text";
+import { useGetCateringsByEventId } from "@/src/features/catering/hooks/use-catering";
+import { cn } from "@/src/utils/cn";
+import { shadowStyle } from "@/src/utils/helper";
 import { MaterialIcons } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
-import { useRouter, useLocalSearchParams } from "expo-router";
-import { useState } from "react";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useEffect, useState } from "react";
 import {
+  ActivityIndicator,
   Pressable,
   ScrollView,
   StatusBar,
-  TouchableOpacity,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { cn } from "../../utils/cn";
-import { shadowStyle } from "../../utils/helper";
-
-// ─── Types ────────────────────────────────────────────────────────────────────
 
 interface DateItem {
   day: string;
   date: number;
   disabled?: boolean;
 }
-
-interface Event {
-  id: string;
-  time: string;
-  title: string;
-  vendor: string;
-  vendorIcon: keyof typeof MaterialIcons.glyphMap;
-  pax: string;
-  isActive?: boolean;
-  isCompleted?: boolean;
-}
-
-// ─── Data ─────────────────────────────────────────────────────────────────────
 
 const DATES: DateItem[] = [
   { day: "Sat", date: 24 },
@@ -44,203 +30,72 @@ const DATES: DateItem[] = [
   { day: "Thu", date: 29, disabled: true },
 ];
 
-const EVENTS: Event[] = [
-  {
-    id: "1",
-    time: "08:30 – 09:30 AM",
-    title: "Executive Breakfast Briefing",
-    vendor: "Luminary Pastries",
-    vendorIcon: "business-center",
-    pax: "50 Pax",
-  },
-  {
-    id: "2",
-    time: "12:15 – 02:00 PM",
-    title: "Board of Directors Luncheon",
-    vendor: "Atelier Culinary",
-    vendorIcon: "restaurant",
-    pax: "15 Pax",
-  },
-  {
-    id: "3",
-    time: "07:00 – 10:00 PM",
-    title: "Annual Gala Reception",
-    vendor: "Velvet Signature",
-    vendorIcon: "local-bar",
-    pax: "250 Pax",
-    isActive: true,
-  },
-  {
-    id: "4",
-    time: "10:30 PM – 01:00 AM",
-    title: "Post-Gala Breakdown & Clean",
-    vendor: "Elite Staffing",
-    vendorIcon: "cleaning-services",
-    pax: "12 Staff",
-    isCompleted: true,
-  },
-];
+const PAGE_SIZE = 10;
 
-// ─── Sub-components ────────────────────────────────────────────────────────────
+const getApiErrorMessage = (error: unknown): string => {
+  const status = (error as any)?.response?.status;
 
-const DateChip = ({
-  item,
-  isSelected,
-  onPress,
-}: {
-  item: DateItem;
-  isSelected: boolean;
-  onPress: () => void;
-}) => (
-  <Pressable
-    onPress={onPress}
-    disabled={item.disabled}
-    className={cn(
-      "flex flex-col items-center justify-center min-w-[60px] py-3 px-2 rounded-md mr-2.5 mb-2",
-      isSelected ? "bg-primary" : "bg-white",
-      item.disabled ? "opacity-30" : "opacity-100"
-    )}
-    style={!isSelected ? shadowStyle : { elevation: 4, shadowColor: "#ee2b8c", shadowOpacity: 0.2, shadowRadius: 4, shadowOffset: { width: 0, height: 2 } }}
-  >
-    <Text
-      className={cn(
-        "text-[10px] font-bold uppercase tracking-widest mb-0.5",
-        isSelected ? "text-white/80" : "text-muted-light"
-      )}
-    >
-      {item.day}
-    </Text>
-    <Text
-      className={cn(
-        "text-lg font-black",
-        isSelected ? "text-white" : "text-on-surface"
-      )}
-    >
-      {item.date}
-    </Text>
-  </Pressable>
-);
-
-const EventCard = ({ event }: { event: Event }) => {
-  if (event.isActive) {
-    return (
-      <TouchableOpacity
-        activeOpacity={0.9}
-        className="mb-4 rounded-xl overflow-hidden"
-        style={shadowStyle}
-      >
-        <LinearGradient
-          colors={["#ee2b8c", "#d11d73"]}
-          className="p-4"
-        >
-          <View className="flex-row justify-between items-center mb-3">
-            <View className="bg-white/20 px-2.5 py-1 rounded-lg">
-              <Text className="text-[11px] font-bold text-white">{event.time}</Text>
-            </View>
-            <View className="flex-row items-center bg-white/30 px-2 py-0.5 rounded-md">
-              <View className="w-1.5 h-1.5 rounded-full bg-white mr-1.5" />
-              <Text className="text-[10px] font-black text-white uppercase tracking-tighter">Live</Text>
-            </View>
-          </View>
-
-          <Text className="text-lg font-bold text-white mb-3 leading-6">
-            {event.title}
-          </Text>
-
-          <View className="flex-row items-center justify-between border-t border-white/10 pt-3">
-            <View className="flex-row items-center gap-4">
-              <View className="flex-row items-center gap-1.5">
-                <MaterialIcons name={event.vendorIcon} size={14} color="rgba(255,255,255,0.8)" />
-                <Text className="text-[12px] font-medium text-white/90">
-                  {event.vendor}
-                </Text>
-              </View>
-              <View className="flex-row items-center gap-1.5">
-                <MaterialIcons name="group" size={14} color="rgba(255,255,255,0.8)" />
-                <Text className="text-[12px] font-bold text-white">
-                  {event.pax}
-                </Text>
-              </View>
-            </View>
-            <MaterialIcons name="arrow-forward-ios" size={14} color="white" />
-          </View>
-        </LinearGradient>
-      </TouchableOpacity>
-    );
+  if (status === 401) {
+    return "You must log in to view this event's catering plans.";
+  }
+  if (status === 403) {
+    return "You don't have permission to view caterings for this event.";
+  }
+  if (status === 404) {
+    return "No catering record was found for this event.";
+  }
+  if (status === 422) {
+    return "There was a validation issue while fetching catering data.";
+  }
+  if (status === 500) {
+    return "Server error. Please try again later.";
   }
 
-  return (
-    <TouchableOpacity
-      className={cn(
-        "bg-white rounded-xl p-4 mb-4 border border-outline-variant/30",
-        event.isCompleted ? "opacity-60" : "opacity-100"
-      )}
-      activeOpacity={0.7}
-      style={shadowStyle}
-    >
-      <View className="flex-row justify-between items-center mb-3">
-        <View className="bg-surface-container-high px-2.5 py-1 rounded-lg">
-          <Text className="text-[11px] font-bold text-on-surface-variant">
-            {event.time}
-          </Text>
-        </View>
-        {event.isCompleted && (
-          <View className="flex-row items-center gap-1 px-2 py-0.5 bg-green-50 rounded-md">
-            <MaterialIcons name="check" size={12} color="#15803d" />
-            <Text className="text-[10px] font-black text-green-700 uppercase">Success</Text>
-          </View>
-        )}
-      </View>
-
-      <Text
-        className={cn(
-          "text-[16px] font-bold mb-3",
-          event.isCompleted ? "text-on-surface-variant line-through opacity-70" : "text-on-surface"
-        )}
-      >
-        {event.title}
-      </Text>
-
-      <View className="flex-row items-center justify-between border-t border-outline-variant/30 pt-3">
-        <View className="flex-row items-center gap-4">
-          <View className="flex-row items-center gap-1.5">
-            <MaterialIcons
-              name={event.vendorIcon}
-              size={14}
-              color="#896175"
-            />
-            <Text className="text-[12px] font-medium text-muted-light">
-              {event.vendor}
-            </Text>
-          </View>
-          <View className="flex-row items-center gap-1.5">
-            <MaterialIcons
-              name="group"
-              size={14}
-              color="#896175"
-            />
-            <Text className="text-[12px] font-medium text-muted-light">
-              {event.pax}
-            </Text>
-          </View>
-        </View>
-        <MaterialIcons name="chevron-right" size={18} color="#896175" />
-      </View>
-    </TouchableOpacity>
-  );
+  return (error as any)?.message ?? "Unable to load catering plans.";
 };
 
-// ─── Main Screen ───────────────────────────────────────────────────────────────
-
-export default function MealScheduleScreen() {
+export default function CateringDashboard() {
   const router = useRouter();
   const { eventId } = useLocalSearchParams();
-  const [selectedDate, setSelectedDate] = useState(2); // Mon 26 (index)
+  const [selectedDate, setSelectedDate] = useState(2);
+  const [page, setPage] = useState(1);
+
+  const eventIdValue =
+    typeof eventId === "string" ? eventId : String(eventId ?? "");
+
+  const { data, isLoading, error, isFetching } = useGetCateringsByEventId(
+    eventIdValue || undefined,
+    page,
+    PAGE_SIZE
+  );
+
+  useEffect(() => {
+    if ((error as any)?.response?.status === 401) {
+      router.replace("/(onboarding)/login");
+    }
+  }, [error, router]);
+
+  const cateringPlans = data?.items ?? [];
+  const totalPages = data?.totalPages ?? 0;
+  const listError = error ? getApiErrorMessage(error) : undefined;
+
   const addClick = () => {
-    router.push(`/(protected)/(client-stack)/events/${eventId}/(organizer)/add-catering`);
-  }
+    router.push(
+      `/(protected)/(client-stack)/events/${eventIdValue}/(organizer)/add-catering`
+    );
+  };
+
+  const handleCardPress = (plan: any) => {
+    router.push(
+      `/(protected)/(client-stack)/events/${eventIdValue}/(organizer)/edit-catering?cateringId=${plan.id}`
+    );
+  };
+
   return (
-    <SafeAreaView className="flex-1 bg-background-light" edges={["top", "bottom"]}>
+    <SafeAreaView
+      className="flex-1 bg-background-light"
+      edges={["top", "bottom"]}
+    >
       <StatusBar barStyle="dark-content" />
 
       <ScrollView
@@ -248,39 +103,43 @@ export default function MealScheduleScreen() {
         stickyHeaderIndices={[0]}
         showsVerticalScrollIndicator={false}
       >
-        {/* ── Sticky Top Navigation Bar ── */}
         <View className="bg-background-light px-4 py-2 border-b border-outline-variant/30 shadow-sm">
           <View className="flex-row items-center justify-between h-14 w-full">
-            {/* Left: Back Button */}
-            <Pressable
-              onPress={() => router.back()}
-            >
-              <MaterialIcons name="arrow-back-ios" size={18} color="#ee2b8c" style={{ marginLeft: 6 }} />
+            <Pressable onPress={() => router.back()}>
+              <MaterialIcons
+                name="arrow-back-ios"
+                size={18}
+                color="#ee2b8c"
+                style={{ marginLeft: 6 }}
+              />
             </Pressable>
 
-            {/* Center: Title (Absolute) */}
             <View
               className="absolute left-0 right-0 items-center justify-center pointer-events-none -z-10"
-              style={{ paddingBottom: 2 }} // Optical adjustment
+              style={{ paddingBottom: 2 }}
             >
               <Text className="text-xl text-on-surface tracking-tighter font-black text-center">
                 Catering
               </Text>
             </View>
 
-            {/* Right: Add Button */}
             <Pressable
               className="flex-row items-center bg-primary px-4 py-2.5 rounded-md gap-2"
-              style={{ ...shadowStyle, shadowColor: "#ee2b8c", shadowOpacity: 0.3 }}
+              style={{
+                ...shadowStyle,
+                shadowColor: "#ee2b8c",
+                shadowOpacity: 0.3,
+              }}
               onPress={addClick}
             >
-              <Text className="text-white font-black text-[15px] tracking-tight">Add</Text>
+              <Text className="text-white font-black text-[15px] tracking-tight">
+                Add
+              </Text>
               <MaterialIcons name="add" size={20} color="white" />
             </Pressable>
           </View>
         </View>
 
-        {/* ── Date Selection Strip ── */}
         <View className="px-4 py-4 border-b border-outline-variant/30 gap-4">
           <View className="px-4">
             <Pressable
@@ -288,7 +147,9 @@ export default function MealScheduleScreen() {
               style={shadowStyle}
             >
               <MaterialIcons name="calendar-today" size={18} color="#ee2b8c" />
-              <Text className="text-on-surface-variant text-md font-bold">Select Date</Text>
+              <Text className="text-on-surface-variant text-md font-bold">
+                Select Date
+              </Text>
             </Pressable>
           </View>
 
@@ -299,28 +160,140 @@ export default function MealScheduleScreen() {
               contentContainerStyle={{ paddingRight: 20, marginLeft: 10 }}
             >
               {DATES.map((item, index) => (
-                <DateChip
+                <Pressable
                   key={item.date}
-                  item={item}
-                  isSelected={selectedDate === index}
                   onPress={() => !item.disabled && setSelectedDate(index)}
-                />
+                  disabled={item.disabled}
+                  className={cn(
+                    "flex flex-col items-center justify-center min-w-[60px] py-3 px-2 rounded-md mr-2.5 mb-2",
+                    selectedDate === index ? "bg-primary" : "bg-white",
+                    item.disabled ? "opacity-30" : "opacity-100"
+                  )}
+                  style={
+                    !item.disabled && selectedDate !== index
+                      ? shadowStyle
+                      : undefined
+                  }
+                >
+                  <Text
+                    className={cn(
+                      "text-[10px] font-bold uppercase tracking-widest mb-0.5",
+                      selectedDate === index
+                        ? "text-white/80"
+                        : "text-muted-light"
+                    )}
+                  >
+                    {item.day}
+                  </Text>
+                  <Text
+                    className={cn(
+                      "text-lg font-black",
+                      selectedDate === index ? "text-white" : "text-on-surface"
+                    )}
+                  >
+                    {item.date}
+                  </Text>
+                </Pressable>
               ))}
             </ScrollView>
           </View>
         </View>
 
-        {/* ── Event List Content ── */}
         <View className="px-4 pt-6">
-          {/* Section Header */}
+          <View className="flex-row items-center justify-between mb-4">
+            <View>
+              <Text className="text-lg font-bold text-on-surface">
+                Catering plans
+              </Text>
+              <Text className="text-sm text-muted-light">
+                Manage pricing, schedule and menus for this event.
+              </Text>
+            </View>
+            <View className="rounded-full bg-primary/10 px-3 py-1">
+              <Text className="text-[11px] font-black text-primary uppercase tracking-[1px]">
+                Event ID {eventIdValue}
+              </Text>
+            </View>
+          </View>
 
+          {isLoading ? (
+            <View className="rounded-3xl bg-white p-6" style={shadowStyle}>
+              <Text className="text-on-surface">Loading catering plans...</Text>
+            </View>
+          ) : listError ? (
+            <View className="rounded-3xl bg-white p-6" style={shadowStyle}>
+              <Text className="text-on-surface font-bold mb-2">
+                {listError}
+              </Text>
+              {(error as any)?.response?.status === 401 ? (
+                <Text className="text-sm text-primary">
+                  Redirecting to login...
+                </Text>
+              ) : null}
+            </View>
+          ) : cateringPlans.length === 0 ? (
+            <View
+              className="rounded-3xl bg-white p-6 items-center"
+              style={shadowStyle}
+            >
+              <MaterialIcons name="restaurant-menu" size={36} color="#ee2b8c" />
+              <Text className="text-on-surface font-black text-lg mt-4">
+                No catering plans yet
+              </Text>
+              <Text className="text-muted-light text-center mt-2">
+                Create a new catering package and add menu items for this event.
+              </Text>
+            </View>
+          ) : (
+            cateringPlans.map((plan) => (
+              <CateringPlanCard
+                key={String(plan.id)}
+                item={plan}
+                onPress={() => handleCardPress(plan)}
+              />
+            ))
+          )}
 
-          {/* Event Cards */}
-          {EVENTS.map((event) => (
-            <EventCard key={event.id} event={event} />
-          ))}
+          {totalPages > 1 ? (
+            <View className="flex-row items-center justify-between mt-4 px-3">
+              <Pressable
+                className="rounded-full bg-white px-4 py-3"
+                style={shadowStyle}
+                disabled={page <= 1}
+                onPress={() => setPage((current) => Math.max(1, current - 1))}
+              >
+                <Text className="text-sm font-bold text-on-surface">
+                  Previous
+                </Text>
+              </Pressable>
+              <Text className="text-sm font-bold text-on-surface">
+                Page {page} of {totalPages}
+              </Text>
+              <Pressable
+                className="rounded-full bg-white px-4 py-3"
+                style={shadowStyle}
+                disabled={page >= totalPages}
+                onPress={() =>
+                  setPage((current) => Math.min(totalPages, current + 1))
+                }
+              >
+                <Text className="text-sm font-bold text-on-surface">Next</Text>
+              </Pressable>
+            </View>
+          ) : null}
 
-          {/* Subtle Footer */}
+          {isFetching && !isLoading ? (
+            <View
+              className="mt-4 rounded-3xl bg-white p-4 items-center"
+              style={shadowStyle}
+            >
+              <ActivityIndicator size="small" color="#ee2b8c" />
+              <Text className="text-sm text-muted-light mt-2">
+                Refreshing catering list...
+              </Text>
+            </View>
+          ) : null}
+
           <View className="items-center py-10">
             <View className="w-12 h-1.5 rounded-full bg-outline-variant/50 mb-4" />
             <Text className="text-[11px] font-black text-muted-light uppercase tracking-[4px] text-center">

@@ -1,27 +1,29 @@
-﻿import { Text } from "@/src/components/ui/Text";
+import { Text } from "@/src/components/ui/Text";
 import {
-  useCreateCatering,
-  useCreateCateringMenu,
+    useCreateCateringMenu,
+    useGetCateringById,
+    useUpdateCatering,
+    useUpdateMenu,
 } from "@/src/features/catering/hooks/use-catering";
+import { CateringMenu } from "@/src/features/catering/types/catering.types";
 import { cn } from "@/src/utils/cn";
 import { shadowStyle } from "@/src/utils/helper";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
-  KeyboardAvoidingView,
-  Platform,
-  Pressable,
-  ScrollView,
-  StatusBar,
-  TextInput,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    KeyboardAvoidingView,
+    Platform,
+    Pressable,
+    ScrollView,
+    StatusBar,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-
-// ─── Types ───────────────────────────────────────────────────────────────────
 
 type MealType = "Breakfast" | "Lunch" | "High Tea" | "Dinner" | "Late Night";
 
@@ -29,31 +31,30 @@ type MenuType = "Buffet" | "Plated" | "Family Style" | "Station";
 
 type CourseType = "Starter" | "Main" | "Dessert" | "Beverage";
 
-interface MealOption {
-  type: MealType;
-  icon: keyof typeof MaterialIcons.glyphMap;
-  color: string;
-}
-
 interface MenuDraft {
+  id?: string | number;
   name: string;
   description: string;
   type: CourseType;
   menuType: MenuType;
 }
 
-const MEAL_OPTIONS: MealOption[] = [
-  { type: "Breakfast", icon: "breakfast-dining", color: "#f59e0b" },
-  { type: "Lunch", icon: "lunch-dining", color: "#10b981" },
-  { type: "High Tea", icon: "local-cafe", color: "#8b5cf6" },
-  { type: "Dinner", icon: "dinner-dining", color: "#ee2b8c" },
-  { type: "Late Night", icon: "nightlife", color: "#6366f1" },
+const MEAL_OPTIONS: MealType[] = [
+  "Breakfast",
+  "Lunch",
+  "High Tea",
+  "Dinner",
+  "Late Night",
 ];
-
 const COURSE_OPTIONS: CourseType[] = ["Starter", "Main", "Dessert", "Beverage"];
 const MENU_TYPES: MenuType[] = ["Buffet", "Plated", "Family Style", "Station"];
 
-// ─── Sub-components ───────────────────────────────────────────────────────────
+const DEFAULT_MENU_ITEM: MenuDraft = {
+  name: "",
+  description: "",
+  type: "Main",
+  menuType: "Buffet",
+};
 
 const FormSection = ({
   title,
@@ -233,99 +234,139 @@ const MenuItemRow = ({
   </View>
 );
 
-const DEFAULT_MENU_ITEM: MenuDraft = {
-  name: "",
-  description: "",
-  type: "Main",
-  menuType: "Buffet",
-};
-
-export default function CreateCateringScreen() {
+export default function EditCateringScreen() {
   const router = useRouter();
-  const { eventId } = useLocalSearchParams();
+  const { eventId, cateringId } = useLocalSearchParams();
   const [selectedMeal, setSelectedMeal] = useState<MealType>("Lunch");
   const [pax, setPax] = useState("");
   const [title, setTitle] = useState("");
-  const [vendor, setVendor] = useState("");
   const [notes, setNotes] = useState("");
-  const [startDateTime, setStartDateTime] = useState(
-    "2026-06-01T18:00:00.000Z"
-  );
-  const [endDateTime, setEndDateTime] = useState("2026-06-01T22:00:00.000Z");
-  const [menuItems, setMenuItems] = useState<MenuDraft[]>([DEFAULT_MENU_ITEM]);
+  const [startDateTime, setStartDateTime] = useState("");
+  const [endDateTime, setEndDateTime] = useState("");
+  const [menuItems, setMenuItems] = useState<MenuDraft[]>([]);
 
-  const createCateringMutation = useCreateCatering();
+  const cateringIdValue =
+    typeof cateringId === "string" ? cateringId : String(cateringId ?? "");
+  const { data, isLoading } = useGetCateringById(cateringIdValue || undefined);
+  const updateCateringMutation = useUpdateCatering();
+  const updateMenuMutation = useUpdateMenu();
   const createMenuMutation = useCreateCateringMenu();
-  const isSaving =
-    createCateringMutation.status === "pending" ||
-    createMenuMutation.status === "pending";
+
+  useEffect(() => {
+    if (data) {
+      setTitle(data.name ?? "");
+      setPax(String(data.per_plate_price ?? ""));
+      setSelectedMeal((data.meal_type as MealType) ?? "Lunch");
+      setStartDateTime(data.startDateTime ?? "");
+      setEndDateTime(data.endDateTime ?? "");
+      setMenuItems(
+        (data.menus ?? []).map((menu: CateringMenu) => ({
+          id: menu.id,
+          name: menu.name,
+          description: menu.description,
+          type: menu.type as CourseType,
+          menuType: menu.menuType as MenuType,
+        }))
+      );
+    }
+  }, [data]);
 
   const handleUpdateMenuItem = (
     key: keyof MenuDraft,
     value: string,
     index: number
   ) => {
-    setMenuItems((previous) =>
-      previous.map((item, itemIndex) =>
+    setMenuItems((prev) =>
+      prev.map((item, itemIndex) =>
         itemIndex === index ? { ...item, [key]: value } : item
       )
     );
   };
 
   const handleRemoveMenuItem = (index: number) => {
-    setMenuItems((previous) =>
-      previous.filter((_, itemIndex) => itemIndex !== index)
-    );
+    setMenuItems((prev) => prev.filter((_, itemIndex) => itemIndex !== index));
   };
 
   const addMenuItem = () => {
-    setMenuItems((previous) => [...previous, { ...DEFAULT_MENU_ITEM }]);
+    setMenuItems((prev) => [...prev, { ...DEFAULT_MENU_ITEM }]);
   };
 
+  const isSaving =
+    updateCateringMutation.status === "pending" ||
+    updateMenuMutation.status === "pending" ||
+    createMenuMutation.status === "pending";
+
   const handleSave = async () => {
-    if (!eventId) {
+    if (!eventId || !cateringIdValue) {
       return;
     }
 
-    const eventIdValue = String(eventId);
+    const payload = {
+      name: title || "Catering Package",
+      per_plate_price: Number(pax) || 0,
+      startDateTime,
+      endDateTime,
+      meal_type: selectedMeal,
+    };
 
     try {
-      const cateringResponse = await createCateringMutation.mutateAsync({
-        eventId: eventIdValue,
-        payload: {
-          name: title || "Catering Package",
-          per_plate_price: Number(pax) || 0,
-          startDateTime,
-          endDateTime,
-          meal_type: selectedMeal,
-        },
+      await updateCateringMutation.mutateAsync({
+        cateringId: cateringIdValue,
+        payload,
+        eventId,
       });
 
-      const cateringId = cateringResponse?.id;
-
-      if (cateringId) {
-        const validMenuItems = menuItems.filter((item) => item.name.trim());
-        await Promise.all(
-          validMenuItems.map((item) =>
-            createMenuMutation.mutateAsync({
-              cateringId,
-              eventId: eventIdValue,
+      await Promise.all(
+        menuItems.map((item) => {
+          if (item.id) {
+            return updateMenuMutation.mutateAsync({
+              menuId: item.id,
+              cateringId: cateringIdValue,
               payload: {
                 name: item.name,
                 description: item.description,
                 type: item.type,
                 menuType: item.menuType,
               },
-            })
-          )
-        );
-      }
+              eventId,
+            });
+          }
+
+          return createMenuMutation.mutateAsync({
+            cateringId: cateringIdValue,
+            payload: {
+              name: item.name,
+              description: item.description,
+              type: item.type,
+              menuType: item.menuType,
+            },
+            eventId,
+          });
+        })
+      );
 
       router.back();
     } catch (error) {
-      console.error("Catering save failed", error);
+      console.error("Failed to update catering", error);
     }
   };
+
+  if (isLoading) {
+    return (
+      <SafeAreaView
+        className="flex-1 bg-background-light"
+        edges={["top", "bottom"]}
+      >
+        <StatusBar barStyle="dark-content" />
+        <View className="flex-1 items-center justify-center">
+          <ActivityIndicator size="large" color="#ee2b8c" />
+          <Text className="text-on-surface mt-4">
+            Loading catering details...
+          </Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView
@@ -360,17 +401,16 @@ export default function CreateCateringScreen() {
               </Pressable>
               <View className="bg-white/60 px-4 py-2 rounded-full border border-white/40">
                 <Text className="text-[12px] font-black text-primary uppercase tracking-widest">
-                  Catering
+                  Update Catering
                 </Text>
               </View>
             </View>
 
             <Text className="text-3xl font-black text-on-surface tracking-tighter mb-2">
-              New Catering Plan
+              Edit Catering Plan
             </Text>
             <Text className="text-muted-light font-medium text-lg leading-6">
-              Create your event catering package with menu sections, pricing and
-              schedule.
+              Update details and menu items for this catering package.
             </Text>
           </LinearGradient>
 
@@ -411,7 +451,7 @@ export default function CreateCateringScreen() {
             <FormSection title="Menu planner" icon="reader-outline">
               {menuItems.map((item, index) => (
                 <MenuItemRow
-                  key={`${item.name}-${index}`}
+                  key={`${item.id ?? index}-${index}`}
                   item={item}
                   index={index}
                   onUpdate={handleUpdateMenuItem}
@@ -428,14 +468,14 @@ export default function CreateCateringScreen() {
               </Pressable>
             </FormSection>
 
-            <FormSection title="Extras" icon="document-text-outline">
+            <FormSection title="Notes" icon="document-text-outline">
               <Text className="text-[11px] font-bold text-muted-light uppercase tracking-widest mb-2 ml-1">
-                Notes for the catering team
+                Plan notes
               </Text>
               <TextInput
                 multiline
                 numberOfLines={4}
-                placeholder="Allergies, serve time, meal preferences..."
+                placeholder="Dietary restrictions, service notes, or special requests"
                 placeholderTextColor="#896175"
                 className="bg-background-light/50 border border-outline-variant/50 rounded-md px-4 py-4 min-h-[120px] text-[16px] font-medium text-on-surface"
                 style={{ textAlignVertical: "top" }}
@@ -464,7 +504,7 @@ export default function CreateCateringScreen() {
                 className="py-5 items-center flex-row justify-center"
               >
                 <Text className="text-white text-lg font-black tracking-tight mr-2">
-                  {isSaving ? "Saving..." : "Create Catering Plan"}
+                  {isSaving ? "Saving..." : "Save Changes"}
                 </Text>
                 <MaterialIcons name="check-circle" size={20} color="white" />
               </LinearGradient>
