@@ -2,6 +2,7 @@ import { HeroSection } from "@/src/components/business/[businessId]/Hero";
 import { LatestReviewSection } from "@/src/components/business/[businessId]/LatestReview";
 import ServiceDetailsSection from "@/src/components/business/[businessId]/ServiceDetailsScreen";
 import VenueDetailsSection from "@/src/components/business/[businessId]/VenueDetailsSection";
+import BusinessMap from "@/src/components/ui/BusinessMap";
 import { Text } from "@/src/components/ui/Text";
 import {
   BusinessRequest,
@@ -260,7 +261,6 @@ export default function BusinessDetailsScreen() {
     });
   };
 
-
   const handleDelete = useCallback(() => {
     if (!businessWithAttribute) return;
     Alert.alert(
@@ -361,6 +361,60 @@ export default function BusinessDetailsScreen() {
 
         <View className="px-4 gap-4 mt-4">
           <ActiveRequestsSection requests={businessWithAttribute.business_information.requests ?? []} />
+
+          {/* Location map */}
+          <View className="bg-white rounded-2xl border border-gray-100 overflow-hidden" style={{ elevation: 2 }}>
+            <View className="px-4 pt-4 pb-3 border-b border-gray-100">
+              <Text variant="h1" className="text-base text-[#181114]">Location</Text>
+            </View>
+            {(() => {
+              const biz = businessWithAttribute.business_information;
+              const lat = biz.latitude != null ? parseFloat(String(biz.latitude)) : NaN;
+              const lng = biz.longitude != null ? parseFloat(String(biz.longitude)) : NaN;
+              const hasExactCoords = !isNaN(lat) && !isNaN(lng);
+              const locationQuery = hasExactCoords
+                ? `${lat},${lng}`
+                : biz.city && biz.country
+                  ? `${biz.city}, ${biz.country}`
+                  : biz.city ?? biz.country ?? biz.location ?? null;
+
+              if (locationQuery) {
+                return (
+                  <View>
+                    <BusinessMap
+                      locationQuery={locationQuery}
+                      isApproximate={!hasExactCoords}
+                      height={220}
+                    />
+                    {!hasExactCoords && (
+                      <TouchableOpacity
+                        onPress={handleEditPress}
+                        activeOpacity={0.8}
+                        className="flex-row items-center gap-2 px-4 py-2.5 bg-amber-50 border-t border-amber-100"
+                      >
+                        <MaterialIcons name="edit-location-alt" size={15} color="#d97706" />
+                        <Text className="text-amber-700 text-xs font-medium flex-1">
+                          Set exact location in Edit Profile for a precise pin
+                        </Text>
+                        <MaterialIcons name="chevron-right" size={15} color="#d97706" />
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                );
+              }
+              return (
+                <TouchableOpacity
+                  onPress={handleEditPress}
+                  activeOpacity={0.8}
+                  className="items-center justify-center py-10 gap-2"
+                >
+                  <MaterialIcons name="add-location-alt" size={36} color="#d1d5db" />
+                  <Text className="text-gray-400 text-sm font-medium">No location set</Text>
+                  <Text className="text-[#ee2b8c] text-xs font-semibold">Tap Edit Profile to add a pin</Text>
+                </TouchableOpacity>
+              );
+            })()}
+          </View>
 
           {/* Category-specific details (from constants) */}
           {businessWithAttribute.business_information.category === "Venue" && (

@@ -1,3 +1,4 @@
+import LocationPicker from "@/src/components/ui/LocationPicker";
 import { Text } from "@/src/components/ui/Text";
 import { BusinessCategory } from "@/src/constants/business";
 import { photos } from "@/src/constants/gallery";
@@ -37,6 +38,8 @@ export default function CreateBusinessScreen() {
     description: "",
     city: "",
     country: "",
+    latitude: "",
+    longitude: "",
     vendorType: "",
     vendorCategoryId: "",
     categoryDetails: {},
@@ -80,6 +83,8 @@ export default function CreateBusinessScreen() {
         cover: coverImage ?? photos[Math.floor(((Math.random() * 1000) % 6) + 1)].url,
         city: form.city.trim() || undefined,
         country: form.country.trim() || undefined,
+        latitude: form.latitude ? parseFloat(form.latitude) : undefined,
+        longitude: form.longitude ? parseFloat(form.longitude) : undefined,
         categoryDetails: form.categoryDetails,
         email: form.email.trim() || undefined,
         contact_phone: form.contactPhone.trim() || undefined,
@@ -504,6 +509,15 @@ export default function CreateBusinessScreen() {
               </View>
             </View>
           </View>
+
+          {/* Location Pin — map picker */}
+          <LocationPicker
+            latitude={form.latitude}
+            longitude={form.longitude}
+            onChange={(lat, lng) =>
+              setForm((prev) => ({ ...prev, latitude: lat, longitude: lng }))
+            }
+          />
         </View>
 
         {/* Submit — inside scroll so it's reachable at the end */}

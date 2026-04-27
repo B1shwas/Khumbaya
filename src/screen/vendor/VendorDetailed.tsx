@@ -1,4 +1,5 @@
 import { Text } from "@/src/components/ui/Text";
+import BusinessMap from "@/src/components/ui/BusinessMap";
 import { AvailableSpacesSection } from "@/src/components/vendor/AvailableSpacesSection";
 import { ServiceInfoSection } from "@/src/components/vendor/ServiceInfoSection";
 import { WriteReviewModal } from "@/src/components/vendor/WriteReviewModal";
@@ -8,7 +9,8 @@ import { useAuthStore } from "@/src/store/AuthStore";
 import { shadowStyle } from "@/src/utils/helper";
 import { MaterialIcons } from "@expo/vector-icons";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
-import { useState } from "react";
+import * as Location from "expo-location";
+import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Dimensions,
@@ -62,9 +64,29 @@ export default function VendorDetailed() {
   const [showGallery, setShowGallery] = useState(false);
   const [activeFilter, setActiveFilter] = useState("All Photos");
   const [showReviewModal, setShowReviewModal] = useState(false);
+  const [locationText, setLocationText] = useState("—");
   const { user } = useAuthStore();
 
   const { data: businessWithAttribute, isLoading, isError } = useGetBusinessById(resolvedId);
+
+  useEffect(() => {
+    const biz = businessWithAttribute?.business_information;
+    if (!biz) return;
+    if (biz.latitude != null && biz.longitude != null) {
+      Location.reverseGeocodeAsync({
+        latitude: Number(biz.latitude),
+        longitude: Number(biz.longitude),
+      }).then((results) => {
+        const r = results[0];
+        if (!r) return;
+        const parts = [r.name, r.district, r.city, r.region, r.country].filter(Boolean);
+        const label = parts.slice(0, 3).join(", ");
+        if (label) setLocationText(label);
+      }).catch(() => {});
+    } else {
+      setLocationText(biz.location ?? (biz.city && biz.country ? `${biz.city}, ${biz.country}` : "—"));
+    }
+  }, [businessWithAttribute]);
 
   if (isLoading) {
     return (
@@ -93,7 +115,6 @@ export default function VendorDetailed() {
 
   const headerImage = biz.cover ?? biz.avatar ?? FALLBACK_HEADER;
   const avatarImage = biz.avatar ?? FALLBACK_AVATAR;
-  const locationText = biz.city && biz.country ? `${biz.city}, ${biz.country}` : biz.location ?? "—";
   const serviceAttr = businessWithAttribute.vendor_services_information?.[0] ?? EMPTY_SERVICE_FALLBACK;
 
   const galleryImage0 = portfolio[0] ?? biz.cover ?? FALLBACK_HEADER;
@@ -217,6 +238,34 @@ export default function VendorDetailed() {
         ) : (
           <ServiceInfoSection service={serviceAttr} category={biz.category} />
         )}
+
+        {/* Location map */}
+        {(() => {
+          const lat = biz.latitude != null ? parseFloat(String(biz.latitude)) : NaN;
+          const lng = biz.longitude != null ? parseFloat(String(biz.longitude)) : NaN;
+          const hasExactCoords = !isNaN(lat) && !isNaN(lng);
+          const locationQuery = hasExactCoords
+            ? `${lat},${lng}`
+            : biz.city && biz.country
+              ? `${biz.city}, ${biz.country}`
+              : biz.city ?? biz.country ?? biz.location ?? null;
+          if (!locationQuery) return null;
+          return (
+            <View className="mt-2 bg-white px-4 pt-5 pb-4">
+              <View className="flex-row items-center gap-2 mb-3">
+                <View className="h-7 w-7 rounded-lg bg-primary/10 items-center justify-center">
+                  <MaterialIcons name="location-on" size={15} color="#ee2b8c" />
+                </View>
+                <Text className="text-xs font-bold text-gray-400 uppercase tracking-widest">Location</Text>
+              </View>
+              <BusinessMap
+                locationQuery={locationQuery}
+                isApproximate={!hasExactCoords}
+                height={200}
+              />
+            </View>
+          );
+        })()}
 
         {/* Gallery */}
         <View className="mt-2 bg-white px-4 pt-5 pb-4">
