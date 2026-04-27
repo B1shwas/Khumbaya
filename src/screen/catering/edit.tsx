@@ -1,9 +1,10 @@
+import { DatePicker } from "@/components/nativewindui/DatePicker";
 import { Text } from "@/src/components/ui/Text";
 import {
-    useCreateCateringMenu,
-    useGetCateringById,
-    useUpdateCatering,
-    useUpdateMenu,
+  useCreateCateringMenu,
+  useGetCateringById,
+  useUpdateCatering,
+  useUpdateMenu,
 } from "@/src/features/catering/hooks/use-catering";
 import { CateringMenu } from "@/src/features/catering/types/catering.types";
 import { cn } from "@/src/utils/cn";
@@ -11,17 +12,18 @@ import { shadowStyle } from "@/src/utils/helper";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { Controller, useFieldArray, useForm } from "react-hook-form";
 import {
-    ActivityIndicator,
-    KeyboardAvoidingView,
-    Platform,
-    Pressable,
-    ScrollView,
-    StatusBar,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StatusBar,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -55,6 +57,16 @@ const DEFAULT_MENU_ITEM: MenuDraft = {
   type: "Main",
   menuType: "Buffet",
 };
+
+interface CateringFormValues {
+  title: string;
+  pax: string;
+  selectedMeal: MealType;
+  notes: string;
+  startDateTime: string;
+  endDateTime: string;
+  menuItems: MenuDraft[];
+}
 
 const FormSection = ({
   title,
@@ -237,16 +249,40 @@ const MenuItemRow = ({
 export default function EditCateringScreen() {
   const router = useRouter();
   const { eventId, cateringId } = useLocalSearchParams();
-  const [selectedMeal, setSelectedMeal] = useState<MealType>("Lunch");
-  const [pax, setPax] = useState("");
-  const [title, setTitle] = useState("");
-  const [notes, setNotes] = useState("");
-  const [startDateTime, setStartDateTime] = useState("");
-  const [endDateTime, setEndDateTime] = useState("");
-  const [menuItems, setMenuItems] = useState<MenuDraft[]>([]);
+
+  const { control, handleSubmit, watch, reset, setValue } =
+    useForm<CateringFormValues>({
+      defaultValues: {
+        title: "",
+        pax: "",
+        selectedMeal: "Lunch",
+        notes: "",
+        startDateTime: new Date().toISOString(),
+        endDateTime: new Date(
+          new Date().getTime() + 4 * 60 * 60 * 1000
+        ).toISOString(),
+        menuItems: [{ ...DEFAULT_MENU_ITEM }],
+      },
+    });
+
+  const { fields, append, remove, update } = useFieldArray({
+    control,
+    name: "menuItems",
+  });
+
+  const selectedMeal = watch("selectedMeal");
+  const startDateTime = watch("startDateTime");
+  const endDateTime = watch("endDateTime");
+  const menuItems = watch("menuItems");
 
   const cateringIdValue =
     typeof cateringId === "string" ? cateringId : String(cateringId ?? "");
+  const eventIdValue =
+    typeof eventId === "string"
+      ? eventId
+      : Array.isArray(eventId)
+        ? (eventId[0] ?? undefined)
+        : undefined;
   const { data, isLoading } = useGetCateringById(cateringIdValue || undefined);
   const updateCateringMutation = useUpdateCatering();
   const updateMenuMutation = useUpdateMenu();
@@ -254,41 +290,51 @@ export default function EditCateringScreen() {
 
   useEffect(() => {
     if (data) {
-      setTitle(data.name ?? "");
-      setPax(String(data.per_plate_price ?? ""));
-      setSelectedMeal((data.meal_type as MealType) ?? "Lunch");
-      setStartDateTime(data.startDateTime ?? "");
-      setEndDateTime(data.endDateTime ?? "");
-      setMenuItems(
-        (data.menus ?? []).map((menu: CateringMenu) => ({
-          id: menu.id,
-          name: menu.name,
-          description: menu.description,
-          type: menu.type as CourseType,
-          menuType: menu.menuType as MenuType,
-        }))
-      );
+      reset({
+        title: data.name ?? "",
+        pax: String(data.per_plate_price ?? ""),
+        selectedMeal: (data.meal_type as MealType) ?? "Lunch",
+        notes: "",
+        startDateTime: data.startDateTime
+          ? new Date(data.startDateTime).toISOString()
+          : new Date().toISOString(),
+        endDateTime: data.endDateTime
+          ? new Date(data.endDateTime).toISOString()
+          : new Date(new Date().getTime() + 4 * 60 * 60 * 1000).toISOString(),
+        menuItems:
+          data.menus && data.menus.length > 0
+            ? (data.menus ?? []).map((menu: CateringMenu) => ({
+                id: menu.id,
+                name: menu.name,
+                description: menu.description,
+                type: menu.type as CourseType,
+                menuType: menu.menuType as MenuType,
+              }))
+            : [{ ...DEFAULT_MENU_ITEM }],
+      });
     }
-  }, [data]);
+  }, [data, reset]);
 
   const handleUpdateMenuItem = (
     key: keyof MenuDraft,
     value: string,
     index: number
   ) => {
-    setMenuItems((prev) =>
-      prev.map((item, itemIndex) =>
-        itemIndex === index ? { ...item, [key]: value } : item
-      )
-    );
+    const currentItem = menuItems?.[index];
+    if (!currentItem) return;
+
+    update(index, {
+      ...currentItem,
+      [key]: value,
+    });
   };
 
   const handleRemoveMenuItem = (index: number) => {
-    setMenuItems((prev) => prev.filter((_, itemIndex) => itemIndex !== index));
+    remove(index);
   };
 
   const addMenuItem = () => {
-    setMenuItems((prev) => [...prev, { ...DEFAULT_MENU_ITEM }]);
+    append({ ...DEFAULT_MENU_ITEM });
   };
 
   const isSaving =
@@ -296,28 +342,32 @@ export default function EditCateringScreen() {
     updateMenuMutation.status === "pending" ||
     createMenuMutation.status === "pending";
 
-  const handleSave = async () => {
-    if (!eventId || !cateringIdValue) {
+  const handleSave = handleSubmit(async (formValues) => {
+    if (!eventIdValue || !cateringIdValue) {
       return;
     }
 
     const payload = {
-      name: title || "Catering Package",
-      per_plate_price: Number(pax) || 0,
-      startDateTime,
-      endDateTime,
-      meal_type: selectedMeal,
+      name: formValues.title || "Catering Package",
+      per_plate_price: Number(formValues.pax) || 0,
+      startDateTime: new Date(formValues.startDateTime).toISOString(),
+      endDateTime: new Date(formValues.endDateTime).toISOString(),
+      meal_type: formValues.selectedMeal,
     };
 
     try {
       await updateCateringMutation.mutateAsync({
         cateringId: cateringIdValue,
         payload,
-        eventId,
+        eventId: eventIdValue,
       });
 
+      const validMenuItems = formValues.menuItems.filter((item) =>
+        item.name.trim()
+      );
+
       await Promise.all(
-        menuItems.map((item) => {
+        validMenuItems.map((item) => {
           if (item.id) {
             return updateMenuMutation.mutateAsync({
               menuId: item.id,
@@ -328,7 +378,7 @@ export default function EditCateringScreen() {
                 type: item.type,
                 menuType: item.menuType,
               },
-              eventId,
+              eventId: eventIdValue,
             });
           }
 
@@ -340,7 +390,7 @@ export default function EditCateringScreen() {
               type: item.type,
               menuType: item.menuType,
             },
-            eventId,
+            eventId: eventIdValue,
           });
         })
       );
@@ -349,7 +399,7 @@ export default function EditCateringScreen() {
     } catch (error) {
       console.error("Failed to update catering", error);
     }
-  };
+  });
 
   if (isLoading) {
     return (
@@ -416,43 +466,156 @@ export default function EditCateringScreen() {
 
           <View className="px-6 -mt-8">
             <FormSection title="Plan details" icon="restaurant-outline">
-              <CustomInput
-                label="Package title"
-                placeholder="e.g. Signature Wedding Buffet"
-                value={title}
-                onChangeText={setTitle}
-                icon="title"
+              <Controller
+                control={control}
+                name="title"
+                render={({ field: { value, onChange } }) => (
+                  <CustomInput
+                    label="Package title"
+                    placeholder="e.g. Signature Wedding Buffet"
+                    value={value}
+                    onChangeText={onChange}
+                    icon="title"
+                  />
+                )}
               />
-              <CustomInput
-                label="Per plate price"
-                placeholder="2000"
-                value={pax}
-                onChangeText={setPax}
-                keyboardType="numeric"
-                icon="payments"
+              <Controller
+                control={control}
+                name="pax"
+                render={({ field: { value, onChange } }) => (
+                  <CustomInput
+                    label="Per plate price"
+                    placeholder="2000"
+                    value={value}
+                    onChangeText={onChange}
+                    keyboardType="numeric"
+                    icon="payments"
+                  />
+                )}
               />
+
+              <View className="mb-5">
+                <Text className="text-[11px] font-bold text-muted-light uppercase tracking-widest mb-2 ml-1">
+                  Meal type
+                </Text>
+                <View className="rounded-md border border-outline-variant/50 bg-background-light p-2">
+                  <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={{ gap: 10 }}
+                  >
+                    {MEAL_OPTIONS.map((option) => {
+                      const isSelected = selectedMeal === option;
+                      return (
+                        <Pressable
+                          key={option}
+                          onPress={() => setValue("selectedMeal", option)}
+                          className={cn(
+                            "rounded-full px-3 py-2 border",
+                            isSelected
+                              ? "border-primary bg-primary/10"
+                              : "border-outline-variant/40 bg-white"
+                          )}
+                        >
+                          <Text
+                            className={cn(
+                              "text-[12px] font-bold",
+                              isSelected ? "text-primary" : "text-on-surface"
+                            )}
+                          >
+                            {option}
+                          </Text>
+                        </Pressable>
+                      );
+                    })}
+                  </ScrollView>
+                </View>
+              </View>
             </FormSection>
 
             <FormSection title="Schedule" icon="time-outline">
-              <CustomInput
-                label="Start date & time"
-                placeholder="2026-06-01T18:00:00.000Z"
-                value={startDateTime}
-                onChangeText={setStartDateTime}
-              />
-              <CustomInput
-                label="End date & time"
-                placeholder="2026-06-01T22:00:00.000Z"
-                value={endDateTime}
-                onChangeText={setEndDateTime}
-              />
+              <View className="mb-5">
+                <Text className="text-[11px] font-bold text-muted-light uppercase tracking-widest mb-2 ml-1">
+                  Start date
+                </Text>
+                <DatePicker
+                  mode="date"
+                  value={new Date(startDateTime)}
+                  onChange={(_event: any, date?: Date) => {
+                    if (date) {
+                      const updated = new Date(startDateTime);
+                      updated.setFullYear(
+                        date.getFullYear(),
+                        date.getMonth(),
+                        date.getDate()
+                      );
+                      setValue("startDateTime", updated.toISOString());
+                    }
+                  }}
+                />
+              </View>
+
+              <View className="mb-5">
+                <Text className="text-[11px] font-bold text-muted-light uppercase tracking-widest mb-2 ml-1">
+                  Start time
+                </Text>
+                <DatePicker
+                  mode="time"
+                  value={new Date(startDateTime)}
+                  onChange={(_event: any, date?: Date) => {
+                    if (date) {
+                      const updated = new Date(startDateTime);
+                      updated.setHours(date.getHours(), date.getMinutes());
+                      setValue("startDateTime", updated.toISOString());
+                    }
+                  }}
+                />
+              </View>
+
+              <View className="mb-5">
+                <Text className="text-[11px] font-bold text-muted-light uppercase tracking-widest mb-2 ml-1">
+                  End date
+                </Text>
+                <DatePicker
+                  mode="date"
+                  value={new Date(endDateTime)}
+                  onChange={(_event: any, date?: Date) => {
+                    if (date) {
+                      const updated = new Date(endDateTime);
+                      updated.setFullYear(
+                        date.getFullYear(),
+                        date.getMonth(),
+                        date.getDate()
+                      );
+                      setValue("endDateTime", updated.toISOString());
+                    }
+                  }}
+                />
+              </View>
+
+              <View>
+                <Text className="text-[11px] font-bold text-muted-light uppercase tracking-widest mb-2 ml-1">
+                  End time
+                </Text>
+                <DatePicker
+                  mode="time"
+                  value={new Date(endDateTime)}
+                  onChange={(_event: any, date?: Date) => {
+                    if (date) {
+                      const updated = new Date(endDateTime);
+                      updated.setHours(date.getHours(), date.getMinutes());
+                      setValue("endDateTime", updated.toISOString());
+                    }
+                  }}
+                />
+              </View>
             </FormSection>
 
             <FormSection title="Menu planner" icon="reader-outline">
-              {menuItems.map((item, index) => (
+              {fields.map((field, index) => (
                 <MenuItemRow
-                  key={`${item.id ?? index}-${index}`}
-                  item={item}
+                  key={field.id}
+                  item={menuItems?.[index] ?? field}
                   index={index}
                   onUpdate={handleUpdateMenuItem}
                   onRemove={handleRemoveMenuItem}
@@ -469,18 +632,26 @@ export default function EditCateringScreen() {
             </FormSection>
 
             <FormSection title="Notes" icon="document-text-outline">
-              <Text className="text-[11px] font-bold text-muted-light uppercase tracking-widest mb-2 ml-1">
-                Plan notes
-              </Text>
-              <TextInput
-                multiline
-                numberOfLines={4}
-                placeholder="Dietary restrictions, service notes, or special requests"
-                placeholderTextColor="#896175"
-                className="bg-background-light/50 border border-outline-variant/50 rounded-md px-4 py-4 min-h-[120px] text-[16px] font-medium text-on-surface"
-                style={{ textAlignVertical: "top" }}
-                value={notes}
-                onChangeText={setNotes}
+              <Controller
+                control={control}
+                name="notes"
+                render={({ field: { value, onChange } }) => (
+                  <>
+                    <Text className="text-[11px] font-bold text-muted-light uppercase tracking-widest mb-2 ml-1">
+                      Plan notes
+                    </Text>
+                    <TextInput
+                      multiline
+                      numberOfLines={4}
+                      placeholder="Dietary restrictions, service notes, or special requests"
+                      placeholderTextColor="#896175"
+                      className="bg-background-light/50 border border-outline-variant/50 rounded-md px-4 py-4 min-h-[120px] text-[16px] font-medium text-on-surface"
+                      style={{ textAlignVertical: "top" }}
+                      value={value}
+                      onChangeText={onChange}
+                    />
+                  </>
+                )}
               />
             </FormSection>
 

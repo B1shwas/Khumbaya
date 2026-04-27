@@ -1,5 +1,6 @@
 import { Text } from "@/src/components/ui/Text";
 import { CateringPlan } from "@/src/features/catering/types";
+import { useGetCateringMenu } from "@/src/features/catering/hooks/use-catering";
 import { shadowStyle } from "@/src/utils/helper";
 import { MaterialIcons } from "@expo/vector-icons";
 import { Pressable, View } from "react-native";
@@ -24,6 +25,9 @@ export default function CateringPlanCard({
   item,
   onPress,
 }: CateringPlanCardProps) {
+  const { data: menuData } = useGetCateringMenu(item.id);
+  const menus = item.menus ?? menuData ?? [];
+
   return (
     <Pressable
       onPress={onPress}
@@ -71,6 +75,24 @@ export default function CateringPlanCard({
           End: {formatDateTime(item.endDateTime)}
         </Text>
       </View>
+
+      {menus.length > 0 ? (
+        <View className="mb-4">
+          <Text className="text-[13px] font-bold text-muted-light uppercase tracking-[1.5px] mb-2">
+            Menu preview
+          </Text>
+          {menus.slice(0, 2).map((menu) => (
+            <Text key={String(menu.id)} className="text-sm text-on-surface">
+              • {menu.name}
+            </Text>
+          ))}
+          {menus.length > 2 ? (
+            <Text className="text-sm text-muted-light mt-2">
+              +{menus.length - 2} more items
+            </Text>
+          ) : null}
+        </View>
+      ) : null}
 
       <View className="flex-row items-center justify-between pt-3 border-t border-outline-variant/30">
         <View className="flex-row items-center gap-2">

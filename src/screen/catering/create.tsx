@@ -10,6 +10,7 @@ import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
+import { Controller, useFieldArray, useForm } from "react-hook-form";
 import {
   KeyboardAvoidingView,
   Platform,
@@ -41,6 +42,16 @@ interface MenuDraft {
   description: string;
   type: CourseType;
   menuType: MenuType;
+}
+
+interface CateringFormValues {
+  title: string;
+  pax: string;
+  selectedMeal: MealType;
+  notes: string;
+  startDateTime: Date;
+  endDateTime: Date;
+  menuItems: MenuDraft[];
 }
 
 const MEAL_OPTIONS: MealOption[] = [
@@ -150,7 +161,7 @@ const MenuItemRow = ({
     />
     <CustomInput
       label="Description"
-      placeholder="Spicy, vegetarian or plated details"
+      placeholder="Food details"
       value={item.description}
       onChangeText={(value) => onUpdate("description", value, index)}
     />
@@ -244,16 +255,33 @@ const DEFAULT_MENU_ITEM: MenuDraft = {
 export default function CreateCateringScreen() {
   const router = useRouter();
   const { eventId } = useLocalSearchParams();
-  const [selectedMeal, setSelectedMeal] = useState<MealType>("Lunch");
-  const [pax, setPax] = useState("");
-  const [title, setTitle] = useState("");
-  const [vendor, setVendor] = useState("");
-  const [notes, setNotes] = useState("");
-  const [startDateTime, setStartDateTime] = useState<Date>(new Date());
-  const [endDateTime, setEndDateTime] = useState<Date>(
-    new Date(new Date().getTime() + 4 * 60 * 60 * 1000)
-  );
-  const [menuItems, setMenuItems] = useState<MenuDraft[]>([DEFAULT_MENU_ITEM]);
+
+  const {
+    control,
+    handleSubmit,
+    watch,
+    setValue,
+  } = useForm<CateringFormValues>({
+    defaultValues: {
+      title: "",
+      pax: "",
+      selectedMeal: "Lunch",
+      notes: "",
+      startDateTime: new Date(),
+      endDateTime: new Date(new Date().getTime() + 4 * 60 * 60 * 1000),
+      menuItems: [{ ...DEFAULT_MENU_ITEM }],
+    },
+  });
+
+  const { fields, append, remove, update } = useFieldArray({
+    control,
+    name: "menuItems",
+  });
+
+  const selectedMeal = watch("selectedMeal");
+  const startDateTime = watch("startDateTime");
+  const endDateTime = watch("endDateTime");
+  const menuItems = watch("menuItems");
 
   const createCateringMutation = useCreateCatering();
   const createMenuMutation = useCreateCateringMenu();
@@ -266,24 +294,24 @@ export default function CreateCateringScreen() {
     value: string,
     index: number
   ) => {
-    setMenuItems((previous) =>
-      previous.map((item, itemIndex) =>
-        itemIndex === index ? { ...item, [key]: value } : item
-      )
-    );
+    const currentItem = menuItems?.[index];
+    if (!currentItem) return;
+
+    update(index, {
+      ...currentItem,
+      [key]: value,
+    });
   };
 
   const handleRemoveMenuItem = (index: number) => {
-    setMenuItems((previous) =>
-      previous.filter((_, itemIndex) => itemIndex !== index)
-    );
+    remove(index);
   };
 
   const addMenuItem = () => {
-    setMenuItems((previous) => [...previous, { ...DEFAULT_MENU_ITEM }]);
+    append({ ...DEFAULT_MENU_ITEM });
   };
 
-  const handleSave = async () => {
+  const handleSave = handleSubmit(async (data: CateringFormValues) => {
     if (!eventId) {
       return;
     }
@@ -294,18 +322,18 @@ export default function CreateCateringScreen() {
       const cateringResponse = await createCateringMutation.mutateAsync({
         eventId: eventIdValue,
         payload: {
-          name: title || "Catering Package",
-          per_plate_price: Number(pax) || 0,
-          startDateTime: startDateTime.toISOString(),
-          endDateTime: endDateTime.toISOString(),
-          meal_type: selectedMeal,
+          name: data.title || "Catering Package",
+          per_plate_price: Number(data.pax) || 0,
+          startDateTime: data.startDateTime.toISOString(),
+          endDateTime: data.endDateTime.toISOString(),
+          meal_type: data.selectedMeal,
         },
       });
 
       const cateringId = cateringResponse?.id;
 
       if (cateringId) {
-        const validMenuItems = menuItems.filter((item) => item.name.trim());
+        const validMenuItems = data.menuItems.filter((item) => item.name.trim());
         await Promise.all(
           validMenuItems.map((item) =>
             createMenuMutation.mutateAsync({
@@ -326,7 +354,7 @@ export default function CreateCateringScreen() {
     } catch (error) {
       console.error("Catering save failed", error);
     }
-  };
+  });
 
   return (
     <SafeAreaView
@@ -377,21 +405,71 @@ export default function CreateCateringScreen() {
 
           <View className="px-6 -mt-8">
             <FormSection title="Plan details" icon="restaurant-outline">
-              <CustomInput
-                label="Package title"
-                placeholder="e.g. Signature Wedding Buffet"
-                value={title}
-                onChangeText={setTitle}
-                icon="title"
+              <Controller
+                control={control}
+                name="title"
+                render={({ field: { value, onChange } }) => (
+                  <CustomInput
+                    label="Package title"
+                    placeholder="e.g. Wedding Buffet"
+                    value={value}
+                    onChangeText={onChange}
+                    icon="title"
+                  />
+                )}
               />
-              <CustomInput
-                label="Per plate price"
-                placeholder="2000"
-                value={pax}
-                onChangeText={setPax}
-                keyboardType="numeric"
-                icon="payments"
+              <Controller
+                control={control}
+                name="pax"
+                render={({ field: { value, onChange } }) => (
+                  <CustomInput
+                    label="Per plate price"
+                    placeholder="2000"
+                    value={value}
+                    onChangeText={onChange}
+                    keyboardType="numeric"
+                    icon="payments"
+                  />
+                )}
               />
+
+              <View className="mb-5">
+                <Text className="text-[11px] font-bold text-muted-light uppercase tracking-widest mb-2 ml-1">
+                  Meal type
+                </Text>
+                <View className="rounded-md border border-outline-variant/50 bg-background-light p-2">
+                  <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={{ gap: 10 }}
+                  >
+                    {MEAL_OPTIONS.map((option) => {
+                      const isSelected = selectedMeal === option.type;
+                      return (
+                        <Pressable
+                          key={option.type}
+                          onPress={() => setValue("selectedMeal", option.type)}
+                          className={cn(
+                            "rounded-full px-3 py-2 border",
+                            isSelected
+                              ? "border-primary bg-primary/10"
+                              : "border-outline-variant/40 bg-white"
+                          )}
+                        >
+                          <Text
+                            className={cn(
+                              "text-[12px] font-bold",
+                              isSelected ? "text-primary" : "text-on-surface"
+                            )}
+                          >
+                            {option.type}
+                          </Text>
+                        </Pressable>
+                      );
+                    })}
+                  </ScrollView>
+                </View>
+              </View>
             </FormSection>
 
             <FormSection title="Schedule" icon="time-outline">
@@ -410,7 +488,7 @@ export default function CreateCateringScreen() {
                         date.getMonth(),
                         date.getDate()
                       );
-                      setStartDateTime(updated);
+                      setValue("startDateTime", updated);
                     }
                   }}
                 />
@@ -427,7 +505,7 @@ export default function CreateCateringScreen() {
                     if (date) {
                       const updated = new Date(startDateTime);
                       updated.setHours(date.getHours(), date.getMinutes());
-                      setStartDateTime(updated);
+                      setValue("startDateTime", updated);
                     }
                   }}
                 />
@@ -448,7 +526,7 @@ export default function CreateCateringScreen() {
                         date.getMonth(),
                         date.getDate()
                       );
-                      setEndDateTime(updated);
+                      setValue("endDateTime", updated);
                     }
                   }}
                 />
@@ -465,7 +543,7 @@ export default function CreateCateringScreen() {
                     if (date) {
                       const updated = new Date(endDateTime);
                       updated.setHours(date.getHours(), date.getMinutes());
-                      setEndDateTime(updated);
+                      setValue("endDateTime", updated);
                     }
                   }}
                 />
@@ -473,10 +551,10 @@ export default function CreateCateringScreen() {
             </FormSection>
 
             <FormSection title="Menu planner" icon="reader-outline">
-              {menuItems.map((item, index) => (
+              {fields.map((field, index) => (
                 <MenuItemRow
-                  key={`${item.name}-${index}`}
-                  item={item}
+                  key={field.id}
+                  item={menuItems?.[index] ?? field}
                   index={index}
                   onUpdate={handleUpdateMenuItem}
                   onRemove={handleRemoveMenuItem}
@@ -496,15 +574,21 @@ export default function CreateCateringScreen() {
               <Text className="text-[11px] font-bold text-muted-light uppercase tracking-widest mb-2 ml-1">
                 Notes for the catering team
               </Text>
-              <TextInput
-                multiline
-                numberOfLines={4}
-                placeholder="Allergies, serve time, meal preferences..."
-                placeholderTextColor="#896175"
-                className="bg-background-light/50 border border-outline-variant/50 rounded-md px-4 py-4 min-h-[120px] text-[16px] font-medium text-on-surface"
-                style={{ textAlignVertical: "top" }}
-                value={notes}
-                onChangeText={setNotes}
+              <Controller
+                control={control}
+                name="notes"
+                render={({ field: { value, onChange } }) => (
+                  <TextInput
+                    multiline
+                    numberOfLines={4}
+                    placeholder="Allergies, serve time, meal preferences..."
+                    placeholderTextColor="#896175"
+                    className="bg-background-light/50 border border-outline-variant/50 rounded-md px-4 py-4 min-h-[120px] text-[16px] font-medium text-on-surface"
+                    style={{ textAlignVertical: "top" }}
+                    value={value}
+                    onChangeText={onChange}
+                  />
+                )}
               />
             </FormSection>
 
@@ -534,11 +618,7 @@ export default function CreateCateringScreen() {
               </LinearGradient>
             </TouchableOpacity>
 
-            <View className="items-center pb-8">
-              <Text className="text-[10px] font-black text-muted-light uppercase tracking-[4px]">
-                Powered by Khumbaya
-              </Text>
-            </View>
+          
           </View>
         </ScrollView>
       </KeyboardAvoidingView>

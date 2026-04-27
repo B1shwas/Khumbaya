@@ -40,21 +40,21 @@ const PAGE_SIZE = 10;
 const getApiErrorMessage = (error: unknown): string => {
   const status = (error as any)?.response?.status;
 
-  if (status === 401) {
-    return "You must log in to view this event's catering plans.";
-  }
-  if (status === 403) {
-    return "You don't have permission to view caterings for this event.";
-  }
-  if (status === 404) {
-    return "No catering record was found for this event.";
-  }
-  if (status === 422) {
-    return "There was a validation issue while fetching catering data.";
-  }
-  if (status === 500) {
-    return "Server error. Please try again later.";
-  }
+  // if (status === 401) {
+  //   return "You must log in to view this event's catering plans.";
+  // }
+  // if (status === 403) {
+  //   return "You don't have permission to view caterings for this event.";
+  // }
+  // if (status === 404) {
+  //   return "No catering record was found for this event.";
+  // }
+  // if (status === 422) {
+  //   return "There was a validation issue while fetching catering data.";
+  // }
+  // if (status === 500) {
+  //   return "Server error. Please try again later.";
+  // }
 
   return (error as any)?.message ?? "Unable to load catering plans.";
 };
@@ -296,10 +296,8 @@ export default function CateringDashboard() {
           ) : null}
 
           <View className="items-center py-10">
-            <View className="w-12 h-1.5 rounded-full bg-outline-variant/50 mb-4" />
-            <Text className="text-[11px] font-black text-muted-light uppercase tracking-[4px] text-center">
-              Khumbaya Management
-            </Text>
+            <View className=" mb-4" />
+           
           </View>
         </View>
       </ScrollView>
