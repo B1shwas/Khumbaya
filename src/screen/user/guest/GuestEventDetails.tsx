@@ -147,6 +147,21 @@ export default function GuestEventDetails() {
     router.push(`/(protected)/(client-stack)/events/${eventId}/(guest)/rsvp`);
   };
 
+  const handleServicePress = (serviceId: string) => {
+    const routeMap: Record<string, string> = {
+      lodging: "lodge",
+      transport: "logistic",
+      meals: "food",
+    };
+
+    const page = routeMap[serviceId];
+    if (!page) return;
+
+    router.push(
+      `/(protected)/(client-stack)/events/${eventId}/(guest)/services/${page}`
+    );
+  };
+
   return (
     <SafeAreaView className="flex-1 bg-background-light" edges={["top"]}>
       <ScrollView
@@ -194,7 +209,10 @@ export default function GuestEventDetails() {
 
         {/* ── Services ── */}
         <Section title="Services Offered">
-          <ServiceGrid services={DEFAULT_SERVICES} />
+          <ServiceGrid
+            services={DEFAULT_SERVICES}
+            onServicePress={(service) => handleServicePress(service.id)}
+          />
         </Section>
 
         {/* ── RSVP section ── */}
