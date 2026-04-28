@@ -132,8 +132,8 @@ export interface FormState {
   description: string;
   city: string;
   country: string;
-  latitude: string;
-  longitude: string;
+  // latitude: string;
+  // longitude: string;
   vendorType: string;
   vendorCategoryId: BusinessCategory | "";
   categoryDetails: Record<string, string | boolean>;

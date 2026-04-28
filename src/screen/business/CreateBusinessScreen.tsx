@@ -38,8 +38,8 @@ export default function CreateBusinessScreen() {
     description: "",
     city: "",
     country: "",
-    latitude: "",
-    longitude: "",
+    // latitude: "",
+    // longitude: "",
     vendorType: "",
     vendorCategoryId: "",
     categoryDetails: {},
@@ -83,8 +83,8 @@ export default function CreateBusinessScreen() {
         cover: coverImage ?? photos[Math.floor(((Math.random() * 1000) % 6) + 1)].url,
         city: form.city.trim() || undefined,
         country: form.country.trim() || undefined,
-        latitude: form.latitude ? parseFloat(form.latitude) : undefined,
-        longitude: form.longitude ? parseFloat(form.longitude) : undefined,
+        // latitude: form.latitude ? parseFloat(form.latitude) : undefined,
+        // longitude: form.longitude ? parseFloat(form.longitude) : undefined,
         categoryDetails: form.categoryDetails,
         email: form.email.trim() || undefined,
         contact_phone: form.contactPhone.trim() || undefined,
@@ -512,8 +512,8 @@ export default function CreateBusinessScreen() {
 
           {/* Location Pin — map picker */}
           <LocationPicker
-            latitude={form.latitude}
-            longitude={form.longitude}
+            latitude="27.7172"
+            longitude="85.3240"
             onChange={(lat, lng) =>
               setForm((prev) => ({ ...prev, latitude: lat, longitude: lng }))
             }

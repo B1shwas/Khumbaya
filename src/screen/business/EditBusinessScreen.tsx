@@ -42,8 +42,8 @@ export default function EditBusinessScreen() {
     description: "",
     city: "",
     country: "",
-    latitude: "",
-    longitude: "",
+    // latitude: "",
+    // longitude: "",
     vendorType: "",
     vendorCategoryId: "",
     categoryDetails: {},
@@ -68,8 +68,8 @@ export default function EditBusinessScreen() {
         description: businessInfo.description ?? "",
         city: businessInfo.city ?? "",
         country: businessInfo.country ?? "",
-        latitude: businessInfo.latitude != null ? String(businessInfo.latitude) : "",
-        longitude: businessInfo.longitude != null ? String(businessInfo.longitude) : "",
+        // latitude: businessInfo.latitude != null ? String(businessInfo.latitude) : "",
+        // longitude: businessInfo.longitude != null ? String(businessInfo.longitude) : "",
         vendorType: "",
         vendorCategoryId: businessInfo.category ?? "",
         categoryDetails: {},
@@ -107,8 +107,8 @@ export default function EditBusinessScreen() {
           cover: coverImage ?? undefined,
           city: form.city.trim() || undefined,
           country: form.country.trim() || undefined,
-          latitude: form.latitude ? parseFloat(form.latitude) : undefined,
-          longitude: form.longitude ? parseFloat(form.longitude) : undefined,
+          // latitude: form.latitude ? parseFloat(form.latitude) : undefined,
+          // longitude: form.longitude ? parseFloat(form.longitude) : undefined,
           categoryDetails: Object.keys(form.categoryDetails).length > 0
             ? form.categoryDetails
             : undefined,
@@ -578,8 +578,8 @@ export default function EditBusinessScreen() {
 
           {/* Location Pin — map picker */}
           <LocationPicker
-            latitude={form.latitude}
-            longitude={form.longitude}
+            latitude="27.7172"
+            longitude="85.3240"
             onChange={(lat, lng) =>
               setForm((prev) => ({ ...prev, latitude: lat, longitude: lng }))
             }
