@@ -1,4 +1,4 @@
-import { BusinessCategory } from "@/src/constants/business";
+import { BusinessCategory } from "@/src/features/business/types";
 import { MaterialIcons } from "@expo/vector-icons";
 
 export interface VendorCategory {

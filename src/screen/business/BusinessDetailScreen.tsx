@@ -8,7 +8,7 @@ import {
   BusinessRequest,
   OtherServiceAttribute,
   VenueAttribute
-} from "@/src/constants/business";
+} from "@/src/features/business/types";
 import { useDeleteBusiness, useGetBusinessById } from "@/src/features/business";
 import { useBusinessDraftStore } from "@/src/features/business/store/useBusiness";
 import { shadowStyle } from "@/src/utils/helper";
@@ -251,12 +251,12 @@ export default function BusinessDetailsScreen() {
   }, [clearBusinessDraft]);
 
   const handleEditPress = () => {
-    if (!businessWithAttribute?.business_information) return;
-    setBusinessDraft(businessWithAttribute.business_information);
+    if (!businessWithAttribute?.businessInformation) return;
+    setBusinessDraft(businessWithAttribute.businessInformation);
     router.push({
       pathname: "/(protected)/(client-tabs)/business/[businessId]/edit" as never,
       params: {
-        businessId: String(businessWithAttribute.business_information.id),
+        businessId: String(businessWithAttribute.businessInformation.id),
       },
     });
   };
@@ -265,7 +265,7 @@ export default function BusinessDetailsScreen() {
     if (!businessWithAttribute) return;
     Alert.alert(
       "Delete Business",
-      `Are you sure you want to delete "${businessWithAttribute.business_information.business_name}"? This action cannot be undone.`,
+      `Are you sure you want to delete "${businessWithAttribute.businessInformation.businessName}"? This action cannot be undone.`,
       [
         { text: "Cancel", style: "cancel" },
         {
@@ -289,25 +289,25 @@ export default function BusinessDetailsScreen() {
   }, [businessId, businessWithAttribute, deleteBusiness, router]);
 
   const handleEditVenuePress = useCallback((venue: VenueAttribute) => {
-    if (!businessWithAttribute?.business_information?.id || !venue?.venue_id) {
+    if (!businessWithAttribute?.businessInformation?.id || !venue?.venueId) {
       return;
     }
     router.push({
       pathname: "/business/[businessId]/venue/[venueId]/update",
       params: {
-        businessId: String(businessWithAttribute.business_information.id),
-        venueId: String(venue.venue_id),
+        businessId: String(businessWithAttribute.businessInformation.id),
+        venueId: String(venue.venueId),
         mode: "edit",
       },
     });
   }, [businessWithAttribute, router]);
 
   const handleAddVenuePress = useCallback(() => {
-    if (!businessWithAttribute?.business_information?.id) return;
+    if (!businessWithAttribute?.businessInformation?.id) return;
     router.push({
       pathname:`/business/[businessId]/venue/create` ,
       params:{
-        businessId: String(businessWithAttribute.business_information.id),
+        businessId: String(businessWithAttribute.businessInformation.id),
         mode:"create",
 
       }}
@@ -315,14 +315,14 @@ export default function BusinessDetailsScreen() {
   }, [businessWithAttribute, router]);
 
   const handleEditServicePress = useCallback((service: OtherServiceAttribute) => {
-    if (!businessWithAttribute?.business_information?.id || !service?.id) {
+    if (!businessWithAttribute?.businessInformation?.id || !service?.id) {
       return;
     }
 
     router.push({
       pathname: "/business/[businessId]/service/[serviceId]/update",
       params: {
-        businessId: String(businessWithAttribute.business_information.id),
+        businessId: String(businessWithAttribute.businessInformation.id),
         serviceId: String(service.id),
         mode: "edit",
       },
@@ -356,11 +356,11 @@ export default function BusinessDetailsScreen() {
       >
         <HeroSection 
         onEditPress={handleEditPress}
-          business={businessWithAttribute.business_information}
+          business={businessWithAttribute.businessInformation}
         />
 
         <View className="px-4 gap-4 mt-4">
-          <ActiveRequestsSection requests={businessWithAttribute.business_information.requests ?? []} />
+          <ActiveRequestsSection requests={[]} />
 
           {/* Location map */}
           <View className="bg-white rounded-2xl border border-gray-100 overflow-hidden" style={{ elevation: 2 }}>
@@ -417,27 +417,27 @@ export default function BusinessDetailsScreen() {
           </View>
 
           {/* Category-specific details (from constants) */}
-          {businessWithAttribute.business_information.category === "Venue" && (
+          {businessWithAttribute.businessInformation.category === "Venue" && (
             <VenueDetailsSection
-              venues={businessWithAttribute.venue_information}
+              venues={businessWithAttribute.venueInformation}
               onEditVenue={handleEditVenuePress}
               onAddVenue={handleAddVenuePress}
             />
           )}
-          {businessWithAttribute.vendor_services_information && businessWithAttribute.business_information.category !== "Venue" && businessWithAttribute.business_information.category != null && (
+          {businessWithAttribute.vendorServicesinformation && businessWithAttribute.businessInformation.category !== "Venue" && businessWithAttribute.businessInformation.category != null && (
             <ServiceDetailsSection
               service={
-                businessWithAttribute.vendor_services_information?.[0]}
+                businessWithAttribute.vendorServicesinformation?.[0]}
               onEdit={
-                businessWithAttribute.vendor_services_information?.[0]
-                  ? () => handleEditServicePress(businessWithAttribute.vendor_services_information[0])
+                businessWithAttribute.vendorServicesinformation?.[0]
+                  ? () => handleEditServicePress(businessWithAttribute.vendorServicesinformation[0])
                   : undefined
               }
             />
           )}
 
-          <AvailabilityCalendar dates={businessWithAttribute.business_information.availabilityDates} />
-          <LatestReviewSection reviews={businessWithAttribute.business_information.reviews ?? []} />
+          <AvailabilityCalendar dates={undefined} />
+          <LatestReviewSection reviews={[]} />
 
           <View className="flex-row items-center justify-between rounded-2xl border border-red-200 bg-red-50 p-4">
             <View>

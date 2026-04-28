@@ -2,8 +2,8 @@ import { CategoryChip } from "@/src/components/onboarding/CategoryChip";
 import { FloatLoginBanner } from "@/src/components/onboarding/FloatLoginBanner";
 import { HeaderExploreVendor } from "@/src/components/onboarding/HeaderExploreVendor";
 import { VendorCard } from "@/src/components/onboarding/VendorCard";
-import { BusinessCategory } from "@/src/constants/business";
 import { useGetBusinessList } from "@/src/features/business/hooks/use-business";
+import { BusinessCategory } from "@/src/features/business/types";
 import { useAuthStore } from "@/src/store/AuthStore";
 import type { Vendor } from "@/src/utils/type/vendor";
 import { useMemo, useState } from "react";
@@ -37,17 +37,18 @@ export default function ExploreVendors() {
   const [selectedCity, setSelectedCity] = useState("All");
   const { user } = useAuthStore();
   const { data: businesses = [] } = useGetBusinessList();
+  console.log('This is the data in the business get Method in the ui screen ', businesses)
 
   const vendorsFromQuery = useMemo<Vendor[]>(() => {
     return businesses.map((business) => ({
       id: String(business.id),
-      name: business.business_name,
+      name: business.businessName,
       category: business.category ?? "Other",
-      rating: business.rating ?? 0,
+      rating: 4,
       reviews: business.totalBookings ?? 0,
       priceLevel:
-        business.price_starting_from != null
-          ? `From रु ${business.price_starting_from}`
+        business.priceStartingFrom != null
+          ? `From रु ${business.priceStartingFrom}`
           : undefined,
       location:
         [business.city, business.country].filter(Boolean).join(", ") ||

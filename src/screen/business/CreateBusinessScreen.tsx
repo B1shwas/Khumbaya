@@ -1,8 +1,8 @@
 import LocationPicker from "@/src/components/ui/LocationPicker";
 import { Text } from "@/src/components/ui/Text";
-import { BusinessCategory } from "@/src/constants/business";
 import { photos } from "@/src/constants/gallery";
 import { useCreateBusiness } from "@/src/features/business";
+import { BusinessCategory } from "@/src/features/business/types";
 import { MaterialIcons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
@@ -77,7 +77,7 @@ export default function CreateBusinessScreen() {
 
     createBusiness.mutate(
       {
-        business_name: form.businessName.trim(),
+        businessName: form.businessName.trim(),
         description: form.description.trim() || undefined,
         category: form.vendorCategoryId,
         cover: coverImage ?? photos[Math.floor(((Math.random() * 1000) % 6) + 1)].url,
@@ -87,7 +87,7 @@ export default function CreateBusinessScreen() {
         // longitude: form.longitude ? parseFloat(form.longitude) : undefined,
         categoryDetails: form.categoryDetails,
         email: form.email.trim() || undefined,
-        contact_phone: form.contactPhone.trim() || undefined,
+        contactPhone: form.contactPhone.trim() || undefined,
       },
       {
         onSuccess: () => {

@@ -23,8 +23,8 @@ export default function DraftInvitationCard({
   isMoving,
   isDeleting,
 }: DraftInvitationCardProps) {
-  const initials = guest.user_detail.username
-    ? guest.user_detail.username
+  const initials = guest.user.username
+    ? guest.user.username
         .split(" ")
         .map((n) => n[0])
         .join("")
@@ -33,16 +33,16 @@ export default function DraftInvitationCard({
     : "GU";
 
   const displayName =
-    guest.user_detail.username?.trim() || guest.user_detail.email || "Guest";
-  const relation = guest.user_detail.relation?.trim();
-  const phone = guest.user_detail.phone?.trim();
+    guest.user.username?.trim() || guest.user.email || "Guest";
+  const relation = guest.user.relation?.trim();
+  const phone = guest.user.phone?.trim();
 
   return (
     <View className="mb-3 rounded-2xl border border-[#EE2B8C]/20 bg-white">
       <View className="min-h-[86px] flex-row items-center gap-3 px-4 py-3">
-        {guest.user_detail.photo ? (
+        {guest.user.photo ? (
           <Image
-            source={{ uri: guest.user_detail.photo }}
+            source={{ uri: guest.user.photo }}
             className="h-12 w-12 rounded-full"
           />
         ) : (

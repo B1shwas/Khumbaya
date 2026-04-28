@@ -1,39 +1,40 @@
-export interface EventGuest {
+import { User } from "@/src/store/AuthStore";
+
+export interface Invitation {
   id: number;
-  userId: number;
+  userId: number | null;
+  hasCheckedIn: boolean | null;
+  hasCheckedOut: boolean | null;
   eventId: number;
-  familyId: number;
+  familyId: number | null;
+  respondedBy: number | null;
+  respondedAt: Date | null;
+  invitedBy: number;
+  role: string;
   status: string | null;
-  arrival_date_time: string | null;
-  departure_date_time: string | null;
-  isAccomodation: boolean | null;
+  notes: string | null;
+  category: string;
   isArrivalPickupRequired: boolean | null;
   isDeparturePickupRequired: boolean | null;
-  notes: string | null;
-  assigned_room: string | null;
-  arrival_info: string | null;
-  pickup_info?: string | null;
-  departure_info: string | null;
-  role: string | null;
-  invited_by: number;
-  joined_at: string;
-  category: "friend" | "family" | "colleague" | "vvip";
+  organizerNote: string | null;
+  isAccomodation: boolean | null;
+  assignedRoom: string | null;
+  arrivalDatetime: Date | null;
+  arrivalLocation: string | null;
+  departureDatetime: Date | null;
+  departureLocation: string | null;
+  arrivalInfo: string | null;
+  departureInfo: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+
 }
 
-export interface UserDetail {
-  id: number;
-  username: string;
-  email: string;
-  phone: string;
-  photo: string | null;
-  familyId: number;
-  relation: string | null;
-}
 
 export interface GuestDetailInterface {
-  user_detail: UserDetail;
-  event_guest: EventGuest;
-  family_name: string | null;
+  user: User;
+  eventGuest: Invitation;
+  familyName: string | null;
 }
 
 export interface FamilyGroup {
@@ -59,8 +60,8 @@ export function groupInvitationsByFamily(
   const individuals: GuestDetailInterface[] = [];
 
   invitations.forEach((invitation) => {
-    if (invitation.event_guest.familyId !== null) {
-      const familyId = invitation.event_guest.familyId;
+    if (invitation.eventGuest.familyId !== null) {
+      const familyId = invitation.eventGuest.familyId;
       if (!familyMap.has(familyId)) {
         familyMap.set(familyId, []);
       }
@@ -76,7 +77,7 @@ export function groupInvitationsByFamily(
     grouped.push({
       type: "family",
       familyId,
-      family_name: members[0].family_name || "Family",
+      family_name: members[0].familyName || "Family",
       members,
       primaryMember: members[0],
       memberCount: members.length,

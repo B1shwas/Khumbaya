@@ -11,8 +11,8 @@ export interface TimelineEvent {
   id: string;
   time: string;
   status: "Completed" | "On Route" | "Upcoming";
-  pickup: string;
-  dropoff: string;
+  from: string;
+  to: string;
   groupName: string;
   guestCount: number;
   guests: LogisticsGuestAvatar[];
@@ -22,7 +22,7 @@ export interface TimelineEvent {
 
 export interface VehicleSummary {
   id: string;
-  name: string;
+  vehicle_name: string;
   type: string;
   status: "Active - On Route" | "Idle";
   loadFactor: number;

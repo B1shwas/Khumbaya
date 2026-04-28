@@ -4,18 +4,18 @@ import {
   AddEventVendorPayload,
   createBusinessApi,
   createBusinessVenueApi,
-  getMyBusiness,
   deleteBusinessApi,
   getBusinessByIdApi,
   getBusinessListApi,
   getEventBusinessApi,
   getEventOfBusiness,
+  getMyBusiness,
   getUserBusiness,
+  ReviewPayload,
+  submitVendorReviewApi,
   updateBusinessApi,
   updateBusinessServiceApi,
   updateBusinessVenueApi,
-  submitVendorReviewApi,
-  ReviewPayload,
 } from "../api";
 import {
   CreateBusinessPayload,
@@ -105,7 +105,7 @@ export const useUpdateBusinessService = () => {
     }) => updateBusinessServiceApi(serviceId, payload),
     onSuccess: (data, variables) => {
       const resolvedBusinessId =
-        data?.business_information?.id ?? variables.businessId;
+        data?.businessInformation?.id ?? variables.businessId;
 
       queryClient.invalidateQueries({ queryKey: ["business/list"] });
 
@@ -133,7 +133,7 @@ export const useUpdateBusinessVenue = () => {
     }) => updateBusinessVenueApi(venueId, payload),
     onSuccess: (data, variables) => {
       const resolvedBusinessId =
-        data?.business_information?.id ?? variables.businessId;
+        data?.businessInformation?.id ?? variables.businessId;
 
       queryClient.invalidateQueries({ queryKey: ["business/list"] });
 
@@ -154,7 +154,7 @@ export const useCreateBusinessVenue = () => {
       createBusinessVenueApi(payload),
     onSuccess: (data, variables) => {
       const resolvedBusinessId =
-        data?.business_information?.id ?? variables.business_id;
+        data?.businessInformation?.id ?? variables.businessId;
 
       queryClient.invalidateQueries({ queryKey: ["business/list"] });
 

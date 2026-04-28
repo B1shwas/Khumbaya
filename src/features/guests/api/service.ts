@@ -1,4 +1,5 @@
 import api from "@/src/api/axios";
+import { GuestWithRoom, RoomData } from "@/src/features/hotel/types/hotel.types";
 
 export interface InviteGuestPayload {
   fullName: string;
@@ -68,10 +69,12 @@ export const getInvitation = async (eventId: number) => {
   const response = await api.get(`/event/${eventId}/invitation`);
   return response.data.data;
 };
-export const getGuestRoom = async(eventId:number)=>{
-  const responce = await api.get(`event/${eventId}/hotel-management`);
-  return responce.data.data?? responce.data;
-}
+export const getGuestRoom = async (
+  eventId: number
+): Promise<RoomData[]> => {
+  const response = await api.get(`event/${eventId}/hotel-management`);
+  return (response.data.data ?? response.data);
+};
 export const removeInvitation = async (eventId: number, guestId: number) => {
   const response = await api.delete(`/event/${eventId}/invitation`, {
     data: { userId: guestId },

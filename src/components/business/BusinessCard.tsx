@@ -1,16 +1,15 @@
-import { Business } from "@/src/constants/business";
 import { getBusinessIcon } from "@/src/constants/business-icons";
+import { Business } from "@/src/features/business/types/index";
 import { shadowStyle } from "@/src/utils/helper";
 import { MaterialIcons } from "@expo/vector-icons";
 import React from "react";
 import { Image, Text, TouchableOpacity, View } from "react-native";
+
 interface BusinessCardProps {
   business: Business;
   onPress?: () => void;
   onMorePress?: () => void;
 }
-
-
 
 function formatViews(n: number): string {
   return n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(n);
@@ -21,7 +20,7 @@ const BusinessCard = React.memo(function BusinessCard({
   onPress,
   onMorePress,
 }: BusinessCardProps) {
-  const isActive = business.is_verified;
+  const isActive = business.isVerified;
   const coverUri = business.cover ?? business.avatar ?? undefined;
 
   return (
@@ -32,7 +31,7 @@ const BusinessCard = React.memo(function BusinessCard({
       onPress={onPress}
     >
       {/* ── Cover image ── */}
-      <View className="w-full  bg-black">
+      <View className="w-full bg-black">
         <Image
           source={coverUri ? { uri: coverUri } : require("@/assets/images/screen.png")}
           className="w-full h-32"
@@ -46,9 +45,7 @@ const BusinessCard = React.memo(function BusinessCard({
             isActive ? "bg-emerald-500/90" : "bg-amber-500/90"
           }`}
         >
-          {isActive && (
-            <View className="w-1.5 h-1.5 rounded-full bg-white" />
-          )}
+          {isActive && <View className="w-1.5 h-1.5 rounded-full bg-white" />}
           <Text className="text-white text-[10px] font-bold tracking-wide">
             {isActive ? "Verified" : "Pending Verification"}
           </Text>
@@ -61,7 +58,7 @@ const BusinessCard = React.memo(function BusinessCard({
         <View className="flex-row items-center gap-2.5 mb-1.5">
           <View className="w-8 h-8 rounded-lg bg-primary/10 items-center justify-center">
             <MaterialIcons
-              name={getBusinessIcon(business.category ?? undefined)}
+              name={getBusinessIcon(business.category as any ?? undefined)}
               size={16}
               color="#ee2b8c"
             />
@@ -70,13 +67,9 @@ const BusinessCard = React.memo(function BusinessCard({
             className="flex-1 text-base font-bold text-[#181114] tracking-tight"
             numberOfLines={1}
           >
-            {business.business_name}
+            {business.businessName}
           </Text>
-          <TouchableOpacity
-            className="p-1"
-            hitSlop={8}
-            onPress={onMorePress}
-          >
+          <TouchableOpacity className="p-1" hitSlop={8} onPress={onMorePress}>
             <MaterialIcons name="more-vert" size={20} color="#6b7280" />
           </TouchableOpacity>
         </View>
@@ -94,31 +87,12 @@ const BusinessCard = React.memo(function BusinessCard({
                 : business.city ?? business.country ?? business.location ?? "Location not set"}
             </Text>
           </View>
-          {business.price_starting_from != null && (
+          {business.priceStartingFrom != null && (
             <View className="bg-gray-100 rounded-full px-2.5 py-0.5 ml-2">
               <Text className="text-[11px] font-bold text-[#594048]">
-                From {business.price_starting_from.toLocaleString()}
+                From {business.priceStartingFrom.toLocaleString()}
               </Text>
             </View>
-          )}
-        </View>
-
-        {/* Row 3 — rating */}
-        <View className="flex-row items-center gap-1 mb-3">
-          <MaterialIcons
-            name="star"
-            size={13}
-            color={business.rating ? "#ee2b8c" : "#d1d5db"}
-          />
-          {business.rating ? (
-            <>
-              <Text className="text-xs font-bold text-[#181114]">
-                {business.rating}
-              </Text>
-              <Text className="text-xs text-gray-400">/ 5.0</Text>
-            </>
-          ) : (
-            <Text className="text-xs text-gray-400 italic">No rating yet</Text>
           )}
         </View>
 
@@ -131,7 +105,7 @@ const BusinessCard = React.memo(function BusinessCard({
                 isActive ? "text-[#181114]" : "text-gray-400"
               }`}
             >
-              {business.upcomingEvents}
+              {business.upcomingEvents ?? 0}
             </Text>
             <Text className="text-[9px] font-semibold text-gray-400 mt-0.5 uppercase tracking-wide">
               Events

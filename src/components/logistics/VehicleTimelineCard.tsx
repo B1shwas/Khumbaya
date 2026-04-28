@@ -69,7 +69,7 @@ export const VehicleTimelineCard: React.FC<VehicleTimelineCardProps> = ({ event 
               <MaterialIcons name={event.pickupIcon} size={10} color={isActive ? "#ee2b8c" : "#594048"} />
               <Text className="text-[9px] font-jakarta-bold text-on-surface-variant uppercase tracking-wider">Pickup</Text>
             </View>
-            <Text className="text-[13px] font-jakarta-semibold text-on-surface leading-none">{event.pickup}</Text>
+            <Text className="text-[13px] font-jakarta-semibold text-on-surface leading-none">{event.from}</Text>
           </View>
         </View>
 
@@ -86,7 +86,7 @@ export const VehicleTimelineCard: React.FC<VehicleTimelineCardProps> = ({ event 
               <MaterialIcons name={event.dropoffIcon} size={10} color={isActive ? "#ee2b8c" : "#594048"} />
               <Text className="text-[9px] font-jakarta-bold text-on-surface-variant uppercase tracking-wider">Drop-off</Text>
             </View>
-            <Text className="text-[13px] font-jakarta-semibold text-on-surface leading-none">{event.dropoff}</Text>
+            <Text className="text-[13px] font-jakarta-semibold text-on-surface leading-none">{event.to}</Text>
           </View>
         </View>
       </View>

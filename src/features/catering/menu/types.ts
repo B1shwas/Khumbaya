@@ -7,7 +7,6 @@ export interface MenuItemColumn {
   cateringId: number;
   type: string;
   menuType: string;
-  isVegetarian: boolean;
   createdAt: Date | string;
   updatedAt: Date | string;
 }

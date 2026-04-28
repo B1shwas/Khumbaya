@@ -1,21 +1,22 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   assign_vehicle,
-  AssignVehiclePayload,
   createVehicle,
   CreateVehicle,
+  get_vehicle_assignment,
   getEventVehicles,
-  get_vehicle_assignment , 
-  getGuestTransportation,
+  getGuestTransportation
 } from "../api";
 
-import { 
-  LogisticsTimelineItem, 
-  mapToLogisticsTimeline 
+import {
+  AssignVehileInputType,
+  LogisticsTimelineItem,
+  mapToLogisticsTimeline,
+  SelectTransportation
 } from "../type";
 
 export const useGuestTransportation = (eventId: string) => {
-  return useQuery({
+  return useQuery<SelectTransportation[]>({
     queryKey: ["logistics", "guest-transportation", eventId],
     queryFn: () => getGuestTransportation(eventId),
     enabled: !!eventId,
@@ -67,7 +68,7 @@ export const useAssignVehicle = (eventId: string) => {
 
   return useMutation({
     mutationKey: ["logistics", "assign-vehicle", eventId],
-    mutationFn: (params: AssignVehiclePayload) => assign_vehicle(params),
+    mutationFn: (params: AssignVehileInputType) => assign_vehicle(params),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["logistics", "guest-transportation", eventId],

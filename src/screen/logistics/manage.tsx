@@ -1,8 +1,8 @@
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
-import DateTimePicker from "@react-native-community/datetimepicker";
+import DateTimePicker, { DateTimePickerEvent } from "@react-native-community/datetimepicker";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React from "react";
-import { Controller, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import {
   ActivityIndicator,
   Alert,
@@ -18,18 +18,20 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { VehicleSummaryCard } from "../../components/logistics/VehicleSummaryCard";
-import { MOCK_VEHICLE_SUMMARY } from "../../constants/logistics";
 import { useAssignVehicle, useGetVehicleAssignement, useGuestTransportation } from "../../features/logistics/hooks/use-transport";
-import { LogisticsTimelineItem } from "../../features/logistics/type";
+import { AssignVehileInputType, LogisticsTimelineItem, SelectTransportation } from "../../features/logistics/type";
 import { cn } from "../../utils/cn";
 import { formatDate, formatTime } from "../../utils/helper";
 
 type AssignTransportFormValues = {
-  pickupLocation: string;
-  dropoffLocation: string;
-  pickupTime: Date;
-  dropoffTime: Date;
+  fromLocation: string;
+  toLocation: string;
+  fromTime: Date;
+  toTime: Date;
 };
+
+type AssignmentType = "arrival" | "departure" | null;
+type EditableEndpoint = "from" | "to" | null;
 
 export default function ManageVehicleScreen() {
   const router = useRouter();
@@ -38,51 +40,50 @@ export default function ManageVehicleScreen() {
     vehicleId?: string
   }>();
 
-
-  const [activeTab, setActiveTab] = React.useState<"timeline" | "assign">("timeline");
+  const [activeTab, setActiveTab] = React.useState<"timeline" | "assign">("assign");
   const [searchQuery, setSearchQuery] = React.useState("");
   const [isAssignModalOpen, setIsAssignModalOpen] = React.useState(false);
+  const [assignmentType, setAssignmentType] = React.useState<AssignmentType>(null);
   const [selectedGuestId, setSelectedGuestId] = React.useState<number | null>(null);
-  const [showPickupPicker, setShowPickupPicker] = React.useState(false);
-  const [showDropoffPicker, setShowDropoffPicker] = React.useState(false);
+  const [selectedGuestData, setSelectedGuestData] = React.useState<SelectTransportation | null>(null);
+  const [editableEndpoint, setEditableEndpoint] = React.useState<EditableEndpoint>(null);
+  const [showTimePicker, setShowTimePicker] = React.useState(false);
   const [pickerMode, setPickerMode] = React.useState<"date" | "time">("date");
+  const [pickerTarget, setPickerTarget] = React.useState<"fromTime" | "toTime" | null>(null);
 
   const { data: guests, isLoading: guestsLoading } = useGuestTransportation(eventId ?? "");
   const { data: assignedVehicles, isLoading: assignedLoading } = useGetVehicleAssignement(vehicleId ?? "");
+  console.log('This is the assigned vehicle d🦓🦓🦓🦓🦓🦓🦓🦓ata ', assignedVehicles);
   console.log('This is the data for the assigne vehicle data ', assignedVehicles);
   const assignVehicleMutation = useAssignVehicle(eventId ?? "");
 
   const {
-    control,
     handleSubmit,
     watch,
     reset,
+    getValues,
     setValue,
     setError,
     clearErrors,
     formState: { errors },
   } = useForm<AssignTransportFormValues>({
     defaultValues: {
-      pickupLocation: "",
-      dropoffLocation: "",
-      pickupTime: new Date(),
-      dropoffTime: new Date(),
+      fromLocation: "",
+      toLocation: "",
+      fromTime: new Date(),
+      toTime: new Date(),
     },
     mode: "onTouched",
   });
 
-  const pickupTime = watch("pickupTime");
-  const dropoffTime = watch("dropoffTime");
+  const fromLocation = watch("fromLocation");
+  const toLocation = watch("toLocation");
+  const fromTime = watch("fromTime");
+  const toTime = watch("toTime");
 
   const timelineAssignments = React.useMemo<LogisticsTimelineItem[]>(() => {
     return assignedVehicles || [];
   }, [assignedVehicles]);
-
-  const toDate = (value?: string | Date | null) => {
-    if (!value) return null;
-    const parsed = value instanceof Date ? value : new Date(value);
-    return Number.isNaN(parsed.getTime()) ? null : parsed;
-  };
 
   const getAssignmentStatus = (assignment: LogisticsTimelineItem) => {
     const now = new Date();
@@ -101,29 +102,53 @@ export default function ManageVehicleScreen() {
     return { badge: "bg-zinc-100", text: "text-zinc-700" };
   };
 
+  const formatGuestMoment = (value?: string | null) => {
+    if (!value) return "Time not set";
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) return "Time not set";
+
+    return new Intl.DateTimeFormat("en-US", {
+      month: "short",
+      hour: "numeric",
+      minute: "2-digit",
+    }).format(parsed);
+  };
+
+  const getGuestLocation = (
+    primary?: string | null,
+    unavailableLabel: string = "Not set"
+  ) => {
+    return primary || unavailableLabel;
+  };
+
   const filteredGuests = React.useMemo(() => {
     if (!guests) return [];
     return guests.filter(guest =>
-      guest.invitation_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (guest.arrival_info && guest.arrival_info.toLowerCase().includes(searchQuery.toLowerCase()))
+      guest.user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      guest.user.phone.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (getGuestLocation(guest.arrivalLocation).toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (getGuestLocation(guest.departureLocation).toLowerCase().includes(searchQuery.toLowerCase()))
     );
   }, [guests, searchQuery]);
 
   const tabs: { label: string; value: "timeline" | "assign" }[] = [
-    { label: "Timeline", value: "timeline" },
     { label: "Assign Guest", value: "assign" },
+    { label: "Timeline", value: "timeline" },
   ];
 
   const resetAssignForm = () => {
     setSelectedGuestId(null);
+    setSelectedGuestData(null);
+    setAssignmentType(null);
+    setEditableEndpoint(null);
+    setPickerTarget(null);
     reset({
-      pickupLocation: "",
-      dropoffLocation: "",
-      pickupTime: new Date(),
-      dropoffTime: new Date(),
+      fromLocation: "",
+      toLocation: "",
+      fromTime: new Date(),
+      toTime: new Date(),
     });
-    setShowPickupPicker(false);
-    setShowDropoffPicker(false);
+    setShowTimePicker(false);
     setPickerMode("date");
   };
 
@@ -133,25 +158,34 @@ export default function ManageVehicleScreen() {
     return Number.isNaN(parsed.getTime()) ? null : parsed;
   };
 
-  const openAssignModal = (guest: {
-    id: number;
-    arrival_info?: string | null;
-    departure_info?: string | null;
-    arrival_date_time?: string | null;
-    departure_date_time?: string | null;
-  }) => {
-    const pickupDefault = parseOptionalGuestDate(guest.arrival_date_time) ?? new Date();
-    const dropoffDefault =
-      parseOptionalGuestDate(guest.departure_date_time) ??
-      new Date(pickupDefault.getTime() + 60 * 60 * 1000);
+  const openAssignModal = (guest: SelectTransportation, type: AssignmentType) => {
+    if (!type) return;
 
+    setSelectedGuestData(guest);
     setSelectedGuestId(guest.id);
-    reset({
-      pickupLocation: guest.arrival_info ?? "",
-      dropoffLocation: guest.departure_info ?? "",
-      pickupTime: pickupDefault,
-      dropoffTime: dropoffDefault,
-    });
+    setAssignmentType(type);
+    setEditableEndpoint(type === "arrival" ? "to" : "from");
+    setPickerTarget(type === "arrival" ? "toTime" : "fromTime");
+
+    const arrivalTime = parseOptionalGuestDate(guest.arrivalDatetime) ?? new Date();
+    const departureTime = parseOptionalGuestDate(guest.departureDatetime) ?? new Date();
+
+    if (type === "arrival") {
+      reset({
+        fromLocation: guest.arrivalLocation ?? guest.arrivalInfo ?? "",
+        toLocation: "",
+        fromTime: arrivalTime,
+        toTime: new Date(arrivalTime.getTime() + 60 * 60 * 1000),
+      });
+    } else {
+      reset({
+        fromLocation: "",
+        toLocation: guest.departureLocation ?? guest.departureInfo ?? "",
+        fromTime: new Date(departureTime.getTime() - 60 * 60 * 1000),
+        toTime: departureTime,
+      });
+    }
+
     clearErrors();
     setIsAssignModalOpen(true);
   };
@@ -161,75 +195,50 @@ export default function ManageVehicleScreen() {
     resetAssignForm();
   };
 
-  const onPickupTimeChange = (event: any, date?: Date) => {
-    if (event.type === "dismissed") {
-      setShowPickupPicker(false);
-      setPickerMode("date");
-      return;
-    }
-
-    if (date) {
-      const updated = new Date(pickupTime);
-
-      if (pickerMode === "date") {
-        updated.setFullYear(date.getFullYear(), date.getMonth(), date.getDate());
-        setValue("pickupTime", updated, { shouldDirty: true, shouldValidate: true });
-
-        if (Platform.OS === "android") {
-          setShowPickupPicker(false);
-          setTimeout(() => {
-            setPickerMode("time");
-            setShowPickupPicker(true);
-          }, 0);
-        } else {
-          setPickerMode("time");
-        }
-      } else {
-        updated.setHours(date.getHours(), date.getMinutes());
-        setValue("pickupTime", updated, { shouldDirty: true, shouldValidate: true });
-        setShowPickupPicker(false);
-        setPickerMode("date");
-      }
-    }
+  const openTimePicker = (target: "fromTime" | "toTime") => {
+    setPickerTarget(target);
+    setPickerMode("date");
+    setShowTimePicker(true);
   };
 
-  const onDropoffTimeChange = (event: any, date?: Date) => {
+  const onTimeChange = (event: DateTimePickerEvent, date?: Date) => {
     if (event.type === "dismissed") {
-      setShowDropoffPicker(false);
+      setShowTimePicker(false);
       setPickerMode("date");
       return;
     }
 
-    if (date) {
-      const updated = new Date(dropoffTime);
+    if (!pickerTarget || !date) return;
 
-      if (pickerMode === "date") {
-        updated.setFullYear(date.getFullYear(), date.getMonth(), date.getDate());
-        setValue("dropoffTime", updated, { shouldDirty: true, shouldValidate: true });
+    const currentValue = getValues(pickerTarget) ?? new Date();
+    const updated = new Date(currentValue);
 
-        if (Platform.OS === "android") {
-          setShowDropoffPicker(false);
-          setTimeout(() => {
-            setPickerMode("time");
-            setShowDropoffPicker(true);
-          }, 0);
-        } else {
+    if (pickerMode === "date") {
+      updated.setFullYear(date.getFullYear(), date.getMonth(), date.getDate());
+      setValue(pickerTarget, updated, { shouldDirty: true, shouldValidate: true });
+
+      if (Platform.OS === "android") {
+        setShowTimePicker(false);
+        setTimeout(() => {
           setPickerMode("time");
-        }
+          setShowTimePicker(true);
+        }, 0);
       } else {
-        updated.setHours(date.getHours(), date.getMinutes());
-        setValue("dropoffTime", updated, { shouldDirty: true, shouldValidate: true });
-        setShowDropoffPicker(false);
-        setPickerMode("date");
+        setPickerMode("time");
       }
+    } else {
+      updated.setHours(date.getHours(), date.getMinutes());
+      setValue(pickerTarget, updated, { shouldDirty: true, shouldValidate: true });
+      setShowTimePicker(false);
+      setPickerMode("date");
     }
   };
 
   const assignVehicle = handleSubmit(async (values) => {
     const vehicleIdNumber = Number(vehicleId);
 
-    if (!selectedGuestId) {
-      Alert.alert("Missing guest", "Please select a guest first.");
+    if (!selectedGuestId || !assignmentType || !selectedGuestData) {
+      Alert.alert("Missing data", "Please select a guest and assignment type.");
       return;
     }
 
@@ -238,33 +247,61 @@ export default function ManageVehicleScreen() {
       return;
     }
 
-    if (values.dropoffTime <= values.pickupTime) {
-      setError("dropoffTime", {
+    const requiredLocationField = assignmentType === "arrival" ? "toLocation" : "fromLocation";
+    const requiredTimeField = assignmentType === "arrival" ? "toTime" : "fromTime";
+
+    if (!values[requiredLocationField].trim()) {
+      setError(requiredLocationField, {
+        type: "validate",
+        message: "This location is required.",
+      });
+      return;
+    }
+
+    if (values.toTime <= values.fromTime) {
+      setError(requiredTimeField, {
         type: "validate",
         message: "Drop-off time must be after pickup time.",
       });
       return;
     }
 
-    clearErrors("dropoffTime");
+    clearErrors([requiredLocationField, requiredTimeField]);
 
     try {
-      await assignVehicleMutation.mutateAsync({
+      const payload: AssignVehileInputType = {
         vehicleId: vehicleIdNumber,
         invitationId: selectedGuestId,
-        pickupLocation: values.pickupLocation.trim(),
-        dropoffLocation: values.dropoffLocation.trim(),
-        pickupTime: values.pickupTime,
-        dropoffTime: values.dropoffTime,
-      });
+        isArrival: assignmentType === "arrival",
+        isDeparture: assignmentType === "departure",
+        fromTime: values.fromTime,
+        toTime: values.toTime,
+        fromLocation: values.fromLocation.trim(),
+        toLocation: values.toLocation.trim(),
+      };
 
-      Alert.alert("Assigned", "Vehicle assigned successfully.");
+      await assignVehicleMutation.mutateAsync(payload);
+
+      Alert.alert("Assigned", `${assignmentType === "arrival" ? "Arrival" : "Departure"} assigned successfully.`);
       closeAssignModal();
     } catch (error) {
       const message = error instanceof Error ? error.message : "Failed to assign vehicle.";
       Alert.alert("Assignment failed", message);
     }
   });
+
+  const isArrivalAssignment = assignmentType === "arrival";
+  const editableLocationField = isArrivalAssignment ? "toLocation" : "fromLocation";
+  const editableTimeField = isArrivalAssignment ? "toTime" : "fromTime";
+  const autoLocation = isArrivalAssignment ? fromLocation : toLocation;
+  const autoTime = isArrivalAssignment ? fromTime : toTime;
+  const editableLocationLabel = isArrivalAssignment ? "To" : "From";
+  const autoLocationLabel = isArrivalAssignment ? "From" : "To";
+  const editableTimeLabel = isArrivalAssignment ? "To Time" : "From Time";
+  const autoTimeLabel = isArrivalAssignment ? "From Time" : "To Time";
+  const editablePlaceholder = isArrivalAssignment
+    ? "Where should the guest be brought to?"
+    : "Where should we pick the guest up from?";
 
   return (
     <SafeAreaView className="flex-1 bg-white" edges={["top", "bottom"]}>
@@ -327,7 +364,16 @@ export default function ManageVehicleScreen() {
         {activeTab === "timeline" ? (
           <>
             {/* Vehicle Summary Section */}
-            <VehicleSummaryCard summary={MOCK_VEHICLE_SUMMARY} />
+            <VehicleSummaryCard summary={{
+              id: "1",
+              vehicle_name: assignedVehicles && assignedVehicles.length > 0 ? assignedVehicles[0].vehicleName : "Vehicle Name",
+              type: "Bus",
+              status: "Active - On Route",
+              loadFactor: 0.75,
+              tripsCompleted: 3,
+              totalTrips: 5,
+              date: new Date().toISOString(),
+            }} />
 
             {/* Timeline Header */}
             <View className="flex-row items-center justify-between mb-5 px-1">
@@ -351,14 +397,12 @@ export default function ManageVehicleScreen() {
                 const status = getAssignmentStatus(assignment);
                 const statusStyles = getStatusStyles(status);
 
-                const timeRange =
-                  assignment.pickupTime && assignment.dropoffTime
-                    ? `${formatDate(assignment.pickupTime.toISOString())} • ${formatTime(assignment.pickupTime.toISOString())} - ${formatTime(assignment.dropoffTime.toISOString())}`
-                    : "Time not set";
+                const pickupTimeStr = assignment.pickupTime ? formatTime(assignment.pickupTime.toISOString()) : "Time not set";
+                const dropoffTimeStr = assignment.dropoffTime ? formatTime(assignment.dropoffTime.toISOString()) : "Time not set";
 
                 return (
                   <View
-                    key={String(assignment.id ?? `${index}-${timeRange}`)}
+                    key={String(assignment.id ?? `${index}-${assignment.pickupTime?.getTime()}`)}
                     className="bg-white rounded-2xl border border-gray-100 p-4 mb-3.5"
                   >
                     <View className="flex-row justify-between items-center mb-3">
@@ -368,23 +412,23 @@ export default function ManageVehicleScreen() {
                         </Text>
                         <View className="flex-row items-center gap-1 mt-0.5">
                           <Text className="text-[10px] text-gray-500 font-jakarta-medium" numberOfLines={1}>
-                            {assignment.driverName}
+                            John Doe
                           </Text>
                           <Text className="text-[10px] text-gray-300">•</Text>
                           <Text className="text-[10px] text-primary/70 font-jakarta-bold">
-                            Guest: {assignment.guestName}
+                            Guest: Sarah Smith
                           </Text>
                         </View>
                       </View>
 
-                      <View className={cn("px-2.5 py-1 rounded-full", statusStyles.badge)}>
-                        <Text className={cn("text-[9px] uppercase font-jakarta-bold tracking-wider", statusStyles.text)}>
-                          {status}
+                      <View className={cn("px-2.5 py-1 rounded-full", "bg-surface-container-high")}>
+                        <Text className={cn("text-[9px] uppercase font-jakarta-bold tracking-wider", "text-on-surface-variant/70")}>
+                          Completed
                         </Text>
                       </View>
                     </View>
 
-                    <Text className="text-[11px] text-primary font-jakarta-semibold mb-3">{timeRange}</Text>
+                    <Text className="text-[11px] text-primary font-jakarta-semibold mb-3">{assignment.pickupTime ? formatDate(assignment.pickupTime.toISOString()) : "Date not set"}</Text>
 
                     <View className="bg-surface-container/50 rounded-xl p-3">
                       <View className="flex-row items-start gap-3 mb-2">
@@ -393,9 +437,14 @@ export default function ManageVehicleScreen() {
                           <View className="w-[1px] h-8 bg-outline-variant absolute top-2" />
                         </View>
                         <View className="flex-1">
-                          <Text className="text-[12px] font-jakarta-semibold text-on-surface">
-                            Khumbaya , Kathmandu
-                          </Text>
+                          <View className="flex-row items-center justify-between gap-2">
+                            <Text className="text-[12px] font-jakarta-semibold text-on-surface flex-1">
+                              {assignment.pickupLocation}
+                            </Text>
+                            <Text className="text-[11px] font-jakarta-semibold text-gray-500 shrink-0">
+                              {pickupTimeStr}
+                            </Text>
+                          </View>
                         </View>
                       </View>
 
@@ -404,9 +453,14 @@ export default function ManageVehicleScreen() {
                           <View className="w-2 h-2 rounded-full border-2 border-primary bg-white z-10" />
                         </View>
                         <View className="flex-1">
-                          <Text className="text-[12px] font-jakarta-semibold text-on-surface">
-                            Bharatpur , Chitwan
-                          </Text>
+                          <View className="flex-row items-center justify-between gap-2">
+                            <Text className="text-[12px] font-jakarta-semibold text-on-surface flex-1">
+                              {assignment.dropoffLocation}
+                            </Text>
+                            <Text className="text-[11px] font-jakarta-semibold text-gray-500 shrink-0">
+                              {dropoffTimeStr}
+                            </Text>
+                          </View>
                         </View>
                       </View>
                     </View>
@@ -466,61 +520,96 @@ export default function ManageVehicleScreen() {
                   key={guest.id}
                   className="bg-white p-4 rounded-2xl mb-3 border border-gray-100 shadow-sm"
                 >
-                  <View className="flex-row items-center justify-between mb-3">
-                    <View className="flex-row items-center">
+                  <View className="flex-row items-start justify-between mb-3 gap-3">
+                    <View className="flex-row items-start flex-1">
                       <View className="w-10 h-10 bg-primary/10 rounded-full items-center justify-center mr-3">
                         <Text className="text-primary font-jakarta-bold">
-                          {guest.invitation_name.charAt(0).toUpperCase()}
+                          {guest.user.name.charAt(0).toUpperCase()}
                         </Text>
                       </View>
-                      <View>
+                      <View className="flex-1">
                         <Text className="text-sm font-jakarta-bold text-gray-900">
-                          {guest.invitation_name}
+                          {guest.user.name}
                         </Text>
-                        <View className="flex-row items-center mt-0.5">
-                          <Ionicons name="location-outline" size={12} color="#6b7280" />
-                          <Text className="text-[10px] text-gray-500 font-jakarta ml-1">
-                            {guest.arrival_info || "No arrival info"}
+                        <View className="flex-row items-center mt-0.5 gap-1.5 flex-wrap">
+                          <Ionicons name="call-outline" size={12} color="#6b7280" />
+                          <Text className="text-[10px] text-gray-500 font-jakarta">
+                            {guest.user.phone || "No phone"}
                           </Text>
                         </View>
                       </View>
                     </View>
-                    <TouchableOpacity className="bg-primary/5 px-3 py-1.5 rounded-lg border border-primary/10"
-                      onPress={() => openAssignModal(guest)}>
-                      <Text className="text-primary text-[10px] font-jakarta-bold uppercase">
-                        Assign {guest.invitation_name}
-                      </Text>
-                    </TouchableOpacity>
                   </View>
 
-                  <View className="flex-row gap-4 mt-1 border-t border-gray-50 pt-3">
-                    <View className="flex-1">
-                      <Text className="text-[9px] font-jakarta-bold text-gray-400 uppercase mb-1">
-                        Arrival
-                      </Text>
-                      <View className="flex-row items-center">
-                        <View className={cn(
-                          "w-2 h-2 rounded-full mr-1.5",
-                          guest.isArrivalPickupRequired ? "bg-green-500" : "bg-gray-300"
-                        )} />
-                        <Text className="text-[11px] font-jakarta-semibold text-gray-700">
-                          {guest.isArrivalPickupRequired ? "Pickup Needed" : "Self Arrival"}
+                  <View className="flex-row gap-2 mb-3">
+                    {guest.arrivalInfo === "assigned" ? (
+                      <View className="flex-1 bg-gray-100 px-3 py-2 rounded-lg border border-gray-200 items-center justify-center">
+                        <Text className="text-gray-500 text-[10px] font-jakarta-bold uppercase text-center">
+                          Arrival Assigned
                         </Text>
                       </View>
+                    ) : (
+                      <TouchableOpacity
+                        className="flex-1 bg-primary/5 px-3 py-2 rounded-lg border border-primary/10"
+                        onPress={() => openAssignModal(guest, "arrival")}
+                      >
+                        <Text className="text-primary text-[10px] font-jakarta-bold uppercase text-center">
+                          Assign Arrival
+                        </Text>
+                      </TouchableOpacity>
+                    )}
+
+                    {guest.departureInfo === "assigned" ? (
+                      <View className="flex-1 bg-gray-100 px-3 py-2 rounded-lg border border-gray-200 items-center justify-center">
+                        <Text className="text-gray-500 text-[10px] font-jakarta-bold uppercase text-center">
+                          Departure Assigned
+                        </Text>
+                      </View>
+                    ) : (
+                      <TouchableOpacity
+                        className="flex-1 bg-primary/5 px-3 py-2 rounded-lg border border-primary/10"
+                        onPress={() => openAssignModal(guest, "departure")}
+                      >
+                        <Text className="text-primary text-[10px] font-jakarta-bold uppercase text-center">
+                          Assign Departure
+                        </Text>
+                      </TouchableOpacity>
+                    )}
+                  </View>
+
+                  <View className="border-t border-gray-50 pt-3 gap-3">
+                    <View className="flex-row items-center gap-3">
+                      <View className="flex-1 flex-row items-center gap-2 min-w-0">
+                        <Ionicons name="location-outline" size={14} color="#6b7280" style={{ marginTop: 1 }} />
+                        <View className="flex-1 min-w-0">
+                          <Text className="text-[9px] font-jakarta-bold text-gray-400 uppercase">
+                            {guest.isArrivalPickupRequired ? "Pickup Needed" : "Self Arrival"}
+                          </Text>
+                          <Text className="text-[11px] font-jakarta-semibold text-gray-700" numberOfLines={1}>
+                            {getGuestLocation(guest.arrivalLocation, guest.isArrivalPickupRequired ? "Pickup Needed" : "Self Arrival")}
+                          </Text>
+                        </View>
+                      </View>
+                      <Text className="text-[11px] font-jakarta-semibold text-gray-500 shrink-0">
+                        {formatGuestMoment(guest.arrivalDatetime)}
+                      </Text>
                     </View>
-                    <View className="flex-1">
-                      <Text className="text-[9px] font-jakarta-bold text-gray-400 uppercase mb-1">
-                        Departure
-                      </Text>
-                      <View className="flex-row items-center">
-                        <View className={cn(
-                          "w-2 h-2 rounded-full mr-1.5",
-                          guest.isDeparturePickupRequired ? "bg-orange-500" : "bg-gray-300"
-                        )} />
-                        <Text className="text-[11px] font-jakarta-semibold text-gray-700">
-                          {guest.isDeparturePickupRequired ? "Drop-off Needed" : "Self Departure"}
-                        </Text>
+
+                    <View className="flex-row items-center gap-3">
+                      <View className="flex-1 flex-row items-center gap-2 min-w-0">
+                        <Ionicons name="flag-outline" size={14} color="#6b7280" style={{ marginTop: 1 }} />
+                        <View className="flex-1 min-w-0">
+                          <Text className="text-[9px] font-jakarta-bold text-gray-400 uppercase">
+                            {guest.isDeparturePickupRequired ? "Departure Needed" : "Self Departure"}
+                          </Text>
+                          <Text className="text-[11px] font-jakarta-semibold text-gray-700" numberOfLines={1}>
+                            {getGuestLocation(guest.departureLocation, guest.isDeparturePickupRequired ? "Drop-off Needed" : "Self Departure")}
+                          </Text>
+                        </View>
                       </View>
+                      <Text className="text-[11px] font-jakarta-semibold text-gray-500 shrink-0">
+                        {formatGuestMoment(guest.departureDatetime)}
+                      </Text>
                     </View>
                   </View>
                 </View>
@@ -551,145 +640,114 @@ export default function ManageVehicleScreen() {
         visible={isAssignModalOpen}
         onRequestClose={closeAssignModal}
       >
-        <View className="flex-1 bg-black/40 items-center justify-center px-5 ">
-          <View className="w-full bg-white rounded-2xl p-5 border border-gray-100">
-            <Text className="text-base font-jakarta-bold text-gray-900 mb-4">
-              Assign Transport Details
-            </Text>
-
-            <Text className="text-[11px] font-jakarta-bold text-gray-500 uppercase mb-1 gap-2">Pickup Location</Text>
-            <Controller
-              control={control}
-              name="pickupLocation"
-              rules={{
-                required: "Pickup location is required",
-                validate: (value) => value.trim().length > 0 || "Pickup location is required",
-              }}
-              render={({ field: { value, onChange } }) => (
-                <TextInput
-                  value={value}
-                  onChangeText={onChange}
-                  placeholder="Enter pickup location"
-                  className="h-11 border border-gray-200 rounded-md px-3 text-sm font-jakarta-medium text-gray-900"
-                  placeholderTextColor="#9ca3af"
-                />
-              )}
-            />
-            {errors.pickupLocation?.message && (
-              <Text className="text-xs text-red-500 mt-1 mb-3">{errors.pickupLocation.message}</Text>
-            )}
-
-            <Text className="text-[11px] font-jakarta-bold text-gray-500 uppercase mb-1 gap-2">Drop-off Location</Text>
-            <Controller
-              control={control}
-              name="dropoffLocation"
-              rules={{
-                required: "Drop-off location is required",
-                validate: (value) => value.trim().length > 0 || "Drop-off location is required",
-              }}
-              render={({ field: { value, onChange } }) => (
-                <TextInput
-                  value={value}
-                  onChangeText={onChange}
-                  placeholder="Enter drop-off location"
-                  className="h-11 border border-gray-200 rounded-md px-3 text-sm font-jakarta-medium text-gray-900"
-                  placeholderTextColor="#9ca3af"
-                />
-              )}
-            />
-            {errors.dropoffLocation?.message && (
-              <Text className="text-xs text-red-500 mt-1 mb-3">{errors.dropoffLocation.message}</Text>
-            )}
-
-            <View className="bg-white border border-gray-100 rounded-md p-4 shadow-sm mb-4 mt-3">
-              <View className="flex-row items-center justify-between w-full mb-3">
-                <View className="flex-row items-center gap-3">
-                  <View className="w-3 h-3 rounded-full bg-primary" />
-                  <Text className="text-sm text-zinc-600 font-medium">Pickup</Text>
-                </View>
-                <View className="flex-row gap-2">
-                  <TouchableOpacity
-                    onPress={() => { setPickerMode("date"); setShowPickupPicker(true); }}
-                    className="px-3 py-1.5 bg-zinc-100 rounded-full"
-                  >
-                    <Text className="text-zinc-700 text-xs font-medium">{formatDate(pickupTime.toISOString())}</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    onPress={() => { setPickerMode("time"); setShowPickupPicker(true); }}
-                    className="px-3 py-1.5 bg-zinc-100 rounded-full"
-                  >
-                    <Text className="text-zinc-700 text-xs font-medium">{formatTime(pickupTime.toISOString())}</Text>
-                  </TouchableOpacity>
-                </View>
+        <View className="flex-1 bg-black/40 items-center justify-center px-5">
+          <View className="w-full bg-white rounded-2xl p-6 border border-gray-100">
+            {/* Header */}
+            <View className="flex-row items-start justify-between mb-5 gap-3">
+              <View className="flex-1">
+                <Text className="text-base font-jakarta-bold text-gray-900">
+                  {isArrivalAssignment ? "Assign Arrival" : "Assign Departure"}
+                </Text>
+                <Text className="text-[11px] text-gray-500 mt-1">
+                  {selectedGuestData?.user.name}
+                </Text>
+                <Text className="text-[10px] text-gray-400 mt-1 leading-4">
+                  Guest invitation data stays on the auto-filled side. You only edit the vehicle route side here.
+                </Text>
               </View>
-
-              <View className="w-full h-[1px] bg-zinc-100 ml-6 mb-3 " />
-
-              <View className="flex-row items-center justify-between w-full">
-                <View className="flex-row items-center gap-3">
-                  <View className="w-3 h-3 rounded-full border-2 border-primary bg-white" />
-                  <Text className="text-sm text-zinc-600 font-medium">Drop-off</Text>
-                </View>
-                <View className="flex-row gap-2">
-                  <TouchableOpacity
-                    onPress={() => { setPickerMode("date"); setShowDropoffPicker(true); }}
-                    className="px-3 py-1.5 bg-zinc-100 rounded-full"
-                  >
-                    <Text className="text-zinc-700 text-xs font-medium">{formatDate(dropoffTime.toISOString())}</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    onPress={() => { setPickerMode("time"); setShowDropoffPicker(true); }}
-                    className="px-3 py-1.5 bg-zinc-100 rounded-full"
-                  >
-                    <Text className="text-zinc-700 text-xs font-medium">{formatTime(dropoffTime.toISOString())}</Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            </View>
-
-            {errors.dropoffTime?.message && (
-              <Text className="text-xs text-red-500 mb-4">{errors.dropoffTime.message}</Text>
-            )}
-
-            {showPickupPicker && (
-              <DateTimePicker
-                value={pickupTime}
-                mode={pickerMode}
-                is24Hour={false}
-                onChange={onPickupTimeChange}
-              />
-            )}
-
-            {showDropoffPicker && (
-              <DateTimePicker
-                value={dropoffTime}
-                mode={pickerMode}
-                is24Hour={false}
-                onChange={onDropoffTimeChange}
-              />
-            )}
-
-            <View className="flex-row items-center justify-end gap-2">
               <TouchableOpacity
                 onPress={closeAssignModal}
-                className="px-4 py-2 rounded-xl border border-gray-200"
-                disabled={assignVehicleMutation.isPending}
+                className="w-8 h-8 rounded-full bg-gray-100 items-center justify-center"
               >
-                <Text className="text-gray-600 font-jakarta-semibold">Cancel</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                onPress={assignVehicle}
-                disabled={assignVehicleMutation.isPending}
-                className="px-4 py-2 rounded-xl bg-primary min-w-24 items-center"
-              >
-                {assignVehicleMutation.isPending ? (
-                  <ActivityIndicator size="small" color="#fff" />
-                ) : (
-                  <Text className="text-white font-jakarta-bold">Assign</Text>
-                )}
+                <Ionicons name="close" size={16} color="#6B7280" />
               </TouchableOpacity>
             </View>
+
+            {/* Content */}
+            <View className="gap-4 mb-6">
+              <View className="gap-2">
+                <Text className="text-[9px] font-jakarta-bold text-gray-400 uppercase">
+                  {autoLocationLabel}
+                </Text>
+                <View className="bg-gray-50 border border-gray-100 rounded-xl p-4 gap-2">
+                  <Text className="text-sm font-jakarta-semibold text-gray-900" numberOfLines={1}>
+                    {autoLocation || "Not set"}
+                  </Text>
+                  <Text className="text-[10px] font-jakarta-bold text-gray-500 uppercase mt-1">
+                    {autoTimeLabel}
+                  </Text>
+                  <Text className="text-xs text-gray-500 font-jakarta-medium">
+                    {autoTime ? `${formatDate(autoTime.toISOString())} • ${formatTime(autoTime.toISOString())}` : "Time not set"}
+                  </Text>
+                </View>
+              </View>
+
+              <View className="gap-2">
+                <Text className="text-[9px] font-jakarta-bold text-gray-400 uppercase">
+                  {editableLocationLabel}
+                </Text>
+                <View className="border border-gray-200 rounded-xl overflow-hidden bg-white">
+                  <TextInput
+                    placeholder={editablePlaceholder}
+                    className="px-4 py-3 font-jakarta-medium text-sm text-gray-900"
+                    placeholderTextColor="#9ca3af"
+                    value={isArrivalAssignment ? toLocation : fromLocation}
+                    onChangeText={(text) => setValue(editableLocationField, text, { shouldDirty: true, shouldValidate: true })}
+                  />
+                </View>
+                {errors[editableLocationField] && (
+                  <Text className="text-[10px] text-red-500 font-jakarta-medium">
+                    {errors[editableLocationField]?.message}
+                  </Text>
+                )}
+              </View>
+
+              <View className="gap-2">
+                <Text className="text-[9px] font-jakarta-bold text-gray-400 uppercase">
+                  {editableTimeLabel}
+                </Text>
+                <TouchableOpacity
+                  onPress={() => openTimePicker(editableTimeField)}
+                  className="bg-gray-50 border border-gray-100 rounded-xl p-4 flex-row items-center justify-between"
+                >
+                  <View>
+                    <Text className="text-sm font-jakarta-semibold text-gray-900">
+                      {formatDate(((isArrivalAssignment ? toTime : fromTime) as Date).toISOString())}
+                    </Text>
+                    <Text className="text-xs text-gray-500 font-jakarta-medium mt-0.5">
+                      Tap to adjust time
+                    </Text>
+                  </View>
+                  <Ionicons name="calendar-outline" size={18} color="#ee2b8c" />
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            {/* Action Button */}
+            <TouchableOpacity
+              onPress={assignVehicle}
+              disabled={assignVehicleMutation.isPending}
+              className={cn("px-4 py-3 rounded-xl items-center", 
+                assignVehicleMutation.isPending ? "bg-primary/50" : "bg-primary"
+              )}
+            >
+              {assignVehicleMutation.isPending ? (
+                <ActivityIndicator size="small" color="#fff" />
+              ) : (
+                <Text className="text-white font-jakarta-bold">
+                  {isArrivalAssignment ? "Assign Arrival" : "Assign Departure"}
+                </Text>
+              )}
+            </TouchableOpacity>
+
+            {showTimePicker && pickerTarget ? (
+              <DateTimePicker
+                value={getValues(pickerTarget) ?? new Date()}
+                mode={pickerMode}
+                display="default"
+                onChange={onTimeChange}
+              />
+            ) : null}
           </View>
         </View>
       </Modal>

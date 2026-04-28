@@ -1,5 +1,5 @@
 import { Text } from "@/src/components/ui/Text";
-import { BusinessCategory, OtherServiceAttribute } from "@/src/constants/business";
+import { BusinessCategory, OtherServiceAttribute } from "@/src/features/business/types";
 import { shadowStyle } from "@/src/utils/helper";
 import { MaterialIcons } from "@expo/vector-icons";
 import { View } from "react-native";
@@ -48,18 +48,18 @@ function BookingCard({ service }: { service: OtherServiceAttribute }) {
       </View>
       <View style={{ height: 1, backgroundColor: "#f0f0f4" }} />
       <View className="px-4 pt-3 pb-4 flex-row gap-2">
-        <StatTile icon="payments" label="Advance" value={service.advance_amount != null ? `₹${service.advance_amount.toLocaleString()}` : "On Request"} />
-        <StatTile icon="flight-takeoff" label="Travel" value={service.travel_charges != null && service.travel_charges > 0 ? `₹${service.travel_charges.toLocaleString()}` : "Included"} />
-        <StatTile icon="event-available" label="Max / Day" value={service.max_bookings_per_day != null ? `${service.max_bookings_per_day}` : "Flexible"} />
+        <StatTile icon="payments" label="Advance" value={service.advanceAmount != null ? `₹${service.advanceAmount.toLocaleString()}` : "On Request"} />
+        <StatTile icon="flight-takeoff" label="Travel" value={service.travelCharges != null && service.travelCharges > 0 ? `₹${service.travelCharges.toLocaleString()}` : "Included"} />
+        <StatTile icon="event-available" label="Max / Day" value={service.maxBookingsPerDay != null ? `${service.maxBookingsPerDay}` : "Flexible"} />
       </View>
       <View className="flex-row gap-2 px-4 pb-4">
-        {service.available_for_destination && (
+        {service.availableForDestination && (
           <View className="flex-row items-center gap-1 bg-primary/10 rounded-full px-3 py-1">
             <MaterialIcons name="flight" size={11} color="#ee2b8c" />
             <Text style={{ color: "#ee2b8c", fontSize: 10 }}>Destination Events</Text>
           </View>
         )}
-        {service.customization_available && (
+        {service.customizationAvailable && (
           <View className="flex-row items-center gap-1 bg-primary/10 rounded-full px-3 py-1">
             <MaterialIcons name="tune" size={11} color="#ee2b8c" />
             <Text style={{ color: "#ee2b8c", fontSize: 10 }}>Customizable</Text>
@@ -99,8 +99,8 @@ export function ServiceInfoSection({
   service: OtherServiceAttribute;
   category: BusinessCategory | null;
 }) {
-  const styles = service.styles_specialized
-    ? service.styles_specialized.split(",").map((s) => s.trim()).filter(Boolean)
+  const styles = service.stylesSpecialized
+    ? service.stylesSpecialized.split(",").map((s) => s.trim()).filter(Boolean)
     : [];
 
   const renderCard = () => {
@@ -110,10 +110,10 @@ export function ServiceInfoSection({
     ) {
       return (
         <ServiceCard icon="camera-alt" title="Photography Details">
-          {service.artist_type ? <InfoRow label="Shoot Style" value={service.artist_type} /> : null}
-          <InfoRow label="Uses Own Equipment" value={service.uses_own_material ? "Yes — all gear included" : "Client provides equipment"} />
+          {service.artistType ? <InfoRow label="Shoot Style" value={service.artistType} /> : null}
+          <InfoRow label="Uses Own Equipment" value={service.usesOwnMaterial ? "Yes — all gear included" : "Client provides equipment"} />
           <StyleChips styles={styles} />
-          {!service.artist_type && styles.length === 0 && <Text className="text-sm text-gray-400 mt-2">Details not provided</Text>}
+          {!service.artistType && styles.length === 0 && <Text className="text-sm text-gray-400 mt-2">Details not provided</Text>}
         </ServiceCard>
       );
     }
@@ -127,10 +127,10 @@ export function ServiceInfoSection({
       const title = category === BusinessCategory.MehendiArtist ? "Mehendi Specialization" : category === BusinessCategory.BridalGrooming ? "Grooming Expertise" : "Makeup Artistry";
       return (
         <ServiceCard icon={icon} title={title}>
-          {service.artist_type ? <InfoRow label="Artist Type" value={service.artist_type} /> : null}
-          <InfoRow label="Uses Own Products" value={service.uses_own_material ? "Yes — products included" : "Client provides products"} />
+          {service.artistType ? <InfoRow label="Artist Type" value={service.artistType} /> : null}
+          <InfoRow label="Uses Own Products" value={service.usesOwnMaterial ? "Yes — products included" : "Client provides products"} />
           <StyleChips styles={styles} />
-          {!service.artist_type && styles.length === 0 && <Text className="text-sm text-gray-400 mt-2">Details not provided</Text>}
+          {!service.artistType && styles.length === 0 && <Text className="text-sm text-gray-400 mt-2">Details not provided</Text>}
         </ServiceCard>
       );
     }
@@ -138,9 +138,9 @@ export function ServiceInfoSection({
     if (category === BusinessCategory.WeddingPlannersDecorator) {
       return (
         <ServiceCard icon="celebration" title="Planning & Decor">
-          {service.artist_type ? <InfoRow label="Specialization" value={service.artist_type} /> : null}
-          <InfoRow label="Customization" value={service.customization_available ? "Full custom themes available" : "Standard packages"} />
-          <InfoRow label="Destination Events" value={service.available_for_destination ? "Available" : "Local only"} />
+          {service.artistType ? <InfoRow label="Specialization" value={service.artistType} /> : null}
+          <InfoRow label="Customization" value={service.customizationAvailable ? "Full custom themes available" : "Standard packages"} />
+          <InfoRow label="Destination Events" value={service.availableForDestination ? "Available" : "Local only"} />
           <StyleChips styles={styles} />
         </ServiceCard>
       );
@@ -149,9 +149,9 @@ export function ServiceInfoSection({
     if (category === BusinessCategory.MusicEntertainment || category === BusinessCategory.Baraat) {
       return (
         <ServiceCard icon="music-note" title={category === BusinessCategory.Baraat ? "Baraat Details" : "Entertainment"}>
-          {service.artist_type ? <InfoRow label="Act Type" value={service.artist_type} /> : null}
-          <InfoRow label="Own Sound System" value={service.uses_own_material ? "Yes — full setup included" : "Venue sound required"} />
-          <InfoRow label="Destination Gigs" value={service.available_for_destination ? "Available" : "Local only"} />
+          {service.artistType ? <InfoRow label="Act Type" value={service.artistType} /> : null}
+          <InfoRow label="Own Sound System" value={service.usesOwnMaterial ? "Yes — full setup included" : "Venue sound required"} />
+          <InfoRow label="Destination Gigs" value={service.availableForDestination ? "Available" : "Local only"} />
           <StyleChips styles={styles} />
         </ServiceCard>
       );
@@ -160,9 +160,9 @@ export function ServiceInfoSection({
     if (category === BusinessCategory.FoodCatering) {
       return (
         <ServiceCard icon="restaurant" title="Catering Details">
-          {service.artist_type ? <InfoRow label="Cuisine Type" value={service.artist_type} /> : null}
-          <InfoRow label="Veg Menu" value={service.serves_veg ? "Available" : "Non-veg only"} />
-          {service.min_order != null && <InfoRow label="Min. Order" value={`₹${service.min_order.toLocaleString()}`} />}
+          {service.artistType ? <InfoRow label="Cuisine Type" value={service.artistType} /> : null}
+          <InfoRow label="Veg Menu" value={service.servicesVeg ? "Available" : "Non-veg only"} />
+          {service.minOrder != null && <InfoRow label="Min. Order" value={`₹${service.minOrder.toLocaleString()}`} />}
           <StyleChips styles={styles} />
         </ServiceCard>
       );
@@ -177,9 +177,9 @@ export function ServiceInfoSection({
       const title = category === BusinessCategory.JewelryAccessories ? "Jewelry & Accessories" : category === BusinessCategory.BridalWear ? "Bridal Wear" : "Invites & Gifting";
       return (
         <ServiceCard icon={icon} title={title}>
-          {service.artist_type ? <InfoRow label="Specialty" value={service.artist_type} /> : null}
-          <InfoRow label="Customization" value={service.customization_available ? "Custom designs available" : "Ready-made only"} />
-          {service.min_order != null && <InfoRow label="Min. Order" value={`₹${service.min_order.toLocaleString()}`} />}
+          {service.artistType ? <InfoRow label="Specialty" value={service.artistType} /> : null}
+          <InfoRow label="Customization" value={service.customizationAvailable ? "Custom designs available" : "Ready-made only"} />
+          {service.minOrder != null && <InfoRow label="Min. Order" value={`₹${service.minOrder.toLocaleString()}`} />}
           <StyleChips styles={styles} />
         </ServiceCard>
       );
@@ -188,8 +188,8 @@ export function ServiceInfoSection({
     if (category === BusinessCategory.SecurityGuard) {
       return (
         <ServiceCard icon="security" title="Security Services">
-          {service.artist_type ? <InfoRow label="Guard Type" value={service.artist_type} /> : null}
-          <InfoRow label="Destination Deployments" value={service.available_for_destination ? "Available" : "Local only"} />
+          {service.artistType ? <InfoRow label="Guard Type" value={service.artistType} /> : null}
+          <InfoRow label="Destination Deployments" value={service.availableForDestination ? "Available" : "Local only"} />
           <StyleChips styles={styles} />
         </ServiceCard>
       );
@@ -197,9 +197,9 @@ export function ServiceInfoSection({
 
     return (
       <ServiceCard icon="palette" title="Service Details">
-        {service.artist_type ? <InfoRow label="Specialization" value={service.artist_type} /> : null}
+        {service.artistType ? <InfoRow label="Specialization" value={service.artistType} /> : null}
         <StyleChips styles={styles} />
-        {!service.artist_type && styles.length === 0 && <Text className="text-sm text-gray-400 mt-2">Details not provided</Text>}
+        {!service.artistType && styles.length === 0 && <Text className="text-sm text-gray-400 mt-2">Details not provided</Text>}
       </ServiceCard>
     );
   };

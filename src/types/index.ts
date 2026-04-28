@@ -1,21 +1,5 @@
-import {
-  SubEventTemplate,
-  TemplateActivity,
-} from "../constants/subeventTemplates";
 
-export interface SelectedActivity {
-  activity: TemplateActivity;
-  time: string;
-  budget: string;
-}
 
-export interface SelectedSubEvent {
-  template: SubEventTemplate;
-  date: string;
-  theme: string;
-  budget: string;
-  activities: SelectedActivity[];
-}
 
 export interface Guest {
   id: string;
@@ -41,13 +25,6 @@ export interface Vendor {
   yearsExperience?: number;
   description?: string;
 }
-
-export type {
-  SubEventTemplate,
-  TemplateActivity,
-} from "../constants/subeventTemplates";
-
-// ─── Guest Event Portal ────────────────────────────────────────────────────
 
 export interface EventHighlight {
   id: string;
@@ -76,7 +53,6 @@ export interface EventHighlight {
 export interface EventService {
   id: string;
   label: string;
-  /** Ionicons icon name */
   icon: string;
 }
 

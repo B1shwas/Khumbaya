@@ -1,6 +1,7 @@
 import api from "@/src/api/axios";
 import { Event } from "@/src/constants/event";
 import { formatDate, formatTime } from "@/src/utils/helper";
+import { Invitation } from "../../guests/types";
 export interface CREATEEVENT {
   title: string;
   description?: string;
@@ -218,28 +219,10 @@ export const getResponsesWithUser = async (eventId: number) => {
   return response.data.data;
 };
 
-export interface RsvpResponsePayload {
-  userId: number;
-  notes?: string;
-  arrival_date_time?: string | null;
-  departure_date_time?: string | null;
-  isAccomodation?: boolean;
-  isArrivalPickupRequired?: boolean;
-  isDeparturePickupRequired?: boolean;
-  assigned_room?: string | null;
-  arrival_info?: string | null;
-  departure_info?: string | null;
-  role?: string;
-  hasCheckedIn?: boolean;
-  hasCheckedOut?: boolean;
-  category?: string;
-  status?: string;
-  familyId?: number;
-}
 
 export const submitRsvpResponseApi = async (
   eventId: number,
-  payload: RsvpResponsePayload
+  payload: Partial<Invitation>
 ) => {
   const response = await api.post(`invitation/responce/${eventId}`, payload);
   return response.data;

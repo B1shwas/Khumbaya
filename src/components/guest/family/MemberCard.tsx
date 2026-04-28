@@ -4,10 +4,10 @@ import { shadowStyle } from "@/src/utils/helper";
 import { MemberRsvpCardProp, RSVPStatus } from "@/src/utils/type/rsvp";
 import { Ionicons } from "@expo/vector-icons";
 import {
-  Image,
-  Pressable,
-  TouchableOpacity,
-  View,
+    Image,
+    Pressable,
+    TouchableOpacity,
+    View,
 } from "react-native";
 const statusConfig: Record<
   RSVPStatus,
@@ -117,8 +117,8 @@ const MemberCard = ({
                   <Text className="text-sm text-slate-500">
                     Room:{" "}
                     <Text variant="caption" className="text-slate-800 text-sm">
-                      {member.assigned_room && member.assigned_room.length > 0
-                        ? member.assigned_room
+                      {member.assignedRoom && member.assignedRoom.length > 0
+                        ? member.assignedRoom
                         : "Not Assigned"}
                     </Text>
                   </Text>

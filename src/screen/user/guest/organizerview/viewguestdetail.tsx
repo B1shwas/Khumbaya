@@ -6,7 +6,7 @@ import {
   useRemoveInvitation,
 } from "@/src/features/guests/api/use-guests";
 import { useGuestDetailStore } from "@/src/features/guests/store/useGuestDetailStore";
-import { formatDate, formatTime } from "@/src/utils/helper";
+import { formatDate, formatTime, toISODateString } from "@/src/utils/helper";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { Stack, useRouter } from "expo-router";
@@ -43,10 +43,10 @@ export default function ViewGuestDetail() {
   const router = useRouter();
   const guestDetail = useGuestDetailStore((state) => state.guestDraft);
 
-  const statusValue = guestDetail?.event_guest?.status?.toLowerCase?.() ?? "";
+  const statusValue = guestDetail?.eventGuest?.status?.toLowerCase?.() ?? "";
   const isConfirmed = statusValue === "accepted" || statusValue === "confirmed";
 
-  const eventId = Number(guestDetail?.event_guest?.eventId ?? 0);
+  const eventId = Number(guestDetail?.eventGuest?.eventId ?? 0);
   const { mutate: submitRsvpResponse, isPending } =
     useSubmitRsvpResponse(eventId);
   const removeInvitationMutation = useRemoveInvitation();
@@ -56,14 +56,13 @@ export default function ViewGuestDetail() {
     isLoading: isGuestCategoriesLoading,
   } = useGetEventGuestCategories(eventId || null);
 
-  const initialRoom = guestDetail?.event_guest?.assigned_room ?? "";
+  const initialRoom = guestDetail?.eventGuest?.assignedRoom ?? "";
   const initialArrivalInfo =
-    guestDetail?.event_guest?.arrival_info ??
-    guestDetail?.event_guest?.pickup_info ??
+    guestDetail?.eventGuest?.arrivalInfo ??
     "";
-  const initialDepartureInfo = guestDetail?.event_guest?.departure_info ?? "";
-  const initialCategory = guestDetail?.event_guest?.category ?? "";
-  const initialNotes = guestDetail?.event_guest?.notes ?? "";
+  const initialDepartureInfo = guestDetail?.eventGuest?.departureInfo ?? "";
+  const initialCategory = guestDetail?.eventGuest?.category ?? "";
+  const initialNotes = guestDetail?.eventGuest?.notes ?? "";
 
   const [categoryModalVisible, setCategoryModalVisible] = useState(false);
   const [isAddingCategory, setIsAddingCategory] = useState(false);
@@ -106,29 +105,29 @@ export default function ViewGuestDetail() {
     initialNotes,
   ]);
 
-  const headerTitle = guestDetail?.user_detail?.username?.trim() || "Guest Detail";
+  const headerTitle = guestDetail?.user?.username?.trim() || "Guest Detail";
   const isSaveDisabled = isPending || !hasAssignmentChanges;
 
   const handleSaveAssignments = () => {
     if (
-      !guestDetail?.event_guest ||
-      !guestDetail?.user_detail?.id ||
+      !guestDetail?.eventGuest ||
+      !guestDetail?.user?.id ||
       !eventId
     ) {
       return;
     }
 
     const payload = {
-      userId: guestDetail.user_detail.id,
-      familyId: guestDetail.event_guest.familyId,
-      isAccomodation: guestDetail.event_guest.isAccomodation ?? undefined,
+      userId: guestDetail.user.id,
+      familyId: guestDetail.eventGuest.familyId,
+      isAccomodation: guestDetail.eventGuest.isAccomodation ?? undefined,
       isArrivalPickupRequired:
-        guestDetail.event_guest.isArrivalPickupRequired ?? undefined,
+        guestDetail.eventGuest.isArrivalPickupRequired ?? undefined,
       isDeparturePickupRequired:
-        guestDetail.event_guest.isDeparturePickupRequired ?? undefined,
-      assigned_room: assignedRoom.trim() || null,
-      arrival_info: arrivalInfo.trim() || null,
-      departure_info: departureInfo.trim() || null,
+        guestDetail.eventGuest.isDeparturePickupRequired ?? undefined,
+      assignedRoom: assignedRoom.trim() || null,
+      arrivalInfo: arrivalInfo.trim() || null,
+      departureInfo: departureInfo.trim() || null,
       notes: notes.trim(),
       category: category.trim() || undefined,
       role: category.trim() || undefined,
@@ -142,14 +141,14 @@ export default function ViewGuestDetail() {
   };
 
   const handleDeleteGuest = () => {
-    if (!guestDetail?.user_detail?.id || !eventId) {
+    if (!guestDetail?.user?.id || !eventId) {
       Alert.alert("Error", "Missing event or guest id.");
       return;
     }
 
     const displayName =
-      guestDetail.user_detail.username?.trim() ||
-      guestDetail.user_detail.email ||
+      guestDetail.user.username?.trim() ||
+      guestDetail.user.email ||
       "this guest";
 
     Alert.alert(
@@ -164,7 +163,7 @@ export default function ViewGuestDetail() {
             try {
               await removeInvitationMutation.mutateAsync({
                 eventId,
-                guestId: guestDetail.user_detail.id,
+                guestId: guestDetail.user.id,
               });
               router.back();
             } catch (error: any) {
@@ -435,8 +434,8 @@ export default function ViewGuestDetail() {
                   }}
                 >
                   <Text variant="h1" className="text-white text-4xl">
-                    {guestDetail?.user_detail.username
-                      ? guestDetail.user_detail.username
+                    {guestDetail?.user.username
+                      ? guestDetail.user.username
                           .split(" ")
                           .map((n) => n[0])
                           .join("")
@@ -452,16 +451,16 @@ export default function ViewGuestDetail() {
                 variant="h1"
                 className="text-slate-900 text-2xl mt-4 text-center"
               >
-                {guestDetail?.user_detail.username || "User Name"}
+                {guestDetail?.user.username || "User Name"}
               </Text>
               <Text variant="h2" className="text-primary text-sm mt-1">
                 {isConfirmed ? "Confirmed" : "Pending"} •{" "}
-                {category || guestDetail?.event_guest.category || "Guest"}
+                {category || guestDetail?.eventGuest.category || "Guest"}
               </Text>
               <View className="flex-row items-center mt-2" style={{ gap: 6 }}>
                 <Ionicons name="call-outline" size={14} color="#64748b" />
                 <Text variant="caption" className="text-slate-500 text-sm">
-                  {guestDetail?.user_detail?.phone?.trim() || "Phone not available"}
+                  {guestDetail?.user?.phone?.trim() || "Phone not available"}
                 </Text>
               </View>
             </LinearGradient>
@@ -515,15 +514,15 @@ export default function ViewGuestDetail() {
                       label: "Category",
                       value:
                         category ||
-                        guestDetail?.event_guest?.category ||
+                        guestDetail?.eventGuest?.category ||
                         "Uncategorized",
                       pill: true,
                     },
                     {
                       label: "Arrival Time",
-                      value: guestDetail?.event_guest?.arrival_date_time
+                      value: guestDetail?.eventGuest?.arrivalDatetime
                         ? formatTime(
-                            guestDetail?.event_guest?.arrival_date_time ??
+                            toISODateString(guestDetail?.eventGuest?.arrivalDatetime) ??
                               undefined
                           )
                         : "TBD",
@@ -532,15 +531,23 @@ export default function ViewGuestDetail() {
                     {
                       label: "Arrival Date",
                       value: formatDate(
-                        guestDetail?.event_guest?.arrival_date_time ?? undefined
+                        toISODateString(guestDetail?.eventGuest?.arrivalDatetime) ?? undefined
                       ),
                       pill: false,
                     },
                     {
+                      label: "Arrival Location",
+                      value:
+                        guestDetail?.eventGuest?.arrivalLocation ||
+                        guestDetail?.eventGuest?.arrivalInfo ||
+                        "TBD",
+                      pill: false,
+                    },
+                    {
                       label: "Departure Time",
-                      value: guestDetail?.event_guest?.departure_date_time
+                      value: guestDetail?.eventGuest?.departureDatetime
                         ? formatTime(
-                            guestDetail?.event_guest?.departure_date_time ??
+                            toISODateString(guestDetail?.eventGuest?.departureDatetime) ??
                               undefined
                           )
                         : "TBD",
@@ -549,24 +556,32 @@ export default function ViewGuestDetail() {
                     {
                       label: "Departure Date",
                       value: formatDate(
-                        guestDetail?.event_guest?.departure_date_time ??
+                        toISODateString(guestDetail?.eventGuest?.departureDatetime) ??
                           undefined
                       ),
                       pill: false,
                     },
                     {
+                      label: "Departure Location",
+                      value:
+                        guestDetail?.eventGuest?.departureLocation ||
+                        guestDetail?.eventGuest?.departureInfo ||
+                        "TBD",
+                      pill: false,
+                    },
+                    {
                       label: "Accommodation",
-                      value: `${guestDetail?.event_guest.isAccomodation ? "Room Needed" : "Room not needed"}`,
+                      value: `${guestDetail?.eventGuest.isAccomodation ? "Room Needed" : "Room not needed"}`,
                       pill: true,
                     },
                     {
                       label: "Arrival Pickup",
-                      value: `${guestDetail?.event_guest.isArrivalPickupRequired ? "Required" : "Not Required"}`,
+                      value: `${guestDetail?.eventGuest.isArrivalPickupRequired ? "Required" : "Not Required"}`,
                       pill: true,
                     },
                     {
                       label: "Departure Pickup",
-                      value: `${guestDetail?.event_guest.isDeparturePickupRequired ? "Required" : "Not Required"}`,
+                      value: `${guestDetail?.eventGuest.isDeparturePickupRequired ? "Required" : "Not Required"}`,
                       pill: true,
                     },
                  
@@ -637,9 +652,9 @@ export default function ViewGuestDetail() {
              
               </View>
 
-              {(guestDetail?.event_guest?.isAccomodation ||
-                guestDetail?.event_guest?.isArrivalPickupRequired ||
-                guestDetail?.event_guest?.isDeparturePickupRequired) && (
+              {(guestDetail?.eventGuest?.isAccomodation ||
+                guestDetail?.eventGuest?.isArrivalPickupRequired ||
+                guestDetail?.eventGuest?.isDeparturePickupRequired) && (
                 <View>
                   <View className="flex-row items-center justify-between mb-4">
                     <View className="flex-row items-center gap-2">
@@ -665,7 +680,7 @@ export default function ViewGuestDetail() {
                     </View>
                   </View>
 
-                  {guestDetail.event_guest.isAccomodation && (
+                  {guestDetail.eventGuest.isAccomodation && (
                     <View className="bg-white border border-slate-200 p-4 rounded-2xl mb-3">
                       <View className="flex-row items-center gap-2 mb-3">
                         <Ionicons
@@ -688,7 +703,7 @@ export default function ViewGuestDetail() {
                     </View>
                   )}
 
-                  {guestDetail.event_guest.isArrivalPickupRequired && (
+                  {guestDetail.eventGuest.isArrivalPickupRequired && (
                     <View className="bg-white border border-slate-200 p-4 rounded-2xl mb-3">
                       <View className="flex-row items-center gap-2 mb-3">
                         <Ionicons
@@ -711,7 +726,7 @@ export default function ViewGuestDetail() {
                     </View>
                   )}
 
-                  {guestDetail.event_guest.isDeparturePickupRequired && (
+                  {guestDetail.eventGuest.isDeparturePickupRequired && (
                     <View className="bg-white border border-slate-200 p-4 rounded-2xl mb-3">
                       <View className="flex-row items-center gap-2 mb-3">
                         <Ionicons

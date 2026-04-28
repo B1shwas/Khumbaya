@@ -47,7 +47,7 @@ export default function GuestFamilyMember() {
   const liveFamilyMembers = useMemo(() => {
     if (!invitations || familyId == null) return [];
     return (invitations as GuestDetailInterface[]).filter(
-      (inv) => inv.event_guest.familyId === familyId
+      (inv) => inv.eventGuest.familyId === familyId
     );
   }, [invitations, familyId]);
 
@@ -60,15 +60,15 @@ export default function GuestFamilyMember() {
     if (familyId == null || !eventId) return;
 
     const guest = liveFamilyMembers.find(
-      (item) => item.user_detail.id === member.id
+      (item) => item.user.id === member.id
     );
 
     if (!guest) return;
     setGuestDetail(guest);
     router.push({
       pathname:
-        `/(protected)/(client-stack)/events/${eventId}/(organizer)/guests/${guest.user_detail.id}/guest-details` as any,
-      params: { guest: JSON.stringify(guest) },
+        `/(protected)/(client-stack)/events/${eventId}/(organizer)/guests/[userId]/guest-details` as any ,
+      params: { userId: JSON.stringify(guest.user.id) },
     });
   };
 

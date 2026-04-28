@@ -1,34 +1,48 @@
 import { User } from "@/src/store/AuthStore";
 
 export interface EventVehicle {
-  id: number;
+   id: number | undefined;
   vehicleName: string;
   eventId: number;
-  driverName: string | null;
-  driverNumber: string | null;
-  capacity: number | null;
-  availablityStartTime: string | Date | null;
-  availablityEndTime: string | Date | null;
-  createdAt?: string;
-  updatedAt?: string;
+  driverName: string | undefined | null;
+  driverNumber: string | undefined | null;
+  capacity: number | undefined | null;
+  availablityStartTime: Date | undefined | null;
+  availablityEndTime: Date | undefined | null;
+  createdAt: Date | undefined;
+  updatedAt: Date | undefined;
+
 }
 
 export interface AssignedVehicle {
-  id?: number;
-  vehicleId: number;
+   vehicleId: number;
   invitationId: number;
-  pickupTime: string | Date | null;
-  dropoffTime: string | Date | null;
-  pickupLocation: string | null;
-  dropoffLocation: string | null;
-  createdAt?: string;
-  updatedAt?: string;
+  fromTime: Date | undefined | null;
+  toTime: Date | undefined | null;
+  fromLocation: string | undefined | null;
+  toLocation: string | undefined | null;
+  createdAt: Date | undefined;
+  updatedAt: Date | undefined;
+}
+export interface AssignVehileInputType {
+
+
+  vehicleId: number ,
+  invitationId: number ,
+  isArrival:boolean| null | undefined  , 
+ isDeparture:boolean| null |undefined  , 
+  fromTime: Date | undefined | null,
+  toTime: Date | undefined | null,
+  fromLocation: string | undefined | null,
+  toLocation: string | undefined | null
+
+
 }
 
 export interface VEHICLE_WITH_ASSIGNMENT {
   vehicle: EventVehicle;
-  assigned_vehicle: AssignedVehicle | null;
-  invited_user: User | null;
+  assignedVehicle: AssignedVehicle | null;
+  invitedUser: User | null;
 }
 
 export interface LogisticsTimelineItem {
@@ -52,10 +66,10 @@ export const mapToLogisticsTimeline = (data: VEHICLE_WITH_ASSIGNMENT | VEHICLE_W
   const items = Array.isArray(data) ? data : [data];
   
   return items.map((item, index) => {
-    const { vehicle, assigned_vehicle, invited_user } = item;
+    const { vehicle, assignedVehicle, invitedUser } = item;
     
     // Determine if we show assignment info or fallback to vehicle availability
-    const isAssigned = !!assigned_vehicle;
+    const isAssigned = !!assignedVehicle;
     
     const toDate = (val: any) => {
       if (!val) return null;
@@ -64,16 +78,16 @@ export const mapToLogisticsTimeline = (data: VEHICLE_WITH_ASSIGNMENT | VEHICLE_W
     };
 
     return {
-      id: assigned_vehicle?.id ?? vehicle.id ?? index,
+      id: assignedVehicle?.invitationId ?? assignedVehicle?.vehicleId ?? vehicle.id ?? index,
       vehicleName: vehicle.vehicleName,
       driverName: vehicle.driverName ?? "No Driver",
       driverNumber: vehicle.driverNumber ?? "N/A",
-      pickupTime: toDate(assigned_vehicle?.pickupTime ?? vehicle.availablityStartTime),
-      dropoffTime: toDate(assigned_vehicle?.dropoffTime ?? vehicle.availablityEndTime),
-      pickupLocation: assigned_vehicle?.pickupLocation ?? "Location not set",
-      dropoffLocation: assigned_vehicle?.dropoffLocation ?? "Location not set",
-      guestName: invited_user?.username ?? "Unassigned",
-      guestId: assigned_vehicle?.invitationId,
+      pickupTime: toDate(assignedVehicle?.fromTime ?? vehicle.availablityStartTime),
+      dropoffTime: toDate(assignedVehicle?.toTime ?? vehicle.availablityEndTime),
+      pickupLocation: assignedVehicle?.fromLocation ?? "Location not set",
+      dropoffLocation: assignedVehicle?.toLocation ?? "Location not set",
+      guestName: invitedUser?.username ?? "Unassigned",
+      guestId: assignedVehicle?.invitationId,
       type: isAssigned ? 'assignment' : 'availability'
     };
   });
@@ -81,13 +95,21 @@ export const mapToLogisticsTimeline = (data: VEHICLE_WITH_ASSIGNMENT | VEHICLE_W
 
 export interface SelectTransportation {
   id: number;
-  invitation_name: string;
+  user:{
+    name: string;
+    familyId: number;
+    foodPreference: string;
+    phone: string;
+    email: string;
+  }
   isArrivalPickupRequired: boolean;
   isDeparturePickupRequired: boolean;
-  arrival_date_time: string;
-  departure_date_time: string;
-  arrival_info: string;
-  departure_info: string;
+  arrivalDatetime: string | null;
+  departureDatetime: string | null;
+  arrivalLocation: string | null;
+  departureLocation: string | null;
+  arrivalInfo: string | null;
+  departureInfo: string | null;
   isAccomodation: boolean;
   eventId: number;
 }

@@ -1,4 +1,3 @@
-// ─── Types ────────────────────────────────────────────────────────────────────
 
 export type MealType =
   | "Breakfast"
@@ -8,16 +7,18 @@ export type MealType =
   | "Late Night";
 
 export interface CateringColumn {
-  id: number;
-  eventId: number;
-  vendorId: number | null;
+    id: number;
   name: string;
-  per_plate_price: string;
-  startDateTime: Date | string;
-  endDateTime: Date | string;
-  meal_type: string;
-  createdAt: Date | string;
-  updatedAt: Date | string;
+  perPlateprice: string;
+  startDateTime: Date;
+  endDateTime: Date;
+  eventId: number;
+  mealType: string;
+  isVeg: boolean;
+  vendorId: number | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+
 }
 
 export interface CateringDetail extends CateringColumn {}
@@ -31,18 +32,11 @@ export interface CateringListResponse {
 
 export interface CreateCateringPayload {
   name: string;
-  per_plate_price: string;
+  perPlateprice: string;
   startDateTime: string | Date;
   endDateTime: string | Date;
-  meal_type: string;
+  mealType: string;
   vendorId?: number | null;
 }
 
-export interface UpdateCateringPayload {
-  name?: string;
-  per_plate_price?: string;
-  startDateTime?: string | Date;
-  endDateTime?: string | Date;
-  meal_type?: string;
-  vendorId?: number | null;
-}
+export type UpdateCateringPayload = Partial<CateringColumn> ;  
