@@ -1,23 +1,21 @@
-import { DatePicker } from "@/components/nativewindui/DatePicker";
 import { MaterialIcons } from "@expo/vector-icons";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
+import React, { useLayoutEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
-  ActivityIndicator,
   Alert,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
   StatusBar,
+  Text,
   TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Text } from "../../components/ui/Text";
+import { DateTimeRangePicker } from "../../components/ui/DateTimeRangePicker";
 import { useCreateCateringMutation } from "../../features/catering";
-import { shadowStyle } from "../../utils/helper";
+import { cn } from "../../utils/cn";
 
 // ─── Types & Constants ────────────────────────────────────────────────────────
 
@@ -37,15 +35,58 @@ const MEAL_TYPE_OPTIONS = [
   { label: "Late Night", value: "Late Night" },
 ];
 
+// ─── Sub-components ───────────────────────────────────────────────────────────
+
+const FormSection = ({
+  title,
+  subtitle,
+  children,
+  icon,
+  iconColor = "#ee2b8c",
+  iconBg = "bg-primary/10",
+}: {
+  title: string;
+  subtitle?: string;
+  children: React.ReactNode;
+  icon: keyof typeof MaterialIcons.glyphMap;
+  iconColor?: string;
+  iconBg?: string;
+}) => (
+  <View className="mb-3 mt-2">
+    <View className="flex-row items-center mb-5 px-1">
+      <View
+        className={cn(
+          "w-10 h-10 rounded-xl items-center justify-center mr-3",
+          iconBg
+        )}
+      >
+        <MaterialIcons name={icon} size={20} color={iconColor} />
+      </View>
+      <View>
+        <Text className="text-lg font-bold text-[#181114] tracking-tight">
+          {title}
+        </Text>
+        {subtitle && (
+          <Text className="text-xs font-medium text-gray-500">{subtitle}</Text>
+        )}
+      </View>
+    </View>
+    <View className="px-1">{children}</View>
+  </View>
+);
+
+// ─── Main Screen ──────────────────────────────────────────────────────────────
+
 export default function CreateCateringScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const eventId = parseInt(params.eventId as string, 10);
 
-  // Form hook
   const {
     control,
     handleSubmit,
+    watch,
+    setValue,
     formState: { errors },
   } = useForm<CateringFormData>({
     defaultValues: {
@@ -57,12 +98,14 @@ export default function CreateCateringScreen() {
     },
   });
 
-  // API mutation
+  const navigation = useNavigation();
   const createCateringMutation = useCreateCateringMutation(eventId);
+
+  const startDateTime = watch("startDateTime");
+  const endDateTime = watch("endDateTime");
 
   const onSubmit = async (data: CateringFormData) => {
     try {
-      // Validate dates
       if (data.endDateTime <= data.startDateTime) {
         Alert.alert("Error", "End time must be after start time");
         return;
@@ -77,10 +120,7 @@ export default function CreateCateringScreen() {
       });
 
       Alert.alert("Success", "Catering plan created successfully!", [
-        {
-          text: "OK",
-          onPress: () => router.back(),
-        },
+        { text: "OK", onPress: () => router.back() },
       ]);
     } catch (error) {
       const errorMessage =
@@ -91,26 +131,51 @@ export default function CreateCateringScreen() {
     }
   };
 
-  return (
-    <SafeAreaView
-      className="flex-1 bg-background-light"
-      edges={["top", "bottom"]}
-    >
-      <StatusBar barStyle="dark-content" />
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        className="flex-1"
-      >
-        <ScrollView
-          className="flex-1"
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 40 }}
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <TouchableOpacity
+          onPress={handleSubmit(onSubmit)}
+          disabled={createCateringMutation.isPending}
+          style={{
+            backgroundColor: "#ee2b8c",
+            paddingHorizontal: 10,
+            paddingVertical: 6,
+            borderRadius: 20,
+            marginRight: 12,
+            opacity: createCateringMutation.isPending ? 0.6 : 1,
+          }}
         >
-          {/* Form Content */}
-          <View className="px-6 py-6">
-            {/* Plan Name */}
-            <View className="mb-6">
-              <Text className="text-sm font-bold text-on-surface mb-3">
+          <Text className="text-white font-bold text-[15px]">
+            {createCateringMutation.isPending ? "Creating..." : "Create"}
+          </Text>
+        </TouchableOpacity>
+      ),
+    });
+  }, [navigation, handleSubmit, onSubmit, createCateringMutation.isPending]);
+
+  return (
+    <SafeAreaView className="flex-1 bg-[#f8f6f7]" edges={["bottom"]}>
+      <StatusBar barStyle="dark-content" />
+
+      <KeyboardAwareScrollView
+        className="flex-1"
+        contentContainerStyle={{ flexGrow: 1, paddingBottom: 32 }}
+        keyboardShouldPersistTaps="handled"
+        enableOnAndroid
+        enableAutomaticScroll
+        extraScrollHeight={120}
+        showsVerticalScrollIndicator={false}
+      >
+        <View className="flex-1 px-4 py-4">
+          {/* Plan Details */}
+          <FormSection
+            title="Plan Details"
+            subtitle="Name and meal configuration"
+            icon="restaurant-menu"
+          >
+            <View className="mb-5">
+              <Text className="mb-1 ml-1 text-xs font-semibold uppercase tracking-wider text-gray-500">
                 Plan Name
               </Text>
               <Controller
@@ -124,27 +189,26 @@ export default function CreateCateringScreen() {
                   },
                 }}
                 render={({ field: { value, onChange } }) => (
-                  <View>
+                  <>
                     <TextInput
                       placeholder="e.g., Wedding Reception Dinner"
-                      placeholderTextColor="#896175"
-                      className="bg-background-light border border-outline-variant/50 rounded-lg px-4 py-3 text-base font-medium text-on-surface"
+                      placeholderTextColor="#9CA3AF"
+                      className="h-14 rounded-md border border-gray-200 bg-white px-4 text-base text-[#181114]"
                       value={value}
                       onChangeText={onChange}
                     />
                     {errors.name && (
-                      <Text className="text-red-500 text-xs mt-2">
+                      <Text className="mt-1 ml-1 text-xs text-red-500">
                         {errors.name.message}
                       </Text>
                     )}
-                  </View>
+                  </>
                 )}
               />
             </View>
 
-            {/* Meal Type Dropdown */}
-            <View className="mb-6">
-              <Text className="text-sm font-bold text-on-surface mb-3">
+            <View className="mb-5">
+              <Text className="mb-1 ml-1 text-xs font-semibold uppercase tracking-wider text-gray-500">
                 Meal Type
               </Text>
               <Controller
@@ -152,15 +216,15 @@ export default function CreateCateringScreen() {
                 name="mealType"
                 rules={{ required: "Meal type is required" }}
                 render={({ field: { value, onChange } }) => (
-                  <View>
+                  <>
                     <Dropdown
                       style={{
-                        height: 50,
+                        height: 56,
                         borderWidth: 1,
                         borderColor: "#e5e7eb",
-                        borderRadius: 8,
+                        borderRadius: 6,
                         paddingHorizontal: 16,
-                        backgroundColor: "#fafbfc",
+                        backgroundColor: "#ffffff",
                       }}
                       data={MEAL_TYPE_OPTIONS}
                       labelField="label"
@@ -170,21 +234,21 @@ export default function CreateCateringScreen() {
                       onChange={(item) => onChange(item.value)}
                       selectedTextStyle={{
                         color: "#ee2b8c",
-                        fontSize: 16,
+                        fontSize: 15,
                         fontWeight: "600",
                       }}
-                      placeholderStyle={{ color: "#896175", fontSize: 16 }}
-                      itemTextStyle={{ color: "#1a1a1a", fontSize: 16 }}
+                      placeholderStyle={{ color: "#9CA3AF", fontSize: 15 }}
+                      itemTextStyle={{ color: "#181114", fontSize: 15 }}
                       activeColor="#fdf2f8"
                       renderItem={(item) => (
                         <View className="flex-row items-center justify-between px-4 py-3">
-                          <Text className="text-base font-medium text-on-surface">
+                          <Text className="text-[15px] font-medium text-[#181114]">
                             {item.label}
                           </Text>
                           {value === item.value && (
                             <MaterialIcons
                               name="check"
-                              size={20}
+                              size={18}
                               color="#ee2b8c"
                             />
                           )}
@@ -192,18 +256,26 @@ export default function CreateCateringScreen() {
                       )}
                     />
                     {errors.mealType && (
-                      <Text className="text-red-500 text-xs mt-2">
+                      <Text className="mt-1 ml-1 text-xs text-red-500">
                         {errors.mealType.message}
                       </Text>
                     )}
-                  </View>
+                  </>
                 )}
               />
             </View>
+          </FormSection>
 
-            {/* Per Plate Price */}
-            <View className="mb-6">
-              <Text className="text-sm font-bold text-on-surface mb-3">
+          {/* Pricing */}
+          <FormSection
+            title="Pricing"
+            subtitle="Per guest cost estimate"
+            icon="payments"
+            iconColor="#a23665"
+            iconBg="bg-secondary-container/20"
+          >
+            <View className="mb-5">
+              <Text className="mb-1 ml-1 text-xs font-semibold uppercase tracking-wider text-gray-500">
                 Per Plate Price
               </Text>
               <Controller
@@ -217,97 +289,69 @@ export default function CreateCateringScreen() {
                   },
                 }}
                 render={({ field: { value, onChange } }) => (
-                  <View>
-                    <View className="flex-row items-center bg-background-light border border-outline-variant/50 rounded-lg px-4 py-3">
+                  <>
+                    <View className="h-14 flex-row items-center rounded-md border border-gray-200 bg-white px-4">
                       <MaterialIcons
                         name="attach-money"
                         size={20}
-                        color="#896175"
+                        color="#9CA3AF"
                       />
                       <TextInput
                         placeholder="0.00"
-                        placeholderTextColor="#896175"
-                        className="flex-1 ml-2 text-base font-medium text-on-surface"
+                        placeholderTextColor="#9CA3AF"
+                        className="flex-1 ml-1 text-base text-[#181114]"
                         value={value}
                         onChangeText={onChange}
                         keyboardType="decimal-pad"
                       />
                     </View>
                     {errors.perPlatePrice && (
-                      <Text className="text-red-500 text-xs mt-2">
+                      <Text className="mt-1 ml-1 text-xs text-red-500">
                         {errors.perPlatePrice.message}
                       </Text>
                     )}
-                  </View>
+                  </>
                 )}
               />
             </View>
+          </FormSection>
 
-            {/* Start Date & Time */}
-            <View className="mb-6">
-              <Text className="text-sm font-bold text-on-surface mb-3">
-                Start Date & Time
+          {/* Service Window */}
+          <FormSection
+            title="Service Window"
+            subtitle="Meal start and end time"
+            icon="schedule"
+            iconColor="#046c00"
+            iconBg="bg-tertiary-container"
+          >
+            <DateTimeRangePicker
+              value={{
+                startDateTime,
+                endDateTime,
+              }}
+              onChange={({ startDateTime: start, endDateTime: end }) => {
+                setValue("startDateTime", start, {
+                  shouldDirty: true,
+                  shouldValidate: true,
+                });
+                setValue("endDateTime", end, {
+                  shouldDirty: true,
+                  shouldValidate: true,
+                });
+              }}
+              startLabel="Start"
+              endLabel="End"
+            />
+            {errors.endDateTime && (
+              <Text className="mt-2 ml-1 text-xs text-red-500">
+                {errors.endDateTime.message}
               </Text>
-              <Controller
-                control={control}
-                name="startDateTime"
-                rules={{ required: "Start date is required" }}
-                render={({ field: { value, onChange } }) => (
-                  <DatePicker
-                    value={value}
-                    mode="datetime"
-                    onChange={(_event, date) => {
-                      if (date) onChange(date);
-                    }}
-                    materialDateLabel="Start Date"
-                    materialTimeLabel="Start Time"
-                  />
-                )}
-              />
-            </View>
+            )}
+          </FormSection>
 
-            {/* End Date & Time */}
-            <View className="mb-6">
-              <Text className="text-sm font-bold text-on-surface mb-3">
-                End Date & Time
-              </Text>
-              <Controller
-                control={control}
-                name="endDateTime"
-                rules={{ required: "End date is required" }}
-                render={({ field: { value, onChange } }) => (
-                  <DatePicker
-                    value={value}
-                    mode="datetime"
-                    onChange={(_event, date) => {
-                      if (date) onChange(date);
-                    }}
-                    materialDateLabel="End Date"
-                    materialTimeLabel="End Time"
-                  />
-                )}
-              />
-            </View>
-
-            {/* Submit Button */}
-            <TouchableOpacity
-              onPress={handleSubmit(onSubmit)}
-              disabled={createCateringMutation.isPending}
-              activeOpacity={0.8}
-              className="mt-8 rounded-lg bg-primary py-4 items-center justify-center overflow-hidden"
-              style={shadowStyle}
-            >
-              {createCateringMutation.isPending ? (
-                <ActivityIndicator color="white" size="small" />
-              ) : (
-                <Text className="text-white text-base font-black tracking-tight">
-                  Create Catering Plan
-                </Text>
-              )}
-            </TouchableOpacity>
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
+          {/* Bottom CTA */}
+        </View>
+      </KeyboardAwareScrollView>
     </SafeAreaView>
   );
 }
