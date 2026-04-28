@@ -89,7 +89,9 @@ const BusinessCard = React.memo(function BusinessCard({
               className="text-xs text-[#594048] flex-1"
               numberOfLines={1}
             >
-              {business.location ?? "Location not set"}
+              {business.city && business.country
+                ? `${business.city}, ${business.country}`
+                : business.city ?? business.country ?? business.location ?? "Location not set"}
             </Text>
           </View>
           {business.price_starting_from != null && (

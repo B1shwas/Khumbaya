@@ -37,7 +37,14 @@
           }
         }
       ],
-      "@react-native-community/datetimepicker"
+      "@react-native-community/datetimepicker",
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow Khumbaya to use your location to show your business on the map.",
+          "locationWhenInUsePermission": "Allow Khumbaya to use your location to show your business on the map."
+        }
+      ],
     ],
     "experiments": {
       "typedRoutes": true,

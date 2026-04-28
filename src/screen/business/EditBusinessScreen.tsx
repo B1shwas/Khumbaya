@@ -1,3 +1,4 @@
+import LocationPicker from "@/src/components/ui/LocationPicker";
 import { Text } from "@/src/components/ui/Text";
 import { useGetBusinessById, useUpdateBusiness } from "@/src/features/business";
 import { useBusinessDraftStore } from "@/src/features/business/store/useBusiness";
@@ -41,6 +42,8 @@ export default function EditBusinessScreen() {
     description: "",
     city: "",
     country: "",
+    // latitude: "",
+    // longitude: "",
     vendorType: "",
     vendorCategoryId: "",
     categoryDetails: {},
@@ -60,16 +63,13 @@ export default function EditBusinessScreen() {
   useEffect(() => {
     if (businessInfo && !initialized) {
 
-      // Split location into city and country (assumes "City, Country" format)
-      const locationParts = (businessInfo.location ?? "").split(", ");
-      const city = locationParts[0] ?? "";
-      const country = locationParts[1] ?? "";
-
       setForm({
         businessName: businessInfo.business_name ?? "",
         description: businessInfo.description ?? "",
-        city,
-        country,
+        city: businessInfo.city ?? "",
+        country: businessInfo.country ?? "",
+        // latitude: businessInfo.latitude != null ? String(businessInfo.latitude) : "",
+        // longitude: businessInfo.longitude != null ? String(businessInfo.longitude) : "",
         vendorType: "",
         vendorCategoryId: businessInfo.category ?? "",
         categoryDetails: {},
@@ -107,6 +107,8 @@ export default function EditBusinessScreen() {
           cover: coverImage ?? undefined,
           city: form.city.trim() || undefined,
           country: form.country.trim() || undefined,
+          // latitude: form.latitude ? parseFloat(form.latitude) : undefined,
+          // longitude: form.longitude ? parseFloat(form.longitude) : undefined,
           categoryDetails: Object.keys(form.categoryDetails).length > 0
             ? form.categoryDetails
             : undefined,
@@ -573,6 +575,15 @@ export default function EditBusinessScreen() {
               </View>
             </View>
           </View>
+
+          {/* Location Pin — map picker */}
+          <LocationPicker
+            latitude="27.7172"
+            longitude="85.3240"
+            onChange={(lat, lng) =>
+              setForm((prev) => ({ ...prev, latitude: lat, longitude: lng }))
+            }
+          />
         </View>
       </ScrollView>
 

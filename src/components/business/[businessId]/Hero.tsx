@@ -1,6 +1,8 @@
 import { Business } from "@/src/features/business/types";
 import { MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
+import * as Location from "expo-location";
+import { useEffect, useState } from "react";
 import { Image, TouchableOpacity, View } from "react-native";
 import { Text } from "../../ui/Text";
 
@@ -11,7 +13,25 @@ export function HeroSection({
 }: {
   business: Business;
   onEditPress: () => void;
-}) {    
+}) {
+  const [locationText, setLocationText] = useState(
+    business.location ?? "Location not pinned"
+  );
+
+  useEffect(() => {
+    if (business.latitude == null || business.longitude == null) return;
+    Location.reverseGeocodeAsync({
+      latitude: Number(business.latitude),
+      longitude: Number(business.longitude),
+    }).then((results) => {
+      const r = results[0];
+      if (!r) return;
+      const parts = [r.name, r.district, r.city, r.region, r.country].filter(Boolean);
+      const label = parts.slice(0, 3).join(", ");
+      if (label) setLocationText(label);
+    }).catch(() => {});
+  }, [business.latitude, business.longitude]);
+
   return (
     <View style={{ height: 210 }} className="w-full">
       <Image
@@ -63,7 +83,7 @@ export function HeroSection({
                 color="rgba(255,255,255,0.75)"
               />
               <Text className="text-white/75 text-xs">
-                {business.location ?? "Location not set"}
+                {locationText}
               </Text>
               {business.price_starting_from != null && (
                 <Text className="text-white/60 text-xs ml-2">
