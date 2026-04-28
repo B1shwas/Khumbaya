@@ -21,8 +21,8 @@ const CATEGORY_ORDER = [
   "Dessert",
 ];
 
-const MenuItemCard = ({ item }: { item: any }) => (
-  <View className="bg-white rounded-3xl border border-gray-200 p-4 shadow-sm mb-3">
+  const MenuItemCard = ({ item }: { item: any }) => (
+   <View className="bg-white rounded-3xl border border-gray-200 p-4 mb-3">
     <View className="flex-row items-start justify-between gap-3">
       <View className="flex-1">
         <Text className="text-sm font-semibold text-[#181114]">
@@ -141,7 +141,7 @@ export default function GuestFoodScreen() {
             <ActivityIndicator size="large" color="#ee2b8c" />
           </View>
         ) : cateringError ? (
-          <View className="rounded-3xl bg-white p-6 shadow-sm border border-gray-100">
+          <View className="rounded-3xl bg-white p-6 border border-gray-100">
             <Text className="text-base font-semibold text-[#181114]">
               Unable to load event catering
             </Text>
@@ -150,7 +150,7 @@ export default function GuestFoodScreen() {
             </Text>
           </View>
         ) : !cateringList?.items?.length ? (
-          <View className="rounded-3xl bg-white p-6 shadow-sm border border-gray-100">
+          <View className="rounded-3xl bg-white p-6 border border-gray-100">
             <Text className="text-base font-semibold text-[#181114]">
               No catering available
             </Text>
@@ -167,17 +167,16 @@ export default function GuestFoodScreen() {
               <View className="flex-row flex-wrap gap-2">
                 {cateringList.items.map((catering: any) => {
                   const isSelected = catering.id === selectedCatering?.id;
+                  function handleIndividualRsvp(event: GestureResponderEvent): void {
+                    throw new Error("Function not implemented.");
+                  }
+
                   return (
-                    <TouchableOpacity
-                      key={catering.id}
-                      onPress={() => setSelectedCateringId(catering.id)}
-                      className={`rounded-full px-4 py-2 border ${
-                        isSelected
-                          ? "border-[#ee2b8c] bg-[#fee2ec]"
-                          : "border-gray-200 bg-white"
-                      }`}
-                      activeOpacity={0.8}
-                    >
+                 <TouchableOpacity
+                   className="flex-1 py-3.5 rounded-md items-center justify-center bg-primary active:scale-[0.98]"
+                   activeOpacity={0.8}
+                   onPress={handleIndividualRsvp}
+                 >
                       <Text
                         className={`${isSelected ? "text-[#b91c1c]" : "text-[#181114]"} text-xs font-semibold`}
                       >
@@ -190,7 +189,7 @@ export default function GuestFoodScreen() {
             </View>
 
             {selectedCatering ? (
-              <View className="rounded-3xl bg-white p-5 shadow-sm border border-gray-100 mb-5">
+               <View className="rounded-3xl bg-white p-5 border border-gray-100 mb-5">
                 <Text className="text-base font-semibold text-[#181114]">
                   {selectedCatering.name}
                 </Text>
@@ -232,16 +231,16 @@ export default function GuestFoodScreen() {
                     ))}
                   </View>
                 ))
-              ) : (
-                <View className="rounded-3xl bg-white p-6 shadow-sm border border-gray-100">
-                  <Text className="text-base font-semibold text-[#181114]">
-                    No menu items available
-                  </Text>
-                  <Text className="text-sm text-gray-500 mt-2">
-                    The selected catering plan does not have any food items yet.
-                  </Text>
-                </View>
-              )}
+                ) : (
+                  <View className="rounded-3xl bg-white p-6 border border-gray-100">
+                    <Text className="text-base font-semibold text-[#181114]">
+                      No menu items available
+                    </Text>
+                    <Text className="text-sm text-gray-500 mt-2">
+                      The selected catering plan does not have any food items yet.
+                    </Text>
+                  </View>
+                )}
             </View>
           </>
         )}

@@ -100,7 +100,7 @@ export default function Lodge() {
           </Text>
         </View>
 
-        <View className="mx-5 mt-5 bg-white rounded-[32px] border border-slate-100 p-5 shadow-sm">
+        <View className="mx-5 mt-5 bg-white rounded-[32px] border border-slate-100 p-5">
           <Text className="text-sm uppercase tracking-[1.5px] text-slate-400 mb-3">
             Hotel information
           </Text>
@@ -180,10 +180,10 @@ export default function Lodge() {
                   : "No room requested";
 
                 return (
-                  <View
-                    key={`family-room-${index}`}
-                    className="rounded-3xl bg-white border border-slate-100 p-4 shadow-sm"
-                  >
+                   <View
+                     key={`family-room-${index}`}
+                     className="rounded-3xl bg-white border border-slate-100 p-4"
+                   >
                     <Text className="text-sm font-jakarta-bold text-slate-900 mb-2">
                       {memberName}
                     </Text>
