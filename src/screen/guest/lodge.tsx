@@ -10,28 +10,92 @@ import React, { useMemo } from "react";
 import { ActivityIndicator, ScrollView, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+function SectionLabel({ children }: { children: string }) {
+  return (
+    <View className="flex-row items-center gap-2 mb-4">
+      <View className="h-px flex-1 bg-slate-100" />
+      <Text className="text-[10px] uppercase tracking-[2px] text-slate-400 font-jakarta-semibold">
+        {children}
+      </Text>
+      <View className="h-px flex-1 bg-slate-100" />
+    </View>
+  );
+}
+
 function InfoRow({
   icon,
   label,
   value,
+  accent = false,
 }: {
   icon: React.ComponentProps<typeof Ionicons>["name"];
   label: string;
   value: string;
+  accent?: boolean;
 }) {
   return (
-    <View className="flex-row items-start gap-3 mb-4">
-      <View className="w-10 h-10 rounded-2xl bg-pink-100 items-center justify-center">
-        <Ionicons name={icon} size={18} color="#ee2b8c" />
+    <View className="flex-row items-center gap-3 py-3 border-b border-slate-50">
+      <View
+        className={`w-8 h-8 rounded-xl items-center justify-center ${
+          accent ? "bg-pink-50" : "bg-slate-50"
+        }`}
+      >
+        <Ionicons
+          name={icon}
+          size={15}
+          color={accent ? "#ee2b8c" : "#94a3b8"}
+        />
       </View>
       <View className="flex-1">
-        <Text className="text-xs uppercase tracking-[1px] text-slate-400 mb-1">
+        <Text className="text-[10px] uppercase tracking-[1.5px] text-slate-400 mb-0.5">
           {label}
         </Text>
-        <Text className="text-base font-jakarta-semibold text-slate-900">
+        <Text
+          className={`text-sm font-jakarta-semibold ${
+            value === "Not available" || value === "Not assigned yet"
+              ? "text-slate-400"
+              : "text-slate-800"
+          }`}
+        >
           {value}
         </Text>
       </View>
+    </View>
+  );
+}
+
+function TravelBlock({
+  type,
+  date,
+  time,
+  location,
+}: {
+  type: "arrival" | "departure";
+  date: string;
+  time: string;
+  location: string;
+}) {
+  const isArrival = type === "arrival";
+  return (
+    <View className="flex-1 rounded-2xl bg-slate-50 p-4">
+      <View className="flex-row items-center gap-1.5 mb-3">
+        <Ionicons
+          name={isArrival ? "arrow-down-circle" : "arrow-up-circle"}
+          size={14}
+          color={isArrival ? "#10b981" : "#f59e0b"}
+        />
+        <Text
+          className={`text-[10px] uppercase tracking-[1.5px] font-jakarta-semibold ${
+            isArrival ? "text-emerald-500" : "text-amber-500"
+          }`}
+        >
+          {isArrival ? "Arrival" : "Departure"}
+        </Text>
+      </View>
+      <Text className="text-sm font-jakarta-bold text-slate-900">{date}</Text>
+      <Text className="text-xs text-slate-500 mt-0.5">{time}</Text>
+      <View className="h-px bg-slate-200 my-2.5" />
+      <Text className="text-xs text-slate-500 leading-relaxed">{location}</Text>
     </View>
   );
 }
@@ -58,18 +122,22 @@ export default function Lodge() {
   const guestRecord = responses[0]?.event_guest ?? null;
   const guestName = responses[0]?.user_detail?.username ?? "Guest";
   const hasFamily = responses.length > 1;
-
   const isLoading = isEventLoading || isResponseLoading;
 
   if (!numericEventId) {
     return (
       <SafeAreaView
-        className="flex-1 bg-background-light items-center justify-center"
+        className="flex-1 bg-slate-50 items-center justify-center"
         edges={["top"]}
       >
-        <Text className="text-sm text-slate-500">
-          Event ID is missing from the route.
-        </Text>
+        <View className="items-center gap-3 px-8">
+          <View className="w-14 h-14 rounded-full bg-pink-50 items-center justify-center">
+            <Ionicons name="alert-circle-outline" size={28} color="#ee2b8c" />
+          </View>
+          <Text className="text-sm text-slate-500 text-center leading-relaxed">
+            Event ID is missing from the route.
+          </Text>
+        </View>
       </SafeAreaView>
     );
   }
@@ -77,122 +145,154 @@ export default function Lodge() {
   if (isLoading) {
     return (
       <SafeAreaView
-        className="flex-1 bg-background-light items-center justify-center"
+        className="flex-1 bg-slate-50 items-center justify-center"
         edges={["top"]}
       >
         <ActivityIndicator size="large" color="#ee2b8c" />
+        <Text className="text-xs text-slate-400 mt-3 tracking-wide">
+          Loading details…
+        </Text>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-background-light" edges={["top"]}>
+    <SafeAreaView className="flex-1 bg-slate-50" edges={["top"]}>
       <ScrollView
-        contentContainerClassName="pb-10"
+        contentContainerClassName="pb-12"
         showsVerticalScrollIndicator={false}
       >
-        <View className="px-5 pt-5">
-          <Text className="text-2xl font-jakarta-bold text-slate-900 mb-2">
+        {/* Header */}
+        <View className="px-5 pt-6 pb-5">
+          <View className="flex-row items-center gap-2 mb-1">
+            <View className="w-1.5 h-5 rounded-full bg-pink-500" />
+            <Text className="text-[11px] uppercase tracking-[2px] text-pink-400 font-jakarta-semibold">
+              Accommodation
+            </Text>
+          </View>
+          <Text className="text-2xl font-jakarta-bold text-slate-900 mt-1">
             Hotel & Room Details
           </Text>
-          <Text className="text-sm text-slate-500 leading-relaxed">
-            View accommodation information for {guestName}.
+          <Text className="text-sm text-slate-400 mt-1 leading-relaxed">
+            Viewing details for{" "}
+            <Text className="text-slate-600 font-jakarta-semibold">
+              {guestName}
+            </Text>
           </Text>
         </View>
 
-        <View className="mx-5 mt-5 bg-white rounded-[32px] border border-slate-100 p-5">
-          <Text className="text-sm uppercase tracking-[1.5px] text-slate-400 mb-3">
-            Hotel information
-          </Text>
-          <View className="rounded-3xl bg-slate-50 p-4 mb-4">
-            <Text className="text-lg font-jakarta-semibold text-slate-900">
+        {/* Venue Card */}
+        <View className="mx-5 mb-4 rounded-3xl overflow-hidden bg-white border border-slate-100 shadow-sm">
+          <View className="bg-pink-500 px-5 py-4">
+            <Text className="text-[10px] uppercase tracking-[2px] text-pink-200 mb-1">
+              Venue
+            </Text>
+            <Text className="text-lg font-jakarta-bold text-white leading-snug">
               {eventDetails?.location || "Hotel details not available"}
             </Text>
-            <Text className="text-sm text-slate-500 mt-2">
+            <Text className="text-sm text-pink-200 mt-0.5">
               {eventDetails?.title || "Event location"}
             </Text>
           </View>
 
-          <InfoRow
-            icon="bed-outline"
-            label="Room allocation"
-            value={guestRecord?.assigned_room || "Not assigned yet"}
-          />
-          <InfoRow
-            icon="key-outline"
-            label="Accommodation status"
-            value={
-              guestRecord?.isAccomodation
-                ? "Room requested"
-                : "No room requested"
-            }
-          />
-          <InfoRow
-            icon="calendar-outline"
-            label="Arrival date"
-            value={formatDate(guestRecord?.arrival_date_time)}
-          />
-          <InfoRow
-            icon="arrow-up-outline"
-            label="Arrival time"
-            value={formatTime(guestRecord?.arrival_date_time)}
-          />
-          <InfoRow
-            icon="location-outline"
-            label="Arrival location"
-            value={formatNullable(guestRecord?.arrival_info)}
-          />
-          <InfoRow
-            icon="calendar-outline"
-            label="Departure date"
-            value={formatDate(guestRecord?.departure_date_time)}
-          />
-          <InfoRow
-            icon="arrow-down-outline"
-            label="Departure time"
-            value={formatTime(guestRecord?.departure_date_time)}
-          />
-          <InfoRow
-            icon="location-outline"
-            label="Departure location"
-            value={formatNullable(guestRecord?.departure_info)}
-          />
-          <InfoRow
-            icon="document-text-outline"
-            label="Notes"
-            value={formatNullable(guestRecord?.notes)}
-          />
+          <View className="px-5 pt-4 pb-5">
+            <InfoRow
+              icon="bed-outline"
+              label="Room allocation"
+              value={guestRecord?.assigned_room || "Not assigned yet"}
+              accent
+            />
+            <InfoRow
+              icon="shield-checkmark-outline"
+              label="Accommodation status"
+              value={
+                guestRecord?.isAccomodation
+                  ? "Room requested"
+                  : "No room requested"
+              }
+              accent={!!guestRecord?.isAccomodation}
+            />
+            <InfoRow
+              icon="document-text-outline"
+              label="Notes"
+              value={formatNullable(guestRecord?.notes)}
+            />
+          </View>
         </View>
 
+        {/* Travel Block */}
+        <View className="mx-5 mb-4 bg-white rounded-3xl border border-slate-100 p-5">
+          <SectionLabel>Travel schedule</SectionLabel>
+          <View className="flex-row gap-3">
+            <TravelBlock
+              type="arrival"
+              date={formatDate(guestRecord?.arrival_date_time)}
+              time={formatTime(guestRecord?.arrival_date_time)}
+              location={formatNullable(guestRecord?.arrival_info)}
+            />
+            <TravelBlock
+              type="departure"
+              date={formatDate(guestRecord?.departure_date_time)}
+              time={formatTime(guestRecord?.departure_date_time)}
+              location={formatNullable(guestRecord?.departure_info)}
+            />
+          </View>
+        </View>
+
+        {/* Family Section */}
         {hasFamily && (
-          <View className="mx-5 mt-6">
-            <Text className="text-base font-jakarta-semibold text-slate-900 mb-4">
-              Family room assignments
-            </Text>
-            <View className="space-y-4">
+          <View className="mx-5">
+            <View className="flex-row items-center gap-2 mb-3">
+              <Ionicons name="people-outline" size={16} color="#94a3b8" />
+              <Text className="text-sm font-jakarta-semibold text-slate-700">
+                Family room assignments
+              </Text>
+              <View className="ml-auto bg-pink-50 rounded-full px-2.5 py-0.5">
+                <Text className="text-xs font-jakarta-semibold text-pink-500">
+                  {responses.length}
+                </Text>
+              </View>
+            </View>
+
+            <View className="gap-3">
               {responses.map((response, index) => {
                 const memberName =
                   response.user_detail?.username ?? `Guest ${index + 1}`;
                 const roomAllocation =
                   response.event_guest?.assigned_room || "Not assigned";
-                const accomodationText = response.event_guest?.isAccomodation
-                  ? "Room requested"
-                  : "No room requested";
+                const hasRoom = !!response.event_guest?.isAccomodation;
 
                 return (
-                   <View
-                     key={`family-room-${index}`}
-                     className="rounded-3xl bg-white border border-slate-100 p-4"
-                   >
-                    <Text className="text-sm font-jakarta-bold text-slate-900 mb-2">
-                      {memberName}
-                    </Text>
-                    <Text className="text-sm text-slate-600">
-                      {roomAllocation}
-                    </Text>
-                    <Text className="text-xs text-slate-400 mt-1">
-                      {accomodationText}
-                    </Text>
+                  <View
+                    key={`family-room-${index}`}
+                    className="bg-white rounded-2xl border border-slate-100 px-4 py-3.5 flex-row items-center gap-3"
+                  >
+                    <View className="w-9 h-9 rounded-full bg-pink-50 items-center justify-center">
+                      <Text className="text-sm font-jakarta-bold text-pink-500">
+                        {memberName.charAt(0).toUpperCase()}
+                      </Text>
+                    </View>
+                    <View className="flex-1">
+                      <Text className="text-sm font-jakarta-bold text-slate-800">
+                        {memberName}
+                      </Text>
+                      <Text className="text-xs text-slate-500 mt-0.5">
+                        {roomAllocation}
+                      </Text>
+                    </View>
+                    <View
+                      className={`rounded-full px-2.5 py-1 ${
+                        hasRoom ? "bg-emerald-50" : "bg-slate-100"
+                      }`}
+                    >
+                      <Text
+                        className={`text-[10px] font-jakarta-semibold ${
+                          hasRoom ? "text-emerald-600" : "text-slate-400"
+                        }`}
+                      >
+                        {hasRoom ? "Requested" : "No room"}
+                      </Text>
+                    </View>
                   </View>
                 );
               })}

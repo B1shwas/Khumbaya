@@ -1,15 +1,15 @@
 import { Text } from "@/src/components/ui/Text";
 import { useCateringList } from "@/src/features/catering";
 import { useMenuList } from "@/src/features/catering/menu";
-import { MaterialIcons } from "@expo/vector-icons";
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import {
-    ActivityIndicator,
-    RefreshControl,
-    ScrollView,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  RefreshControl,
+  ScrollView,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -21,35 +21,60 @@ const CATEGORY_ORDER = [
   "Dessert",
 ];
 
-  const MenuItemCard = ({ item }: { item: any }) => (
-   <View className="bg-white rounded-3xl border border-gray-200 p-4 mb-3">
-    <View className="flex-row items-start justify-between gap-3">
-      <View className="flex-1">
-        <Text className="text-sm font-semibold text-[#181114]">
+const CATEGORY_ICONS: Record<string, React.ComponentProps<typeof Ionicons>["name"]> = {
+  Starter: "leaf-outline",
+  Appetizer: "restaurant-outline",
+  "Main Course": "flame-outline",
+  Beverage: "wine-outline",
+  Dessert: "ice-cream-outline",
+  Other: "ellipsis-horizontal-outline",
+};
+
+const MenuItemCard = ({ item }: { item: any }) => (
+  <View className="bg-slate-50 rounded-2xl px-4 py-3.5 mb-2.5 flex-row items-start gap-3">
+    <View className="flex-1">
+      <View className="flex-row items-center gap-2 flex-wrap">
+        <Text className="text-sm font-jakarta-semibold text-slate-900">
           {item.name}
         </Text>
-        {item.description ? (
-          <Text className="text-xs text-gray-500 mt-1">{item.description}</Text>
-        ) : null}
-        <Text className="text-[11px] text-gray-400 mt-2">
-          {item.type || "Food"}
-        </Text>
+        {item.isVegetarian && (
+          <View className="bg-emerald-50 border border-emerald-100 rounded-full px-2 py-0.5 flex-row items-center gap-1">
+            <MaterialIcons name="eco" size={10} color="#16a34a" />
+            <Text className="text-[9px] font-jakarta-semibold text-emerald-600 uppercase tracking-wide">
+              Veg
+            </Text>
+          </View>
+        )}
       </View>
-      {item.isVegetarian ? (
-        <View className="w-6 h-6 rounded-full bg-emerald-50 items-center justify-center border border-emerald-200">
-          <MaterialIcons name="eco" size={18} color="#16a34a" />
-        </View>
+      {item.description ? (
+        <Text className="text-xs text-slate-400 mt-1 leading-relaxed">
+          {item.description}
+        </Text>
       ) : null}
     </View>
   </View>
 );
 
+function EmptyState({ title, subtitle }: { title: string; subtitle: string }) {
+  return (
+    <View className="bg-white rounded-3xl border border-slate-100 p-8 items-center">
+      <View className="w-12 h-12 rounded-full bg-slate-50 items-center justify-center mb-3">
+        <Ionicons name="restaurant-outline" size={22} color="#cbd5e1" />
+      </View>
+      <Text className="text-sm font-jakarta-bold text-slate-800 text-center">
+        {title}
+      </Text>
+      <Text className="text-xs text-slate-400 mt-1.5 text-center leading-relaxed">
+        {subtitle}
+      </Text>
+    </View>
+  );
+}
+
 export default function GuestFoodScreen() {
   const params = useLocalSearchParams();
   const eventId = Number(params.eventId);
-  const [selectedCateringId, setSelectedCateringId] = useState<number | null>(
-    null
-  );
+  const [selectedCateringId, setSelectedCateringId] = useState<number | null>(null);
 
   const {
     data: cateringList,
@@ -59,15 +84,9 @@ export default function GuestFoodScreen() {
   } = useCateringList(1, 50, eventId, { enabled: !!eventId });
 
   const selectedCatering = useMemo(() => {
-    if (!cateringList?.items?.length) {
-      return null;
-    }
+    if (!cateringList?.items?.length) return null;
     if (selectedCateringId) {
-      return (
-        cateringList.items.find(
-          (item: any) => item.id === selectedCateringId
-        ) ?? null
-      );
+      return cateringList.items.find((item: any) => item.id === selectedCateringId) ?? null;
     }
     return cateringList.items[0];
   }, [cateringList, selectedCateringId]);
@@ -110,13 +129,11 @@ export default function GuestFoodScreen() {
 
   const onRefresh = () => {
     refetchCatering();
-    if (selectedCateringId) {
-      refetchMenu();
-    }
+    if (selectedCateringId) refetchMenu();
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-[#f8f6f7]">
+    <SafeAreaView className="flex-1 bg-slate-50" edges={["top"]}>
       <ScrollView
         className="flex-1"
         contentContainerClassName="px-5 pb-20"
@@ -129,119 +146,144 @@ export default function GuestFoodScreen() {
           />
         }
       >
-        <View className="pt-6 pb-4">
-          <Text className="text-2xl font-bold text-[#181114]">Food Menu</Text>
-          <Text className="text-sm text-gray-500 mt-2">
-            View the event menu for the food plans assigned to your event.
+        {/* Header */}
+        <View className="pt-6 pb-5">
+          <View className="flex-row items-center gap-2 mb-1">
+            <View className="w-1.5 h-5 rounded-full bg-pink-500" />
+            <Text className="text-[11px] uppercase tracking-[2px] text-pink-400 font-jakarta-semibold">
+              Catering
+            </Text>
+          </View>
+          <Text className="text-2xl font-jakarta-bold text-slate-900 mt-1">
+            Food Menu
+          </Text>
+          <Text className="text-sm text-slate-400 mt-1 leading-relaxed">
+            Browse the food plans assigned to your event.
           </Text>
         </View>
 
         {isLoadingCatering ? (
-          <View className="flex-1 items-center justify-center py-20">
+          <View className="items-center justify-center py-20 gap-3">
             <ActivityIndicator size="large" color="#ee2b8c" />
+            <Text className="text-xs text-slate-400 tracking-wide">
+              Loading catering…
+            </Text>
           </View>
         ) : cateringError ? (
-          <View className="rounded-3xl bg-white p-6 border border-gray-100">
-            <Text className="text-base font-semibold text-[#181114]">
-              Unable to load event catering
-            </Text>
-            <Text className="text-sm text-gray-500 mt-2">
-              Please pull down to refresh and try again.
-            </Text>
-          </View>
+          <EmptyState
+            title="Unable to load catering"
+            subtitle="Please pull down to refresh and try again."
+          />
         ) : !cateringList?.items?.length ? (
-          <View className="rounded-3xl bg-white p-6 border border-gray-100">
-            <Text className="text-base font-semibold text-[#181114]">
-              No catering available
-            </Text>
-            <Text className="text-sm text-gray-500 mt-2">
-              There is no food plan configured yet for this event.
-            </Text>
-          </View>
+          <EmptyState
+            title="No catering available"
+            subtitle="There is no food plan configured yet for this event."
+          />
         ) : (
           <>
-            <View className="mb-4">
-              <Text className="text-sm text-gray-500 mb-2">
-                Choose a catering plan
-              </Text>
-              <View className="flex-row flex-wrap gap-2">
-                {cateringList.items.map((catering: any) => {
-                  const isSelected = catering.id === selectedCatering?.id;
-                  function handleIndividualRsvp(event: GestureResponderEvent): void {
-                    throw new Error("Function not implemented.");
-                  }
-
-                  return (
-                 <TouchableOpacity
-                   className="flex-1 py-3.5 rounded-md items-center justify-center bg-primary active:scale-[0.98]"
-                   activeOpacity={0.8}
-                   onPress={handleIndividualRsvp}
-                 >
-                      <Text
-                        className={`${isSelected ? "text-[#b91c1c]" : "text-[#181114]"} text-xs font-semibold`}
+            {/* Plan Selector */}
+            {cateringList.items.length > 1 && (
+              <View className="mb-4">
+                <Text className="text-[10px] uppercase tracking-[1.5px] text-slate-400 font-jakarta-semibold mb-2.5">
+                  Choose a plan
+                </Text>
+                <View className="flex-row flex-wrap gap-2">
+                  {cateringList.items.map((catering: any) => {
+                    const isSelected = catering.id === selectedCatering?.id;
+                    return (
+                      <TouchableOpacity
+                        key={catering.id}
+                        onPress={() => setSelectedCateringId(catering.id)}
+                        activeOpacity={0.7}
+                        className={`rounded-2xl px-4 py-2.5 border ${
+                          isSelected
+                            ? "bg-pink-500 border-pink-500"
+                            : "bg-white border-slate-100"
+                        }`}
                       >
-                        {catering.name}
-                      </Text>
-                    </TouchableOpacity>
-                  );
-                })}
+                        <Text
+                          className={`text-xs font-jakarta-semibold ${
+                            isSelected ? "text-white" : "text-slate-600"
+                          }`}
+                        >
+                          {catering.name}
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
               </View>
-            </View>
+            )}
 
-            {selectedCatering ? (
-               <View className="rounded-3xl bg-white p-5 border border-gray-100 mb-5">
-                <Text className="text-base font-semibold text-[#181114]">
-                  {selectedCatering.name}
-                </Text>
-                <Text className="text-xs text-gray-500 mt-2">
-                  Meal type: {selectedCatering.meal_type || "N/A"}
-                </Text>
-              </View>
-            ) : null}
-
-            <View className="mb-4">
-              <View className="flex-row items-center justify-between mb-3">
-                <Text className="text-sm font-bold text-[#181114]">
-                  Menu Items
-                </Text>
-                <Text className="text-xs text-gray-400">
-                  {menuItems.length} item{menuItems.length === 1 ? "" : "s"}
-                </Text>
-              </View>
-
-              {isLoadingMenu && !menuItems.length ? (
-                <ActivityIndicator size="small" color="#ee2b8c" />
-              ) : menuError ? (
-                <View className="rounded-3xl bg-white p-4 border border-red-100">
-                  <Text className="text-sm font-semibold text-[#b91c1c]">
-                    Failed to load menu
+            {/* Selected Plan Info */}
+            {selectedCatering && (
+              <View className="bg-pink-500 rounded-3xl px-5 py-4 mb-5 flex-row items-center gap-3">
+                <View className="w-10 h-10 rounded-2xl bg-white/20 items-center justify-center">
+                  <Ionicons name="restaurant" size={18} color="white" />
+                </View>
+                <View className="flex-1">
+                  <Text className="text-base font-jakarta-bold text-white">
+                    {selectedCatering.name}
                   </Text>
-                  <Text className="text-xs text-gray-500 mt-1">
-                    Pull down to refresh and try again.
+                  <Text className="text-xs text-pink-200 mt-0.5">
+                    {selectedCatering.meal_type
+                      ? `Meal type: ${selectedCatering.meal_type}`
+                      : "Meal type not specified"}
                   </Text>
                 </View>
-              ) : menuItems.length ? (
-                sortedCategories.map((category) => (
-                  <View key={category} className="mb-5">
-                    <Text className="text-sm font-semibold text-[#181114] mb-3">
-                      {category}
-                    </Text>
+                <View className="bg-white/20 rounded-full px-2.5 py-1">
+                  <Text className="text-[10px] font-jakarta-semibold text-white">
+                    {menuItems.length} items
+                  </Text>
+                </View>
+              </View>
+            )}
+
+            {/* Menu Items */}
+            {isLoadingMenu && !menuItems.length ? (
+              <View className="items-center py-10">
+                <ActivityIndicator size="small" color="#ee2b8c" />
+              </View>
+            ) : menuError ? (
+              <View className="bg-red-50 rounded-2xl border border-red-100 p-4 flex-row items-center gap-3">
+                <Ionicons name="alert-circle-outline" size={18} color="#ef4444" />
+                <View className="flex-1">
+                  <Text className="text-sm font-jakarta-semibold text-red-600">
+                    Failed to load menu
+                  </Text>
+                  <Text className="text-xs text-red-400 mt-0.5">
+                    Pull down to refresh.
+                  </Text>
+                </View>
+              </View>
+            ) : menuItems.length ? (
+              sortedCategories.map((category) => {
+                const icon = CATEGORY_ICONS[category] ?? "ellipsis-horizontal-outline";
+                return (
+                  <View key={category} className="mb-6">
+                    <View className="flex-row items-center gap-2 mb-3">
+                      <View className="w-7 h-7 rounded-xl bg-white border border-slate-100 items-center justify-center">
+                        <Ionicons name={icon} size={13} color="#94a3b8" />
+                      </View>
+                      <Text className="text-sm font-jakarta-bold text-slate-800">
+                        {category}
+                      </Text>
+                      <Text className="text-xs text-slate-400 ml-auto">
+                        {groupedMenus[category].length}
+                      </Text>
+                    </View>
                     {groupedMenus[category].map((item) => (
                       <MenuItemCard key={item.id} item={item} />
                     ))}
                   </View>
-                ))
-                ) : (
-                  <View className="rounded-3xl bg-white p-6 border border-gray-100">
-                    <Text className="text-base font-semibold text-[#181114]">
-                      No menu items available
-                    </Text>
-                    <Text className="text-sm text-gray-500 mt-2">
-                      The selected catering plan does not have any food items yet.
-                    </Text>
-                  </View>
-                )}
-            </View>
+                );
+              })
+            ) : (
+              <EmptyState
+                title="No menu items yet"
+                subtitle="The selected catering plan doesn't have any food items configured."
+              />
+            )}
           </>
         )}
       </ScrollView>
