@@ -1,5 +1,5 @@
 import SubEventCard from "@/src/components/event/subevent/CardSubevent";
-import { Event } from "@/src/constants/event";
+import { SubEvent } from "@/src/constants/event";
 import { useSubEventsOfEvent } from "@/src/features/events/hooks/use-event";
 import { sortByDateTime } from "@/src/utils/helper";
 import { Ionicons } from "@expo/vector-icons";
@@ -28,7 +28,7 @@ const formatDayHeader = (dateStr?: string | null): string => {
 
 type ListItem =
   | { type: "header"; label: string; key: string }
-  | { type: "card"; item: Event; index: number; total: number; key: string };
+  | { type: "card"; item: SubEvent; index: number; total: number; key: string };
 
 export default function ListSubEvent() {
   const router = useRouter();
@@ -40,7 +40,7 @@ export default function ListSubEvent() {
     refetch,
   } = useSubEventsOfEvent(Number(eventId));
 
-  const subEvents = (subEventsResponse ?? []) as Event[];
+  const subEvents = (subEventsResponse ?? []) as SubEvent[];
 
   useFocusEffect(
     useCallback(() => {
@@ -56,10 +56,10 @@ export default function ListSubEvent() {
   const listData = useMemo((): ListItem[] => {
     const result: ListItem[] = [];
     let lastDay = "";
-    let dayItems: Event[] = [];
+    let dayItems: SubEvent[] = [];
 
     // First pass: collect per-day groups to know per-day totals
-    const dayMap = new Map<string, Event[]>();
+    const dayMap = new Map<string, SubEvent[]>();
     for (const item of sorted) {
       const dayKey = getCalendarDay(item.startDateTime);
       if (!dayMap.has(dayKey)) dayMap.set(dayKey, []);

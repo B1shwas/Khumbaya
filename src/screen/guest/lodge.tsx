@@ -4,7 +4,6 @@ import {
   useEventResponseWithUser,
 } from "@/src/features/events/hooks/use-event";
 import { GuestDetailInterface } from "@/src/features/guests/types";
-import { formatDate, formatTime } from "@/src/utils/helper";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams } from "expo-router";
 import React, { useMemo } from "react";
@@ -163,24 +162,24 @@ export default function Lodge() {
         {/* Header */}
         <View className="px-5 pt-6 pb-5">
           <View className="flex-row items-center gap-2 mb-1">
-            <View className="w-1.5 h-5 rounded-full bg-pink-500" />
-            <Text className="text-[11px] uppercase tracking-[2px] text-pink-400 font-jakarta-semibold">
+            {/* <View className="w-1.5 h-5 rounded-full bg-pink-500" /> */}
+            {/* <Text className="text-[11px] uppercase tracking-[2px] text-pink-400 font-jakarta-semibold">
               Accommodation
-            </Text>
+            </Text> */}
           </View>
           <Text className="text-2xl font-jakarta-bold text-slate-900 mt-1">
             Hotel & Room Details
           </Text>
-          <Text className="text-sm text-slate-400 mt-1 leading-relaxed">
+          {/* <Text className="text-sm text-slate-400 mt-1 leading-relaxed">
             Viewing details for{" "}
             <Text className="text-slate-600 font-jakarta-semibold">
               {guestName}
             </Text>
-          </Text>
+          </Text> */}
         </View>
 
         {/* Venue Card */}
-        <View className="mx-5 mb-4 rounded-3xl overflow-hidden bg-white border border-slate-100 shadow-sm">
+        {/* <View className="mx-5 mb-4 rounded-3xl overflow-hidden bg-white border border-slate-100 shadow-sm">
           <View className="bg-pink-500 px-5 py-4">
             <Text className="text-[10px] uppercase tracking-[2px] text-pink-200 mb-1">
               Venue
@@ -216,10 +215,10 @@ export default function Lodge() {
               value={formatNullable(guestRecord?.notes)}
             />
           </View>
-        </View>
+        </View> */}
 
         {/* Travel Block */}
-        <View className="mx-5 mb-4 bg-white rounded-3xl border border-slate-100 p-5">
+        {/* <View className="mx-5 mb-4 bg-white rounded-3xl border border-slate-100 p-5">
           <SectionLabel>Travel schedule</SectionLabel>
           <View className="flex-row gap-3">
             <TravelBlock
@@ -235,7 +234,7 @@ export default function Lodge() {
               location={formatNullable(guestRecord?.departureInfo)}
             />
           </View>
-        </View>
+        </View> */}
 
         {/* Family Section */}
         {hasFamily && (
@@ -274,22 +273,26 @@ export default function Lodge() {
                       <Text className="text-sm font-jakarta-bold text-slate-800">
                         {memberName}
                       </Text>
-                      <Text className="text-xs text-slate-500 mt-0.5">
-                        {roomAllocation}
-                      </Text>
-                    </View>
-                    <View
-                      className={`rounded-full px-2.5 py-1 ${
-                        hasRoom ? "bg-emerald-50" : "bg-slate-100"
-                      }`}
-                    >
-                      <Text
-                        className={`text-[10px] font-jakarta-semibold ${
-                          hasRoom ? "text-emerald-600" : "text-slate-400"
-                        }`}
-                      >
-                        {hasRoom ? "Requested" : "No room"}
-                      </Text>
+                      <View className="mt-2 flex-row items-center gap-2">
+                        <View className="rounded-full bg-slate-100 px-2.5 py-1">
+                          <Text className="text-[10px] font-jakarta-semibold text-slate-500">
+                            {roomAllocation}
+                          </Text>
+                        </View>
+                        <View
+                          className={`rounded-full px-2.5 py-1 ${
+                            hasRoom ? "bg-emerald-50" : "bg-slate-100"
+                          }`}
+                        >
+                          <Text
+                            className={`text-[10px] font-jakarta-semibold ${
+                              hasRoom ? "text-emerald-600" : "text-slate-400"
+                            }`}
+                          >
+                            {hasRoom ? "Requested" : "No room"}
+                          </Text>
+                        </View>
+                      </View>
                     </View>
                   </View>
                 );
