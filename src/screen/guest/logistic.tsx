@@ -1,5 +1,6 @@
 import { Text } from "@/src/components/ui/Text";
-import { useGuestTransportation } from "@/src/features/logistics/hooks/use-transport";
+import { useEventResponseWithUser } from "@/src/features/events/hooks/use-event";
+import { GuestDetailInterface } from "@/src/features/guests/types";
 import { formatDate, formatTime } from "@/src/utils/helper";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams } from "expo-router";
@@ -83,17 +84,18 @@ function EmptyState({ icon, title, subtitle }: { icon: React.ComponentProps<type
 }
 
 export default function Logistic() {
-  const params = useLocalSearchParams();
-  const eventId = Array.isArray(params.eventId) ? params.eventId[0] : params.eventId;
+  const { eventId } = useLocalSearchParams<{ eventId: string }>();
+  const numericEventId = eventId ? Number(eventId) : 0;
 
-  const { data: transportData, isLoading, error, refetch } = useGuestTransportation(
-    String(eventId ?? "")
-  );
+  const { data: eventResponse, isLoading: isResponseLoading, error, refetch } =
+    useEventResponseWithUser(numericEventId);
 
-  const hasTransport = useMemo(
-    () => Array.isArray(transportData) && transportData.length > 0,
-    [transportData]
-  );
+  const responses = useMemo(() => {
+    return (eventResponse?.responses ?? []) as GuestDetailInterface[];
+  }, [eventResponse]);
+
+  const isLoading = isResponseLoading;
+  const hasTransport = responses.length > 0;
 
   return (
     <SafeAreaView className="flex-1 bg-slate-50" edges={["top"]}>
@@ -132,54 +134,59 @@ export default function Logistic() {
             title="Could not load transport details"
             subtitle="Pull down to refresh or try again later."
           />
-         ) : !hasTransport ? (
-           <EmptyState
-             icon="car-outline"
-             title="No transport information"
-             subtitle="Your event does not currently have transport details assigned."
-           />
-         ) : (
-           (transportData || []).map((item, index) => (
-            <View key={item.id} className="mb-4">
-              {/* Card header */}
-              <View className="bg-pink-500 rounded-t-3xl px-5 py-4 flex-row items-center gap-3">
-                <View className="w-9 h-9 rounded-xl bg-white/20 items-center justify-center">
-                  <Ionicons name="car-outline" size={17} color="white" />
-                </View>
-                <View className="flex-1">
-                  <Text className="text-base font-jakarta-bold text-white">
-                    {item.invitation_name || "Guest Transport"}
-                  </Text>
-                  <Text className="text-xs text-pink-200 mt-0.5">
-                    Transport #{index + 1}
-                  </Text>
-                </View>
-                <View className="bg-white/20 rounded-full px-2.5 py-1">
-                  <Ionicons name="navigate-outline" size={13} color="white" />
-                </View>
-              </View>
+        ) : !hasTransport ? (
+          <EmptyState
+            icon="car-outline"
+            title="No transport information"
+            subtitle="Your event does not currently have transport details assigned."
+          />
+        ) : (
+          responses.map((response, index) => {
+            const eg = response.eventGuest;
+            const memberName = response.user?.username ?? `Guest ${index + 1}`;
 
-              {/* Travel blocks */}
-              <View className="bg-white border-x border-b border-slate-100 rounded-b-3xl p-4">
-                <View className="flex-row gap-3">
-                  <TravelBlock
-                    type="arrival"
-                    isRequired={!!item.isArrivalPickupRequired}
-                    date={formatDate(item.arrival_date_time)}
-                    time={formatTime(item.arrival_date_time)}
-                    location={item.arrival_info || "Not provided"}
-                  />
-                  <TravelBlock
-                    type="departure"
-                    isRequired={!!item.isDeparturePickupRequired}
-                    date={formatDate(item.departure_date_time)}
-                    time={formatTime(item.departure_date_time)}
-                    location={item.departure_info || "Not provided"}
-                  />
+            return (
+              <View key={response.user?.id ?? index} className="mb-4">
+                {/* Card header */}
+                <View className="bg-pink-500 rounded-t-3xl px-5 py-4 flex-row items-center gap-3">
+                  <View className="w-9 h-9 rounded-xl bg-white/20 items-center justify-center">
+                    <Ionicons name="car-outline" size={17} color="white" />
+                  </View>
+                  <View className="flex-1">
+                    <Text className="text-base font-jakarta-bold text-white">
+                      {memberName}
+                    </Text>
+                    <Text className="text-xs text-pink-200 mt-0.5">
+                      Transportation Details
+                    </Text>
+                  </View>
+                  <View className="bg-white/20 rounded-full px-2.5 py-1">
+                    <Ionicons name="navigate-outline" size={13} color="white" />
+                  </View>
+                </View>
+
+                {/* Travel blocks */}
+                <View className="bg-white border-x border-b border-slate-100 rounded-b-3xl p-4">
+                  <View className="flex-row gap-3">
+                    <TravelBlock
+                      type="arrival"
+                      isRequired={!!eg?.isArrivalPickupRequired}
+                      date={formatDate(eg?.arrivalDatetime)}
+                      time={formatTime(eg?.arrivalDatetime)}
+                      location={eg?.arrivalInfo || "Not provided"}
+                    />
+                    <TravelBlock
+                      type="departure"
+                      isRequired={!!eg?.isDeparturePickupRequired}
+                      date={formatDate(eg?.departureDatetime)}
+                      time={formatTime(eg?.departureDatetime)}
+                      location={eg?.departureInfo || "Not provided"}
+                    />
+                  </View>
                 </View>
               </View>
-            </View>
-          ))
+            );
+          })
         )}
       </ScrollView>
     </SafeAreaView>

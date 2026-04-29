@@ -225,11 +225,11 @@ export default function GuestFoodScreen() {
                   <Text className="text-base font-jakarta-bold text-white">
                     {selectedCatering.name}
                   </Text>
-                  <Text className="text-xs text-pink-200 mt-0.5">
-                    {selectedCatering.meal_type
-                      ? `Meal type: ${selectedCatering.meal_type}`
-                      : "Meal type not specified"}
-                  </Text>
+                   <Text className="text-xs text-pink-200 mt-0.5">
+                     {selectedCatering.mealType
+                       ? `Meal type: ${selectedCatering.mealType}`
+                       : "Meal type not specified"}
+                   </Text>
                 </View>
                 <View className="bg-white/20 rounded-full px-2.5 py-1">
                   <Text className="text-[10px] font-jakarta-semibold text-white">

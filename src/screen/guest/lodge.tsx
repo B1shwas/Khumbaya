@@ -3,6 +3,7 @@ import {
   useEventById,
   useEventResponseWithUser,
 } from "@/src/features/events/hooks/use-event";
+import { GuestDetailInterface } from "@/src/features/guests/types";
 import { formatDate, formatTime } from "@/src/utils/helper";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams } from "expo-router";
@@ -113,14 +114,11 @@ export default function Lodge() {
     useEventResponseWithUser(numericEventId);
 
   const responses = useMemo(() => {
-    return (eventResponse?.responses ?? []) as Array<{
-      event_guest?: Record<string, any> | null;
-      user_detail?: Record<string, any>;
-    }>;
+    return (eventResponse?.responses ?? []) as GuestDetailInterface[];
   }, [eventResponse]);
 
-  const guestRecord = responses[0]?.event_guest ?? null;
-  const guestName = responses[0]?.user_detail?.username ?? "Guest";
+  const guestRecord = responses[0]?.eventGuest ?? null;
+  const guestName = responses[0]?.user?.username ?? "Guest";
   const hasFamily = responses.length > 1;
   const isLoading = isEventLoading || isResponseLoading;
 
@@ -199,7 +197,7 @@ export default function Lodge() {
             <InfoRow
               icon="bed-outline"
               label="Room allocation"
-              value={guestRecord?.assigned_room || "Not assigned yet"}
+              value={guestRecord?.assignedRoom || "Not assigned yet"}
               accent
             />
             <InfoRow
@@ -226,15 +224,15 @@ export default function Lodge() {
           <View className="flex-row gap-3">
             <TravelBlock
               type="arrival"
-              date={formatDate(guestRecord?.arrival_date_time)}
-              time={formatTime(guestRecord?.arrival_date_time)}
-              location={formatNullable(guestRecord?.arrival_info)}
+              date={formatDate(guestRecord?.arrivalDatetime)}
+              time={formatTime(guestRecord?.arrivalDatetime)}
+              location={formatNullable(guestRecord?.arrivalInfo)}
             />
             <TravelBlock
               type="departure"
-              date={formatDate(guestRecord?.departure_date_time)}
-              time={formatTime(guestRecord?.departure_date_time)}
-              location={formatNullable(guestRecord?.departure_info)}
+              date={formatDate(guestRecord?.departureDatetime)}
+              time={formatTime(guestRecord?.departureDatetime)}
+              location={formatNullable(guestRecord?.departureInfo)}
             />
           </View>
         </View>
@@ -257,10 +255,10 @@ export default function Lodge() {
             <View className="gap-3">
               {responses.map((response, index) => {
                 const memberName =
-                  response.user_detail?.username ?? `Guest ${index + 1}`;
+                  response.user?.username ?? `Guest ${index + 1}`;
                 const roomAllocation =
-                  response.event_guest?.assigned_room || "Not assigned";
-                const hasRoom = !!response.event_guest?.isAccomodation;
+                  response.eventGuest?.assignedRoom || "Not assigned";
+                const hasRoom = !!response.eventGuest?.isAccomodation;
 
                 return (
                   <View
