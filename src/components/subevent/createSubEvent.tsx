@@ -1,8 +1,7 @@
-import { DatePicker } from "@/components/nativewindui/DatePicker";
+import { DateTimeRangePicker } from "@/src/components/ui/DateTimeRangePicker";
 import { Text } from "@/src/components/ui/Text";
 import { useCreateEvent } from "@/src/features/events/hooks/use-event";
 import { Ionicons } from "@expo/vector-icons";
-import { useQueryClient } from "@tanstack/react-query";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
 import {
@@ -16,24 +15,17 @@ import {
 
 export default function CreateSubEventScreen() {
   const router = useRouter();
-  const { eventId } = useLocalSearchParams();
-  const queryClient = useQueryClient();
+  const { eventId } = useLocalSearchParams<{ eventId: string }>();
   const { mutateAsync: createEvent } = useCreateEvent();
   const [loading, setLoading] = useState(false);
   const [name, setName] = useState("");
 
-  const [selectedStartDateTime, setSelectedStartDateTime] = useState(
-    new Date()
-  );
-  const [selectedEndDateTime, setSelectedEndDateTime] = useState(new Date());
+  const parentId = Number(eventId);
 
-  const handleStartDateChange = (_event: any, date?: Date) => {
-    if (date) setSelectedStartDateTime(date);
-  };
-
-  const handleEndDateChange = (_event: any, date?: Date) => {
-    if (date) setSelectedEndDateTime(date);
-  };
+  const [dateRange, setDateRange] = useState({
+    startDateTime: new Date(),
+    endDateTime: new Date(),
+  });
 
   const handleSave = async () => {
     if (!name.trim()) {
@@ -41,22 +33,24 @@ export default function CreateSubEventScreen() {
       return;
     }
 
-    setLoading(true);
+    if (!parentId || isNaN(parentId)) {
+      Alert.alert("Error", "Invalid event. Please go back and try again.");
+      return;
+    }
 
-    const startDateTime = new Date(selectedStartDateTime);
-    const endDateTime = new Date(selectedEndDateTime);
+    setLoading(true);
 
     try {
       await createEvent({
         title: name.trim(),
-        startDateTime,
-        endDateTime,
-        parentId: Number(eventId),
-        type: "Subevent -1 (Edit it later)",
-      });
-
-      await queryClient.invalidateQueries({
-        queryKey: ["sub-events", Number(eventId)],
+        startDateTime: dateRange.startDateTime,
+        endDateTime: dateRange.endDateTime,
+        parentId,
+        description: "",
+        type: "Other",
+        role: "Organizer",
+        location: "TBD",
+        imageUrl: "",
       });
 
       Alert.alert("Success", "Sub-event created successfully!", [
@@ -95,23 +89,11 @@ export default function CreateSubEventScreen() {
 
         {/* Date */}
         <View className="mt-6">
-          <DatePicker
-            mode="datetime"
-            value={selectedStartDateTime}
-            onChange={handleStartDateChange}
-            materialDateLabel="Start Date"
-            materialTimeLabel="Start Time"
-            materialDateClassName="mb-2"
-          />
-        </View>
-        <View className="mt-6">
-          <DatePicker
-            mode="datetime"
-            value={selectedEndDateTime}
-            onChange={handleEndDateChange}
-            materialDateLabel="End Date"
-            materialTimeLabel="End Time"
-            materialDateClassName="mb-2"
+          <DateTimeRangePicker
+            value={dateRange}
+            onChange={setDateRange}
+            startLabel="Start"
+            endLabel="End"
           />
         </View>
 
