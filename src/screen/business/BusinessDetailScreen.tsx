@@ -2,12 +2,13 @@ import { HeroSection } from "@/src/components/business/[businessId]/Hero";
 import { LatestReviewSection } from "@/src/components/business/[businessId]/LatestReview";
 import ServiceDetailsSection from "@/src/components/business/[businessId]/ServiceDetailsScreen";
 import VenueDetailsSection from "@/src/components/business/[businessId]/VenueDetailsSection";
+import BusinessMap from "@/src/components/ui/BusinessMap";
 import { Text } from "@/src/components/ui/Text";
 import {
   BusinessRequest,
   OtherServiceAttribute,
   VenueAttribute
-} from "@/src/constants/business";
+} from "@/src/features/business/types";
 import { useDeleteBusiness, useGetBusinessById } from "@/src/features/business";
 import { useBusinessDraftStore } from "@/src/features/business/store/useBusiness";
 import { shadowStyle } from "@/src/utils/helper";
@@ -250,22 +251,21 @@ export default function BusinessDetailsScreen() {
   }, [clearBusinessDraft]);
 
   const handleEditPress = () => {
-    if (!businessWithAttribute?.business_information) return;
-    setBusinessDraft(businessWithAttribute.business_information);
+    if (!businessWithAttribute?.businessInformation) return;
+    setBusinessDraft(businessWithAttribute.businessInformation);
     router.push({
       pathname: "/(protected)/(client-tabs)/business/[businessId]/edit" as never,
       params: {
-        businessId: String(businessWithAttribute.business_information.id),
+        businessId: String(businessWithAttribute.businessInformation.id),
       },
     });
   };
-
 
   const handleDelete = useCallback(() => {
     if (!businessWithAttribute) return;
     Alert.alert(
       "Delete Business",
-      `Are you sure you want to delete "${businessWithAttribute.business_information.business_name}"? This action cannot be undone.`,
+      `Are you sure you want to delete "${businessWithAttribute.businessInformation.businessName}"? This action cannot be undone.`,
       [
         { text: "Cancel", style: "cancel" },
         {
@@ -289,25 +289,25 @@ export default function BusinessDetailsScreen() {
   }, [businessId, businessWithAttribute, deleteBusiness, router]);
 
   const handleEditVenuePress = useCallback((venue: VenueAttribute) => {
-    if (!businessWithAttribute?.business_information?.id || !venue?.venue_id) {
+    if (!businessWithAttribute?.businessInformation?.id || !venue?.venueId) {
       return;
     }
     router.push({
       pathname: "/business/[businessId]/venue/[venueId]/update",
       params: {
-        businessId: String(businessWithAttribute.business_information.id),
-        venueId: String(venue.venue_id),
+        businessId: String(businessWithAttribute.businessInformation.id),
+        venueId: String(venue.venueId),
         mode: "edit",
       },
     });
   }, [businessWithAttribute, router]);
 
   const handleAddVenuePress = useCallback(() => {
-    if (!businessWithAttribute?.business_information?.id) return;
+    if (!businessWithAttribute?.businessInformation?.id) return;
     router.push({
       pathname:`/business/[businessId]/venue/create` ,
       params:{
-        businessId: String(businessWithAttribute.business_information.id),
+        businessId: String(businessWithAttribute.businessInformation.id),
         mode:"create",
 
       }}
@@ -315,14 +315,14 @@ export default function BusinessDetailsScreen() {
   }, [businessWithAttribute, router]);
 
   const handleEditServicePress = useCallback((service: OtherServiceAttribute) => {
-    if (!businessWithAttribute?.business_information?.id || !service?.id) {
+    if (!businessWithAttribute?.businessInformation?.id || !service?.id) {
       return;
     }
 
     router.push({
       pathname: "/business/[businessId]/service/[serviceId]/update",
       params: {
-        businessId: String(businessWithAttribute.business_information.id),
+        businessId: String(businessWithAttribute.businessInformation.id),
         serviceId: String(service.id),
         mode: "edit",
       },
@@ -356,34 +356,88 @@ export default function BusinessDetailsScreen() {
       >
         <HeroSection 
         onEditPress={handleEditPress}
-          business={businessWithAttribute.business_information}
+          business={businessWithAttribute.businessInformation}
         />
 
         <View className="px-4 gap-4 mt-4">
-          <ActiveRequestsSection requests={businessWithAttribute.business_information.requests ?? []} />
+          <ActiveRequestsSection requests={[]} />
+
+          {/* Location map */}
+          <View className="bg-white rounded-2xl border border-gray-100 overflow-hidden" style={{ elevation: 2 }}>
+            <View className="px-4 pt-4 pb-3 border-b border-gray-100">
+              <Text variant="h1" className="text-base text-[#181114]">Location</Text>
+            </View>
+            {(() => {
+              const biz = businessWithAttribute.business_information;
+              const lat = biz.latitude != null ? parseFloat(String(biz.latitude)) : NaN;
+              const lng = biz.longitude != null ? parseFloat(String(biz.longitude)) : NaN;
+              const hasExactCoords = !isNaN(lat) && !isNaN(lng);
+              const locationQuery = hasExactCoords
+                ? `${lat},${lng}`
+                : biz.city && biz.country
+                  ? `${biz.city}, ${biz.country}`
+                  : biz.city ?? biz.country ?? biz.location ?? null;
+
+              if (locationQuery) {
+                return (
+                  <View>
+                    <BusinessMap
+                      locationQuery={locationQuery}
+                      isApproximate={!hasExactCoords}
+                      height={220}
+                    />
+                    {!hasExactCoords && (
+                      <TouchableOpacity
+                        onPress={handleEditPress}
+                        activeOpacity={0.8}
+                        className="flex-row items-center gap-2 px-4 py-2.5 bg-amber-50 border-t border-amber-100"
+                      >
+                        <MaterialIcons name="edit-location-alt" size={15} color="#d97706" />
+                        <Text className="text-amber-700 text-xs font-medium flex-1">
+                          Set exact location in Edit Profile for a precise pin
+                        </Text>
+                        <MaterialIcons name="chevron-right" size={15} color="#d97706" />
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                );
+              }
+              return (
+                <TouchableOpacity
+                  onPress={handleEditPress}
+                  activeOpacity={0.8}
+                  className="items-center justify-center py-10 gap-2"
+                >
+                  <MaterialIcons name="add-location-alt" size={36} color="#d1d5db" />
+                  <Text className="text-gray-400 text-sm font-medium">No location set</Text>
+                  <Text className="text-[#ee2b8c] text-xs font-semibold">Tap Edit Profile to add a pin</Text>
+                </TouchableOpacity>
+              );
+            })()}
+          </View>
 
           {/* Category-specific details (from constants) */}
-          {businessWithAttribute.business_information.category === "Venue" && (
+          {businessWithAttribute.businessInformation.category === "Venue" && (
             <VenueDetailsSection
-              venues={businessWithAttribute.venue_information}
+              venues={businessWithAttribute.venueInformation}
               onEditVenue={handleEditVenuePress}
               onAddVenue={handleAddVenuePress}
             />
           )}
-          {businessWithAttribute.vendor_services_information && businessWithAttribute.business_information.category !== "Venue" && businessWithAttribute.business_information.category != null && (
+          {businessWithAttribute.vendorServicesinformation && businessWithAttribute.businessInformation.category !== "Venue" && businessWithAttribute.businessInformation.category != null && (
             <ServiceDetailsSection
               service={
-                businessWithAttribute.vendor_services_information?.[0]}
+                businessWithAttribute.vendorServicesinformation?.[0]}
               onEdit={
-                businessWithAttribute.vendor_services_information?.[0]
-                  ? () => handleEditServicePress(businessWithAttribute.vendor_services_information[0])
+                businessWithAttribute.vendorServicesinformation?.[0]
+                  ? () => handleEditServicePress(businessWithAttribute.vendorServicesinformation[0])
                   : undefined
               }
             />
           )}
 
-          <AvailabilityCalendar dates={businessWithAttribute.business_information.availabilityDates} />
-          <LatestReviewSection reviews={businessWithAttribute.business_information.reviews ?? []} />
+          <AvailabilityCalendar dates={undefined} />
+          <LatestReviewSection reviews={[]} />
 
           <View className="flex-row items-center justify-between rounded-2xl border border-red-200 bg-red-50 p-4">
             <View>

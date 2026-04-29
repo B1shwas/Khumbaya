@@ -70,10 +70,10 @@ export default function CreateCateringScreen() {
 
       await createCateringMutation.mutateAsync({
         name: data.name,
-        per_plate_price: data.perPlatePrice,
+        perPlateprice: data.perPlatePrice,
         startDateTime: data.startDateTime.toISOString(),
         endDateTime: data.endDateTime.toISOString(),
-        meal_type: data.mealType,
+        mealType: data.mealType,
       });
 
       Alert.alert("Success", "Catering plan created successfully!", [

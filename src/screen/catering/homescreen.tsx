@@ -93,23 +93,23 @@ const CateringCard = ({
             <View
               className="w-6 h-6 rounded-md items-center justify-center"
               style={{
-                backgroundColor: getMealColor(catering.meal_type) + "20",
+                backgroundColor: getMealColor(catering.mealType) + "20",
               }}
             >
               <MaterialIcons
-                name={getMealIcon(catering.meal_type)}
+                name={getMealIcon(catering.mealType)}
                 size={14}
-                color={getMealColor(catering.meal_type)}
+                color={getMealColor(catering.mealType)}
               />
             </View>
             <Text className="text-[12px] font-medium text-muted-light">
-              {catering.meal_type}
+              {catering.mealType}
             </Text>
           </View>
           <View className="flex-row items-center gap-1.5">
             <MaterialIcons name="attach-money" size={14} color="#896175" />
             <Text className="text-[12px] font-bold text-on-surface">
-              ${catering.per_plate_price}/plate
+              ${catering.perPlateprice}/plate
             </Text>
           </View>
         </View>
@@ -244,11 +244,10 @@ export default function CateringListScreen() {
               <TouchableOpacity
                 onPress={() => setPage(Math.max(1, page - 1))}
                 disabled={page === 1}
-                className={`px-4 py-2 rounded-md ${
-                  page === 1
+                className={`px-4 py-2 rounded-md ${page === 1
                     ? "bg-surface-container opacity-50"
                     : "bg-surface-container"
-                }`}
+                  }`}
               >
                 <Text
                   className={
@@ -270,11 +269,10 @@ export default function CateringListScreen() {
                   setPage(Math.min(cateringData.totalPages, page + 1))
                 }
                 disabled={page === cateringData.totalPages}
-                className={`px-4 py-2 rounded-md ${
-                  page === cateringData.totalPages
+                className={`px-4 py-2 rounded-md ${page === cateringData.totalPages
                     ? "bg-surface-container opacity-50"
                     : "bg-surface-container"
-                }`}
+                  }`}
               >
                 <Text
                   className={

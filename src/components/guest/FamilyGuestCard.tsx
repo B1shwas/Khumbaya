@@ -9,15 +9,15 @@ interface FamilyCardProps {
 }
 
 const getFamilyEffectiveStatus = (
-  members: { event_guest: { status?: string } }[]
+  members: { eventGuest: { status?: string | null } }[]
 ): string => {
   const hasAccepted = members.some(
-    (m) => m.event_guest.status?.toLowerCase() === "accepted"
+    (m) => m.eventGuest.status?.toLowerCase() === "accepted"
   );
   if (hasAccepted) return "accepted";
 
   const hasPendingOrInvited = members.some((m) => {
-    const status = m.event_guest.status?.toLowerCase() ?? "";
+    const status = m.eventGuest.status?.toLowerCase() ?? "";
     return status === "pending" || status === "invited";
   });
   if (hasPendingOrInvited) return "pending";
@@ -86,9 +86,9 @@ export default function FamilyCard({
         <View className="min-h-[86px] flex-row items-center gap-3 px-4 py-3">
           {/* Avatar with member count badge */}
           <View className="relative">
-            {primaryMember.user_detail.photo ? (
+            {primaryMember.user.photo ? (
               <Image
-                source={{ uri: primaryMember.user_detail.photo }}
+                source={{ uri: primaryMember.user.photo }}
                 className="h-12 w-12 rounded-full"
               />
             ) : (

@@ -96,7 +96,7 @@ export default function GuestListScreen() {
     if (!invitations) return [] as GuestDetailInterface[];
 
     return invitations.filter((invitation: GuestDetailInterface) => {
-      const status = String(invitation.event_guest.status ?? "pending")
+      const status = String(invitation.eventGuest.status ?? "pending")
         .trim()
         .toLowerCase();
       return matchesTabStatus(status, activeTab);
@@ -107,7 +107,7 @@ export default function GuestListScreen() {
     const categoryCountMap = new Map<string, number>();
 
     for (const invitation of tabFilteredInvitations) {
-      const category = getNormalizedCategory(invitation.event_guest.category);
+      const category = getNormalizedCategory(invitation.eventGuest.category);
       categoryCountMap.set(category, (categoryCountMap.get(category) ?? 0) + 1);
     }
 
@@ -151,7 +151,7 @@ export default function GuestListScreen() {
     (guest: GuestDetailInterface) => {
       if (selectedCategory === "all") return true;
       return (
-        getNormalizedCategory(guest.event_guest.category) === selectedCategory
+        getNormalizedCategory(guest.eventGuest.category) === selectedCategory
       );
     },
     [getNormalizedCategory, selectedCategory]
@@ -160,12 +160,12 @@ export default function GuestListScreen() {
   const getFamilyEffectiveStatus = useCallback(
     (members: GuestDetailInterface[]): string => {
       const hasAccepted = members.some(
-        (m) => m.event_guest.status?.toLowerCase() === "accepted"
+        (m) => m.eventGuest.status?.toLowerCase() === "accepted"
       );
       if (hasAccepted) return "accepted";
 
       const hasPendingOrInvited = members.some((m) => {
-        const status = m.event_guest.status?.toLowerCase() ?? "";
+        const status = m.eventGuest.status?.toLowerCase() ?? "";
         return status === "pending" || status === "invited";
       });
       if (hasPendingOrInvited) return "pending";
@@ -190,7 +190,7 @@ export default function GuestListScreen() {
         return item.members.some((member) => matchesSelectedCategory(member));
       }
 
-      const status = String(item.data.event_guest.status ?? "pending")
+      const status = String(item.data.eventGuest.status ?? "pending")
         .trim()
         .toLowerCase();
       if (!matchesTabStatus(status, activeTab)) return false;
@@ -206,7 +206,7 @@ export default function GuestListScreen() {
 
   const draftInvitations = useMemo(() => {
     return tabFilteredInvitations.filter((invitation: GuestDetailInterface) => {
-      const status = String(invitation.event_guest.status ?? "pending")
+      const status = String(invitation.eventGuest.status ?? "pending")
         .trim()
         .toLowerCase();
       return status === "draft" && matchesSelectedCategory(invitation);
@@ -251,20 +251,20 @@ export default function GuestListScreen() {
     setGuestDetail(guest);
     router.push({
       pathname:
-        `/(protected)/(client-stack)/events/${eventId}/(organizer)/guests/${guest.user_detail.id}/guest-details` as any,
+        `/(protected)/(client-stack)/events/${eventId}/(organizer)/guests/${guest.user.id}/guest-details` as any,
       params: { guest: JSON.stringify(guest) },
     });
   };
 
   const onPressDraftSend = useCallback(
     async (guest: GuestDetailInterface) => {
-      if (!eventId || !guest?.user_detail?.id) return;
+      if (!eventId || !guest?.user?.id) return;
 
-      setDraftAction({ userId: guest.user_detail.id, type: "send" });
+      setDraftAction({ userId: guest.user.id, type: "send" });
       try {
         await submitRsvpMutation.mutateAsync({
-          userId: guest.user_detail.id,
-          familyId: guest.event_guest.familyId,
+          userId: guest.user.id,
+          familyId: guest.eventGuest.familyId,
           status: "pending",
         });
       } catch (error: any) {
@@ -282,11 +282,11 @@ export default function GuestListScreen() {
 
   const onDeleteDraft = useCallback(
     (guest: GuestDetailInterface) => {
-      if (!eventId || !guest?.user_detail?.id) return;
+      if (!eventId || !guest?.user?.id) return;
 
       const displayName =
-        guest.user_detail.username?.trim() ||
-        guest.user_detail.email ||
+        guest.user.username?.trim() ||
+        guest.user.email ||
         "this guest";
 
       Alert.alert("Delete draft", `Delete ${displayName}'s draft invitation?`, [
@@ -295,11 +295,11 @@ export default function GuestListScreen() {
           text: "Delete",
           style: "destructive",
           onPress: async () => {
-            setDraftAction({ userId: guest.user_detail.id, type: "delete" });
+            setDraftAction({ userId: guest.user.id, type: "delete" });
             try {
               await removeInvitationMutation.mutateAsync({
                 eventId,
-                guestId: guest.user_detail.id,
+                guestId: guest.user.id,
               });
             } catch (error: any) {
               const message =
@@ -423,7 +423,7 @@ export default function GuestListScreen() {
         <FlatList
           data={draftInvitations}
           keyExtractor={(item: GuestDetailInterface) =>
-            `draft-${item.user_detail.id}`
+            `draft-${item.user.id}`
           }
           renderItem={({ item }: { item: GuestDetailInterface }) => (
             <DraftInvitationCard
@@ -432,11 +432,11 @@ export default function GuestListScreen() {
               onDeleteDraft={() => onDeleteDraft(item)}
               isMoving={
                 draftAction?.type === "send" &&
-                draftAction?.userId === item.user_detail.id
+                draftAction?.userId === item.user.id
               }
               isDeleting={
                 draftAction?.type === "delete" &&
-                draftAction?.userId === item.user_detail.id
+                draftAction?.userId === item.user.id
               }
             />
           )}
@@ -459,7 +459,7 @@ export default function GuestListScreen() {
           keyExtractor={(item: GroupedInvitation) =>
             item.type === "family"
               ? `family-${item.familyId}`
-              : `individual-${item.data.user_detail.id}`
+              : `individual-${item.data.user.id}`
           }
           renderItem={({ item }: { item: GroupedInvitation }) => {
             if (item.type === "family") {

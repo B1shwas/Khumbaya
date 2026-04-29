@@ -1,11 +1,11 @@
 import { Event } from "@/src/constants/event";
 import { User } from "@/src/store/AuthStore";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Invitation } from "../../guests/types";
 import {
   acceptRsvpInvitationApi,
   CREATEEVENT,
   createEventApi,
-  // deleteEventApi,
   getCompletedEventsApi,
   getEventById,
   getEventOwners,
@@ -15,7 +15,6 @@ import {
   getUpcomingEventsApi,
   makeEventMember,
   MakeEventMemberType,
-  RsvpResponsePayload,
   submitRsvpResponseApi,
   updateEventApi,
 } from "../api/events.service";
@@ -177,10 +176,6 @@ export const useAcceptRsvpInvitation = () => {
   });
 };
 
-interface UseEventByIdOptions {
-  enabled?: boolean;
-}
-
 export const useEventById = (eventId: number) => {
   return useQuery({
     queryKey: ["event", eventId],
@@ -204,7 +199,7 @@ export const useEventResponseWithUser = (eventId: number) => {
 export const useSubmitRsvpResponse = (eventId: number) => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (payload: RsvpResponsePayload) =>
+    mutationFn: (payload: Partial<Invitation>) =>
       submitRsvpResponseApi(eventId, payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["event-responses", eventId] });

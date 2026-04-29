@@ -132,14 +132,14 @@ export default function Logistic() {
             title="Could not load transport details"
             subtitle="Pull down to refresh or try again later."
           />
-        ) : !hasTransport ? (
-          <EmptyState
-            icon="car-outline"
-            title="No transport information"
-            subtitle="Your event does not currently have transport details assigned."
-          />
-        ) : (
-          transportData.map((item, index) => (
+         ) : !hasTransport ? (
+           <EmptyState
+             icon="car-outline"
+             title="No transport information"
+             subtitle="Your event does not currently have transport details assigned."
+           />
+         ) : (
+           (transportData || []).map((item, index) => (
             <View key={item.id} className="mb-4">
               {/* Card header */}
               <View className="bg-pink-500 rounded-t-3xl px-5 py-4 flex-row items-center gap-3">

@@ -4,9 +4,9 @@ import { formatDate, getChecklistDueMeta } from "@/src/utils/helper";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useState } from "react";
 import {
-    Image,
-    Pressable,
-    View
+  Image,
+  Pressable,
+  View
 } from "react-native";
 
 export type ChecklistTask = TodoColumn;
@@ -74,8 +74,8 @@ const ChecklistTaskItem = ({
           {task.category ? (
             <View
               className={`flex-row items-center px-2.5 py-1 rounded-full border ${task.isDone
-                  ? "bg-gray-100 border-gray-200"
-                  : "bg-primary/5 border-primary/20"
+                ? "bg-gray-100 border-gray-200"
+                : "bg-primary/5 border-primary/20"
                 }`}
             >
               <MaterialIcons
@@ -85,8 +85,8 @@ const ChecklistTaskItem = ({
               />
               <Text
                 className={`text-xs font-jakarta-bold ml-1.5 ${task.isDone
-                    ? "text-text-disabled"
-                    : "text-primary"
+                  ? "text-text-disabled"
+                  : "text-primary"
                   }`}
               >
                 {task.category}
@@ -121,9 +121,9 @@ const ChecklistTaskItem = ({
 
           <View className={`flex-row items-center ${task.isDone ? "opacity-50" : ""}`}>
             <View className="w-5 h-5 rounded-full overflow-hidden border border-white shadow-sm bg-surface-tertiary">
-              {task.assigned_user?.photo ? (
+              {task.assignedUser?.photo ? (
                 <Image
-                  source={{ uri: task.assigned_user.photo }}
+                  source={{ uri: task.assignedUser.photo }}
                   className="w-full h-full"
                   resizeMode="cover"
                 />
@@ -134,7 +134,7 @@ const ChecklistTaskItem = ({
               )}
             </View>
             <Text className="text-xs font-jakarta-bold text-muted-light ml-2">
-              {task.assigned_user?.username ?? "Unassigned"}
+              {task.assignedUser?.username ?? "Unassigned"}
             </Text>
           </View>
         </View>

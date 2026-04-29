@@ -21,7 +21,7 @@ export const VehicleSummaryCard: React.FC<VehicleSummaryCardProps> = ({ summary 
         </View>
         <View className="flex-1">
           <Text className="text-base font-jakarta-bold text-on-surface mb-1" numberOfLines={1}>
-            {summary.name}
+            {summary.vehicle_name}
           </Text>
           <View className="flex-row items-center gap-2">
             <View className={cn(

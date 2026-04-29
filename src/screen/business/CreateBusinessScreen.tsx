@@ -1,7 +1,8 @@
+import LocationPicker from "@/src/components/ui/LocationPicker";
 import { Text } from "@/src/components/ui/Text";
-import { BusinessCategory } from "@/src/constants/business";
 import { photos } from "@/src/constants/gallery";
 import { useCreateBusiness } from "@/src/features/business";
+import { BusinessCategory } from "@/src/features/business/types";
 import { MaterialIcons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
@@ -37,6 +38,8 @@ export default function CreateBusinessScreen() {
     description: "",
     city: "",
     country: "",
+    // latitude: "",
+    // longitude: "",
     vendorType: "",
     vendorCategoryId: "",
     categoryDetails: {},
@@ -74,15 +77,17 @@ export default function CreateBusinessScreen() {
 
     createBusiness.mutate(
       {
-        business_name: form.businessName.trim(),
+        businessName: form.businessName.trim(),
         description: form.description.trim() || undefined,
         category: form.vendorCategoryId,
         cover: coverImage ?? photos[Math.floor(((Math.random() * 1000) % 6) + 1)].url,
         city: form.city.trim() || undefined,
         country: form.country.trim() || undefined,
+        // latitude: form.latitude ? parseFloat(form.latitude) : undefined,
+        // longitude: form.longitude ? parseFloat(form.longitude) : undefined,
         categoryDetails: form.categoryDetails,
         email: form.email.trim() || undefined,
-        contact_phone: form.contactPhone.trim() || undefined,
+        contactPhone: form.contactPhone.trim() || undefined,
       },
       {
         onSuccess: () => {
@@ -504,6 +509,15 @@ export default function CreateBusinessScreen() {
               </View>
             </View>
           </View>
+
+          {/* Location Pin — map picker */}
+          <LocationPicker
+            latitude="27.7172"
+            longitude="85.3240"
+            onChange={(lat, lng) =>
+              setForm((prev) => ({ ...prev, latitude: lat, longitude: lng }))
+            }
+          />
         </View>
 
         {/* Submit — inside scroll so it's reachable at the end */}

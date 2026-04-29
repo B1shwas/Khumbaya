@@ -1,5 +1,5 @@
 import api from "@/src/api/axios";
-import { Business, BusinessWithAttribute } from "@/src/constants/business";
+import { Business, BusinessWithAttribute } from "@/src/features/business/types/index";
 import {
   CreateBusinessPayload,
   CreateBusinessVenuePayload,
@@ -14,8 +14,9 @@ export const getBusinessListApi = async (
   const response = await api.get(
     `/business${userId ? `?userId=${userId}` : ""}`
   );
-  console.log("The business informartion of the user i🍈🍈🍈🍈🍈🍈s ", response.data.data.items);
-  return response.data.data.items;
+  const payload = response.data?.data;
+  // API returns array directly or paginated with .items
+  return Array.isArray(payload) ? payload : (payload?.items ?? []);
 };
 
 export const createBusinessApi = async (
@@ -64,7 +65,7 @@ export const createBusinessVenueApi = async (
   params: CreateBusinessVenuePayload
 ): Promise<BusinessWithAttribute> => {
   const response = await api.post(
-    `/business/${params.business_id}/venue`,
+    `/business/${params.businessId}/venue`,
     params
   );
   console.log('this ivenue_typevenue_types te apya🍳🍳🍳🍳🍳🍳🍳load to make the new venue in the system of the vendor business with the ingormation , ', params);
@@ -107,7 +108,7 @@ export const getEventBusinessApi = async (
 
   return [];
 };
-export const getMyBusiness = async () => {
+export const getMyBusiness = async (): Promise<Business[]> => {
   const response = await api.get("/business/me");
   return response.data.data ?? response.data;
 }

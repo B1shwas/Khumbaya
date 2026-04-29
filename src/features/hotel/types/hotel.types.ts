@@ -1,16 +1,4 @@
-export interface Hotel {
-  id: number;
-  eventId: number;
-  name: string;
-  location: string;
-  checkInDate: string | null;
-  checkOutDate: string | null;
-  totalRooms: number;
-  bookingReference: string | null;
-  contactPerson: string | null;
-  contactPhone: string | null;
-  specialRequests: string | null;
-}
+import { User } from "@/src/store/AuthStore";
 
 export interface RoomAllocation {
   id: number;
@@ -22,16 +10,16 @@ export interface RoomAllocation {
   status: "allocated" | "confirmed" | "checked-in" | "checked-out";
 }
 
-export interface HotelWithAllocations extends Hotel {
-  allocations: RoomAllocation[];
+export interface GuestWithRoom {
+  category: string;
+  hasCheckedIn: boolean | null;
+  hasCheckedOut: boolean | null;
+  invitationId: number;
+  room?: string | null;
+  user: User;
 }
 
-export interface AcceptedGuestWithRoom {
-  assigned_room: string | null;
-  user: {
-    id: number;
-    username: string;
-    phone: string;
-    photo: string | null;
-  };
+export interface RoomData {
+  room: string;
+  eachuser: GuestWithRoom[];
 }

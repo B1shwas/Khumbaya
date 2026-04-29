@@ -1,29 +1,33 @@
 export type RSVPStatus = "attending" | "declined" | "pending";
-import { EventGuest, GuestDetailInterface } from "@/src/features/guests/types";
-export interface MemberRsvpCardProp {
+import { GuestDetailInterface, Invitation } from "@/src/features/guests/types";
+
+interface MemberRsvpRawFields {
+  rawStatus: Invitation["status"];
+  rawArrival: Invitation["arrivalDatetime"];
+  rawDeparture: Invitation["departureDatetime"];
+  rawAccommodation: Invitation["isAccomodation"];
+  rawIsArrivalPickupRequired: Invitation["isArrivalPickupRequired"];
+  rawIsDeparturePickupRequired: Invitation["isDeparturePickupRequired"];
+  rawAssignedRoom: Invitation["assignedRoom"];
+  rawArrivalInfo: Invitation["arrivalInfo"];
+  rawDepartureInfo: Invitation["departureInfo"];
+}
+
+export interface MemberRsvpCardProp extends MemberRsvpRawFields {
   id: number;
   familyId: number;
   name: string;
   avatarUrl?: string;
   status: RSVPStatus;
-  dateRange?: string;
-  roomNeeded?: string;
   email?: string;
   phone: string;
-  assigned_room?: string;
+  assignedRoom?: string;
+  dateRange?: string;
+  roomNeeded?: string;
   notes?: string;
-  rawStatus: string | null;
-  rawArrival: string | null;
-  rawDeparture: string | null;
-  rawAccommodation: boolean | null;
-  rawIsArrivalPickupRequired: boolean | null;
-  rawIsDeparturePickupRequired: boolean | null;
-  rawAssignedRoom: string | null;
-  rawArrivalInfo: string | null;
-  rawDepartureInfo: string | null;
 }
 
-function deriveStatus(event_guest: EventGuest | null): RSVPStatus {
+function deriveStatus(event_guest: Invitation | null): RSVPStatus {
   if (!event_guest) return "pending";
   if (event_guest.status === "rejected") return "declined";
   if (event_guest.status === "accepted") return "attending";
@@ -31,11 +35,11 @@ function deriveStatus(event_guest: EventGuest | null): RSVPStatus {
 }
 
 function formatDateRange(
-  arrival: string | null,
-  departure: string | null
+  arrival: Date | null,
+  departure: Date | null
 ): string | undefined {
   if (!arrival && !departure) return undefined;
-  const fmt = (d: string) =>
+  const fmt = (d: Date) =>
     new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric" });
   if (arrival && departure) return `${fmt(arrival)} – ${fmt(departure)}`;
   if (arrival) return `From ${fmt(arrival)}`;
@@ -45,39 +49,39 @@ function formatDateRange(
 export function mapToMemberRsvp(
   item: GuestDetailInterface
 ): MemberRsvpCardProp {
-  const status = deriveStatus(item.event_guest);
+  const status = deriveStatus(item.eventGuest);
   return {
-    id: item.user_detail.id,
-    familyId: item.user_detail.familyId,
-    name: item.user_detail.username,
-    email: item.user_detail.email,
-    phone: item.user_detail.phone,
-    avatarUrl: item.user_detail.photo ?? undefined,
+    id: item.user.id,
+    familyId: item.user.familyId ?? 0,
+    name: item.user.username,
+    email: item.user.email,
+    phone: item.user.phone,
+    avatarUrl: item.user.photo ?? undefined,
     status,
-    dateRange: item.event_guest
+    dateRange: item.eventGuest
       ? formatDateRange(
-        item.event_guest.arrival_date_time,
-        item.event_guest.departure_date_time
+        item.eventGuest.arrivalDatetime,
+        item.eventGuest.departureDatetime
       )
       : undefined,
     roomNeeded:
-      item.event_guest?.isAccomodation != null
-        ? item.event_guest.isAccomodation
+      item.eventGuest?.isAccomodation != null
+        ? item.eventGuest.isAccomodation
           ? "Yes"
           : "No"
         : undefined,
-    assigned_room:item.event_guest?.assigned_room ?? undefined,
-    notes: item.event_guest?.notes ?? undefined,
-    rawStatus: item.event_guest?.status ?? null,
-    rawArrival: item.event_guest?.arrival_date_time ?? null,
-    rawDeparture: item.event_guest?.departure_date_time ?? null,
-    rawAccommodation: item.event_guest?.isAccomodation ?? null,
+    assignedRoom: item.eventGuest?.assignedRoom ?? undefined,
+    notes: item.eventGuest?.notes ?? undefined,
+    rawStatus: item.eventGuest?.status ?? null,
+    rawArrival: item.eventGuest?.arrivalDatetime ?? null,
+    rawDeparture: item.eventGuest?.departureDatetime ?? null,
+    rawAccommodation: item.eventGuest?.isAccomodation ?? null,
     rawIsArrivalPickupRequired:
-      item.event_guest?.isArrivalPickupRequired ?? null,
+      item.eventGuest?.isArrivalPickupRequired ?? null,
     rawIsDeparturePickupRequired:
-      item.event_guest?.isDeparturePickupRequired ?? null,
-    rawAssignedRoom: item.event_guest?.assigned_room ?? null,
-    rawArrivalInfo: item.event_guest?.arrival_info ?? null,
-    rawDepartureInfo: item.event_guest?.departure_info ?? null,
+      item.eventGuest?.isDeparturePickupRequired ?? null,
+    rawAssignedRoom: item.eventGuest?.assignedRoom ?? null,
+    rawArrivalInfo: item.eventGuest?.arrivalInfo ?? null,
+    rawDepartureInfo: item.eventGuest?.departureInfo ?? null,
   };
 }

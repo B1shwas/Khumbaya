@@ -1,4 +1,4 @@
-import { BusinessCategory } from "@/src/constants/business";
+import { BusinessCategory } from "@/src/features/business/types";
 import { MaterialIcons } from "@expo/vector-icons";
 
 export interface VendorCategory {
@@ -132,6 +132,8 @@ export interface FormState {
   description: string;
   city: string;
   country: string;
+  // latitude: string;
+  // longitude: string;
   vendorType: string;
   vendorCategoryId: BusinessCategory | "";
   categoryDetails: Record<string, string | boolean>;

@@ -1,13 +1,14 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { GuestWithRoom, RoomData } from "../../hotel/types/hotel.types";
 import {
   createEventGuestCategory,
-  type CreateGuestCategoryPayload,
   getEventGuest,
   getEventGuestCategories,
   getGuestRoom,
   getInvitation,
   inviteGuest,
   removeInvitation,
+  type CreateGuestCategoryPayload,
   type GuestCategoryOption,
   type InviteGuestPayload,
 } from "./service";
@@ -99,9 +100,9 @@ export const useRemoveInvitation = () => {
 };
 
 export const useGetGuestRoom = (eventId: number | null  ) => {
-  return useQuery({
+  return useQuery<RoomData[]>({
     queryKey: ["event-guest-room", eventId],
-    queryFn: () => getGuestRoom(eventId!),
+    queryFn: async () => getGuestRoom(eventId!),
     enabled: !!eventId,
   });
 };

@@ -2,13 +2,13 @@ import { Text } from "@/src/components/ui/Text";
 import { AvailableSpacesSection } from "@/src/components/vendor/AvailableSpacesSection";
 import { ServiceInfoSection } from "@/src/components/vendor/ServiceInfoSection";
 import { WriteReviewModal } from "@/src/components/vendor/WriteReviewModal";
-import { BusinessCategory, OtherServiceAttribute } from "@/src/constants/business";
 import { useGetBusinessById } from "@/src/features/business/hooks/use-business";
+import { BusinessCategory, OtherServiceAttribute } from "@/src/features/business/types";
 import { useAuthStore } from "@/src/store/AuthStore";
 import { shadowStyle } from "@/src/utils/helper";
 import { MaterialIcons } from "@expo/vector-icons";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Dimensions,
@@ -32,20 +32,20 @@ const FALLBACK_AVATAR =
 
 const EMPTY_SERVICE_FALLBACK: OtherServiceAttribute = {
   id: 0,
-  business_id: 0,
-  artist_type: null,
-  styles_specialized: null,
-  max_bookings_per_day: null,
-  advance_amount: null,
-  uses_own_material: false,
-  travel_charges: null,
-  portfolio_link: null,
-  available_for_destination: false,
-  customization_available: false,
-  serves_veg: false,
-  min_order: null,
-  createdAt: "",
-  updatedAt: "",
+  businessId: 0,
+  artistType: null,
+  stylesSpecialized: null,
+  maxBookingsPerDay: null,
+  advanceAmount: null,
+  usesOwnMaterial: false,
+  travelCharges: null,
+  portfolioLink: null,
+  availableForDestination: false,
+  customizationAvailable: false,
+  servicesVeg: false,
+  minOrder: null,
+  createdAt: null,
+  updatedAt: null,
 };
 
 function truncateHeaderTitle(title?: string | null, maxLength = 28): string {
@@ -62,9 +62,29 @@ export default function VendorDetailed() {
   const [showGallery, setShowGallery] = useState(false);
   const [activeFilter, setActiveFilter] = useState("All Photos");
   const [showReviewModal, setShowReviewModal] = useState(false);
+  const [locationText, setLocationText] = useState("—");
   const { user } = useAuthStore();
 
   const { data: businessWithAttribute, isLoading, isError } = useGetBusinessById(resolvedId);
+
+  useEffect(() => {
+    const biz = businessWithAttribute?.businessInformation;
+    if (!biz) return;
+    // if (biz.latitude != null && biz.longitude != null) {
+    //   Location.reverseGeocodeAsync({
+    //     latitude: Number(biz.latitude),
+    //     longitude: Number(biz.longitude),
+    //   }).then((results) => {
+    //     const r = results[0];
+    //     if (!r) return;
+    //     const parts = [r.name, r.district, r.city, r.region, r.country].filter(Boolean);
+    //     const label = parts.slice(0, 3).join(", ");
+    //     if (label) setLocationText(label);
+    //   }).catch(() => {});
+    // } else {
+    //   setLocationText(biz.location ?? (biz.city && biz.country ? `${biz.city}, ${biz.country}` : "—"));
+    // }
+  }, [businessWithAttribute]);
 
   if (isLoading) {
     return (
@@ -86,15 +106,15 @@ export default function VendorDetailed() {
     );
   }
 
-  const biz = businessWithAttribute.business_information;
-  const portfolio = biz.portfolio ?? [];
-  const tags = biz.services?.map((s) => s.title) ?? [];
-  const reviews = biz.reviews ?? [];
+  const biz = businessWithAttribute.businessInformation;
+  const portfolio: string[] = [];
+  const tags = biz.serviceArea ? [biz.serviceArea] : [];
+  const reviews: any[] = [];
 
   const headerImage = biz.cover ?? biz.avatar ?? FALLBACK_HEADER;
   const avatarImage = biz.avatar ?? FALLBACK_AVATAR;
-  const locationText = biz.city && biz.country ? `${biz.city}, ${biz.country}` : biz.location ?? "—";
-  const serviceAttr = businessWithAttribute.vendor_services_information?.[0] ?? EMPTY_SERVICE_FALLBACK;
+  // const locationText = biz.city && biz.country ? `${biz.city}, ${biz.country}` : biz.location ?? "—";
+  const serviceAttr = businessWithAttribute.vendorServicesinformation?.[0] ?? EMPTY_SERVICE_FALLBACK;
 
   const galleryImage0 = portfolio[0] ?? biz.cover ?? FALLBACK_HEADER;
   const galleryImage1 = portfolio[1] ?? biz.avatar ?? FALLBACK_HEADER;
@@ -113,7 +133,7 @@ export default function VendorDetailed() {
     <>
       <Stack.Screen
         options={{
-          title: truncateHeaderTitle(biz.business_name),
+          title: truncateHeaderTitle(biz.businessName),
           headerBackButtonDisplayMode: "minimal",
           headerTitleAlign: "center",
           headerLeft: () => (
@@ -148,7 +168,7 @@ export default function VendorDetailed() {
                 <View className="flex-row items-center gap-1 bg-green-50 px-2.5 py-1 rounded-full border border-green-100">
                   <MaterialIcons name="verified" size={13} color="#16a34a" />
                   <Text className="text-[10px] font-semibold text-green-700 uppercase tracking-wider">
-                    {biz.is_verified ? "Verified" : "Unverified"}
+                    {biz.isVerified ? "Verified" : "Unverified"}
                   </Text>
                 </View>
                 <Pressable
@@ -162,7 +182,7 @@ export default function VendorDetailed() {
             </View>
 
             <Text className="text-2xl font-bold text-[#181114] mt-3" style={{ lineHeight: 30 }} numberOfLines={2}>
-              {biz.business_name}
+              {biz.businessName}
             </Text>
             <View className="flex-row items-center gap-1 mt-1">
               <MaterialIcons name="location-on" size={15} color="#ee2b8c" />
@@ -171,7 +191,7 @@ export default function VendorDetailed() {
             <View className="flex-row items-center gap-3 mt-3">
               <View className="flex-row items-center gap-1.5 bg-primary/10 px-3 py-1.5 rounded-full border border-primary/20">
                 <MaterialIcons name="star" size={14} color="#ee2b8c" />
-                <Text className="text-sm font-bold text-[#181114]">{biz.rating ?? "N/A"}</Text>
+                <Text className="text-sm font-bold text-[#181114]">N/A</Text>
                 <Text className="text-xs text-gray-400">rating</Text>
               </View>
               <View className="h-4 w-px bg-gray-200" />
@@ -210,13 +230,41 @@ export default function VendorDetailed() {
         {/* Category section */}
         {biz.category === BusinessCategory.Venue ? (
           <AvailableSpacesSection
-            venues={businessWithAttribute.venue_information}
-            coverFallback={biz.cover}
+            venues={businessWithAttribute.venueInformation}
+            coverFallback={biz.cover as any}
             portfolio={portfolio}
           />
         ) : (
-          <ServiceInfoSection service={serviceAttr} category={biz.category} />
+          <ServiceInfoSection service={serviceAttr} category={biz.category as BusinessCategory ?? null} />
         )}
+
+        {/* Location map */}
+        {(() => {
+          // const lat = biz.latitude != null ? parseFloat(String(biz.latitude)) : NaN;
+          // const lng = biz.longitude != null ? parseFloat(String(biz.longitude)) : NaN;
+          // const hasExactCoords = !isNaN(lat) && !isNaN(lng);
+          // const locationQuery = hasExactCoords
+          //   ? `${lat},${lng}`
+          //   : biz.city && biz.country
+          //     ? `${biz.city}, ${biz.country}`
+          //     : biz.city ?? biz.country ?? biz.location ?? null;
+          // if (!locationQuery) return null;
+          // return (
+          //   <View className="mt-2 bg-white px-4 pt-5 pb-4">
+          //     <View className="flex-row items-center gap-2 mb-3">
+          //       <View className="h-7 w-7 rounded-lg bg-primary/10 items-center justify-center">
+          //         <MaterialIcons name="location-on" size={15} color="#ee2b8c" />
+          //       </View>
+          //       <Text className="text-xs font-bold text-gray-400 uppercase tracking-widest">Location</Text>
+          //     </View>
+          //     <BusinessMap
+          //       locationQuery={locationQuery}
+          //       // isApproximate={!hasExactCoords}
+          //       height={200}
+          //     />
+          //   </View>
+          // );
+        })()}
 
         {/* Gallery */}
         <View className="mt-2 bg-white px-4 pt-5 pb-4">

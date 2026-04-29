@@ -24,7 +24,7 @@ export default function GuestCard({
   onDraftPress,
   isDraftActionLoading = false,
 }: GuestCardProps) {
-  const displayStatus = (guest?.event_guest?.status || "Pending").trim();
+  const displayStatus = (guest?.eventGuest?.status || "Pending").trim();
   const isDraft = displayStatus.toLowerCase() === "draft";
 
   const getStatusColor = () => {
@@ -57,8 +57,8 @@ export default function GuestCard({
     }
   };
 
-  const initials = guest.user_detail.username
-    ? guest.user_detail.username
+  const initials = guest.user.username
+    ? guest.user.username
         .split(" ")
         .map((n) => n[0])
         .join("")
@@ -67,9 +67,9 @@ export default function GuestCard({
     : "GU";
 
   const displayName =
-    guest.user_detail.username?.trim() || guest.user_detail.email || "Guest";
-  const relation = guest.user_detail.relation?.trim();
-  const phone = guest.user_detail.phone?.trim();
+    guest.user.username?.trim() || guest.user.email || "Guest";
+  const relation = guest.user.relation?.trim();
+  const phone = guest.user.phone?.trim();
 
   return (
     <View className="mb-3 rounded-2xl bg-white">
@@ -79,9 +79,9 @@ export default function GuestCard({
         className="rounded-2xl"
       >
         <View className="min-h-[86px] flex-row items-center gap-3 px-4 py-3">
-          {guest.user_detail.photo ? (
+          {guest.user.photo ? (
             <Image
-              source={{ uri: guest.user_detail.photo }}
+              source={{ uri: guest.user.photo }}
               className="h-12 w-12 rounded-full"
             />
           ) : (

@@ -1,19 +1,23 @@
+import { Invitation } from "@/src/features/guests/types";
 import { create } from "zustand";
+import { User } from "./AuthStore";
+
+export type RsvpDraftUser = Pick<
+  User,
+  "id" | "username" | "photo" | "email" | "phone" | "relation" | "familyId"
+>;
+
+export interface RsvpFamilyMemberDraft {
+  user: RsvpDraftUser;
+  familyId?: Invitation["familyId"];
+  eventGuest: Partial<Invitation> | null;
+}
 
 export interface RsvpDraft {
-  userId: number;
-  familyId?: number;
-  memberName?: string;
-  rawStatus: string | null;
-  rawArrival: string | null;
-  rawDeparture: string | null;
-  rawAccommodation: boolean | null;
-  rawIsArrivalPickupRequired: boolean | null;
-  rawIsDeparturePickupRequired: boolean | null;
-  rawAssignedRoom: string | null;
-  rawArrivalInfo: string | null;
-  rawDepartureInfo: string | null;
-  rawNotes: string | null;
+  user: RsvpDraftUser;
+  familyId?: Invitation["familyId"];
+  eventGuest: Partial<Invitation> | null;
+  familyMembers?: RsvpFamilyMemberDraft[];
 }
 
 interface RsvpState {

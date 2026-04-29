@@ -235,8 +235,13 @@ export default function GuestDetailsInfo({
             title="Travel & Accommodation"
             items={[
               {
-                label: "Arrival Info",
+                label: "Arrival Location",
                 value: `${formatDate(guest.arrivalDate)} @ ${formatTime(guest.arrivalDate)}\n${guest.arrivalLocation || "TBD"}`,
+                icon: <Ionicons name="airplane-outline" size={18} color="#ee2b8c" />,
+              },
+              {
+                label: "Departure Location",
+                value: `${formatDate(guest.departureDate)} @ ${formatTime(guest.departureDate)}\n${guest.departureLocation || "TBD"}`,
                 icon: <Ionicons name="airplane-outline" size={18} color="#ee2b8c" />,
               },
               {

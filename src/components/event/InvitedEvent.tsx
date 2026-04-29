@@ -1,3 +1,4 @@
+import { VendorEventInvitation } from "@/src/features/business";
 import { useGetVendorEventInvitations } from "@/src/features/business/hooks/use-business";
 import { useGetInvitedEvents } from "@/src/features/events/hooks/use-event";
 import { useAuthStore } from "@/src/store/AuthStore";
@@ -19,17 +20,6 @@ interface InvitedEventsTabProps {
   isActive: boolean;
 }
 
-interface VendorEventInvitation {
-  id: number;
-  event_id: number;
-  vendor_business_id: number;
-  event_title: string;
-  event_location: string;
-  event_startDateTime: string;
-  event_endDateTime: string;
-  event_image: string;
-  business_name: string;
-}
 
 const VendorEventCard = ({
   invitation,
@@ -41,7 +31,7 @@ const VendorEventCard = ({
       <Pressable className="flex-row p-3 rounded-md overflow-hidden">
         <View className="w-20 h-20 rounded-lg overflow-hidden">
           <Image
-            source={{ uri: invitation.event_image }}
+            source={{ uri: invitation.eventImage }}
             className="w-full h-full"
           />
         </View>
@@ -50,7 +40,7 @@ const VendorEventCard = ({
             className="font-jakarta-bold text-base text-gray-900 flex-1 mr-2"
             numberOfLines={2}
           >
-            {invitation.event_title}
+            {invitation.eventTitle}
           </Text>
           <View>
             <View className="flex-row items-center mt-2">
@@ -59,14 +49,14 @@ const VendorEventCard = ({
                 className="font-jakarta text-[13px] text-gray-600 ml-1 flex-1"
                 numberOfLines={1}
               >
-                {invitation.event_location}
+                {invitation.eventLocation}
               </Text>
             </View>
             <View className="flex-row items-center mt-1">
               <Ionicons name="calendar" size={14} color={"#ee2b8c"} />
               <Text className="font-jakarta-semibold text-[13px] text-primary ml-1">
-                {formatDate(invitation.event_startDateTime)} •{" "}
-                {formatTime(invitation.event_startDateTime)}
+                {formatDate(invitation.eventStartDateTime)} •{" "}
+                {formatTime(invitation.eventEndDateTime)}
               </Text>
             </View>
           </View>
@@ -88,7 +78,7 @@ export const InvitedEventsTab = ({ isActive }: InvitedEventsTabProps) => {
     isError,
     refetch,
   } = useGetInvitedEvents();
-
+ console.log('This is the invited events tab with the data 🦓🦓🦓🦓🦓🦓', invitedEvents)
   const {
     data: vendorInvitations = [],
     isLoading: isLoadingVendor,

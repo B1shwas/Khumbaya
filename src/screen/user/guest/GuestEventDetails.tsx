@@ -7,6 +7,7 @@ import {
   useEventResponseWithUser,
   useSubEventsOfEvent,
 } from "@/src/features/events/hooks/use-event";
+import { GuestDetailInterface } from "@/src/features/guests/types";
 import { useRsvpStore } from "@/src/store/useRsvpStore";
 import { EventService } from "@/src/types";
 import { formatDate } from "@/src/utils/helper";
@@ -63,54 +64,51 @@ export default function GuestEventDetails() {
   const { data: subEvents, isLoading: subEventsLoading } = useSubEventsOfEvent(
     Number(eventId)
   );
+  console.log('This ist the sub event in the guest deta🦓🦓🦓🦓🦓🦓🦓🦓🦓🦓🦓🦓🦓🦓🦓🦓il section with the data ', subEvents)
 
   const setDraft = useRsvpStore((s) => s.setDraft);
+  const clearDraft = useRsvpStore((s) => s.clearDraft);
 
   const { data: eventDetails, isLoading } = useEventById(Number(eventId));
   const { data: eventResponse, isLoading: responseLoading } =
     useEventResponseWithUser(Number(eventId));
 
   const isFamily = eventResponse?.isFamily ?? false;
-  const responses = (eventResponse?.responses ?? []) as Array<{
-    event_guest: {
-      status: string | null;
-      arrival_date_time: string | null;
-      departure_date_time: string | null;
-      isAccomodation: boolean | null;
-      isArrivalPickupRequired: boolean | null;
-      isDeparturePickupRequired: boolean | null;
-      notes: string | null;
-      assigned_room: string | null;
-      arrival_info: string | null;
-      departure_info: string | null;
-    } | null;
-    user_detail: {
-      id: number;
-      username: string;
-      photo: string | null;
-      relation: string | null;
-    };
-  }>;
+  const responses = (eventResponse?.responses ?? []) as Array<GuestDetailInterface>;
 
   /**
    * Individual invite: the single guest record for the logged-in user.
    * responses[0] is the only entry when isFamily === false.
    */
-  const myGuestRecord = !isFamily ? (responses[0]?.event_guest ?? null) : null;
+  const myGuestRecord = !isFamily ? (responses[0]?.eventGuest ?? null) : null;
   console.log("This is the data in the has rsvp in the data   ", myGuestRecord);
   const hasRsvped = isFamily ? true : myGuestRecord !== null;
 
   const familyMembers = responses.map((r) => ({
-    id: r.user_detail.id.toString(),
-    name: r.user_detail.username,
-    avatarUrl: r.user_detail.photo ?? undefined,
+    id: r.user.id.toString(),
+    name: r.user.username,
+    avatarUrl: r.user.photo ?? undefined,
   }));
 
   const confirmedCount = responses.filter(
-    (r) => r.event_guest?.status === "accepted"
+    (r) => r.eventGuest?.status === "accepted"
   ).length;
 
-  const familyName = responses[0]?.user_detail?.relation ?? "Your Family";
+  const familyName = responses[0]?.user?.relation ?? "Your Family";
+
+  const familyDraftMembers = responses.map((r) => ({
+    user: {
+      id: r.user.id,
+      username: r.user.username,
+      photo: r.user.photo,
+      email: r.user.email,
+      phone: r.user.phone,
+      relation: r.user.relation,
+      familyId: r.user.familyId,
+    },
+    familyId: r.eventGuest?.familyId ?? null,
+    eventGuest: r.eventGuest ?? null,
+  }));
 
   if (isLoading || subEventsLoading || responseLoading) {
     return (
@@ -124,26 +122,7 @@ export default function GuestEventDetails() {
   }
 
   const handleIndividualRsvp = () => {
-    const me = responses[0];
-
-    if (me) {
-      setDraft({
-        userId: me.user_detail.id,
-        memberName: me.user_detail.username,
-        rawStatus: me.event_guest?.status ?? null,
-        rawArrival: me.event_guest?.arrival_date_time ?? null,
-        rawDeparture: me.event_guest?.departure_date_time ?? null,
-        rawAccommodation: me.event_guest?.isAccomodation ?? null,
-        rawIsArrivalPickupRequired:
-          me.event_guest?.isArrivalPickupRequired ?? null,
-        rawIsDeparturePickupRequired:
-          me.event_guest?.isDeparturePickupRequired ?? null,
-        rawNotes: me.event_guest?.notes ?? null,
-        rawAssignedRoom: null,
-        rawArrivalInfo: null,
-        rawDepartureInfo: null,
-      });
-    }
+    clearDraft();
     router.push(`/(protected)/(client-stack)/events/${eventId}/(guest)/rsvp`);
   };
 
@@ -223,16 +202,52 @@ export default function GuestEventDetails() {
                 familyName={familyName}
                 members={familyMembers}
                 confirmedCount={confirmedCount}
-                onEdit={() =>
+                onEdit={() => {
+                  const first = responses[0];
+                  if (first) {
+                    setDraft({
+                      user: {
+                        id: first.user.id,
+                        username: first.user.username,
+                        photo: first.user.photo,
+                        email: first.user.email,
+                        phone: first.user.phone,
+                        relation: first.user.relation,
+                        familyId: first.user.familyId,
+                      },
+                      familyId: first.eventGuest?.familyId ?? undefined,
+                      eventGuest: first.eventGuest ?? null,
+                      familyMembers: familyDraftMembers,
+                    });
+                  }
+
                   router.push(
                     `/(protected)/(client-stack)/events/${eventId}/(guest)/family-rsvp`
-                  )
-                }
-                onView={() =>
+                  );
+                }}
+                onView={() => {
+                  const first = responses[0];
+                  if (first) {
+                    setDraft({
+                      user: {
+                        id: first.user.id,
+                        username: first.user.username,
+                        photo: first.user.photo,
+                        email: first.user.email,
+                        phone: first.user.phone,
+                        relation: first.user.relation,
+                        familyId: first.user.familyId,
+                      },
+                      familyId: first.eventGuest?.familyId ?? undefined,
+                      eventGuest: first.eventGuest ?? null,
+                      familyMembers: familyDraftMembers,
+                    });
+                  }
+
                   router.push(
                     `/(protected)/(client-stack)/events/${eventId}/(guest)/family-responce`
-                  )
-                }
+                  );
+                }}
               />
             </View>
           ) : (
@@ -276,12 +291,12 @@ export default function GuestEventDetails() {
                   </Text>
                 </TouchableOpacity>
 
-                {(responses[0]?.event_guest?.assigned_room ||
-                  responses[0]?.event_guest?.isArrivalPickupRequired ||
-                  responses[0]?.event_guest?.isDeparturePickupRequired ||
-                  responses[0]?.event_guest?.notes ||
-                  responses[0]?.event_guest?.arrival_info ||
-                  responses[0]?.event_guest?.departure_info) && (
+                {(responses[0]?.eventGuest?.assignedRoom ||
+                  responses[0]?.eventGuest?.isArrivalPickupRequired ||
+                  responses[0]?.eventGuest?.isDeparturePickupRequired ||
+                  responses[0]?.eventGuest?.notes ||
+                  responses[0]?.eventGuest?.arrivalInfo ||
+                  responses[0]?.eventGuest?.departureInfo) && (
                   <TouchableOpacity
                     className="flex-1 py-3.5 rounded-md items-center justify-center bg-slate-50 border border-slate-200 active:bg-slate-100 active:scale-[0.98]"
                     activeOpacity={0.8}
