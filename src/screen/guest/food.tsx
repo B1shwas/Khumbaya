@@ -21,7 +21,10 @@ const CATEGORY_ORDER = [
   "Dessert",
 ];
 
-const CATEGORY_ICONS: Record<string, React.ComponentProps<typeof Ionicons>["name"]> = {
+const CATEGORY_ICONS: Record<
+  string,
+  React.ComponentProps<typeof Ionicons>["name"]
+> = {
   Starter: "leaf-outline",
   Appetizer: "restaurant-outline",
   "Main Course": "flame-outline",
@@ -74,7 +77,10 @@ function EmptyState({ title, subtitle }: { title: string; subtitle: string }) {
 export default function GuestFoodScreen() {
   const params = useLocalSearchParams();
   const eventId = Number(params.eventId);
-  const [selectedCateringId, setSelectedCateringId] = useState<number | null>(null);
+  const [selectedCateringId, setSelectedCateringId] = useState<number | null>(
+    null
+  );
+  const [isPlanDropdownOpen, setIsPlanDropdownOpen] = useState(false);
 
   const {
     data: cateringList,
@@ -86,7 +92,11 @@ export default function GuestFoodScreen() {
   const selectedCatering = useMemo(() => {
     if (!cateringList?.items?.length) return null;
     if (selectedCateringId) {
-      return cateringList.items.find((item: any) => item.id === selectedCateringId) ?? null;
+      return (
+        cateringList.items.find(
+          (item: any) => item.id === selectedCateringId
+        ) ?? null
+      );
     }
     return cateringList.items[0];
   }, [cateringList, selectedCateringId]);
@@ -148,12 +158,6 @@ export default function GuestFoodScreen() {
       >
         {/* Header */}
         <View className="pt-6 pb-5">
-          <View className="flex-row items-center gap-2 mb-1">
-            <View className="w-1.5 h-5 rounded-full bg-pink-500" />
-            <Text className="text-[11px] uppercase tracking-[2px] text-pink-400 font-jakarta-semibold">
-              Catering
-            </Text>
-          </View>
           <Text className="text-2xl font-jakarta-bold text-slate-900 mt-1">
             Food Menu
           </Text>
@@ -187,30 +191,58 @@ export default function GuestFoodScreen() {
                 <Text className="text-[10px] uppercase tracking-[1.5px] text-slate-400 font-jakarta-semibold mb-2.5">
                   Choose a plan
                 </Text>
-                <View className="flex-row flex-wrap gap-2">
-                  {cateringList.items.map((catering: any) => {
-                    const isSelected = catering.id === selectedCatering?.id;
-                    return (
-                      <TouchableOpacity
-                        key={catering.id}
-                        onPress={() => setSelectedCateringId(catering.id)}
-                        activeOpacity={0.7}
-                        className={`rounded-2xl px-4 py-2.5 border ${
-                          isSelected
-                            ? "bg-pink-500 border-pink-500"
-                            : "bg-white border-slate-100"
-                        }`}
-                      >
-                        <Text
-                          className={`text-xs font-jakarta-semibold ${
-                            isSelected ? "text-white" : "text-slate-600"
-                          }`}
-                        >
-                          {catering.name}
-                        </Text>
-                      </TouchableOpacity>
-                    );
-                  })}
+                <View className="relative">
+                  <TouchableOpacity
+                    onPress={() => setIsPlanDropdownOpen((prev) => !prev)}
+                    activeOpacity={0.75}
+                    className="flex-row items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3"
+                  >
+                    <Text className="text-sm font-jakarta-semibold text-slate-900">
+                      {selectedCatering?.name ?? "Select a food plan"}
+                    </Text>
+                    <Ionicons
+                      name={isPlanDropdownOpen ? "chevron-up" : "chevron-down"}
+                      size={18}
+                      color="#64748b"
+                    />
+                  </TouchableOpacity>
+
+                  {isPlanDropdownOpen && (
+                    <View className="mt-2 rounded-3xl border border-slate-200 bg-white shadow-lg overflow-hidden">
+                      {cateringList.items.map((catering: any) => {
+                        const isSelected = catering.id === selectedCatering?.id;
+                        return (
+                          <TouchableOpacity
+                            key={catering.id}
+                            onPress={() => {
+                              setSelectedCateringId(catering.id);
+                              setIsPlanDropdownOpen(false);
+                            }}
+                            activeOpacity={0.75}
+                            className={`px-4 py-3 ${
+                              isSelected ? "bg-pink-50" : "bg-white"
+                            } ${
+                              catering.id !==
+                              cateringList.items[cateringList.items.length - 1]
+                                .id
+                                ? "border-b border-slate-100"
+                                : ""
+                            }`}
+                          >
+                            <Text
+                              className={`text-sm ${
+                                isSelected
+                                  ? "text-pink-600 font-jakarta-semibold"
+                                  : "text-slate-700"
+                              }`}
+                            >
+                              {catering.name}
+                            </Text>
+                          </TouchableOpacity>
+                        );
+                      })}
+                    </View>
+                  )}
                 </View>
               </View>
             )}
@@ -225,11 +257,11 @@ export default function GuestFoodScreen() {
                   <Text className="text-base font-jakarta-bold text-white">
                     {selectedCatering.name}
                   </Text>
-                   <Text className="text-xs text-pink-200 mt-0.5">
-                     {selectedCatering.mealType
-                       ? `Meal type: ${selectedCatering.mealType}`
-                       : "Meal type not specified"}
-                   </Text>
+                  <Text className="text-xs text-pink-200 mt-0.5">
+                    {selectedCatering.mealType
+                      ? `Meal type: ${selectedCatering.mealType}`
+                      : "Meal type not specified"}
+                  </Text>
                 </View>
                 <View className="bg-white/20 rounded-full px-2.5 py-1">
                   <Text className="text-[10px] font-jakarta-semibold text-white">
@@ -246,7 +278,11 @@ export default function GuestFoodScreen() {
               </View>
             ) : menuError ? (
               <View className="bg-red-50 rounded-2xl border border-red-100 p-4 flex-row items-center gap-3">
-                <Ionicons name="alert-circle-outline" size={18} color="#ef4444" />
+                <Ionicons
+                  name="alert-circle-outline"
+                  size={18}
+                  color="#ef4444"
+                />
                 <View className="flex-1">
                   <Text className="text-sm font-jakarta-semibold text-red-600">
                     Failed to load menu
@@ -258,7 +294,8 @@ export default function GuestFoodScreen() {
               </View>
             ) : menuItems.length ? (
               sortedCategories.map((category) => {
-                const icon = CATEGORY_ICONS[category] ?? "ellipsis-horizontal-outline";
+                const icon =
+                  CATEGORY_ICONS[category] ?? "ellipsis-horizontal-outline";
                 return (
                   <View key={category} className="mb-6">
                     <View className="flex-row items-center gap-2 mb-3">
