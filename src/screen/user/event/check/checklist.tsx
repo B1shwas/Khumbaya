@@ -1,16 +1,18 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Alert, Pressable, ScrollView, Text, View } from "react-native";
+import { Alert, Modal, Pressable, ScrollView, Text, View } from "react-native";
 
-import { CategoryChip } from "@/src/components/onboarding/CategoryChip";
 import { TODO_ALL_CATEGORY, TODO_CATEGORIES, type TodoCategoryFilter } from "@/src/constants/todo";
 import { useBulkUpdateTodoStatus, useDeleteTodo, useTodosByEventId } from "@/src/features/todo/hooks/useTodo";
 import { useTodoDraftStore, useTodoListStore } from "@/src/features/todo/store";
 import type { TodoColumn } from "@/src/features/todo/type";
+import { useAuthStore } from "@/src/store/AuthStore";
 import { useChecklistDraftStore } from "@/src/store/useChecklistDraftStore";
+import { filterTaskByDueDate, type DueDateFilter } from "@/src/utils/dateFilters";
 import { useDebounce } from "@/src/utils/helper";
 import ChecklistTaskItem from "./ChecklistTaskItem";
+import { DueDateFilterModal } from "./DueDateFilterModal";
 
 export type ChecklistTask = TodoColumn;
 
@@ -19,7 +21,11 @@ export default function ChecklistScreen() {
   const router = useRouter();
   const { eventId } = useLocalSearchParams<{ eventId?: string | string[] }>();
   const [selectedCategory, setSelectedCategory] = useState<TodoCategoryFilter>(TODO_ALL_CATEGORY);
+  const [selectedDueDate, setSelectedDueDate] = useState<DueDateFilter>(null);
+  const [showAssignedToMe, setShowAssignedToMe] = useState(false);
+  const [showFilterModal, setShowFilterModal] = useState(false);
 
+  const { user } = useAuthStore();
   const { clearDraft } = useChecklistDraftStore();
   const { clearTodoDetail, setTodoDetail } = useTodoDraftStore();
   const { todos, setTodos, toggleTodoStatus } = useTodoListStore();
@@ -101,9 +107,25 @@ export default function ChecklistScreen() {
   );
 
   const filteredTodos = useMemo(() => {
-    if (selectedCategory === TODO_ALL_CATEGORY) return todos;
-    return todos.filter((todo) => todo.category === selectedCategory);
-  }, [selectedCategory, todos]);
+    return todos.filter((todo) => {
+      // Filter by category
+      if (selectedCategory !== TODO_ALL_CATEGORY && todo.category !== selectedCategory) {
+        return false;
+      }
+
+      // Filter by due date
+      if (!filterTaskByDueDate(todo.dueDate, selectedDueDate)) {
+        return false;
+      }
+
+      // Filter by assigned to me
+      if (showAssignedToMe && user?.id && todo.assignedTo !== user.id) {
+        return false;
+      }
+
+      return true;
+    });
+  }, [selectedCategory, selectedDueDate, showAssignedToMe, todos, user?.id]);
 
   const handleCreateTask = useCallback(() => {
     if (parsedEventId) {
@@ -144,13 +166,24 @@ export default function ChecklistScreen() {
       options={{
         title: "Checklist",
         headerRight: () => (
-          <Pressable
-            onPress={handleCreateTask}
-            className="flex-row items-center justify-center gap-1 bg-primary px-2 py-2 rounded-md -right-1 top-1"
-          >
-            <MaterialIcons name="add" size={16} color="white" />
-            <Text className="text-white font-semibold text-sm">Add Task</Text>
-          </Pressable>
+          <View className="flex-row items-center gap-2 -right-1 top-1">
+            <Pressable
+              onPress={() => setShowFilterModal(true)}
+              className="flex-row items-center justify-center gap-1 bg-secondary px-2 py-2 rounded-md"
+            >
+              <MaterialIcons name="tune" size={16} color="white" />
+              {(selectedDueDate || showAssignedToMe) && (
+                <View className="w-2 h-2 rounded-full bg-white" />
+              )}
+            </Pressable>
+            <Pressable
+              onPress={handleCreateTask}
+              className="flex-row items-center justify-center gap-1 bg-primary px-2 py-2 rounded-md"
+            >
+              <MaterialIcons name="add" size={16} color="white" />
+              <Text className="text-white font-semibold text-sm">Add Task</Text>
+            </Pressable>
+          </View>
         ),
       }}
     />
@@ -159,20 +192,6 @@ export default function ChecklistScreen() {
       className="flex-1 p-1"
     >
       <View className=" gap-4 px-4 mt-2">
-
-        <View className="gap-3">
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
-            {availableCategories.map((category) => (
-              <CategoryChip
-                key={category}
-                label={category}
-                isActive={selectedCategory === category}
-                onPress={() => setSelectedCategory(category)}
-              />
-            ))}
-          </ScrollView>
-        </View>
-
 
         {filteredTodos.length === 0 ? (
           <View className="bg-white rounded-xl p-6 items-center border border-border">
@@ -220,6 +239,27 @@ export default function ChecklistScreen() {
         )}
       </View>
     </ScrollView>
+
+    <Modal
+      visible={showFilterModal}
+      transparent
+      animationType="slide"
+      onRequestClose={() => setShowFilterModal(false)}
+    >
+      <Pressable
+        style={{ flex: 1 }}
+        onPress={() => setShowFilterModal(false)}
+      />
+      <DueDateFilterModal
+        selectedFilter={selectedDueDate}
+        onSelectFilter={setSelectedDueDate}
+        showAssignedToMe={showAssignedToMe}
+        onToggleAssignedToMe={() => setShowAssignedToMe(!showAssignedToMe)}
+        selectedCategory={selectedCategory}
+        onSelectCategory={setSelectedCategory}
+        onClose={() => setShowFilterModal(false)}
+      />
+    </Modal>
   </>
   );
 }

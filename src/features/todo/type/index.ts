@@ -8,8 +8,8 @@ export interface TodoColumn {
   isDone: boolean | null;
   category: TodoCategory | string | null;
   assignedTo: number;
-  assignedUser: User;
-  title: string | null;
+  assignedUser: User | null | undefined;
+  title: string ;
   parentId: number | null;
   dueDate: Date | string | null;
   status: string | null;

@@ -42,21 +42,21 @@ const ChecklistTaskItem = ({
         ? "bg-surface-secondary  flex-row items-start p-5 rounded-xl mb-4"
         : "bg-surface  flex-row items-start p-5 rounded-xl mb-4"
         }`}
-      onPress={onToggleComplete}
+      onPress={onEditPress}
     >
       <Pressable
         onPress={(event) => {
           event.stopPropagation?.();
           onToggleComplete();
         }}
-        className={`mt-0.5 w-6 h-6 rounded-sm border-2 flex items-center justify-center mr-4 ${task.isDone
+        className={`mt-0.5 w-8 h-8 rounded-md border-2 flex items-center justify-center mr-4 ${task.isDone
           ? "bg-success-500 border-success-500"
           : "border-primary/20 active:border-primary active:bg-primary/5"
           }`}
         disabled={isUpdating}
       >
         {task.isDone ? (
-          <MaterialIcons name="check" size={18} color="white" />
+          <MaterialIcons name="check" size={22} color="white" />
         ) : null}
       </Pressable>
 
