@@ -8,7 +8,7 @@ const headerBackButton = () => (
   </TouchableOpacity>
 );
 
-export default function GuestEventLayout() {
+export default function GuestServicesLayout() {
   return (
     <Stack
       screenOptions={{
@@ -22,11 +22,9 @@ export default function GuestEventLayout() {
         headerLeft: headerBackButton,
       }}
     >
-      <Stack.Screen name="index" options={{ title: "Event Details" }} />
-      <Stack.Screen name="rsvp/index" options={{ title: "My RSVP" }} />
-      <Stack.Screen name="accommodation" options={{ title: "Accommodation" }} />
-      <Stack.Screen name="family-rsvp" options={{ title: "Family RSVP" }} />
-      <Stack.Screen name="services" options={{ headerShown: false }} />
+      <Stack.Screen name="logistic" options={{ title: "Logistics" }} />
+      <Stack.Screen name="lodge" options={{ title: "Hotel" }} />
+      <Stack.Screen name="food" options={{ title: "Meals" }} />
     </Stack>
   );
 }
