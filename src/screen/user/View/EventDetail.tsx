@@ -4,16 +4,19 @@ import { Event } from "@/src/constants/event";
 import { useGetEventWithRole } from "@/src/features/events/hooks/use-event";
 import { useEventStore } from "@/src/features/events/store/useEventStore";
 import { useThrottledRouter } from "@/src/hooks/useThrottledRouter";
-import { RelativePathString, useLocalSearchParams } from "expo-router";
+import { RelativePathString, useLocalSearchParams, useNavigation } from "expo-router";
 import { useEffect } from "react";
-import { ScrollView, Text, View } from "react-native";
+import { Animated, Text, View } from "react-native";
 import EventDetailHero from "./EventDetailHero";
 
 const EventDetail = () => {
   const { eventId } = useLocalSearchParams<{ eventId: string }>();
+  const navigation = useNavigation();
+
   const { push } = useThrottledRouter();
   const { clearEventDraft, setEventDraft } = useEventStore();
   const { data: found } = useGetEventWithRole();
+
   const foundEvent = found?.find(
     (e: Event) => String(e.id) === String(eventId)
   );
@@ -30,7 +33,6 @@ const EventDetail = () => {
     time: "",
     startDateTime: "",
     endDateTime: "",
-
     days: 0,
     hours: 0,
     minutes: 0,
@@ -45,101 +47,68 @@ const EventDetail = () => {
     clearEventDraft();
   }, [clearEventDraft]);
 
+  useEffect(() => {
+    navigation.setOptions({
+      title: "Event Detail",
+    });
+  }, []);
+
+  const handleScroll = (eventScroll: any) => {
+    const y = eventScroll.nativeEvent.contentOffset.y;
+
+    if (y > 120) {
+      navigation.setOptions({
+        title: event.title, 
+      });
+    } else {
+      navigation.setOptions({
+        title: "Event Detail",
+      });
+    }
+  };
+
   const manageActions = [
-    {
-      id: "subevents",
-      name: "Sub Events",
-      icon: "layers-outline",
-      color: "#F97316",
-      route: `./(subevent)`,
-    },
-     {
-      id: "guests",
-      name: "Guest Management",
-      icon: "people",
-      color: "#8B5CF6",
-      route: `./guests`,
-    },
-
-      {
-      id: "budget",
-      name: "Budget",
-      icon: "wallet",
-      color: "#10B981",
-      route: `./budget`,
-    },
-      {
-      id: "checklist",
-      name: "Checklist",
-      icon: "checkmark-circle-outline",
-      color: "#EC4899",
-      route: `./tasklist`,
-    },
-     {
-      id: "catering",
-      name: "Catering",
-      icon: "restaurant",
-      color: "#F43F5E",
-      route: `./catering`,
-    },
-     {
-      id: "hotel-management",
-      name: "Hotel Management",
-      icon: "bed-outline",
-      color: "#F59E0B",
-      route: `./hotel`,
-    },   
-   {
-      id: "logistics",
-      name: "logistics",
-      icon: "cube-outline",  // or "cube" for filled
-      color: "#10B981",
-      route: "./(logistics)"
-    },
-    {
-      id: "vendors",
-      name: "Vendors",
-      icon: "business",
-      color: "#3B82F6",
-      route: `./vendor`,
-    },
-
+    { id: "subevents", name: "Sub Events", icon: "layers-outline", color: "#F97316", route: "./(subevent)" },
+    { id: "guests", name: "Guest Management", icon: "people", color: "#8B5CF6", route: "./guests" },
+    { id: "budget", name: "Budget", icon: "wallet", color: "#10B981", route: "./budget" },
+    { id: "checklist", name: "Checklist", icon: "checkmark-circle-outline", color: "#EC4899", route: "./tasklist" },
+    { id: "catering", name: "Catering", icon: "restaurant", color: "#F43F5E", route: "./catering" },
+    { id: "hotel-management", name: "Hotel Management", icon: "bed-outline", color: "#F59E0B", route: "./hotel" },
+    { id: "logistics", name: "logistics", icon: "cube-outline", color: "#10B981", route: "./(logistics)" },
+    { id: "vendors", name: "Vendors", icon: "business", color: "#3B82F6", route: "./vendor" },
   ];
 
   return (
-    <ScrollView
+    <Animated.ScrollView
       className="flex-1 bg-background-light"
       showsVerticalScrollIndicator={false}
+      scrollEventThrottle={16}
+      onScroll={handleScroll}
     >
       <EventDetailHero
         imageUrl={event.imageUrl}
         status={event.status}
         title={event.title}
-        // date={event.date}
         startDateTime={event.startDateTime}
         endDateTime={event.endDateTime}
         location={event.location}
       />
 
-      {/* Main Navigation Grid */}
-      <View className="  mt-6 px-4 pb-4">
-        {/* dark:text-white removed */}
+      <View className="mt-6 px-4 pb-4">
         <Text className="text-lg font-bold mb-3">Manage Event</Text>
+
         <View className="flex-row flex-wrap gap-3 justify-center">
           {manageActions.map((action) => (
-            <NavigateComponent key={action.id} {...action} className="" />
+            <NavigateComponent key={action.id} {...action} />
           ))}
 
-          {/* Gallery - Full Width */}
-          {/* Component with the Titleicon and the description Gallery , Upload & Share photos */}
           <Row
             title="Gallery"
             description="Upload & Share Photos"
             iconstring="images"
-            onPress={() => {
-              push("./gallery" as RelativePathString);
-            }}
+            onPress={() => push("./gallery" as RelativePathString)}
           />
+
           <Row
             title="Event Details"
             description="Complete Event Information"
@@ -149,6 +118,7 @@ const EventDetail = () => {
               push("./edit-event" as RelativePathString);
             }}
           />
+
           <Row
             title="Planning Committee"
             description="Add Event Organizers and Collaborators"
@@ -160,9 +130,8 @@ const EventDetail = () => {
         </View>
       </View>
 
-      {/* Bottom spacer */}
       <View className="h-24" />
-    </ScrollView>
+    </Animated.ScrollView>
   );
 };
 
