@@ -211,7 +211,7 @@ export default function CateringDetailsScreen() {
     );
   }
 
-  const mealColor = MEAL_TYPE_COLORS[catering.meal_type] ?? "#ee2b8c";
+  const mealColor = MEAL_TYPE_COLORS[catering.mealType] ?? "#ee2b8c";
   const startDate = new Date(catering.startDateTime);
   const endDate = new Date(catering.endDateTime);
 
@@ -238,13 +238,13 @@ export default function CateringDetailsScreen() {
             <Text className="text-2xl font-black text-on-surface flex-1 mr-3" numberOfLines={2}>
               {catering.name}
             </Text>
-            {catering.meal_type ? (
+            {catering.mealType ? (
               <View
                 style={{ backgroundColor: mealColor + "18", borderColor: mealColor + "40" }}
                 className="rounded-full px-3 py-1 border"
               >
                 <Text style={{ color: mealColor }} className="text-xs font-bold">
-                  {catering.meal_type}
+                  {catering.mealType}
                 </Text>
               </View>
             ) : null}
@@ -280,18 +280,18 @@ export default function CateringDetailsScreen() {
           <StatPill
             icon="attach-money"
             label="Per plate"
-            value={`$${catering.per_plate_price}`}
+            value={`$${catering.perPlateprice}`}
           />
           <StatPill
             icon="restaurant"
             label="Menu items"
             value={String(menuData?.length ?? 0)}
           />
-          <StatPill
+          {/* <StatPill
             icon="eco"
             label="Veg items"
             value={String(vegCount)}
-          />
+          /> */}
         </View>
 
         {/* Menu Section */}
