@@ -6,8 +6,6 @@ import { Image, Pressable, Text, View } from "react-native";
 
 type SubEventCardProps = {
   item: SubEvent;
-  index: number;
-  total: number;
   eventId: string;
 };
 
@@ -74,34 +72,16 @@ const PILL_HEIGHT = 52;
 
 export default function SubEventCard({
   item,
-  index,
-  total,
   eventId,
 }: SubEventCardProps) {
   const router = useRouter();
   const derivedStatus = getDerivedStatus(item);
   const statusMeta = getStatusMeta(derivedStatus);
   const timeRange = formatTimeRange(item.startDateTime, item.endDateTime);
-  const isFirst = index === 0;
-  const isLast = index === total - 1;
   const { month, day } = getDateParts(item.startDateTime);
-  const pillCenter = PILL_HEIGHT / 2;
 
   return (
     <View className="relative flex-row gap-4 pb-5">
-      {/* Connector lines */}
-      {!isFirst ? (
-        <View
-          className="absolute z-0 w-0.5 bg-[#e6dbe0]"
-          style={{ left: 21, top: 0, height: pillCenter }}
-        />
-      ) : null}
-      {!isLast ? (
-        <View
-          className="absolute z-0 w-0.5 bg-[#e6dbe0]"
-          style={{ left: 21, top: pillCenter, bottom: 0 }}
-        />
-      ) : null}
 
       {/* Date pill */}
       <View className="z-10 items-center" style={{ width: 44 }}>

@@ -64,8 +64,6 @@ export default function GuestEventDetails() {
   const { data: subEvents, isLoading: subEventsLoading } = useSubEventsOfEvent(
     Number(eventId)
   );
-  console.log('This ist the sub event in the guest deta🦓🦓🦓🦓🦓🦓🦓🦓🦓🦓🦓🦓🦓🦓🦓🦓il section with the data ', subEvents)
-
   const setDraft = useRsvpStore((s) => s.setDraft);
   const clearDraft = useRsvpStore((s) => s.clearDraft);
 

@@ -1,6 +1,5 @@
 import { Text } from "@/src/components/ui/Text";
 import { useEventById } from "@/src/features/events/hooks/use-event";
-import { formatTime } from "@/src/utils/helper";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import {
@@ -14,230 +13,211 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 const PRIMARY = "#ee2b8c";
 
-/* ---------------- HERO SECTION ---------------- */
-const HeroSection = ({ status, imageUrl, startDateTime, location }: any) => (
-  <View className="w-full h-80">
-    <View className="relative w-full h-full">
-      {imageUrl ? (
-        <Image
-          source={{ uri: imageUrl }}
-          className="w-full h-full"
-          resizeMode="cover"
-        />
-      ) : (
-        <View className="w-full h-full bg-pink-50 items-center justify-center">
-          <Ionicons name="image-outline" size={64} color="#f9a8d4" />
-        </View>
-      )}
+const fmt = (dateStr?: string | null) => {
+  if (!dateStr) return null;
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return null;
+  return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+};
 
-      {/* overlay */}
-      <View className="absolute inset-0 bg-black/40" />
+const fmtTime = (dateStr?: string | null) => {
+  if (!dateStr) return null;
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return null;
+  return d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
+};
 
-      {/* content */}
-      <View className="absolute bottom-0 left-0 right-0 p-4 items-center">
-        <View className="flex-row items-center gap-2 mb-2">
-          <View className="bg-[#ee2b8c] px-3 py-1 rounded-full">
-            <Text className="text-white text-xs font-semibold uppercase">
-              {status || "Upcoming"}
-            </Text>
-          </View>
-        </View>
-
-        {startDateTime && (
-          <Text className="text-gray-200 text-xs">
-            {formatTime(startDateTime)}
-            {location && ` • ${location}`}
-          </Text>
-        )}
-      </View>
-    </View>
-  </View>
-);
-
-/* ---------------- INFO ROW ---------------- */
-const InfoRow = ({
+const Row = ({
   icon,
   label,
-  primary,
-  secondary,
+  value,
+  sub,
 }: {
   icon: string;
   label: string;
-  primary: string;
-  secondary?: string;
+  value: string;
+  sub?: string | null;
 }) => (
-  <View className="flex-row items-start gap-3 flex-1">
-    <View className="bg-[#ee2b8c]/10 p-2.5 rounded-xl">
-      <MaterialIcons name={icon as any} size={20} color={PRIMARY} />
+  <View className="flex-row items-center gap-3 py-3.5">
+    <View className="w-9 h-9 rounded-full bg-pink-50 items-center justify-center">
+      <MaterialIcons name={icon as any} size={18} color={PRIMARY} />
     </View>
     <View className="flex-1">
-      <Text className="text-[10px] font-bold text-gray-400 uppercase mb-1">
+      <Text className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">
         {label}
       </Text>
-      <Text className="text-[#181114] font-semibold">{primary}</Text>
-      {secondary && <Text className="text-gray-500 text-xs">{secondary}</Text>}
+      <Text className="text-sm font-semibold text-gray-800">{value}</Text>
+      {sub ? <Text className="text-xs text-gray-500 mt-0.5">{sub}</Text> : null}
     </View>
   </View>
 );
 
-/* ---------------- MAIN CARD ---------------- */
-const MainInfoCard = ({ subEvent }: { subEvent: any }) => {
-  const { budget, startDateTime, endDateTime, location, theme, role } =
-    subEvent || {};
+const Sep = () => <View className="h-px bg-gray-100" />;
 
-  const formatDate = (dateStr: string) => {
-    if (!dateStr) return "";
-    const date = new Date(dateStr);
-    return date.toLocaleDateString("en-US", {
-      month: "long",
-      day: "numeric",
-      year: "numeric",
-    });
-  };
-
-  const formatTimeRange = (start: string, end: string) => {
-    if (!start || !end) return "";
-    const startTime = new Date(start);
-    const endTime = new Date(end);
-    const formatTime = (d: Date) =>
-      d.toLocaleTimeString("en-US", {
-        hour: "numeric",
-        minute: "2-digit",
-        hour12: true,
-      });
-    return `${formatTime(startTime)} – ${formatTime(endTime)}`;
-  };
-
-  return (
-    <View className="bg-white rounded-md p-4 shadow-sm border border-slate-100 mb-4 mt-4">
-      <View className="flex-row gap-4 mb-6">
-        <InfoRow
-          icon="calendar-today"
-          label="Date & Time"
-          primary={startDateTime ? formatDate(startDateTime) : "TBD"}
-          secondary={
-            startDateTime && endDateTime
-              ? formatTimeRange(startDateTime, endDateTime)
-              : undefined
-          }
-        />
-        <InfoRow icon="location-on" label="Venue" primary={location || "TBD"} />
-      </View>
-
-      <View className="flex-row gap-4 mb-4">
-        <InfoRow icon="palette" label="Theme" primary={theme || "N/A"} />
-        <InfoRow icon="person" label="Role" primary={role || "Organizer"} />
-      </View>
-
-      {budget && budget > 0 && (
-        <>
-          <View className="h-px bg-slate-100 mb-5" />
-
-          <View className="bg-gray-50 p-4 rounded-xl">
-            <Text className="text-xs text-gray-500">Budget</Text>
-            <Text className="text-xl font-bold text-[#ee2b8c]">
-              ₹{budget.toLocaleString()}
-            </Text>
-          </View>
-        </>
-      )}
-    </View>
-  );
-};
-
-/* ---------------- DESCRIPTION ---------------- */
-const DescriptionCard = ({ description }: { description?: string }) => {
-  if (!description) return null;
-
-  return (
-    <View className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 mb-4">
-      <View className="flex-row items-center gap-2 mb-3">
-        <MaterialIcons name="description" size={18} color={PRIMARY} />
-        <Text className="text-base font-bold">Description</Text>
-      </View>
-
-      <Text className="text-gray-600 text-sm leading-relaxed">
-        {description}
-      </Text>
-    </View>
-  );
-};
+const Card = ({ children }: { children: React.ReactNode }) => (
+  <View className="mx-4 mt-3 bg-white rounded-2xl px-4 border border-gray-100 shadow-sm overflow-hidden">
+    {children}
+  </View>
+);
 
 export default function SubEventDetailScreen() {
   const router = useRouter();
-  const { subEventId } = useLocalSearchParams<{
-    subEventId: string;
-    eventId: string;
-  }>();
-
+  const { subEventId } = useLocalSearchParams<{ subEventId: string }>();
   const parsedId = Number(subEventId);
+
   const { data: subEvent, isLoading } = useEventById(parsedId);
-
-  const handleEditEvent = () => {
-    router.push(
-      `/(protected)/(client-stack)/events/${parsedId}/(organizer)/edit-event`
-    );
-  };
-
-  const handleBack = () => {
-    router.back();
-  };
 
   if (isLoading) {
     return (
-      <SafeAreaView className="flex-1 items-center justify-center">
+      <SafeAreaView className="flex-1 items-center justify-center bg-white">
         <ActivityIndicator size="large" color={PRIMARY} />
-        <Text className="mt-3 text-gray-500">Loading...</Text>
       </SafeAreaView>
     );
   }
 
   if (!subEvent) {
     return (
-      <SafeAreaView className="flex-1 items-center justify-center px-6">
-        <Text className="text-lg font-bold">Not found</Text>
+      <SafeAreaView className="flex-1 items-center justify-center bg-white px-6">
+        <Text className="text-lg font-bold text-gray-700">Event not found</Text>
       </SafeAreaView>
     );
   }
 
+  const {
+    title,
+    status,
+    imageUrl,
+    startDateTime,
+    endDateTime,
+    location,
+    venue,
+    theme,
+    role,
+    budget,
+    description,
+    dressCode,
+    rsvpDeadline,
+  } = subEvent;
+
+  const statusLabel = status
+    ? status.charAt(0).toUpperCase() + status.slice(1).toLowerCase()
+    : "Upcoming";
+
+  const startDate = fmt(startDateTime);
+  const startTime = fmtTime(startDateTime);
+  const endDate = fmt(endDateTime);
+  const endTime = fmtTime(endDateTime);
+  const rsvpDate = fmt(rsvpDeadline);
+  const rsvpTime = fmtTime(rsvpDeadline);
+
   return (
-    <SafeAreaView className="flex-1 bg-white">
-      <View className="px-4 py-3 border-b border-slate-100 flex-row items-center">
-        <TouchableOpacity
-          onPress={handleBack}
-          className="w-10 h-10 rounded-full  items-center justify-center"
-          activeOpacity={0.85}
-        >
-          <Ionicons name="arrow-back" size={18} color="#181114" />
-        </TouchableOpacity>
+    <SafeAreaView className="flex-1 bg-gray-50" edges={["top"]}>
 
-        <Text
-          className="text-base font-extrabold text-[#181114] flex-1 mx-3 text-center"
-          numberOfLines={1}
-        >
-          {subEvent.title || "Sub Event"}
-        </Text>
+      <View className="w-full h-80">
+        {imageUrl ? (
+          <Image source={{ uri: imageUrl }} className="w-full h-full" resizeMode="cover" />
+        ) : (
+          <View className="w-full h-full bg-pink-100 items-center justify-center">
+            <Ionicons name="image-outline" size={56} color="#f9a8d4" />
+          </View>
+        )}
+        <View className="absolute inset-0 bg-black/30" />
 
-        <TouchableOpacity
-          onPress={handleEditEvent}
-          className="w-10 h-10 rounded-full bg-primary/10 items-center justify-center"
-          activeOpacity={0.85}
-        >
-          <Ionicons name="create-outline" size={18} color={PRIMARY} />
-        </TouchableOpacity>
+        {/* Nav buttons */}
+        <View className="absolute top-0 left-0 right-0 flex-row items-center justify-between px-4 pt-2">
+          <TouchableOpacity
+            onPress={() => router.back()}
+            className="w-9 h-9 rounded-full bg-white items-center justify-center shadow"
+            activeOpacity={0.8}
+          >
+            <Ionicons name="arrow-back" size={18} color="#181114" />
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() =>
+              router.push(
+                `/(protected)/(client-stack)/events/${parsedId}/(organizer)/edit-event`
+              )
+            }
+            className="w-9 h-9 rounded-full bg-white items-center justify-center shadow"
+            activeOpacity={0.8}
+          >
+            <Ionicons name="create-outline" size={18} color={PRIMARY} />
+          </TouchableOpacity>
+        </View>
+
+        {/* Title + status */}
+        <View className="absolute bottom-6 left-0 right-0 items-center px-6">
+          <Text className="text-white text-3xl font-bold mb-2 text-center">
+            {title || "Sub Event"}
+          </Text>
+          <View className="bg-[#ee2b8c] px-4 py-1 rounded-full">
+            <Text className="text-white text-xs font-bold uppercase tracking-wider">
+              {statusLabel}
+            </Text>
+          </View>
+        </View>
       </View>
 
-      <ScrollView showsVerticalScrollIndicator={false}>
-        <HeroSection
-          status={subEvent.status}
-          imageUrl={subEvent.imageUrl}
-          startDateTime={subEvent.startDateTime}
-          location={subEvent.location}
-        />
-        <View className="px-4">
-          <MainInfoCard subEvent={subEvent} />
-          <DescriptionCard description={subEvent.description} />
-        </View>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        className="flex-1"
+        contentContainerStyle={{ paddingBottom: 32 }}
+      >
+        <Card>
+          <Row icon="event" label="Start" value={startDate ?? "TBD"} sub={startTime} />
+          <Sep />
+          <Row icon="event-available" label="End" value={endDate ?? "TBD"} sub={endTime} />
+          {rsvpDeadline ? (
+            <>
+              <Sep />
+              <Row icon="schedule" label="RSVP Deadline" value={rsvpDate ?? "TBD"} sub={rsvpTime} />
+            </>
+          ) : null}
+          <Sep />
+          <Row icon="location-on" label="Venue" value={location || venue || "TBD"} />
+          {theme || dressCode || role ? <Sep /> : null}
+          {theme ? <Row icon="palette" label="Theme" value={theme} /> : null}
+          {dressCode ? (
+            <>
+              {theme ? <Sep /> : null}
+              <Row icon="checkroom" label="Dress Code" value={dressCode} />
+            </>
+          ) : null}
+          {role ? (
+            <>
+              {theme || dressCode ? <Sep /> : null}
+              <Row icon="person" label="Your Role" value={role} />
+            </>
+          ) : null}
+        </Card>
+
+        {/* Budget */}
+        {budget && budget > 0 ? (
+          <View className="mx-4 mt-3 bg-white rounded-2xl px-5 py-4 border border-gray-100 shadow-sm flex-row items-center justify-between">
+            <View className="flex-row items-center gap-3">
+              <View className="w-9 h-9 rounded-full bg-pink-50 items-center justify-center">
+                <MaterialIcons name="account-balance-wallet" size={18} color={PRIMARY} />
+              </View>
+              <Text className="text-sm font-semibold text-gray-500 uppercase tracking-wide">
+                Budget
+              </Text>
+            </View>
+            <Text className="text-lg font-bold text-[#ee2b8c]">
+              ₹{Number(budget).toLocaleString()}
+            </Text>
+          </View>
+        ) : null}
+
+        {/* Description */}
+        {description ? (
+          <View className="mx-4 mt-3 bg-white rounded-2xl px-5 py-4 border border-gray-100 shadow-sm">
+            <View className="flex-row items-center gap-2 mb-2">
+              <MaterialIcons name="description" size={16} color={PRIMARY} />
+              <Text className="text-sm font-bold text-gray-700">Description</Text>
+            </View>
+            <Text className="text-sm text-gray-500 leading-relaxed">{description}</Text>
+          </View>
+        ) : null}
       </ScrollView>
     </SafeAreaView>
   );

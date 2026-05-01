@@ -66,7 +66,7 @@ export default function DetailedChecklist() {
       task: taskDetails.trim(),
       category: category || null,
       dueDate: dueDate ? dueDate.toISOString() : null,
-      assigned_to: assignedTo ?? undefined,
+      assignedTo: assignedTo ?? undefined,
     };
 
     if (isEditMode && parsedTaskId) {
@@ -84,7 +84,7 @@ export default function DetailedChecklist() {
       );
     } else {
       createTodo(
-        { ...payload, task: payload.task || "" },
+        payload ,
         {
           onSuccess: () => {
             // Alert.alert("Success", "Task created successfully");
