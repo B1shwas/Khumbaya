@@ -1,24 +1,24 @@
-import { Text } from "@/src/components/ui/Text";
 import { useCreateMenuMutation } from "@/src/features/catering/menu";
+import { cn } from "@/src/utils/cn";
 import { shadowStyle } from "@/src/utils/helper";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import React from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
   ActivityIndicator,
   Alert,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
   StatusBar,
+  Text,
   TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-// ─── Types & Constants
+// ─── Types & Constants ────────────────────────────────────────────────────────
 
 interface MenuFormData {
   name: string;
@@ -41,10 +41,51 @@ const DISH_TYPE_OPTIONS = [
   { label: "Vegan", value: "Vegan" },
 ];
 
+// ─── Sub-components ───────────────────────────────────────────────────────────
+
+const FormSection = ({
+  title,
+  subtitle,
+  children,
+  icon,
+  iconColor = "#ee2b8c",
+  iconBg = "bg-primary/10",
+}: {
+  title: string;
+  subtitle?: string;
+  children: React.ReactNode;
+  icon: keyof typeof MaterialIcons.glyphMap;
+  iconColor?: string;
+  iconBg?: string;
+}) => (
+  <View className="mb-3 mt-2">
+    <View className="flex-row items-center mb-5 px-1">
+      <View
+        className={cn(
+          "w-10 h-10 rounded-xl items-center justify-center mr-3",
+          iconBg
+        )}
+      >
+        <MaterialIcons name={icon} size={20} color={iconColor} />
+      </View>
+      <View>
+        <Text className="text-lg font-bold text-[#181114] tracking-tight">
+          {title}
+        </Text>
+        {subtitle && (
+          <Text className="text-xs font-medium text-gray-500">{subtitle}</Text>
+        )}
+      </View>
+    </View>
+    <View className="px-1">{children}</View>
+  </View>
+);
+
+// ─── Main Screen ──────────────────────────────────────────────────────────────
+
 export default function AddMenuScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
-  const eventId = parseInt(params.eventId as string, 10);
   const cateringId = parseInt(params.cateringId as string, 10);
 
   const {
@@ -72,10 +113,7 @@ export default function AddMenuScreen() {
       });
 
       Alert.alert("Success", "Menu item added successfully!", [
-        {
-          text: "OK",
-          onPress: () => router.back(),
-        },
+        { text: "OK", onPress: () => router.back() },
       ]);
     } catch (error) {
       const errorMessage =
@@ -85,21 +123,27 @@ export default function AddMenuScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-background-light">
+    <SafeAreaView className="flex-1 bg-[#f8f6f7]" edges={["bottom"]}>
       <StatusBar barStyle="dark-content" />
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
+
+      <KeyboardAwareScrollView
         className="flex-1"
+        contentContainerStyle={{ flexGrow: 1, paddingBottom: 32 }}
+        keyboardShouldPersistTaps="handled"
+        enableOnAndroid
+        enableAutomaticScroll
+        extraScrollHeight={120}
+        showsVerticalScrollIndicator={false}
       >
-        <ScrollView
-          className="flex-1"
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 40 }}
-        >
-          <View className="px-6 py-6">
-            {/* Dish Name */}
-            <View className="mb-6">
-              <Text className="text-sm font-bold text-on-surface mb-3">
+        <View className="flex-1 px-4 py-4">
+          {/* Dish Info */}
+          <FormSection
+            title="Dish Info"
+            subtitle="Name and description"
+            icon="restaurant-menu"
+          >
+            <View className="mb-5">
+              <Text className="mb-1 ml-1 text-xs font-semibold uppercase tracking-wider text-gray-500">
                 Dish Name
               </Text>
               <Controller
@@ -113,27 +157,26 @@ export default function AddMenuScreen() {
                   },
                 }}
                 render={({ field: { value, onChange } }) => (
-                  <View>
+                  <>
                     <TextInput
                       placeholder="e.g., Paneer Tikka Masala"
-                      placeholderTextColor="#896175"
-                      className="bg-background-light border border-outline-variant/50 rounded-lg px-4 py-3 text-base font-medium text-on-surface"
+                      placeholderTextColor="#9CA3AF"
+                      className="h-14 rounded-md border border-gray-200 bg-white px-4 text-base text-[#181114]"
                       value={value}
                       onChangeText={onChange}
                     />
                     {errors.name && (
-                      <Text className="text-red-500 text-xs mt-2">
+                      <Text className="mt-1 ml-1 text-xs text-red-500">
                         {errors.name.message}
                       </Text>
                     )}
-                  </View>
+                  </>
                 )}
               />
             </View>
 
-            {/* Description */}
-            <View className="mb-6">
-              <Text className="text-sm font-bold text-on-surface mb-3">
+            <View className="mb-5">
+              <Text className="mb-1 ml-1 text-xs font-semibold uppercase tracking-wider text-gray-500">
                 Description
               </Text>
               <Controller
@@ -147,76 +190,78 @@ export default function AddMenuScreen() {
                   },
                 }}
                 render={({ field: { value, onChange } }) => (
-                  <View>
+                  <>
                     <TextInput
                       placeholder="Brief description of the dish"
-                      placeholderTextColor="#896175"
-                      className="bg-background-light border border-outline-variant/50 rounded-lg px-4 py-3 text-base font-medium text-on-surface min-h-[100px]"
+                      placeholderTextColor="#9CA3AF"
+                      className="rounded-md border border-gray-200 bg-white px-4 py-4 text-base text-[#181114]"
                       value={value}
                       onChangeText={onChange}
                       multiline
                       numberOfLines={3}
-                      style={{ textAlignVertical: "top" }}
+                      style={{ textAlignVertical: "top", minHeight: 96 }}
                     />
                     {errors.description && (
-                      <Text className="text-red-500 text-xs mt-2">
+                      <Text className="mt-1 ml-1 text-xs text-red-500">
                         {errors.description.message}
                       </Text>
                     )}
-                  </View>
+                  </>
                 )}
               />
             </View>
+          </FormSection>
 
-            {/* Dish Type 
-            <View className="mb-6">
-              <Text className="text-sm font-bold text-on-surface mb-3">
-                Dish Type
+          {/* Dish Type */}
+          <FormSection
+            title="Dish Type"
+            subtitle="Dietary classification"
+            icon="eco"
+            iconColor="#046c00"
+            iconBg="bg-tertiary-container"
+          >
+            <View className="mb-5">
+              <Text className="mb-1 ml-1 text-xs font-semibold uppercase tracking-wider text-gray-500">
+                Dietary Type
               </Text>
               <Controller
                 control={control}
                 name="type"
                 rules={{ required: "Dish type is required" }}
                 render={({ field: { value, onChange } }) => (
-                  <View>
+                  <>
                     <Dropdown
                       style={{
-                        height: 50,
+                        height: 56,
                         borderWidth: 1,
                         borderColor: "#e5e7eb",
-                        borderRadius: 8,
+                        borderRadius: 6,
                         paddingHorizontal: 16,
-                        backgroundColor: "#fafbfc",
+                        backgroundColor: "#ffffff",
                       }}
                       data={DISH_TYPE_OPTIONS}
                       labelField="label"
                       valueField="value"
-                      placeholder="Select dish type"
+                      placeholder="Select dietary type"
                       value={value}
                       onChange={(item) => onChange(item.value)}
                       selectedTextStyle={{
                         color: "#ee2b8c",
-                        fontSize: 16,
+                        fontSize: 15,
                         fontWeight: "600",
                       }}
-                      placeholderStyle={{
-                        color: "#896175",
-                        fontSize: 16,
-                      }}
-                      itemTextStyle={{
-                        color: "#1a1a1a",
-                        fontSize: 16,
-                      }}
+                      placeholderStyle={{ color: "#9CA3AF", fontSize: 15 }}
+                      itemTextStyle={{ color: "#181114", fontSize: 15 }}
                       activeColor="#fdf2f8"
                       renderItem={(item) => (
                         <View className="flex-row items-center justify-between px-4 py-3">
-                          <Text className="text-base font-medium text-on-surface">
+                          <Text className="text-[15px] font-medium text-[#181114]">
                             {item.label}
                           </Text>
                           {value === item.value && (
                             <MaterialIcons
                               name="check"
-                              size={20}
+                              size={18}
                               color="#ee2b8c"
                             />
                           )}
@@ -224,19 +269,26 @@ export default function AddMenuScreen() {
                       )}
                     />
                     {errors.type && (
-                      <Text className="text-red-500 text-xs mt-2">
+                      <Text className="mt-1 ml-1 text-xs text-red-500">
                         {errors.type.message}
                       </Text>
                     )}
-                  </View>
+                  </>
                 )}
               />
             </View>
-*/}
+          </FormSection>
 
-            {/* Menu Type */}
-            <View className="mb-6">
-              <Text className="text-sm font-bold text-on-surface mb-3">
+          {/* Category */}
+          <FormSection
+            title="Category"
+            subtitle="Where this dish appears on the menu"
+            icon="category"
+            iconColor="#a23665"
+            iconBg="bg-secondary-container/20"
+          >
+            <View className="mb-5">
+              <Text className="mb-1 ml-1 text-xs font-semibold uppercase tracking-wider text-gray-500">
                 Menu Category
               </Text>
               <Controller
@@ -244,15 +296,15 @@ export default function AddMenuScreen() {
                 name="menuType"
                 rules={{ required: "Menu category is required" }}
                 render={({ field: { value, onChange } }) => (
-                  <View>
+                  <>
                     <Dropdown
                       style={{
-                        height: 50,
+                        height: 56,
                         borderWidth: 1,
                         borderColor: "#e5e7eb",
-                        borderRadius: 8,
+                        borderRadius: 6,
                         paddingHorizontal: 16,
-                        backgroundColor: "#fafbfc",
+                        backgroundColor: "#ffffff",
                       }}
                       data={MENU_TYPE_OPTIONS}
                       labelField="label"
@@ -262,27 +314,21 @@ export default function AddMenuScreen() {
                       onChange={(item) => onChange(item.value)}
                       selectedTextStyle={{
                         color: "#ee2b8c",
-                        fontSize: 16,
+                        fontSize: 15,
                         fontWeight: "600",
                       }}
-                      placeholderStyle={{
-                        color: "#896175",
-                        fontSize: 16,
-                      }}
-                      itemTextStyle={{
-                        color: "#1a1a1a",
-                        fontSize: 16,
-                      }}
+                      placeholderStyle={{ color: "#9CA3AF", fontSize: 15 }}
+                      itemTextStyle={{ color: "#181114", fontSize: 15 }}
                       activeColor="#fdf2f8"
                       renderItem={(item) => (
                         <View className="flex-row items-center justify-between px-4 py-3">
-                          <Text className="text-base font-medium text-on-surface">
+                          <Text className="text-[15px] font-medium text-[#181114]">
                             {item.label}
                           </Text>
                           {value === item.value && (
                             <MaterialIcons
                               name="check"
-                              size={20}
+                              size={18}
                               color="#ee2b8c"
                             />
                           )}
@@ -290,21 +336,23 @@ export default function AddMenuScreen() {
                       )}
                     />
                     {errors.menuType && (
-                      <Text className="text-red-500 text-xs mt-2">
+                      <Text className="mt-1 ml-1 text-xs text-red-500">
                         {errors.menuType.message}
                       </Text>
                     )}
-                  </View>
+                  </>
                 )}
               />
             </View>
+          </FormSection>
 
-            {/* Submit Button */}
+          {/* Submit */}
+          <View className="mt-6 px-1">
             <TouchableOpacity
               onPress={handleSubmit(onSubmit)}
               disabled={createMenuMutation.isPending}
               activeOpacity={0.8}
-              className="rounded-lg bg-primary py-4 items-center justify-center overflow-hidden"
+              className="rounded-xl bg-primary py-4 items-center justify-center"
               style={shadowStyle}
             >
               {createMenuMutation.isPending ? (
@@ -316,8 +364,8 @@ export default function AddMenuScreen() {
               )}
             </TouchableOpacity>
           </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
+        </View>
+      </KeyboardAwareScrollView>
     </SafeAreaView>
   );
 }
