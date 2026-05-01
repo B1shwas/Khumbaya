@@ -23,6 +23,8 @@ export interface Event {
   rsvpDeadline?: string;
 }
 
+export type SubEvent = Event;
+
 export type EventRole = "Vendor" | "Organizer" | "Guest";
 export type EventTab = "upcoming" | "invited" | "completed";
 

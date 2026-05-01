@@ -28,7 +28,7 @@ const formatDayHeader = (dateStr?: string | null): string => {
 
 type ListItem =
   | { type: "header"; label: string; key: string }
-  | { type: "card"; item: SubEvent; index: number; total: number; key: string };
+  | { type: "card"; item: SubEvent; key: string };
 
 export default function ListSubEvent() {
   const router = useRouter();
@@ -56,18 +56,8 @@ export default function ListSubEvent() {
   const listData = useMemo((): ListItem[] => {
     const result: ListItem[] = [];
     let lastDay = "";
-    let dayItems: SubEvent[] = [];
-
-    // First pass: collect per-day groups to know per-day totals
-    const dayMap = new Map<string, SubEvent[]>();
-    for (const item of sorted) {
-      const dayKey = getCalendarDay(item.startDateTime);
-      if (!dayMap.has(dayKey)) dayMap.set(dayKey, []);
-      dayMap.get(dayKey)!.push(item);
-    }
-
-    // Second pass: build flat list with headers
     const seen = new Set<string>();
+
     for (const item of sorted) {
       const dayKey = getCalendarDay(item.startDateTime);
       if (dayKey !== lastDay) {
@@ -81,15 +71,7 @@ export default function ListSubEvent() {
         }
         lastDay = dayKey;
       }
-      const dayTotal = dayMap.get(dayKey)?.length ?? 1;
-      const dayIndex = dayMap.get(dayKey)?.indexOf(item) ?? 0;
-      result.push({
-        type: "card",
-        item,
-        index: dayIndex,
-        total: dayTotal,
-        key: String(item.id),
-      });
+      result.push({ type: "card", item, key: String(item.id) });
     }
 
     return result;
@@ -128,8 +110,6 @@ export default function ListSubEvent() {
             return (
               <SubEventCard
                 item={item.item}
-                index={item.index}
-                total={item.total}
                 eventId={eventId as string}
               />
             );
