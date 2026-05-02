@@ -279,35 +279,35 @@ export default function HotelManagementScreen() {
                 <MaterialIcons name="keyboard-arrow-left" size={32} color="#ee2b8c" />
               </TouchableOpacity>
 
-            
+
             </View>
           ),
           headerTitle: isHeaderSearchActive
             ? () => (
-                <View className="flex-row items-center bg-white rounded-xl border border-gray-200 px-2 h-11 w-[232px]">
-                  <Ionicons
-                    name="search-outline"
-                    size={15}
-                    color="#9CA3AF"
-                    style={{ marginRight: 4 }}
-                  />
-                  <TextInput
-                    autoFocus
-                    className="flex-1 h-10 text-[14px] text-gray-900 font-jakarta"
-                    placeholder="Search guest, phone, room…"
-                    placeholderTextColor="#9CA3AF"
-                    value={searchText}
-                    onChangeText={setSearchText}
-                    returnKeyType="search"
-                    style={{ paddingVertical: 0, margin: 0 }}
-                  />
-                </View>
-              )
+              <View className="flex-row items-center bg-white rounded-xl border border-gray-200 px-2 h-11 w-[232px]">
+                <Ionicons
+                  name="search-outline"
+                  size={15}
+                  color="#9CA3AF"
+                  style={{ marginRight: 4 }}
+                />
+                <TextInput
+                  autoFocus
+                  className="flex-1 h-10 text-[14px] text-gray-900 font-jakarta"
+                  placeholder="Search guest, phone, room…"
+                  placeholderTextColor="#9CA3AF"
+                  value={searchText}
+                  onChangeText={setSearchText}
+                  returnKeyType="search"
+                  style={{ paddingVertical: 0, margin: 0 }}
+                />
+              </View>
+            )
             : "Hotel Management",
-          headerTitleAlign: !isHeaderSearchActive?"center":"left",
+          headerTitleAlign: !isHeaderSearchActive ? "center" : "left",
           headerRight: () => (
             <View className="flex-row items-center gap-3">
-                {!isHeaderSearchActive && (
+              {!isHeaderSearchActive && (
                 <TouchableOpacity
                   onPress={() => setIsHeaderSearchActive(true)}
                   className="h-9 w-9 rounded-lg border border-gray-200 bg-white items-center justify-center"
@@ -317,11 +317,10 @@ export default function HotelManagementScreen() {
               )}
               <TouchableOpacity
                 onPress={() => setIsCategoryModalVisible(true)}
-                className={`h-9 w-9 rounded-lg border items-center justify-center ${
-                  selectedCategory !== "all"
-                    ? "bg-primary border-primary/30"
-                    : "bg-white border-gray-200"
-                }`}
+                className={`h-9 w-9 rounded-lg border items-center justify-center ${selectedCategory !== "all"
+                  ? "bg-primary border-primary/30"
+                  : "bg-white border-gray-200"
+                  }`}
               >
                 <Ionicons
                   name="funnel"

@@ -1,4 +1,3 @@
-import LocationPicker from "@/src/components/ui/LocationPicker";
 import { Text } from "@/src/components/ui/Text";
 import { photos } from "@/src/constants/gallery";
 import { useCreateBusiness } from "@/src/features/business";
@@ -38,8 +37,6 @@ export default function CreateBusinessScreen() {
     description: "",
     city: "",
     country: "",
-    // latitude: "",
-    // longitude: "",
     vendorType: "",
     vendorCategoryId: "",
     categoryDetails: {},
@@ -61,7 +58,8 @@ export default function CreateBusinessScreen() {
       categoryDetails: { ...prev.categoryDetails, [key]: value },
     }));
 
-  const handleSubmit = () => {
+
+  const handleSubmit = async () => {
     if (!form?.businessName?.trim()) {
       Alert.alert("Required", "Please enter a business name.");
       return;
@@ -75,6 +73,7 @@ export default function CreateBusinessScreen() {
       return;
     }
 
+
     createBusiness.mutate(
       {
         businessName: form.businessName.trim(),
@@ -83,8 +82,6 @@ export default function CreateBusinessScreen() {
         cover: coverImage ?? photos[Math.floor(((Math.random() * 1000) % 6) + 1)].url,
         city: form.city.trim() || undefined,
         country: form.country.trim() || undefined,
-        // latitude: form.latitude ? parseFloat(form.latitude) : undefined,
-        // longitude: form.longitude ? parseFloat(form.longitude) : undefined,
         categoryDetails: form.categoryDetails,
         email: form.email.trim() || undefined,
         contactPhone: form.contactPhone.trim() || undefined,
@@ -509,15 +506,6 @@ export default function CreateBusinessScreen() {
               </View>
             </View>
           </View>
-
-          {/* Location Pin — map picker */}
-          <LocationPicker
-            latitude="27.7172"
-            longitude="85.3240"
-            onChange={(lat, lng) =>
-              setForm((prev) => ({ ...prev, latitude: lat, longitude: lng }))
-            }
-          />
         </View>
 
         {/* Submit — inside scroll so it's reachable at the end */}

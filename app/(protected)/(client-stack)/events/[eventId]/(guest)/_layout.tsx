@@ -22,7 +22,7 @@ export default function GuestEventLayout() {
         headerLeft: headerBackButton,
       }}
     >
-      <Stack.Screen name="index" options={{ title: "Event Details" }} />
+      <Stack.Screen name="index" options={{ headerShown: false }} />
       <Stack.Screen name="rsvp/index" options={{ title: "My RSVP" }} />
       <Stack.Screen name="accommodation" options={{ title: "Accommodation" }} />
       <Stack.Screen name="family-rsvp" options={{ title: "Family RSVP" }} />

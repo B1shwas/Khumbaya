@@ -1,5 +1,6 @@
 // Accommodation Types
 
+//TODO: update this in the feature not in the global type state 
 export interface Room {
   id: string;
   name: string;

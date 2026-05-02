@@ -70,20 +70,13 @@ export default function VendorDetailed() {
   useEffect(() => {
     const biz = businessWithAttribute?.businessInformation;
     if (!biz) return;
-    // if (biz.latitude != null && biz.longitude != null) {
-    //   Location.reverseGeocodeAsync({
-    //     latitude: Number(biz.latitude),
-    //     longitude: Number(biz.longitude),
-    //   }).then((results) => {
-    //     const r = results[0];
-    //     if (!r) return;
-    //     const parts = [r.name, r.district, r.city, r.region, r.country].filter(Boolean);
-    //     const label = parts.slice(0, 3).join(", ");
-    //     if (label) setLocationText(label);
-    //   }).catch(() => {});
-    // } else {
-    //   setLocationText(biz.location ?? (biz.city && biz.country ? `${biz.city}, ${biz.country}` : "—"));
-    // }
+    if (biz.location) {
+      setLocationText(biz.location);
+    } else if (biz.city && biz.country) {
+      setLocationText(`${biz.city}, ${biz.country}`);
+    } else {
+      setLocationText("—");
+    }
   }, [businessWithAttribute]);
 
   if (isLoading) {
@@ -238,33 +231,7 @@ export default function VendorDetailed() {
           <ServiceInfoSection service={serviceAttr} category={biz.category as BusinessCategory ?? null} />
         )}
 
-        {/* Location map */}
-        {(() => {
-          // const lat = biz.latitude != null ? parseFloat(String(biz.latitude)) : NaN;
-          // const lng = biz.longitude != null ? parseFloat(String(biz.longitude)) : NaN;
-          // const hasExactCoords = !isNaN(lat) && !isNaN(lng);
-          // const locationQuery = hasExactCoords
-          //   ? `${lat},${lng}`
-          //   : biz.city && biz.country
-          //     ? `${biz.city}, ${biz.country}`
-          //     : biz.city ?? biz.country ?? biz.location ?? null;
-          // if (!locationQuery) return null;
-          // return (
-          //   <View className="mt-2 bg-white px-4 pt-5 pb-4">
-          //     <View className="flex-row items-center gap-2 mb-3">
-          //       <View className="h-7 w-7 rounded-lg bg-primary/10 items-center justify-center">
-          //         <MaterialIcons name="location-on" size={15} color="#ee2b8c" />
-          //       </View>
-          //       <Text className="text-xs font-bold text-gray-400 uppercase tracking-widest">Location</Text>
-          //     </View>
-          //     <BusinessMap
-          //       locationQuery={locationQuery}
-          //       // isApproximate={!hasExactCoords}
-          //       height={200}
-          //     />
-          //   </View>
-          // );
-        })()}
+
 
         {/* Gallery */}
         <View className="mt-2 bg-white px-4 pt-5 pb-4">
