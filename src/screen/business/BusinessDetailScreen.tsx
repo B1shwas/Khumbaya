@@ -1,4 +1,4 @@
-﻿import { HeroSection } from "@/src/components/business/[businessId]/Hero";
+import { HeroSection } from "@/src/components/business/[businessId]/Hero";
 import { LatestReviewSection } from "@/src/components/business/[businessId]/LatestReview";
 import ServiceDetailsSection from "@/src/components/business/[businessId]/ServiceDetailsScreen";
 import VenueDetailsSection from "@/src/components/business/[businessId]/VenueDetailsSection";
@@ -8,25 +8,27 @@ import { useBusinessDraftStore } from "@/src/features/business/store/useBusiness
 import {
   BusinessRequest,
   OtherServiceAttribute,
-  VenueAttribute,
+  VenueAttribute
 } from "@/src/features/business/types";
 import { useReviews } from "@/src/features/review/hooks/use-review";
-import { ReviewResponse } from "@/src/features/review/types";
 import { shadowStyle } from "@/src/utils/helper";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect } from "react";
 import {
-  ActivityIndicator,
-  Alert,
-  Image,
-  ScrollView,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Alert,
+    Image,
+    ScrollView,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const FALLBACK_AVATAR = "https://i.pravatar.cc/150?img=12";
+// ─── Hero ────────────────────────────────────────────────────────────────────
+
+// ─── Active Requests ──────────────────────────────────────────────────────────
 
 function RequestCard({ request }: { request: BusinessRequest }) {
   const isPending = request.status === "pending";
@@ -147,6 +149,7 @@ function AvailabilityCalendar({
         </Text>
       </View>
 
+      {/* Day labels */}
       <View className="flex-row mb-1">
         {DAY_LABELS.map((d, i) => (
           <View key={i} style={{ flex: 1, alignItems: "center" }}>
@@ -157,6 +160,7 @@ function AvailabilityCalendar({
         ))}
       </View>
 
+      {/* Weeks */}
       {weeks.map((week, wi) => (
         <View key={wi} className="flex-row mb-1">
           {week.map((day, di) => {
@@ -189,6 +193,7 @@ function AvailabilityCalendar({
         </View>
       ))}
 
+      {/* Legend */}
       <View className="flex-row gap-4 mt-2 pt-2 border-t border-gray-100">
         <View className="flex-row items-center gap-1.5">
           <View className="w-3 h-3 rounded-full bg-primary" />
@@ -244,17 +249,14 @@ export default function BusinessDetailsScreen() {
     if (!businessWithAttribute) return;
     Alert.alert(
       "Delete Business",
-      `Are you sure you want to delete "${
-        businessWithAttribute.businessInformation.businessName
-      }"? This action cannot be undone.`,
+      `Are you sure you want to delete "${businessWithAttribute.businessInformation.businessName}"? This action cannot be undone.`,
       [
         { text: "Cancel", style: "cancel" },
         {
           text: "Delete",
           style: "destructive",
           onPress: () => {
-            if (!businessId) return;
-            deleteBusiness.mutate(businessId, {
+            deleteBusiness.mutate(businessId!, {
               onSuccess: () => {
                 Alert.alert("Deleted", "Business deleted successfully.", [
                   { text: "OK", onPress: () => router.back() },
@@ -294,6 +296,22 @@ export default function BusinessDetailsScreen() {
     if (!businessWithAttribute?.businessInformation?.id) return;
     router.push({
       pathname: `/business/[businessId]/venue/create`,
+      params: {
+        businessId: String(businessWithAttribute.businessInformation.id),
+        mode: "create",
+
+      }
+    }
+    );
+  }, [businessWithAttribute, router]);
+
+  const handleEditServicePress = useCallback((service: OtherServiceAttribute) => {
+    if (!businessWithAttribute?.businessInformation?.id || !service?.id) {
+      return;
+    }
+
+    router.push({
+      pathname: "/business/[businessId]/service/[serviceId]/update",
       params: {
         businessId: String(businessWithAttribute.businessInformation.id),
         mode: "create",
@@ -341,7 +359,7 @@ export default function BusinessDetailsScreen() {
   const reviewCount = reviewData?.totalItems ?? 0;
 
   const mappedReviews =
-    reviewData?.items?.map((review: ReviewResponse) => ({
+    reviewData?.items?.map((review: { id: any; reviewerName: any; businessAvatar: any; rating: any; description: any; createdAt: string | number | Date; }) => ({
       id: String(review.id),
       reviewerName: review.reviewerName ?? "Anonymous",
       reviewerAvatarUrl: review.businessAvatar ?? FALLBACK_AVATAR,
@@ -374,6 +392,7 @@ export default function BusinessDetailsScreen() {
         <View className="px-4 gap-4 mt-4">
           <ActiveRequestsSection requests={[]} />
 
+          {/* Category-specific details (from constants) */}
           {businessWithAttribute.businessInformation.category === "Venue" && (
             <VenueDetailsSection
               venues={businessWithAttribute.venueInformation}
@@ -424,6 +443,8 @@ export default function BusinessDetailsScreen() {
           </View>
         </View>
       </ScrollView>
+
+      {/* Dropdown menu overlay */}
     </View>
   );
 }
