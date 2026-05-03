@@ -1,4 +1,3 @@
-import LocationPicker from "@/src/components/ui/LocationPicker";
 import { Text } from "@/src/components/ui/Text";
 import { useGetBusinessById, useUpdateBusiness } from "@/src/features/business";
 import { useBusinessDraftStore } from "@/src/features/business/store/useBusiness";
@@ -35,15 +34,13 @@ export default function EditBusinessScreen() {
   const updateBusiness = useUpdateBusiness();
   const draftBusiness = useBusinessDraftStore((state) => state.business);
   const clearBusinessDraft = useBusinessDraftStore((state) => state.clearBusiness);
-  const businessInfo = draftBusiness ?? business?.business_information ?? null;
+  const businessInfo = draftBusiness ?? business?.businessInformation ?? null;
 
   const [form, setForm] = useState<FormState>({
     businessName: "",
     description: "",
     city: "",
     country: "",
-    // latitude: "",
-    // longitude: "",
     vendorType: "",
     vendorCategoryId: "",
     categoryDetails: {},
@@ -62,19 +59,16 @@ export default function EditBusinessScreen() {
   // Pre-populate form when business data loads
   useEffect(() => {
     if (businessInfo && !initialized) {
-
       setForm({
-        businessName: businessInfo.business_name ?? "",
+        businessName: businessInfo.businessName ?? "",
         description: businessInfo.description ?? "",
         city: businessInfo.city ?? "",
         country: businessInfo.country ?? "",
-        // latitude: businessInfo.latitude != null ? String(businessInfo.latitude) : "",
-        // longitude: businessInfo.longitude != null ? String(businessInfo.longitude) : "",
         vendorType: "",
-        vendorCategoryId: businessInfo.category ?? "",
+        vendorCategoryId: businessInfo.category ?? "" as any,
         categoryDetails: {},
         email: businessInfo.email ?? "",
-        contactPhone: businessInfo.contact_phone ?? "",
+        contactPhone: businessInfo.contactPhone ?? "",
       });
       setCoverImage(businessInfo.cover ?? null);
       setInitialized(true);
@@ -87,7 +81,8 @@ export default function EditBusinessScreen() {
       categoryDetails: { ...prev.categoryDetails, [key]: value },
     }));
 
-  const handleSubmit = () => {
+
+  const handleSubmit = async () => {
     if (!form.businessName.trim()) {
       Alert.alert("Required", "Please enter a business name.");
       return;
@@ -97,23 +92,20 @@ export default function EditBusinessScreen() {
       return;
     }
 
+
     updateBusiness.mutate(
       {
         id: businessId!,
         payload: {
-          business_name: form.businessName.trim(),
+          businessName: form.businessName.trim(),
           description: form.description.trim() || undefined,
           category: form.vendorCategoryId || undefined,
           cover: coverImage ?? undefined,
           city: form.city.trim() || undefined,
           country: form.country.trim() || undefined,
-          // latitude: form.latitude ? parseFloat(form.latitude) : undefined,
-          // longitude: form.longitude ? parseFloat(form.longitude) : undefined,
-          categoryDetails: Object.keys(form.categoryDetails).length > 0
-            ? form.categoryDetails
-            : undefined,
+
           email: form.email.trim() || undefined,
-          contact_phone: form.contactPhone.trim() || undefined,
+          contactPhone: form.contactPhone.trim() || undefined,
         },
       },
       {
@@ -575,18 +567,8 @@ export default function EditBusinessScreen() {
               </View>
             </View>
           </View>
-
-          {/* Location Pin — map picker */}
-          <LocationPicker
-            latitude="27.7172"
-            longitude="85.3240"
-            onChange={(lat, lng) =>
-              setForm((prev) => ({ ...prev, latitude: lat, longitude: lng }))
-            }
-          />
         </View>
       </ScrollView>
-
     </KeyboardAvoidingView>
   );
 }

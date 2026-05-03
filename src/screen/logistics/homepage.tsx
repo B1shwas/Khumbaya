@@ -4,8 +4,8 @@ import { ActivityIndicator, ScrollView, StatusBar, Text, TouchableOpacity, View 
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LogisticsCard } from '../../components/logistics/LogisticsCard';
 import { StatCard } from '../../components/logistics/StatCard';
-import type { EventVehicle } from '../../features/logistics/type';
 import { useGetVehicle } from '../../features/logistics/hooks/use-transport';
+import type { EventVehicle } from '../../features/logistics/type';
 import { formatDate, formatTime } from '../../utils/helper';
 
 const toFleetStatus = (status?: string): 'En Route' | 'Active' | 'In Service' | 'Idle' => {
@@ -146,36 +146,7 @@ const LogisticsHomepage = () => {
             )}
           </View>
 
-          {/* Recent Activity */}
-          {/* <View className="px-6">
-            <View className="flex-row justify-between items-center mb-4">
-              <Text className="text-gray-900 font-jakarta-bold text-lg">Recent Deliveries</Text>
-              <CalendarDays size={18} color="#9ca3af" />
-            </View>
 
-            <View className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
-              {RECENT_DELIVERIES.map((delivery, index) => (
-                <View
-                  key={index}
-                  className={`flex-row justify-between items-center py-3 ${index !== RECENT_DELIVERIES.length - 1 ? 'border-b border-gray-50' : ''}`}
-                >
-                  <View className="flex-row items-center">
-                    <View className="w-8 h-8 bg-gray-50 rounded-lg items-center justify-center mr-3">
-                      <Package size={16} color="#4b5563" />
-                    </View>
-                    <View>
-                      <Text className="text-gray-900 font-jakarta-semibold text-sm">{delivery.item}</Text>
-                      <Text className="text-gray-400 font-jakarta-medium text-xs">{delivery.id}</Text>
-                    </View>
-                  </View>
-                  <View className="items-end">
-                    <Text className="text-green-600 font-jakarta-bold text-xs">{delivery.status}</Text>
-                    <Text className="text-gray-400 font-jakarta text-[10px]">{delivery.time}</Text>
-                  </View>
-                </View>
-              ))}
-            </View>
-          </View> */}
         </ScrollView>
 
       </View>

@@ -1,10 +1,10 @@
 import { Text } from "@/src/components/ui/Text";
-import { VenueAttribute } from "@/src/constants/business";
 import {
   useCreateBusinessVenue,
   useGetBusinessById,
   useUpdateBusinessVenue,
 } from "@/src/features/business";
+import { VenueAttribute } from "@/src/features/business/types";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useMemo } from "react";
@@ -35,39 +35,39 @@ const VENUE_TYPE_OPTIONS = [
 ].map((label) => ({ label, value: label }));
 
 type VenueFormState = {
-  venue_name: string;
-  venue_type: string;
+  venueName: string;
+  venueType: string;
   capacity: string;
-  area_sqft: string;
-  price_per_hour: string;
-  min_booking_hours: string;
-  max_booking_hours: string;
-  rooms_available: string;
-  sound_limit_db: string;
-  has_catering: boolean;
-  has_av_equipment: boolean;
-  is_outDoor: boolean;
+  areaSqft: string;
+  pricePerhour: string;
+  minBookinghours: string;
+  maxBookinghours: string;
+  roomsAvailable: string;
+  soundLimitdb: string;
+  hasCatering: boolean;
+  hasAvequipment: boolean;
+  isOutDoor: boolean;
   parking: boolean;
-  valet_available: boolean;
-  alcohol_allowed: boolean;
+  valetAvailable: boolean;
+  alcoholAllowed: boolean;
 };
 
 const EMPTY_FORM: VenueFormState = {
-  venue_name: "",
-  venue_type: "",
+  venueName: "",
+  venueType: "",
   capacity: "",
-  area_sqft: "",
-  price_per_hour: "",
-  min_booking_hours: "",
-  max_booking_hours: "",
-  rooms_available: "",
-  sound_limit_db: "",
-  has_catering: false,
-  has_av_equipment: false,
-  is_outDoor: false,
+  areaSqft: "",
+  pricePerhour: "",
+  minBookinghours: "",
+  maxBookinghours: "",
+  roomsAvailable: "",
+  soundLimitdb: "",
+  hasCatering: false,
+  hasAvequipment: false,
+  isOutDoor: false,
   parking: false,
-  valet_available: false,
-  alcohol_allowed: false,
+  valetAvailable: false,
+  alcoholAllowed: false,
 };
 
 function toFormValue(value: number | null) {
@@ -76,21 +76,21 @@ function toFormValue(value: number | null) {
 
 function mapVenueToForm(venue: VenueAttribute): VenueFormState {
   return {
-    venue_name: venue.venue_name ?? "",
-    venue_type: venue.venue_type ?? "",
+    venueName: venue.venueName ?? "",
+    venueType: venue.venueType ?? "",
     capacity: toFormValue(venue.capacity),
-    area_sqft: toFormValue(venue.area_sqft),
-    price_per_hour: toFormValue(venue.price_per_hour),
-    min_booking_hours: toFormValue(venue.min_booking_hours),
-    max_booking_hours: toFormValue(venue.max_booking_hours),
-    rooms_available: toFormValue(venue.rooms_available),
-    sound_limit_db: toFormValue(venue.sound_limit_db),
-    has_catering: venue.has_catering,
-    has_av_equipment: venue.has_av_equipment,
-    is_outDoor: venue.is_outDoor,
+    areaSqft: toFormValue(venue.areaSqft),
+    pricePerhour: toFormValue(venue.pricePerhour),
+    minBookinghours: toFormValue(venue.minBookinghours),
+    maxBookinghours: toFormValue(venue.maxBookinghours),
+    roomsAvailable: toFormValue(venue.roomsAvailable),
+    soundLimitdb: toFormValue(venue.soundLimitdb),
+    hasCatering: venue.hasCatering,
+    hasAvequipment: venue.hasAvequipment,
+    isOutDoor: venue.isOutDoor,
     parking: venue.parking,
-    valet_available: venue.valet_available,
-    alcohol_allowed: venue.alcohol_allowed,
+    valetAvailable: venue.valetAvailable,
+    alcoholAllowed: venue.alcoholAllowed,
   };
 }
 
@@ -193,12 +193,12 @@ export default function VenueFormScreen() {
   });
 
   const editingVenue = useMemo(() => {
-    if (!isEditMode || !businessWithAttribute?.venue_information || !venueId) return null;
+    if (!isEditMode || !businessWithAttribute?.venueInformation || !venueId) return null;
     return (
-      businessWithAttribute.venue_information.find((v) => String(v.venue_id) === String(venueId)) ??
+      businessWithAttribute.venueInformation.find((v) => String(v.venueId) === String(venueId)) ??
       null
     );
-  }, [businessWithAttribute?.venue_information, isEditMode, venueId]);
+  }, [businessWithAttribute?.venueInformation, isEditMode, venueId]);
 
   useEffect(() => {
     if (isEditMode) {
@@ -210,27 +210,27 @@ export default function VenueFormScreen() {
   }, [isEditMode, editingVenue, reset]);
 
   const onSubmit = (form: VenueFormState) => {
-    if (!form.venue_type && !isEditMode) {
+    if (!form.venueType && !isEditMode) {
       Alert.alert("Required", "Please select a venue type.");
       return;
     }
 
     const venuePayload = {
-      venue_name: form.venue_name || undefined,
-      venue_type: form.venue_type,
+      venueName: form.venueName || undefined,
+      venueType: form.venueType,
       capacity: toNullableNumber(form.capacity),
-      area_sqft: toNullableNumber(form.area_sqft),
-      price_per_hour: toNullableNumber(form.price_per_hour),
-      min_booking_hours: toNullableNumber(form.min_booking_hours),
-      max_booking_hours: toNullableNumber(form.max_booking_hours),
-      rooms_available: toNullableNumber(form.rooms_available),
-      sound_limit_db: toNullableNumber(form.sound_limit_db),
-      has_catering: form.has_catering,
-      has_av_equipment: form.has_av_equipment,
-      is_outDoor: form.is_outDoor,
+      areaSqft: toNullableNumber(form.areaSqft),
+      pricePerhour: toNullableNumber(form.pricePerhour),
+      minBookinghours: toNullableNumber(form.minBookinghours),
+      maxBookinghours: toNullableNumber(form.maxBookinghours),
+      roomsAvailable: toNullableNumber(form.roomsAvailable),
+      soundLimitdb: toNullableNumber(form.soundLimitdb),
+      hasCatering: form.hasCatering,
+      hasAvequipment: form.hasAvequipment,
+      isOutDoor: form.isOutDoor,
       parking: form.parking,
-      valet_available: form.valet_available,
-      alcohol_allowed: form.alcohol_allowed,
+      valetAvailable: form.valetAvailable,
+      alcoholAllowed: form.alcoholAllowed,
     };
 
     if (isEditMode) {
@@ -266,7 +266,7 @@ export default function VenueFormScreen() {
 
     createBusinessVenue.mutate(
       {
-        business_id: String(businessId),
+        businessId: String(businessId),
         ...venuePayload,
       },
       {
@@ -344,7 +344,7 @@ export default function VenueFormScreen() {
             </Text>
             <Controller
               control={control}
-              name="venue_name"
+              name="venueName"
               render={({ field: { value, onChange } }) => (
                 <View className="flex-row items-center bg-white border border-gray-100 rounded-md shadow-sm overflow-hidden">
                   <MaterialIcons
@@ -374,7 +374,7 @@ export default function VenueFormScreen() {
             </Text>
             <Controller
               control={control}
-              name="venue_type"
+              name="venueType"
               render={({ field: { value, onChange } }) => (
                 <Dropdown
                   style={{
@@ -443,7 +443,7 @@ export default function VenueFormScreen() {
             <View className="flex-1">
               <Controller
                 control={control}
-                name="price_per_hour"
+                name="pricePerhour"
                 render={({ field: { value, onChange } }) => (
                   <NumberInput
                     label="Price Per Hour"
@@ -467,7 +467,7 @@ export default function VenueFormScreen() {
                 <View className="gap-2.5">
                   <Controller
                     control={control}
-                    name="has_catering"
+                    name="hasCatering"
                     render={({ field: { value, onChange } }) => (
                       <ToggleItem
                         label="Catering Available"
@@ -479,7 +479,7 @@ export default function VenueFormScreen() {
                   />
                   <Controller
                     control={control}
-                    name="is_outDoor"
+                    name="isOutDoor"
                     render={({ field: { value, onChange } }) => (
                       <ToggleItem
                         label="Outdoor Venue"
@@ -518,7 +518,7 @@ export default function VenueFormScreen() {
                 <View className="flex-1">
                   <Controller
                     control={control}
-                    name="area_sqft"
+                    name="areaSqft"
                     render={({ field: { value, onChange } }) => (
                       <NumberInput
                         label="Area"
@@ -534,7 +534,7 @@ export default function VenueFormScreen() {
                 <View className="flex-1">
                   <Controller
                     control={control}
-                    name="rooms_available"
+                    name="roomsAvailable"
                     render={({ field: { value, onChange } }) => (
                       <NumberInput
                         label="Rooms Available"
@@ -553,7 +553,7 @@ export default function VenueFormScreen() {
                 <View className="flex-1">
                   <Controller
                     control={control}
-                    name="min_booking_hours"
+                    name="minBookinghours"
                     render={({ field: { value, onChange } }) => (
                       <NumberInput
                         label="Min Booking Hours"
@@ -569,7 +569,7 @@ export default function VenueFormScreen() {
                 <View className="flex-1">
                   <Controller
                     control={control}
-                    name="max_booking_hours"
+                    name="maxBookinghours"
                     render={({ field: { value, onChange } }) => (
                       <NumberInput
                         label="Max Booking Hours"
@@ -586,7 +586,7 @@ export default function VenueFormScreen() {
 
               <Controller
                 control={control}
-                name="sound_limit_db"
+                name="soundLimitdb"
                 render={({ field: { value, onChange } }) => (
                   <NumberInput
                     label="Sound Limit"
@@ -606,7 +606,7 @@ export default function VenueFormScreen() {
                 <View className="gap-2.5">
                   <Controller
                     control={control}
-                    name="has_catering"
+                    name="hasCatering"
                     render={({ field: { value, onChange } }) => (
                       <ToggleItem
                         label="Catering Available"
@@ -618,7 +618,7 @@ export default function VenueFormScreen() {
                   />
                   <Controller
                     control={control}
-                    name="has_av_equipment"
+                    name="hasAvequipment"
                     render={({ field: { value, onChange } }) => (
                       <ToggleItem
                         label="AV Equipment"
@@ -630,7 +630,7 @@ export default function VenueFormScreen() {
                   />
                   <Controller
                     control={control}
-                    name="is_outDoor"
+                    name="isOutDoor"
                     render={({ field: { value, onChange } }) => (
                       <ToggleItem
                         label="Outdoor Venue"
@@ -654,7 +654,7 @@ export default function VenueFormScreen() {
                   />
                   <Controller
                     control={control}
-                    name="valet_available"
+                    name="valetAvailable"
                     render={({ field: { value, onChange } }) => (
                       <ToggleItem
                         label="Valet Service"
@@ -666,7 +666,7 @@ export default function VenueFormScreen() {
                   />
                   <Controller
                     control={control}
-                    name="alcohol_allowed"
+                    name="alcoholAllowed"
                     render={({ field: { value, onChange } }) => (
                       <ToggleItem
                         label="Alcohol Allowed"

@@ -34,11 +34,10 @@ function InfoRow({
   accent?: boolean;
 }) {
   return (
-    <View className="flex-row items-center gap-3 py-3 border-b border-slate-50">
+    <View className="flex-row items-center gap-3 pb-3  border-b border-slate-50">
       <View
-        className={`w-8 h-8 rounded-xl items-center justify-center ${
-          accent ? "bg-pink-50" : "bg-slate-50"
-        }`}
+        className={`w-8 h-8 rounded-xl items-center justify-center ${accent ? "bg-pink-50" : "bg-slate-50"
+          }`}
       >
         <Ionicons
           name={icon}
@@ -51,11 +50,10 @@ function InfoRow({
           {label}
         </Text>
         <Text
-          className={`text-sm font-jakarta-semibold ${
-            value === "Not available" || value === "Not assigned yet"
-              ? "text-slate-400"
-              : "text-slate-800"
-          }`}
+          className={`text-sm font-jakarta-semibold ${value === "Not available" || value === "Not assigned yet"
+            ? "text-slate-400"
+            : "text-slate-800"
+            }`}
         >
           {value}
         </Text>
@@ -63,45 +61,6 @@ function InfoRow({
     </View>
   );
 }
-
-function TravelBlock({
-  type,
-  date,
-  time,
-  location,
-}: {
-  type: "arrival" | "departure";
-  date: string;
-  time: string;
-  location: string;
-}) {
-  const isArrival = type === "arrival";
-  return (
-    <View className="flex-1 rounded-2xl bg-slate-50 p-4">
-      <View className="flex-row items-center gap-1.5 mb-3">
-        <Ionicons
-          name={isArrival ? "arrow-down-circle" : "arrow-up-circle"}
-          size={14}
-          color={isArrival ? "#10b981" : "#f59e0b"}
-        />
-        <Text
-          className={`text-[10px] uppercase tracking-[1.5px] font-jakarta-semibold ${
-            isArrival ? "text-emerald-500" : "text-amber-500"
-          }`}
-        >
-          {isArrival ? "Arrival" : "Departure"}
-        </Text>
-      </View>
-      <Text className="text-sm font-jakarta-bold text-slate-900">{date}</Text>
-      <Text className="text-xs text-slate-500 mt-0.5">{time}</Text>
-      <View className="h-px bg-slate-200 my-2.5" />
-      <Text className="text-xs text-slate-500 leading-relaxed">{location}</Text>
-    </View>
-  );
-}
-
-const formatNullable = (value?: string | null) =>
-  value?.trim() || "Not available";
 
 export default function Lodge() {
   const { eventId } = useLocalSearchParams<{ eventId: string }>();
@@ -177,65 +136,6 @@ export default function Lodge() {
             </Text>
           </Text> */}
         </View>
-
-        {/* Venue Card */}
-        {/* <View className="mx-5 mb-4 rounded-3xl overflow-hidden bg-white border border-slate-100 shadow-sm">
-          <View className="bg-pink-500 px-5 py-4">
-            <Text className="text-[10px] uppercase tracking-[2px] text-pink-200 mb-1">
-              Venue
-            </Text>
-            <Text className="text-lg font-jakarta-bold text-white leading-snug">
-              {eventDetails?.location || "Hotel details not available"}
-            </Text>
-            <Text className="text-sm text-pink-200 mt-0.5">
-              {eventDetails?.title || "Event location"}
-            </Text>
-          </View>
-
-          <View className="px-5 pt-4 pb-5">
-            <InfoRow
-              icon="bed-outline"
-              label="Room allocation"
-              value={guestRecord?.assignedRoom || "Not assigned yet"}
-              accent
-            />
-            <InfoRow
-              icon="shield-checkmark-outline"
-              label="Accommodation status"
-              value={
-                guestRecord?.isAccomodation
-                  ? "Room requested"
-                  : "No room requested"
-              }
-              accent={!!guestRecord?.isAccomodation}
-            />
-            <InfoRow
-              icon="document-text-outline"
-              label="Notes"
-              value={formatNullable(guestRecord?.notes)}
-            />
-          </View>
-        </View> */}
-
-        {/* Travel Block */}
-        {/* <View className="mx-5 mb-4 bg-white rounded-3xl border border-slate-100 p-5">
-          <SectionLabel>Travel schedule</SectionLabel>
-          <View className="flex-row gap-3">
-            <TravelBlock
-              type="arrival"
-              date={formatDate(guestRecord?.arrivalDatetime)}
-              time={formatTime(guestRecord?.arrivalDatetime)}
-              location={formatNullable(guestRecord?.arrivalInfo)}
-            />
-            <TravelBlock
-              type="departure"
-              date={formatDate(guestRecord?.departureDatetime)}
-              time={formatTime(guestRecord?.departureDatetime)}
-              location={formatNullable(guestRecord?.departureInfo)}
-            />
-          </View>
-        </View> */}
-
         {/* Family Section */}
         {hasFamily && (
           <View className="mx-5">
@@ -280,14 +180,12 @@ export default function Lodge() {
                           </Text>
                         </View>
                         <View
-                          className={`rounded-full px-2.5 py-1 ${
-                            hasRoom ? "bg-emerald-50" : "bg-slate-100"
-                          }`}
+                          className={`rounded-full px-2.5 py-1 ${hasRoom ? "bg-emerald-50" : "bg-slate-100"
+                            }`}
                         >
                           <Text
-                            className={`text-[10px] font-jakarta-semibold ${
-                              hasRoom ? "text-emerald-600" : "text-slate-400"
-                            }`}
+                            className={`text-[10px] font-jakarta-semibold ${hasRoom ? "text-emerald-600" : "text-slate-400"
+                              }`}
                           >
                             {hasRoom ? "Requested" : "No room"}
                           </Text>

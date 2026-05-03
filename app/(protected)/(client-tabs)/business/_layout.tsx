@@ -36,7 +36,8 @@ export default function BusinessLayout() {
         name="[businessId]"
         options={{ headerShown: false }}
       />
-    
+
+
     </Stack>
   );
 }

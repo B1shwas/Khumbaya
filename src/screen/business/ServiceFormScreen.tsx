@@ -1,52 +1,52 @@
 import { Text } from "@/src/components/ui/Text";
-import { OtherServiceAttribute } from "@/src/constants/business";
 import {
-    useGetBusinessById,
-    useUpdateBusinessService,
+  useGetBusinessById,
+  useUpdateBusinessService,
 } from "@/src/features/business";
+import { OtherServiceAttribute } from "@/src/features/business/types";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useMemo } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
-    ActivityIndicator,
-    Alert,
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    Switch,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  Switch,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 type ServiceFormState = {
-  artist_type: string;
-  styles_specialized: string;
-  max_bookings_per_day: string;
-  advance_amount: string;
-  travel_charges: string;
-  min_order: string;
-  portfolio_link: string;
-  uses_own_material: boolean;
-  available_for_destination: boolean;
-  customization_available: boolean;
-  serves_veg: boolean;
+  artistType: string;
+  stylesSpecialized: string;
+  maxBookingsPerDay: string;
+  advanceAmount: string;
+  travelCharges: string;
+  minOrder: string;
+  portfolioLink: string;
+  usesOwnMaterial: boolean;
+  availableForDestination: boolean;
+  customizationAvailable: boolean;
+  servicesVeg: boolean;
 };
 
 const EMPTY_FORM: ServiceFormState = {
-  artist_type: "",
-  styles_specialized: "",
-  max_bookings_per_day: "",
-  advance_amount: "",
-  travel_charges: "",
-  min_order: "",
-  portfolio_link: "",
-  uses_own_material: false,
-  available_for_destination: false,
-  customization_available: false,
-  serves_veg: false,
+  artistType: "",
+  stylesSpecialized: "",
+  maxBookingsPerDay: "",
+  advanceAmount: "",
+  travelCharges: "",
+  minOrder: "",
+  portfolioLink: "",
+  usesOwnMaterial: false,
+  availableForDestination: false,
+  customizationAvailable: false,
+  servicesVeg: false,
 };
 
 function toFormValue(value: number | null) {
@@ -62,17 +62,17 @@ function toNullableNumber(value: string): number | null | undefined {
 
 function mapServiceToForm(service: OtherServiceAttribute): ServiceFormState {
   return {
-    artist_type: service.artist_type ?? "",
-    styles_specialized: service.styles_specialized ?? "",
-    max_bookings_per_day: toFormValue(service.max_bookings_per_day),
-    advance_amount: toFormValue(service.advance_amount),
-    travel_charges: toFormValue(service.travel_charges),
-    min_order: toFormValue(service.min_order),
-    portfolio_link: service.portfolio_link ?? "",
-    uses_own_material: service.uses_own_material,
-    available_for_destination: service.available_for_destination,
-    customization_available: service.customization_available,
-    serves_veg: service.serves_veg,
+    artistType: service.artistType ?? "",
+    stylesSpecialized: service.stylesSpecialized ?? "",
+    maxBookingsPerDay: toFormValue(service.maxBookingsPerDay),
+    advanceAmount: toFormValue(service.advanceAmount),
+    travelCharges: toFormValue(service.travelCharges),
+    minOrder: toFormValue(service.minOrder),
+    portfolioLink: service.portfolioLink ?? "",
+    usesOwnMaterial: service.usesOwnMaterial,
+    availableForDestination: service.availableForDestination,
+    customizationAvailable: service.customizationAvailable,
+    servicesVeg: service.servicesVeg,
   };
 }
 
@@ -171,16 +171,16 @@ export default function ServiceFormScreen() {
   });
 
   const editingService = useMemo(() => {
-    if (!isEditMode || !businessWithAttribute?.vendor_services_information || !serviceId) {
+    if (!isEditMode || !businessWithAttribute?.vendorServicesinformation || !serviceId) {
       return null;
     }
 
     return (
-      businessWithAttribute.vendor_services_information.find(
+      businessWithAttribute.vendorServicesinformation.find(
         (service) => String(service.id) === String(serviceId)
       ) ?? null
     );
-  }, [businessWithAttribute?.vendor_services_information, isEditMode, serviceId]);
+  }, [businessWithAttribute?.vendorServicesinformation, isEditMode, serviceId]);
 
   useEffect(() => {
     if (isEditMode) {
@@ -210,17 +210,17 @@ export default function ServiceFormScreen() {
         serviceId,
         businessId,
         payload: {
-          artist_type: form.artist_type.trim() || undefined,
-          styles_specialized: form.styles_specialized.trim() || undefined,
-          max_bookings_per_day: toNullableNumber(form.max_bookings_per_day),
-          advance_amount: toNullableNumber(form.advance_amount),
-          travel_charges: toNullableNumber(form.travel_charges),
-          min_order: toNullableNumber(form.min_order),
-          portfolio_link: form.portfolio_link.trim() || undefined,
-          uses_own_material: form.uses_own_material,
-          available_for_destination: form.available_for_destination,
-          customization_available: form.customization_available,
-          serves_veg: form.serves_veg,
+          artistType: form.artistType.trim() || undefined,
+          stylesSpecialized: form.stylesSpecialized.trim() || undefined,
+          maxBookingsPerDay: toNullableNumber(form.maxBookingsPerDay),
+          advanceAmount: toNullableNumber(form.advanceAmount),
+          travelCharges: toNullableNumber(form.travelCharges),
+          minOrder: toNullableNumber(form.minOrder),
+          portfolioLink: form.portfolioLink.trim() || undefined,
+          usesOwnMaterial: form.usesOwnMaterial,
+          availableForDestination: form.availableForDestination,
+          customizationAvailable: form.customizationAvailable,
+          servicesVeg: form.servicesVeg,
         },
       },
       {
@@ -286,7 +286,7 @@ export default function ServiceFormScreen() {
         <View className="gap-5">
           <Controller
             control={control}
-            name="artist_type"
+            name="artistType"
             render={({ field: { value, onChange } }) => (
               <TextField
                 label="Artist Type"
@@ -300,7 +300,7 @@ export default function ServiceFormScreen() {
 
           <Controller
             control={control}
-            name="styles_specialized"
+            name="stylesSpecialized"
             render={({ field: { value, onChange } }) => (
               <TextField
                 label="Styles Specialized"
@@ -316,7 +316,7 @@ export default function ServiceFormScreen() {
             <View className="flex-1">
               <Controller
                 control={control}
-                name="max_bookings_per_day"
+                name="maxBookingsPerDay"
                 render={({ field: { value, onChange } }) => (
                   <TextField
                     label="Max Bookings / Day"
@@ -332,7 +332,7 @@ export default function ServiceFormScreen() {
             <View className="flex-1">
               <Controller
                 control={control}
-                name="advance_amount"
+                name="advanceAmount"
                 render={({ field: { value, onChange } }) => (
                   <TextField
                     label="Advance Amount"
@@ -352,7 +352,7 @@ export default function ServiceFormScreen() {
             <View className="flex-1">
               <Controller
                 control={control}
-                name="travel_charges"
+                name="travelCharges"
                 render={({ field: { value, onChange } }) => (
                   <TextField
                     label="Travel Charges"
@@ -369,7 +369,7 @@ export default function ServiceFormScreen() {
             <View className="flex-1">
               <Controller
                 control={control}
-                name="min_order"
+                name="minOrder"
                 render={({ field: { value, onChange } }) => (
                   <TextField
                     label="Minimum Order"
@@ -387,7 +387,7 @@ export default function ServiceFormScreen() {
 
           <Controller
             control={control}
-            name="portfolio_link"
+            name="portfolioLink"
             render={({ field: { value, onChange } }) => (
               <TextField
                 label="Portfolio Link"
@@ -407,7 +407,7 @@ export default function ServiceFormScreen() {
             <View className="gap-2.5">
               <Controller
                 control={control}
-                name="uses_own_material"
+                name="usesOwnMaterial"
                 render={({ field: { value, onChange } }) => (
                   <ToggleItem
                     label="Uses Own Material"
@@ -419,7 +419,7 @@ export default function ServiceFormScreen() {
               />
               <Controller
                 control={control}
-                name="available_for_destination"
+                name="availableForDestination"
                 render={({ field: { value, onChange } }) => (
                   <ToggleItem
                     label="Available for Destination"
@@ -431,7 +431,7 @@ export default function ServiceFormScreen() {
               />
               <Controller
                 control={control}
-                name="customization_available"
+                name="customizationAvailable"
                 render={({ field: { value, onChange } }) => (
                   <ToggleItem
                     label="Customization Available"
@@ -443,7 +443,7 @@ export default function ServiceFormScreen() {
               />
               <Controller
                 control={control}
-                name="serves_veg"
+                name="servicesVeg"
                 render={({ field: { value, onChange } }) => (
                   <ToggleItem
                     label="Serves Veg"

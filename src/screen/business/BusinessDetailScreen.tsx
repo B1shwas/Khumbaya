@@ -2,14 +2,13 @@ import { HeroSection } from "@/src/components/business/[businessId]/Hero";
 import { LatestReviewSection } from "@/src/components/business/[businessId]/LatestReview";
 import ServiceDetailsSection from "@/src/components/business/[businessId]/ServiceDetailsScreen";
 import VenueDetailsSection from "@/src/components/business/[businessId]/VenueDetailsSection";
-import BusinessMap from "@/src/components/ui/BusinessMap";
 import { Text } from "@/src/components/ui/Text";
 import { useDeleteBusiness, useGetBusinessById } from "@/src/features/business";
 import { useBusinessDraftStore } from "@/src/features/business/store/useBusiness";
 import {
-    BusinessRequest,
-    OtherServiceAttribute,
-    VenueAttribute,
+  BusinessRequest,
+  OtherServiceAttribute,
+  VenueAttribute
 } from "@/src/features/business/types";
 import { useReviews } from "@/src/features/review/hooks/use-review";
 import { shadowStyle } from "@/src/utils/helper";
@@ -28,39 +27,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 const FALLBACK_AVATAR = "https://i.pravatar.cc/150?img=12";
 // ─── Hero ────────────────────────────────────────────────────────────────────
-
-function StatCard({
-  label,
-  value,
-  iconName,
-  iconColor,
-  bgColor,
-}: {
-  label: string;
-  value: string;
-  iconName: keyof typeof MaterialIcons.glyphMap;
-  iconColor: string;
-  bgColor: string;
-}) {
-  return (
-    <View
-      className="flex-1 rounded-md p-3 border border-gray-100"
-      style={[shadowStyle, { backgroundColor: bgColor }]}
-    >
-      <MaterialIcons name={iconName} size={20} color={iconColor} />
-      <Text variant="h1" className="text-lg mt-1" style={{ color: iconColor }}>
-        {value}
-      </Text>
-      <Text
-        variant="caption"
-        className="text-[10px] text-[#594048] mt-0.5"
-        numberOfLines={2}
-      >
-        {label}
-      </Text>
-    </View>
-  );
-}
 
 // ─── Active Requests ──────────────────────────────────────────────────────────
 
@@ -272,8 +238,7 @@ export default function BusinessDetailsScreen() {
     if (!businessWithAttribute?.businessInformation) return;
     setBusinessDraft(businessWithAttribute.businessInformation);
     router.push({
-      pathname:
-        "/(protected)/(client-tabs)/business/[businessId]/edit" as never,
+      pathname: "/(protected)/(client-tabs)/business/[businessId]/edit",
       params: {
         businessId: String(businessWithAttribute.businessInformation.id),
       },
@@ -334,6 +299,22 @@ export default function BusinessDetailsScreen() {
       params: {
         businessId: String(businessWithAttribute.businessInformation.id),
         mode: "create",
+
+      }
+    }
+    );
+  }, [businessWithAttribute, router]);
+
+  const handleEditServicePress = useCallback((service: OtherServiceAttribute) => {
+    if (!businessWithAttribute?.businessInformation?.id || !service?.id) {
+      return;
+    }
+
+    router.push({
+      pathname: "/business/[businessId]/service/[serviceId]/update",
+      params: {
+        businessId: String(businessWithAttribute.businessInformation.id),
+        mode: "create",
       },
     });
   }, [businessWithAttribute, router]);
@@ -378,7 +359,7 @@ export default function BusinessDetailsScreen() {
   const reviewCount = reviewData?.totalItems ?? 0;
 
   const mappedReviews =
-    reviewData?.items?.map((review) => ({
+    reviewData?.items?.map((review: { id: any; reviewerName: any; businessAvatar: any; rating: any; description: any; createdAt: string | number | Date; }) => ({
       id: String(review.id),
       reviewerName: review.reviewerName ?? "Anonymous",
       reviewerAvatarUrl: review.businessAvatar ?? FALLBACK_AVATAR,
@@ -410,140 +391,6 @@ export default function BusinessDetailsScreen() {
 
         <View className="px-4 gap-4 mt-4">
           <ActiveRequestsSection requests={[]} />
-
-          <View
-            className="bg-white rounded-2xl border border-gray-100 p-4"
-            style={{ elevation: 2 }}
-          >
-            <View className="flex-row items-center justify-between mb-3">
-              <View>
-                <Text variant="h1" className="text-base text-[#181114]">
-                  Reviews
-                </Text>
-                <Text
-                  variant="caption"
-                  className="text-[11px] text-gray-500 mt-1"
-                >
-                  {reviewCount} review{reviewCount === 1 ? "" : "s"}
-                </Text>
-              </View>
-              <TouchableOpacity
-                activeOpacity={0.8}
-                className="rounded-full border border-gray-200 px-3 py-2"
-                onPress={handleViewAllReviews}
-              >
-                <Text variant="h2" className="text-xs text-[#181114]">
-                  View All
-                </Text>
-              </TouchableOpacity>
-            </View>
-            {latestReview ? (
-              <View className="rounded-2xl bg-gray-50 p-4">
-                <View className="flex-row items-center justify-between mb-3">
-                  <Text variant="h2" className="text-sm text-[#181114]">
-                    Latest rating: {latestReview.rating.toFixed(1)}
-                  </Text>
-                  <View className="flex-row gap-0.5">
-                    {Array.from({ length: 5 }).map((_, index) => (
-                      <MaterialIcons
-                        key={index}
-                        name="star"
-                        size={14}
-                        color={
-                          index < latestReview.rating ? "#ee2b8c" : "#e5e7eb"
-                        }
-                      />
-                    ))}
-                  </View>
-                </View>
-                <Text className="text-sm text-gray-600 leading-6">
-                  "{latestReview.quote || "No review text yet."}"
-                </Text>
-              </View>
-            ) : (
-              <Text variant="caption" className="text-[11px] text-gray-500">
-                No reviews available yet. Submit the first review to get
-                started.
-              </Text>
-            )}
-          </View>
-
-          {/* Location map */}
-          <View
-            className="bg-white rounded-2xl border border-gray-100 overflow-hidden"
-            style={{ elevation: 2 }}
-          >
-            <View className="px-4 pt-4 pb-3 border-b border-gray-100">
-              <Text variant="h1" className="text-base text-[#181114]">
-                Location
-              </Text>
-            </View>
-            {(() => {
-              const biz = businessWithAttribute.business_information;
-              const lat =
-                biz.latitude != null ? parseFloat(String(biz.latitude)) : NaN;
-              const lng =
-                biz.longitude != null ? parseFloat(String(biz.longitude)) : NaN;
-              const hasExactCoords = !isNaN(lat) && !isNaN(lng);
-              const locationQuery = hasExactCoords
-                ? `${lat},${lng}`
-                : biz.city && biz.country
-                  ? `${biz.city}, ${biz.country}`
-                  : (biz.city ?? biz.country ?? biz.location ?? null);
-
-              if (locationQuery) {
-                return (
-                  <View>
-                    <BusinessMap
-                      locationQuery={locationQuery}
-                      isApproximate={!hasExactCoords}
-                      height={220}
-                    />
-                    {!hasExactCoords && (
-                      <TouchableOpacity
-                        onPress={handleEditPress}
-                        activeOpacity={0.8}
-                        className="flex-row items-center gap-2 px-4 py-2.5 bg-amber-50 border-t border-amber-100"
-                      >
-                        <MaterialIcons
-                          name="edit-location-alt"
-                          size={15}
-                          color="#d97706"
-                        />
-                        <Text className="text-amber-700 text-xs font-medium flex-1">
-                          Set exact location in Edit Profile for a precise pin
-                        </Text>
-                        <MaterialIcons
-                          name="chevron-right"
-                          size={15}
-                          color="#d97706"
-                        />
-                      </TouchableOpacity>
-                    )}
-                  </View>
-                );
-              }
-              return (
-                <TouchableOpacity
-                  onPress={handleEditPress}
-                  activeOpacity={0.8}
-                  className="items-center justify-center py-10 gap-2"
-                >
-                  <MaterialIcons
-                    name="add-location-alt"
-                    size={36}
-                    color="#d1d5db"
-                  />
-                  <Text className="text-gray-400 text-sm font-medium">
-                    No location set
-                  </Text>
-                  <Text className="text-[#ee2b8c] text-xs font-semibold">
-                    Tap Edit Profile to add a pin
-                  </Text>
-                </TouchableOpacity>
-              );
-            })()}
-          </View>
 
           {/* Category-specific details (from constants) */}
           {businessWithAttribute.businessInformation.category === "Venue" && (

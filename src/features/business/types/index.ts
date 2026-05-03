@@ -21,6 +21,7 @@ export interface CreateBusinessPayload {
   description?: string;
   city?: string;
   country?: string;
+  location?: string;
   latitude?: number;
   longitude?: number;
   cover?: string;
@@ -32,7 +33,7 @@ export interface CreateBusinessPayload {
 export type  UpdateBusinessPayload = Partial<Omit<Business , "id" | "ownerId" | "createdAt" | "updatedAt">>;
 
 export type UpdateBusinessServicePayload = Partial<
-  Omit<OtherServiceAttribute, "id" | "business_id" | "createdAt" | "updatedAt">
+  Omit<OtherServiceAttribute, "id" | "businessId" | "createdAt" | "updatedAt">
 >;
 
 export type UpdateBusinessVenuePayload = Partial<
@@ -118,6 +119,8 @@ export interface Business {
   avatar?: string | null;
   cover?: string | null;
   location?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
   email?: string | null;
   city?: string | null;
   country?: string | null;
