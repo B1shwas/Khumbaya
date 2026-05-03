@@ -1,6 +1,4 @@
-import EventHighlightTimeline from "@/src/components/event/EventHighlightTimeline";
-import FamilyRsvpCard from "@/src/components/event/FamilyRsvpCard";
-import ServiceGrid from "@/src/components/event/ServiceGrid";
+import NavigateComponent from "@/src/components/event/NavigateComponent";
 import { Text } from "@/src/components/ui/Text";
 import {
   useEventById,
@@ -8,14 +6,11 @@ import {
   useSubEventsOfEvent,
 } from "@/src/features/events/hooks/use-event";
 import { GuestDetailInterface } from "@/src/features/guests/types";
+import EventDetailHero from "@/src/screen/user/View/EventDetailHero";
 import { useRsvpStore } from "@/src/store/useRsvpStore";
-import { EventService } from "@/src/types";
-import { formatDate } from "@/src/utils/helper";
-import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import {
   ActivityIndicator,
-  Image,
   ScrollView,
   TouchableOpacity,
   View,
@@ -23,12 +18,6 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 // this will be replaced by the timelines or we will be creating the highlight (major subevent api)
-
-const DEFAULT_SERVICES: EventService[] = [
-  { id: "lodging", label: "Lodging", icon: "bed-outline" },
-  { id: "transport", label: "Transport", icon: "car-outline" },
-  { id: "meals", label: "Meals", icon: "restaurant-outline" },
-];
 
 const Section = ({
   title,
@@ -72,7 +61,8 @@ export default function GuestEventDetails() {
     useEventResponseWithUser(Number(eventId));
 
   const isFamily = eventResponse?.isFamily ?? false;
-  const responses = (eventResponse?.responses ?? []) as Array<GuestDetailInterface>;
+  const responses = (eventResponse?.responses ??
+    []) as Array<GuestDetailInterface>;
 
   /**
    * Individual invite: the single guest record for the logged-in user.
@@ -124,20 +114,43 @@ export default function GuestEventDetails() {
     router.push(`/(protected)/(client-stack)/events/${eventId}/(guest)/rsvp`);
   };
 
-  const handleServicePress = (serviceId: string) => {
-    const routeMap: Record<string, string> = {
-      lodging: "lodge",
-      transport: "logistic",
-      meals: "food",
-    };
-
-    const page = routeMap[serviceId];
-    if (!page) return;
-
-    router.push(
-      `/(protected)/(client-stack)/events/${eventId}/(guest)/services/${page}`
-    );
-  };
+  const serviceActions = [
+    {
+      id: "lodging",
+      name: "Lodging",
+      icon: "bed-outline",
+      color: "#F59E0B",
+      route: `/(protected)/(client-stack)/events/${eventId}/(guest)/services/lodge`,
+    },
+    {
+      id: "transport",
+      name: "Transport",
+      icon: "cube-outline",
+      color: "#10B981",
+      route: `/(protected)/(client-stack)/events/${eventId}/(guest)/services/logistic`,
+    },
+    {
+      id: "meals",
+      name: "Meals",
+      icon: "restaurant",
+      color: "#F43F5E",
+      route: `/(protected)/(client-stack)/events/${eventId}/(guest)/services/food`,
+    },
+    {
+      id: "highlight",
+      name: "Highlights",
+      icon: "layers-outline",
+      color: "#F97316",
+      route: `/(protected)/(client-stack)/events/${eventId}/(guest)/event-highlight`,
+    },
+    {
+      id: "rsvp",
+      name: "RSVP",
+      icon: "people",
+      color: "#8B5CF6",
+      route: `/(protected)/(client-stack)/events/${eventId}/(guest)/family-rsvp`,
+    },
+  ];
 
   return (
     <SafeAreaView className="flex-1 bg-background-light" edges={["top"]}>
@@ -145,57 +158,36 @@ export default function GuestEventDetails() {
         showsVerticalScrollIndicator={false}
         contentContainerClassName="pb-10"
       >
-        <View className="items-center pb-2 px-5">
-          <View className="w-32 h-32 rounded-full overflow-hidden border-4 border-pink-100">
-            {eventDetails?.imageUrl ? (
-              <Image
-                source={{ uri: eventDetails.imageUrl }}
-                className="w-full h-full"
-                resizeMode="cover"
-              />
-            ) : (
-              <View className="w-full h-full bg-pink-50" />
-            )}
-          </View>
+        <EventDetailHero
+          imageUrl={eventDetails?.imageUrl}
+          status={eventDetails?.status ?? "upcoming"}
+          title={eventDetails?.title}
+          startDateTime={eventDetails?.startDateTime}
+          endDateTime={eventDetails?.endDateTime}
+          location={eventDetails?.location}
+        />
 
-          <Text variant="h1" className="text-center mt-4 text-lg">
-            {eventDetails?.title}
-          </Text>
+        <View className="px-5 pt-6">
+          <Text className="text-lg font-bold mb-3">Manage Event</Text>
 
-          <View className="flex-row items-center gap-1.5 mt-2">
-            <Ionicons name="calendar-outline" size={14} color="#ee2b8c" />
-            <Text variant="caption" className="text-primary">
-              {formatDate(eventDetails?.startDateTime)}
-            </Text>
-          </View>
+          <Section title="Services Offered">
+            <View className="flex-row flex-wrap justify-between gap-3">
+              {serviceActions.map((action) => (
+                <NavigateComponent
+                  key={action.id}
+                  id={action.id}
+                  name={action.name}
+                  icon={action.icon}
+                  color={action.color}
+                  route={action.route}
+                />
+              ))}
+            </View>
+          </Section>
 
-          <View className="flex-row items-center gap-1.5 mt-1">
-            <Ionicons name="location-outline" size={14} color="#6b7280" />
-            <Text variant="caption">{eventDetails?.location}</Text>
-          </View>
-        </View>
-
-        {/* ── Highlights ── */}
-        <Section
-          title="Event Highlights"
-          action="View Full Itinerary"
-          onAction={() => {}}
-        >
-          <EventHighlightTimeline highlights={subEvents} />
-        </Section>
-
-        {/* ── Services ── */}
-        <Section title="Services Offered">
-          <ServiceGrid
-            services={DEFAULT_SERVICES}
-            onServicePress={(service) => handleServicePress(service.id)}
-          />
-        </Section>
-
-        {/* ── RSVP section ── */}
-        <View className="px-5 py-5">
-          {isFamily ? (
-            <View className="gap-4">
+          {/* <View className="mt-4 bg-white rounded-3xl p-5 border border-slate-100 shadow-sm">
+            <Text className="text-lg font-bold mb-4">RSVP</Text>
+            {isFamily ? (
               <FamilyRsvpCard
                 familyName={familyName}
                 members={familyMembers}
@@ -247,67 +239,67 @@ export default function GuestEventDetails() {
                   );
                 }}
               />
-            </View>
-          ) : (
-            <View className="bg-white rounded-md p-6 border border-slate-100 shadow-sm gap-4">
-              <View className="flex-row items-center gap-3">
-                <View
-                  className={`w-10 h-10 rounded-full items-center justify-center ${
-                    hasRsvped ? "bg-green-100" : "bg-pink-100"
-                  }`}
-                >
-                  <Ionicons
-                    name={hasRsvped ? "checkmark-circle" : "mail"}
-                    size={22}
-                    color={hasRsvped ? "#16a34a" : "#ee2b8c"}
-                  />
+            ) : (
+              <View className="bg-white rounded-xl p-5 border border-slate-100 shadow-sm gap-4">
+                <View className="flex-row items-center gap-3">
+                  <View
+                    className={`w-10 h-10 rounded-full items-center justify-center ${
+                      hasRsvped ? "bg-green-100" : "bg-pink-100"
+                    }`}
+                  >
+                    <Ionicons
+                      name={hasRsvped ? "checkmark-circle" : "mail"}
+                      size={22}
+                      color={hasRsvped ? "#16a34a" : "#ee2b8c"}
+                    />
+                  </View>
+                  <View>
+                    <Text className="text-lg font-extrabold text-slate-900 leading-tight">
+                      {hasRsvped ? "Your RSVP" : "Invitation"}
+                    </Text>
+                    <Text className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
+                      {hasRsvped ? "Confirmed" : "Action Required"}
+                    </Text>
+                  </View>
                 </View>
-                <View>
-                  <Text className="text-lg font-extrabold text-slate-900 leading-tight">
-                    {hasRsvped ? "Your RSVP" : "Invitation"}
-                  </Text>
-                  <Text className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
-                    {hasRsvped ? "Confirmed" : "Action Required"}
-                  </Text>
-                </View>
-              </View>
 
-              <Text className="text-sm text-slate-500 leading-relaxed">
-                {hasRsvped
-                  ? "Your response has been recorded. You can update your travel and accommodation details at any time."
-                  : "We'd be honored to have you join us for this special occasion. Please confirm your attendance."}
-              </Text>
+                <Text className="text-sm text-slate-500 leading-relaxed">
+                  {hasRsvped
+                    ? "Your response has been recorded. You can update your travel and accommodation details at any time."
+                    : "We'd be honored to have you join us for this special occasion. Please confirm your attendance."}
+                </Text>
 
-              <View className="flex-row gap-3">
-                <TouchableOpacity
-                  className="flex-1 py-3.5 rounded-md items-center justify-center bg-primary shadow-lg shadow-primary/20 active:scale-[0.98]"
-                  activeOpacity={0.8}
-                  onPress={handleIndividualRsvp}
-                >
-                  <Text className="text-white font-bold text-sm">
-                    {hasRsvped ? "Edit RSVP" : "Confirm Attendance"}
-                  </Text>
-                </TouchableOpacity>
-
-                {(responses[0]?.eventGuest?.assignedRoom ||
-                  responses[0]?.eventGuest?.isArrivalPickupRequired ||
-                  responses[0]?.eventGuest?.isDeparturePickupRequired ||
-                  responses[0]?.eventGuest?.notes ||
-                  responses[0]?.eventGuest?.arrivalInfo ||
-                  responses[0]?.eventGuest?.departureInfo) && (
+                <View className="flex-row gap-3">
                   <TouchableOpacity
-                    className="flex-1 py-3.5 rounded-md items-center justify-center bg-slate-50 border border-slate-200 active:bg-slate-100 active:scale-[0.98]"
+                    className="flex-1 py-3.5 rounded-md items-center justify-center bg-primary shadow-lg shadow-primary/20 active:scale-[0.98]"
                     activeOpacity={0.8}
                     onPress={handleIndividualRsvp}
                   >
-                    <Text className="text-slate-600 font-bold text-sm">
-                      View Data
+                    <Text className="text-white font-bold text-sm">
+                      {hasRsvped ? "Edit RSVP" : "Confirm Attendance"}
                     </Text>
                   </TouchableOpacity>
-                )}
+
+                  {(responses[0]?.eventGuest?.assignedRoom ||
+                    responses[0]?.eventGuest?.isArrivalPickupRequired ||
+                    responses[0]?.eventGuest?.isDeparturePickupRequired ||
+                    responses[0]?.eventGuest?.notes ||
+                    responses[0]?.eventGuest?.arrivalInfo ||
+                    responses[0]?.eventGuest?.departureInfo) && (
+                    <TouchableOpacity
+                      className="flex-1 py-3.5 rounded-md items-center justify-center bg-slate-50 border border-slate-200 active:bg-slate-100 active:scale-[0.98]"
+                      activeOpacity={0.8}
+                      onPress={handleIndividualRsvp}
+                    >
+                      <Text className="text-slate-600 font-bold text-sm">
+                        View Data
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
               </View>
-            </View>
-          )}
+            )}
+          </View> */}
         </View>
       </ScrollView>
     </SafeAreaView>
