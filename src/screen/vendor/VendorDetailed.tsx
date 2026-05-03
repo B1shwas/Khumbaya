@@ -68,6 +68,14 @@ export default function VendorDetailed() {
   const [showGallery, setShowGallery] = useState(false);
   const [activeFilter, setActiveFilter] = useState("All Photos");
   const [showReviewModal, setShowReviewModal] = useState(false);
+  const [reviewToEdit, setReviewToEdit] = useState<
+    | {
+        id: number | string;
+        rating: number;
+        description?: string | null;
+      }
+    | undefined
+  >(undefined);
   const [locationText, setLocationText] = useState("—");
   const { user } = useAuthStore();
   const businessId = Number(resolvedId);
@@ -148,6 +156,24 @@ export default function VendorDetailed() {
     ? reviewData?.items.find((review) => review.userId === user.id)
     : undefined;
   const reviewButtonLabel = userReview ? "Edit Review" : "Write Review";
+
+  const openReviewModal = () => {
+    if (userReview) {
+      setReviewToEdit({
+        id: userReview.id,
+        rating: userReview.rating,
+        description: userReview.description,
+      });
+    } else {
+      setReviewToEdit(undefined);
+    }
+    setShowReviewModal(true);
+  };
+
+  const closeReviewModal = () => {
+    setShowReviewModal(false);
+    setReviewToEdit(undefined);
+  };
 
   const headerImage = biz.cover ?? biz.avatar ?? FALLBACK_HEADER;
   const avatarImage = biz.avatar ?? FALLBACK_AVATAR;
@@ -457,7 +483,7 @@ export default function VendorDetailed() {
             </View>
             {user && (
               <Pressable
-                onPress={() => setShowReviewModal(true)}
+                onPress={openReviewModal}
                 className="flex-row items-center gap-1.5 bg-primary px-3 py-1.5 rounded-full"
                 style={{
                   elevation: 2,
@@ -487,7 +513,7 @@ export default function VendorDetailed() {
                   </Text>
                 </View>
                 <Pressable
-                  onPress={() => setShowReviewModal(true)}
+                  onPress={openReviewModal}
                   className="rounded-full border border-primary px-3 py-2"
                 >
                   <Text className="text-xs text-primary font-semibold">
@@ -624,8 +650,9 @@ export default function VendorDetailed() {
 
       <WriteReviewModal
         visible={showReviewModal}
-        onClose={() => setShowReviewModal(false)}
+        onClose={closeReviewModal}
         businessId={resolvedId}
+        initialReview={reviewToEdit}
       />
 
       {/* Gallery Modal */}
