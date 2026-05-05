@@ -236,7 +236,7 @@ export default function GuestListScreen() {
   const openAddGuestScreen = useCallback(() => {
     if (!eventId) return;
     router.push(
-      `./addguest` as RelativePathString
+      `./addguest` 
     );
   }, [eventId, router]);
 

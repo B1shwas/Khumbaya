@@ -1,4 +1,4 @@
-import { DatePicker } from "@/components/nativewindui/DatePicker";
+import { DateTimeRangePicker } from "@/src/components/ui/DateTimeRangePicker";
 import { Text } from "@/src/components/ui/Text";
 import type { Event } from "@/src/constants/event";
 import {
@@ -8,7 +8,7 @@ import {
 } from "@/src/features/events/hooks/use-event";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import {
   ActivityIndicator,
   Alert,
@@ -50,7 +50,7 @@ export default function SubEventEditScreen() {
   // const { mutateAsync: deleteEventMutate, isPending: isDeleting } =
   //   useDeleteEvent(parsedId);
 
-  const { control, reset, handleSubmit } = useForm<SubEventEditForm>({
+  const { control, reset, handleSubmit, setValue } = useForm<SubEventEditForm>({
     defaultValues: {
       title: "",
       description: "",
@@ -61,6 +61,9 @@ export default function SubEventEditScreen() {
       endDateTime: new Date(),
     },
   });
+
+  const startDateTime = useWatch({ control, name: "startDateTime" });
+  const endDateTime = useWatch({ control, name: "endDateTime" });
 
   useEffect(() => {
     if (!subEvent) return;
@@ -262,36 +265,23 @@ export default function SubEventEditScreen() {
           </View>
 
           <View>
-            <Controller
-              control={control}
-              name="startDateTime"
-              render={({ field: { value, onChange } }) => (
-                <DatePicker
-                  mode="datetime"
-                  value={value}
-                  onChange={(_, date) => date && onChange(date)}
-                  materialDateLabel="Start Date"
-                  materialTimeLabel="Start Time"
-                  materialDateClassName="mb-2"
-                />
-              )}
-            />
-          </View>
-
-          <View>
-            <Controller
-              control={control}
-              name="endDateTime"
-              render={({ field: { value, onChange } }) => (
-                <DatePicker
-                  mode="datetime"
-                  value={value}
-                  onChange={(_, date) => date && onChange(date)}
-                  materialDateLabel="End Date"
-                  materialTimeLabel="End Time"
-                  materialDateClassName="mb-2"
-                />
-              )}
+            <DateTimeRangePicker
+              value={{
+                startDateTime: startDateTime ?? new Date(),
+                endDateTime: endDateTime ?? new Date(),
+              }}
+              onChange={({ startDateTime, endDateTime }) => {
+                setValue("startDateTime", startDateTime, {
+                  shouldDirty: true,
+                  shouldValidate: true,
+                });
+                setValue("endDateTime", endDateTime, {
+                  shouldDirty: true,
+                  shouldValidate: true,
+                });
+              }}
+              startLabel="Start Date & Time"
+              endLabel="End Date & Time"
             />
           </View>
         </View>
