@@ -8,7 +8,7 @@ interface QuickServiceButtonProps {
   name: string;
   icon?: string;
   color: string;
-  route: string;
+  route: RelativePathString;
   className?: string;
 }
 export default function NavigateComponent({
@@ -23,7 +23,7 @@ export default function NavigateComponent({
   return (
     <TouchableOpacity
       className={` flex items-center gap-2 px-4 py-3 bg-white  justify-center dark:bg-surface-dark rounded-xl shadow-sm border border-gray-100 h-[100px] ${className}`}
-      onPress={() => push(route as RelativePathString)}
+      onPress={() => push(route)}
       activeOpacity={0.8}
       style={{ width: "47%" }}
     >

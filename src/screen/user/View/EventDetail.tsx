@@ -67,15 +67,15 @@ const EventDetail = () => {
     }
   };
 
-  const manageActions = [
-    { id: "subevents", name: "Sub Events", icon: "layers-outline", color: "#F97316", route: "./(subevent)" },
-    { id: "guests", name: "Guest Management", icon: "people", color: "#8B5CF6", route: "./guests" },
-    { id: "budget", name: "Budget", icon: "wallet", color: "#10B981", route: "./budget" },
-    { id: "checklist", name: "Checklist", icon: "checkmark-circle-outline", color: "#EC4899", route: "./tasklist" },
-    { id: "catering", name: "Catering", icon: "restaurant", color: "#F43F5E", route: "./catering" },
-    { id: "hotel-management", name: "Hotel Management", icon: "bed-outline", color: "#F59E0B", route: "./hotel" },
-    { id: "logistics", name: "logistics", icon: "cube-outline", color: "#10B981", route: "./(logistics)" },
-    { id: "vendors", name: "Vendors", icon: "business", color: "#3B82F6", route: "./vendor" },
+   const manageActions = [
+    { id: "subevents", name: "Sub Events", icon: "layers-outline", color: "#F97316", route: "./(subevent)" as RelativePathString },
+    { id: "guests", name: "Guest Management", icon: "people", color: "#8B5CF6", route: "./guests" as RelativePathString },
+    { id: "budget", name: "Budget", icon: "wallet", color: "#10B981", route: "./budget" as RelativePathString },
+    { id: "checklist", name: "Checklist", icon: "checkmark-circle-outline", color: "#EC4899", route: "./tasklist" as RelativePathString },
+    { id: "catering", name: "Catering", icon: "restaurant", color: "#F43F5E", route: "./catering" as RelativePathString },
+    { id: "hotel-management", name: "Hotel Management", icon: "bed-outline", color: "#F59E0B", route: "./hotel" as RelativePathString },
+    { id: "logistics", name: "logistics", icon: "cube-outline", color: "#10B981", route: "./(logistics)" as RelativePathString },
+    { id: "vendors", name: "Vendors", icon: "business", color: "#3B82F6", route: "./vendor" as RelativePathString },
   ];
 
   return (

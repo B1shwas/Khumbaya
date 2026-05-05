@@ -1,6 +1,4 @@
-import EventHighlightTimeline from "@/src/components/event/EventHighlightTimeline";
 import FamilyRsvpCard from "@/src/components/event/FamilyRsvpCard";
-import ServiceGrid from "@/src/components/event/ServiceGrid";
 import { Text } from "@/src/components/ui/Text";
 import {
   useEventById,
@@ -10,25 +8,28 @@ import {
 import { GuestDetailInterface } from "@/src/features/guests/types";
 import { useRsvpStore } from "@/src/store/useRsvpStore";
 import { EventService } from "@/src/types";
-import { formatDate } from "@/src/utils/helper";
 import { Ionicons } from "@expo/vector-icons";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { RelativePathString, useLocalSearchParams, useRouter } from "expo-router";
 import {
   ActivityIndicator,
-  Image,
   ScrollView,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import EventDetailHero from "../View/EventDetailHero";
 
 // this will be replaced by the timelines or we will be creating the highlight (major subevent api)
-
-const DEFAULT_SERVICES: EventService[] = [
-  { id: "lodging", label: "Lodging", icon: "bed-outline" },
-  { id: "transport", label: "Transport", icon: "car-outline" },
-  { id: "meals", label: "Meals", icon: "restaurant-outline" },
-];
+   const manageActions = [
+    { id: "subevents", name: "Sub Events", icon: "layers-outline", color: "#F97316", route: "./(subevent)" as RelativePathString},
+    { id: "guests", name: "Guest Management", icon: "people", color: "#8B5CF6", route: "./guests" as RelativePathString },
+    { id: "budget", name: "Budget", icon: "wallet", color: "#10B981", route: "./budget" as RelativePathString },
+    { id: "checklist", name: "Checklist", icon: "checkmark-circle-outline", color: "#EC4899", route: "./tasklist" as RelativePathString },
+    { id: "catering", name: "Catering", icon: "restaurant", color: "#F43F5E", route: "./catering" as RelativePathString },
+    { id: "hotel-management", name: "Hotel Management", icon: "bed-outline", color: "#F59E0B", route: "./hotel" as RelativePathString },
+    { id: "logistics", name: "logistics", icon: "cube-outline", color: "#10B981", route: "./(logistics)" as RelativePathString },
+    { id: "vendors", name: "Vendors", icon: "business", color: "#3B82F6", route: "./vendor" as RelativePathString },
+  ];
 
 const Section = ({
   title,
@@ -61,9 +62,7 @@ const Section = ({
 export default function GuestEventDetails() {
   const router = useRouter();
   const { eventId } = useLocalSearchParams<{ eventId: string }>();
-  const { data: subEvents, isLoading: subEventsLoading } = useSubEventsOfEvent(
-    Number(eventId)
-  );
+ 
   const setDraft = useRsvpStore((s) => s.setDraft);
   const clearDraft = useRsvpStore((s) => s.clearDraft);
 
@@ -74,12 +73,7 @@ export default function GuestEventDetails() {
   const isFamily = eventResponse?.isFamily ?? false;
   const responses = (eventResponse?.responses ?? []) as Array<GuestDetailInterface>;
 
-  /**
-   * Individual invite: the single guest record for the logged-in user.
-   * responses[0] is the only entry when isFamily === false.
-   */
   const myGuestRecord = !isFamily ? (responses[0]?.eventGuest ?? null) : null;
-  console.log("This is the data in the has rsvp in the data   ", myGuestRecord);
   const hasRsvped = isFamily ? true : myGuestRecord !== null;
 
   const familyMembers = responses.map((r) => ({
@@ -108,7 +102,7 @@ export default function GuestEventDetails() {
     eventGuest: r.eventGuest ?? null,
   }));
 
-  if (isLoading || subEventsLoading || responseLoading) {
+  if (isLoading  || responseLoading) {
     return (
       <SafeAreaView
         className="flex-1 bg-background-light items-center justify-center"
@@ -145,52 +139,15 @@ export default function GuestEventDetails() {
         showsVerticalScrollIndicator={false}
         contentContainerClassName="pb-10"
       >
-        <View className="items-center pb-2 px-5">
-          <View className="w-32 h-32 rounded-full overflow-hidden border-4 border-pink-100">
-            {eventDetails?.imageUrl ? (
-              <Image
-                source={{ uri: eventDetails.imageUrl }}
-                className="w-full h-full"
-                resizeMode="cover"
-              />
-            ) : (
-              <View className="w-full h-full bg-pink-50" />
-            )}
-          </View>
-
-          <Text variant="h1" className="text-center mt-4 text-lg">
-            {eventDetails?.title}
-          </Text>
-
-          <View className="flex-row items-center gap-1.5 mt-2">
-            <Ionicons name="calendar-outline" size={14} color="#ee2b8c" />
-            <Text variant="caption" className="text-primary">
-              {formatDate(eventDetails?.startDateTime)}
-            </Text>
-          </View>
-
-          <View className="flex-row items-center gap-1.5 mt-1">
-            <Ionicons name="location-outline" size={14} color="#6b7280" />
-            <Text variant="caption">{eventDetails?.location}</Text>
-          </View>
-        </View>
-
-        {/* ── Highlights ── */}
-        <Section
-          title="Event Highlights"
-          action="View Full Itinerary"
-          onAction={() => {}}
-        >
-          <EventHighlightTimeline highlights={subEvents} />
-        </Section>
-
-        {/* ── Services ── */}
-        <Section title="Services Offered">
-          <ServiceGrid
-            services={DEFAULT_SERVICES}
-            onServicePress={(service) => handleServicePress(service.id)}
-          />
-        </Section>
+       <EventDetailHero
+        imageUrl={eventDetails.imageUrl}
+        status={eventDetails.status}
+        title={eventDetails.title}
+        startDateTime={eventDetails.startDateTime}
+        endDateTime={eventDetails.endDateTime}
+        location={eventDetails.location}
+      />
+    
 
         {/* ── RSVP section ── */}
         <View className="px-5 py-5">
