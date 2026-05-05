@@ -10,19 +10,22 @@ import {
   OtherServiceAttribute,
   VenueAttribute
 } from "@/src/features/business/types";
+import { useReviews } from "@/src/features/review/hooks/use-review";
 import { shadowStyle } from "@/src/utils/helper";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect } from "react";
 import {
-  ActivityIndicator,
-  Alert,
-  Image,
-  ScrollView,
-  TouchableOpacity,
-  View
+    ActivityIndicator,
+    Alert,
+    Image,
+    ScrollView,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+
+const FALLBACK_AVATAR = "https://i.pravatar.cc/150?img=12";
 // ─── Hero ────────────────────────────────────────────────────────────────────
 
 // ─── Active Requests ──────────────────────────────────────────────────────────
@@ -54,13 +57,17 @@ function RequestCard({ request }: { request: BusinessRequest }) {
               activeOpacity={0.85}
               className="bg-primary rounded-lg px-3 py-1.5"
             >
-              <Text variant="h1" className="text-white text-xs">Accept</Text>
+              <Text variant="h1" className="text-white text-xs">
+                Accept
+              </Text>
             </TouchableOpacity>
             <TouchableOpacity
               activeOpacity={0.85}
               className="bg-gray-100 rounded-lg px-3 py-1.5"
             >
-              <Text variant="h1" className="text-gray-500 text-xs">Reject</Text>
+              <Text variant="h1" className="text-gray-500 text-xs">
+                Reject
+              </Text>
             </TouchableOpacity>
           </View>
         ) : (
@@ -86,7 +93,9 @@ function ActiveRequestsSection({ requests }: { requests: BusinessRequest[] }) {
           Active Requests
         </Text>
         <TouchableOpacity activeOpacity={0.7}>
-          <Text variant="h1" className="text-xs text-primary">View All</Text>
+          <Text variant="h1" className="text-xs text-primary">
+            View All
+          </Text>
         </TouchableOpacity>
       </View>
       {requests.length === 0 ? (
@@ -132,7 +141,9 @@ function AvailabilityCalendar({
       style={shadowStyle}
     >
       <View className="flex-row items-center justify-between mb-3">
-        <Text variant="h1" className="text-base text-[#181114]">Availability</Text>
+        <Text variant="h1" className="text-base text-[#181114]">
+          Availability
+        </Text>
         <Text variant="h2" className="text-xs text-[#594048]">
           {monthName} {year}
         </Text>
@@ -142,7 +153,9 @@ function AvailabilityCalendar({
       <View className="flex-row mb-1">
         {DAY_LABELS.map((d, i) => (
           <View key={i} style={{ flex: 1, alignItems: "center" }}>
-            <Text variant="h1" className="text-[10px] text-gray-400">{d}</Text>
+            <Text variant="h1" className="text-[10px] text-gray-400">
+              {d}
+            </Text>
           </View>
         ))}
       </View>
@@ -157,17 +170,19 @@ function AvailabilityCalendar({
             return (
               <View key={di} style={{ flex: 1, alignItems: "center" }}>
                 <View
-                  className={`w-7 h-7 rounded-full items-center justify-center ${isBooked
-                    ? "bg-primary"
-                    : isPending
-                      ? "bg-amber-400"
-                      : "bg-transparent"
-                    }`}
+                  className={`w-7 h-7 rounded-full items-center justify-center ${
+                    isBooked
+                      ? "bg-primary"
+                      : isPending
+                        ? "bg-amber-400"
+                        : "bg-transparent"
+                  }`}
                 >
                   <Text
                     variant="h2"
-                    className={`text-xs ${isBooked || isPending ? "text-white" : "text-[#181114]"
-                      }`}
+                    className={`text-xs ${
+                      isBooked || isPending ? "text-white" : "text-[#181114]"
+                    }`}
                   >
                     {day}
                   </Text>
@@ -197,16 +212,23 @@ function AvailabilityCalendar({
   );
 }
 
-
-
-
 export default function BusinessDetailsScreen() {
   const router = useRouter();
   const { businessId } = useLocalSearchParams<{ businessId: string }>();
-  const { data: businessWithAttribute, isLoading } = useGetBusinessById(businessId ?? "");
+  const businessIdNumber = Number(businessId);
+  const { data: reviewData } = useReviews(
+    Number.isNaN(businessIdNumber)
+      ? undefined
+      : { businessId: businessIdNumber, page: 1, limit: 10 }
+  );
+  const { data: businessWithAttribute, isLoading } = useGetBusinessById(
+    businessId ?? ""
+  );
   const deleteBusiness = useDeleteBusiness();
   const setBusinessDraft = useBusinessDraftStore((state) => state.setBusiness);
-  const clearBusinessDraft = useBusinessDraftStore((state) => state.clearBusiness);
+  const clearBusinessDraft = useBusinessDraftStore(
+    (state) => state.clearBusiness
+  );
 
   useEffect(() => {
     clearBusinessDraft();
@@ -241,7 +263,10 @@ export default function BusinessDetailsScreen() {
                 ]);
               },
               onError: () => {
-                Alert.alert("Error", "Failed to delete business. Please try again.");
+                Alert.alert(
+                  "Error",
+                  "Failed to delete business. Please try again."
+                );
               },
             });
           },
@@ -250,19 +275,22 @@ export default function BusinessDetailsScreen() {
     );
   }, [businessId, businessWithAttribute, deleteBusiness, router]);
 
-  const handleEditVenuePress = useCallback((venue: VenueAttribute) => {
-    if (!businessWithAttribute?.businessInformation?.id || !venue?.venueId) {
-      return;
-    }
-    router.push({
-      pathname: "/business/[businessId]/venue/[venueId]/update",
-      params: {
-        businessId: String(businessWithAttribute.businessInformation.id),
-        venueId: String(venue.venueId),
-        mode: "edit",
-      },
-    });
-  }, [businessWithAttribute, router]);
+  const handleEditVenuePress = useCallback(
+    (venue: VenueAttribute) => {
+      if (!businessWithAttribute?.businessInformation?.id || !venue?.venueId) {
+        return;
+      }
+      router.push({
+        pathname: "/business/[businessId]/venue/[venueId]/update",
+        params: {
+          businessId: String(businessWithAttribute.businessInformation.id),
+          venueId: String(venue.venueId),
+          mode: "edit",
+        },
+      });
+    },
+    [businessWithAttribute, router]
+  );
 
   const handleAddVenuePress = useCallback(() => {
     if (!businessWithAttribute?.businessInformation?.id) return;
@@ -286,11 +314,28 @@ export default function BusinessDetailsScreen() {
       pathname: "/business/[businessId]/service/[serviceId]/update",
       params: {
         businessId: String(businessWithAttribute.businessInformation.id),
-        serviceId: String(service.id),
-        mode: "edit",
+        mode: "create",
       },
     });
   }, [businessWithAttribute, router]);
+
+  const handleEditServicePress = useCallback(
+    (service: OtherServiceAttribute) => {
+      if (!businessWithAttribute?.businessInformation?.id || !service?.id) {
+        return;
+      }
+
+      router.push({
+        pathname: "/business/[businessId]/service/[serviceId]/update",
+        params: {
+          businessId: String(businessWithAttribute.businessInformation.id),
+          serviceId: String(service.id),
+          mode: "edit",
+        },
+      });
+    },
+    [businessWithAttribute, router]
+  );
 
   if (isLoading) {
     return (
@@ -310,6 +355,28 @@ export default function BusinessDetailsScreen() {
       </SafeAreaView>
     );
   }
+
+  const reviewCount = reviewData?.totalItems ?? 0;
+
+  const mappedReviews =
+    reviewData?.items?.map((review: { id: any; reviewerName: any; businessAvatar: any; rating: any; description: any; createdAt: string | number | Date; }) => ({
+      id: String(review.id),
+      reviewerName: review.reviewerName ?? "Anonymous",
+      reviewerAvatarUrl: review.businessAvatar ?? FALLBACK_AVATAR,
+      rating: review.rating,
+      quote: review.description ?? "",
+      date: new Date(review.createdAt).toLocaleDateString(),
+    })) ?? [];
+
+  const latestReview = mappedReviews[0];
+
+  const handleViewAllReviews = () => {
+    if (!businessId) return;
+    router.push({
+      pathname: "/business/[businessId]/reviews",
+      params: { businessId },
+    });
+  };
 
   return (
     <View className="flex-1 bg-[#f8f6f7]">
@@ -333,20 +400,24 @@ export default function BusinessDetailsScreen() {
               onAddVenue={handleAddVenuePress}
             />
           )}
-          {businessWithAttribute.vendorServicesinformation && businessWithAttribute.businessInformation.category !== "Venue" && businessWithAttribute.businessInformation.category != null && (
-            <ServiceDetailsSection
-              service={
-                businessWithAttribute.vendorServicesinformation?.[0]}
-              onEdit={
-                businessWithAttribute.vendorServicesinformation?.[0]
-                  ? () => handleEditServicePress(businessWithAttribute.vendorServicesinformation[0])
-                  : undefined
-              }
-            />
-          )}
+          {businessWithAttribute.vendorServicesinformation &&
+            businessWithAttribute.businessInformation.category !== "Venue" &&
+            businessWithAttribute.businessInformation.category != null && (
+              <ServiceDetailsSection
+                service={businessWithAttribute.vendorServicesinformation?.[0]}
+                onEdit={
+                  businessWithAttribute.vendorServicesinformation?.[0]
+                    ? () =>
+                        handleEditServicePress(
+                          businessWithAttribute.vendorServicesinformation[0]
+                        )
+                    : undefined
+                }
+              />
+            )}
 
           <AvailabilityCalendar dates={undefined} />
-          <LatestReviewSection reviews={[]} />
+          <LatestReviewSection reviews={mappedReviews} />
 
           <View className="flex-row items-center justify-between rounded-2xl border border-red-200 bg-red-50 p-4">
             <View>
@@ -362,7 +433,10 @@ export default function BusinessDetailsScreen() {
               activeOpacity={0.8}
               className="rounded-lg px-4 py-2"
             >
-              <Text variant="h1" className="text-xs uppercase tracking-widest text-red-600">
+              <Text
+                variant="h1"
+                className="text-xs uppercase tracking-widest text-red-600"
+              >
                 Delete
               </Text>
             </TouchableOpacity>
@@ -371,7 +445,6 @@ export default function BusinessDetailsScreen() {
       </ScrollView>
 
       {/* Dropdown menu overlay */}
-
     </View>
   );
 }
