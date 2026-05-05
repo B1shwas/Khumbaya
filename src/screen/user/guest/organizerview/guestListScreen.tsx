@@ -19,7 +19,7 @@ import {
 } from "@/src/features/guests/types";
 import { cn } from "@/src/utils/cn";
 import { Ionicons } from "@expo/vector-icons";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { RelativePathString, useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Alert,
@@ -236,14 +236,14 @@ export default function GuestListScreen() {
   const openAddGuestScreen = useCallback(() => {
     if (!eventId) return;
     router.push(
-      `/(protected)/(client-stack)/events/${eventId}/(organizer)/addguest`
+      `./addguest` as RelativePathString
     );
   }, [eventId, router]);
 
   const openContactPickerScreen = useCallback(() => {
     if (!eventId) return;
     router.push(
-      `/(protected)/(client-stack)/events/${eventId}/(organizer)/contactpicker`
+      `./contactpicker` as RelativePathString
     );
   }, [eventId, router]);
 
@@ -251,7 +251,7 @@ export default function GuestListScreen() {
     setGuestDetail(guest);
     router.push({
       pathname:
-        `/(protected)/(client-stack)/events/${eventId}/(organizer)/guests/${guest.user.id}/guest-details` as any,
+        `./${guest.user.id}/guest-details` as RelativePathString ,
       params: { guest: JSON.stringify(guest) },
     });
   };
@@ -321,8 +321,8 @@ export default function GuestListScreen() {
     setFamilyGuest(familyData);
     router.push({
       pathname:
-        `/(protected)/(client-stack)/events/${eventId}/(organizer)/guests/familymember` as any,
-      params: { family: JSON.stringify(familyData) },
+        `./familymember` as RelativePathString,
+    params: { family: JSON.stringify(familyData) },
     });
   };
 

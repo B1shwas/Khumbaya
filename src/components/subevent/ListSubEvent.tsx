@@ -6,7 +6,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useMemo } from "react";
 import { FlatList, Text, TouchableOpacity, View } from "react-native";
-
+//TODO: Helper ma rakhna data
 const getCalendarDay = (dateStr?: string | null): string => {
   if (!dateStr) return "";
   const d = new Date(dateStr);
@@ -121,7 +121,7 @@ export default function ListSubEvent() {
         onPress={() => {
           router.push({
             pathname:
-              "/(protected)/(client-stack)/events/[eventId]/(organizer)/subevent-create",
+              "./subevent-create",
             params: { eventId: eventId as string },
           });
         }}

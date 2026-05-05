@@ -15,6 +15,7 @@ export default function EventGuestManagementLayout() {
     >
       <Stack.Screen name="index" options={{ title: "Guest Management" }} />
       <Stack.Screen name="familymember" options={{ title: "Family Members" }} />
+      <Stack.Screen name="addguest" options={{ title: "Add Guest" }} />
       <Stack.Screen name="[id]" options={{ headerShown:false}} />
     </Stack>
   );

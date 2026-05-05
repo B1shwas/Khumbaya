@@ -1,13 +1,12 @@
 import FamilyRsvpCard from "@/src/components/event/FamilyRsvpCard";
+import NavigateComponent from "@/src/components/event/NavigateComponent";
 import { Text } from "@/src/components/ui/Text";
 import {
   useEventById,
-  useEventResponseWithUser,
-  useSubEventsOfEvent,
+  useEventResponseWithUser
 } from "@/src/features/events/hooks/use-event";
 import { GuestDetailInterface } from "@/src/features/guests/types";
 import { useRsvpStore } from "@/src/store/useRsvpStore";
-import { EventService } from "@/src/types";
 import { Ionicons } from "@expo/vector-icons";
 import { RelativePathString, useLocalSearchParams, useRouter } from "expo-router";
 import {
@@ -22,42 +21,13 @@ import EventDetailHero from "../View/EventDetailHero";
 // this will be replaced by the timelines or we will be creating the highlight (major subevent api)
    const manageActions = [
     { id: "subevents", name: "Sub Events", icon: "layers-outline", color: "#F97316", route: "./(subevent)" as RelativePathString},
-    { id: "guests", name: "Guest Management", icon: "people", color: "#8B5CF6", route: "./guests" as RelativePathString },
-    { id: "budget", name: "Budget", icon: "wallet", color: "#10B981", route: "./budget" as RelativePathString },
     { id: "checklist", name: "Checklist", icon: "checkmark-circle-outline", color: "#EC4899", route: "./tasklist" as RelativePathString },
     { id: "catering", name: "Catering", icon: "restaurant", color: "#F43F5E", route: "./catering" as RelativePathString },
     { id: "hotel-management", name: "Hotel Management", icon: "bed-outline", color: "#F59E0B", route: "./hotel" as RelativePathString },
     { id: "logistics", name: "logistics", icon: "cube-outline", color: "#10B981", route: "./(logistics)" as RelativePathString },
-    { id: "vendors", name: "Vendors", icon: "business", color: "#3B82F6", route: "./vendor" as RelativePathString },
   ];
 
-const Section = ({
-  title,
-  action,
-  onAction,
-  children,
-}: {
-  title: string;
-  action?: string;
-  onAction?: () => void;
-  children: React.ReactNode;
-}) => (
-  <View className="px-5 py-5">
-    <View className="flex-row items-center justify-between mb-3">
-      <Text variant="h2" className="text-xl">
-        {title}
-      </Text>
-      {action && onAction && (
-        <TouchableOpacity onPress={onAction} activeOpacity={0.7}>
-          <Text variant="caption" className="text-primary">
-            {action}
-          </Text>
-        </TouchableOpacity>
-      )}
-    </View>
-    {children}
-  </View>
-);
+
 
 export default function GuestEventDetails() {
   const router = useRouter();
@@ -147,8 +117,14 @@ export default function GuestEventDetails() {
         endDateTime={eventDetails.endDateTime}
         location={eventDetails.location}
       />
-    
-
+       <View className="mt-6 px-4 pb-4">
+         <Text className="text-lg font-bold mb-3">Manage Event</Text>
+         <View className="flex-row flex-wrap gap-3 justify-center">
+           {manageActions.map((action) => (
+             <NavigateComponent key={action.id} {...action} />
+           ))}      
+         </View>
+       </View>
         {/* ── RSVP section ── */}
         <View className="px-5 py-5">
           {isFamily ? (
