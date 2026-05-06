@@ -1,5 +1,6 @@
 import { Text } from "@/src/components/ui/Text";
 import { useReviews } from "@/src/features/review/hooks/use-review";
+import { useAuthStore } from "@/src/store/AuthStore";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams } from "expo-router";
 import { ActivityIndicator, FlatList, Image, View } from "react-native";
@@ -10,6 +11,7 @@ const FALLBACK_AVATAR =
 
 export default function BusinessReviewListScreen() {
   const { businessId } = useLocalSearchParams<{ businessId: string }>();
+  const { user } = useAuthStore();
   const businessIdNumber = Number(businessId);
 
   const { data, isLoading, isError } = useReviews(
@@ -21,8 +23,17 @@ export default function BusinessReviewListScreen() {
   const reviews =
     data?.items.map((review) => ({
       id: String(review.id),
-      reviewerName: review.reviewerName ?? "Anonymous",
-      reviewerAvatarUrl: review.businessAvatar ?? FALLBACK_AVATAR,
+      reviewerName:
+        review.reviewerName?.trim() ||
+        review.user?.username?.trim() ||
+        (review.userId === user?.id ? user.username?.trim() : "") ||
+        "Anonymous",
+      reviewerAvatarUrl:
+        review.reviewerAvatar ??
+        review.user?.photo ??
+        (review.userId === user?.id ? user.photo : null) ??
+        review.businessAvatar ??
+        FALLBACK_AVATAR,
       rating: review.rating,
       quote: review.description ?? "",
       date: new Date(review.createdAt).toLocaleDateString(),

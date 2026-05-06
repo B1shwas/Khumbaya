@@ -8,7 +8,13 @@ export type ReviewResponse = {
   updatedAt: string;
   businessName?: string;
   businessAvatar?: string | null;
+  reviewerAvatar?: string | null;
   reviewerName?: string;
+  user?: {
+    id?: number;
+    username?: string | null;
+    photo?: string | null;
+  } | null;
 };
 
 export type ReviewListResponse = {

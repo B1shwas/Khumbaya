@@ -1,15 +1,12 @@
 import { Text } from "@/src/components/ui/Text";
 import { AvailableSpacesSection } from "@/src/components/vendor/AvailableSpacesSection";
 import { ServiceInfoSection } from "@/src/components/vendor/ServiceInfoSection";
-import { WriteReviewModal } from "@/src/components/vendor/WriteReviewModal";
 import { useGetBusinessById } from "@/src/features/business/hooks/use-business";
 import {
   BusinessCategory,
   OtherServiceAttribute,
 } from "@/src/features/business/types";
-import { useReviews } from "@/src/features/review/hooks/use-review";
-import { useAuthStore } from "@/src/store/AuthStore";
-import { shadowStyle } from "@/src/utils/helper";
+import { ReviewSection } from "@/src/screen/vendor/review";
 import { MaterialIcons } from "@expo/vector-icons";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
@@ -67,27 +64,9 @@ export default function VendorDetailed() {
 
   const [showGallery, setShowGallery] = useState(false);
   const [activeFilter, setActiveFilter] = useState("All Photos");
-  const [showReviewModal, setShowReviewModal] = useState(false);
-  const [reviewToEdit, setReviewToEdit] = useState<
-    | {
-        id: number | string;
-        rating: number;
-        description?: string | null;
-      }
-    | undefined
-  >(undefined);
   const [locationText, setLocationText] = useState("—");
-  const { user } = useAuthStore();
+
   const businessId = Number(resolvedId);
-  const { data: reviewData } = useReviews(
-    Number.isNaN(businessId)
-      ? undefined
-      : {
-          businessId,
-          page: 1,
-          limit: 10,
-        }
-  );
 
   const {
     data: businessWithAttribute,
@@ -133,44 +112,9 @@ export default function VendorDetailed() {
   const biz = businessWithAttribute.businessInformation;
   const portfolio: string[] = [];
   const tags = biz.serviceArea ? [biz.serviceArea] : [];
-  const reviews =
-    reviewData?.items.map((review) => ({
-      id: String(review.id),
-      reviewerName: review.reviewerName ?? "Anonymous",
-      reviewerAvatarUrl: review.businessAvatar ?? FALLBACK_AVATAR,
-      rating: review.rating,
-      quote: review.description ?? "",
-      date: new Date(review.createdAt).toLocaleDateString(),
-      userId: review.userId,
-      reviewId: review.id,
-    })) ?? [];
-  const reviewCount = reviewData?.totalItems ?? reviews.length;
-  const userReview = user
-    ? reviewData?.items.find((review) => review.userId === user.id)
-    : undefined;
-  const reviewButtonLabel = userReview ? "Edit Review" : "Write Review";
-
-  const openReviewModal = () => {
-    if (userReview) {
-      setReviewToEdit({
-        id: userReview.id,
-        rating: userReview.rating,
-        description: userReview.description,
-      });
-    } else {
-      setReviewToEdit(undefined);
-    }
-    setShowReviewModal(true);
-  };
-
-  const closeReviewModal = () => {
-    setShowReviewModal(false);
-    setReviewToEdit(undefined);
-  };
 
   const headerImage = biz.cover ?? biz.avatar ?? FALLBACK_HEADER;
   const avatarImage = biz.avatar ?? FALLBACK_AVATAR;
-  // const locationText = biz.city && biz.country ? `${biz.city}, ${biz.country}` : biz.location ?? "—";
   const serviceAttr =
     businessWithAttribute.vendorServicesinformation?.[0] ??
     EMPTY_SERVICE_FALLBACK;
@@ -258,6 +202,7 @@ export default function VendorDetailed() {
                   resizeMode="cover"
                 />
               </View>
+
               {/* Badges */}
               <View className="flex-row gap-2 pb-1">
                 <View className="flex-row items-center gap-1 bg-green-50 px-2.5 py-1 rounded-full border border-green-100">
@@ -369,8 +314,6 @@ export default function VendorDetailed() {
           />
         )}
 
-
-
         {/* Gallery */}
         <View className="mt-2 bg-white px-4 pt-5 pb-4">
           <View className="flex-row justify-between items-center mb-3">
@@ -441,150 +384,8 @@ export default function VendorDetailed() {
           </View>
         </View>
 
-        {/* Reviews */}
-        <View className="mt-2 bg-white px-4 pt-5 pb-6">
-          <View className="flex-row justify-between items-center mb-4">
-            <View>
-              <Text className="text-lg font-bold text-[#181114]">Reviews</Text>
-              <Text className="text-xs text-gray-400">{reviewCount} total</Text>
-            </View>
-            {user && (
-              <Pressable
-                onPress={openReviewModal}
-                className="flex-row items-center gap-1.5 bg-primary px-3 py-1.5 rounded-full"
-                style={{
-                  elevation: 2,
-                  shadowColor: "#ee2b8c",
-                  shadowOpacity: 0.3,
-                  shadowRadius: 4,
-                  shadowOffset: { width: 0, height: 2 },
-                }}
-              >
-                <MaterialIcons name="edit" size={12} color="#fff" />
-                <Text className="text-white text-xs font-semibold">
-                  {reviewButtonLabel}
-                </Text>
-              </Pressable>
-            )}
-          </View>
-
-          {userReview ? (
-            <View className="mb-4 rounded-3xl border border-primary/20 bg-primary/5 p-4">
-              <View className="flex-row items-center justify-between gap-3 mb-3">
-                <View>
-                  <Text className="text-sm font-semibold text-primary">
-                    Your review
-                  </Text>
-                  <Text className="text-xs text-gray-500 mt-1">
-                    You have already reviewed this vendor.
-                  </Text>
-                </View>
-                <Pressable
-                  onPress={openReviewModal}
-                  className="rounded-full border border-primary px-3 py-2"
-                >
-                  <Text className="text-xs text-primary font-semibold">
-                    Edit
-                  </Text>
-                </Pressable>
-              </View>
-              <View className="rounded-2xl bg-white p-4 border border-primary/10">
-                <View className="flex-row items-center justify-between mb-3">
-                  <Text className="text-sm font-semibold text-[#181114]">
-                    {userReview.reviewerName}
-                  </Text>
-                  <View className="flex-row gap-0.5">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <MaterialIcons
-                        key={`user-review-star-${i}`}
-                        name="star"
-                        size={14}
-                        color={i < userReview.rating ? "#ee2b8c" : "#e5e7eb"}
-                      />
-                    ))}
-                  </View>
-                </View>
-                <Text className="text-sm text-gray-600 leading-6">
-                  {userReview.description || "No review text yet."}
-                </Text>
-              </View>
-            </View>
-          ) : null}
-          {reviews.length === 0 ? (
-            <View className="items-center py-10 bg-gray-50 rounded-2xl">
-              <View className="h-14 w-14 rounded-full bg-gray-100 items-center justify-center mb-3">
-                <MaterialIcons name="rate-review" size={28} color="#d1d5db" />
-              </View>
-              <Text className="text-gray-500 font-semibold text-sm">
-                No reviews yet
-              </Text>
-              <Text className="text-gray-400 text-xs mt-1">
-                Be the first to share your experience
-              </Text>
-            </View>
-          ) : (
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{ gap: 12, paddingBottom: 4 }}
-            >
-              {reviews.map((review) => (
-                <View
-                  key={review.id}
-                  style={[
-                    {
-                      width: 300,
-                      backgroundColor: "#fff",
-                      borderRadius: 16,
-                      padding: 16,
-                      borderWidth: 1,
-                      borderColor: "#f3f4f6",
-                    },
-                    shadowStyle,
-                  ]}
-                >
-                  <View className="flex-row items-center gap-3 mb-3">
-                    <Image
-                      source={{ uri: review.reviewerAvatarUrl }}
-                      className="h-10 w-10 rounded-full bg-gray-100"
-                      resizeMode="cover"
-                    />
-                    <View className="flex-1">
-                      <Text className="text-sm font-semibold text-[#181114]">
-                        {review.reviewerName}
-                      </Text>
-                      <Text className="text-[10px] text-gray-400 mt-0.5">
-                        {review.date}
-                      </Text>
-                    </View>
-                    <View className="bg-amber-50 px-2 py-1 rounded-lg flex-row items-center gap-0.5">
-                      <MaterialIcons name="star" size={13} color="#f59e0b" />
-                      <Text className="text-xs font-bold text-amber-600">
-                        {review.rating}
-                      </Text>
-                    </View>
-                  </View>
-                  <View className="flex-row gap-0.5 mb-2.5">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <MaterialIcons
-                        key={`${review.id}-${i}`}
-                        name="star"
-                        size={13}
-                        color={i < review.rating ? "#f59e0b" : "#e5e7eb"}
-                      />
-                    ))}
-                  </View>
-                  <Text
-                    className="text-sm text-gray-600 leading-5 italic"
-                    numberOfLines={4}
-                  >
-                    "{review.quote}"
-                  </Text>
-                </View>
-              ))}
-            </ScrollView>
-          )}
-        </View>
+        {/* ── Reviews ── replaced with extracted component */}
+        <ReviewSection businessId={businessId} resolvedId={resolvedId} />
 
         {/* Enquiry CTA */}
         <View className="px-4 pt-4 pb-6">
@@ -614,13 +415,6 @@ export default function VendorDetailed() {
           </Pressable>
         </View>
       </ScrollView>
-
-      <WriteReviewModal
-        visible={showReviewModal}
-        onClose={closeReviewModal}
-        businessId={resolvedId}
-        initialReview={reviewToEdit}
-      />
 
       {/* Gallery Modal */}
       <Modal
