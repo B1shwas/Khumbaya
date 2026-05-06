@@ -409,6 +409,7 @@ export default function HotelManagementScreen() {
           renderItem={({ item: guest }) => (
             <UnassignedGuestRow
               guest={guest}
+              isGuestView={isGuestView}
               onAssignRoom={(selectedGuest) => {
                 setRoomAssignmentModal({ visible: true, guest: selectedGuest });
                 setNewRoom("");
@@ -489,31 +490,6 @@ export default function HotelManagementScreen() {
               </Text>
             ) : null
           }
-          ListFooterComponent={
-            unassignedGuests.length > 0 ? (
-              <View className="mt-5 gap-2">
-                <View className="flex-row items-center gap-2 mb-1">
-                  <View className="h-px flex-1 bg-gray-200" />
-                  <Text className="font-jakarta-bold text-[11px] text-amber-600 uppercase tracking-widest">
-                    Unassigned · {unassignedGuests.length}
-                  </Text>
-                  <View className="h-px flex-1 bg-gray-200" />
-                </View>
-                {unassignedGuests.map((guest, idx) => (
-                  <UnassignedGuestRow
-                    key={`${guest.user?.id ?? "guest"}-${idx}`}
-                    guest={guest}
-                    onAssignRoom={(selectedGuest) => {
-                      setRoomAssignmentModal({ visible: true, guest: selectedGuest });
-                      setNewRoom("");
-                    }}
-                    onDetailsPress={navigateToDetails}
-                    isGuestView={isGuestView}
-                  />
-                ))}
-              </View>
-            ) : null
-          }
           ListEmptyComponent={
             <View className="items-center pt-20 gap-4">
               <View className="w-20 h-20 rounded-3xl bg-gray-100 items-center justify-center">
@@ -532,9 +508,6 @@ export default function HotelManagementScreen() {
         />
       )}
 
-      {/* ══════════════════════════════════════════════
-          Modal: Room Check-In Management
-      ══════════════════════════════════════════════ */}
       <Modal
         visible={roomCheckInModal.visible}
         transparent
