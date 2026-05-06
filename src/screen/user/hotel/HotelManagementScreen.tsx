@@ -60,7 +60,8 @@ const STATUS_CONFIG = {
 
 export default function HotelManagementScreen() {
   const router = useRouter();
-  const { eventId } = useLocalSearchParams<{ eventId: string }>();
+  const { eventId, isGuest } = useLocalSearchParams<{ eventId: string; isGuest?: string }>();
+  const isGuestView = isGuest === "true";
   const numericEventId = eventId ? Number(eventId) : null;
 
   const { mutate: submitRsvpResponse, isPending } = useSubmitRsvpResponse(Number(eventId));
@@ -94,6 +95,8 @@ export default function HotelManagementScreen() {
     isRefetching,
     refetch,
   } = useGetGuestRoom(numericEventId);
+
+
 
   const normalizedGuests = useMemo(() => {
     if (!Array.isArray(guestRooms)) return [];
@@ -459,7 +462,8 @@ export default function HotelManagementScreen() {
               isPending={isPending}
               activeCheckoutUserId={activeCheckoutUserId}
               onManage={handleManageRoom}
-              onCheckout={(guest) => handleGuestStatusToggle(guest, "check-out")}
+              onCheckout={(guest) =>  handleGuestStatusToggle(guest, "check-out")}
+              isGuestView={isGuestView}
             />
           )}
           contentContainerStyle={{
@@ -482,6 +486,31 @@ export default function HotelManagementScreen() {
               <Text className="font-jakarta-bold text-[11px] text-gray-400 uppercase tracking-widest mb-1">
                 Rooms · {roomCardList.length}
               </Text>
+            ) : null
+          }
+          ListFooterComponent={
+            unassignedGuests.length > 0 ? (
+              <View className="mt-5 gap-2">
+                <View className="flex-row items-center gap-2 mb-1">
+                  <View className="h-px flex-1 bg-gray-200" />
+                  <Text className="font-jakarta-bold text-[11px] text-amber-600 uppercase tracking-widest">
+                    Unassigned · {unassignedGuests.length}
+                  </Text>
+                  <View className="h-px flex-1 bg-gray-200" />
+                </View>
+                {unassignedGuests.map((guest, idx) => (
+                  <UnassignedGuestRow
+                    key={`${guest.user?.id ?? "guest"}-${idx}`}
+                    guest={guest}
+                    onAssignRoom={(selectedGuest) => {
+                      setRoomAssignmentModal({ visible: true, guest: selectedGuest });
+                      setNewRoom("");
+                    }}
+                    onDetailsPress={navigateToDetails}
+                    isGuestView={isGuestView}
+                  />
+                ))}
+              </View>
             ) : null
           }
           ListEmptyComponent={
