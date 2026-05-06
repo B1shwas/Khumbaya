@@ -1,16 +1,14 @@
-import { MaterialIcons } from "@expo/vector-icons";
-import { Stack, useLocalSearchParams, useRouter } from "expo-router";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { Alert, Modal, Pressable, ScrollView, Text, View } from "react-native";
-
-import { TODO_ALL_CATEGORY, TODO_CATEGORIES, type TodoCategoryFilter } from "@/src/constants/todo";
+import { TODO_ALL_CATEGORY, type TodoCategoryFilter } from "@/src/constants/todo";
 import { useBulkUpdateTodoStatus, useDeleteTodo, useTodosByEventId } from "@/src/features/todo/hooks/useTodo";
 import { useTodoDraftStore, useTodoListStore } from "@/src/features/todo/store";
 import type { TodoColumn } from "@/src/features/todo/type";
 import { useAuthStore } from "@/src/store/AuthStore";
-import { useChecklistDraftStore } from "@/src/store/useChecklistDraftStore";
 import { filterTaskByDueDate, type DueDateFilter } from "@/src/utils/dateFilters";
 import { useDebounce } from "@/src/utils/helper";
+import { MaterialIcons } from "@expo/vector-icons";
+import { Stack, useLocalSearchParams, useRouter } from "expo-router";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Alert, Modal, Pressable, ScrollView, Text, View } from "react-native";
 import ChecklistTaskItem from "./ChecklistTaskItem";
 import { DueDateFilterModal } from "./DueDateFilterModal";
 
@@ -19,32 +17,27 @@ export type ChecklistTask = TodoColumn;
 
 export default function ChecklistScreen() {
   const router = useRouter();
-  const { eventId } = useLocalSearchParams<{ eventId?: string | string[] }>();
+  const { eventId: eventId, isGuest
+  } = useLocalSearchParams<{ eventId?: string | string[]; isGuestview?: string; isGuest?: string }>();
+
+  if (Number(eventId) && isNaN(Number(eventId))) {
+    throw new Error("Invalid eventId");
+  }
   const [selectedCategory, setSelectedCategory] = useState<TodoCategoryFilter>(TODO_ALL_CATEGORY);
   const [selectedDueDate, setSelectedDueDate] = useState<DueDateFilter>(null);
   const [showAssignedToMe, setShowAssignedToMe] = useState(false);
   const [showFilterModal, setShowFilterModal] = useState(false);
 
+  const isGuestView = isGuest === "true";
   const { user } = useAuthStore();
-  const { clearDraft } = useChecklistDraftStore();
+  
   const { clearTodoDetail, setTodoDetail } = useTodoDraftStore();
-  const { todos, setTodos, toggleTodoStatus } = useTodoListStore();
+  const { todos, setTodos, toggleTodoStatus , clearTodos } = useTodoListStore();
 
-  const parsedEventId = eventId ? Number(eventId) : null;
-
-  if (parsedEventId && isNaN(parsedEventId)) {
-    throw new Error("Invalid eventId");
-  }
-  const { data: todosList, refetch, isLoading } = useTodosByEventId(parsedEventId);
+  const { data: todosList, refetch, isLoading, isFetching } = useTodosByEventId(eventId as string);
   const { mutate: deleteTodo, isPending: isDeletingTodo } = useDeleteTodo();
   const { mutateAsync: bulkAsync } = useBulkUpdateTodoStatus();
 
-
-  useEffect(() => {
-    if (todosList && todosList.length > 0) {
-      setTodos(todosList);
-    }
-  }, [todosList]);
 
   const debouncedTodos = useDebounce(todos, 1000);
 
@@ -52,7 +45,7 @@ export default function ChecklistScreen() {
     if (debouncedTodos.length === 0) return;
     const updates = debouncedTodos
       .filter((t) => {
-        const original = todosList?.find((o: ChecklistTask) => o.id === t.id);
+        const original = todosList?.find((task: ChecklistTask) => task.id === t.id);
         return original && Boolean(original.isDone) !== Boolean(t.isDone);
       })
       .map((t) => ({
@@ -85,29 +78,17 @@ export default function ChecklistScreen() {
           text: "Delete",
           style: "destructive",
           onPress: () => {
-            deleteTodo({ id: todoId, eventId: parsedEventId });
+            deleteTodo({ id: todoId, eventId: eventId as string });
           },
         },
       ]);
     },
-    [deleteTodo, parsedEventId]
+    [deleteTodo, eventId]
   );
 
-  useEffect(() => {
-    clearDraft();
-    clearTodoDetail();
-  }, [clearDraft, clearTodoDetail]);
-
-
-
-
-  const availableCategories = useMemo(
-    () => [TODO_ALL_CATEGORY, ...TODO_CATEGORIES] as TodoCategoryFilter[],
-    []
-  );
 
   const filteredTodos = useMemo(() => {
-    return todos.filter((todo) => {
+    return todos.filter((todo: any) => {
       // Filter by category
       if (selectedCategory !== TODO_ALL_CATEGORY && todo.category !== selectedCategory) {
         return false;
@@ -128,17 +109,18 @@ export default function ChecklistScreen() {
   }, [selectedCategory, selectedDueDate, showAssignedToMe, todos, user?.id]);
 
   const handleCreateTask = useCallback(() => {
-    if (parsedEventId) {
+    if (eventId && !isGuestView) {
+
       clearTodoDetail();
-      clearDraft();
+      clearTodos();
       router.push({
-        pathname: "/(protected)/(client-stack)/events/[eventId]/(organizer)/tasklist/detail",
-        params: { eventId: parsedEventId },
+        pathname: "../tasklist/detail",
+        params: { eventId: eventId },
       });
     }
-  }, [clearDraft, clearTodoDetail, parsedEventId, router]);
+  }, [clearTodos, clearTodoDetail, eventId, router, isGuestView]);
 
-  if (isLoading) {
+  if (isLoading || isFetching) {
     return (
 
       <View className="gap-4 px-4 mt-2">
@@ -166,23 +148,29 @@ export default function ChecklistScreen() {
       options={{
         title: "Checklist",
         headerRight: () => (
-          <View className="flex-row items-center gap-2 -right-1 top-1">
+          <View className="flex-row items-center mr-1 rounded-full overflow-hidden border border-border bg-white">
             <Pressable
               onPress={() => setShowFilterModal(true)}
-              className="flex-row items-center justify-center gap-1 bg-secondary px-2 py-2 rounded-md"
+              className="w-20 h-10 items-center justify-center"
             >
-              <MaterialIcons name="tune" size={16} color="white" />
-              {(selectedDueDate || showAssignedToMe) && (
-                <View className="w-2 h-2 rounded-full bg-white" />
-              )}
+              <MaterialIcons
+                name="tune"
+                size={18}
+                color={(selectedDueDate || showAssignedToMe) ? "#C2185B" : "#64748b"}
+              />
             </Pressable>
-            <Pressable
-              onPress={handleCreateTask}
-              className="flex-row items-center justify-center gap-1 bg-primary px-2 py-2 rounded-md"
-            >
-              <MaterialIcons name="add" size={16} color="white" />
-              <Text className="text-white font-semibold text-sm">Add Task</Text>
-            </Pressable>
+            {/* GUESTVIEW */}
+            {!isGuestView && (
+              <>
+                <View className="w-px h-5 bg-border" />
+                <Pressable
+                  onPress={handleCreateTask}
+                  className="w-12 h-10 items-center justify-center"
+                >
+                  <MaterialIcons name="add" size={22} color="#E91E8C" />
+                </Pressable>
+              </>
+            )}
           </View>
         ),
       }}
@@ -205,33 +193,41 @@ export default function ChecklistScreen() {
               Start by creating your first todo for this event.
             </Text>
 
-            <Pressable
-              onPress={handleCreateTask}
-              className="mt-4 flex-row items-center gap-2 bg-primary px-4 py-2.5 rounded-md"
-            >
-              <MaterialIcons name="add" size={16} color="white" />
-              <Text className="text-white font-semibold">Create Todo</Text>
-            </Pressable>
+            {!isGuestView && (
+              <Pressable
+                onPress={handleCreateTask}
+                className="mt-4 flex-row items-center gap-2 bg-primary px-4 py-2.5 rounded-md"
+              >
+                <MaterialIcons name="add" size={16} color="white" />
+                <Text className="text-white font-semibold">Create Todo</Text>
+              </Pressable>
+            )}
           </View>
         ) : (
-          filteredTodos.map((task) => (
+          filteredTodos.map((task: any) => (
             <ChecklistTaskItem
               key={task.id}
               task={task}
               isDeleting={isDeletingTodo}
-              onToggleComplete={() => handleToggleComplete(task)}
-              onDeletePress={() => handleDeleteTask(task)}
+              onToggleComplete={() => {
+                if (isGuestView) return;
+                handleToggleComplete(task);
+              }}
+              onDeletePress={() => {
+                if (isGuestView) return;
+                handleDeleteTask(task);
+              }}
               onEditPress={() => {
-                if (!parsedEventId) {
+                if (!eventId) {
                   return;
                 }
                 if (task) {
+                  console.log('Setting todo detail for task:', task);
                   setTodoDetail(task);
                 }
                 router.push({
-                  pathname:
-                    "/(protected)/(client-stack)/events/[eventId]/(organizer)/tasklist/detail",
-                  params: { eventId: parsedEventId, taskId: task.id },
+                  pathname: "../tasklist/detail",
+                  params: { eventId: eventId, taskId: task.id, isGuestview: isGuestView ? "true" : undefined },
                 });
               }}
             />
