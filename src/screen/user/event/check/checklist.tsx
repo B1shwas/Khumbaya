@@ -156,25 +156,27 @@ export default function ChecklistScreen() {
       options={{
         title: "Checklist",
         headerRight: () => (
-          <View className="flex-row items-center gap-2 -right-1 top-1">
+          <View className="flex-row items-center mr-1 rounded-full overflow-hidden border border-border bg-white">
             <Pressable
               onPress={() => setShowFilterModal(true)}
-              className="flex-row items-center justify-center gap-1 bg-secondary px-2 py-2 rounded-md"
+              className="w-20 h-10 items-center justify-center"
             >
-              <MaterialIcons name="tune" size={16} color="white" />
-              {(selectedDueDate || showAssignedToMe) && (
-                <View className="w-2 h-2 rounded-full bg-white" />
-              )}
+              <MaterialIcons
+                name="tune"
+                size={18}
+                color={(selectedDueDate || showAssignedToMe) ? "#C2185B" : "#64748b"}
+              />
             </Pressable>
-            {/* TODO:Review */}
             {!isGuestView && (
-              <Pressable
-                onPress={handleCreateTask}
-                className="flex-row items-center justify-center gap-1 bg-primary px-2 py-2 rounded-md"
-              >
-                <MaterialIcons name="add" size={16} color="white" />
-                <Text className="text-white font-semibold text-sm">Add Task</Text>
-              </Pressable>
+              <>
+                <View className="w-px h-5 bg-border" />
+                <Pressable
+                  onPress={handleCreateTask}
+                  className="w-12 h-10 items-center justify-center"
+                >
+                  <MaterialIcons name="add" size={22} color="#E91E8C" />
+                </Pressable>
+              </>
             )}
           </View>
         ),
