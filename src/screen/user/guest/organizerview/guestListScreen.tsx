@@ -195,20 +195,39 @@ export default function GuestListScreen() {
 
   const filteredGroupedInvitations = useMemo(() => {
     return groupedInvitations.filter((item: GroupedInvitation) => {
-      if (item.type === "family") {
-        const effectiveStatus = getFamilyEffectiveStatus(item.members);
-        const matchesStatus = matchesTabStatus(effectiveStatus, activeTab);
+        if (item.type === "family") {
+          const effectiveStatus = getFamilyEffectiveStatus(item.members);
+          const matchesStatus = matchesTabStatus(effectiveStatus, activeTab);
 
-        if (!matchesStatus) return false;
-        return item.members.some((member) => matchesSelectedCategory(member));
-      }
+          if (!matchesStatus) return false;
+          return item.members.some((member) => matchesSelectedCategory(member));
+        }
 
-      const status = String(item.data.eventGuest.status ?? "pending")
-        .trim()
-        .toLowerCase();
-      if (!matchesTabStatus(status, activeTab)) return false;
-      return matchesSelectedCategory(item.data);
-    });
+        const status = String(item.data.eventGuest.status ?? "pending")
+          .trim()
+          .toLowerCase();
+        if (!matchesTabStatus(status, activeTab)) return false;
+        return matchesSelectedCategory(item.data);
+      })
+      .map((item: GroupedInvitation): GroupedInvitation => {
+        if (item.type === "family") {
+          return {
+            ...item,
+            members: [...item.members].sort((a, b) =>
+              (a.user.username ?? "").localeCompare(b.user.username ?? "")
+            ),
+          };
+        }
+        return item;
+      })
+      .sort((a, b) => {
+        const nameA =
+          a.type === "family" ? a.family_name : (a.data.user.username ?? "");
+        const nameB =
+          b.type === "family" ? b.family_name : (b.data.user.username ?? "");
+        return nameA.localeCompare(nameB);
+        
+      });
   }, [
     groupedInvitations,
     activeTab,
@@ -219,11 +238,12 @@ export default function GuestListScreen() {
 
   const draftInvitations = useMemo(() => {
     return tabFilteredInvitations.filter((invitation: GuestDetailInterface) => {
-      const status = String(invitation.eventGuest.status ?? "pending")
-        .trim()
-        .toLowerCase();
-      return status === "draft" && matchesSelectedCategory(invitation);
-    });
+        const status = String(invitation.eventGuest.status ?? "pending")
+          .trim()
+          .toLowerCase();
+        return status === "draft" && matchesSelectedCategory(invitation);
+      }
+      );
   }, [tabFilteredInvitations, matchesSelectedCategory]);
 
   const filteredGuestCount =
