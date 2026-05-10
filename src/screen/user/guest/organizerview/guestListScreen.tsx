@@ -2,7 +2,8 @@ import DraftInvitationCard from "@/src/components/guest/DraftInvitationCard";
 import FamilyCard from "@/src/components/guest/FamilyGuestCard";
 import GuestCard from "@/src/components/guest/GuestCard";
 import { Text } from "@/src/components/ui/Text";
-import { useSubmitRsvpResponse } from "@/src/features/events/hooks/use-event";
+import { useSubEventsOfEvent, useSubmitRsvpResponse } from "@/src/features/events/hooks/use-event";
+import { useSubEventListStore } from "@/src/features/events/store/useEventStore";
 import {
   useGetInvitationsForEvent,
   useRemoveInvitation,
@@ -40,6 +41,16 @@ export default function GuestListScreen() {
   const { push } = useThrottledRouter();
   const params = useLocalSearchParams();
   const eventId = Number(params.eventId);
+
+  const {
+    data: subEventsResponse,
+  } = useSubEventsOfEvent(Number(eventId));
+  const { setSubEventList } = useSubEventListStore();
+
+  useEffect(() => {
+    setSubEventList(subEventsResponse ?? []);
+  }, [subEventsResponse, setSubEventList])
+
   const setGuestDetail = useGuestDetailStore((state) => state.setGuestDetail);
   const clearGuestDetail = useGuestDetailStore(
     (state) => state.clearGuestDetail

@@ -9,7 +9,7 @@ import { useDebounce } from "@/src/utils/helper";
 import { MaterialIcons } from "@expo/vector-icons";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Alert, Modal, Pressable, ScrollView, Text, View } from "react-native";
+import { ActivityIndicator, Alert, Modal, Pressable, ScrollView, Text, View } from "react-native";
 import ChecklistTaskItem from "./ChecklistTaskItem";
 import { DueDateFilterModal } from "./DueDateFilterModal";
 
@@ -102,7 +102,7 @@ export default function ChecklistScreen() {
   }, [clearTodoDetail, eventId, router, isGuestView]);
 
   // ── loading skeleton ──────────────────────────────────────────────────────
-  if (isLoading || isFetching || !todos) {
+  if (isLoading || !todos) {
     return (
       <View className="gap-4 px-4 mt-2">
         <View className="rounded-md p-8 bg-white shadow-sm">
@@ -203,6 +203,14 @@ export default function ChecklistScreen() {
           )}
         </View>
       </ScrollView>
+          {isFetching && (
+            <View className="items-end">
+              <View className=" absolute bottom-8 right-8 flex-row items-center gap-2 bg-[#ee2b8c]/10 border border-[#ee2b8c]/30 px-3 py-2 rounded-full">
+                <ActivityIndicator size="small" color="#ee2b8c" />
+                <Text className="text-[#ee2b8c] text-xs font-semibold">Loading</Text>
+              </View>
+            </View>
+          )}
 
       {hasTodos && (
         <Modal

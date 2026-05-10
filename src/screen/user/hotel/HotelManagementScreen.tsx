@@ -1,6 +1,7 @@
 import { AssignRoomModal } from "@/src/components/accommodation/AssignModel";
 import { RoomCardItem } from "@/src/components/accommodation/RoomCardItem";
 import { UnassignedGuestRow } from "@/src/components/accommodation/UnassignedGuestRow";
+import { CategoryModal } from "@/src/components/guest/hotel/CategoryModel";
 import { Text } from "@/src/components/ui/Text";
 import { useSubmitRsvpResponse } from "@/src/features/events/hooks/use-event";
 import { useGetGuestRoom } from "@/src/features/guests/api/use-guests";
@@ -159,12 +160,6 @@ export default function HotelManagementScreen() {
     if (!exists) setSelectedCategory("all");
   }, [categoryStats, selectedCategory]);
 
-  const guestsAfterCategoryFilter = useMemo(() => {
-    if (selectedCategory === "all") return filteredGuests;
-    return filteredGuests.filter(
-      (g) => getNormalizedCategory(g.category) === selectedCategory
-    );
-  }, [filteredGuests, selectedCategory]);
 
   const roomCardList = useMemo<RoomData[]>(() => {
     const guestsByRoom = new Map<string, GuestWithRoom[]>();
@@ -194,15 +189,16 @@ export default function HotelManagementScreen() {
   ];
 
   const tabs = [
-    { 
-      label: "Assign Guests", 
-      value: "assign" as const, 
-      count: unassignedGuests.length 
+    {
+      label: isGuest ? " Room requests" : "Assign Guest",
+      value: "assign" as const,
+      count: unassignedGuests.length
     },
-    { 
-      label: "Room List",
-       value: "roomList" as const, 
-       count: roomCardList.length },
+    {
+      label: isGuest ? " My Room" : "Room List",
+      value: "roomList" as const,
+      count: roomCardList.length
+    },
   ] as const;
 
   function navigateToDetails(guest: GuestWithRoom) {
@@ -272,6 +268,8 @@ export default function HotelManagementScreen() {
       }
     );
   }
+
+
 
   // ─── Render ──────────────────────────────────────────────────────────────────
 
@@ -368,7 +366,7 @@ export default function HotelManagementScreen() {
             <Text
               className={cn(
                 "text-md font-jakarta-semibold p-1 ",
-                activeTab === tab.value ? "text-primary" : "text-gray-500"
+                activeTab === tab.value ? "text-primary" : "text-black"
               )}
             >
               {tab.label}
@@ -415,7 +413,6 @@ export default function HotelManagementScreen() {
                 setNewRoom("");
               }}
               onDetailsPress={navigateToDetails}
-              isGuestView={isGuestView}
             />
           )}
           contentContainerStyle={{
@@ -464,7 +461,7 @@ export default function HotelManagementScreen() {
               isPending={isPending}
               activeCheckoutUserId={activeCheckoutUserId}
               onManage={handleManageRoom}
-              onCheckout={(guest) =>  handleGuestStatusToggle(guest, "check-out")}
+              onCheckout={(guest) => handleGuestStatusToggle(guest, "check-out")}
               isGuestView={isGuestView}
             />
           )}
@@ -657,79 +654,14 @@ export default function HotelManagementScreen() {
           </View>
         </View>
       </Modal>
-      <Modal
-        visible={isCategoryModalVisible}
-        transparent
-        animationType="slide"
-        onRequestClose={() => setIsCategoryModalVisible(false)}
-      >
-        <View className="flex-1 bg-black/40 justify-end">
-          <TouchableOpacity
-            activeOpacity={1}
-            onPress={() => setIsCategoryModalVisible(false)}
-            className="absolute inset-0"
-          />
-          <View className="bg-white rounded-t-3xl px-5 pt-3 pb-8">
-            <View className="w-10 h-1 bg-gray-200 rounded-full self-center mb-4" />
-            <View className="flex-row items-center justify-between mb-5">
-              <View>
-                <Text className="font-jakarta-bold text-base text-[#181114]">
-                  Filter by Category
-                </Text>
-                <Text className="font-jakarta text-[11px] text-gray-400 mt-0.5">
-                  Select a group to view
-                </Text>
-              </View>
-              <TouchableOpacity
-                onPress={() => setIsCategoryModalVisible(false)}
-                className="w-8 h-8 rounded-full bg-gray-100 items-center justify-center"
-              >
-                <Ionicons name="close" size={16} color="#6B7280" />
-              </TouchableOpacity>
-            </View>
+      <CategoryModal
+        isVisible={isCategoryModalVisible}
+        onClose={() => setIsCategoryModalVisible(false)}
+        options={categoryPickerOptions}
+        selectedCategory={selectedCategory}
+        onSelectCategory={setSelectedCategory}
+      />
 
-            <View className="gap-2">
-              {categoryPickerOptions.map((option) => {
-                const isActive = selectedCategory === option.value;
-                return (
-                  <TouchableOpacity
-                    key={option.value}
-                    onPress={() => {
-                      setSelectedCategory(option.value);
-                      setIsCategoryModalVisible(false);
-                    }}
-                    className={`flex-row items-center justify-between px-4 py-3.5 rounded-xl border ${isActive ? "border-primary bg-primary/8" : "border-gray-100 bg-gray-50"
-                      }`}
-                  >
-                    <Text
-                      className={`font-jakarta-semibold text-sm ${isActive ? "text-primary" : "text-[#181114]"
-                        }`}
-                    >
-                      {option.label}
-                    </Text>
-                    <View className="flex-row items-center gap-2">
-                      <View
-                        className={`px-2.5 py-0.5 rounded-full ${isActive ? "bg-primary/15" : "bg-gray-200"
-                          }`}
-                      >
-                        <Text
-                          className={`font-jakarta-bold text-[10px] ${isActive ? "text-primary" : "text-gray-500"
-                            }`}
-                        >
-                          {option.count}
-                        </Text>
-                      </View>
-                      {isActive && (
-                        <Ionicons name="checkmark-circle" size={18} color="#ee2b8c" />
-                      )}
-                    </View>
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
-          </View>
-        </View>
-      </Modal>
 
       <AssignRoomModal
         roomAssignmentModal={roomAssignmentModal}
