@@ -1,15 +1,14 @@
 import { Text } from "@/src/components/ui/Text";
+import { WriteReviewModal } from "@/src/components/vendor/WriteReviewModal";
 import { useReviews } from "@/src/features/review/hooks/use-review";
 import { useAuthStore } from "@/src/store/AuthStore";
 import { shadowStyle } from "@/src/utils/helper";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useState } from "react";
 import { Image, Pressable, ScrollView, View } from "react-native";
-import { WriteReviewModal } from "@/src/components/vendor/WriteReviewModal";
 
 const FALLBACK_AVATAR =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuDIWVyUn7mizRXt-pU0k_RKFdAfNF_d21mLZuL6fE-z88oUHVipXSGUhNmA5WfOISIeb5QApM1WV-MqiArQgJejxYGuerwubu6lcVkwkED06qEDLGBM7Xqz0ISW7b9rPn7S5ZW1hwAZxyVJLtwp0mkKKpGBUzYThC2D9AsRi-INlhoD8olL86wNyceuSQjvSCGLvlkuKEaRRpvGNa3ooDKEzBTa-g2eoD-4QuvwrSjC7f8_Nwv5Gm18EKFeYf5rKFnpg1QNMlLOq18";
-
 
 interface Review {
   id: string;
@@ -55,11 +54,15 @@ function ReviewCard({ review }: { review: Review }) {
           <Text className="text-sm font-semibold text-[#181114]">
             {review.reviewerName}
           </Text>
-          <Text className="text-[10px] text-gray-400 mt-0.5">{review.date}</Text>
+          <Text className="text-[10px] text-gray-400 mt-0.5">
+            {review.date}
+          </Text>
         </View>
         <View className="bg-amber-50 px-2 py-1 rounded-lg flex-row items-center gap-0.5">
           <MaterialIcons name="star" size={13} color="#f59e0b" />
-          <Text className="text-xs font-bold text-amber-600">{review.rating}</Text>
+          <Text className="text-xs font-bold text-amber-600">
+            {review.rating}
+          </Text>
         </View>
       </View>
 
@@ -76,13 +79,15 @@ function ReviewCard({ review }: { review: Review }) {
       </View>
 
       {/* Quote */}
-      <Text className="text-sm text-gray-600 leading-5 italic" numberOfLines={4}>
+      <Text
+        className="text-sm text-gray-600 leading-5 italic"
+        numberOfLines={4}
+      >
         "{review.quote}"
       </Text>
     </View>
   );
 }
-
 
 function EmptyReviews() {
   return (
@@ -90,7 +95,9 @@ function EmptyReviews() {
       <View className="h-14 w-14 rounded-full bg-gray-100 items-center justify-center mb-3">
         <MaterialIcons name="rate-review" size={28} color="#d1d5db" />
       </View>
-      <Text className="text-gray-500 font-semibold text-sm">No reviews yet</Text>
+      <Text className="text-gray-500 font-semibold text-sm">
+        No reviews yet
+      </Text>
       <Text className="text-gray-400 text-xs mt-1">
         Be the first to share your experience
       </Text>
@@ -98,12 +105,12 @@ function EmptyReviews() {
   );
 }
 
-
 export function ReviewSection({ businessId, resolvedId }: ReviewSectionProps) {
   const { user } = useAuthStore();
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [reviewToEdit, setReviewToEdit] = useState<
-    { id: number | string; rating: number; description?: string | null } | undefined
+    | { id: number | string; rating: number; description?: string | null }
+    | undefined
   >(undefined);
 
   const { data: reviewData } = useReviews(
@@ -115,6 +122,7 @@ export function ReviewSection({ businessId, resolvedId }: ReviewSectionProps) {
       id: String(review.id),
       reviewerName:
         review.reviewerName?.trim() ||
+        review.username?.trim() ||
         review.user?.name?.trim() ||
         review.user?.username?.trim() ||
         (review.userId === user?.id ? user.username?.trim() : "") ||
@@ -138,11 +146,14 @@ export function ReviewSection({ businessId, resolvedId }: ReviewSectionProps) {
     : undefined;
   const reviewButtonLabel = userReview ? "Edit Review" : "Write Review";
 
-  
   const openReviewModal = () => {
     setReviewToEdit(
       userReview
-        ? { id: userReview.id, rating: userReview.rating, description: userReview.description }
+        ? {
+            id: userReview.id,
+            rating: userReview.rating,
+            description: userReview.description,
+          }
         : undefined
     );
     setShowReviewModal(true);
@@ -152,7 +163,6 @@ export function ReviewSection({ businessId, resolvedId }: ReviewSectionProps) {
     setShowReviewModal(false);
     setReviewToEdit(undefined);
   };
-
 
   return (
     <>
@@ -177,7 +187,9 @@ export function ReviewSection({ businessId, resolvedId }: ReviewSectionProps) {
               }}
             >
               <MaterialIcons name="edit" size={12} color="#fff" />
-              <Text className="text-white text-xs font-semibold">{reviewButtonLabel}</Text>
+              <Text className="text-white text-xs font-semibold">
+                {reviewButtonLabel}
+              </Text>
             </Pressable>
           )}
         </View>
@@ -208,4 +220,3 @@ export function ReviewSection({ businessId, resolvedId }: ReviewSectionProps) {
     </>
   );
 }
-

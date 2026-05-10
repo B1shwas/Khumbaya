@@ -25,6 +25,7 @@ export default function BusinessReviewListScreen() {
       id: String(review.id),
       reviewerName:
         review.reviewerName?.trim() ||
+        review.username?.trim() ||
         review.user?.username?.trim() ||
         (review.userId === user?.id ? user.username?.trim() : "") ||
         "Anonymous",

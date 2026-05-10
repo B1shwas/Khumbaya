@@ -10,9 +10,11 @@ export type ReviewResponse = {
   businessAvatar?: string | null;
   reviewerAvatar?: string | null;
   reviewerName?: string;
+  username?: string | null;
   user?: {
     id?: number;
     username?: string | null;
+    name?: string | null;
     photo?: string | null;
   } | null;
 };
