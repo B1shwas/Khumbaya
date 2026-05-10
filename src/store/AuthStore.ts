@@ -1,7 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as SecureStore from "expo-secure-store";
 import { create } from "zustand";
-import axios from "../api/axios";
+import { setAuthTokenGetter, setOnUnauthorizedHandler } from "../api/axios";
 import { getUserBusiness } from "../features/business";
 import { getUserProfile } from "../features/user/api/user.service";
 import { clearQueryCache } from "./queryClientManager";
@@ -94,7 +94,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       set({ isLoading: false });
     }
   },
-
   setAuth: async (token, user) => {
     await Promise.all([
       SecureStore.setItemAsync("token", token),
@@ -140,22 +139,15 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
     set({ isProfileLoading: true });
     try {
-      const response = await axios.get(`/user/me`, {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-      console.log(response.data);
-
-      const userData = response.data;
-      const actualUserData = userData.data || userData;
-      await AsyncStorage.setItem("user", JSON.stringify(actualUserData));
-      set({ user: actualUserData, isProfileLoading: false });
+      const response = await getUserProfile();
+      await AsyncStorage.setItem("user", JSON.stringify(response));
+      set({ user: response, isProfileLoading: false });
     } catch (error) {
       console.error("❌ [AuthStore] Error fetching user profile:", error);
       set({ isProfileLoading: false });
     }
   },
 }));
+
+setAuthTokenGetter(() => useAuthStore.getState().token);
+setOnUnauthorizedHandler(() => useAuthStore.getState().clearAuth());
