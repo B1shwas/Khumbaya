@@ -89,7 +89,12 @@ export default function EditProfileScreen() {
         city: user.city || "",
         address: user.address || "",
         zip: user.zip || "",
-        dob: user.dob ? user.dob.toISOString() : "",
+          dob:
+          typeof user.dob === "string"
+            ? user.dob
+            : user.dob
+              ? user.dob.toISOString()
+              : "",
       });
       setLoading(false);
     } else if (!isProfileLoading && !user) {
