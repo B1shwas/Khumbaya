@@ -320,6 +320,7 @@ export default function EditProfileScreen() {
             <Text className="text-sm font-semibold text-gray-700 mb-2">
               Phone Number
             </Text>
+            {/* AI  */}
             <View className="h-14 flex-row items-center rounded-md border border-gray-200 bg-white overflow-hidden">
               <Pressable
                 onPress={() => setPickerVisible(true)}
