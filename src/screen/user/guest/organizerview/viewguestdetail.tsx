@@ -1,16 +1,18 @@
 import { Text } from "@/src/components/ui/Text";
 import { useSubmitRsvpResponse } from "@/src/features/events/hooks/use-event";
+import { useSubEventListStore } from "@/src/features/events/store/useEventStore";
 import {
   useCreateEventGuestCategory,
   useGetEventGuestCategories,
   useRemoveInvitation,
 } from "@/src/features/guests/api/use-guests";
 import { useGuestDetailStore } from "@/src/features/guests/store/useGuestDetailStore";
+import { useAuthStore } from "@/src/store/AuthStore";
 import { formatDate, formatTime, toISODateString } from "@/src/utils/helper";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { Stack, useRouter } from "expo-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -42,6 +44,7 @@ const formatDisplayValue = (value?: string) => {
 export default function ViewGuestDetail() {
   const router = useRouter();
   const guestDetail = useGuestDetailStore((state) => state.guestDraft);
+  const currentUserId = useAuthStore((state) => state.user?.id ?? null);
 
   const statusValue = guestDetail?.eventGuest?.status?.toLowerCase?.() ?? "";
   const isConfirmed = statusValue === "accepted" || statusValue === "confirmed";
@@ -74,6 +77,33 @@ export default function ViewGuestDetail() {
   const [departureInfo, setDepartureInfo] = useState(initialDepartureInfo);
   const [category, setCategory] = useState(initialCategory);
   const [notes] = useState(initialNotes);
+  // TODO: Review this is genearated code 
+  const { subEventList } = useSubEventListStore();
+  const unInvitedSubevents = guestDetail?.eventGuest?.unInvitedSubevent ?? [];
+  const subEvents = subEventList ?? [];
+  const [unInvitedSubeventIds, setUnInvitedSubeventIds] = useState<number[]>(
+    unInvitedSubevents
+  );
+  const [unInvitedUpdatedBy, setUnInvitedUpdatedBy] = useState<number | null>(
+    currentUserId
+  );
+
+  useEffect(() => {
+    setUnInvitedSubeventIds(unInvitedSubevents);
+  }, [unInvitedSubevents]);
+
+  const isSubEventInvited = (subEventId: string | number) =>
+    !unInvitedSubeventIds.includes(Number(subEventId));
+
+  const toggleSubEventInvite = (subEventId: string | number) => {
+    const id = Number(subEventId);
+    setUnInvitedSubeventIds((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
+    setUnInvitedUpdatedBy(currentUserId);
+  };
+
+  console.log('This is the Guest invitation responce on the user interface 🦄🦄🦄🦄🦄🦄🦄🦄🦄🦄', guestDetail?.eventGuest, subEventList);
 
   const categoryOptions = useMemo(
     () =>
@@ -83,14 +113,21 @@ export default function ViewGuestDetail() {
       })),
     [guestCategories]
   );
-
+  // TODO:Reviwe
   const hasAssignmentChanges = useMemo(() => {
+    const initialUnInvited = [...unInvitedSubevents].sort((a, b) => a - b);
+    const currentUnInvited = [...unInvitedSubeventIds].sort((a, b) => a - b);
+    const unInvitedChanged =
+      initialUnInvited.length !== currentUnInvited.length ||
+      initialUnInvited.some((id, index) => id !== currentUnInvited[index]);
+
     return (
       assignedRoom.trim() !== initialRoom.trim() ||
       arrivalInfo.trim() !== initialArrivalInfo.trim() ||
       departureInfo.trim() !== initialDepartureInfo.trim() ||
       category.trim().toLowerCase() !== initialCategory.trim().toLowerCase() ||
-      notes.trim() !== initialNotes.trim()
+      notes.trim() !== initialNotes.trim() ||
+      unInvitedChanged
     );
   }, [
     assignedRoom,
@@ -103,6 +140,8 @@ export default function ViewGuestDetail() {
     initialDepartureInfo,
     initialCategory,
     initialNotes,
+    unInvitedSubeventIds,
+    unInvitedSubevents,
   ]);
 
   const headerTitle = guestDetail?.user?.username?.trim() || "Guest Detail";
@@ -131,6 +170,7 @@ export default function ViewGuestDetail() {
       notes: notes.trim(),
       category: category.trim() || undefined,
       role: category.trim() || undefined,
+      unInvitedSubevent: unInvitedSubeventIds,
     };
 
     submitRsvpResponse(payload, {
@@ -292,8 +332,8 @@ export default function ViewGuestDetail() {
                         <Pressable
                           key={option.value}
                           className={`rounded-full px-3 py-1.5 border ${isActive
-                              ? "border-primary bg-primary/10"
-                              : "border-slate-200 bg-white"
+                            ? "border-primary bg-primary/10"
+                            : "border-slate-200 bg-white"
                             }`}
                           onPress={() => {
                             setCategory(option.value);
@@ -343,8 +383,8 @@ export default function ViewGuestDetail() {
                             <Pressable
                               key={option.value}
                               className={`flex-1 items-center justify-center rounded-md border py-2.5 ${isActive
-                                  ? "border-primary bg-primary/10"
-                                  : "border-slate-200 bg-white"
+                                ? "border-primary bg-primary/10"
+                                : "border-slate-200 bg-white"
                                 }`}
                               onPress={() => setNewCategoryPriority(option.value)}
                             >
@@ -647,6 +687,48 @@ export default function ViewGuestDetail() {
 
 
                 </View>
+                {/* Sub event list TODO: CHEck this shit */}
+                {subEvents.length > 0 && (
+                  <View className="bg-white border border-slate-200 p-4 rounded-2xl mb-3">
+                    <View className="flex-row items-center gap-2 mb-3">
+                      <Ionicons
+                        name="checkbox-outline"
+                        size={22}
+                        color="#EE2B8C"
+                      />
+                      <Text variant="caption" className="text-sm">
+                        Invited Sub event
+                      </Text>
+                    </View>
+                    <View className="flex-row flex-wrap" style={{ gap: 10 }}>
+                      {subEvents.map((subEvent) => {
+                        const isChecked = isSubEventInvited(subEvent.id);
+                        return (
+                          <TouchableOpacity
+                            key={subEvent.id}
+                            onPress={() => toggleSubEventInvite(subEvent.id)}
+                            className="w-[48%] flex-row items-center rounded-lg border border-slate-100 bg-slate-50 px-2.5 py-2"
+                            activeOpacity={0.8}
+                          >
+                            <Ionicons
+                              name={isChecked ? "checkbox" : "square-outline"}
+                              size={20}
+                              color={isChecked ? "#EE2B8C" : "#94a3b8"}
+                            />
+                            <Text
+                              variant="body"
+                              className="ml-2 flex-1 text-slate-700 text-sm"
+                              numberOfLines={1}
+                              ellipsizeMode="tail"
+                            >
+                              {subEvent.title ?? "Untitled sub-event"}
+                            </Text>
+                          </TouchableOpacity>
+                        );
+                      })}
+                    </View>
+                  </View>
+                )}
 
                 {(guestDetail?.eventGuest?.isAccomodation ||
                   guestDetail?.eventGuest?.isArrivalPickupRequired ||

@@ -190,7 +190,7 @@ export default function EditEventScreen() {
     });
 
   useEffect(() => {
-     if (fullEvent) reset(buildInitialForm(fullEvent as Event));
+    if (fullEvent) reset(buildInitialForm(fullEvent as Event));
   }, [fullEvent, reset]);
 
   const startDateTime = watch("startDateTime");
@@ -293,7 +293,7 @@ export default function EditEventScreen() {
       location: values.city.trim() || undefined,
       venue: values.venue.trim() || undefined,
       dressCode: values.dressCode || undefined,
-      theme: values.theme.trim() || undefined,
+      theme: values.theme.trim(),
       budget: values.budget ? Number(values.budget) : undefined,
       rsvpDeadline: values.rsvpDeadline.toISOString(),
     };

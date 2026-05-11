@@ -56,7 +56,6 @@ export default function ManageVehicleScreen() {
   const { data: guests, isLoading: guestsLoading } = useGuestTransportation(eventId ?? "");
   const { data: assignedVehicles, isLoading: assignedLoading } = useGetVehicleAssignement(vehicleId ?? "");
   console.log('This is the assigned vehicle d🦓🦓🦓🦓🦓🦓🦓🦓ata ', assignedVehicles);
-  console.log('This is the data for the assigne vehicle data ', assignedVehicles);
   const assignVehicleMutation = useAssignVehicle(eventId ?? "");
 
   const {
@@ -422,17 +421,17 @@ export default function ManageVehicleScreen() {
                     <View className="flex-row justify-between items-center mb-3">
                       <View className="flex-1 pr-3">
                         <Text className="text-[13px] font-jakarta-bold text-on-surface" numberOfLines={1}>
-                            Guest:{assignment.guestName}
-                       
+                          Guest:{assignment.guestName}
+
                         </Text>
                         <View className="flex-row items-center gap-1 mt-0.5">
                           <Text className="text-[10px] text-gray-500 font-jakarta-medium" numberOfLines={1}>
-                          {assignment.driverNumber
-                           ?? "Phone not set"}
+                            {assignment.driverNumber
+                              ?? "Phone not set"}
                           </Text>
                           <Text className="text-[10px] text-gray-300">•</Text>
                           <Text className="text-[10px] text-primary/70 font-jakarta-bold">
-                            
+
                             {assignment.driverName ? `Driver: ${assignment.driverName}` : "Driver not assigned"}
 
                           </Text>
@@ -745,7 +744,7 @@ export default function ManageVehicleScreen() {
             <TouchableOpacity
               onPress={assignVehicle}
               disabled={assignVehicleMutation.isPending}
-              className={cn("px-4 py-3 rounded-xl items-center", 
+              className={cn("px-4 py-3 rounded-xl items-center",
                 assignVehicleMutation.isPending ? "bg-primary/50" : "bg-primary"
               )}
             >

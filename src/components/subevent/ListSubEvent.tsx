@@ -36,8 +36,7 @@ export default function ListSubEvent() {
   const { isGuest } = useLocalSearchParams<{ isGuest?: string }>();
   const isGuestView = isGuest === "true";
   const { eventId } = useLocalSearchParams();
-  const eventDraft = useEventStore((event)=>event.eventDraft)
-  console.log('The parent event for the list of the sub event in t⟵⟵⟵⟵⟵⟵⟵⟵⟵⟵⟵⟵he ui is '  , eventDraft)
+  const eventDraft = useEventStore((event) => event.eventDraft)
   const {
     data: subEventsResponse,
     isLoading,
@@ -115,12 +114,13 @@ export default function ListSubEvent() {
               <SubEventCard
                 item={item.item}
                 event={eventDraft!}
+                isGuestView={isGuestView}
               />
             );
           }}
         />
       )}
-{/* TODO:Review ai generated code */}
+      {/* TODO:Review ai generated code */}
       {!isGuestView && (
         <TouchableOpacity
           onPress={() => {

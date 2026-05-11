@@ -2,7 +2,8 @@ import DraftInvitationCard from "@/src/components/guest/DraftInvitationCard";
 import FamilyCard from "@/src/components/guest/FamilyGuestCard";
 import GuestCard from "@/src/components/guest/GuestCard";
 import { Text } from "@/src/components/ui/Text";
-import { useSubmitRsvpResponse } from "@/src/features/events/hooks/use-event";
+import { useSubEventsOfEvent, useSubmitRsvpResponse } from "@/src/features/events/hooks/use-event";
+import { useSubEventListStore } from "@/src/features/events/store/useEventStore";
 import {
   useGetInvitationsForEvent,
   useRemoveInvitation,
@@ -40,6 +41,16 @@ export default function GuestListScreen() {
   const { push } = useThrottledRouter();
   const params = useLocalSearchParams();
   const eventId = Number(params.eventId);
+
+  const {
+    data: subEventsResponse,
+  } = useSubEventsOfEvent(Number(eventId));
+  const { setSubEventList } = useSubEventListStore();
+
+  useEffect(() => {
+    setSubEventList(subEventsResponse ?? []);
+  }, [subEventsResponse, setSubEventList])
+
   const setGuestDetail = useGuestDetailStore((state) => state.setGuestDetail);
   const clearGuestDetail = useGuestDetailStore(
     (state) => state.clearGuestDetail
@@ -184,20 +195,39 @@ export default function GuestListScreen() {
 
   const filteredGroupedInvitations = useMemo(() => {
     return groupedInvitations.filter((item: GroupedInvitation) => {
-      if (item.type === "family") {
-        const effectiveStatus = getFamilyEffectiveStatus(item.members);
-        const matchesStatus = matchesTabStatus(effectiveStatus, activeTab);
+        if (item.type === "family") {
+          const effectiveStatus = getFamilyEffectiveStatus(item.members);
+          const matchesStatus = matchesTabStatus(effectiveStatus, activeTab);
 
-        if (!matchesStatus) return false;
-        return item.members.some((member) => matchesSelectedCategory(member));
-      }
+          if (!matchesStatus) return false;
+          return item.members.some((member) => matchesSelectedCategory(member));
+        }
 
-      const status = String(item.data.eventGuest.status ?? "pending")
-        .trim()
-        .toLowerCase();
-      if (!matchesTabStatus(status, activeTab)) return false;
-      return matchesSelectedCategory(item.data);
-    });
+        const status = String(item.data.eventGuest.status ?? "pending")
+          .trim()
+          .toLowerCase();
+        if (!matchesTabStatus(status, activeTab)) return false;
+        return matchesSelectedCategory(item.data);
+      })
+      .map((item: GroupedInvitation): GroupedInvitation => {
+        if (item.type === "family") {
+          return {
+            ...item,
+            members: [...item.members].sort((a, b) =>
+              (a.user.username ?? "").localeCompare(b.user.username ?? "")
+            ),
+          };
+        }
+        return item;
+      })
+      .sort((a, b) => {
+        const nameA =
+          a.type === "family" ? a.family_name : (a.data.user.username ?? "");
+        const nameB =
+          b.type === "family" ? b.family_name : (b.data.user.username ?? "");
+        return nameA.localeCompare(nameB);
+        
+      });
   }, [
     groupedInvitations,
     activeTab,
@@ -208,11 +238,12 @@ export default function GuestListScreen() {
 
   const draftInvitations = useMemo(() => {
     return tabFilteredInvitations.filter((invitation: GuestDetailInterface) => {
-      const status = String(invitation.eventGuest.status ?? "pending")
-        .trim()
-        .toLowerCase();
-      return status === "draft" && matchesSelectedCategory(invitation);
-    });
+        const status = String(invitation.eventGuest.status ?? "pending")
+          .trim()
+          .toLowerCase();
+        return status === "draft" && matchesSelectedCategory(invitation);
+      }
+      );
   }, [tabFilteredInvitations, matchesSelectedCategory]);
 
   const filteredGuestCount =

@@ -23,6 +23,8 @@ import {
 } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import Animated, { FadeInDown, FadeOut, LinearTransition } from "react-native-reanimated";
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 const PRIMARY = "#ee2b8c";
 
@@ -165,8 +167,10 @@ export const RSVPFormContent = ({
   const departureDateTime = watch("departureDateTime");
   const arrivalLocation = watch("arrivalLocation");
   const departureLocation = watch("departureLocation");
-
-
+  const _damping = 8;
+  const _entering = FadeInDown.springify(500).damping(_damping);
+  const _exiting = FadeOut.springify(500).damping(_damping);
+  const _layoutAnimation = LinearTransition.springify(500).damping(_damping);
 
   const onSubmit = (values: RSVPFormValues) => {
     submitRsvp(
@@ -253,11 +257,15 @@ export const RSVPFormContent = ({
         </View>
       </View>
 
-      {/* Declined message */}
+      {/* Declined message
+        layout transition on appear from the right and on dissapear on the right
+    */}
       {attendance === "no" && (
-        <View
+        <Animated.View
+          layout={_layoutAnimation}
           className="items-center gap-3 py-8 px-6 rounded-xl border border-slate-200"
           style={{ backgroundColor: "#f8fafc" }}
+
         >
           <MaterialIcons name="sentiment-dissatisfied" size={40} color="#94a3b8" />
           <Text variant="h1" className="text-slate-600 text-center">
@@ -266,13 +274,18 @@ export const RSVPFormContent = ({
           <Text className="text-sm text-slate-400 text-center">
             Your response will be saved. You can always update your RSVP later.
           </Text>
-        </View>
+        </Animated.View>
       )}
 
-      {/* Accommodation */}
+      {/* Accommodation , opposite from the animation fone in that */}
       {attendance === "yes" && (
-        <View className="flex-row items-center justify-between p-4 bg-pink-50 rounded-md border border-pink-100">
-          <View className="flex-row items-center gap-3">
+        <Animated.View className="flex-row items-center justify-between p-4 bg-pink-50 rounded-md border border-pink-100"
+          layout={_layoutAnimation}
+          entering={_entering}
+          exiting={_exiting}
+        >
+          <Animated.View className="flex-row items-center gap-3"
+          >
             <Icon name="hotel" />
             <View>
               <Text variant="h1" className="text-sm text-slate-900">
@@ -282,7 +295,7 @@ export const RSVPFormContent = ({
                 Do you need a room booked?
               </Text>
             </View>
-          </View>
+          </Animated.View>
           <Switch
             value={accommodation}
             onValueChange={(value) =>
@@ -291,12 +304,16 @@ export const RSVPFormContent = ({
             trackColor={{ false: "#e2e8f0", true: PRIMARY }}
             thumbColor="#ffffff"
           />
-        </View>
+        </Animated.View>
       )}
 
       {/* Transportation + conditional Travel Details */}
       {attendance === "yes" && (
-        <View className="gap-4">
+        <Animated.View className="gap-4"
+          layout={_layoutAnimation}
+          entering={_entering}
+          exiting={_exiting}
+        >
           <View className="flex-row items-center gap-2">
             <Icon name="directions_car" />
             <Text variant="h1" className="text-slate-800">
@@ -342,9 +359,17 @@ export const RSVPFormContent = ({
             </Pressable>
           </View>
 
-          {/* Arrival details — revealed when Arrival Pickup is ticked */}
+          {/* Arrival details — revealed when Arrival Pickup is ticked 
+            Arrival animation an the layout transition in this arrival from the top to down 
+          */}
+
           {arrivalPickup && (
-            <View className="gap-4">
+            <Animated.View className="gap-4"
+              entering={_entering}
+              exiting={_exiting}
+              layout={_layoutAnimation}
+            >
+
               <View className="flex-row items-center gap-2">
                 <Icon name="flight_land" />
                 <Text variant="h1" className="text-slate-800">
@@ -408,12 +433,15 @@ export const RSVPFormContent = ({
                   className="bg-white rounded-md px-4 py-3 text-sm text-slate-900 border border-pink-100"
                 />
               </View>
-            </View>
+            </Animated.View>
           )}
 
           {/* Departure details — revealed when Departure Drop is ticked */}
           {departureDrop && (
-            <View className="gap-4">
+
+            <Animated.View className="gap-4"
+              layout={_layoutAnimation}
+            >
               <View className="flex-row items-center gap-2">
                 <Icon name="flight_takeoff" />
                 <Text variant="h1" className="text-slate-800">
@@ -477,13 +505,15 @@ export const RSVPFormContent = ({
                   className="bg-white rounded-md px-4 py-3 text-sm text-slate-900 border border-pink-100"
                 />
               </View>
-            </View>
+            </Animated.View>
           )}
-        </View>
+        </Animated.View>
       )}
 
       {/* Dietary Notes */}
-      <View>
+      <Animated.View
+        layout={_layoutAnimation}
+      >
         <View className="flex-row items-center gap-2 mb-3">
           <Icon name="restaurant_menu" />
           <Text variant="h1" className="text-slate-800">
@@ -502,13 +532,13 @@ export const RSVPFormContent = ({
           placeholderTextColor="#94a3b8"
           textAlignVertical="top"
         />
-      </View>
+      </Animated.View>
 
       {/* Submit */}
-      <TouchableOpacity
+      <AnimatedPressable
+        layout={_layoutAnimation}
         className="w-full py-4 rounded-md items-center justify-center mb-4"
         style={{ backgroundColor: PRIMARY }}
-        activeOpacity={0.9}
         onPress={handleSubmit(onSubmit)}
         disabled={isPending}
       >
@@ -519,7 +549,7 @@ export const RSVPFormContent = ({
             Save RSVP
           </Text>
         )}
-      </TouchableOpacity>
+      </AnimatedPressable>
     </View>
   );
 };
