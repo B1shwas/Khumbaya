@@ -161,15 +161,11 @@ export default function EventCreate() {
       title: formData.name.trim(),
       description: `${formData.eventType} event`,
       type: EVENT_TYPE_TO_BACKEND[formData.eventType as EventType],
+      rsvpDeadline: new Date(selectedDateTime.getTime() - 1 * 24 * 60 * 60 * 1000).toISOString(), // 1 day before event start
       startDateTime: selectedDateTime,
       endDateTime: selectedEndDateTime,
-      theme: "Classic",
       parentId: undefined,
       role: "Organizer",
-      location: "TBD",
-      imageUrl:
-        formData.coverImage ??
-        "https://images.unsplash.com/photo-1519741497674-611481863552?w=1200&q=80",
     };
 
     createEvent(payload, {
