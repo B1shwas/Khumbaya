@@ -12,6 +12,7 @@ export interface CREATEEVENT {
   theme?: string;
   parentId?: number;
   location?: string;
+  venue?: string;
   role?: string;
   imageUrl?: string;
   rsvpDeadline?: string;
@@ -31,6 +32,7 @@ export interface EVENT {
   theme?: string;
   parentId?: number;
   location?: string;
+  venue?: string | null;
   role?: string;
   status?: string;
   organizer?: number;
@@ -74,6 +76,7 @@ interface GetEventsParams {
   page?: number;
   limit?: number;
 }
+//TODO: update this shit  this is shit literal shit
 
 const mapInvitationToEvent = (item: InvitationItem): Event => {
   const detail = item.event_detail ?? item.event ?? {};
@@ -117,8 +120,8 @@ const mapInvitationToEvent = (item: InvitationItem): Event => {
     endDateTime: endDateTimeValue,
     date: formatDate(startDateTime),
     time: formatTime(startDateTime, detail.startTime),
-    location: detail.location ?? "Location TBA",
-    venue: detail.venue ?? detail.location ?? "Location TBA",
+    location: detail.location ?? "",
+    venue: detail.venue ?? detail.location ?? "",
     imageUrl: detail.imageUrl ?? "",
     role: "Guest",
     status,
@@ -138,7 +141,7 @@ export const getUpcomingEventsApi = async ({
     params: { page, limit },
   });
   const payload = response.data?.data;
-
+  //TODO: FIX THIS SHIT
   if (Array.isArray(payload?.items)) {
     return payload.items.map((item: any, index: number) => {
       // Merge properties from the indexed key (e.g., payload["0"]) if it exists
@@ -149,12 +152,16 @@ export const getUpcomingEventsApi = async ({
       };
 
       const startDateTime = mergedItem.startDateTime || mergedItem.startDate;
+      const location = mergedItem.location ?? ""
+      const venue = mergedItem.venue ?? ""
 
       return {
         ...mergedItem,
         id: String(mergedItem.id),
         date: formatDate(startDateTime),
         time: formatTime(startDateTime),
+        location,
+        venue,
         role: mergedItem.role || "Guest",
         dressCode: mergedItem.dressCode ?? mergedItem.dress_code ?? null,
       } as Event;
