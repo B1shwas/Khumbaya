@@ -6,6 +6,7 @@ import {
   getEventGuestCategories,
   getGuestRoom,
   getInvitation,
+  importGuestlist,
   inviteGuest,
   removeInvitation,
   type CreateGuestCategoryPayload,
@@ -55,6 +56,22 @@ export const useCreateEventGuestCategory = () => {
         queryKey: ["event-guest-categories", variables.eventId],
       });
     },
+  });
+};
+
+
+export const useImportGuestlist = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      fromEventId,
+      toEventId,
+    }: {
+      fromEventId: number;
+      toEventId: number;
+    }) => importGuestlist(fromEventId, toEventId),
+    
   });
 };
 

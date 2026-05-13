@@ -2,7 +2,7 @@ import { Text } from "@/src/components/ui/Text";
 import { usegetUpcomingEvents } from "@/src/features/events/hooks/use-event";
 import {
   useGetInvitationsForEvent,
-  useInviteGuest,
+  useImportGuestlist,
 } from "@/src/features/guests/api/use-guests";
 import { GuestDetailInterface } from "@/src/features/guests/types";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
@@ -33,7 +33,7 @@ export default function ImportGuestListScreen() {
     useGetInvitationsForEvent(selectedEventId);
 
   useEffect(() => {
-    if (previewGuests && previewGuests.length > 0) {
+    if (previewGuests && previewGuests ?.length > 0) {
       setSelectedGuestIds(
         new Set(previewGuests.map((g: GuestDetailInterface) => g.eventGuest.id))
       );
@@ -42,7 +42,7 @@ export default function ImportGuestListScreen() {
     }
   }, [previewGuests]);
 
-  const inviteGuestMutation = useInviteGuest();
+  const importGuestlistMutation = useImportGuestlist();
 
   const sourceEvents = useMemo(
     () =>
@@ -78,54 +78,31 @@ export default function ImportGuestListScreen() {
         { text: "Cancel", style: "cancel" },
         {
           text: "Import",
-          onPress: async () => {
-            try {
-              setIsImporting(true);
-
-              const selectedGuests = (previewGuests ?? []).filter(
-                (g: GuestDetailInterface) =>
-                  selectedGuestIds.has(g.eventGuest.id)
-              );
-
-              const results = await Promise.allSettled(
-                selectedGuests.map((guest: GuestDetailInterface) =>
-                  inviteGuestMutation.mutateAsync({
-                    eventId: targetEventId,
-                    payload: {
-                      fullName:
-                        guest.user.username || guest.user.email || "",
-                      invitation_name:
-                        guest.user.username || guest.user.email || "",
-                      isDraft: asDraft,
-                      phone: guest.user.phone || "",
-                      isFamily: false,
-                      role: guest.eventGuest.role || "Guest",
-                      category: guest.eventGuest.category || "friend",
-                      status: asDraft ? "draft" : "pending",
-                      isAccomodation:
-                        guest.eventGuest.isAccomodation ?? false,
-                    },
-                  })
-                )
-              );
-
-              const successCount = results.filter(
-                (r) => r.status === "fulfilled"
-              ).length;
-
-              setSelectedGuestIds(new Set());
-              setSelectedEventId(null);
-
-              Alert.alert(
-                "Done",
-                `${successCount} guest${successCount === 1 ? "" : "s"} imported as ${label}.`,
-                [{ text: "OK", onPress: () => router.back() }]
-              );
-            } catch (error) {
-              Alert.alert("Error", "Failed to import guests. Please try again.");
-            } finally {
-              setIsImporting(false);
-            }
+          onPress: () => {
+            setIsImporting(true);
+            importGuestlistMutation.mutate(
+              {
+                fromEventId: selectedEventId,
+                toEventId: targetEventId,
+              },
+              {
+                onSuccess: () => {
+                  setIsImporting(false);
+                  Alert.alert(
+                    "Success",
+                    `Guest list imported successfully as ${label}.`,
+                    [{ text: "OK", onPress: () => router.back() }]
+                  );
+                },
+                onError: () => {
+                  setIsImporting(false);
+                  Alert.alert(
+                    "Error",
+                    "Failed to import guest list. Please try again."
+                  );
+                },
+              }
+            );
           },
         },
       ]
@@ -189,16 +166,7 @@ export default function ImportGuestListScreen() {
             </Text>
           </TouchableOpacity>
 
-          {/* STATUS */}
-          <Text className="text-slate-500 text-sm mb-3">
-            {previewLoading
-              ? "Loading guests..."
-              : `${selectedGuestIds.size} of ${
-                  previewGuests?.length ?? 0
-                } guest${
-                  (previewGuests?.length ?? 0) === 1 ? "" : "s"
-                } selected`}
-          </Text>
+          
 
           {/* GUEST LIST */}
           <FlatList
