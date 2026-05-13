@@ -9,7 +9,15 @@ import { sortByDateTime } from "@/src/utils/helper";
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useMemo, useState } from "react";
-import { Alert, FlatList, Text, TouchableOpacity, View } from "react-native";
+import {
+  Alert,
+  FlatList,
+  Modal,
+  Pressable,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 //TODO: Helper ma rakhna data
 const getCalendarDay = (dateStr?: string | null): string => {
   if (!dateStr) return "";
@@ -46,6 +54,7 @@ export default function ListSubEvent() {
     refetch,
   } = useSubEventsOfEvent(Number(eventId));
 
+  const [menuItem, setMenuItem] = useState<SubEvent | null>(null);
   const [duplicatingId, setDuplicatingId] = useState<string | null>(null);
   const { mutateAsync: duplicateSubEvent } = useDuplicateEvent(Number(eventId));
 
@@ -112,6 +121,7 @@ export default function ListSubEvent() {
       );
     } finally {
       setDuplicatingId(null);
+      setMenuItem(null);
       refetch();
     }
   };
@@ -137,37 +147,55 @@ export default function ListSubEvent() {
           renderItem={({ item }) => {
             if (item.type === "header") return null;
             return (
-              <View className="mb-4">
+              <View className="mb-4 relative">
                 <SubEventCard
                   item={item.item}
                   event={eventDraft!}
                   isGuestView={isGuestView}
+                  showMenu={!isGuestView}
+                  onMenuPress={() => setMenuItem(item.item)}
                 />
-                {!isGuestView && (
-                  <TouchableOpacity
-                    disabled={duplicatingId === item.item.id}
-                    onPress={() => handleDuplicate(item.item)}
-                    className={`mt-2 rounded-full px-4 py-2 items-center ${
-                      duplicatingId === item.item.id
-                        ? "bg-gray-400"
-                        : "bg-primary"
-                    }`}
-                  >
-                    <View className="flex-row items-center gap-2">
-                      <Ionicons name="copy-outline" size={16} color="white" />
-                      <Text className="text-sm font-semibold text-white">
-                        {duplicatingId === item.item.id
-                          ? "Duplicating..."
-                          : "Duplicate"}
-                      </Text>
-                    </View>
-                  </TouchableOpacity>
-                )}
               </View>
             );
           }}
         />
       )}
+      {/* FAAAAAH */}
+      <Modal
+        visible={!!menuItem}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setMenuItem(null)}
+      >
+        <Pressable
+          className="flex-1 bg-black/20 justify-end"
+          onPress={() => setMenuItem(null)}
+        >
+          <Pressable className="bg-white rounded-2xl p-4 mx-4 mb-6">
+            <TouchableOpacity
+              onPress={() => menuItem && handleDuplicate(menuItem)}
+              disabled={duplicatingId === menuItem?.id}
+              className="flex-row items-center gap-3 py-3"
+            >
+              <View className="h-8 w-8 rounded-full bg-primary/10 items-center justify-center">
+                <Ionicons name="copy-outline" size={16} color="#ee2b8c" />
+              </View>
+              <Text className="text-base text-gray-900">
+                {duplicatingId === menuItem?.id ? "Duplicating..." : "Duplicate"}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => setMenuItem(null)}
+              className="flex-row items-center gap-3 py-3"
+            >
+              <View className="h-8 w-8 rounded-full bg-gray-100 items-center justify-center">
+                <Ionicons name="close" size={16} color="#9CA3AF" />
+              </View>
+              <Text className="text-base text-gray-500">Cancel</Text>
+            </TouchableOpacity>
+          </Pressable>
+        </Pressable>
+      </Modal>
       {/* TODO:Review ai generated code */}
       {!isGuestView && (
         <TouchableOpacity
