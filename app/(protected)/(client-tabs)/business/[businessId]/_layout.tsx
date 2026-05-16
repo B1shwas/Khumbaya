@@ -35,6 +35,7 @@ export default function BusinessDetailedLayout() {
         name="venue/[venueId]/update"
         options={{ headerShown: false }}
       />
+        <Stack.Screen name="reviews" options={{ title: "Business Reviews" }} />
     </Stack>
   );
 }
