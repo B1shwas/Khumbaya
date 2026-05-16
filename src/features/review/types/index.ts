@@ -26,6 +26,11 @@ export type ReviewListResponse = {
   totalPages: number;
 };
 
+export type DeleteReviewResponse = {
+  id: number;
+  message: string;
+};
+
 export type ReviewQueryParams = {
   businessId?: number;
   userId?: number;

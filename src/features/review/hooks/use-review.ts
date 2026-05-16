@@ -13,7 +13,7 @@ import type {
   ReviewQueryParams,
   ReviewResponse,
   UpdateReviewPayload,
-} from "@/src/features/review/types";
+} from "@/src/features/review/types/index";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export const useReviews = (params?: ReviewQueryParams) => {

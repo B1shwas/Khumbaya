@@ -2,11 +2,12 @@ import api from "@/src/api/axios";
 import type {
     CreateReviewForBusinessPayload,
     CreateReviewPayload,
+    DeleteReviewResponse,
     ReviewListResponse,
     ReviewQueryParams,
     ReviewResponse,
     UpdateReviewPayload,
-} from "@/src/features/review/types";
+} from "@/src/features/review/types/index";
 
 const buildQueryString = (params?: ReviewQueryParams) => {
   const query = new URLSearchParams();
@@ -65,7 +66,7 @@ export const updateReviewApi = async (
 
 export const deleteReviewApi = async (
   id: number | string
-): Promise<ReviewResponse> => {
+): Promise<DeleteReviewResponse> => {
   const response = await api.delete(`/review/${id}`);
   return response.data?.data;
 };
