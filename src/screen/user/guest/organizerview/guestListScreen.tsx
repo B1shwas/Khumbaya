@@ -67,7 +67,7 @@ export default function GuestListScreen() {
 
   const [draftAction, setDraftAction] = useState<{
     userId: number;
-    type: "send" | "delete";
+    type: "send" | "delete" | "moveToDraft";
   } | null>(null);
   const [activeTab, setActiveTab] = useState<GuestFilterTab>("pending");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
@@ -357,6 +357,30 @@ export default function GuestListScreen() {
     [eventId, removeInvitationMutation]
   );
 
+  const onMoveToDraft = useCallback(
+    async (guest: GuestDetailInterface) => {
+      if (!eventId || !guest?.user?.id) return;
+
+      setDraftAction({ userId: guest.user.id, type: "moveToDraft" });
+      try {
+        await submitRsvpMutation.mutateAsync({
+          userId: guest.user.id,
+          familyId: guest.eventGuest.familyId,
+          status: "draft",
+        });
+      } catch (error: any) {
+        const message =
+          error?.response?.data?.message ||
+          error?.message ||
+          "Failed to move to draft.";
+        Alert.alert("Error", message);
+      } finally {
+        setDraftAction(null);
+      }
+    },
+    [eventId, submitRsvpMutation]
+  );
+
   const onPressFamilyCard = (familyData: FamilyGroup) => {
     setFamilyGuest(familyData);
     push({
@@ -547,6 +571,10 @@ export default function GuestListScreen() {
           }
           renderItem={({ item, index }: { item: GroupedInvitation, index: number }) => {
             if (item.type === "family") {
+              const isPending = item.members.some(m => {
+                const s = m.eventGuest.status?.toLowerCase() ?? "";
+                return s === "pending" || s === "invited";
+              });
               return (
                 <Animated.View
                   layout={_layoutAnimation}
@@ -558,6 +586,14 @@ export default function GuestListScreen() {
                       onPressFamilyCard(item);
                     }}
                     style={''}
+                    onMoveToDraft={isPending ? () => {
+                      const primaryGuest = item.members[0];
+                      onMoveToDraft(primaryGuest);
+                    } : undefined}
+                    isMovingToDraft={
+                      draftAction?.type === "moveToDraft" &&
+                      item.members.some(m => m.user.id === draftAction.userId)
+                    }
                   />
                 </Animated.View>
               );
@@ -573,6 +609,11 @@ export default function GuestListScreen() {
                   onPress={() => {
                     onPressGuestCard(item.data);
                   }}
+                  onMoveToDraft={() => onMoveToDraft(item.data)}
+                  isMovingToDraft={
+                    draftAction?.type === "moveToDraft" &&
+                    draftAction.userId === item.data.user.id
+                  }
                 />
               </Animated.View>
             );
