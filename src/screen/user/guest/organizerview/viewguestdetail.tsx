@@ -40,6 +40,16 @@ const formatDisplayValue = (value?: string) => {
   if (!value) return "-";
   return value.charAt(0).toUpperCase() + value.slice(1);
 };
+
+const getProfileText = (...values: unknown[]) => {
+  for (const value of values) {
+    if (typeof value === "string" && value.trim()) {
+      return value.trim();
+    }
+  }
+  return "";
+};
+
 //TODO: Delete this
 
 
@@ -148,6 +158,67 @@ export default function ViewGuestDetail() {
 
   const headerTitle = guestDetail?.user?.username?.trim() || "Guest Detail";
   const isSaveDisabled = isPending || !hasAssignmentChanges;
+  const guestUser = guestDetail?.user;
+  const guestInfo =
+    guestUser?.info && typeof guestUser.info === "object"
+      ? (guestUser.info as Record<string, unknown>)
+      : {};
+  const guestProfile =
+    (guestUser as any)?.profile && typeof (guestUser as any).profile === "object"
+      ? ((guestUser as any).profile as Record<string, unknown>)
+      : guestInfo.profile && typeof guestInfo.profile === "object"
+        ? (guestInfo.profile as Record<string, unknown>)
+        : {};
+  const guestDob =
+    guestUser?.dob ??
+    guestProfile.dob ??
+    guestProfile.dateOfBirth ??
+    guestInfo.dob ??
+    guestInfo.dateOfBirth;
+  const formattedGuestDob =
+    guestDob instanceof Date || typeof guestDob === "string"
+      ? formatDate(toISODateString(guestDob))
+      : "";
+  const guestLocation = getProfileText(
+    guestUser?.location,
+    guestProfile.location,
+    guestInfo.location,
+    guestUser?.address,
+    [guestUser?.city, guestUser?.country].filter(Boolean).join(", ")
+  );
+  const guestProfileRows = [
+    {
+      label: "Gender",
+      value: getProfileText(
+        (guestUser as any)?.gender,
+        guestProfile.gender,
+        guestInfo.gender
+      ),
+    },
+    {
+      label: "DOB",
+      value: formattedGuestDob === "—" ? "" : formattedGuestDob,
+    },
+    {
+      label: "Email",
+      value: getProfileText(guestUser?.email),
+    },
+    {
+      label: "Location",
+      value: guestLocation,
+    },
+    {
+      label: "Food Preference",
+      value: getProfileText(
+        guestUser?.foodPreference,
+        (guestUser as any)?.foodPreferences,
+        guestProfile.foodPreference,
+        guestProfile.foodPreferences,
+        guestInfo.foodPreference,
+        guestInfo.foodPreferences
+      ),
+    },
+  ].filter((row) => row.value);
 
   const handleSaveAssignments = () => {
     if (
@@ -532,7 +603,48 @@ export default function ViewGuestDetail() {
               </View>
 
               <View className="px-6 pt-6 pb-10 gap-8">
-                <View>
+                {/* {isConfirmed && guestProfileRows.length > 0 && ( */}
+                  <View>
+                    <View className="flex-row items-center gap-2 mb-4">
+                      <Ionicons
+                        name="id-card-outline"
+                        size={20}
+                        color="#EE2B8C"
+                      />
+                      <Text
+                        variant="caption"
+                        className="text-xs font-bold uppercase tracking-widest"
+                      >
+                        Guest Details
+                      </Text>
+                    </View>
+                    <View className="bg-slate-50 rounded-2xl px-4">
+                      {guestProfileRows.map((row, i, arr) => (
+                        <View
+                          key={row.label}
+                          className={`flex-row justify-between items-center py-3 ${i < arr.length - 1 ? "border-b border-slate-100" : ""}`}
+                          style={{ gap: 16 }}
+                        >
+                          <Text
+                            variant="body"
+                            className="text-slate-500 text-sm"
+                          >
+                            {row.label}
+                          </Text>
+                          <Text
+                            variant="h2"
+                            className="text-slate-900 text-sm text-right flex-1"
+                          >
+                            {row.value}
+                          </Text>
+                        </View>
+                      ))}
+                    </View>
+                  </View>
+                {/* )} */}
+
+                {isConfirmed && (
+                  <View>
                   <View className="flex-row items-center gap-2 mb-4">
                     <Ionicons
                       name="person-circle-outline"
@@ -663,7 +775,8 @@ export default function ViewGuestDetail() {
                       </View>
                     ))}
                   </View>
-                </View>
+                  </View>
+                )}
 
                 <View className="bg-white border border-slate-200 p-4 rounded-2xl mb-3">
                   <View className="flex-row justify-between items-start">
